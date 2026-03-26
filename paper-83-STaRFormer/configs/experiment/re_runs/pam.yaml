@@ -1,0 +1,124 @@
+# @package _global_
+# pam
+dataset: pam
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: pam
+  - override /callbacks/model_ckpt: pam
+  - override /datamodule: pam/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: pam/centralized
+
+run_url: null # add your wandb path here "<entity>/<project>/runs/<run_id>"
+change_config: {
+  "loss": {
+     "lambda_cl": 0.1, 
+  },
+  datamodule: {
+#    "num_val": null,
+#    "instance": null,
+#    "num_test": null,
+#    "num_train": null,
+#    "batch_size": 256,
+#    "aws_profile": null,
+#    "num_workers": 0,
+#    "text_labels": [0,1,2,3,4,5,6,7],
+#    "use_threads": null,
+#    "pad_sequence": true,
+#    "display_labels": [0,1,2,3,4,5,6,7],
+#    "s3_bucket_path": data-phd,
+#    "val_batch_size": 256,
+#    "test_batch_size": 256,
+#    "training_method": centralized,
+#    "dataset_instance": 2024-10-20_21:52:07,
+    "train_split_index": 1,
+  },
+}
+#change_config: {
+#  "logger": {
+#    "sweep": false, 
+#    "project": "pam"
+#  }, 
+#  "model": {
+#    "text_model": null,
+#    "output_head": {
+#      "task": "classification",
+#      "d_out": 8,
+#      "reduced": false,
+#      "d_hidden": null,
+#      "activation": "selu",
+#      "batch_size": 256,
+#      "cls_method": "cls_token"
+#    },
+#    "sequence_model": {
+#      "bias": true,
+#      "name": "starformer",
+#      "n_head": 8,
+#      "d_model": 32,
+#      "dropout": 0.10172151423229432,
+#      "masking": darem, # "darem", 'random'
+#      "mask_threshold": 0.2077646024366467, #0.15,
+#      "mask_region_bound": 0.1, #0.05,
+#      "ratio_highest_attention": 0.3, #0.3,
+#      "embedding": {
+#        "d_features": 17,
+#        "max_seq_len": 241
+#      },
+#      "precision": 32,
+#      "activation": "relu",
+#      "mask_check": true,
+#      "batch_first": false,
+#      "layer_norm_eps": 0.00001,
+#      "reconstruction": false,
+#      "dim_feedforward": 128,
+#      "num_encoder_layers": 2,
+#      "enable_nested_tensor": true,
+#      "aggregate_attn_per_batch": false
+#    },
+#  },
+#  "loss": {
+#    #"lamdba_sim": 1.0,
+#  #  "lambda_contrastive": 0.1
+#    "loss_fn": darem_sscl,
+#    "method": sscl,
+#    "lambda_cl": 0.7959594118700971, # 0.7959594118700971
+#    "lambda_fuse_cl": 0.5,
+#    "temp": 0.5,
+#    "batch_size": 256,
+#    "pred_type": multiclass,
+#    "task": classification,
+#    "task_loss_fn": cross_entropy,
+#  },
+#  "seed": 42,
+#  task: classification,
+#  datamodule: {
+#    "num_val": null,
+#    "instance": null,
+#    "num_test": null,
+#    "num_train": null,
+#    "batch_size": 256,
+#    "aws_profile": null,
+#    "num_workers": 0,
+#    "text_labels": [0,1,2,3,4,5,6,7],
+#    "use_threads": null,
+#    "pad_sequence": true,
+#    "display_labels": [0,1,2,3,4,5,6,7],
+#    "s3_bucket_path": data-phd,
+#    "val_batch_size": 256,
+#    "test_batch_size": 256,
+#    "training_method": centralized,
+#    "dataset_instance": 2024-10-20_21:52:07,
+#    "train_split_index": 0,
+#  },
+#  optimizer:{
+#    "eps": 1.0e-08,
+#    "name": adam,
+#    "beta1": 0.857390717437505,
+#    "beta2": 0.9394514187252576,
+#    "weight_decay": 0.0004104689621916005,
+#  },
+#}

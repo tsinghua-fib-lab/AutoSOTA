@@ -1,0 +1,38 @@
+# @package _global_
+dataset: japanesevowels
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: ucr_uea
+  - override /callbacks/model_ckpt: ucr_uea
+  - override /datamodule: ucr_uea/japanesevowels/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: transformer
+  - override /optimizer: adam
+  - override /training: ucr_uea/centralized
+  
+
+training:
+  epochs: 300 #50
+model:
+  embedding:
+    mts:
+      d_features: 12 
+      max_seq_len: 26
+  encoder_only: true
+  output_head:
+    use_cls_token: true 
+    batch_size: ${training.batch_size} 
+    d_out: 9
+logger:
+  project: japanesevowels_sweeps
+  sweep: true
+datamodule:
+  s3_bucket_path: null
+callbacks:
+  lr_scheduler:
+    patience: 8
+  
+  
+  

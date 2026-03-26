@@ -1,0 +1,51 @@
+MODEL:
+  PRETRAIN_PATH_T: '/data/RNTReID/pretrain_model/ViT-B-16.pt'
+  TRANSFORMER_TYPE: 'ViT-B-16'
+  STRIDE_SIZE: [ 16, 16 ]
+  SIE_CAMERA: True
+  DIRECT: 0
+  SIE_COE: 1.0
+  ID_LOSS_WEIGHT: 0.25
+  TRIPLET_LOSS_WEIGHT: 1.0
+  GLOBAL_LOCAL: False
+  ADD_SHARE: True
+  ADD_ELOSS: True
+  ADD_CLOSS: True
+
+INPUT:
+  SIZE_TRAIN: [ 128, 256 ]
+  SIZE_TEST: [ 128, 256 ]
+  PROB: 0.5 # random horizontal flip
+  RE_PROB: 0.5 # random erasing
+  PADDING: 10
+
+DATALOADER:
+  SAMPLER: 'softmax_triplet'
+  NUM_INSTANCE: 4
+  NUM_WORKERS: 14
+
+DATASETS:
+  NAMES: ('MSVR310')
+  ROOT_DIR: '/data/RNTReID/'
+
+SOLVER:
+  BASE_LR: 0.00035
+  WARMUP_ITERS: 10
+  MAX_EPOCHS: 50
+  OPTIMIZER_NAME: 'Adam'
+  GAMMA: 0.1
+  IMS_PER_BATCH: 64
+  EVAL_PERIOD: 1
+
+TEST:
+  IMS_PER_BATCH: 128
+  RE_RANKING: 'no'
+  WEIGHT: ''
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+  MISS: "nothing"
+#  MISS: "nt"
+
+OUTPUT_DIR: '/home/tan/data/fyy_temp/result/MSVR310/'
+
+

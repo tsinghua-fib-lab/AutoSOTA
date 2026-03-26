@@ -1,0 +1,47 @@
+# @package _global_
+dataset: kpi
+task: anomaly_detection
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: anomaly
+  - override /callbacks/model_ckpt: anomaly
+  - override /datamodule: anomaly/kpi/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: anomaly/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    monitor: val/loss_task
+  lr_scheduler: 
+    monitor: val/loss_task
+logger:
+  entity: null # add your wandb entity here
+  project: kpi_sweeps
+  sweep: true
+loss:
+  lambda_fuse_cl: 1.0 # only use self-supervision, supervision unnecessary (no classes exist)
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: null
+model:
+  sequence_model:
+    embedding:
+      d_features: 1
+      max_seq_len: ${datamodule.window_size}
+    masking: darem
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: True 
+    cls_method: elementwise
+    norm_dim: ${datamodule.window_size}
+  
+  
+  

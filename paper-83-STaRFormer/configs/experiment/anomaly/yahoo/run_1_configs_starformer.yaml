@@ -1,0 +1,30 @@
+model:
+  sequence_model:
+    activation: silu # 'gelu' 'silu'
+    d_model: 32 #8
+    dim_feedforward: 32 #32
+    dropout: 0.3 #0.1073617781434152
+    n_head: 2 #4
+    num_encoder_layers: 2 #2 4
+    mask_threshold: 0.05 # 0.2 (mask_p)
+    mask_region_bound: 0.05 # 0.1
+    ratio_highest_attention: 0.2 # 0.5
+  output_head:
+    reduced: True
+    activation: relu
+  text_model:
+    name: null
+    hidden_size: null
+    aligner:
+      kernel_size: null
+      activation: null
+
+optimizer:
+  beta1: 0.9
+  beta2: 0.999 
+training:
+  learning_rate: 0.005 #0.01
+  batch_size: 16
+datamodule:
+  window_size: 1024
+  stride: 512

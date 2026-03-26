@@ -1,0 +1,63 @@
+# @package _global_
+
+# Override defaults by taking another config
+defaults:
+  - rf_base_50.yaml
+  - _self_
+
+env:
+  generator_params:
+    variant_preset: "all"
+
+  val_file: [cvrp/val/50.npz, vrptw/val/50.npz, ovrp/val/50.npz, vrpl/val/50.npz,
+             vrpb/val/50.npz, ovrptw/val/50.npz, vrpbl/val/50.npz, vrpbltw/val/50.npz,
+             vrpbtw/val/50.npz, vrpltw/val/50.npz, ovrpb/val/50.npz, ovrpbl/val/50.npz,
+             ovrpbltw/val/50.npz, ovrpbtw/val/50.npz, ovrpl/val/50.npz, ovrpltw/val/50.npz,
+             cvrp/val/100.npz, vrptw/val/100.npz, # generalization
+  ]
+
+  val_dataloader_names: [cvrp50, vrptw50, ovrp50, vrpl50,
+                         vrpb50, ovrptw50, vrpbl50, vrpbltw50,
+                         vrpbtw50, vrpltw50, ovrpb50, ovrpbl50,
+                         ovrpbltw50, ovrpbtw50, ovrpl50, ovrpltw50,
+                         cvrp100, vrptw100,]
+
+  test_file: [cvrp/test/50.npz, vrptw/test/50.npz, ovrp/test/50.npz, vrpl/test/50.npz,
+              vrpb/test/50.npz, ovrptw/test/50.npz, vrpbl/test/50.npz, vrpbltw/test/50.npz,
+              vrpbtw/test/50.npz, vrpltw/test/50.npz, ovrpb/test/50.npz, ovrpbl/test/50.npz,
+              ovrpbltw/test/50.npz, ovrpbtw/test/50.npz, ovrpl/test/50.npz, ovrpltw/test/50.npz,
+              cvrp/test/100.npz, vrptw/test/100.npz, # generalization
+  ]
+
+  test_dataloader_names: ${env.val_dataloader_names}
+
+model:
+  _target_: models.model.CadaModel
+  policy:
+    _target_: models.policy.CadaPolicy
+    normalization: "rms"
+    encoder_use_prenorm: false
+    encoder_use_post_layers_norm: false
+    parallel_gated_kwargs:
+      mlp_activation: "silu"
+    attn_sparse_ratio: 0.5
+    sparse_applied_to_score: true
+    prompt_embedding:
+      _target_: models.env_embeddings.mtvrp.init.MTVRPPromptEmbedding
+      normalization: null
+    lora_modules_ckpt_path: null
+
+
+# Logging: we use Wandb in this case
+logger:
+  wandb:
+    project: ""
+    tags: []
+    group: ""
+    name: ""
+    entity: ""
+
+
+callbacks:
+  model_checkpoint:
+    monitor: "val/reward/vrptw50"

@@ -1,0 +1,1 @@
+python tinysam_zero_shot_ins_eval.py --eval_type='coco' --val_img_path='/home/ma-user/work/cache/val2017/' --val_json_path='json_files/instances_val2017.json' --vit_det_file_path='json_files/coco_instances_results_vitdet.json' --sam_checkpoint_path='../weights/tinysam.pth'

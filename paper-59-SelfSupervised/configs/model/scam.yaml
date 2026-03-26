@@ -1,0 +1,20 @@
+defaults:
+  - components/decoders/decoder@decoder
+  - components/embeddings/conv_embedding@embedding
+  - components/predictors/multi_predictor@predictor
+  - mlp@predictor.pred_model
+
+_target_: src.models.nets.scam_multi.Model
+_partial_: true
+name: scam_${.predictor.name}_${.predictor.pred_model.name}
+embedding:
+  num_emb_layers: 4
+  dim: 128
+  dim_multiplier: 4
+decoder:
+  dim: 128
+  num_series: 16
+predictor:
+  num_models: 8
+if_softmask: false
+loss_names: ['loss_pred', 'loss_rec', 'loss_tar']

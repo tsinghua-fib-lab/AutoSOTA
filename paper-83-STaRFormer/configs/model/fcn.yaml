@@ -1,0 +1,16 @@
+sequence_model:
+  name: fcn
+  in_channels: 24
+# text model
+text_model:
+  aligner:
+    kernel_size: null
+    activation: null
+# Output head
+output_head:
+  task: regression # other options: 'regression', 'forecasting'
+  d_out: 1 
+  d_hidden: null
+  activation: relu
+  reduced: True
+  cls_method: autoregressive # options: 'cls_token', 'autoregressive', 'elementwise'

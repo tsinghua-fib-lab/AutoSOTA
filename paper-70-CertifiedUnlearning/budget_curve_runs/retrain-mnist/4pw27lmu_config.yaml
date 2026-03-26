@@ -1,0 +1,56 @@
+
+dataset:
+  name: "mnist"
+  input_shape: [28,28,1]
+  root: "./data"
+  batch_size: 128
+  num_workers: 4
+  val_split: 0.1
+  forget_split: 0.1
+  seed: 142
+
+model:
+  name: tiny_net
+  n_classes: 10
+
+training:
+  epochs: 10
+  optim: "SGD"
+  max_lr: 0.06
+  momentum: 0
+  weight_decay: 0.0005
+  lr_schedule: "onecycle"
+  pretrained: "logs/gdnuoit7/ckpt"
+
+unlearning:
+  epochs: 10
+  optim: "SGD"
+  momentum: 0
+  weight_decay: 0.0005
+  lr_schedule: "constant"
+  noise_schedule: "constant"
+  max_lr: 0.06
+  init_model_clip: 20
+  init_model_clip_type: "clip"
+  init_sigma: 0
+  algorithm: 'retrain' 
+  delta: 0.00001
+
+post_unlearning:
+  optim: "SGD"
+  momentum: 0
+  weight_decay: 0.0005
+  lr_schedule: "onecycle"
+  max_lr: 0.1
+  post_unlearn_clip: False
+
+
+wandb:
+  project: "unlearning-dp-f2"
+  entity: "unlearning-dynamics"
+  log_dir: "./wandb_logs"
+
+secure_rng: False
+save_every: 1
+global_seed: 30
+  

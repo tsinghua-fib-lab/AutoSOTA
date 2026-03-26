@@ -1,0 +1,54 @@
+Found 1 datasets on the following paths: ['data/cvrp/test/50.npz']
+Loading checkpoint from  pretrained_moses_model/rf/50/multilora_denseroute_softmax.ckpt
+
+
+Traceback (most recent call last):
+  File "/repo/test.py", line 386, in <module>
+    o = test(policy, td_test, env, device=device, num_augment=opts.num_augment, augment_fn=opts.augment_fn)
+  File "/repo/test.py", line 91, in test
+    out = policy(td, env, phase="test", num_starts=n_start, return_actions=True)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/policy.py", line 426, in forward
+    outdict = super(MultiLoRAPolicy, self).forward(
+  File "/opt/conda/lib/python3.10/site-packages/rl4co/models/common/constructive/base.py", line 195, in forward
+    hidden, init_embeds = self.encoder(td)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/encoder.py", line 170, in forward
+    return self.encoder(td, mask)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/encoder.py", line 80, in forward
+    h = layer(h, mask)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/nn/transformer.py", line 197, in forward
+    h = h + self.ffn(self.norm_ffn(h))
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/nn/transformer.py", line 123, in forward
+    z1, z2 = self.l1(z), self.l2(z)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/nn/lora.py", line 340, in forward
+    output = self.lora_layer(x, *args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/repo/models/nn/lora.py", line 221, in forward
+    outputs = (outputs * gates[..., None]).sum(1) + self.lora_layers[self.n_experts](x)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 31.13 GiB. GPU 0 has a total capacty of 79.25 GiB of which 4.66 GiB is free. Including non-PyTorch memory, this process has 74.58 GiB memory in use. Of the allocated memory 31.36 GiB is allocated by PyTorch, and 42.72 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

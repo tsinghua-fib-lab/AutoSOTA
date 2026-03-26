@@ -1,0 +1,149 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "applang"
+version = "0.2.2"
+description = "A Prompt Programming Language"
+authors = [
+    { name = "Honghua Dong", email = "dhh19951@gmail.com" },
+    { name = "QiDong Su", email = "soodoshll@gmail.com" },
+    { name = "Jim Gao", email = "ybgao@cs.toronto.edu" },
+]
+dependencies = [
+    "loguru>=0.7.2",
+    "roman>=4.1",
+    "python-dotenv>=1.0.0",
+    "openai>=1.13.3",
+    "pydantic>=2.6.3",
+    "docstring-parser>=0.15",
+    "inflection>=0.5.1",
+    "PyYAML>=6.0.1",
+    "toml>=0.10.2",
+    "termcolor>=2.4.0",
+    "litellm>=1.59.8",
+    "tiktoken>=0.6.0",
+    "addict>=2.4.0",
+    "pendulum>=3.0.0",
+    "libcst>=1.4.0",
+    "rich>=13.8.1",
+    "pillow>=11.0.0",
+    "deprecated>=1.2.15",
+    "jsonargparse>=4.35.0",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/appl-team/appl"
+
+# [tool.mypy]
+# pretty = true
+# show_error_codes = true
+# warn_unused_ignores = true
+# ignore_missing_imports = true
+
+[project.optional-dependencies]
+ext = [
+    "lunary>=1.0.36",
+    "instructor>=1.5.2",
+    "langfuse>=2.56.1",
+]
+
+[project.scripts]
+appltrace = "appl.cli.vis_trace:main"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+test = ["pytest>=8.0.2"]
+docs = [
+    "black>=24.2.0",
+    "mkdocstrings[python]>=0.24.1",
+    "mkdocs-material>=9.5.13",
+    "mkdocs-jupyter>=0.24.6",
+    "mkdocs-coverage>=1.0.0",
+    "markdown-exec>=1.8.0",
+    "markdown-callouts>=0.4.0",
+    "mkdocs-gen-files>=0.5.0",
+    "mkdocs-literate-nav>=0.6.1",
+]
+dev = ["pre-commit>=3.6.2", "ruff>=0.3.2"]
+
+[tool.isort]
+known_first_party = "appl"
+
+[tool.ruff.lint]
+# Enable a subset of the pycodestyle (`E`)  codes.
+select = ["E4", "E7", "E9", "F", "D", "N"]
+ignore = [
+    "F401",
+    "F403",
+    "F405",
+    "F541",
+    "F811",
+    "F841",
+    "E402",
+    "D100",
+    "D104",
+    "D105",
+    "D406",
+    "D407",
+    "D413",
+]
+# F401: '...' imported but unused
+# F403: '...' undeclared; assumed '...'
+# F405: '...' may be undefined, or defined from star imports: ...
+# F541: f-string is missing placeholders
+# F811: redefinition of unused '...' from line ...
+# F841: local variable '...' is assigned to but never used
+# E402: module level import not at top of file
+# D100: Missing docstring in public module
+# D104: Missing docstring in public package
+# D105: Missing docstring in magic method
+# D406: Section name should end with a newline
+# D407: Missing dashed underline after section
+# D413: Missing blank line after last section
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "N"]
+"examples/*" = ["D", "N"]
+
+[tool.ruff.lint.pep8-naming]
+ignore-names = ["visit_*", "leave_*"]
+
+[tool.ruff.lint.pydocstyle]
+# not use "google" to include the D401: First line should be in imperative mood 
+convention = "pep257"
+ignore-decorators = ["appl.core.types.override"] # imported override decorators
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

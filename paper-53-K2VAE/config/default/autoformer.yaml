@@ -1,0 +1,45 @@
+# lightning==2.3.0.dev0
+seed_everything: 0
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+  # num_sanity_val_steps: 0
+  # gradient_clip_algorithm: 'norm'
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.Autoformer
+    init_args:
+      moving_avg: 25
+      factor: 1
+      n_heads: 8
+      activation: 'gelu'
+      e_layers: 2
+      d_layers: 1
+      output_attention: false
+      d_ff: 512
+      f_hidden_size: 512
+      embed: 'timeF'
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: true
+      feat_idx_emb_dim: 1
+  num_samples: 1
+  learning_rate: 1e-3
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: solar_nips
+      split_val: true
+      scaler: standard # none, standard, scaling
+  batch_size: 32
+  test_batch_size: 32
+  num_workers: 8

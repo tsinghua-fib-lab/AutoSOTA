@@ -1,0 +1,176 @@
+DSM_warmup: false
+FID_ckpt: null
+FID_freq: 1
+T: 1.0
+backward_net: Transformerv5
+beta_max: 20
+beta_min: 0.001
+ckpt_file: null
+ckpt_freq: 1
+ckpt_path: results/pm25_Unetv2_Transformerv2_ve_alternate_imputation_v2_dsm_v2_10_12_2022_095150_backward_cnt
+compute_FID: false
+compute_NLL: false
+cpu: false
+data_dim:
+- 72
+- 8
+dataset_missing_ratio: 0.1
+device: cuda:3
+dir: pm25_Unetv2_Transformerv2_ve_alternate_imputation_v2_dsm_v2_10_12_2022_095150_backward_cnt
+dsm_train_method: dsm_v2
+ema_decay: 0.99
+eval_impute_function: imputation
+eval_itr: 200
+forward_net: Transformerv5
+gpu: 3
+grad_clip: 1.0
+group: '0'
+imputation_eval: true
+input_size: &id001 !!python/tuple
+- 192
+- 192
+interval: 100
+l2_norm: 1.0e-06
+load: results/pm25_Unetv2_Transformerv2_ve_alternate_imputation_v2_dsm_v2_10_11_2022_191240_backward_cnt_sota/stage_19_fb.npz
+log_fn: null
+log_tb: true
+lr: 0.0005
+lr_b: 5.0e-06
+lr_dsm: 0.001
+lr_f: 1.0e-06
+lr_gamma: 0.99
+lr_step: 300
+model_configs:
+  Transformerv1: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _convert_dict: true
+    _fields:
+      channels: 64
+      diffusion_embedding_dim: 128
+      featureemb: 16
+      input_size: *id001
+      layers: 4
+      name: Transformerv1
+      nheads: 8
+      output_layer: conv1d
+      timeemb: 128
+    _locked: false
+    _type_safe: true
+  Transformerv2: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _convert_dict: true
+    _fields:
+      channels: 64
+      diffusion_embedding_dim: 128
+      featureemb: 16
+      input_size: *id001
+      layers: 1
+      name: Transformerv2
+      nheads: 8
+      output_layer: conv1d
+      timeemb: 128
+    _locked: false
+    _type_safe: true
+  Transformerv3: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _convert_dict: true
+    _fields:
+      channels: 64
+      diffusion_embedding_dim: 128
+      featureemb: 16
+      input_size: *id001
+      layers: 4
+      name: Transformerv3
+      nheads: 8
+      output_layer: conv1d
+      timeemb: 128
+    _locked: false
+    _type_safe: true
+  Transformerv4: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _fields:
+      channels: 64
+      diffusion_embedding_dim: 128
+      featureemb: 16
+      input_size: *id001
+      layers: 4
+      name: Transformerv4
+      nheads: 8
+      output_layer: conv1d
+      timeemb: 128
+    _locked: false
+    _type_safe: true
+  Transformerv5: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _convert_dict: true
+    _fields:
+      channels: 16
+      diffusion_embedding_dim: 64
+      is_linear: false
+      featureemb: 16
+      input_size: *id001
+      layers: 2
+      name: Transformerv5
+      nheads: 8
+      output_layer: conv1d
+      timeemb: 32
+    _locked: false
+    _type_safe: true
+  Unetv2: !!python/object:ml_collections.config_dict.config_dict.ConfigDict
+    _convert_dict: true
+    _fields:
+      attention_layers:
+      - 1
+      - 2
+      channel_mult: !!python/tuple
+      - 1
+      - 1
+      - 1
+      dropout: 0.0
+      in_channels: 1
+      input_size: *id001
+      name: Unetv2
+      num_channels: 32
+      num_head: 2
+      num_norm_groups: 32
+      num_res_blocks: 2
+      out_channel: 1
+    _locked: false
+    _type_safe: true
+name: debug
+noise_type: gaussian
+normalize_loss: false
+notes: backward_cnt
+num_FID_sample: 2000
+num_corrector: 1
+num_epoch: 6
+num_eval_sample: 1
+num_hutchinson_samp: 1
+num_itr: 80
+num_itr_dsm: 10000
+num_stage: 20
+optimizer: AdamW
+output_layer: conv1d
+permute_batch: true
+physio_nfold: 0
+problem_name: pm25
+rand_mask_rank: null
+reset_ema_stage: null
+reuse_traj: false
+samp_bs: 1000
+scale_by_g: false
+sde_type: ve
+seed: 0
+sigma_max: 20.0
+sigma_min: 0.001
+sinusoid_dataset_path: ''
+snapshot_freq: 1
+snr: 0.08
+t0: 0.001
+train_bs_t: 10
+train_bs_t_dsm: 1
+train_bs_x: 10
+train_bs_x_dsm: 64
+train_method: alternate_imputation_v2
+training: 
+  _convert_dict: true
+  _fields: {}
+  _locked: false
+  _type_safe: true
+use_arange_t: false
+use_corrector: false

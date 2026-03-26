@@ -1,0 +1,162 @@
+program: scripts/training/train.py
+
+method: bayes
+metric: 
+  name: val/acc
+  goal: maximize
+project: fingermovements_sweeps
+
+parameters:
+  training.learning_rate:
+    max: 0.01
+    min: 0.00001
+    distribution: uniform
+  training.batch_size: # adapt
+    values:
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+      - 316
+    distribution: categorical
+  optimizer.beta1:
+    max: 0.99     
+    min: 0.8
+    distribution: uniform
+  optimizer.beta2: 
+    max: 0.9999 
+    min: 0.9
+    distribution: uniform
+  optimizer.weight_decay: 
+    max: 0.0005
+    min: 0.0
+    distribution: uniform
+  # model
+  model.sequence_model.activation:
+    values:
+      - elu
+      - relu
+      - selu
+      - gelu
+      - silu
+      - tanh
+    distribution: categorical
+  model.sequence_model.d_model:
+    values:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+    distribution: categorical
+  model.sequence_model.dim_feedforward:
+    values:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+    distribution: categorical
+  model.sequence_model.dropout:
+    max: 0.7
+    min: 0.0
+    distribution: uniform
+  model.sequence_model.n_head:
+    values:
+      - 2
+      - 4
+      - 8
+    distribution: categorical
+  model.sequence_model.num_encoder_layers:
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    distribution: categorical
+  model.sequence_model.mask_threshold:
+    values:
+      - 0.01
+      - 0.05
+      - 0.1
+      - 0.15
+      - 0.2
+      - 0.25
+      - 0.3
+    distribution: categorical
+  model.sequence_model.mask_region_bound:
+    values:
+      - 0.05
+      - 0.1
+      - 0.15
+      - 0.2
+      - 0.25
+      - 0.3
+    distribution: categorical
+  model.sequence_model.ratio_highest_attention:
+    values:
+      - 0.1
+      - 0.2
+      - 0.3
+      - 0.4
+      - 0.5
+    distribution: categorical
+  # output head
+  model.output_head.reduced:
+    values:
+      - true
+      - false
+    distribution: categorical
+  model.output_head.activation:
+    values:
+      - elu
+      - relu
+      - selu
+      - gelu
+      - silu
+      - tanh
+    distribution: categorical
+  # loss
+  loss.lambda_cl:
+    min: 0.01
+    max: 5
+    distribution: uniform
+  # callback
+  callbacks.lr_scheduler.patience: 
+    values:
+      - 5
+      - 8
+      - 10
+      - 15
+      - 20
+    distribution: categorical
+  callbacks.ema.decay: 
+    values:
+      - 0.01
+      - 0.05
+      - 0.1
+      - 0.2
+      - 0.3
+      - 0.5
+      - 0.7
+      - 0.9
+      - 0.95
+      - 0.999
+    distribution: categorical
+
+early_terminate:
+  type: hyperband
+  s: 2
+  eta: 3
+  max_iter: 27
+
+
+command:
+ - python
+ - ${program}
+ - +experiment=uea/fingermovements/sweep_starformer.yaml
+ - system.accelerator=gpu
+ - +logger.run_1_config_path=null

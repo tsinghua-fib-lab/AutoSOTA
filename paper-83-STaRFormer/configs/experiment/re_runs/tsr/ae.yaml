@@ -1,0 +1,42 @@
+# @package _global_
+dataset: appliancesenergy
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /datamodule: tsr/ae/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+run_url: null # add your wandb path here "<entity>/<project>/runs/<run_id>"
+
+change_config: {
+  "logger": {
+    "sweep": false, 
+    "project": "appliancesenergy"
+  },
+  datamodule: {
+    norm: null
+  },
+  callbacks: {
+    early_stop: {
+      monitor: val/rmse,
+      mode: min, # if loss --> min, for acc --> max
+      patience: 30,
+      verbose: True,
+    },
+    lr_scheduler: {
+      name: ReduceLROnPlateau,
+      apply: True,
+      mode: min,
+      factor: 0.8,
+      patience: 15,
+      min_lr: 1e-06,
+      monitor: val/rmse,
+    },
+  },
+}

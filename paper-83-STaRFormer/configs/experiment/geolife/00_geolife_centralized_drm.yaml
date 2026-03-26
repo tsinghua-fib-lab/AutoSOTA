@@ -1,0 +1,30 @@
+# @package _global_
+dataset: geolife
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: geolife
+  - override /callbacks/model_ckpt: geolife
+  - override /datamodule: geolife/centralized
+  - override /logger: wandb
+  - override /loss: contrastive
+  - override /model: drm_transformer
+  - override /optimizer: adam
+  - override /training: geolife/centralized
+  
+
+training:
+  epochs: 300 #50
+model:
+  embedding:
+    d_features: 10
+    max_seq_len: 9255
+  output_head:
+    batch_size: ${training.batch_size} 
+    d_out: 4
+logger:
+  project: geolife
+  sweep: false
+datamodule:
+  pad_sequence: True
+  s3_bucket_path: null

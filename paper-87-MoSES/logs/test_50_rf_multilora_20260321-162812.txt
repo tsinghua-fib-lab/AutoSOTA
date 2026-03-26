@@ -1,0 +1,24 @@
+Found 1 datasets on the following paths: ['data/cvrp/test/50.npz']
+Loading checkpoint from  pretrained_moses_model/rf/50/multilora_denseroute_softplus.ckpt
+
+
+Traceback (most recent call last):
+  File "/repo/test.py", line 377, in <module>
+    td_test = env.load_data(dataset)  # this also adds the bks cost
+  File "/repo/envs/mtvrp/env.py", line 709, in load_data
+    td = load_npz_to_tensordict(fpath)
+  File "/opt/conda/lib/python3.10/site-packages/rl4co/data/utils.py", line 19, in load_npz_to_tensordict
+    return TensorDict(x_dict, batch_size=batch_size)
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/_td.py", line 310, in __init__
+    self.set(key, value, non_blocking=sub_non_blocking)
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/base.py", line 7464, in set
+    return self._set_tuple(
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/_td.py", line 2537, in _set_tuple
+    return self._set_str(
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/_td.py", line 2480, in _set_str
+    value = self._validate_value(
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/base.py", line 13098, in _validate_value_devicefree
+    value = self._convert_to_tensor(value)
+  File "/opt/conda/lib/python3.10/site-packages/tensordict/base.py", line 12912, in _convert_to_tensor
+    return torch.as_tensor(array, device=self.device)
+RuntimeError: Could not infer dtype of numpy.float32

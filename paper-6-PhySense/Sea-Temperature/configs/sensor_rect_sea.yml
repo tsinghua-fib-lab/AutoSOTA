@@ -1,0 +1,19 @@
+data:
+    num_workers: 4
+
+model:
+    name: 'physense_for_pipe_crossattn'
+    in_channels: 2
+    out_channels: 1
+    image_size: [171, 360]
+    patch_size: [3, 3]
+
+training:
+    batch_size: 10 # 4 gpus in default
+    gpu_num: 4
+    n_epochs: 301
+    save_freq: 10
+    ckpt_path: './checkpoints'
+
+optim:
+    lr: 0.0002

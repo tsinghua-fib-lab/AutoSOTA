@@ -1,0 +1,47 @@
+# @package _global_
+
+# Override defaults by taking another config
+defaults:
+  - rf_base_50.yaml
+  - _self_
+
+env:
+  generator_params:
+    variant_preset: "ovrp" # ovrp, vrpb, vrpl, vrptw
+
+  val_file: [ "${env.generator_params.variant_preset}/val/${env.generator_params.num_loc}.npz", ]
+
+  val_dataloader_names: [ "${env.generator_params.variant_preset}${env.generator_params.num_loc}", ]
+
+  test_file: [ "${env.generator_params.variant_preset}/test/${env.generator_params.num_loc}.npz", ]
+
+  test_dataloader_names: ${env.val_dataloader_names}
+
+model:
+  _target_: models.model.LoRABaseModel
+  use_aug: False
+  policy:
+    _target_: models.policy.LoRAPolicy
+    normalization: "rms"
+    encoder_use_prenorm: True
+    encoder_use_post_layers_norm: True
+    parallel_gated_kwargs:
+      mlp_activation: "silu"
+    lora_rank: 32
+    lora_alpha: 1.0
+    lora_use_gate: true
+    lora_act_func: 'sigmoid'
+    lora_use_linear: false
+    lora_modules_ckpt_path: null
+    basis_policy_ckpt_path: null
+    
+
+# Logging: we use Wandb in this case
+logger:
+  wandb:
+    project: ""
+    tags: []
+    group: ""
+    name: ""
+    entity: ""
+  

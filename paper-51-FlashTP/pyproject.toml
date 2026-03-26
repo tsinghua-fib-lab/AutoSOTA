@@ -1,0 +1,26 @@
+[project]
+name = "flashTP_e3nn"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.4.1",
+    "e3nn"
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel", "torch>=2.4.1","ninja"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+include = ["flashTP_e3nn*"]
+exclude = ["example*"]
+
+[tool.setuptools.package-data]
+flashTP_e3nn = [
+    "sptp_exp_opt_extcg/*.{cpp,cu,hpp}",
+    "sptp_exp_opt_large/*.{cpp,cu,hpp}",
+    "sptp_exp_opt*/CMakeLists.txt"
+]

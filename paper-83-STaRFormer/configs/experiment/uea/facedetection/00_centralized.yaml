@@ -1,0 +1,13 @@
+# @package _global_
+dataset: facedetection
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: ucr_uea
+  - override /callbacks/model_ckpt: ucr_uea
+  - override /datamodule: ucr_uea/facedetection/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: transformer
+  - override /optimizer: adam
+  - override /training: ucr_uea/centralized

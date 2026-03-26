@@ -1,0 +1,44 @@
+sequence_model:
+  name: starformer
+  ### embedding
+  embedding:
+    d_features: 9
+    max_seq_len: 487 # max in data: 487
+  ### embedding
+  ### transformer layer params
+  d_model: 16
+  n_head: 2
+  num_encoder_layers: 2
+  dim_feedforward: 16
+  dropout: 0.0
+  activation: silu
+  layer_norm_eps: 1e-05
+  batch_first: False
+  bias: true
+  enable_nested_tensor: True
+  mask_check: True
+  masking: null
+  mask_threshold: null # 0.2 (mask_p)
+  mask_region_bound: null # 0.1
+  ratio_highest_attention: null # 0.5
+  aggregate_attn_per_batch: False
+  precision: 32
+  reconstruction: False
+
+text_model:
+  aligner:
+    kernel_size: null
+    activation: null
+
+### output head params
+# Output head
+output_head:
+  task: classification
+  batch_size: ${training.batch_size}
+  d_out: 1
+  d_hidden: null
+  activation: relu
+  reduced: True 
+  cls_method: autoregressive
+
+  

@@ -1,0 +1,56 @@
+# @package _global_
+dataset: InsectWingbeat # adapt to dataset
+task: classification
+
+defaults:
+  - /callbacks/ema: default
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: uea
+  - override /callbacks/model_ckpt: uea
+  - override /datamodule: uea/insectwingbeat/centralized # adapt to dataset
+  - override /logger: wandb
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: uea/centralized
+  
+callbacks:
+  lr_scheduler: 
+    monitor: val/loss_ce
+  lr_scheudler:
+    monitor: val/loss_ce
+    patience: 30
+  ema:
+    apply: True
+model:
+  sequence_model:
+    embedding:
+      d_features: 200 # adapt to dataset
+      max_seq_len: 21 # adapt to dataset (+1)
+    masking: darem 
+    mask_threshold: 0.2 
+    mask_region_bound: 0.1 
+    ratio_highest_attention: 0.5 
+    activation: relu
+    task: ${task}
+    batch_size: ${training.batch_size} 
+    cls_method: cls_token
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 10 # adapt to dataset
+    d_hidden: null
+    activation: relu
+    reduced: False 
+    cls_method: cls_token
+
+logger:
+  project: insectwingbeat_sweeps # adapt to dataset
+  sweep: true
+
+loss:
+  pred_type: multiclass # adapt to dataset
+  task: ${task}
+  
+  
+  

@@ -1,0 +1,197 @@
+# Modified based on https://github.com/mkdocstrings/mkdocstrings/blob/main/mkdocs.yml
+site_name: APPL
+site_description: "A Prompt Programming Language"
+repo_name: appl-team/appl
+repo_url: https://github.com/appl-team/appl
+site_url: https://appl-team.github.io/appl/
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2024 APPL Team
+watch: [mkdocs.yml, README.md, src, docs, examples]
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+nav:
+  - Introduction:
+    - Welcome to APPL: index.md
+    - Installation Guide: install.md
+    - Setup Guide: setup.md
+    - FAQs: faq.md
+    - Contribution Guide: contribute.md
+  - Tutorials:
+    - tutorials/index.md
+    - Getting Started: tutorials/1_get_started.md
+    - "Example: QA with LMs": tutorials/2_qa_example.md
+    - APPL Function: tutorials/3_appl_function.md
+    - Concurrent LM Calls: tutorials/4_concurrent.md
+    - Tool Calls for LMs: tutorials/5_tool_calls.md
+    - Coding Prompts: tutorials/6_prompt_coding.md
+    - Using Tracing: tutorials/7_tracing.md
+    - Usage:
+      - Servers: tutorials/usage/servers.md
+      - Streaming: tutorials/usage/streaming.md
+      - Structured Output: tutorials/usage/structured.md
+      - Using SRT: tutorials/usage/srt.md
+    - Appendix:
+      - Prompt Capture: tutorials/appendix/prompt_capture.md
+  - Cookbook:  # how-to-guides
+    - cookbook/index.md
+    - ReAct Agent: cookbook/react.md
+    - Multi Agent Chat: cookbook/multi_agent_chat.md
+    - Chat with Codes: cookbook/chat_with_codes.md
+    - Very Long Prompt: cookbook/long_prompt.md
+  - Blog:
+    - blogs/index.md
+  - Documentation:
+    - appl: docs/
+  - Development:
+    - dev/index.md
+    - Management: dev/manage.md
+    - Documentation: dev/docs.md
+    - Coverage Report: coverage.md
+
+theme:
+  name: "material"
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil 
+    view: material/eye
+  features:
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.code.select
+  - content.tooltips
+  - navigation.expand
+  - navigation.footer
+  - navigation.indexes
+  - navigation.path
+  - navigation.sections
+  - navigation.tabs
+  # - navigation.tabs.sticky
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - search.suggest
+  - toc.follow
+  palette:
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: teal
+    accent: purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    accent: lime
+    toggle:
+      icon: material/weather-night
+      name: Switch to system preference
+
+extra_css:
+- style.css
+
+# https://facelessuser.github.io/pymdown-extensions/
+markdown_extensions:
+- admonition
+- attr_list
+- callouts
+- footnotes
+- md_in_html
+- pymdownx.arithmatex:
+    generic: true
+- pymdownx.details
+- pymdownx.emoji:
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+- pymdownx.highlight:
+    anchor_linenums: true
+    line_spans: __span
+    pygments_lang_class: true
+- pymdownx.inlinehilite:
+    style_plain_text: python
+# - pymdownx.magiclink:
+#     normalize_issue_symbols: true
+#     repo_url_shorthand: true
+#     user: appl-team
+#     repo: appl
+- pymdownx.mark
+- pymdownx.smartsymbols
+- pymdownx.snippets:
+    base_path: [!relative $config_dir]
+    check_paths: true
+- pymdownx.superfences
+- pymdownx.tabbed:
+    alternate_style: true
+    slugify: !!python/object/apply:pymdownx.slugs.slugify
+      kwds:
+        case: lower
+- pymdownx.tasklist:
+    custom_checkbox: true
+- pymdownx.tilde
+- toc:
+    permalink: true
+
+plugins:
+  - search
+  - autorefs
+  # - autolinks
+  - markdown-exec
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+          - https://docs.python.org/3/objects.inv
+          - https://installer.readthedocs.io/en/stable/objects.inv  # demonstration purpose in the docs
+          - https://mkdocstrings.github.io/autorefs/objects.inv
+          paths: []
+          options:
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list
+            docstring_style: google
+            filters: ["!^_"]
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            # summary: true
+  - gen-files:
+      scripts:
+      - scripts/gen_ref_nav.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mike:
+      version_selector: true
+  - mkdocs-jupyter
+  - coverage
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/appl-team/appl
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/q3x4Qwgj29
+    - icon: fontawesome/brands/twitter
+      link: https://x.com/honghua_dong/status/1805310304751894891
+  analytics:
+    provider: google
+    property: G-5M9WF9SE4J
+  version:
+    provider: mike

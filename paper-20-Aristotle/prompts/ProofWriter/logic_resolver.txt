@@ -1,0 +1,280 @@
+Instructions:
+
+Given two clauses, follow these steps:
+
+1. **Identify Contradictory Terms:**
+  Two terms are contradictory if they share the same predicate and arguments but differ in either polarity (one is negated) or boolean value (True vs. False).
+
+   **Examples:**
+   - \( P(x, False) \) contradicts \( \neg P(x, False) \) and \( P(x, True) \).
+   - \( \neg P(x, False) \) contradicts \( P(x, False) \) and \( \neg P(x, True) \).
+
+2. **Resolve the Clauses:**
+   - If contradictory terms are found, apply the resolution rule:
+     - From \( (P(x, True) \lor Q(x, True)) \) and \( (P(x, False) \lor M(x, True)) \), derive \( Q(x, True) \lor M(x, True) \).
+
+3. **Sufficiency Check:**
+   - **If** the resolution leads to a contradiction:
+     - Output:
+       - New Clause: {Contradiction}
+       - Sufficiency Label: [True]
+   - **Else:**
+     - Output:
+       - New Clause: {new_clause}
+       - Sufficiency Label: [False]
+---
+Example:
+
+Clause 1: Difficult(Bradley, True) \lor Known(x,False)
+
+Clause 2: Difficult(x,False) ∨ Embarrassed(x,True) ∨ Colorful(x,False)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - **Clause 1:** \( Difficult(Bradley, True) \lor Known(x, False) \)
+   - **Clause 2:** \( (Difficult(x, False) \lor Embarrassed(x, True)) \lor Colorful(x, False) \)
+   - After instantiating `x` as Bradley, \( Difficult(Bradley, True) \) is complementary to \( Difficult(Bradley, False) \).
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Difficult(Bradley, True) \lor Known(x, False) \)
+- **Clause 2:** \( Difficult(Bradley, False) \lor Embarrassed(Bradley, True) \lor Colorful(Bradley, False) \)
+
+Remove the complementary terms and use "OR" to connect the remaining term:
+\[
+Known(x, False) \lor Embarrassed(Bradley, True) \lor Colorful(Bradley, False)
+\]
+
+### **Step 3: Sufficiency Check**
+
+- No contradiction is found.
+
+**New Clause:** {\( Known(x, False) \lor Embarrassed(Bradley, True) \lor Colorful(Bradley, False) \)}
+
+**Sufficiency Label:** [False]
+
+---
+Example:
+Clause 1: \( Rough(x, False) \lor Red(Charlie, True) \)
+Clause 2: \( Red(Charlie, False) \lor Rough(x, True) \)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - \( Rough(x, False) \) in Clause 1 is complementary to \( Rough(x, True) \) in Clause 2 because they share the same predicate and argument but differ in boolean value..
+   - \( Red(Charlie, True) \) in Clause 1 is complementary to \( Red(Charlie, False) \) in Clause 2 because they share the same predicate and argument but differ in boolean value..
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Rough(x, False) \lor Red(Charlie, True) \)
+- **Clause 2:** \( Red(Charlie, False) \lor Rough(x, True) \)
+
+After resolving both complementary terms:
+\[
+\text{Contradiction}
+\]
+
+### **Step 3: Sufficiency Check**
+
+- A contradiction is found.
+
+**New Clause:** {Contradiction}
+
+**Sufficiency Label:** [True]
+
+---
+Example:
+Clause 1: Doubtful(x, True) \lor Clean(x, True)
+Clause 2: Doubtful(x, False) \lor Rich(Landon, False)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - \( Doubtful(x, True) \) in the first clause is complementary to \( Doubtful(x, False) \) in the second clause because they share the same predicate and argument but differ in boolean value.
+   - Clean(x, True) in clause 1 is not complement to Rich(Landon, False) in clause 2 because they have different predicate.
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Doubtful(x, True) \lor Clean(x, True) \)
+- **Clause 2:** \( Doubtful(x, False) \lor Rich(Landon, False) \)
+
+After resolving the complementary terms:
+\[
+Clean(x, True) \lor Rich(Landon, False)
+\]
+
+### **Step 3: Sufficiency Check**
+
+- No contradiction is found.
+
+**New Clause:** {\( Clean(x, True) \lor Rich(Landon, False) \)}
+
+**Sufficiency Label:** [False]
+
+---
+Example:
+Clause 1: Stupid(Conway, True)
+Clause 2: Stupid(x, False) 
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - After instantiating `x` as Conway, \( Stupid(Conway, True) \) in Clause 1 is complementary to \( Stupid(Conway, False) \) in Clause 2 because they share the same predicate and argument but differ in boolean value..
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Stupid(Conway, True) \)
+- **Clause 2:** \( Stupid(x, False) \)
+
+After resolving the complementary terms:
+\[
+\text{Contradiction}
+\]
+
+### **Step 3: Sufficiency Check**
+
+- A contradiction is found.
+
+**New Clause:** {Contradiction}
+
+**Sufficiency Label:** [True]
+---
+Example:
+Clause 1: Worrisome(Alan,False)∨Distinct(Alan,True)
+Clause 2: Distinct(x,True)∨Worrisome(x,True)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - **Clause 1:** \( Worrisome(Alan, False) \lor Distinct(Alan, True) \)
+   - **Clause 2:** \( Distinct(x, True) \lor Worrisome(x, True) \)
+   
+   After instantiating \( x \) as Alan, \( Worrisome(Alan, False) \) in Clause 1 is complementary to \( Worrisome(Alan, True) \) in Clause 2 because they share the same predicate and argument but differ in boolean value.
+   Distinct(Alen, True) in the instantiated clause 2 is not complement to Distinct(Alen, True) in clause 2 because they have the same boolean value.
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Worrisome(Alan, False) \lor Distinct(Alan, True) \)
+- **Clause 2:** \( Distinct(Alan, True) \lor Worrisome(Alan, True) \)
+
+Remove the complementary terms and use "OR" to connect the remaining term:
+\[
+Distinct(Alan, True) \lor Distinct(Alan, True)
+\]
+
+Since the remaining terms are identical, the new clause simplifies to:
+\[
+Distinct(Alan, True)
+\]
+
+### **Step 3: Sufficiency Check**
+
+- No contradiction is found.
+
+**New Clause:** {Distinct(Alan, True)}
+
+**Sufficiency Label:** [False]
+---
+Example: 
+Clause 1: Bottle(Mean, True) \lor Screen(Raw, False)
+Clause 2: Bottle(x, False) \lor Tennis(x, False)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - **Clause 1:** \( Bottle(Mean, True) \lor Screen(Raw, False) \)
+   - **Clause 2:** \( Bottle(x, False) \lor Tennis(x, False) \)
+   
+   After instantiating \( x \) as Mean, \( Bottle(Mean, True) \) in Clause 1 is complementary to \( Bottle(Mean, False) \) in Clause 2 because they share the same predicate and argument but differ in boolean value.
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Bottle(Mean, True) \lor Screen(Raw, False) \)
+- **Clause 2:** \( Bottle(Mean, False) \lor Tennis(Mean, False) \)
+
+Remove the complementary terms and use "OR" to connect the remaining terms:
+\[
+Screen(Raw, False) \lor Tennis(Mean, False)
+\]
+
+### **Step 3: Sufficiency Check**
+
+- No contradiction is found.
+
+**New Clause:** {Screen(Raw, False) \lor Tennis(Mean, False)}
+
+**Sufficiency Label:** [False]
+---
+Example:
+Clause 1: Apple(Tom, True) or Pad(Jack, True)
+Clause 2: Apple(x, False) or Pad(x, False)
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+1. **Identify Potential Complementary Terms:**
+   - **Clause 1:** \( Apple(Tom, True) \lor Pad(Jack, True) \)
+   - **Clause 2:** \( Apple(x, False) \lor Pad(x, False) \)
+   
+   After instantiating \( x \) as Tom, \( Apple(Tom, True) \) in Clause 1 is complementary to \( Apple(Tom, False) \) in Clause 2.
+   Since we instantiate \( x \) as Tom, Pad(x, False) in clause 2 becomes Pad(Tom, False), which is not complementary to Pad(Jack, True) in clause 1 because they have different argument (Tom vs. Jack)
+
+### **Step 2: Resolve the Clauses**
+
+- **Clause 1:** \( Apple(Tom, True) \lor Pad(Jack, True) \)
+- **Clause 2:** \( Apple(Tom, False) \lor Pad(Tom, False) \)
+
+Remove the complementary terms and use "OR" to connect the remaining terms:
+\[
+Pad(Jack, True) \lor Pad(Tom, False)
+\]
+
+### **Step 3: Sufficiency Check**
+
+- No contradiction is found.
+
+**New Clause:** {Pad(Jack, True) \lor Pad(Tom, False)}
+
+**Sufficiency Label:** [False]
+---
+Example:
+Clause 1: Goto(x, Ben, False)
+Clause 2: Goto(x, father, False) ∨ Goto(Screen, Ben, True)
+
+### Step 1: Check for Complementary Terms
+
+- **Clause 1:** \( Goto(x, Ben, False) \)
+- **Clause 2:** \( Goto(x, father, False) \lor Goto(Screen, Ben, True) \)
+
+- **Without instantiation**:
+  - \( Goto(x, Ben, False) \) vs. \( Goto(x, father, False) \): Same predicate, different second arguments (Ben vs. father), same boolean value → **not complementary**.
+  - \( Goto(x, Ben, False) \) vs. \( Goto(Screen, Ben, True) \): Same predicate, different first argument (\( x \) vs. Screen), opposite boolean values.
+
+- **Instantiation**: Since one of the arguments is \( x \), instantiate \( x \) as Screen.
+
+### Step 2: Instantiation
+
+- After instantiation, Clause 1 becomes:
+  - \( Goto(Screen, Ben, False) \)
+- Now, \( Goto(Screen, Ben, False) \) and \( Goto(Screen, Ben, True) \) are complementary because they share the same predicate, arguments, and opposite boolean values.
+
+### Step 3: Resolve Clauses
+
+- Resolve the complementary terms:
+\[
+Goto(x, father, False)
+\]
+
+### Step 4: Sufficiency Check
+
+**New Clause:** {Goto(x, father, False)}  
+**Sufficiency Label:** [False]
+---
+Please conclude the information in the below format:
+New Clause: {placeholder_for_new_clause}
+Sufficiency Label: [placeholder_for_sufficiency_label]
+---
+Please make sure that two terms are complementary only if they have the same predicate and arugment, and different boolean value (True vs. False). If they have the same boolean value, they are not complementary thus cannot be resolved.
+Please make sure that argument 'x' can be instantiated to anything so it will always match will the argument in the other clause with the same position.
+Below is the one you need to resolve:
+Clause 1: [[SOS]]
+Clause 2: [[SELECTED-CLAUSE]]

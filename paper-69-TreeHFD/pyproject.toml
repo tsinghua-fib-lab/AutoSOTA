@@ -1,0 +1,62 @@
+
+[build-system]
+requires = ["setuptools>=78"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "treehfd"
+version = "1.2.0"
+authors = [
+    {name = "Clement Benard", email = "clement-l.benard@thalesgroup.com"}
+]
+description = "A python module to explain xgboost models with the Hoeffding functional decomposition."
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+keywords=[
+    "machine learning",
+    "gradient boosted tree",
+    "explainability",
+    "Hoeffding functional decomposition",
+    "functional ANOVA decomposition"
+]
+dependencies=[
+	"numpy>=2.3",
+	"xgboost>=3.1",
+	"scipy>=1.16",
+	"scikit-learn>=1.7",
+	"pandas>=2.3",
+	"tqdm>=4.67"
+]
+classifiers=[
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics"
+]
+
+[project.urls]
+documentation = "https://treehfd.readthedocs.io/en/latest/"
+repository = "https://github.com/ThalesGroup/treehfd"
+
+[project.optional-dependencies]
+examples = ["matplotlib"]
+doc = ["sphinx", "sphinx-rtd-theme"]
+dev = ["pytest", "ruff", "pyright[nodejs]", "coverage"]
+
+[project.readme]
+file="README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+platforms = [
+    "Linux",
+    "Mac OS-X",
+    "Unix"
+]

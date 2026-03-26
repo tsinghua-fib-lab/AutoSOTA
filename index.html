@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoSOTA</title>
+    <meta
+      name="description"
+      content="AutoSOTA results page for automatically optimized research codebases."
+    />
+    <meta property="og:title" content="AutoSOTA" />
+    <meta
+      property="og:description"
+      content="A results-first GitHub Pages site for AutoSota_list."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#top">
+        <span class="brand-mark"></span>
+        <span class="brand-text">AutoSOTA</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#featured">Featured</a>
+        <a href="#runs">Runs</a>
+      </nav>
+
+      <a
+        class="repo-link"
+        href="https://github.com/Ericccc02/AutoSota_list"
+        target="_blank"
+        rel="noreferrer"
+      >
+        GitHub
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="hero section">
+        <div class="hero-intro">
+          <p class="eyebrow">AutoSOTA / Results Board</p>
+          <h1>AutoSOTA</h1>
+          <p class="hero-copy">
+            Automatically optimized research codebases, rendered directly from
+            the repository README and focused on the optimization results.
+          </p>
+        </div>
+
+        <article class="hero-panel">
+          <div class="hero-panel-copy">
+            <p class="panel-kicker">AutoSOTA Live Results</p>
+            <h2 id="hero-headline">Loading optimized papers...</h2>
+            <p id="hero-summary" class="hero-summary">
+              Parsing the repository leaderboard and per-paper optimization notes
+              from README.md.
+            </p>
+
+            <div class="hero-actions">
+              <a
+                class="button button-strong"
+                href="https://github.com/Ericccc02/AutoSota_list"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Repository
+              </a>
+              <a class="button" href="#runs">Browse Runs</a>
+            </div>
+          </div>
+
+          <div id="stats-grid" class="stats-grid" aria-live="polite">
+            <div class="stat-card loading-card">
+              <span class="stat-value">--</span>
+              <span class="stat-label">Loading</span>
+            </div>
+            <div class="stat-card loading-card">
+              <span class="stat-value">--</span>
+              <span class="stat-label">Loading</span>
+            </div>
+            <div class="stat-card loading-card">
+              <span class="stat-value">--</span>
+              <span class="stat-label">Loading</span>
+            </div>
+            <div class="stat-card loading-card">
+              <span class="stat-value">--</span>
+              <span class="stat-label">Loading</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="featured">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Selected Runs</p>
+            <h2>Highlighted optimization wins.</h2>
+          </div>
+          <p class="section-note">
+            Picked from the strongest relative improvements in the repository
+            ledger.
+          </p>
+        </div>
+
+        <div id="featured-grid" class="featured-grid" aria-live="polite">
+          <article class="featured-card featured-card-loading">
+            <p>Loading featured runs...</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="runs">
+        <div class="section-head section-head-runs">
+          <div>
+            <p class="eyebrow">Research Runs</p>
+            <h2>All optimized papers.</h2>
+          </div>
+
+          <div class="controls">
+            <label class="search-field">
+              <span class="search-label">Search</span>
+              <input
+                id="search-input"
+                type="search"
+                placeholder="ID, method, metric, paper title"
+              />
+            </label>
+
+            <div class="filter-group" id="filter-group" aria-label="Filters">
+              <button class="filter-button is-active" data-filter="all" type="button">
+                All
+              </button>
+              <button class="filter-button" data-filter="strong" type="button">
+                Strong
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="runs-shell">
+          <div class="runs-meta">
+            <p id="runs-summary">Loading README.md...</p>
+            <a
+              href="https://github.com/Ericccc02/AutoSota_list/blob/main/README.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View README source
+            </a>
+          </div>
+
+          <div id="runs-list" class="runs-list" aria-live="polite">
+            <article class="run-card run-card-loading">
+              <p>Loading optimized papers...</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>AutoSOTA</p>
+      <p>GitHub Pages-ready static site driven by README.md.</p>
+      <p>&copy; <span id="year"></span></p>
+    </footer>
+
+    <noscript>
+      <div class="noscript-banner">
+        This page uses JavaScript to parse README.md and render the optimization
+        leaderboard.
+      </div>
+    </noscript>
+
+    <script src="script.js"></script>
+  </body>
+</html>

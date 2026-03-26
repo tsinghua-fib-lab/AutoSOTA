@@ -1,0 +1,45 @@
+# @package _global_
+dataset: geolife
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: geolife
+  - override /callbacks/model_ckpt: geolife
+  - override /datamodule: geolife/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: drm_transformer
+  - override /optimizer: adam
+  - override /training: geolife/centralized
+
+run_url: "<entity>/geolife_sweeps/runs/aeowd9du"  
+change_config: {
+  "logger": {
+    "sweep": false, 
+    "project": "geolife"
+  }, 
+  #"loss": {
+    #"lamdba_sim": 1,
+    #"lambda_contrastive": 10.0
+  #},
+  "model": {
+    "reconstruction": false,
+  #  "mask_threshold": 0.5, #0.47209069368940304
+  #  "mask_region_bound": 0.3, # 0.25
+  #  "ratio_highest_attention": 0.5
+  },
+  "datamodule": {
+    #"train_test_split": {'train': 0.7, 'val': 0.1, 'test': 0.2},
+    "max_trajectory_length": 512,
+    "synthetic_minority_upsampling": false,
+    "noise_level": 0.01,
+  },
+  "training": {
+    "log_every_n_steps": 10
+  },
+  #"seed": 42
+  #"seed": 123
+  #"seed": 0
+  #"seed": 63
+  "seed": 2024
+}

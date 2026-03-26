@@ -1,0 +1,29 @@
+# Data Arguments
+dataset: stackoverflow
+topics_list: gith-pdf
+samples_per_mixture_server: 10
+num_uniform_server: 1000
+
+# Privacy Arguments
+datapoint_privacy: False
+
+outer_product_epsilon: 1
+weighting_epsilon: 1
+center_init_gaussian_epsilon: 1
+center_init_contributed_components_epsilon: 0.2
+fedlloyds_epsilon: 1
+fedlloyds_epsilon_split: 0.5
+
+outer_product_clipping_bound: 5
+weighting_clipping_bound: 10
+center_init_clipping_bound: 1.8
+center_init_contributed_components_clipping_bound: 6
+fedlloyds_clipping_bound: 5
+fedlloyds_laplace_clipping_bound: 10
+
+
+# Algorithm Arguments
+initialization_algorithm: FederatedClusterInit
+clustering_algorithm: FederatedLloyds
+minimum_server_point_weight: 5
+fedlloyds_num_iterations: 0

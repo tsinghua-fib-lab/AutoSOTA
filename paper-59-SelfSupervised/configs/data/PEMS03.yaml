@@ -1,0 +1,11 @@
+_target_: src.data.datamodule.DataModule
+name: PEMS03
+data_dir: ${paths.data_dir}
+batch_size: 64 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+num_workers: 25
+pin_memory: False
+task: forecasting
+scale: True
+num_channels: 358
+cycle_len: 288
+train_val_test_split: [0.6, 0.2, 0.2]

@@ -1,0 +1,64 @@
+baseline_metrics:
+  fid: 2.8883
+container_name: paper_opt_paper-84
+docker_image: docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+eval_command: cd / && python eval_cifar10.py
+eval_command_file: eval_cifar10.py
+eval_output_format: "The eval script prints two sections at the end:\n  === FID score\
+  \ (net_ema1): 2.8883 ===\n  === FID RESULT ===\n  FID (1-NFE, CIFAR-10, net_ema1):\
+  \ 2.8883\nParse the float after \"FID (1-NFE, CIFAR-10, net_ema1): \" as the metric\
+  \ value.\nLower FID is better.\n"
+eval_timeout_minutes: 45
+gpu_devices: 2,3
+known_levers: "- net_ema selector: eval uses net_ema1 (ema_decay=0.99995); alternatives\
+  \ are\n  model.net_ema (net_ema0, ema_decay ~0.9999) or net_ema2 (ema_decay ~0.9999)\n\
+  - batch_size: controls inference batch size (default 128); larger may be faster\n\
+  - fid_samples: number of generated samples for FID (default 50000); lower is faster\n\
+  \  but noisier — keep at 50000 for accurate metric\n- model.sample() integration\
+  \ steps: MeanFlow uses 1-NFE (single function evaluation)\n  via the mean flow ODE;\
+  \ the number of ODE steps is fixed at 1 for 1-NFE metric\n- use_edm_aug: True (EDM\
+  \ augmentation was used during training; must match checkpoint)\n- args in train_arg_parser.py:\
+  \ ema_decays, model architecture hyperparameters\n  (hidden_size, depth, num_heads\
+  \ in DiT-S/2 config)\n- model_configs.py: instantiate_model builds a DiT-S/2 model\
+  \ (32x32 CIFAR-10)\n- Sampling temperature / noise scaling in model.sample() in\
+  \ meanflow.py\n- Quantization in synthetic samples: synthetic_samples = floor(x*255)/255\n\
+  \  (this quantization step in eval_cifar10.py may affect FID)\n"
+max_debug_attempts: 3
+max_debug_minutes: 15
+max_iterations: 12
+metric_direction: lower
+openrouter_api_key: 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
+paper_repo_url: https://github.com/Gsunshine/py-meanflow
+paper_title: Mean Flows for One-step Generative Modeling
+primary_metric: fid
+repo_path: /py-meanflow
+research_model: openai/o4-mini-deep-research
+research_timeout_minutes: 20
+setup_notes: "BASE IMAGE: docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime\n\
+  (PyTorch 2.1.0, CUDA 12.1, Python 3.10)\n\nNOTE: autosota/paper-84:reproduced is\
+  \ a Repo2Run base without PyTorch and\nshould NOT be used as the docker_image. Use\
+  \ the pytorch base image above.\n\nREQUIRED SETUP (must run before eval):\n1. Install\
+  \ dependencies:\n     pip install torchmetrics[image] torchvision tensorboard -q\
+  \ \\\n       -i https://pypi.tuna.tsinghua.edu.cn/simple\n2. Clone py-meanflow repo:\n\
+  \     git clone https://github.com/Gsunshine/py-meanflow /py-meanflow\n3. Place\
+  \ eval_cifar10.py at /eval_cifar10.py inside the container.\n   Script source: /home/dataset-assist-0/scy/paper-optimizer-v3/papers/paper-84/eval_cifar10.py\n\
+  \nVOLUME MOUNTS (required for docker run):\n- Checkpoint:\n    -v /home/dataset-assist-0/Group/group1/084/checkpoints:/checkpoints:ro\n\
+  \  Checkpoint file: /checkpoints/cifar10_meanflow.pth (epoch 14349, ~855MB)\n- CIFAR-10\
+  \ dataset:\n    -v /home/dataset-assist-0/Group/group1/084/datasets/cifar10:/tmp/cifar10_data/cifar10_data:ro\n\
+  \  The dataset directory contains cifar-10-batches-py/ (already extracted)\n  eval_cifar10.py\
+  \ sets data_path='/tmp/cifar10_data/cifar10_data'\n- Inception weights cache (to\
+  \ avoid network download):\n    -v /home/dataset-assist-0/scy/paper-optimizer-v3/inception_cache:/root/.cache/torch/hub/checkpoints:ro\n\
+  \  File: weights-inception-2015-12-05-6726825d.pth\n\nTYPICAL DOCKER RUN COMMAND\
+  \ (for reference):\n  docker run --gpus '\"device=2,3\"' --shm-size=64g -it \\\n\
+  \    -v /home/dataset-assist-0/Group/group1/084/checkpoints:/checkpoints:ro \\\n\
+  \    -v /home/dataset-assist-0/Group/group1/084/datasets/cifar10:/tmp/cifar10_data/cifar10_data:ro\
+  \ \\\n    -v /home/dataset-assist-0/scy/paper-optimizer-v3/inception_cache:/root/.cache/torch/hub/checkpoints:ro\
+  \ \\\n    docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \\\n    bash\
+  \ -c \"pip install torchmetrics[image] torchvision -q -i https://pypi.tuna.tsinghua.edu.cn/simple\
+  \ && \\\n             git clone https://github.com/Gsunshine/py-meanflow /py-meanflow\
+  \ && \\\n             python /eval_cifar10.py\"\n\nREPRODUCTION DETAILS:\n- Reproduced\
+  \ FID: 2.8883 (paper reports 2.92, CI [2.83, 2.929])\n- Uses net_ema1 (ema_decay=0.99995)\
+  \ from the checkpoint\n- 50K generated samples for FID-50K evaluation\n- 2x A100\
+  \ GPUs used during reproduction\n- torchmetrics FrechetInceptionDistance with normalize=True\n\
+  - Dataset used: CIFAR-10 train split (50K images) for real distribution\n"
+target_improvement_pct: 2.0

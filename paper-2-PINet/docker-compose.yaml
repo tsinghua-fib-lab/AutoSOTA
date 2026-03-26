@@ -1,0 +1,31 @@
+# docker-compose.yml
+x-common: &common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  working_dir: /app
+  environment:
+    PYTHONPATH: /app/src
+  command: ["pytest", "--cov=src/pinet", "--cov-report=term-missing", "-v"]
+
+services:
+  pinet-cpu:
+    <<: *common
+    image: pinet:cpu
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ubuntu:24.04
+        PIP_EXTRAS: dev
+
+  pinet-gpu:
+    <<: *common
+    image: pinet:gpu
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ghcr.io/nvidia/driver:7c5f8932-550.144.03-ubuntu24.04
+        PIP_EXTRAS: cuda12,dev
+    gpus: all

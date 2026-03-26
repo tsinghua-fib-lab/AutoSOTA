@@ -1,0 +1,44 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  check_val_every_n_epoch: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+  gradient_clip_val: 0.5
+model:
+  forecaster:
+    class_path: probts.model.forecaster.prob_forecaster.TSDiffCond
+    init_args:
+      timesteps: 100
+      hidden_dim: 64
+      step_emb: 128
+      num_residual_blocks: 3
+      dropout: 0.0
+      mode: diag # diag, nplr
+      measure: diag # 'diag', 'diag-lin', 'diag-inv', or 'diag-legs' for diag
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: false
+      feat_idx_emb_dim: 1
+      use_scaling: false
+  num_samples: 100
+  learning_rate: 0.001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: solar_nips
+      split_val: true
+      scaler: temporal # identity, standard, temporal
+      context_length: 336
+  batch_size: 32
+  test_batch_size: 32
+  num_workers: 8

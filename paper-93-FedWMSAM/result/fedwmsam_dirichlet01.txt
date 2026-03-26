@@ -1,0 +1,3028 @@
+##=============================================##
+##     Federated Learning Simulator Starts     ##
+##=============================================##
+Namespace(dataset='CIFAR10', model='ResNet18', non_iid=True, split_rule='Dirichlet', split_coef=0.1, active_ratio=0.1, total_client=100, comm_rounds=500, local_epochs=5, batchsize=50, weight_decay=0.001, local_learning_rate=0.1, global_learning_rate=1.0, lr_decay=0.998, seed=20, cuda=0, data_file='./', out_file='out/', save_model=False, use_RI=False, alpha=0.1, beta=0.1, beta1=0.9, beta2=0.99, lamb=0.1, rho=0.1, gamma=1.0, epsilon=0.01, mode='normal', method='FedWMSAM')
+Files already downloaded and verified
+Files already downloaded and verified
+[6119, 5752, 5607, 4156, 5041, 4836, 6272, 3957, 3249, 5011]
+begin to save data...
+data loading finished.
+Initialize the Dataset     --->  CIFAR10 Dirichlet-0.1 100 clients
+Initialize the Model Func  --->  ResNet18 model
+                           --->  11181642 parameters
+Initialize the Server      --->  FedWMSAM
+Initialize the Public Storage:
+   Local Model Param List  --->  100 * 11181642
+ Local Updated Param List  --->  100 * 11181642
+   Train/Test [loss, acc]  --->  500 * 2
+  Consistency (Divergence) --->  500
+ Var Reduction Param List  --->  100 * 11181642
+##=============================================##
+##           Training Process Starts           ##
+##=============================================##
+============= Communication Round 1 =============
+Selected Clients:  4, 15, 33, 61, 69, 80, 92
+   Train    ----    Loss: 2.9533,   Accuracy: 0.1002
+    Test    ----    Loss: 3.4639,   Accuracy: 0.1000
+            ----    Divergence: 0.2901
+            ----    Time: 9.57s
+============= Communication Round 2 =============
+Selected Clients:  0,  3,  5, 10, 75, 95, 97
+   Train    ----    Loss: 2.5946,   Accuracy: 0.1394
+    Test    ----    Loss: 3.0661,   Accuracy: 0.1309
+            ----    Divergence: 0.1884
+            ----    Time: 8.22s
+============= Communication Round 3 =============
+Selected Clients: 10, 15, 32, 41, 43, 44, 61, 69, 73, 89, 98
+   Train    ----    Loss: 2.4394,   Accuracy: 0.1975
+    Test    ----    Loss: 2.9465,   Accuracy: 0.2053
+            ----    Divergence: 0.1252
+            ----    Time: 11.69s
+============= Communication Round 4 =============
+Selected Clients: 10, 17, 23, 35, 55, 76, 77, 82, 92, 95, 96
+   Train    ----    Loss: 2.4256,   Accuracy: 0.1940
+    Test    ----    Loss: 2.9416,   Accuracy: 0.1737
+            ----    Divergence: 0.1185
+            ----    Time: 11.84s
+============= Communication Round 5 =============
+Selected Clients: 51, 55, 63, 81, 86, 88, 93
+   Train    ----    Loss: 2.4890,   Accuracy: 0.1976
+    Test    ----    Loss: 2.9717,   Accuracy: 0.1940
+            ----    Divergence: 0.1262
+            ----    Time: 8.17s
+============= Communication Round 6 =============
+Selected Clients: 26, 40, 48, 52, 63, 70, 84, 86, 92, 96, 98
+   Train    ----    Loss: 2.5324,   Accuracy: 0.2294
+    Test    ----    Loss: 3.0814,   Accuracy: 0.2128
+            ----    Divergence: 0.1140
+            ----    Time: 11.83s
+============= Communication Round 7 =============
+Selected Clients: 42, 47, 58, 73, 89, 90, 93
+   Train    ----    Loss: 2.5289,   Accuracy: 0.1897
+    Test    ----    Loss: 2.9644,   Accuracy: 0.1769
+            ----    Divergence: 0.1041
+            ----    Time: 8.29s
+============= Communication Round 8 =============
+Selected Clients: 20, 24, 38, 42, 43, 76, 92
+   Train    ----    Loss: 2.3682,   Accuracy: 0.2819
+    Test    ----    Loss: 2.8037,   Accuracy: 0.2593
+            ----    Divergence: 0.1100
+            ----    Time: 7.93s
+============= Communication Round 9 =============
+Selected Clients: 13, 27, 32, 40, 45, 71, 74, 96
+   Train    ----    Loss: 2.2493,   Accuracy: 0.2846
+    Test    ----    Loss: 2.7276,   Accuracy: 0.2470
+            ----    Divergence: 0.1206
+            ----    Time: 9.00s
+============= Communication Round 10 =============
+Selected Clients:  2, 12, 20, 34, 55, 67, 74, 79, 93, 98
+   Train    ----    Loss: 1.9861,   Accuracy: 0.3252
+    Test    ----    Loss: 2.4451,   Accuracy: 0.2787
+            ----    Divergence: 0.1301
+            ----    Time: 10.74s
+============= Communication Round 11 =============
+Selected Clients: 15, 23, 28, 49, 58, 74, 77, 92, 94, 96
+   Train    ----    Loss: 1.9808,   Accuracy: 0.3382
+    Test    ----    Loss: 2.3692,   Accuracy: 0.3162
+            ----    Divergence: 0.1513
+            ----    Time: 10.79s
+============= Communication Round 12 =============
+Selected Clients:  7,  8, 10, 14, 17, 34, 37, 38, 39, 47, 52, 70, 77, 78, 85
+   Train    ----    Loss: 1.8679,   Accuracy: 0.3472
+    Test    ----    Loss: 2.1983,   Accuracy: 0.3277
+            ----    Divergence: 0.1371
+            ----    Time: 15.45s
+============= Communication Round 13 =============
+Selected Clients: 10, 17, 21, 30, 34, 49, 53, 63, 64, 88
+   Train    ----    Loss: 1.8973,   Accuracy: 0.3268
+    Test    ----    Loss: 2.1395,   Accuracy: 0.3322
+            ----    Divergence: 0.1537
+            ----    Time: 10.73s
+============= Communication Round 14 =============
+Selected Clients:  6, 12, 25, 27, 35, 43, 54, 59, 64
+   Train    ----    Loss: 1.8534,   Accuracy: 0.3356
+    Test    ----    Loss: 2.0646,   Accuracy: 0.3472
+            ----    Divergence: 0.1170
+            ----    Time: 10.51s
+============= Communication Round 15 =============
+Selected Clients:  0,  2,  4, 10, 25, 50, 51, 55, 60, 67, 71, 74, 85, 86
+   Train    ----    Loss: 1.6802,   Accuracy: 0.4140
+    Test    ----    Loss: 1.9256,   Accuracy: 0.3870
+            ----    Divergence: 0.1606
+            ----    Time: 15.00s
+============= Communication Round 16 =============
+Selected Clients: 11, 23, 25, 29, 75, 80, 94, 95
+   Train    ----    Loss: 1.7276,   Accuracy: 0.4073
+    Test    ----    Loss: 1.9684,   Accuracy: 0.3855
+            ----    Divergence: 0.1301
+            ----    Time: 8.91s
+============= Communication Round 17 =============
+Selected Clients:  9, 15, 29, 38, 55, 61, 71, 90
+   Train    ----    Loss: 1.8210,   Accuracy: 0.4022
+    Test    ----    Loss: 2.0779,   Accuracy: 0.3737
+            ----    Divergence: 0.1446
+            ----    Time: 8.83s
+============= Communication Round 18 =============
+Selected Clients: 20, 34, 37, 40, 49, 68, 77
+   Train    ----    Loss: 1.7801,   Accuracy: 0.3815
+    Test    ----    Loss: 1.9756,   Accuracy: 0.3709
+            ----    Divergence: 0.1262
+            ----    Time: 8.08s
+============= Communication Round 19 =============
+Selected Clients:  9, 30, 38, 45, 72, 82, 83
+   Train    ----    Loss: 1.7121,   Accuracy: 0.4182
+    Test    ----    Loss: 1.9338,   Accuracy: 0.3919
+            ----    Divergence: 0.1446
+            ----    Time: 8.33s
+============= Communication Round 20 =============
+Selected Clients: 20, 38, 47, 63, 67, 78, 94
+   Train    ----    Loss: 1.9285,   Accuracy: 0.4067
+    Test    ----    Loss: 2.1555,   Accuracy: 0.3802
+            ----    Divergence: 0.0991
+            ----    Time: 7.94s
+============= Communication Round 21 =============
+Selected Clients:  1, 14, 32, 40, 46, 55, 64, 67, 76, 78
+   Train    ----    Loss: 1.6380,   Accuracy: 0.4293
+    Test    ----    Loss: 1.8104,   Accuracy: 0.4049
+            ----    Divergence: 0.1496
+            ----    Time: 10.72s
+============= Communication Round 22 =============
+Selected Clients:  1,  3, 15, 30, 64, 84, 98
+   Train    ----    Loss: 1.6370,   Accuracy: 0.4103
+    Test    ----    Loss: 1.8050,   Accuracy: 0.3886
+            ----    Divergence: 0.1282
+            ----    Time: 7.93s
+============= Communication Round 23 =============
+Selected Clients:  6, 10, 29, 32, 37, 42, 56, 58, 68, 72, 77, 83, 98
+   Train    ----    Loss: 1.6630,   Accuracy: 0.3927
+    Test    ----    Loss: 1.7627,   Accuracy: 0.3871
+            ----    Divergence: 0.1460
+            ----    Time: 13.93s
+============= Communication Round 24 =============
+Selected Clients:  8, 13, 18, 26, 30, 83, 86, 88
+   Train    ----    Loss: 1.6791,   Accuracy: 0.4186
+    Test    ----    Loss: 1.8334,   Accuracy: 0.3820
+            ----    Divergence: 0.1215
+            ----    Time: 9.61s
+============= Communication Round 25 =============
+Selected Clients: 39, 41, 49, 64, 69, 72, 84, 88, 96
+   Train    ----    Loss: 1.5673,   Accuracy: 0.4452
+    Test    ----    Loss: 1.7130,   Accuracy: 0.4164
+            ----    Divergence: 0.1378
+            ----    Time: 10.58s
+============= Communication Round 26 =============
+Selected Clients:  3,  6, 27, 44, 49, 59, 69, 78, 80
+   Train    ----    Loss: 1.8938,   Accuracy: 0.3575
+    Test    ----    Loss: 1.9275,   Accuracy: 0.3632
+            ----    Divergence: 0.1182
+            ----    Time: 10.79s
+============= Communication Round 27 =============
+Selected Clients:  6, 11, 20, 22, 30, 36, 40, 42, 44, 50, 57, 64, 79, 93, 94
+   Train    ----    Loss: 1.9703,   Accuracy: 0.3443
+    Test    ----    Loss: 2.0256,   Accuracy: 0.3500
+            ----    Divergence: 0.1433
+            ----    Time: 17.29s
+============= Communication Round 28 =============
+Selected Clients: 11, 12, 23, 32, 57, 63, 83
+   Train    ----    Loss: 1.8184,   Accuracy: 0.3938
+    Test    ----    Loss: 1.9050,   Accuracy: 0.3900
+            ----    Divergence: 0.1288
+            ----    Time: 8.03s
+============= Communication Round 29 =============
+Selected Clients:  0, 21, 22, 34, 46, 52, 64, 65, 67, 73, 78, 88, 90, 91
+   Train    ----    Loss: 1.5894,   Accuracy: 0.4392
+    Test    ----    Loss: 1.7002,   Accuracy: 0.4166
+            ----    Divergence: 0.1471
+            ----    Time: 14.50s
+============= Communication Round 30 =============
+Selected Clients: 17, 29, 49, 53, 54, 58, 74, 79, 86, 97
+   Train    ----    Loss: 1.5320,   Accuracy: 0.4622
+    Test    ----    Loss: 1.5920,   Accuracy: 0.4482
+            ----    Divergence: 0.1456
+            ----    Time: 10.71s
+============= Communication Round 31 =============
+Selected Clients: 25, 27, 59, 78, 79, 80
+   Train    ----    Loss: 1.4988,   Accuracy: 0.4533
+    Test    ----    Loss: 1.5443,   Accuracy: 0.4448
+            ----    Divergence: 0.1130
+            ----    Time: 6.88s
+============= Communication Round 32 =============
+Selected Clients:  1, 15, 19, 36, 57, 62, 63, 65, 84, 86
+   Train    ----    Loss: 1.5006,   Accuracy: 0.4804
+    Test    ----    Loss: 1.6119,   Accuracy: 0.4495
+            ----    Divergence: 0.1442
+            ----    Time: 10.71s
+============= Communication Round 33 =============
+Selected Clients:  1,  4,  6, 21, 34, 39, 41, 67, 73, 97
+   Train    ----    Loss: 1.6375,   Accuracy: 0.4776
+    Test    ----    Loss: 1.7212,   Accuracy: 0.4517
+            ----    Divergence: 0.1296
+            ----    Time: 10.71s
+============= Communication Round 34 =============
+Selected Clients: 12, 46, 53, 56, 61, 65, 78
+   Train    ----    Loss: 1.5407,   Accuracy: 0.4764
+    Test    ----    Loss: 1.6067,   Accuracy: 0.4578
+            ----    Divergence: 0.1211
+            ----    Time: 7.86s
+============= Communication Round 35 =============
+Selected Clients:  4,  9, 30, 51, 56, 64, 67, 68, 80, 87
+   Train    ----    Loss: 1.4509,   Accuracy: 0.4945
+    Test    ----    Loss: 1.4987,   Accuracy: 0.4821
+            ----    Divergence: 0.1328
+            ----    Time: 10.75s
+============= Communication Round 36 =============
+Selected Clients:  0,  7, 10, 12, 22, 33, 44, 66, 70, 77, 82
+   Train    ----    Loss: 1.3676,   Accuracy: 0.5193
+    Test    ----    Loss: 1.4494,   Accuracy: 0.4995
+            ----    Divergence: 0.1587
+            ----    Time: 11.72s
+============= Communication Round 37 =============
+Selected Clients: 11, 13, 22, 23, 48, 57, 59, 71, 75, 98, 99
+   Train    ----    Loss: 1.5266,   Accuracy: 0.4708
+    Test    ----    Loss: 1.6339,   Accuracy: 0.4396
+            ----    Divergence: 0.1382
+            ----    Time: 11.94s
+============= Communication Round 38 =============
+Selected Clients:  0, 10, 21, 25, 26, 28, 29, 30, 33, 38
+   Train    ----    Loss: 1.6156,   Accuracy: 0.4627
+    Test    ----    Loss: 1.6984,   Accuracy: 0.4428
+            ----    Divergence: 0.1485
+            ----    Time: 10.87s
+============= Communication Round 39 =============
+Selected Clients:  3, 18, 24, 29, 41, 55, 58, 60, 77, 82, 83, 91, 98
+   Train    ----    Loss: 1.4533,   Accuracy: 0.5030
+    Test    ----    Loss: 1.5520,   Accuracy: 0.4726
+            ----    Divergence: 0.1604
+            ----    Time: 13.69s
+============= Communication Round 40 =============
+Selected Clients:  3, 22, 58, 60, 76
+   Train    ----    Loss: 1.5086,   Accuracy: 0.4933
+    Test    ----    Loss: 1.5696,   Accuracy: 0.4721
+            ----    Divergence: 0.1341
+            ----    Time: 6.01s
+============= Communication Round 41 =============
+Selected Clients:  7, 21, 33, 34, 36, 56, 74, 90, 96
+   Train    ----    Loss: 1.5614,   Accuracy: 0.4646
+    Test    ----    Loss: 1.5770,   Accuracy: 0.4649
+            ----    Divergence: 0.1849
+            ----    Time: 9.80s
+============= Communication Round 42 =============
+Selected Clients:  5, 17, 18, 21, 34, 50, 57, 58, 84, 85
+   Train    ----    Loss: 1.5358,   Accuracy: 0.4714
+    Test    ----    Loss: 1.6063,   Accuracy: 0.4558
+            ----    Divergence: 0.1485
+            ----    Time: 10.80s
+============= Communication Round 43 =============
+Selected Clients:  0, 11, 19, 30, 57, 71, 91, 93
+   Train    ----    Loss: 1.6685,   Accuracy: 0.4416
+    Test    ----    Loss: 1.7881,   Accuracy: 0.4129
+            ----    Divergence: 0.1725
+            ----    Time: 8.90s
+============= Communication Round 44 =============
+Selected Clients:  2, 10, 17, 26, 57, 61, 85, 89, 91, 97
+   Train    ----    Loss: 1.6522,   Accuracy: 0.4679
+    Test    ----    Loss: 1.7400,   Accuracy: 0.4458
+            ----    Divergence: 0.1662
+            ----    Time: 11.21s
+============= Communication Round 45 =============
+Selected Clients: 14, 16, 21, 22, 35, 50, 53, 61, 68, 74, 77, 79, 94, 99
+   Train    ----    Loss: 1.5799,   Accuracy: 0.4792
+    Test    ----    Loss: 1.6430,   Accuracy: 0.4595
+            ----    Divergence: 0.1461
+            ----    Time: 15.59s
+============= Communication Round 46 =============
+Selected Clients:  1, 33, 36, 45, 50, 54, 57, 70, 73, 81
+   Train    ----    Loss: 1.4475,   Accuracy: 0.5004
+    Test    ----    Loss: 1.5488,   Accuracy: 0.4681
+            ----    Divergence: 0.1550
+            ----    Time: 11.55s
+============= Communication Round 47 =============
+Selected Clients: 10, 13, 21, 24, 27, 28, 29, 30, 32, 37, 43, 46, 64, 78, 84, 91
+   Train    ----    Loss: 1.3241,   Accuracy: 0.5391
+    Test    ----    Loss: 1.4167,   Accuracy: 0.5070
+            ----    Divergence: 0.1716
+            ----    Time: 17.65s
+============= Communication Round 48 =============
+Selected Clients:  4,  9, 17, 20, 39, 48, 68, 74, 89, 91, 96
+   Train    ----    Loss: 1.3270,   Accuracy: 0.5419
+    Test    ----    Loss: 1.4249,   Accuracy: 0.5035
+            ----    Divergence: 0.1853
+            ----    Time: 12.34s
+============= Communication Round 49 =============
+Selected Clients:  1,  7, 20, 25, 34, 51, 54, 55, 62, 66, 68, 82, 85, 89, 99
+   Train    ----    Loss: 1.3567,   Accuracy: 0.5217
+    Test    ----    Loss: 1.4256,   Accuracy: 0.4985
+            ----    Divergence: 0.1605
+            ----    Time: 15.59s
+============= Communication Round 50 =============
+Selected Clients:  7, 12, 39, 45, 46, 49, 75, 78, 85, 87
+   Train    ----    Loss: 1.6214,   Accuracy: 0.4109
+    Test    ----    Loss: 1.6615,   Accuracy: 0.4007
+            ----    Divergence: 0.1452
+            ----    Time: 10.73s
+============= Communication Round 51 =============
+Selected Clients: 14, 25, 37, 47, 78, 86, 92, 96, 98
+   Train    ----    Loss: 1.4559,   Accuracy: 0.5008
+    Test    ----    Loss: 1.5734,   Accuracy: 0.4669
+            ----    Divergence: 0.1589
+            ----    Time: 10.30s
+============= Communication Round 52 =============
+Selected Clients: 26, 30, 53, 56, 99
+   Train    ----    Loss: 1.4798,   Accuracy: 0.4681
+    Test    ----    Loss: 1.5739,   Accuracy: 0.4355
+            ----    Divergence: 0.1442
+            ----    Time: 6.44s
+============= Communication Round 53 =============
+Selected Clients:  8, 26, 27, 37, 42, 43, 53, 58, 76
+   Train    ----    Loss: 1.4123,   Accuracy: 0.5072
+    Test    ----    Loss: 1.4512,   Accuracy: 0.4967
+            ----    Divergence: 0.1712
+            ----    Time: 10.53s
+============= Communication Round 54 =============
+Selected Clients: 21, 22, 24, 32, 40, 45, 49, 54, 57, 89
+   Train    ----    Loss: 1.3036,   Accuracy: 0.5437
+    Test    ----    Loss: 1.3694,   Accuracy: 0.5206
+            ----    Divergence: 0.1889
+            ----    Time: 11.52s
+============= Communication Round 55 =============
+Selected Clients: 12, 15, 17, 20, 27, 32, 37, 59, 63, 65, 70, 79, 80, 98
+   Train    ----    Loss: 1.1991,   Accuracy: 0.5839
+    Test    ----    Loss: 1.2942,   Accuracy: 0.5512
+            ----    Divergence: 0.1778
+            ----    Time: 15.59s
+============= Communication Round 56 =============
+Selected Clients:  1, 17, 29, 34, 36, 40, 51, 85, 98, 99
+   Train    ----    Loss: 1.3120,   Accuracy: 0.5470
+    Test    ----    Loss: 1.3883,   Accuracy: 0.5303
+            ----    Divergence: 0.2018
+            ----    Time: 11.54s
+============= Communication Round 57 =============
+Selected Clients:  8, 33, 40, 42, 63, 70, 72, 86, 90, 97
+   Train    ----    Loss: 1.2138,   Accuracy: 0.5746
+    Test    ----    Loss: 1.2818,   Accuracy: 0.5582
+            ----    Divergence: 0.1939
+            ----    Time: 11.43s
+============= Communication Round 58 =============
+Selected Clients:  4, 18, 22, 24, 26, 32, 57, 84, 85, 88
+   Train    ----    Loss: 1.3504,   Accuracy: 0.5564
+    Test    ----    Loss: 1.5065,   Accuracy: 0.5108
+            ----    Divergence: 0.2141
+            ----    Time: 11.52s
+============= Communication Round 59 =============
+Selected Clients:  0,  8, 27, 34, 35, 39, 40, 47, 64, 84, 88, 89, 96, 97
+   Train    ----    Loss: 1.3200,   Accuracy: 0.5653
+    Test    ----    Loss: 1.4885,   Accuracy: 0.5211
+            ----    Divergence: 0.2160
+            ----    Time: 15.50s
+============= Communication Round 60 =============
+Selected Clients:  8, 23, 30, 48, 52, 61, 69, 73, 93, 96
+   Train    ----    Loss: 1.3593,   Accuracy: 0.5306
+    Test    ----    Loss: 1.4517,   Accuracy: 0.5137
+            ----    Divergence: 0.2300
+            ----    Time: 11.61s
+============= Communication Round 61 =============
+Selected Clients: 11, 19, 34, 42, 44, 53, 66, 68, 91
+   Train    ----    Loss: 1.3702,   Accuracy: 0.5263
+    Test    ----    Loss: 1.4054,   Accuracy: 0.5266
+            ----    Divergence: 0.2567
+            ----    Time: 10.56s
+============= Communication Round 62 =============
+Selected Clients:  5,  8, 38, 54, 58, 60, 64, 78, 84, 88, 98
+   Train    ----    Loss: 1.0954,   Accuracy: 0.6172
+    Test    ----    Loss: 1.1518,   Accuracy: 0.6043
+            ----    Divergence: 0.2705
+            ----    Time: 12.69s
+============= Communication Round 63 =============
+Selected Clients: 18, 19, 22, 25, 27, 29, 34, 39, 44, 48, 50, 52, 64, 76, 83
+   Train    ----    Loss: 1.1472,   Accuracy: 0.6168
+    Test    ----    Loss: 1.2489,   Accuracy: 0.5881
+            ----    Divergence: 0.2782
+            ----    Time: 16.27s
+============= Communication Round 64 =============
+Selected Clients: 11, 21, 53, 65, 67, 78, 85, 97
+   Train    ----    Loss: 1.1028,   Accuracy: 0.6140
+    Test    ----    Loss: 1.1819,   Accuracy: 0.5895
+            ----    Divergence: 0.3001
+            ----    Time: 9.52s
+============= Communication Round 65 =============
+Selected Clients:  0, 22, 46, 50, 58, 66, 70, 73, 83
+   Train    ----    Loss: 1.1200,   Accuracy: 0.6156
+    Test    ----    Loss: 1.1996,   Accuracy: 0.5992
+            ----    Divergence: 0.3045
+            ----    Time: 10.52s
+============= Communication Round 66 =============
+Selected Clients: 19, 29, 39, 46, 53, 63, 73, 82, 88, 95
+   Train    ----    Loss: 1.1189,   Accuracy: 0.6224
+    Test    ----    Loss: 1.2283,   Accuracy: 0.5935
+            ----    Divergence: 0.3464
+            ----    Time: 11.45s
+============= Communication Round 67 =============
+Selected Clients: 15, 29, 53, 63, 83, 98
+   Train    ----    Loss: 1.1297,   Accuracy: 0.6170
+    Test    ----    Loss: 1.2282,   Accuracy: 0.5956
+            ----    Divergence: 0.3286
+            ----    Time: 7.44s
+============= Communication Round 68 =============
+Selected Clients:  3, 19, 22, 25, 31, 37, 52, 64, 78, 81, 83, 92, 96, 97, 98
+   Train    ----    Loss: 1.1062,   Accuracy: 0.6214
+    Test    ----    Loss: 1.2056,   Accuracy: 0.5974
+            ----    Divergence: 0.3397
+            ----    Time: 16.46s
+============= Communication Round 69 =============
+Selected Clients: 11, 12, 23, 30, 45, 47, 51, 52, 62, 64, 77, 89, 98
+   Train    ----    Loss: 1.0734,   Accuracy: 0.6356
+    Test    ----    Loss: 1.1962,   Accuracy: 0.6028
+            ----    Divergence: 0.2801
+            ----    Time: 14.45s
+============= Communication Round 70 =============
+Selected Clients:  3,  5,  8, 21, 35, 51, 56, 59, 61, 76, 87, 96, 97
+   Train    ----    Loss: 1.0801,   Accuracy: 0.6219
+    Test    ----    Loss: 1.1728,   Accuracy: 0.5994
+            ----    Divergence: 0.3351
+            ----    Time: 14.44s
+============= Communication Round 71 =============
+Selected Clients: 22, 25, 58, 60, 63, 72, 92, 96
+   Train    ----    Loss: 1.1398,   Accuracy: 0.6283
+    Test    ----    Loss: 1.2729,   Accuracy: 0.5906
+            ----    Divergence: 0.3679
+            ----    Time: 9.37s
+============= Communication Round 72 =============
+Selected Clients:  3, 11, 16, 17, 20, 23, 28, 29, 64, 83, 97, 98
+   Train    ----    Loss: 1.0199,   Accuracy: 0.6466
+    Test    ----    Loss: 1.0939,   Accuracy: 0.6242
+            ----    Divergence: 0.3681
+            ----    Time: 13.37s
+============= Communication Round 73 =============
+Selected Clients:  4, 30, 39, 45, 51, 57, 70, 73, 92, 96, 97
+   Train    ----    Loss: 1.0439,   Accuracy: 0.6419
+    Test    ----    Loss: 1.1677,   Accuracy: 0.6043
+            ----    Divergence: 0.4062
+            ----    Time: 12.49s
+============= Communication Round 74 =============
+Selected Clients: 17, 21, 27, 49, 50, 55, 60, 61, 78, 79, 80, 83, 99
+   Train    ----    Loss: 1.0581,   Accuracy: 0.6412
+    Test    ----    Loss: 1.1739,   Accuracy: 0.6156
+            ----    Divergence: 0.5014
+            ----    Time: 14.52s
+============= Communication Round 75 =============
+Selected Clients: 18, 22, 25, 32, 37, 59, 60, 73, 84, 88, 94, 99
+   Train    ----    Loss: 0.9989,   Accuracy: 0.6586
+    Test    ----    Loss: 1.1055,   Accuracy: 0.6262
+            ----    Divergence: 0.3947
+            ----    Time: 13.51s
+============= Communication Round 76 =============
+Selected Clients: 23, 35, 37, 51, 55, 57, 73, 77, 82, 98
+   Train    ----    Loss: 1.0454,   Accuracy: 0.6470
+    Test    ----    Loss: 1.1432,   Accuracy: 0.6233
+            ----    Divergence: 0.3937
+            ----    Time: 11.37s
+============= Communication Round 77 =============
+Selected Clients:  6,  9, 16, 25, 40, 76, 77, 87
+   Train    ----    Loss: 1.0018,   Accuracy: 0.6564
+    Test    ----    Loss: 1.1104,   Accuracy: 0.6286
+            ----    Divergence: 0.4303
+            ----    Time: 9.49s
+============= Communication Round 78 =============
+Selected Clients: 33, 35, 52, 62, 63, 66, 82, 94
+   Train    ----    Loss: 1.1269,   Accuracy: 0.6206
+    Test    ----    Loss: 1.2209,   Accuracy: 0.6038
+            ----    Divergence: 0.4308
+            ----    Time: 9.36s
+============= Communication Round 79 =============
+Selected Clients:  9, 24, 43, 44, 45, 49, 55, 58, 61, 74
+   Train    ----    Loss: 1.0280,   Accuracy: 0.6642
+    Test    ----    Loss: 1.1546,   Accuracy: 0.6333
+            ----    Divergence: 0.5086
+            ----    Time: 11.33s
+============= Communication Round 80 =============
+Selected Clients:  3,  7,  9, 18, 27, 29, 33, 35, 41, 59, 71, 73
+   Train    ----    Loss: 0.9576,   Accuracy: 0.6669
+    Test    ----    Loss: 1.0484,   Accuracy: 0.6424
+            ----    Divergence: 0.4755
+            ----    Time: 13.30s
+============= Communication Round 81 =============
+Selected Clients:  4, 26, 29, 34, 37, 43, 58, 78, 81
+   Train    ----    Loss: 0.9845,   Accuracy: 0.6609
+    Test    ----    Loss: 1.0907,   Accuracy: 0.6365
+            ----    Divergence: 0.5060
+            ----    Time: 10.41s
+============= Communication Round 82 =============
+Selected Clients:  2, 16, 22, 40, 52, 58, 68, 79, 88, 90, 94
+   Train    ----    Loss: 1.0541,   Accuracy: 0.6457
+    Test    ----    Loss: 1.1421,   Accuracy: 0.6283
+            ----    Divergence: 0.4682
+            ----    Time: 12.34s
+============= Communication Round 83 =============
+Selected Clients: 21, 37, 53, 69, 75, 91
+   Train    ----    Loss: 1.2434,   Accuracy: 0.5871
+    Test    ----    Loss: 1.3013,   Accuracy: 0.5785
+            ----    Divergence: 0.4661
+            ----    Time: 7.39s
+============= Communication Round 84 =============
+Selected Clients: 15, 26, 31, 39, 41, 47, 63, 68, 69, 74, 87, 93
+   Train    ----    Loss: 1.1637,   Accuracy: 0.6289
+    Test    ----    Loss: 1.2980,   Accuracy: 0.5997
+            ----    Divergence: 0.4415
+            ----    Time: 13.48s
+============= Communication Round 85 =============
+Selected Clients: 11, 32, 35, 43, 51, 55, 67, 71, 86
+   Train    ----    Loss: 1.1297,   Accuracy: 0.6308
+    Test    ----    Loss: 1.2657,   Accuracy: 0.5937
+            ----    Divergence: 0.5032
+            ----    Time: 10.34s
+============= Communication Round 86 =============
+Selected Clients:  0,  5,  7, 13, 44, 49, 51, 58, 68, 70, 71, 98
+   Train    ----    Loss: 0.9907,   Accuracy: 0.6710
+    Test    ----    Loss: 1.1073,   Accuracy: 0.6434
+            ----    Divergence: 0.5556
+            ----    Time: 13.57s
+============= Communication Round 87 =============
+Selected Clients:  0, 14, 17, 34, 40, 50, 57, 72, 84
+   Train    ----    Loss: 1.1861,   Accuracy: 0.6205
+    Test    ----    Loss: 1.3198,   Accuracy: 0.5956
+            ----    Divergence: 0.5498
+            ----    Time: 10.29s
+============= Communication Round 88 =============
+Selected Clients:  7, 20, 22, 43, 52, 64, 69, 74, 76, 83
+   Train    ----    Loss: 1.0069,   Accuracy: 0.6658
+    Test    ----    Loss: 1.1391,   Accuracy: 0.6376
+            ----    Divergence: 0.4373
+            ----    Time: 11.40s
+============= Communication Round 89 =============
+Selected Clients:  1,  9, 14, 21, 30, 31, 45, 49, 72, 75, 88
+   Train    ----    Loss: 0.9628,   Accuracy: 0.6751
+    Test    ----    Loss: 1.0951,   Accuracy: 0.6409
+            ----    Divergence: 0.5629
+            ----    Time: 12.62s
+============= Communication Round 90 =============
+Selected Clients:  8, 10, 19, 23, 47, 51, 57, 59, 76
+   Train    ----    Loss: 0.9587,   Accuracy: 0.6746
+    Test    ----    Loss: 1.0920,   Accuracy: 0.6419
+            ----    Divergence: 0.5448
+            ----    Time: 10.50s
+============= Communication Round 91 =============
+Selected Clients:  9, 13, 16, 18, 25, 26, 36, 45, 50, 65, 70, 73, 76, 79, 94, 97
+   Train    ----    Loss: 0.8945,   Accuracy: 0.6951
+    Test    ----    Loss: 1.0386,   Accuracy: 0.6571
+            ----    Divergence: 0.5987
+            ----    Time: 17.71s
+============= Communication Round 92 =============
+Selected Clients:  6, 12, 18, 27, 46, 54, 55, 56, 58, 80, 91
+   Train    ----    Loss: 0.9932,   Accuracy: 0.6698
+    Test    ----    Loss: 1.1187,   Accuracy: 0.6400
+            ----    Divergence: 0.7079
+            ----    Time: 12.58s
+============= Communication Round 93 =============
+Selected Clients:  3,  6, 10, 13, 15, 22, 26, 40, 55, 67, 77, 79, 80, 83, 84, 88, 90, 93
+   Train    ----    Loss: 0.9304,   Accuracy: 0.6831
+    Test    ----    Loss: 1.0462,   Accuracy: 0.6539
+            ----    Divergence: 0.6017
+            ----    Time: 19.73s
+============= Communication Round 94 =============
+Selected Clients:  1, 21, 38, 44, 55, 56, 83, 85, 91
+   Train    ----    Loss: 0.9250,   Accuracy: 0.6890
+    Test    ----    Loss: 1.0522,   Accuracy: 0.6593
+            ----    Divergence: 0.7397
+            ----    Time: 10.47s
+============= Communication Round 95 =============
+Selected Clients: 13, 14, 20, 27, 41, 42, 67, 71, 79, 93, 94
+   Train    ----    Loss: 0.9446,   Accuracy: 0.6828
+    Test    ----    Loss: 1.0886,   Accuracy: 0.6520
+            ----    Divergence: 0.6206
+            ----    Time: 12.39s
+============= Communication Round 96 =============
+Selected Clients: 12, 31, 41, 45, 48, 62, 80, 82, 92, 95, 97
+   Train    ----    Loss: 0.9818,   Accuracy: 0.6737
+    Test    ----    Loss: 1.1667,   Accuracy: 0.6323
+            ----    Divergence: 0.6292
+            ----    Time: 12.42s
+============= Communication Round 97 =============
+Selected Clients:  3,  4,  6, 14, 16, 57, 69, 81, 86
+   Train    ----    Loss: 0.9236,   Accuracy: 0.6862
+    Test    ----    Loss: 1.0457,   Accuracy: 0.6598
+            ----    Divergence: 0.8110
+            ----    Time: 10.44s
+============= Communication Round 98 =============
+Selected Clients:  6,  8, 20, 21, 22, 24, 37, 40, 44, 62, 82, 86
+   Train    ----    Loss: 0.8806,   Accuracy: 0.7025
+    Test    ----    Loss: 1.0138,   Accuracy: 0.6660
+            ----    Divergence: 0.7271
+            ----    Time: 13.34s
+============= Communication Round 99 =============
+Selected Clients:  2, 21, 23, 28, 34, 41, 47, 59, 72, 80, 87
+   Train    ----    Loss: 0.8820,   Accuracy: 0.7009
+    Test    ----    Loss: 0.9967,   Accuracy: 0.6758
+            ----    Divergence: 0.5238
+            ----    Time: 12.37s
+============= Communication Round 100 =============
+Selected Clients:  5,  6,  9, 15, 29, 34, 38, 53, 66, 68, 74, 80
+   Train    ----    Loss: 0.8506,   Accuracy: 0.7139
+    Test    ----    Loss: 0.9590,   Accuracy: 0.6854
+            ----    Divergence: 0.7254
+            ----    Time: 13.43s
+============= Communication Round 101 =============
+Selected Clients: 11, 19, 28, 33, 45, 50, 58, 70, 71, 72, 75, 84, 91
+   Train    ----    Loss: 0.8487,   Accuracy: 0.7102
+    Test    ----    Loss: 0.9739,   Accuracy: 0.6787
+            ----    Divergence: 0.7075
+            ----    Time: 14.36s
+============= Communication Round 102 =============
+Selected Clients: 12, 22, 35, 41, 44, 45, 46, 50, 69, 80, 90, 98
+   Train    ----    Loss: 0.8747,   Accuracy: 0.7013
+    Test    ----    Loss: 1.0038,   Accuracy: 0.6706
+            ----    Divergence: 0.5786
+            ----    Time: 13.27s
+============= Communication Round 103 =============
+Selected Clients: 14, 28, 31, 37, 39, 47, 58, 61, 62, 69, 91, 92, 97, 99
+   Train    ----    Loss: 0.8756,   Accuracy: 0.7076
+    Test    ----    Loss: 1.0169,   Accuracy: 0.6715
+            ----    Divergence: 0.6958
+            ----    Time: 15.32s
+============= Communication Round 104 =============
+Selected Clients: 13, 30, 65, 70, 74, 87
+   Train    ----    Loss: 1.0195,   Accuracy: 0.6751
+    Test    ----    Loss: 1.2242,   Accuracy: 0.6168
+            ----    Divergence: 0.5302
+            ----    Time: 7.40s
+============= Communication Round 105 =============
+Selected Clients: 16, 31, 40, 44, 58, 83, 88, 94
+   Train    ----    Loss: 0.8593,   Accuracy: 0.7112
+    Test    ----    Loss: 1.0085,   Accuracy: 0.6733
+            ----    Divergence: 0.8069
+            ----    Time: 9.65s
+============= Communication Round 106 =============
+Selected Clients:  1, 13, 29, 31, 34, 51, 70
+   Train    ----    Loss: 1.3191,   Accuracy: 0.6054
+    Test    ----    Loss: 1.4752,   Accuracy: 0.5751
+            ----    Divergence: 0.6614
+            ----    Time: 8.57s
+============= Communication Round 107 =============
+Selected Clients:  2,  7, 14, 37, 44, 62, 91, 94
+   Train    ----    Loss: 0.9163,   Accuracy: 0.6918
+    Test    ----    Loss: 1.0537,   Accuracy: 0.6619
+            ----    Divergence: 0.7482
+            ----    Time: 9.49s
+============= Communication Round 108 =============
+Selected Clients:  1,  5, 13, 15, 18, 23, 41, 81
+   Train    ----    Loss: 0.8617,   Accuracy: 0.7118
+    Test    ----    Loss: 1.0215,   Accuracy: 0.6757
+            ----    Divergence: 0.6931
+            ----    Time: 9.31s
+============= Communication Round 109 =============
+Selected Clients:  3, 30, 66, 85
+   Train    ----    Loss: 0.9104,   Accuracy: 0.6941
+    Test    ----    Loss: 1.0445,   Accuracy: 0.6612
+            ----    Divergence: 0.9773
+            ----    Time: 5.48s
+============= Communication Round 110 =============
+Selected Clients:  3,  7,  8,  9, 11, 26, 44, 45, 46, 55, 62, 83, 85, 92, 95
+   Train    ----    Loss: 0.8207,   Accuracy: 0.7203
+    Test    ----    Loss: 0.9679,   Accuracy: 0.6788
+            ----    Divergence: 0.9528
+            ----    Time: 16.44s
+============= Communication Round 111 =============
+Selected Clients: 11, 13, 24, 25, 38, 49, 90, 91
+   Train    ----    Loss: 0.8458,   Accuracy: 0.7150
+    Test    ----    Loss: 0.9992,   Accuracy: 0.6809
+            ----    Divergence: 0.8231
+            ----    Time: 10.09s
+============= Communication Round 112 =============
+Selected Clients: 13, 17, 65, 95, 96
+   Train    ----    Loss: 0.9813,   Accuracy: 0.6803
+    Test    ----    Loss: 1.1950,   Accuracy: 0.6281
+            ----    Divergence: 0.7165
+            ----    Time: 6.76s
+============= Communication Round 113 =============
+Selected Clients: 10, 11, 13, 27, 28, 39, 47, 60, 64, 66, 67, 69, 92, 94
+   Train    ----    Loss: 0.8625,   Accuracy: 0.7044
+    Test    ----    Loss: 0.9988,   Accuracy: 0.6747
+            ----    Divergence: 0.8794
+            ----    Time: 16.15s
+============= Communication Round 114 =============
+Selected Clients: 42, 43, 47, 70, 76, 78, 79, 83, 85, 87, 99
+   Train    ----    Loss: 0.8203,   Accuracy: 0.7233
+    Test    ----    Loss: 0.9692,   Accuracy: 0.6859
+            ----    Divergence: 0.8881
+            ----    Time: 12.79s
+============= Communication Round 115 =============
+Selected Clients:  9, 32, 40, 71, 73, 76, 84, 95
+   Train    ----    Loss: 0.9847,   Accuracy: 0.6906
+    Test    ----    Loss: 1.1650,   Accuracy: 0.6534
+            ----    Divergence: 0.8870
+            ----    Time: 9.77s
+============= Communication Round 116 =============
+Selected Clients:  8, 14, 18, 26, 34, 45, 46, 85, 86
+   Train    ----    Loss: 0.9786,   Accuracy: 0.6975
+    Test    ----    Loss: 1.1972,   Accuracy: 0.6461
+            ----    Divergence: 1.0464
+            ----    Time: 11.29s
+============= Communication Round 117 =============
+Selected Clients: 15, 17, 22, 23, 26, 53, 57, 60, 61, 72, 73, 88, 98
+   Train    ----    Loss: 0.8120,   Accuracy: 0.7303
+    Test    ----    Loss: 0.9914,   Accuracy: 0.6857
+            ----    Divergence: 0.9488
+            ----    Time: 16.20s
+============= Communication Round 118 =============
+Selected Clients:  1,  7, 15, 37, 43, 45, 48, 80, 83, 87, 96
+   Train    ----    Loss: 0.8330,   Accuracy: 0.7203
+    Test    ----    Loss: 0.9847,   Accuracy: 0.6816
+            ----    Divergence: 0.9143
+            ----    Time: 12.96s
+============= Communication Round 119 =============
+Selected Clients:  5, 11, 13, 20, 24, 25, 59, 62, 99
+   Train    ----    Loss: 0.8474,   Accuracy: 0.7183
+    Test    ----    Loss: 1.0089,   Accuracy: 0.6781
+            ----    Divergence: 0.7718
+            ----    Time: 10.42s
+============= Communication Round 120 =============
+Selected Clients: 10, 14, 27, 46, 59, 66, 74, 97
+   Train    ----    Loss: 0.8762,   Accuracy: 0.7088
+    Test    ----    Loss: 0.9997,   Accuracy: 0.6806
+            ----    Divergence: 1.0789
+            ----    Time: 9.59s
+============= Communication Round 121 =============
+Selected Clients:  2,  4,  6, 14, 18, 38, 46, 83, 88
+   Train    ----    Loss: 0.8597,   Accuracy: 0.7147
+    Test    ----    Loss: 0.9826,   Accuracy: 0.6900
+            ----    Divergence: 1.0795
+            ----    Time: 10.95s
+============= Communication Round 122 =============
+Selected Clients:  2,  6, 10, 20, 22, 27, 74, 75, 77, 78, 83, 91, 98
+   Train    ----    Loss: 0.7855,   Accuracy: 0.7345
+    Test    ----    Loss: 0.9140,   Accuracy: 0.7004
+            ----    Divergence: 0.9466
+            ----    Time: 15.41s
+============= Communication Round 123 =============
+Selected Clients: 22, 23, 44, 45, 46, 54, 77, 84, 87, 93
+   Train    ----    Loss: 0.8062,   Accuracy: 0.7259
+    Test    ----    Loss: 0.9573,   Accuracy: 0.6819
+            ----    Divergence: 0.8908
+            ----    Time: 13.70s
+============= Communication Round 124 =============
+Selected Clients:  6,  7, 11, 12, 15, 19, 21, 23, 32, 35, 46, 70, 71, 81, 97
+   Train    ----    Loss: 0.8362,   Accuracy: 0.7220
+    Test    ----    Loss: 0.9976,   Accuracy: 0.6766
+            ----    Divergence: 1.0295
+            ----    Time: 18.16s
+============= Communication Round 125 =============
+Selected Clients:  0, 11, 25, 43, 53, 60, 64, 67, 80, 85, 95, 98
+   Train    ----    Loss: 0.7786,   Accuracy: 0.7377
+    Test    ----    Loss: 0.9397,   Accuracy: 0.6923
+            ----    Divergence: 1.0643
+            ----    Time: 14.35s
+============= Communication Round 126 =============
+Selected Clients:  1,  3, 13, 14, 22, 25, 26, 30, 35, 45, 54, 69, 74, 75
+   Train    ----    Loss: 0.7700,   Accuracy: 0.7373
+    Test    ----    Loss: 0.9264,   Accuracy: 0.6919
+            ----    Divergence: 0.9689
+            ----    Time: 16.33s
+============= Communication Round 127 =============
+Selected Clients:  7, 25, 39, 78, 79, 83
+   Train    ----    Loss: 0.8248,   Accuracy: 0.7259
+    Test    ----    Loss: 0.9861,   Accuracy: 0.6794
+            ----    Divergence: 1.1811
+            ----    Time: 7.59s
+============= Communication Round 128 =============
+Selected Clients:  2,  7, 12, 14, 21, 28, 29, 30, 31, 37, 41, 46, 54, 68, 71, 75, 77, 78, 88, 90, 91, 98
+   Train    ----    Loss: 0.7900,   Accuracy: 0.7319
+    Test    ----    Loss: 0.9319,   Accuracy: 0.6924
+            ----    Divergence: 1.0519
+            ----    Time: 25.33s
+============= Communication Round 129 =============
+Selected Clients:  3, 13, 50, 54, 56, 70, 83, 88
+   Train    ----    Loss: 0.8045,   Accuracy: 0.7303
+    Test    ----    Loss: 0.9734,   Accuracy: 0.6843
+            ----    Divergence: 1.1406
+            ----    Time: 9.73s
+============= Communication Round 130 =============
+Selected Clients:  9, 32, 38, 43, 48, 50, 63, 64, 79, 83
+   Train    ----    Loss: 0.7737,   Accuracy: 0.7399
+    Test    ----    Loss: 0.9590,   Accuracy: 0.6912
+            ----    Divergence: 1.0399
+            ----    Time: 11.23s
+============= Communication Round 131 =============
+Selected Clients:  8, 12, 35, 45, 64, 69, 72, 96
+   Train    ----    Loss: 0.9277,   Accuracy: 0.6959
+    Test    ----    Loss: 1.0970,   Accuracy: 0.6514
+            ----    Divergence: 0.8446
+            ----    Time: 9.34s
+============= Communication Round 132 =============
+Selected Clients: 16, 21, 24, 29, 39, 44, 50, 54, 75
+   Train    ----    Loss: 0.7624,   Accuracy: 0.7416
+    Test    ----    Loss: 0.9236,   Accuracy: 0.6992
+            ----    Divergence: 1.3077
+            ----    Time: 10.16s
+============= Communication Round 133 =============
+Selected Clients:  2,  6, 12, 30, 42, 45, 52, 59
+   Train    ----    Loss: 0.8431,   Accuracy: 0.7207
+    Test    ----    Loss: 1.0114,   Accuracy: 0.6802
+            ----    Divergence: 0.9255
+            ----    Time: 9.20s
+============= Communication Round 134 =============
+Selected Clients:  3, 21, 26, 38, 40, 43, 44, 66, 70, 92, 94, 98
+   Train    ----    Loss: 0.7485,   Accuracy: 0.7461
+    Test    ----    Loss: 0.9154,   Accuracy: 0.7018
+            ----    Divergence: 1.1338
+            ----    Time: 13.45s
+============= Communication Round 135 =============
+Selected Clients: 27, 31, 39, 66, 68, 72, 77, 89
+   Train    ----    Loss: 0.7459,   Accuracy: 0.7479
+    Test    ----    Loss: 0.9025,   Accuracy: 0.7051
+            ----    Divergence: 1.1021
+            ----    Time: 10.10s
+============= Communication Round 136 =============
+Selected Clients: 20, 22, 24, 37, 47, 52, 54, 56, 64
+   Train    ----    Loss: 0.8662,   Accuracy: 0.7124
+    Test    ----    Loss: 1.0290,   Accuracy: 0.6707
+            ----    Divergence: 0.9037
+            ----    Time: 11.12s
+============= Communication Round 137 =============
+Selected Clients: 14, 16, 24, 31, 40, 45, 46, 48, 51, 52, 58, 75, 84, 90
+   Train    ----    Loss: 0.8160,   Accuracy: 0.7271
+    Test    ----    Loss: 0.9912,   Accuracy: 0.6863
+            ----    Divergence: 1.2327
+            ----    Time: 16.30s
+============= Communication Round 138 =============
+Selected Clients: 14, 20, 32, 41, 42, 46, 65, 68, 73, 83, 85, 86, 87
+   Train    ----    Loss: 0.7693,   Accuracy: 0.7416
+    Test    ----    Loss: 0.9515,   Accuracy: 0.6959
+            ----    Divergence: 1.1875
+            ----    Time: 14.96s
+============= Communication Round 139 =============
+Selected Clients:  0,  8, 70, 76, 79
+   Train    ----    Loss: 0.9817,   Accuracy: 0.6986
+    Test    ----    Loss: 1.2043,   Accuracy: 0.6482
+            ----    Divergence: 1.0374
+            ----    Time: 6.30s
+============= Communication Round 140 =============
+Selected Clients: 19, 25, 30, 35, 47, 50, 71, 98, 99
+   Train    ----    Loss: 0.8267,   Accuracy: 0.7277
+    Test    ----    Loss: 1.0365,   Accuracy: 0.6730
+            ----    Divergence: 1.0999
+            ----    Time: 10.17s
+============= Communication Round 141 =============
+Selected Clients: 13, 14, 37, 47, 48, 49, 71, 93, 94
+   Train    ----    Loss: 0.8066,   Accuracy: 0.7252
+    Test    ----    Loss: 0.9668,   Accuracy: 0.6822
+            ----    Divergence: 1.0564
+            ----    Time: 10.55s
+============= Communication Round 142 =============
+Selected Clients:  3, 35, 52, 69, 76, 89, 90, 94
+   Train    ----    Loss: 0.8121,   Accuracy: 0.7242
+    Test    ----    Loss: 0.9613,   Accuracy: 0.6902
+            ----    Divergence: 0.8999
+            ----    Time: 12.03s
+============= Communication Round 143 =============
+Selected Clients: 16, 49, 50, 93, 98
+   Train    ----    Loss: 0.7994,   Accuracy: 0.7322
+    Test    ----    Loss: 0.9835,   Accuracy: 0.6880
+            ----    Divergence: 1.2138
+            ----    Time: 6.54s
+============= Communication Round 144 =============
+Selected Clients:  5, 25, 48, 51, 53, 63, 65, 69, 73, 75, 76, 80, 92
+   Train    ----    Loss: 0.7347,   Accuracy: 0.7483
+    Test    ----    Loss: 0.9147,   Accuracy: 0.7023
+            ----    Divergence: 1.0881
+            ----    Time: 15.08s
+============= Communication Round 145 =============
+Selected Clients:  6, 13, 41, 60, 82, 84, 95
+   Train    ----    Loss: 0.9129,   Accuracy: 0.6973
+    Test    ----    Loss: 1.1026,   Accuracy: 0.6548
+            ----    Divergence: 1.0886
+            ----    Time: 8.48s
+============= Communication Round 146 =============
+Selected Clients:  7, 31, 38, 43, 55, 58, 68, 76, 77, 85, 94, 95
+   Train    ----    Loss: 0.8342,   Accuracy: 0.7189
+    Test    ----    Loss: 1.0246,   Accuracy: 0.6764
+            ----    Divergence: 1.0484
+            ----    Time: 13.52s
+============= Communication Round 147 =============
+Selected Clients:  3, 81, 94
+   Train    ----    Loss: 0.9847,   Accuracy: 0.6681
+    Test    ----    Loss: 1.1436,   Accuracy: 0.6317
+            ----    Divergence: 1.2617
+            ----    Time: 4.31s
+============= Communication Round 148 =============
+Selected Clients: 19, 35, 38, 39, 52, 76, 78
+   Train    ----    Loss: 0.8242,   Accuracy: 0.7205
+    Test    ----    Loss: 0.9992,   Accuracy: 0.6739
+            ----    Divergence: 1.1440
+            ----    Time: 8.17s
+============= Communication Round 149 =============
+Selected Clients: 33, 34, 47, 50, 58, 61, 66, 72, 82, 86
+   Train    ----    Loss: 0.8044,   Accuracy: 0.7310
+    Test    ----    Loss: 0.9885,   Accuracy: 0.6842
+            ----    Divergence: 1.3968
+            ----    Time: 12.28s
+============= Communication Round 150 =============
+Selected Clients:  3,  7,  9, 16, 21, 32, 41, 43, 50, 54, 55, 72, 74, 76, 81, 82, 92
+   Train    ----    Loss: 0.7875,   Accuracy: 0.7387
+    Test    ----    Loss: 0.9731,   Accuracy: 0.6923
+            ----    Divergence: 1.2419
+            ----    Time: 20.02s
+============= Communication Round 151 =============
+Selected Clients:  0,  7, 16, 42, 44, 58, 63, 74, 77, 91
+   Train    ----    Loss: 0.7815,   Accuracy: 0.7381
+    Test    ----    Loss: 0.9549,   Accuracy: 0.6943
+            ----    Divergence: 1.2514
+            ----    Time: 11.34s
+============= Communication Round 152 =============
+Selected Clients: 12, 19, 21, 29, 43, 50, 55, 65, 76, 78, 81, 87, 92
+   Train    ----    Loss: 0.7306,   Accuracy: 0.7532
+    Test    ----    Loss: 0.9152,   Accuracy: 0.7067
+            ----    Divergence: 1.1667
+            ----    Time: 14.13s
+============= Communication Round 153 =============
+Selected Clients: 16, 17, 19, 26, 43, 52, 53, 66, 83, 84, 90
+   Train    ----    Loss: 0.7332,   Accuracy: 0.7497
+    Test    ----    Loss: 0.8741,   Accuracy: 0.7087
+            ----    Divergence: 1.2891
+            ----    Time: 11.99s
+============= Communication Round 154 =============
+Selected Clients:  0,  8, 54, 57
+   Train    ----    Loss: 0.9314,   Accuracy: 0.7017
+    Test    ----    Loss: 1.1438,   Accuracy: 0.6537
+            ----    Divergence: 1.1646
+            ----    Time: 5.23s
+============= Communication Round 155 =============
+Selected Clients:  5,  9, 13, 17, 24, 25, 30, 35, 37, 38, 43, 49, 85, 87, 97
+   Train    ----    Loss: 0.7572,   Accuracy: 0.7455
+    Test    ----    Loss: 0.9388,   Accuracy: 0.6927
+            ----    Divergence: 1.3435
+            ----    Time: 16.40s
+============= Communication Round 156 =============
+Selected Clients:  4,  9, 20, 26, 27, 34, 45, 68, 71, 76, 83, 86, 90, 95, 98
+   Train    ----    Loss: 0.7314,   Accuracy: 0.7523
+    Test    ----    Loss: 0.9078,   Accuracy: 0.6996
+            ----    Divergence: 1.6113
+            ----    Time: 18.88s
+============= Communication Round 157 =============
+Selected Clients: 26, 56, 58, 65, 93, 97
+   Train    ----    Loss: 0.8122,   Accuracy: 0.7280
+    Test    ----    Loss: 0.9746,   Accuracy: 0.6850
+            ----    Divergence: 1.2943
+            ----    Time: 7.62s
+============= Communication Round 158 =============
+Selected Clients: 35, 37, 40, 41, 66, 70, 80, 81, 94, 95, 99
+   Train    ----    Loss: 0.7297,   Accuracy: 0.7470
+    Test    ----    Loss: 0.8951,   Accuracy: 0.7039
+            ----    Divergence: 1.3009
+            ----    Time: 13.53s
+============= Communication Round 159 =============
+Selected Clients:  1,  9, 10, 11, 28, 30, 31, 47, 52, 62, 73, 80, 81, 85
+   Train    ----    Loss: 0.7641,   Accuracy: 0.7400
+    Test    ----    Loss: 0.9125,   Accuracy: 0.6992
+            ----    Divergence: 1.4409
+            ----    Time: 16.59s
+============= Communication Round 160 =============
+Selected Clients: 20, 24, 43, 47, 50, 87
+   Train    ----    Loss: 0.8431,   Accuracy: 0.7197
+    Test    ----    Loss: 1.0380,   Accuracy: 0.6656
+            ----    Divergence: 0.9819
+            ----    Time: 7.93s
+============= Communication Round 161 =============
+Selected Clients:  1,  7, 14, 46, 53, 61, 70, 74, 80, 84, 86, 92, 95
+   Train    ----    Loss: 0.7533,   Accuracy: 0.7452
+    Test    ----    Loss: 0.9528,   Accuracy: 0.6850
+            ----    Divergence: 1.4228
+            ----    Time: 15.06s
+============= Communication Round 162 =============
+Selected Clients: 21, 22, 30, 36, 43, 55, 57, 81, 98
+   Train    ----    Loss: 0.7420,   Accuracy: 0.7504
+    Test    ----    Loss: 0.9388,   Accuracy: 0.6967
+            ----    Divergence: 1.4778
+            ----    Time: 11.19s
+============= Communication Round 163 =============
+Selected Clients:  1, 14, 24, 37, 49, 76, 96, 98
+   Train    ----    Loss: 0.7798,   Accuracy: 0.7382
+    Test    ----    Loss: 0.9741,   Accuracy: 0.6808
+            ----    Divergence: 1.6274
+            ----    Time: 10.58s
+============= Communication Round 164 =============
+Selected Clients: 10, 27, 30, 42, 60, 65, 68, 72, 78, 79, 89, 90, 96, 98
+   Train    ----    Loss: 0.7347,   Accuracy: 0.7563
+    Test    ----    Loss: 0.8955,   Accuracy: 0.7153
+            ----    Divergence: 1.5587
+            ----    Time: 15.23s
+============= Communication Round 165 =============
+Selected Clients:  0,  5, 29, 32, 47, 62, 63, 70, 96
+   Train    ----    Loss: 0.8041,   Accuracy: 0.7425
+    Test    ----    Loss: 1.0082,   Accuracy: 0.6962
+            ----    Divergence: 1.1974
+            ----    Time: 10.64s
+============= Communication Round 166 =============
+Selected Clients: 17, 22, 23, 28, 40, 52, 81, 83, 85, 88
+   Train    ----    Loss: 0.7467,   Accuracy: 0.7495
+    Test    ----    Loss: 0.9212,   Accuracy: 0.7032
+            ----    Divergence: 1.4567
+            ----    Time: 11.95s
+============= Communication Round 167 =============
+Selected Clients: 12, 20, 35, 40, 61, 64, 74, 75, 76, 81, 84, 86, 94, 98
+   Train    ----    Loss: 0.7736,   Accuracy: 0.7371
+    Test    ----    Loss: 0.9308,   Accuracy: 0.6963
+            ----    Divergence: 1.2676
+            ----    Time: 15.30s
+============= Communication Round 168 =============
+Selected Clients:  2,  7, 12, 16, 32, 39, 44, 49, 55, 60, 68, 78, 82, 91
+   Train    ----    Loss: 0.7296,   Accuracy: 0.7519
+    Test    ----    Loss: 0.9023,   Accuracy: 0.7082
+            ----    Divergence: 1.5724
+            ----    Time: 17.84s
+============= Communication Round 169 =============
+Selected Clients:  8, 19, 21, 23, 24, 42, 57, 62, 64, 75, 89
+   Train    ----    Loss: 0.7010,   Accuracy: 0.7627
+    Test    ----    Loss: 0.8834,   Accuracy: 0.7142
+            ----    Divergence: 1.3329
+            ----    Time: 13.08s
+============= Communication Round 170 =============
+Selected Clients:  7, 21, 26, 40, 46, 61, 66, 67, 68, 82
+   Train    ----    Loss: 0.6844,   Accuracy: 0.7668
+    Test    ----    Loss: 0.8537,   Accuracy: 0.7205
+            ----    Divergence: 1.7370
+            ----    Time: 12.36s
+============= Communication Round 171 =============
+Selected Clients: 26, 40, 47, 69, 70, 73, 80, 92
+   Train    ----    Loss: 0.7517,   Accuracy: 0.7474
+    Test    ----    Loss: 0.9202,   Accuracy: 0.7080
+            ----    Divergence: 1.0982
+            ----    Time: 10.04s
+============= Communication Round 172 =============
+Selected Clients: 19, 22, 24, 44, 48, 56, 61, 66, 72, 79, 83, 89
+   Train    ----    Loss: 0.7376,   Accuracy: 0.7576
+    Test    ----    Loss: 0.9245,   Accuracy: 0.7120
+            ----    Divergence: 1.6115
+            ----    Time: 14.43s
+============= Communication Round 173 =============
+Selected Clients:  4, 55, 57, 73, 93, 94, 99
+   Train    ----    Loss: 0.7198,   Accuracy: 0.7587
+    Test    ----    Loss: 0.8725,   Accuracy: 0.7171
+            ----    Divergence: 1.3001
+            ----    Time: 9.04s
+============= Communication Round 174 =============
+Selected Clients:  3, 17, 40, 43, 44, 54, 90, 92, 99
+   Train    ----    Loss: 0.8086,   Accuracy: 0.7259
+    Test    ----    Loss: 0.9466,   Accuracy: 0.6979
+            ----    Divergence: 1.3310
+            ----    Time: 11.56s
+============= Communication Round 175 =============
+Selected Clients: 11, 14, 22, 23, 27, 32, 43, 46, 57, 62, 69, 70, 72, 79, 81, 99
+   Train    ----    Loss: 0.7048,   Accuracy: 0.7649
+    Test    ----    Loss: 0.8923,   Accuracy: 0.7212
+            ----    Divergence: 1.5673
+            ----    Time: 18.75s
+============= Communication Round 176 =============
+Selected Clients:  1,  8, 24, 34, 44, 49, 51, 70, 81, 96, 99
+   Train    ----    Loss: 0.7335,   Accuracy: 0.7580
+    Test    ----    Loss: 0.9471,   Accuracy: 0.7029
+            ----    Divergence: 1.8617
+            ----    Time: 13.61s
+============= Communication Round 177 =============
+Selected Clients:  2, 11, 25, 32, 39, 40, 44, 48, 49, 56, 61, 89, 96
+   Train    ----    Loss: 0.7084,   Accuracy: 0.7611
+    Test    ----    Loss: 0.8932,   Accuracy: 0.7133
+            ----    Divergence: 1.7123
+            ----    Time: 15.29s
+============= Communication Round 178 =============
+Selected Clients: 25, 26, 30, 46, 47, 65, 70, 79
+   Train    ----    Loss: 0.8114,   Accuracy: 0.7382
+    Test    ----    Loss: 1.0399,   Accuracy: 0.6830
+            ----    Divergence: 1.6194
+            ----    Time: 9.54s
+============= Communication Round 179 =============
+Selected Clients:  3, 17, 19, 32, 38, 43, 65, 74, 99
+   Train    ----    Loss: 0.7246,   Accuracy: 0.7587
+    Test    ----    Loss: 0.9165,   Accuracy: 0.7133
+            ----    Divergence: 1.1699
+            ----    Time: 11.10s
+============= Communication Round 180 =============
+Selected Clients: 11, 22, 40, 55, 60, 68, 70, 78, 90, 95
+   Train    ----    Loss: 0.7484,   Accuracy: 0.7482
+    Test    ----    Loss: 0.9154,   Accuracy: 0.7064
+            ----    Divergence: 1.5509
+            ----    Time: 12.71s
+============= Communication Round 181 =============
+Selected Clients:  5, 18, 34, 52, 58, 72, 73, 76, 92, 97
+   Train    ----    Loss: 0.8329,   Accuracy: 0.7285
+    Test    ----    Loss: 0.9977,   Accuracy: 0.6904
+            ----    Divergence: 1.6344
+            ----    Time: 12.63s
+============= Communication Round 182 =============
+Selected Clients: 14, 33, 34, 38, 50, 54, 70, 74, 89, 97
+   Train    ----    Loss: 0.8530,   Accuracy: 0.7290
+    Test    ----    Loss: 1.0693,   Accuracy: 0.6692
+            ----    Divergence: 1.5282
+            ----    Time: 13.21s
+============= Communication Round 183 =============
+Selected Clients: 13, 33, 34, 39, 57
+   Train    ----    Loss: 0.9074,   Accuracy: 0.7201
+    Test    ----    Loss: 1.1344,   Accuracy: 0.6620
+            ----    Divergence: 1.3738
+            ----    Time: 7.66s
+============= Communication Round 184 =============
+Selected Clients: 18, 27, 35, 38, 56, 78, 91
+   Train    ----    Loss: 0.7898,   Accuracy: 0.7406
+    Test    ----    Loss: 0.9710,   Accuracy: 0.6980
+            ----    Divergence: 1.7867
+            ----    Time: 9.79s
+============= Communication Round 185 =============
+Selected Clients: 26, 28, 38, 61, 70, 72, 73, 81, 93
+   Train    ----    Loss: 0.7941,   Accuracy: 0.7377
+    Test    ----    Loss: 0.9639,   Accuracy: 0.6977
+            ----    Divergence: 1.7146
+            ----    Time: 11.39s
+============= Communication Round 186 =============
+Selected Clients: 12, 19, 29, 41, 42, 60, 89
+   Train    ----    Loss: 0.7218,   Accuracy: 0.7605
+    Test    ----    Loss: 0.9268,   Accuracy: 0.7038
+            ----    Divergence: 1.2950
+            ----    Time: 8.62s
+============= Communication Round 187 =============
+Selected Clients:  2, 14, 37, 66, 71, 82, 86, 97
+   Train    ----    Loss: 0.7073,   Accuracy: 0.7625
+    Test    ----    Loss: 0.8765,   Accuracy: 0.7153
+            ----    Divergence: 1.8141
+            ----    Time: 10.06s
+============= Communication Round 188 =============
+Selected Clients:  7,  9, 10, 15, 29, 31, 38, 43, 52, 57, 72, 80, 81, 83, 90
+   Train    ----    Loss: 0.7044,   Accuracy: 0.7649
+    Test    ----    Loss: 0.8840,   Accuracy: 0.7239
+            ----    Divergence: 1.5443
+            ----    Time: 19.23s
+============= Communication Round 189 =============
+Selected Clients:  2, 40, 56, 59, 62, 63, 66, 71, 79
+   Train    ----    Loss: 0.7468,   Accuracy: 0.7548
+    Test    ----    Loss: 0.9212,   Accuracy: 0.7097
+            ----    Divergence: 1.6086
+            ----    Time: 11.91s
+============= Communication Round 190 =============
+Selected Clients:  7, 13, 16, 23, 33, 39, 45, 92, 95, 97
+   Train    ----    Loss: 0.7241,   Accuracy: 0.7552
+    Test    ----    Loss: 0.9299,   Accuracy: 0.7040
+            ----    Divergence: 1.5227
+            ----    Time: 11.39s
+============= Communication Round 191 =============
+Selected Clients:  0, 12, 21, 35, 40, 47, 56, 58, 65, 75, 81, 84
+   Train    ----    Loss: 0.6739,   Accuracy: 0.7717
+    Test    ----    Loss: 0.8686,   Accuracy: 0.7167
+            ----    Divergence: 1.5655
+            ----    Time: 13.42s
+============= Communication Round 192 =============
+Selected Clients:  3, 58, 69, 71, 79, 92, 96, 98
+   Train    ----    Loss: 0.6990,   Accuracy: 0.7638
+    Test    ----    Loss: 0.8840,   Accuracy: 0.7139
+            ----    Divergence: 1.7285
+            ----    Time: 9.44s
+============= Communication Round 193 =============
+Selected Clients:  2,  3, 12, 17, 23, 25, 35, 49, 62, 79, 80
+   Train    ----    Loss: 0.7333,   Accuracy: 0.7514
+    Test    ----    Loss: 0.9043,   Accuracy: 0.7040
+            ----    Divergence: 1.4168
+            ----    Time: 14.02s
+============= Communication Round 194 =============
+Selected Clients:  9, 11, 16, 19, 20, 26, 39, 42, 52, 64, 72, 76, 92
+   Train    ----    Loss: 0.6939,   Accuracy: 0.7640
+    Test    ----    Loss: 0.8941,   Accuracy: 0.7126
+            ----    Divergence: 1.7914
+            ----    Time: 15.22s
+============= Communication Round 195 =============
+Selected Clients:  0,  7, 13, 25, 34, 39, 66, 74, 98
+   Train    ----    Loss: 0.8237,   Accuracy: 0.7343
+    Test    ----    Loss: 1.0495,   Accuracy: 0.6795
+            ----    Divergence: 1.6755
+            ----    Time: 10.55s
+============= Communication Round 196 =============
+Selected Clients:  5, 19, 36, 43, 55, 56, 62, 63, 76, 86, 95
+   Train    ----    Loss: 0.7037,   Accuracy: 0.7603
+    Test    ----    Loss: 0.9142,   Accuracy: 0.7016
+            ----    Divergence: 1.4785
+            ----    Time: 12.42s
+============= Communication Round 197 =============
+Selected Clients:  0, 31, 45, 63, 65, 68
+   Train    ----    Loss: 0.7331,   Accuracy: 0.7568
+    Test    ----    Loss: 0.9293,   Accuracy: 0.7058
+            ----    Divergence: 1.4512
+            ----    Time: 7.21s
+============= Communication Round 198 =============
+Selected Clients: 20, 50, 52, 77
+   Train    ----    Loss: 0.8422,   Accuracy: 0.7215
+    Test    ----    Loss: 1.0507,   Accuracy: 0.6744
+            ----    Divergence: 0.9088
+            ----    Time: 6.08s
+============= Communication Round 199 =============
+Selected Clients:  8, 31, 32, 36, 41, 43, 54, 62, 68, 75, 82
+   Train    ----    Loss: 0.7875,   Accuracy: 0.7457
+    Test    ----    Loss: 0.9763,   Accuracy: 0.6932
+            ----    Divergence: 1.3182
+            ----    Time: 13.99s
+============= Communication Round 200 =============
+Selected Clients:  0, 14, 16, 23, 32, 37
+   Train    ----    Loss: 0.7396,   Accuracy: 0.7549
+    Test    ----    Loss: 0.9175,   Accuracy: 0.7076
+            ----    Divergence: 1.6472
+            ----    Time: 7.71s
+============= Communication Round 201 =============
+Selected Clients: 40, 60, 82, 93
+   Train    ----    Loss: 0.7625,   Accuracy: 0.7399
+    Test    ----    Loss: 0.9507,   Accuracy: 0.6850
+            ----    Divergence: 1.7125
+            ----    Time: 5.66s
+============= Communication Round 202 =============
+Selected Clients:  2,  9, 18, 19, 24, 34, 40, 48, 61, 88
+   Train    ----    Loss: 0.7517,   Accuracy: 0.7468
+    Test    ----    Loss: 0.9502,   Accuracy: 0.6959
+            ----    Divergence: 2.1339
+            ----    Time: 11.30s
+============= Communication Round 203 =============
+Selected Clients:  4, 12, 19, 46, 56, 63, 74, 82
+   Train    ----    Loss: 0.8346,   Accuracy: 0.7304
+    Test    ----    Loss: 1.0581,   Accuracy: 0.6760
+            ----    Divergence: 1.6346
+            ----    Time: 9.18s
+============= Communication Round 204 =============
+Selected Clients:  4, 23, 27, 83, 93
+   Train    ----    Loss: 0.7764,   Accuracy: 0.7369
+    Test    ----    Loss: 0.9250,   Accuracy: 0.6977
+            ----    Divergence: 1.7845
+            ----    Time: 6.28s
+============= Communication Round 205 =============
+Selected Clients:  2, 37, 50, 63, 68, 76, 92, 93, 94
+   Train    ----    Loss: 0.7260,   Accuracy: 0.7521
+    Test    ----    Loss: 0.8691,   Accuracy: 0.7134
+            ----    Divergence: 1.5030
+            ----    Time: 11.48s
+============= Communication Round 206 =============
+Selected Clients:  8, 27, 34, 37, 58, 64, 69, 75, 77, 86, 90, 94
+   Train    ----    Loss: 0.7366,   Accuracy: 0.7484
+    Test    ----    Loss: 0.8815,   Accuracy: 0.7097
+            ----    Divergence: 1.5231
+            ----    Time: 14.65s
+============= Communication Round 207 =============
+Selected Clients: 13, 28, 31, 38, 47, 50, 51, 53, 63, 64, 69, 73, 94
+   Train    ----    Loss: 0.7211,   Accuracy: 0.7579
+    Test    ----    Loss: 0.8810,   Accuracy: 0.7115
+            ----    Divergence: 1.4558
+            ----    Time: 15.48s
+============= Communication Round 208 =============
+Selected Clients: 24, 30, 40, 58, 61, 62, 64, 68, 89, 92
+   Train    ----    Loss: 0.7209,   Accuracy: 0.7562
+    Test    ----    Loss: 0.9074,   Accuracy: 0.7033
+            ----    Divergence: 1.8343
+            ----    Time: 11.52s
+============= Communication Round 209 =============
+Selected Clients: 11, 16, 19, 28, 36, 38, 48, 59, 74
+   Train    ----    Loss: 0.7737,   Accuracy: 0.7409
+    Test    ----    Loss: 0.9417,   Accuracy: 0.6941
+            ----    Divergence: 1.6395
+            ----    Time: 10.45s
+============= Communication Round 210 =============
+Selected Clients:  0, 22, 39, 45, 54, 70, 76, 77, 94, 97
+   Train    ----    Loss: 0.7388,   Accuracy: 0.7529
+    Test    ----    Loss: 0.9561,   Accuracy: 0.6922
+            ----    Divergence: 1.8499
+            ----    Time: 13.48s
+============= Communication Round 211 =============
+Selected Clients:  6,  7, 19, 24, 32, 33, 35, 41, 59, 68, 75, 76, 80, 81
+   Train    ----    Loss: 0.6313,   Accuracy: 0.7822
+    Test    ----    Loss: 0.8087,   Accuracy: 0.7339
+            ----    Divergence: 1.6919
+            ----    Time: 16.31s
+============= Communication Round 212 =============
+Selected Clients:  6,  8, 10, 14, 15, 26, 36, 38, 42, 43, 49, 57, 66, 99
+   Train    ----    Loss: 0.6496,   Accuracy: 0.7787
+    Test    ----    Loss: 0.8404,   Accuracy: 0.7247
+            ----    Divergence: 2.0207
+            ----    Time: 16.36s
+============= Communication Round 213 =============
+Selected Clients:  8, 13, 27, 28, 44, 59, 99
+   Train    ----    Loss: 0.8314,   Accuracy: 0.7205
+    Test    ----    Loss: 1.0028,   Accuracy: 0.6838
+            ----    Divergence: 1.5155
+            ----    Time: 8.67s
+============= Communication Round 214 =============
+Selected Clients: 14, 23, 29, 59, 64, 71, 76, 77, 97
+   Train    ----    Loss: 0.6741,   Accuracy: 0.7712
+    Test    ----    Loss: 0.8514,   Accuracy: 0.7228
+            ----    Divergence: 1.4948
+            ----    Time: 11.10s
+============= Communication Round 215 =============
+Selected Clients:  0, 23, 26, 36, 43, 79
+   Train    ----    Loss: 0.6959,   Accuracy: 0.7669
+    Test    ----    Loss: 0.8783,   Accuracy: 0.7179
+            ----    Divergence: 1.4700
+            ----    Time: 8.41s
+============= Communication Round 216 =============
+Selected Clients:  2,  7,  8, 10, 16, 30, 36, 39, 51, 54, 57, 71, 95
+   Train    ----    Loss: 0.6388,   Accuracy: 0.7796
+    Test    ----    Loss: 0.8199,   Accuracy: 0.7280
+            ----    Divergence: 2.0478
+            ----    Time: 15.40s
+============= Communication Round 217 =============
+Selected Clients:  0, 17, 18, 19, 51, 61, 67, 68, 73, 92
+   Train    ----    Loss: 0.6779,   Accuracy: 0.7676
+    Test    ----    Loss: 0.8603,   Accuracy: 0.7207
+            ----    Divergence: 1.7737
+            ----    Time: 11.41s
+============= Communication Round 218 =============
+Selected Clients:  2, 39, 65, 75, 81, 85, 88
+   Train    ----    Loss: 0.6870,   Accuracy: 0.7662
+    Test    ----    Loss: 0.8728,   Accuracy: 0.7159
+            ----    Divergence: 1.8406
+            ----    Time: 8.48s
+============= Communication Round 219 =============
+Selected Clients:  0,  6,  7, 17, 18, 22, 33, 46, 49, 54, 55, 59, 61, 64, 66, 85, 88
+   Train    ----    Loss: 0.6689,   Accuracy: 0.7676
+    Test    ----    Loss: 0.8624,   Accuracy: 0.7177
+            ----    Divergence: 1.9239
+            ----    Time: 19.08s
+============= Communication Round 220 =============
+Selected Clients: 14, 66, 77, 81, 85, 88
+   Train    ----    Loss: 0.6922,   Accuracy: 0.7632
+    Test    ----    Loss: 0.8767,   Accuracy: 0.7160
+            ----    Divergence: 1.8998
+            ----    Time: 8.46s
+============= Communication Round 221 =============
+Selected Clients:  9, 76, 91, 93
+   Train    ----    Loss: 0.7241,   Accuracy: 0.7581
+    Test    ----    Loss: 0.9253,   Accuracy: 0.7058
+            ----    Divergence: 1.8768
+            ----    Time: 6.21s
+============= Communication Round 222 =============
+Selected Clients:  3,  6, 12, 47, 58, 85
+   Train    ----    Loss: 0.6829,   Accuracy: 0.7628
+    Test    ----    Loss: 0.8574,   Accuracy: 0.7170
+            ----    Divergence: 1.6929
+            ----    Time: 7.80s
+============= Communication Round 223 =============
+Selected Clients:  1,  9, 15, 18, 20, 22, 25, 26, 38, 42, 45, 46, 51, 54, 56, 60, 80, 88, 95
+   Train    ----    Loss: 0.6890,   Accuracy: 0.7636
+    Test    ----    Loss: 0.9001,   Accuracy: 0.7059
+            ----    Divergence: 2.0232
+            ----    Time: 20.24s
+============= Communication Round 224 =============
+Selected Clients: 39, 40, 43, 48, 50, 53, 57
+   Train    ----    Loss: 0.6421,   Accuracy: 0.7784
+    Test    ----    Loss: 0.8396,   Accuracy: 0.7232
+            ----    Divergence: 1.9851
+            ----    Time: 8.91s
+============= Communication Round 225 =============
+Selected Clients:  1,  4, 11, 13, 16, 19, 21, 31, 34, 43, 45, 50, 61, 70, 74, 75, 79, 87
+   Train    ----    Loss: 0.6520,   Accuracy: 0.7770
+    Test    ----    Loss: 0.8518,   Accuracy: 0.7213
+            ----    Divergence: 1.8971
+            ----    Time: 22.11s
+============= Communication Round 226 =============
+Selected Clients:  3, 18, 25, 32, 36, 44, 67, 75, 77, 98
+   Train    ----    Loss: 0.6499,   Accuracy: 0.7753
+    Test    ----    Loss: 0.8477,   Accuracy: 0.7217
+            ----    Divergence: 1.7157
+            ----    Time: 12.30s
+============= Communication Round 227 =============
+Selected Clients:  4,  8, 30, 36, 41, 76, 84, 86, 94
+   Train    ----    Loss: 0.6598,   Accuracy: 0.7764
+    Test    ----    Loss: 0.8836,   Accuracy: 0.7119
+            ----    Divergence: 1.8013
+            ----    Time: 10.61s
+============= Communication Round 228 =============
+Selected Clients:  3, 18, 47, 55, 74, 77, 80, 91, 94, 96
+   Train    ----    Loss: 0.6858,   Accuracy: 0.7636
+    Test    ----    Loss: 0.9131,   Accuracy: 0.6983
+            ----    Divergence: 1.4465
+            ----    Time: 11.13s
+============= Communication Round 229 =============
+Selected Clients:  2,  8, 57, 59, 60, 66, 74, 78, 98
+   Train    ----    Loss: 0.6458,   Accuracy: 0.7805
+    Test    ----    Loss: 0.8538,   Accuracy: 0.7219
+            ----    Divergence: 2.0391
+            ----    Time: 10.69s
+============= Communication Round 230 =============
+Selected Clients:  7, 17, 26, 39, 42, 47, 54, 64, 71, 73, 91, 92
+   Train    ----    Loss: 0.6357,   Accuracy: 0.7821
+    Test    ----    Loss: 0.8466,   Accuracy: 0.7274
+            ----    Divergence: 1.9699
+            ----    Time: 14.64s
+============= Communication Round 231 =============
+Selected Clients: 22, 48, 51, 86, 98
+   Train    ----    Loss: 0.6978,   Accuracy: 0.7645
+    Test    ----    Loss: 0.9246,   Accuracy: 0.7049
+            ----    Divergence: 1.6131
+            ----    Time: 6.85s
+============= Communication Round 232 =============
+Selected Clients:  3, 14, 15, 22, 39, 52, 54, 64, 79, 97
+   Train    ----    Loss: 0.6363,   Accuracy: 0.7809
+    Test    ----    Loss: 0.8491,   Accuracy: 0.7206
+            ----    Divergence: 1.9664
+            ----    Time: 11.71s
+============= Communication Round 233 =============
+Selected Clients:  0, 12, 15, 24, 25, 55, 60, 61, 73, 93
+   Train    ----    Loss: 0.6382,   Accuracy: 0.7810
+    Test    ----    Loss: 0.8587,   Accuracy: 0.7207
+            ----    Divergence: 1.8786
+            ----    Time: 11.38s
+============= Communication Round 234 =============
+Selected Clients:  4, 31, 38, 63, 76, 87, 90, 91, 93
+   Train    ----    Loss: 0.6737,   Accuracy: 0.7724
+    Test    ----    Loss: 0.8648,   Accuracy: 0.7259
+            ----    Divergence: 1.6727
+            ----    Time: 9.86s
+============= Communication Round 235 =============
+Selected Clients: 12, 19, 29, 37, 40, 46, 62, 66, 68, 95
+   Train    ----    Loss: 0.6730,   Accuracy: 0.7695
+    Test    ----    Loss: 0.8628,   Accuracy: 0.7268
+            ----    Divergence: 2.0915
+            ----    Time: 11.06s
+============= Communication Round 236 =============
+Selected Clients:  3, 25, 29, 31, 36, 49, 95
+   Train    ----    Loss: 0.6433,   Accuracy: 0.7796
+    Test    ----    Loss: 0.8568,   Accuracy: 0.7239
+            ----    Divergence: 1.9570
+            ----    Time: 8.55s
+============= Communication Round 237 =============
+Selected Clients:  0,  3,  4,  7, 39, 43, 55, 68, 80, 99
+   Train    ----    Loss: 0.6435,   Accuracy: 0.7771
+    Test    ----    Loss: 0.8566,   Accuracy: 0.7228
+            ----    Divergence: 1.8061
+            ----    Time: 11.64s
+============= Communication Round 238 =============
+Selected Clients: 12, 38, 39, 52, 63, 69, 75, 87, 94
+   Train    ----    Loss: 0.6682,   Accuracy: 0.7737
+    Test    ----    Loss: 0.8670,   Accuracy: 0.7225
+            ----    Divergence: 1.3563
+            ----    Time: 10.56s
+============= Communication Round 239 =============
+Selected Clients:  0,  4, 20, 21, 43, 57, 63, 71, 90
+   Train    ----    Loss: 0.6738,   Accuracy: 0.7754
+    Test    ----    Loss: 0.8904,   Accuracy: 0.7237
+            ----    Divergence: 1.5675
+            ----    Time: 10.69s
+============= Communication Round 240 =============
+Selected Clients: 28, 33, 50, 61, 86, 96, 99
+   Train    ----    Loss: 0.7352,   Accuracy: 0.7612
+    Test    ----    Loss: 0.9970,   Accuracy: 0.6984
+            ----    Divergence: 1.9515
+            ----    Time: 8.73s
+============= Communication Round 241 =============
+Selected Clients:  0, 14, 19, 22, 29, 36, 37, 39, 46, 51, 53, 61, 69, 72, 88, 92
+   Train    ----    Loss: 0.6259,   Accuracy: 0.7869
+    Test    ----    Loss: 0.8509,   Accuracy: 0.7289
+            ----    Divergence: 2.0490
+            ----    Time: 20.90s
+============= Communication Round 242 =============
+Selected Clients:  4, 11, 13, 15, 30, 32, 46, 51, 64, 70, 90
+   Train    ----    Loss: 0.6214,   Accuracy: 0.7893
+    Test    ----    Loss: 0.8382,   Accuracy: 0.7320
+            ----    Divergence: 1.9053
+            ----    Time: 14.47s
+============= Communication Round 243 =============
+Selected Clients:  6, 22, 26, 28, 31, 36, 42, 44, 57, 65, 84, 89
+   Train    ----    Loss: 0.7167,   Accuracy: 0.7637
+    Test    ----    Loss: 0.9540,   Accuracy: 0.7061
+            ----    Divergence: 1.7043
+            ----    Time: 14.48s
+============= Communication Round 244 =============
+Selected Clients: 15, 18, 24, 32, 36, 41, 62, 70, 83, 90, 91, 94
+   Train    ----    Loss: 0.6372,   Accuracy: 0.7868
+    Test    ----    Loss: 0.8667,   Accuracy: 0.7317
+            ----    Divergence: 1.8574
+            ----    Time: 14.18s
+============= Communication Round 245 =============
+Selected Clients:  3, 10, 42, 58, 66, 70, 74, 91, 93
+   Train    ----    Loss: 0.6533,   Accuracy: 0.7796
+    Test    ----    Loss: 0.8650,   Accuracy: 0.7277
+            ----    Divergence: 2.3372
+            ----    Time: 11.27s
+============= Communication Round 246 =============
+Selected Clients:  3,  8, 13, 16, 25, 79, 94, 95
+   Train    ----    Loss: 0.6335,   Accuracy: 0.7824
+    Test    ----    Loss: 0.8544,   Accuracy: 0.7286
+            ----    Divergence: 2.1459
+            ----    Time: 9.57s
+============= Communication Round 247 =============
+Selected Clients:  0,  1, 11, 54, 56, 73, 81, 93
+   Train    ----    Loss: 0.6637,   Accuracy: 0.7724
+    Test    ----    Loss: 0.8496,   Accuracy: 0.7282
+            ----    Divergence: 2.3069
+            ----    Time: 11.03s
+============= Communication Round 248 =============
+Selected Clients: 16, 27, 57, 68, 80, 90, 94
+   Train    ----    Loss: 0.6827,   Accuracy: 0.7674
+    Test    ----    Loss: 0.8717,   Accuracy: 0.7156
+            ----    Divergence: 2.0162
+            ----    Time: 10.04s
+============= Communication Round 249 =============
+Selected Clients:  6,  7, 14, 42, 47, 64, 71, 81, 88
+   Train    ----    Loss: 0.6160,   Accuracy: 0.7901
+    Test    ----    Loss: 0.8352,   Accuracy: 0.7285
+            ----    Divergence: 2.1496
+            ----    Time: 12.15s
+============= Communication Round 250 =============
+Selected Clients:  4, 16, 41, 53, 73, 96
+   Train    ----    Loss: 0.6212,   Accuracy: 0.7863
+    Test    ----    Loss: 0.8377,   Accuracy: 0.7317
+            ----    Divergence: 2.0325
+            ----    Time: 7.43s
+============= Communication Round 251 =============
+Selected Clients:  2, 21, 29, 38, 42, 43, 49, 54, 57, 60, 82, 87, 99
+   Train    ----    Loss: 0.6066,   Accuracy: 0.7915
+    Test    ----    Loss: 0.8129,   Accuracy: 0.7361
+            ----    Divergence: 2.1819
+            ----    Time: 14.42s
+============= Communication Round 252 =============
+Selected Clients:  2, 13, 28, 74, 94, 96, 99
+   Train    ----    Loss: 0.6724,   Accuracy: 0.7749
+    Test    ----    Loss: 0.8792,   Accuracy: 0.7243
+            ----    Divergence: 1.3615
+            ----    Time: 8.58s
+============= Communication Round 253 =============
+Selected Clients: 19, 28, 29, 36, 37, 44, 46, 84, 86, 92
+   Train    ----    Loss: 0.6241,   Accuracy: 0.7864
+    Test    ----    Loss: 0.8352,   Accuracy: 0.7336
+            ----    Divergence: 1.9249
+            ----    Time: 11.56s
+============= Communication Round 254 =============
+Selected Clients:  0,  1,  2,  3, 10, 21, 30, 34, 39, 56, 68, 94
+   Train    ----    Loss: 0.5964,   Accuracy: 0.7950
+    Test    ----    Loss: 0.8170,   Accuracy: 0.7394
+            ----    Divergence: 2.4616
+            ----    Time: 13.52s
+============= Communication Round 255 =============
+Selected Clients:  3,  5,  9, 10, 18, 26, 35, 47, 53, 59, 60, 64, 82, 84, 86, 90, 92
+   Train    ----    Loss: 0.5855,   Accuracy: 0.7982
+    Test    ----    Loss: 0.8127,   Accuracy: 0.7425
+            ----    Divergence: 1.8883
+            ----    Time: 21.50s
+============= Communication Round 256 =============
+Selected Clients: 16, 28, 29, 45, 62, 65, 89, 95
+   Train    ----    Loss: 0.7033,   Accuracy: 0.7688
+    Test    ----    Loss: 0.9438,   Accuracy: 0.7119
+            ----    Divergence: 1.9968
+            ----    Time: 9.82s
+============= Communication Round 257 =============
+Selected Clients:  3, 17, 40, 51, 54, 62, 74, 77, 88, 93
+   Train    ----    Loss: 0.6179,   Accuracy: 0.7894
+    Test    ----    Loss: 0.8343,   Accuracy: 0.7347
+            ----    Divergence: 1.8942
+            ----    Time: 11.75s
+============= Communication Round 258 =============
+Selected Clients:  2, 16, 54, 57, 71, 74, 85, 86, 90, 97
+   Train    ----    Loss: 0.6319,   Accuracy: 0.7880
+    Test    ----    Loss: 0.8693,   Accuracy: 0.7268
+            ----    Divergence: 1.9225
+            ----    Time: 11.60s
+============= Communication Round 259 =============
+Selected Clients: 83, 87, 89, 90, 96
+   Train    ----    Loss: 0.7405,   Accuracy: 0.7559
+    Test    ----    Loss: 0.9594,   Accuracy: 0.7010
+            ----    Divergence: 1.5719
+            ----    Time: 6.56s
+============= Communication Round 260 =============
+Selected Clients:  5, 14, 29, 58, 67, 98
+   Train    ----    Loss: 0.6847,   Accuracy: 0.7760
+    Test    ----    Loss: 0.9263,   Accuracy: 0.7204
+            ----    Divergence: 2.0868
+            ----    Time: 7.64s
+============= Communication Round 261 =============
+Selected Clients: 21, 30, 37, 47, 49, 60, 69, 79, 91, 94
+   Train    ----    Loss: 0.6472,   Accuracy: 0.7800
+    Test    ----    Loss: 0.8662,   Accuracy: 0.7246
+            ----    Divergence: 2.1718
+            ----    Time: 11.61s
+============= Communication Round 262 =============
+Selected Clients:  1, 17, 18, 23, 28, 29, 31, 35, 37, 46, 52, 60, 69, 80, 88
+   Train    ----    Loss: 0.5905,   Accuracy: 0.7957
+    Test    ----    Loss: 0.7962,   Accuracy: 0.7460
+            ----    Divergence: 1.7449
+            ----    Time: 19.82s
+============= Communication Round 263 =============
+Selected Clients:  7, 11, 21, 27, 34, 39, 44, 48, 72, 83
+   Train    ----    Loss: 0.5996,   Accuracy: 0.7942
+    Test    ----    Loss: 0.8255,   Accuracy: 0.7388
+            ----    Divergence: 2.5257
+            ----    Time: 13.10s
+============= Communication Round 264 =============
+Selected Clients: 18, 19, 29, 31, 42, 45, 72, 80, 85, 88, 91, 93, 94, 98
+   Train    ----    Loss: 0.6031,   Accuracy: 0.7937
+    Test    ----    Loss: 0.8483,   Accuracy: 0.7311
+            ----    Divergence: 2.1126
+            ----    Time: 16.46s
+============= Communication Round 265 =============
+Selected Clients:  2,  6,  8, 13, 20, 22, 28, 32, 38, 47, 49, 62, 75
+   Train    ----    Loss: 0.6263,   Accuracy: 0.7900
+    Test    ----    Loss: 0.8798,   Accuracy: 0.7285
+            ----    Divergence: 1.5573
+            ----    Time: 15.35s
+============= Communication Round 266 =============
+Selected Clients:  1, 10, 35, 48, 49, 50, 53, 65, 75, 78
+   Train    ----    Loss: 0.6268,   Accuracy: 0.7843
+    Test    ----    Loss: 0.8355,   Accuracy: 0.7281
+            ----    Divergence: 1.9477
+            ----    Time: 11.65s
+============= Communication Round 267 =============
+Selected Clients:  7,  9, 11, 18, 19, 40, 47, 68, 73, 79, 90
+   Train    ----    Loss: 0.6388,   Accuracy: 0.7815
+    Test    ----    Loss: 0.8448,   Accuracy: 0.7320
+            ----    Divergence: 1.8618
+            ----    Time: 13.76s
+============= Communication Round 268 =============
+Selected Clients:  5,  7, 15, 17, 22, 23, 48, 51, 57, 90, 96
+   Train    ----    Loss: 0.6290,   Accuracy: 0.7879
+    Test    ----    Loss: 0.8920,   Accuracy: 0.7238
+            ----    Divergence: 1.7521
+            ----    Time: 14.19s
+============= Communication Round 269 =============
+Selected Clients:  3, 18, 38, 43, 59, 78, 80, 89, 96
+   Train    ----    Loss: 0.6579,   Accuracy: 0.7787
+    Test    ----    Loss: 0.9201,   Accuracy: 0.7155
+            ----    Divergence: 1.8176
+            ----    Time: 11.01s
+============= Communication Round 270 =============
+Selected Clients: 13, 23, 25, 26, 29, 32, 33, 39, 41, 48, 52, 59, 62, 64, 79, 84, 86, 91, 98
+   Train    ----    Loss: 0.6136,   Accuracy: 0.7930
+    Test    ----    Loss: 0.8642,   Accuracy: 0.7298
+            ----    Divergence: 1.8492
+            ----    Time: 20.36s
+============= Communication Round 271 =============
+Selected Clients:  3,  5,  8, 33, 50, 68, 74, 75
+   Train    ----    Loss: 0.5944,   Accuracy: 0.7966
+    Test    ----    Loss: 0.8345,   Accuracy: 0.7309
+            ----    Divergence: 1.7930
+            ----    Time: 9.47s
+============= Communication Round 272 =============
+Selected Clients:  0, 23, 37, 60, 75, 88, 99
+   Train    ----    Loss: 0.6395,   Accuracy: 0.7825
+    Test    ----    Loss: 0.8614,   Accuracy: 0.7277
+            ----    Divergence: 1.6144
+            ----    Time: 8.45s
+============= Communication Round 273 =============
+Selected Clients:  8, 10, 29, 32, 39, 55, 59, 68, 74, 95, 97, 99
+   Train    ----    Loss: 0.6300,   Accuracy: 0.7875
+    Test    ----    Loss: 0.8828,   Accuracy: 0.7229
+            ----    Divergence: 1.7438
+            ----    Time: 14.41s
+============= Communication Round 274 =============
+Selected Clients:  6, 23, 45, 48, 60, 70, 81, 90
+   Train    ----    Loss: 0.6403,   Accuracy: 0.7847
+    Test    ----    Loss: 0.8751,   Accuracy: 0.7288
+            ----    Divergence: 2.1456
+            ----    Time: 11.50s
+============= Communication Round 275 =============
+Selected Clients:  3, 28, 34, 48, 63, 92, 94
+   Train    ----    Loss: 0.7133,   Accuracy: 0.7597
+    Test    ----    Loss: 0.9424,   Accuracy: 0.7062
+            ----    Divergence: 2.0637
+            ----    Time: 9.89s
+============= Communication Round 276 =============
+Selected Clients: 11, 12, 21, 27, 29, 60, 69, 78, 89, 95
+   Train    ----    Loss: 0.5982,   Accuracy: 0.7928
+    Test    ----    Loss: 0.8232,   Accuracy: 0.7378
+            ----    Divergence: 2.3455
+            ----    Time: 12.47s
+============= Communication Round 277 =============
+Selected Clients:  5, 12, 26, 27, 58, 61, 72, 88, 97, 99
+   Train    ----    Loss: 0.6163,   Accuracy: 0.7919
+    Test    ----    Loss: 0.8566,   Accuracy: 0.7332
+            ----    Divergence: 2.0434
+            ----    Time: 11.83s
+============= Communication Round 278 =============
+Selected Clients:  1,  2,  3,  7, 11, 16, 17, 27, 56, 73, 77, 80, 85, 87
+   Train    ----    Loss: 0.6067,   Accuracy: 0.7910
+    Test    ----    Loss: 0.8275,   Accuracy: 0.7343
+            ----    Divergence: 2.3703
+            ----    Time: 15.66s
+============= Communication Round 279 =============
+Selected Clients:  9, 27, 34, 37, 38, 42, 61, 70, 72
+   Train    ----    Loss: 0.6136,   Accuracy: 0.7932
+    Test    ----    Loss: 0.8600,   Accuracy: 0.7325
+            ----    Divergence: 2.1750
+            ----    Time: 10.53s
+============= Communication Round 280 =============
+Selected Clients: 13, 46, 53, 59, 62, 73, 80, 83, 86, 94, 96, 98
+   Train    ----    Loss: 0.6072,   Accuracy: 0.7932
+    Test    ----    Loss: 0.8567,   Accuracy: 0.7320
+            ----    Divergence: 2.1398
+            ----    Time: 14.85s
+============= Communication Round 281 =============
+Selected Clients:  8, 31, 77, 83, 98
+   Train    ----    Loss: 0.6471,   Accuracy: 0.7850
+    Test    ----    Loss: 0.9005,   Accuracy: 0.7299
+            ----    Divergence: 1.5455
+            ----    Time: 7.26s
+============= Communication Round 282 =============
+Selected Clients: 13, 17, 30, 32, 34, 67, 98
+   Train    ----    Loss: 0.6615,   Accuracy: 0.7845
+    Test    ----    Loss: 0.9333,   Accuracy: 0.7190
+            ----    Divergence: 2.0115
+            ----    Time: 9.60s
+============= Communication Round 283 =============
+Selected Clients: 11, 15, 36, 41, 49, 54, 67, 71, 74, 81
+   Train    ----    Loss: 0.6044,   Accuracy: 0.7961
+    Test    ----    Loss: 0.8497,   Accuracy: 0.7374
+            ----    Divergence: 2.3334
+            ----    Time: 11.65s
+============= Communication Round 284 =============
+Selected Clients: 12, 16, 20, 22, 25, 27, 34, 55, 65, 71, 76, 88, 93, 99
+   Train    ----    Loss: 0.6107,   Accuracy: 0.7958
+    Test    ----    Loss: 0.8683,   Accuracy: 0.7356
+            ----    Divergence: 2.0945
+            ----    Time: 15.46s
+============= Communication Round 285 =============
+Selected Clients: 11, 15, 37, 41, 64, 73, 84, 87, 97
+   Train    ----    Loss: 0.5963,   Accuracy: 0.7976
+    Test    ----    Loss: 0.8316,   Accuracy: 0.7410
+            ----    Divergence: 1.6450
+            ----    Time: 10.59s
+============= Communication Round 286 =============
+Selected Clients: 12, 14, 17, 19, 22, 23, 46, 96
+   Train    ----    Loss: 0.6208,   Accuracy: 0.7925
+    Test    ----    Loss: 0.8872,   Accuracy: 0.7275
+            ----    Divergence: 1.8692
+            ----    Time: 9.57s
+============= Communication Round 287 =============
+Selected Clients: 15, 19, 20, 35, 37, 40, 45, 71, 76, 85, 92, 93
+   Train    ----    Loss: 0.6032,   Accuracy: 0.7958
+    Test    ----    Loss: 0.8471,   Accuracy: 0.7343
+            ----    Divergence: 1.7014
+            ----    Time: 14.05s
+============= Communication Round 288 =============
+Selected Clients:  5, 14, 52, 60, 85, 89, 98
+   Train    ----    Loss: 0.6300,   Accuracy: 0.7870
+    Test    ----    Loss: 0.8706,   Accuracy: 0.7285
+            ----    Divergence: 1.8838
+            ----    Time: 9.95s
+============= Communication Round 289 =============
+Selected Clients:  2,  5, 21, 31, 32, 33, 34, 39, 44, 51, 60, 69, 83, 94, 96, 97
+   Train    ----    Loss: 0.6061,   Accuracy: 0.7963
+    Test    ----    Loss: 0.8607,   Accuracy: 0.7353
+            ----    Divergence: 2.0682
+            ----    Time: 19.89s
+============= Communication Round 290 =============
+Selected Clients:  9, 14, 25, 33, 71
+   Train    ----    Loss: 0.6767,   Accuracy: 0.7757
+    Test    ----    Loss: 0.9419,   Accuracy: 0.7129
+            ----    Divergence: 1.8399
+            ----    Time: 6.60s
+============= Communication Round 291 =============
+Selected Clients:  6, 11, 26, 30, 33, 38, 63, 67, 80, 83, 96
+   Train    ----    Loss: 0.6529,   Accuracy: 0.7823
+    Test    ----    Loss: 0.9017,   Accuracy: 0.7227
+            ----    Divergence: 2.1614
+            ----    Time: 12.71s
+============= Communication Round 292 =============
+Selected Clients: 23, 37, 40, 41, 44, 45, 62, 66, 73, 75
+   Train    ----    Loss: 0.6360,   Accuracy: 0.7856
+    Test    ----    Loss: 0.8567,   Accuracy: 0.7288
+            ----    Divergence: 1.7554
+            ----    Time: 11.37s
+============= Communication Round 293 =============
+Selected Clients:  8, 16, 17, 22, 24, 31, 33, 34, 35, 38, 41, 63, 64, 80, 85, 93, 99
+   Train    ----    Loss: 0.6089,   Accuracy: 0.7950
+    Test    ----    Loss: 0.8432,   Accuracy: 0.7375
+            ----    Divergence: 1.7646
+            ----    Time: 18.71s
+============= Communication Round 294 =============
+Selected Clients: 15, 17, 26, 52, 60, 65, 68, 71, 72, 90, 93
+   Train    ----    Loss: 0.6140,   Accuracy: 0.7946
+    Test    ----    Loss: 0.8609,   Accuracy: 0.7337
+            ----    Divergence: 1.7551
+            ----    Time: 14.58s
+============= Communication Round 295 =============
+Selected Clients: 16, 29, 50, 63, 64, 66, 67, 85
+   Train    ----    Loss: 0.6541,   Accuracy: 0.7815
+    Test    ----    Loss: 0.9031,   Accuracy: 0.7258
+            ----    Divergence: 2.3477
+            ----    Time: 11.14s
+============= Communication Round 296 =============
+Selected Clients: 12, 25, 36, 45, 78, 89
+   Train    ----    Loss: 0.6218,   Accuracy: 0.7922
+    Test    ----    Loss: 0.8672,   Accuracy: 0.7388
+            ----    Divergence: 1.8933
+            ----    Time: 7.77s
+============= Communication Round 297 =============
+Selected Clients:  3, 11, 26, 30, 47, 50, 52, 68, 71, 72, 76, 81, 85, 97
+   Train    ----    Loss: 0.5714,   Accuracy: 0.8047
+    Test    ----    Loss: 0.8233,   Accuracy: 0.7475
+            ----    Divergence: 2.2682
+            ----    Time: 15.58s
+============= Communication Round 298 =============
+Selected Clients: 55, 58, 67, 69, 74, 77, 87, 96
+   Train    ----    Loss: 0.5963,   Accuracy: 0.7972
+    Test    ----    Loss: 0.8586,   Accuracy: 0.7353
+            ----    Divergence: 1.4075
+            ----    Time: 9.57s
+============= Communication Round 299 =============
+Selected Clients:  6, 10, 12, 22, 40, 41, 43, 44, 46, 50, 58, 68, 83, 89, 95
+   Train    ----    Loss: 0.5815,   Accuracy: 0.8020
+    Test    ----    Loss: 0.8415,   Accuracy: 0.7374
+            ----    Divergence: 1.9463
+            ----    Time: 16.61s
+============= Communication Round 300 =============
+Selected Clients:  3, 10, 17, 21, 37, 43, 47, 65, 70, 79, 86, 95
+   Train    ----    Loss: 0.5724,   Accuracy: 0.8032
+    Test    ----    Loss: 0.8285,   Accuracy: 0.7431
+            ----    Divergence: 1.9500
+            ----    Time: 14.63s
+============= Communication Round 301 =============
+Selected Clients:  6,  7,  9, 31, 35, 44, 58, 65, 69, 81, 89, 96
+   Train    ----    Loss: 0.5637,   Accuracy: 0.8067
+    Test    ----    Loss: 0.8259,   Accuracy: 0.7451
+            ----    Divergence: 1.8602
+            ----    Time: 16.29s
+============= Communication Round 302 =============
+Selected Clients:  1,  8, 16, 28, 43, 51, 61, 64, 67, 89
+   Train    ----    Loss: 0.5977,   Accuracy: 0.7954
+    Test    ----    Loss: 0.8274,   Accuracy: 0.7413
+            ----    Divergence: 1.9553
+            ----    Time: 13.35s
+============= Communication Round 303 =============
+Selected Clients:  4, 11, 21, 35, 38, 42, 50, 63, 69, 83, 97, 98
+   Train    ----    Loss: 0.5742,   Accuracy: 0.8022
+    Test    ----    Loss: 0.8056,   Accuracy: 0.7426
+            ----    Divergence: 2.1930
+            ----    Time: 15.98s
+============= Communication Round 304 =============
+Selected Clients: 12, 17, 26, 29, 50, 51, 55, 57, 63, 66, 70, 88, 90
+   Train    ----    Loss: 0.5776,   Accuracy: 0.8051
+    Test    ----    Loss: 0.8470,   Accuracy: 0.7433
+            ----    Divergence: 1.8363
+            ----    Time: 14.25s
+============= Communication Round 305 =============
+Selected Clients:  0,  2, 10, 15, 21, 36, 64, 74, 80, 84, 98
+   Train    ----    Loss: 0.6027,   Accuracy: 0.7986
+    Test    ----    Loss: 0.8643,   Accuracy: 0.7376
+            ----    Divergence: 1.8840
+            ----    Time: 12.01s
+============= Communication Round 306 =============
+Selected Clients: 40, 41, 57, 59, 81, 94
+   Train    ----    Loss: 0.7432,   Accuracy: 0.7479
+    Test    ----    Loss: 0.9729,   Accuracy: 0.6931
+            ----    Divergence: 1.6007
+            ----    Time: 7.69s
+============= Communication Round 307 =============
+Selected Clients:  3, 13, 16, 46, 63, 70, 85, 89, 98
+   Train    ----    Loss: 0.6449,   Accuracy: 0.7852
+    Test    ----    Loss: 0.8979,   Accuracy: 0.7168
+            ----    Divergence: 2.2563
+            ----    Time: 10.43s
+============= Communication Round 308 =============
+Selected Clients:  6, 34, 35, 38, 42, 47, 50, 52, 73, 81, 86, 87, 89, 93
+   Train    ----    Loss: 0.6182,   Accuracy: 0.7902
+    Test    ----    Loss: 0.8395,   Accuracy: 0.7319
+            ----    Divergence: 1.8880
+            ----    Time: 15.91s
+============= Communication Round 309 =============
+Selected Clients:  2,  9, 45, 86, 88, 91, 99
+   Train    ----    Loss: 0.6162,   Accuracy: 0.7948
+    Test    ----    Loss: 0.8675,   Accuracy: 0.7300
+            ----    Divergence: 2.0154
+            ----    Time: 8.97s
+============= Communication Round 310 =============
+Selected Clients:  2, 16, 24, 54, 62, 74, 96, 97
+   Train    ----    Loss: 0.6015,   Accuracy: 0.7953
+    Test    ----    Loss: 0.8506,   Accuracy: 0.7338
+            ----    Divergence: 2.0199
+            ----    Time: 10.99s
+============= Communication Round 311 =============
+Selected Clients:  3, 24, 31, 72, 76, 77, 79, 80, 87
+   Train    ----    Loss: 0.5948,   Accuracy: 0.7945
+    Test    ----    Loss: 0.8464,   Accuracy: 0.7343
+            ----    Divergence: 1.9461
+            ----    Time: 12.44s
+============= Communication Round 312 =============
+Selected Clients: 12, 31, 32, 35, 70, 99
+   Train    ----    Loss: 0.6245,   Accuracy: 0.7886
+    Test    ----    Loss: 0.8785,   Accuracy: 0.7256
+            ----    Divergence: 1.1472
+            ----    Time: 7.58s
+============= Communication Round 313 =============
+Selected Clients: 12, 15, 25, 29, 31, 35, 40, 48, 66, 69, 73, 75, 88, 92, 96
+   Train    ----    Loss: 0.5772,   Accuracy: 0.8018
+    Test    ----    Loss: 0.8185,   Accuracy: 0.7373
+            ----    Divergence: 1.8496
+            ----    Time: 17.83s
+============= Communication Round 314 =============
+Selected Clients:  2,  5,  7, 10, 11, 24, 26, 36, 45, 70, 72, 80, 86
+   Train    ----    Loss: 0.5993,   Accuracy: 0.7970
+    Test    ----    Loss: 0.8285,   Accuracy: 0.7392
+            ----    Divergence: 2.0601
+            ----    Time: 15.40s
+============= Communication Round 315 =============
+Selected Clients:  1, 13, 15, 23, 25, 35, 42, 43, 63, 65, 94
+   Train    ----    Loss: 0.5953,   Accuracy: 0.7987
+    Test    ----    Loss: 0.8441,   Accuracy: 0.7398
+            ----    Divergence: 1.5548
+            ----    Time: 14.76s
+============= Communication Round 316 =============
+Selected Clients:  1, 45, 57, 62, 73, 83, 84, 95
+   Train    ----    Loss: 0.6755,   Accuracy: 0.7745
+    Test    ----    Loss: 0.9457,   Accuracy: 0.7070
+            ----    Divergence: 2.0384
+            ----    Time: 10.87s
+============= Communication Round 317 =============
+Selected Clients: 29, 31, 74, 76, 77, 88, 98
+   Train    ----    Loss: 0.6447,   Accuracy: 0.7861
+    Test    ----    Loss: 0.9202,   Accuracy: 0.7201
+            ----    Divergence: 1.6087
+            ----    Time: 8.73s
+============= Communication Round 318 =============
+Selected Clients:  3, 31, 51, 85, 86, 95
+   Train    ----    Loss: 0.6265,   Accuracy: 0.7881
+    Test    ----    Loss: 0.8909,   Accuracy: 0.7256
+            ----    Divergence: 2.1180
+            ----    Time: 7.68s
+============= Communication Round 319 =============
+Selected Clients:  6, 20, 22, 24, 26, 64, 82, 94, 95
+   Train    ----    Loss: 0.6023,   Accuracy: 0.7961
+    Test    ----    Loss: 0.8613,   Accuracy: 0.7341
+            ----    Divergence: 2.1185
+            ----    Time: 10.86s
+============= Communication Round 320 =============
+Selected Clients:  5, 12, 16, 24, 26, 38, 39, 47, 48, 83, 86, 98
+   Train    ----    Loss: 0.5913,   Accuracy: 0.8012
+    Test    ----    Loss: 0.8563,   Accuracy: 0.7365
+            ----    Divergence: 2.0493
+            ----    Time: 14.68s
+============= Communication Round 321 =============
+Selected Clients: 12, 14, 15, 19, 23, 32, 68, 81, 87
+   Train    ----    Loss: 0.6204,   Accuracy: 0.7965
+    Test    ----    Loss: 0.8647,   Accuracy: 0.7348
+            ----    Divergence: 1.8553
+            ----    Time: 12.48s
+============= Communication Round 322 =============
+Selected Clients:  6,  7, 17, 33, 39, 76, 90
+   Train    ----    Loss: 0.7174,   Accuracy: 0.7670
+    Test    ----    Loss: 0.9708,   Accuracy: 0.7100
+            ----    Divergence: 1.9701
+            ----    Time: 9.64s
+============= Communication Round 323 =============
+Selected Clients:  0,  2, 17, 22, 43, 55, 58, 61, 66, 77, 79, 81
+   Train    ----    Loss: 0.6328,   Accuracy: 0.7875
+    Test    ----    Loss: 0.8836,   Accuracy: 0.7292
+            ----    Divergence: 2.0095
+            ----    Time: 13.98s
+============= Communication Round 324 =============
+Selected Clients:  0, 11, 22, 44, 48
+   Train    ----    Loss: 0.5744,   Accuracy: 0.8020
+    Test    ----    Loss: 0.8144,   Accuracy: 0.7408
+            ----    Divergence: 1.7600
+            ----    Time: 6.74s
+============= Communication Round 325 =============
+Selected Clients:  3, 12, 20, 42, 59, 72, 73, 87, 93
+   Train    ----    Loss: 0.6421,   Accuracy: 0.7776
+    Test    ----    Loss: 0.8685,   Accuracy: 0.7186
+            ----    Divergence: 1.9060
+            ----    Time: 10.87s
+============= Communication Round 326 =============
+Selected Clients:  8, 18, 40, 54, 60, 64, 65, 82, 92
+   Train    ----    Loss: 0.5728,   Accuracy: 0.8048
+    Test    ----    Loss: 0.8461,   Accuracy: 0.7341
+            ----    Divergence: 2.0609
+            ----    Time: 11.74s
+============= Communication Round 327 =============
+Selected Clients:  1,  6, 10, 42, 60
+   Train    ----    Loss: 0.6174,   Accuracy: 0.7900
+    Test    ----    Loss: 0.8588,   Accuracy: 0.7310
+            ----    Divergence: 2.3149
+            ----    Time: 7.61s
+============= Communication Round 328 =============
+Selected Clients:  7, 16, 22, 34, 35, 41, 57, 83, 86, 93
+   Train    ----    Loss: 0.5837,   Accuracy: 0.8039
+    Test    ----    Loss: 0.8535,   Accuracy: 0.7436
+            ----    Divergence: 1.9615
+            ----    Time: 12.50s
+============= Communication Round 329 =============
+Selected Clients: 10, 14, 18, 32, 36, 51, 55, 60, 85, 95
+   Train    ----    Loss: 0.6586,   Accuracy: 0.7878
+    Test    ----    Loss: 0.9310,   Accuracy: 0.7262
+            ----    Divergence: 2.1345
+            ----    Time: 11.91s
+============= Communication Round 330 =============
+Selected Clients: 23, 30, 49, 51, 63, 76
+   Train    ----    Loss: 0.6645,   Accuracy: 0.7847
+    Test    ----    Loss: 0.9180,   Accuracy: 0.7264
+            ----    Divergence: 2.2169
+            ----    Time: 8.07s
+============= Communication Round 331 =============
+Selected Clients:  5, 31, 43, 46, 63, 67
+   Train    ----    Loss: 0.6799,   Accuracy: 0.7763
+    Test    ----    Loss: 0.9204,   Accuracy: 0.7168
+            ----    Divergence: 1.7726
+            ----    Time: 7.87s
+============= Communication Round 332 =============
+Selected Clients:  0,  2, 12, 13, 14, 15, 17, 37, 46, 51, 61, 67, 69, 78, 79, 80, 90, 91, 98
+   Train    ----    Loss: 0.6633,   Accuracy: 0.7856
+    Test    ----    Loss: 0.9112,   Accuracy: 0.7267
+            ----    Divergence: 2.0963
+            ----    Time: 24.21s
+============= Communication Round 333 =============
+Selected Clients:  8, 12, 44, 56, 67, 76, 77, 78, 81, 82, 93, 96
+   Train    ----    Loss: 0.6201,   Accuracy: 0.7974
+    Test    ----    Loss: 0.8806,   Accuracy: 0.7371
+            ----    Divergence: 2.0784
+            ----    Time: 14.76s
+============= Communication Round 334 =============
+Selected Clients:  6, 45
+   Train    ----    Loss: 0.7726,   Accuracy: 0.7586
+    Test    ----    Loss: 0.9889,   Accuracy: 0.7071
+            ----    Divergence: 1.5480
+            ----    Time: 3.48s
+============= Communication Round 335 =============
+Selected Clients:  9, 10, 18, 22, 23, 29, 48, 55, 56, 57, 65, 76, 79, 85, 89, 91, 94, 95, 99
+   Train    ----    Loss: 0.6393,   Accuracy: 0.7908
+    Test    ----    Loss: 0.8781,   Accuracy: 0.7300
+            ----    Divergence: 2.2631
+            ----    Time: 21.62s
+============= Communication Round 336 =============
+Selected Clients: 51, 61, 72, 77, 82, 97, 98, 99
+   Train    ----    Loss: 0.6497,   Accuracy: 0.7855
+    Test    ----    Loss: 0.8907,   Accuracy: 0.7274
+            ----    Divergence: 1.8688
+            ----    Time: 9.84s
+============= Communication Round 337 =============
+Selected Clients: 10, 32, 35, 46, 49, 57, 71, 82
+   Train    ----    Loss: 0.5916,   Accuracy: 0.8020
+    Test    ----    Loss: 0.8284,   Accuracy: 0.7443
+            ----    Divergence: 2.1443
+            ----    Time: 10.76s
+============= Communication Round 338 =============
+Selected Clients: 13, 16, 19, 30, 74, 94, 95, 97
+   Train    ----    Loss: 0.6021,   Accuracy: 0.7988
+    Test    ----    Loss: 0.8511,   Accuracy: 0.7350
+            ----    Divergence: 1.8581
+            ----    Time: 10.80s
+============= Communication Round 339 =============
+Selected Clients:  9, 11, 15, 24, 29, 32, 33, 50, 61, 92
+   Train    ----    Loss: 0.5734,   Accuracy: 0.8064
+    Test    ----    Loss: 0.8280,   Accuracy: 0.7407
+            ----    Divergence: 2.0800
+            ----    Time: 11.88s
+============= Communication Round 340 =============
+Selected Clients: 25, 26, 45, 51, 52, 80
+   Train    ----    Loss: 0.6884,   Accuracy: 0.7774
+    Test    ----    Loss: 0.9537,   Accuracy: 0.7143
+            ----    Divergence: 1.4354
+            ----    Time: 7.94s
+============= Communication Round 341 =============
+Selected Clients:  5,  9, 14, 23, 57, 77, 83, 87, 89, 90, 96
+   Train    ----    Loss: 0.5828,   Accuracy: 0.8043
+    Test    ----    Loss: 0.8388,   Accuracy: 0.7410
+            ----    Divergence: 1.6759
+            ----    Time: 12.81s
+============= Communication Round 342 =============
+Selected Clients: 28, 39, 42, 47, 73, 84, 87, 94
+   Train    ----    Loss: 0.6404,   Accuracy: 0.7819
+    Test    ----    Loss: 0.8969,   Accuracy: 0.7198
+            ----    Divergence: 1.8449
+            ----    Time: 10.79s
+============= Communication Round 343 =============
+Selected Clients:  0,  3,  4, 14, 15, 17, 24, 26, 36, 42, 43, 47, 52, 91
+   Train    ----    Loss: 0.5775,   Accuracy: 0.8060
+    Test    ----    Loss: 0.8350,   Accuracy: 0.7454
+            ----    Divergence: 2.0408
+            ----    Time: 17.62s
+============= Communication Round 344 =============
+Selected Clients:  7, 20, 23, 33, 51, 60, 69, 89, 93, 95, 98, 99
+   Train    ----    Loss: 0.5758,   Accuracy: 0.8069
+    Test    ----    Loss: 0.8548,   Accuracy: 0.7421
+            ----    Divergence: 1.7375
+            ----    Time: 13.34s
+============= Communication Round 345 =============
+Selected Clients:  1,  4,  9, 25, 31, 34, 37, 53, 54, 60, 62, 73, 76, 77
+   Train    ----    Loss: 0.6123,   Accuracy: 0.8003
+    Test    ----    Loss: 0.8671,   Accuracy: 0.7392
+            ----    Divergence: 1.9911
+            ----    Time: 15.84s
+============= Communication Round 346 =============
+Selected Clients: 26, 30, 32, 48, 51, 91, 93
+   Train    ----    Loss: 0.5714,   Accuracy: 0.8104
+    Test    ----    Loss: 0.8522,   Accuracy: 0.7425
+            ----    Divergence: 1.9956
+            ----    Time: 8.47s
+============= Communication Round 347 =============
+Selected Clients: 22, 23, 29, 31, 48, 68, 71, 75, 98
+   Train    ----    Loss: 0.6319,   Accuracy: 0.7930
+    Test    ----    Loss: 0.8934,   Accuracy: 0.7335
+            ----    Divergence: 1.6376
+            ----    Time: 12.50s
+============= Communication Round 348 =============
+Selected Clients:  0,  2,  4, 18, 26, 36, 44, 49, 64, 67, 80, 84
+   Train    ----    Loss: 0.5403,   Accuracy: 0.8117
+    Test    ----    Loss: 0.7952,   Accuracy: 0.7507
+            ----    Divergence: 2.0307
+            ----    Time: 15.18s
+============= Communication Round 349 =============
+Selected Clients:  1,  6,  8, 21, 36, 40, 44, 52, 59, 61, 62, 75, 85, 88, 98
+   Train    ----    Loss: 0.5404,   Accuracy: 0.8144
+    Test    ----    Loss: 0.7987,   Accuracy: 0.7513
+            ----    Divergence: 1.8619
+            ----    Time: 16.96s
+============= Communication Round 350 =============
+Selected Clients: 31, 48, 49, 54, 55, 65, 76, 78
+   Train    ----    Loss: 0.6562,   Accuracy: 0.7848
+    Test    ----    Loss: 0.9339,   Accuracy: 0.7161
+            ----    Divergence: 1.9836
+            ----    Time: 9.52s
+============= Communication Round 351 =============
+Selected Clients:  4, 21, 53, 62, 66, 71, 83, 94, 95
+   Train    ----    Loss: 0.5930,   Accuracy: 0.7977
+    Test    ----    Loss: 0.8171,   Accuracy: 0.7454
+            ----    Divergence: 2.2398
+            ----    Time: 11.20s
+============= Communication Round 352 =============
+Selected Clients:  8, 20, 34, 42, 54, 58, 66, 73, 74
+   Train    ----    Loss: 0.7332,   Accuracy: 0.7608
+    Test    ----    Loss: 0.9752,   Accuracy: 0.7082
+            ----    Divergence: 2.0351
+            ----    Time: 12.15s
+============= Communication Round 353 =============
+Selected Clients:  4, 18, 27, 34, 38, 45, 55, 59, 69, 84, 87, 94, 96
+   Train    ----    Loss: 0.5408,   Accuracy: 0.8147
+    Test    ----    Loss: 0.8023,   Accuracy: 0.7499
+            ----    Divergence: 1.9709
+            ----    Time: 15.52s
+============= Communication Round 354 =============
+Selected Clients: 18, 24, 27, 49, 50, 55, 69, 78, 84, 86, 94, 97
+   Train    ----    Loss: 0.5375,   Accuracy: 0.8140
+    Test    ----    Loss: 0.7937,   Accuracy: 0.7520
+            ----    Divergence: 2.1926
+            ----    Time: 13.58s
+============= Communication Round 355 =============
+Selected Clients:  7,  8, 20, 30, 57, 73, 81, 84, 95, 97, 98
+   Train    ----    Loss: 0.5350,   Accuracy: 0.8170
+    Test    ----    Loss: 0.8016,   Accuracy: 0.7480
+            ----    Divergence: 1.9237
+            ----    Time: 12.81s
+============= Communication Round 356 =============
+Selected Clients:  1,  2,  8, 13, 16, 46, 66, 78, 96
+   Train    ----    Loss: 0.5505,   Accuracy: 0.8121
+    Test    ----    Loss: 0.8218,   Accuracy: 0.7434
+            ----    Divergence: 2.2190
+            ----    Time: 11.30s
+============= Communication Round 357 =============
+Selected Clients:  3, 21, 39, 60, 62, 64, 84, 96, 98
+   Train    ----    Loss: 0.5760,   Accuracy: 0.8030
+    Test    ----    Loss: 0.8386,   Accuracy: 0.7341
+            ----    Divergence: 2.1120
+            ----    Time: 12.00s
+============= Communication Round 358 =============
+Selected Clients:  4, 10, 27, 33, 40, 48, 54, 58, 74, 75, 76, 88, 89, 94, 96, 99
+   Train    ----    Loss: 0.5292,   Accuracy: 0.8170
+    Test    ----    Loss: 0.7957,   Accuracy: 0.7482
+            ----    Divergence: 2.0397
+            ----    Time: 20.24s
+============= Communication Round 359 =============
+Selected Clients:  1,  2,  5,  6,  7, 20, 36, 58, 62, 73, 74, 76, 84, 85, 92
+   Train    ----    Loss: 0.5271,   Accuracy: 0.8164
+    Test    ----    Loss: 0.7892,   Accuracy: 0.7502
+            ----    Divergence: 1.6889
+            ----    Time: 17.48s
+============= Communication Round 360 =============
+Selected Clients:  6, 15, 23, 34, 39, 44, 57, 73, 74, 76, 92, 98
+   Train    ----    Loss: 0.5848,   Accuracy: 0.8033
+    Test    ----    Loss: 0.8516,   Accuracy: 0.7314
+            ----    Divergence: 1.7070
+            ----    Time: 12.79s
+============= Communication Round 361 =============
+Selected Clients: 20, 26, 28, 50, 53, 69, 72, 88
+   Train    ----    Loss: 0.5486,   Accuracy: 0.8103
+    Test    ----    Loss: 0.8203,   Accuracy: 0.7471
+            ----    Divergence: 1.6131
+            ----    Time: 8.73s
+============= Communication Round 362 =============
+Selected Clients: 10, 16, 51, 61, 69
+   Train    ----    Loss: 0.6460,   Accuracy: 0.7807
+    Test    ----    Loss: 0.8897,   Accuracy: 0.7213
+            ----    Divergence: 1.7338
+            ----    Time: 6.02s
+============= Communication Round 363 =============
+Selected Clients: 11, 27, 45, 70, 76, 86, 92
+   Train    ----    Loss: 0.5599,   Accuracy: 0.8091
+    Test    ----    Loss: 0.8330,   Accuracy: 0.7489
+            ----    Divergence: 1.9614
+            ----    Time: 7.92s
+============= Communication Round 364 =============
+Selected Clients:  8, 13, 18, 22, 31, 84, 87, 88, 91
+   Train    ----    Loss: 0.5908,   Accuracy: 0.8023
+    Test    ----    Loss: 0.8958,   Accuracy: 0.7348
+            ----    Divergence: 1.5467
+            ----    Time: 9.90s
+============= Communication Round 365 =============
+Selected Clients: 10, 11, 21, 31, 41, 55, 58, 60, 71, 76, 78, 87
+   Train    ----    Loss: 0.5254,   Accuracy: 0.8209
+    Test    ----    Loss: 0.8107,   Accuracy: 0.7514
+            ----    Divergence: 1.8070
+            ----    Time: 13.76s
+============= Communication Round 366 =============
+Selected Clients:  0,  3,  5, 10, 14, 25, 27, 30, 54, 63, 67, 72, 81
+   Train    ----    Loss: 0.5660,   Accuracy: 0.8081
+    Test    ----    Loss: 0.8449,   Accuracy: 0.7463
+            ----    Divergence: 2.2080
+            ----    Time: 15.40s
+============= Communication Round 367 =============
+Selected Clients:  8, 16, 21, 40, 45, 67, 82, 87, 92, 98
+   Train    ----    Loss: 0.5341,   Accuracy: 0.8201
+    Test    ----    Loss: 0.8168,   Accuracy: 0.7518
+            ----    Divergence: 2.0083
+            ----    Time: 12.40s
+============= Communication Round 368 =============
+Selected Clients:  2,  7, 14, 15, 24, 25, 90, 92, 93
+   Train    ----    Loss: 0.5363,   Accuracy: 0.8183
+    Test    ----    Loss: 0.8111,   Accuracy: 0.7530
+            ----    Divergence: 1.5634
+            ----    Time: 10.34s
+============= Communication Round 369 =============
+Selected Clients:  7, 11, 21, 29, 31, 41, 58, 63, 82, 83, 97
+   Train    ----    Loss: 0.5361,   Accuracy: 0.8172
+    Test    ----    Loss: 0.8116,   Accuracy: 0.7517
+            ----    Divergence: 1.9017
+            ----    Time: 13.56s
+============= Communication Round 370 =============
+Selected Clients: 11, 24, 39, 48, 60, 63, 64, 74, 76, 97
+   Train    ----    Loss: 0.5083,   Accuracy: 0.8246
+    Test    ----    Loss: 0.7870,   Accuracy: 0.7547
+            ----    Divergence: 2.0306
+            ----    Time: 12.25s
+============= Communication Round 371 =============
+Selected Clients: 13, 16, 21, 26, 39, 41, 43, 45, 80, 86, 99
+   Train    ----    Loss: 0.5868,   Accuracy: 0.8022
+    Test    ----    Loss: 0.8770,   Accuracy: 0.7346
+            ----    Divergence: 1.6157
+            ----    Time: 12.18s
+============= Communication Round 372 =============
+Selected Clients:  0,  6, 33, 44, 58, 59, 63, 92
+   Train    ----    Loss: 0.7143,   Accuracy: 0.7742
+    Test    ----    Loss: 0.9814,   Accuracy: 0.7150
+            ----    Divergence: 1.4986
+            ----    Time: 10.33s
+============= Communication Round 373 =============
+Selected Clients:  2, 15, 21, 33, 34, 43, 62, 64, 75, 78, 81
+   Train    ----    Loss: 0.5406,   Accuracy: 0.8173
+    Test    ----    Loss: 0.8212,   Accuracy: 0.7459
+            ----    Divergence: 1.7476
+            ----    Time: 12.51s
+============= Communication Round 374 =============
+Selected Clients: 16, 18, 26, 32, 37, 44, 50, 59, 75, 76, 79, 82, 86, 89, 94, 95
+   Train    ----    Loss: 0.5108,   Accuracy: 0.8248
+    Test    ----    Loss: 0.8093,   Accuracy: 0.7494
+            ----    Divergence: 2.0094
+            ----    Time: 17.47s
+============= Communication Round 375 =============
+Selected Clients:  2, 11, 18, 26, 30, 47, 48, 53, 54, 60, 67, 71, 89
+   Train    ----    Loss: 0.5254,   Accuracy: 0.8231
+    Test    ----    Loss: 0.8102,   Accuracy: 0.7522
+            ----    Divergence: 2.0399
+            ----    Time: 14.69s
+============= Communication Round 376 =============
+Selected Clients: 11, 16, 23, 49, 54, 56, 61, 67, 68, 94
+   Train    ----    Loss: 0.5281,   Accuracy: 0.8204
+    Test    ----    Loss: 0.8114,   Accuracy: 0.7482
+            ----    Divergence: 2.0522
+            ----    Time: 11.15s
+============= Communication Round 377 =============
+Selected Clients:  4, 18, 23, 37, 47, 68, 69, 88, 93
+   Train    ----    Loss: 0.5521,   Accuracy: 0.8167
+    Test    ----    Loss: 0.8256,   Accuracy: 0.7513
+            ----    Divergence: 1.5786
+            ----    Time: 11.90s
+============= Communication Round 378 =============
+Selected Clients:  5, 14, 15, 18, 43, 51, 55, 91, 92
+   Train    ----    Loss: 0.5572,   Accuracy: 0.8129
+    Test    ----    Loss: 0.8619,   Accuracy: 0.7416
+            ----    Divergence: 1.6333
+            ----    Time: 10.72s
+============= Communication Round 379 =============
+Selected Clients:  1,  6, 12, 17, 21, 25, 78
+   Train    ----    Loss: 0.6178,   Accuracy: 0.7949
+    Test    ----    Loss: 0.8981,   Accuracy: 0.7283
+            ----    Divergence: 1.8236
+            ----    Time: 8.35s
+============= Communication Round 380 =============
+Selected Clients:  2,  9, 36, 39, 41, 61, 72, 79, 81
+   Train    ----    Loss: 0.5136,   Accuracy: 0.8241
+    Test    ----    Loss: 0.7978,   Accuracy: 0.7526
+            ----    Divergence: 1.9980
+            ----    Time: 11.03s
+============= Communication Round 381 =============
+Selected Clients:  5, 15, 48, 49, 58, 65, 70, 86, 88, 91, 96
+   Train    ----    Loss: 0.5808,   Accuracy: 0.8052
+    Test    ----    Loss: 0.8769,   Accuracy: 0.7313
+            ----    Divergence: 2.0785
+            ----    Time: 14.14s
+============= Communication Round 382 =============
+Selected Clients:  3, 10, 13, 20, 27, 36, 43, 44, 46, 54, 63, 76, 87, 93
+   Train    ----    Loss: 0.5075,   Accuracy: 0.8257
+    Test    ----    Loss: 0.7960,   Accuracy: 0.7588
+            ----    Divergence: 2.1099
+            ----    Time: 16.91s
+============= Communication Round 383 =============
+Selected Clients:  0, 32, 35, 44, 47, 73, 75, 96
+   Train    ----    Loss: 0.5829,   Accuracy: 0.8096
+    Test    ----    Loss: 0.8634,   Accuracy: 0.7437
+            ----    Divergence: 1.2758
+            ----    Time: 11.33s
+============= Communication Round 384 =============
+Selected Clients:  9, 18, 20, 28, 55, 58, 60, 65, 66, 69, 82, 85, 91, 92
+   Train    ----    Loss: 0.5132,   Accuracy: 0.8246
+    Test    ----    Loss: 0.8166,   Accuracy: 0.7527
+            ----    Divergence: 1.9635
+            ----    Time: 16.73s
+============= Communication Round 385 =============
+Selected Clients:  4,  7, 18, 26, 31, 37, 42, 53, 70, 93, 96
+   Train    ----    Loss: 0.5203,   Accuracy: 0.8258
+    Test    ----    Loss: 0.8181,   Accuracy: 0.7555
+            ----    Divergence: 1.9302
+            ----    Time: 14.42s
+============= Communication Round 386 =============
+Selected Clients:  5, 11, 15, 29, 52
+   Train    ----    Loss: 0.5750,   Accuracy: 0.8134
+    Test    ----    Loss: 0.8675,   Accuracy: 0.7464
+            ----    Divergence: 1.5630
+            ----    Time: 6.77s
+============= Communication Round 387 =============
+Selected Clients: 25, 61, 63, 64, 86, 88, 94
+   Train    ----    Loss: 0.6326,   Accuracy: 0.8015
+    Test    ----    Loss: 0.9452,   Accuracy: 0.7301
+            ----    Divergence: 1.7744
+            ----    Time: 8.51s
+============= Communication Round 388 =============
+Selected Clients: 11, 60, 70, 71, 76, 89
+   Train    ----    Loss: 0.6961,   Accuracy: 0.7840
+    Test    ----    Loss: 1.0340,   Accuracy: 0.7116
+            ----    Divergence: 1.8827
+            ----    Time: 7.35s
+============= Communication Round 389 =============
+Selected Clients:  8, 41, 54, 77
+   Train    ----    Loss: 0.8357,   Accuracy: 0.7392
+    Test    ----    Loss: 1.1402,   Accuracy: 0.6723
+            ----    Divergence: 1.2334
+            ----    Time: 5.91s
+============= Communication Round 390 =============
+Selected Clients:  2, 14, 20, 46, 47, 49, 74, 75, 92, 93
+   Train    ----    Loss: 0.6184,   Accuracy: 0.8016
+    Test    ----    Loss: 0.9253,   Accuracy: 0.7313
+            ----    Divergence: 1.5188
+            ----    Time: 12.48s
+============= Communication Round 391 =============
+Selected Clients: 10, 13, 19, 24, 25, 37, 57, 65, 77, 82, 85, 95, 98
+   Train    ----    Loss: 0.5756,   Accuracy: 0.8151
+    Test    ----    Loss: 0.9186,   Accuracy: 0.7408
+            ----    Divergence: 2.0213
+            ----    Time: 14.33s
+============= Communication Round 392 =============
+Selected Clients: 13, 22, 46, 67, 68, 79
+   Train    ----    Loss: 0.5679,   Accuracy: 0.8155
+    Test    ----    Loss: 0.8830,   Accuracy: 0.7451
+            ----    Divergence: 1.7532
+            ----    Time: 7.61s
+============= Communication Round 393 =============
+Selected Clients:  2, 29, 41, 78
+   Train    ----    Loss: 0.6500,   Accuracy: 0.7856
+    Test    ----    Loss: 0.9434,   Accuracy: 0.7144
+            ----    Divergence: 1.3271
+            ----    Time: 5.98s
+============= Communication Round 394 =============
+Selected Clients:  2,  9, 16, 19, 37, 41, 45, 46, 52, 58, 80, 81, 86
+   Train    ----    Loss: 0.5435,   Accuracy: 0.8181
+    Test    ----    Loss: 0.8559,   Accuracy: 0.7462
+            ----    Divergence: 2.0667
+            ----    Time: 16.56s
+============= Communication Round 395 =============
+Selected Clients:  0, 19, 45, 78, 91, 92, 93
+   Train    ----    Loss: 0.6196,   Accuracy: 0.7955
+    Test    ----    Loss: 0.9228,   Accuracy: 0.7302
+            ----    Divergence: 1.7045
+            ----    Time: 8.29s
+============= Communication Round 396 =============
+Selected Clients:  0, 21, 28, 32, 39, 86, 94, 99
+   Train    ----    Loss: 0.6433,   Accuracy: 0.7964
+    Test    ----    Loss: 0.9596,   Accuracy: 0.7282
+            ----    Divergence: 1.8245
+            ----    Time: 9.71s
+============= Communication Round 397 =============
+Selected Clients: 13, 31, 32, 41, 42, 56, 57, 59, 62, 64, 69, 72, 75, 86, 98
+   Train    ----    Loss: 0.5689,   Accuracy: 0.8108
+    Test    ----    Loss: 0.8759,   Accuracy: 0.7410
+            ----    Divergence: 1.3734
+            ----    Time: 18.30s
+============= Communication Round 398 =============
+Selected Clients:  0,  2, 36, 47, 64, 70, 71, 87, 98
+   Train    ----    Loss: 0.6481,   Accuracy: 0.7928
+    Test    ----    Loss: 0.9308,   Accuracy: 0.7303
+            ----    Divergence: 1.5739
+            ----    Time: 11.82s
+============= Communication Round 399 =============
+Selected Clients:  7,  9, 16, 49, 80, 84
+   Train    ----    Loss: 0.6239,   Accuracy: 0.7915
+    Test    ----    Loss: 0.9335,   Accuracy: 0.7201
+            ----    Divergence: 1.9213
+            ----    Time: 8.31s
+============= Communication Round 400 =============
+Selected Clients:  2, 12, 18, 19, 26, 58, 74, 75, 80, 91
+   Train    ----    Loss: 0.5476,   Accuracy: 0.8139
+    Test    ----    Loss: 0.8466,   Accuracy: 0.7384
+            ----    Divergence: 1.5465
+            ----    Time: 11.34s
+============= Communication Round 401 =============
+Selected Clients:  7, 10, 11, 15, 27, 37, 38, 57, 59, 62, 67, 87, 99
+   Train    ----    Loss: 0.5375,   Accuracy: 0.8155
+    Test    ----    Loss: 0.8081,   Accuracy: 0.7546
+            ----    Divergence: 1.7188
+            ----    Time: 15.01s
+============= Communication Round 402 =============
+Selected Clients:  2, 20, 28, 34, 42, 63, 67, 77, 89, 90
+   Train    ----    Loss: 0.5691,   Accuracy: 0.8083
+    Test    ----    Loss: 0.8628,   Accuracy: 0.7414
+            ----    Divergence: 1.5889
+            ----    Time: 12.29s
+============= Communication Round 403 =============
+Selected Clients: 11, 17, 24, 43, 45, 51, 66, 88
+   Train    ----    Loss: 0.5273,   Accuracy: 0.8210
+    Test    ----    Loss: 0.8240,   Accuracy: 0.7474
+            ----    Divergence: 1.9831
+            ----    Time: 9.30s
+============= Communication Round 404 =============
+Selected Clients: 13, 25, 29, 35, 39, 57, 71, 78, 85, 94
+   Train    ----    Loss: 0.5294,   Accuracy: 0.8234
+    Test    ----    Loss: 0.8380,   Accuracy: 0.7531
+            ----    Divergence: 1.7277
+            ----    Time: 12.09s
+============= Communication Round 405 =============
+Selected Clients: 25, 30, 42, 63, 73, 82, 94
+   Train    ----    Loss: 0.5533,   Accuracy: 0.8154
+    Test    ----    Loss: 0.8534,   Accuracy: 0.7440
+            ----    Divergence: 2.1118
+            ----    Time: 9.94s
+============= Communication Round 406 =============
+Selected Clients: 39, 44, 55, 59, 79
+   Train    ----    Loss: 0.6633,   Accuracy: 0.7889
+    Test    ----    Loss: 0.9593,   Accuracy: 0.7245
+            ----    Divergence: 1.4086
+            ----    Time: 6.41s
+============= Communication Round 407 =============
+Selected Clients: 30, 34, 37, 91, 99
+   Train    ----    Loss: 0.5874,   Accuracy: 0.8068
+    Test    ----    Loss: 0.8745,   Accuracy: 0.7391
+            ----    Divergence: 1.8513
+            ----    Time: 6.44s
+============= Communication Round 408 =============
+Selected Clients: 30, 33, 34, 36, 37, 38, 45, 50, 51, 57, 59, 70, 76, 79, 85, 90
+   Train    ----    Loss: 0.5196,   Accuracy: 0.8227
+    Test    ----    Loss: 0.8056,   Accuracy: 0.7504
+            ----    Divergence: 1.8216
+            ----    Time: 18.94s
+============= Communication Round 409 =============
+Selected Clients:  9, 18, 33, 51, 63, 66, 74, 77, 85
+   Train    ----    Loss: 0.5855,   Accuracy: 0.8048
+    Test    ----    Loss: 0.8864,   Accuracy: 0.7328
+            ----    Divergence: 1.7156
+            ----    Time: 10.50s
+============= Communication Round 410 =============
+Selected Clients: 10, 12, 41, 47, 48, 68, 70, 93
+   Train    ----    Loss: 0.5062,   Accuracy: 0.8252
+    Test    ----    Loss: 0.7738,   Accuracy: 0.7561
+            ----    Divergence: 1.3378
+            ----    Time: 9.53s
+============= Communication Round 411 =============
+Selected Clients: 21, 22, 28, 42, 63, 70
+   Train    ----    Loss: 0.7146,   Accuracy: 0.7747
+    Test    ----    Loss: 1.0079,   Accuracy: 0.7107
+            ----    Divergence: 1.6053
+            ----    Time: 7.72s
+============= Communication Round 412 =============
+Selected Clients:  6, 23, 32, 47, 50, 51, 54, 57, 61, 64, 77, 91
+   Train    ----    Loss: 0.5198,   Accuracy: 0.8250
+    Test    ----    Loss: 0.8163,   Accuracy: 0.7496
+            ----    Divergence: 1.7173
+            ----    Time: 14.35s
+============= Communication Round 413 =============
+Selected Clients:  7, 13, 21, 34, 52, 55, 58, 82, 85, 87, 96, 99
+   Train    ----    Loss: 0.5420,   Accuracy: 0.8194
+    Test    ----    Loss: 0.8440,   Accuracy: 0.7436
+            ----    Divergence: 1.7119
+            ----    Time: 13.56s
+============= Communication Round 414 =============
+Selected Clients:  1,  8, 33, 34, 43, 48, 50, 62, 71, 87, 92, 96
+   Train    ----    Loss: 0.5535,   Accuracy: 0.8157
+    Test    ----    Loss: 0.8513,   Accuracy: 0.7452
+            ----    Divergence: 1.5703
+            ----    Time: 16.28s
+============= Communication Round 415 =============
+Selected Clients: 12, 15, 16, 37, 39, 41, 43, 46, 53, 56, 65, 69, 91
+   Train    ----    Loss: 0.5027,   Accuracy: 0.8280
+    Test    ----    Loss: 0.7905,   Accuracy: 0.7544
+            ----    Divergence: 1.8281
+            ----    Time: 16.06s
+============= Communication Round 416 =============
+Selected Clients:  8, 24, 26, 45, 55, 62, 69, 76, 85
+   Train    ----    Loss: 0.6000,   Accuracy: 0.8082
+    Test    ----    Loss: 0.9064,   Accuracy: 0.7346
+            ----    Divergence: 1.6676
+            ----    Time: 12.30s
+============= Communication Round 417 =============
+Selected Clients: 19, 37, 39, 48, 54, 72, 85
+   Train    ----    Loss: 0.6192,   Accuracy: 0.7959
+    Test    ----    Loss: 0.9192,   Accuracy: 0.7218
+            ----    Divergence: 1.9736
+            ----    Time: 10.51s
+============= Communication Round 418 =============
+Selected Clients:  6, 11, 12, 19, 30, 43, 50, 55
+   Train    ----    Loss: 0.5666,   Accuracy: 0.8119
+    Test    ----    Loss: 0.8671,   Accuracy: 0.7379
+            ----    Divergence: 1.5183
+            ----    Time: 10.56s
+============= Communication Round 419 =============
+Selected Clients: 11, 17, 22, 24, 26, 27, 32, 46, 47, 50, 63, 64, 66, 68, 77, 82, 92
+   Train    ----    Loss: 0.5056,   Accuracy: 0.8289
+    Test    ----    Loss: 0.7942,   Accuracy: 0.7575
+            ----    Divergence: 1.9284
+            ----    Time: 21.74s
+============= Communication Round 420 =============
+Selected Clients:  2, 16, 26, 35, 37, 51, 73, 79, 80, 91, 93, 95, 98
+   Train    ----    Loss: 0.4853,   Accuracy: 0.8307
+    Test    ----    Loss: 0.7833,   Accuracy: 0.7557
+            ----    Divergence: 1.9819
+            ----    Time: 14.92s
+============= Communication Round 421 =============
+Selected Clients: 23, 36, 46, 48, 53, 54, 55, 58, 59, 74
+   Train    ----    Loss: 0.5550,   Accuracy: 0.8140
+    Test    ----    Loss: 0.8336,   Accuracy: 0.7453
+            ----    Divergence: 1.7803
+            ----    Time: 12.10s
+============= Communication Round 422 =============
+Selected Clients:  2,  8, 19, 21, 35, 38, 45, 46, 47, 55, 59, 63, 68, 87, 88, 90, 92
+   Train    ----    Loss: 0.5656,   Accuracy: 0.8136
+    Test    ----    Loss: 0.8309,   Accuracy: 0.7443
+            ----    Divergence: 1.4288
+            ----    Time: 19.20s
+============= Communication Round 423 =============
+Selected Clients: 12, 18, 21, 23, 45, 46, 64, 79, 85, 86, 94, 97
+   Train    ----    Loss: 0.4886,   Accuracy: 0.8329
+    Test    ----    Loss: 0.7772,   Accuracy: 0.7618
+            ----    Divergence: 1.8630
+            ----    Time: 13.54s
+============= Communication Round 424 =============
+Selected Clients:  2, 16, 34, 42, 48, 54, 55, 56, 63, 66, 69, 84, 85, 91
+   Train    ----    Loss: 0.4875,   Accuracy: 0.8343
+    Test    ----    Loss: 0.7793,   Accuracy: 0.7609
+            ----    Divergence: 2.0703
+            ----    Time: 17.99s
+============= Communication Round 425 =============
+Selected Clients:  4,  5, 20, 32, 33, 36, 48, 52, 57, 71, 75, 98
+   Train    ----    Loss: 0.5107,   Accuracy: 0.8283
+    Test    ----    Loss: 0.8077,   Accuracy: 0.7528
+            ----    Divergence: 1.5460
+            ----    Time: 14.41s
+============= Communication Round 426 =============
+Selected Clients:  1,  2,  6, 14, 17, 23, 40, 43, 80, 94, 99
+   Train    ----    Loss: 0.5456,   Accuracy: 0.8153
+    Test    ----    Loss: 0.8514,   Accuracy: 0.7417
+            ----    Divergence: 1.4332
+            ----    Time: 12.67s
+============= Communication Round 427 =============
+Selected Clients:  3, 16, 26, 27, 32, 52, 66, 83, 88, 91, 97
+   Train    ----    Loss: 0.4931,   Accuracy: 0.8321
+    Test    ----    Loss: 0.7828,   Accuracy: 0.7621
+            ----    Divergence: 2.0813
+            ----    Time: 14.16s
+============= Communication Round 428 =============
+Selected Clients: 45, 46, 50, 65, 66, 75, 78, 95
+   Train    ----    Loss: 0.4961,   Accuracy: 0.8302
+    Test    ----    Loss: 0.8076,   Accuracy: 0.7542
+            ----    Divergence: 1.9303
+            ----    Time: 10.86s
+============= Communication Round 429 =============
+Selected Clients:  8, 63, 66, 67, 69, 85, 96
+   Train    ----    Loss: 0.4948,   Accuracy: 0.8299
+    Test    ----    Loss: 0.7917,   Accuracy: 0.7577
+            ----    Divergence: 1.7365
+            ----    Time: 9.99s
+============= Communication Round 430 =============
+Selected Clients: 12, 15, 17, 23, 24, 41, 45, 64, 65, 77, 78, 86, 98
+   Train    ----    Loss: 0.4954,   Accuracy: 0.8315
+    Test    ----    Loss: 0.7917,   Accuracy: 0.7602
+            ----    Divergence: 1.5766
+            ----    Time: 16.93s
+============= Communication Round 431 =============
+Selected Clients: 27, 48, 61, 81, 86, 88, 99
+   Train    ----    Loss: 0.5779,   Accuracy: 0.8050
+    Test    ----    Loss: 0.8675,   Accuracy: 0.7370
+            ----    Divergence: 2.0050
+            ----    Time: 9.15s
+============= Communication Round 432 =============
+Selected Clients: 10, 28, 31, 38, 39, 47, 53, 76, 79, 88
+   Train    ----    Loss: 0.4879,   Accuracy: 0.8330
+    Test    ----    Loss: 0.7839,   Accuracy: 0.7638
+            ----    Divergence: 1.6316
+            ----    Time: 13.05s
+============= Communication Round 433 =============
+Selected Clients:  4,  6, 19, 22, 35, 38, 45, 59, 67, 69, 73, 74, 76, 78, 82
+   Train    ----    Loss: 0.4850,   Accuracy: 0.8341
+    Test    ----    Loss: 0.7790,   Accuracy: 0.7659
+            ----    Divergence: 1.6649
+            ----    Time: 16.69s
+============= Communication Round 434 =============
+Selected Clients: 20, 34, 35, 43, 50, 60, 62, 64, 71, 80, 81, 90, 96, 97
+   Train    ----    Loss: 0.4942,   Accuracy: 0.8317
+    Test    ----    Loss: 0.7789,   Accuracy: 0.7599
+            ----    Divergence: 1.4765
+            ----    Time: 16.14s
+============= Communication Round 435 =============
+Selected Clients:  8,  9, 26, 36, 52, 69, 72, 78, 85, 96
+   Train    ----    Loss: 0.4931,   Accuracy: 0.8319
+    Test    ----    Loss: 0.7814,   Accuracy: 0.7628
+            ----    Divergence: 1.4674
+            ----    Time: 12.86s
+============= Communication Round 436 =============
+Selected Clients:  3,  8, 12, 13, 23, 25, 28, 33, 42, 45, 61, 66, 73, 76, 89, 94
+   Train    ----    Loss: 0.5005,   Accuracy: 0.8277
+    Test    ----    Loss: 0.8049,   Accuracy: 0.7598
+            ----    Divergence: 1.6886
+            ----    Time: 17.43s
+============= Communication Round 437 =============
+Selected Clients: 23, 46, 50, 52, 65, 69, 73, 75, 84, 94
+   Train    ----    Loss: 0.5155,   Accuracy: 0.8240
+    Test    ----    Loss: 0.8206,   Accuracy: 0.7518
+            ----    Divergence: 1.2493
+            ----    Time: 12.17s
+============= Communication Round 438 =============
+Selected Clients:  7,  9, 10, 14, 17, 19, 26, 34, 40, 55, 59, 64, 78, 94, 99
+   Train    ----    Loss: 0.5324,   Accuracy: 0.8181
+    Test    ----    Loss: 0.8301,   Accuracy: 0.7498
+            ----    Divergence: 1.4969
+            ----    Time: 16.99s
+============= Communication Round 439 =============
+Selected Clients: 25, 35, 50, 51, 56, 84, 86, 87
+   Train    ----    Loss: 0.5381,   Accuracy: 0.8166
+    Test    ----    Loss: 0.8551,   Accuracy: 0.7439
+            ----    Divergence: 1.3467
+            ----    Time: 9.36s
+============= Communication Round 440 =============
+Selected Clients:  4, 11, 29, 37, 51, 56, 66, 67, 76, 85, 86, 95
+   Train    ----    Loss: 0.4884,   Accuracy: 0.8320
+    Test    ----    Loss: 0.7899,   Accuracy: 0.7592
+            ----    Divergence: 1.9701
+            ----    Time: 15.25s
+============= Communication Round 441 =============
+Selected Clients: 17, 30, 32, 33, 44, 61, 71, 83, 85, 90, 91
+   Train    ----    Loss: 0.4891,   Accuracy: 0.8348
+    Test    ----    Loss: 0.7983,   Accuracy: 0.7658
+            ----    Divergence: 1.6856
+            ----    Time: 12.79s
+============= Communication Round 442 =============
+Selected Clients:  8, 28, 40, 51, 59, 78, 83, 84, 88, 92, 96
+   Train    ----    Loss: 0.5440,   Accuracy: 0.8221
+    Test    ----    Loss: 0.8683,   Accuracy: 0.7515
+            ----    Divergence: 1.5976
+            ----    Time: 12.12s
+============= Communication Round 443 =============
+Selected Clients: 17, 27, 32, 33, 41, 44, 75
+   Train    ----    Loss: 0.5747,   Accuracy: 0.8080
+    Test    ----    Loss: 0.8637,   Accuracy: 0.7427
+            ----    Divergence: 1.2106
+            ----    Time: 9.46s
+============= Communication Round 444 =============
+Selected Clients:  6, 11, 12, 14, 15, 22, 39, 62, 86, 88, 94
+   Train    ----    Loss: 0.5499,   Accuracy: 0.8156
+    Test    ----    Loss: 0.8498,   Accuracy: 0.7456
+            ----    Divergence: 1.4509
+            ----    Time: 13.61s
+============= Communication Round 445 =============
+Selected Clients:  3,  4, 13, 15, 36, 63, 65, 66, 67, 75, 83, 94
+   Train    ----    Loss: 0.5835,   Accuracy: 0.8086
+    Test    ----    Loss: 0.8746,   Accuracy: 0.7426
+            ----    Divergence: 1.7096
+            ----    Time: 14.95s
+============= Communication Round 446 =============
+Selected Clients:  3,  4,  5,  8, 24, 37, 44, 48, 56, 59, 65, 82
+   Train    ----    Loss: 0.4836,   Accuracy: 0.8356
+    Test    ----    Loss: 0.8166,   Accuracy: 0.7636
+            ----    Divergence: 1.8660
+            ----    Time: 15.58s
+============= Communication Round 447 =============
+Selected Clients:  4,  7, 11, 13, 16, 30, 37, 45, 50, 61, 84
+   Train    ----    Loss: 0.5212,   Accuracy: 0.8253
+    Test    ----    Loss: 0.8526,   Accuracy: 0.7482
+            ----    Divergence: 1.8198
+            ----    Time: 12.20s
+============= Communication Round 448 =============
+Selected Clients:  6,  9, 10, 25, 42, 52, 53, 57, 61, 65, 98
+   Train    ----    Loss: 0.5149,   Accuracy: 0.8265
+    Test    ----    Loss: 0.8309,   Accuracy: 0.7502
+            ----    Divergence: 1.6018
+            ----    Time: 12.28s
+============= Communication Round 449 =============
+Selected Clients: 16, 19, 21, 28, 36, 61, 69, 80, 91, 92, 94, 99
+   Train    ----    Loss: 0.4859,   Accuracy: 0.8339
+    Test    ----    Loss: 0.7973,   Accuracy: 0.7611
+            ----    Divergence: 1.5516
+            ----    Time: 14.43s
+============= Communication Round 450 =============
+Selected Clients:  1,  8, 24, 28, 42, 55, 58, 72, 78, 80, 88, 95
+   Train    ----    Loss: 0.5266,   Accuracy: 0.8222
+    Test    ----    Loss: 0.8510,   Accuracy: 0.7466
+            ----    Divergence: 1.7759
+            ----    Time: 13.11s
+============= Communication Round 451 =============
+Selected Clients:  0, 19, 21, 24, 29, 40, 41, 45, 50, 61, 66, 69, 71, 80, 89, 94, 97
+   Train    ----    Loss: 0.4747,   Accuracy: 0.8394
+    Test    ----    Loss: 0.7972,   Accuracy: 0.7624
+            ----    Divergence: 1.6904
+            ----    Time: 20.62s
+============= Communication Round 452 =============
+Selected Clients:  5, 11, 19, 20, 23, 24, 35, 39, 68, 75
+   Train    ----    Loss: 0.5259,   Accuracy: 0.8222
+    Test    ----    Loss: 0.8210,   Accuracy: 0.7573
+            ----    Divergence: 1.4063
+            ----    Time: 11.70s
+============= Communication Round 453 =============
+Selected Clients:  4, 11, 25, 32, 53, 54, 57, 63, 64, 67, 85, 86, 98
+   Train    ----    Loss: 0.5574,   Accuracy: 0.8150
+    Test    ----    Loss: 0.8718,   Accuracy: 0.7447
+            ----    Divergence: 1.8424
+            ----    Time: 14.59s
+============= Communication Round 454 =============
+Selected Clients:  0,  7, 12, 13, 18, 39, 43, 44, 46, 49, 56, 68, 75, 88
+   Train    ----    Loss: 0.4838,   Accuracy: 0.8363
+    Test    ----    Loss: 0.8147,   Accuracy: 0.7586
+            ----    Divergence: 1.6185
+            ----    Time: 19.91s
+============= Communication Round 455 =============
+Selected Clients: 20, 24, 27, 28, 49, 53, 71, 86, 91, 94
+   Train    ----    Loss: 0.4794,   Accuracy: 0.8379
+    Test    ----    Loss: 0.7944,   Accuracy: 0.7646
+            ----    Divergence: 1.8598
+            ----    Time: 13.53s
+============= Communication Round 456 =============
+Selected Clients:  0, 10, 14, 39, 50, 52, 59, 78, 84, 90, 91, 93
+   Train    ----    Loss: 0.4879,   Accuracy: 0.8349
+    Test    ----    Loss: 0.7979,   Accuracy: 0.7622
+            ----    Divergence: 1.5868
+            ----    Time: 13.99s
+============= Communication Round 457 =============
+Selected Clients:  2,  4, 10, 33, 39, 46, 58, 63, 65, 82, 84
+   Train    ----    Loss: 0.5024,   Accuracy: 0.8294
+    Test    ----    Loss: 0.8338,   Accuracy: 0.7512
+            ----    Divergence: 1.9355
+            ----    Time: 13.76s
+============= Communication Round 458 =============
+Selected Clients: 23, 33, 54, 67, 69, 88
+   Train    ----    Loss: 0.5300,   Accuracy: 0.8200
+    Test    ----    Loss: 0.8181,   Accuracy: 0.7505
+            ----    Divergence: 1.3407
+            ----    Time: 8.83s
+============= Communication Round 459 =============
+Selected Clients:  9, 17, 18, 19, 26, 27, 29, 33, 36, 50, 55, 66, 85, 89
+   Train    ----    Loss: 0.4620,   Accuracy: 0.8405
+    Test    ----    Loss: 0.7725,   Accuracy: 0.7694
+            ----    Divergence: 1.8735
+            ----    Time: 18.50s
+============= Communication Round 460 =============
+Selected Clients:  0,  5, 17, 26, 31, 42, 46, 47, 60, 68, 69
+   Train    ----    Loss: 0.4807,   Accuracy: 0.8362
+    Test    ----    Loss: 0.8012,   Accuracy: 0.7632
+            ----    Divergence: 1.5036
+            ----    Time: 15.07s
+============= Communication Round 461 =============
+Selected Clients:  8, 31, 49, 71, 74, 94
+   Train    ----    Loss: 0.5802,   Accuracy: 0.8118
+    Test    ----    Loss: 0.9244,   Accuracy: 0.7356
+            ----    Divergence: 1.3374
+            ----    Time: 8.53s
+============= Communication Round 462 =============
+Selected Clients:  0,  5, 11, 12, 49, 61, 69, 72, 87, 97, 98
+   Train    ----    Loss: 0.6102,   Accuracy: 0.8055
+    Test    ----    Loss: 0.9164,   Accuracy: 0.7383
+            ----    Divergence: 1.5340
+            ----    Time: 14.77s
+============= Communication Round 463 =============
+Selected Clients: 22, 24, 32, 38, 48, 64, 77, 88, 90, 96, 98
+   Train    ----    Loss: 0.4988,   Accuracy: 0.8331
+    Test    ----    Loss: 0.8205,   Accuracy: 0.7550
+            ----    Divergence: 1.4678
+            ----    Time: 14.91s
+============= Communication Round 464 =============
+Selected Clients:  7, 13, 15, 16, 29, 44, 54, 57, 60, 61, 76, 83, 87
+   Train    ----    Loss: 0.4763,   Accuracy: 0.8398
+    Test    ----    Loss: 0.8087,   Accuracy: 0.7610
+            ----    Divergence: 1.7472
+            ----    Time: 16.63s
+============= Communication Round 465 =============
+Selected Clients: 59, 65, 71, 89, 92
+   Train    ----    Loss: 0.6739,   Accuracy: 0.7885
+    Test    ----    Loss: 1.0280,   Accuracy: 0.7153
+            ----    Divergence: 0.9756
+            ----    Time: 6.99s
+============= Communication Round 466 =============
+Selected Clients:  6, 19, 29, 39, 50, 57, 60, 62, 82, 86, 87
+   Train    ----    Loss: 0.5264,   Accuracy: 0.8240
+    Test    ----    Loss: 0.8765,   Accuracy: 0.7460
+            ----    Divergence: 1.7285
+            ----    Time: 14.06s
+============= Communication Round 467 =============
+Selected Clients:  1,  4, 22, 28, 39, 46, 49, 53, 63, 65, 78, 84
+   Train    ----    Loss: 0.4924,   Accuracy: 0.8334
+    Test    ----    Loss: 0.8285,   Accuracy: 0.7550
+            ----    Divergence: 1.9344
+            ----    Time: 13.72s
+============= Communication Round 468 =============
+Selected Clients:  9, 12, 15, 16, 34, 37, 48, 50, 58, 68, 93
+   Train    ----    Loss: 0.4999,   Accuracy: 0.8319
+    Test    ----    Loss: 0.8271,   Accuracy: 0.7581
+            ----    Divergence: 1.6353
+            ----    Time: 12.35s
+============= Communication Round 469 =============
+Selected Clients:  3,  7, 16, 18, 19, 26, 33, 38, 66, 78, 80, 86, 91, 95
+   Train    ----    Loss: 0.4914,   Accuracy: 0.8340
+    Test    ----    Loss: 0.8392,   Accuracy: 0.7523
+            ----    Divergence: 1.9510
+            ----    Time: 18.37s
+============= Communication Round 470 =============
+Selected Clients:  2,  3, 11, 44, 49, 99
+   Train    ----    Loss: 0.5006,   Accuracy: 0.8282
+    Test    ----    Loss: 0.8157,   Accuracy: 0.7610
+            ----    Divergence: 1.7589
+            ----    Time: 7.39s
+============= Communication Round 471 =============
+Selected Clients:  2, 24, 30, 31, 33, 45, 49, 52
+   Train    ----    Loss: 0.5028,   Accuracy: 0.8281
+    Test    ----    Loss: 0.8252,   Accuracy: 0.7523
+            ----    Divergence: 1.5882
+            ----    Time: 10.82s
+============= Communication Round 472 =============
+Selected Clients:  2,  5,  8, 21, 26, 28, 46, 79, 98
+   Train    ----    Loss: 0.4967,   Accuracy: 0.8334
+    Test    ----    Loss: 0.8341,   Accuracy: 0.7589
+            ----    Divergence: 1.8215
+            ----    Time: 14.24s
+============= Communication Round 473 =============
+Selected Clients: 10, 23, 43, 57, 69, 88, 99
+   Train    ----    Loss: 0.5396,   Accuracy: 0.8212
+    Test    ----    Loss: 0.8501,   Accuracy: 0.7488
+            ----    Divergence: 1.0318
+            ----    Time: 11.32s
+============= Communication Round 474 =============
+Selected Clients: 19, 30, 43, 54, 55, 63, 66, 71, 83, 85, 88, 98
+   Train    ----    Loss: 0.5027,   Accuracy: 0.8308
+    Test    ----    Loss: 0.8353,   Accuracy: 0.7560
+            ----    Divergence: 1.7746
+            ----    Time: 15.42s
+============= Communication Round 475 =============
+Selected Clients:  0,  1,  9, 15, 21, 31, 86
+   Train    ----    Loss: 0.6403,   Accuracy: 0.7997
+    Test    ----    Loss: 0.9845,   Accuracy: 0.7263
+            ----    Divergence: 1.4250
+            ----    Time: 9.79s
+============= Communication Round 476 =============
+Selected Clients: 29, 55, 57, 66, 78, 81, 99
+   Train    ----    Loss: 0.5292,   Accuracy: 0.8258
+    Test    ----    Loss: 0.8774,   Accuracy: 0.7510
+            ----    Divergence: 1.5757
+            ----    Time: 10.58s
+============= Communication Round 477 =============
+Selected Clients:  0, 13, 22, 27, 28, 55, 70, 84, 88
+   Train    ----    Loss: 0.5394,   Accuracy: 0.8248
+    Test    ----    Loss: 0.8950,   Accuracy: 0.7430
+            ----    Divergence: 1.3231
+            ----    Time: 12.08s
+============= Communication Round 478 =============
+Selected Clients:  8, 26, 29, 57, 58, 60, 67, 69, 95, 98
+   Train    ----    Loss: 0.5789,   Accuracy: 0.8179
+    Test    ----    Loss: 0.9460,   Accuracy: 0.7383
+            ----    Divergence: 1.5305
+            ----    Time: 13.24s
+============= Communication Round 479 =============
+Selected Clients:  1, 15, 25, 39, 41, 70, 74, 78, 79, 80, 89
+   Train    ----    Loss: 0.5923,   Accuracy: 0.8079
+    Test    ----    Loss: 0.9517,   Accuracy: 0.7243
+            ----    Divergence: 1.4283
+            ----    Time: 15.93s
+============= Communication Round 480 =============
+Selected Clients:  6, 12, 33, 36, 44, 58, 66, 76, 88, 92, 93, 95
+   Train    ----    Loss: 0.4760,   Accuracy: 0.8392
+    Test    ----    Loss: 0.7991,   Accuracy: 0.7611
+            ----    Divergence: 1.6077
+            ----    Time: 15.66s
+============= Communication Round 481 =============
+Selected Clients:  1,  4, 28, 55, 87
+   Train    ----    Loss: 0.5842,   Accuracy: 0.8112
+    Test    ----    Loss: 0.8983,   Accuracy: 0.7431
+            ----    Divergence: 1.2605
+            ----    Time: 6.77s
+============= Communication Round 482 =============
+Selected Clients:  2,  3, 19, 25, 34, 35, 51, 52, 53, 55, 81
+   Train    ----    Loss: 0.4519,   Accuracy: 0.8427
+    Test    ----    Loss: 0.7923,   Accuracy: 0.7636
+            ----    Divergence: 1.5643
+            ----    Time: 14.06s
+============= Communication Round 483 =============
+Selected Clients:  0,  3,  5,  9, 13, 26, 38, 40, 51, 59, 76, 78, 82
+   Train    ----    Loss: 0.5042,   Accuracy: 0.8324
+    Test    ----    Loss: 0.8702,   Accuracy: 0.7529
+            ----    Divergence: 1.5879
+            ----    Time: 16.55s
+============= Communication Round 484 =============
+Selected Clients:  0,  7, 17, 43, 54, 81, 84, 87, 89, 90, 96, 99
+   Train    ----    Loss: 0.4973,   Accuracy: 0.8336
+    Test    ----    Loss: 0.8511,   Accuracy: 0.7518
+            ----    Divergence: 1.2693
+            ----    Time: 15.67s
+============= Communication Round 485 =============
+Selected Clients: 15, 35, 40, 42, 59, 63, 82, 85, 87
+   Train    ----    Loss: 0.4588,   Accuracy: 0.8416
+    Test    ----    Loss: 0.8002,   Accuracy: 0.7643
+            ----    Divergence: 1.4259
+            ----    Time: 12.69s
+============= Communication Round 486 =============
+Selected Clients:  6,  7, 10, 20, 49, 53, 62, 69, 79, 87, 88, 95, 98
+   Train    ----    Loss: 0.4742,   Accuracy: 0.8387
+    Test    ----    Loss: 0.8187,   Accuracy: 0.7607
+            ----    Divergence: 1.4415
+            ----    Time: 15.57s
+============= Communication Round 487 =============
+Selected Clients:  1,  3,  6,  9, 13, 18, 42, 51, 53, 74
+   Train    ----    Loss: 0.4629,   Accuracy: 0.8410
+    Test    ----    Loss: 0.8013,   Accuracy: 0.7609
+            ----    Divergence: 1.5384
+            ----    Time: 11.49s
+============= Communication Round 488 =============
+Selected Clients:  0, 19, 28, 38, 40, 42, 63, 79, 86, 98
+   Train    ----    Loss: 0.4472,   Accuracy: 0.8475
+    Test    ----    Loss: 0.7971,   Accuracy: 0.7676
+            ----    Divergence: 1.5001
+            ----    Time: 13.63s
+============= Communication Round 489 =============
+Selected Clients:  8, 27, 31, 48, 54, 62, 75, 79, 82, 93
+   Train    ----    Loss: 0.4891,   Accuracy: 0.8348
+    Test    ----    Loss: 0.8243,   Accuracy: 0.7586
+            ----    Divergence: 1.5195
+            ----    Time: 13.44s
+============= Communication Round 490 =============
+Selected Clients: 12, 14, 22, 24, 29, 31, 52, 74, 76, 93
+   Train    ----    Loss: 0.5224,   Accuracy: 0.8226
+    Test    ----    Loss: 0.8633,   Accuracy: 0.7462
+            ----    Divergence: 1.0180
+            ----    Time: 12.35s
+============= Communication Round 491 =============
+Selected Clients:  1,  2,  9, 10, 13, 24, 63, 64, 69, 72, 76, 81, 90, 99
+   Train    ----    Loss: 0.5047,   Accuracy: 0.8260
+    Test    ----    Loss: 0.8316,   Accuracy: 0.7490
+            ----    Divergence: 1.3738
+            ----    Time: 16.57s
+============= Communication Round 492 =============
+Selected Clients:  6, 17, 22, 23, 30, 33, 34, 47, 54, 55, 56, 72, 76, 79, 84, 88, 98
+   Train    ----    Loss: 0.6110,   Accuracy: 0.8131
+    Test    ----    Loss: 0.9774,   Accuracy: 0.7329
+            ----    Divergence: 1.4482
+            ----    Time: 18.77s
+============= Communication Round 493 =============
+Selected Clients:  4, 13, 33, 34, 35, 55, 58, 66, 79
+   Train    ----    Loss: 0.5979,   Accuracy: 0.8099
+    Test    ----    Loss: 0.9188,   Accuracy: 0.7422
+            ----    Divergence: 1.4699
+            ----    Time: 10.72s
+============= Communication Round 494 =============
+Selected Clients:  0,  1, 30, 50, 51, 71, 89
+   Train    ----    Loss: 0.4958,   Accuracy: 0.8367
+    Test    ----    Loss: 0.8547,   Accuracy: 0.7593
+            ----    Divergence: 1.6718
+            ----    Time: 8.53s
+============= Communication Round 495 =============
+Selected Clients:  4, 12, 22, 23, 41, 45, 46, 59, 60, 76, 79, 91, 92, 95
+   Train    ----    Loss: 0.5780,   Accuracy: 0.8268
+    Test    ----    Loss: 0.9549,   Accuracy: 0.7449
+            ----    Divergence: 1.4120
+            ----    Time: 15.74s
+============= Communication Round 496 =============
+Selected Clients: 16, 19, 24, 39, 51, 64, 77, 81, 91
+   Train    ----    Loss: 0.5190,   Accuracy: 0.8323
+    Test    ----    Loss: 0.8940,   Accuracy: 0.7514
+            ----    Divergence: 1.7949
+            ----    Time: 10.48s
+============= Communication Round 497 =============
+Selected Clients: 19, 31, 41, 44, 48, 65, 70, 80, 90, 92
+   Train    ----    Loss: 0.6095,   Accuracy: 0.8079
+    Test    ----    Loss: 0.9718,   Accuracy: 0.7340
+            ----    Divergence: 0.9998
+            ----    Time: 11.49s
+============= Communication Round 498 =============
+Selected Clients:  1,  8, 14, 29, 33, 48, 74, 78, 83, 86, 88, 94
+   Train    ----    Loss: 0.5460,   Accuracy: 0.8208
+    Test    ----    Loss: 0.8926,   Accuracy: 0.7469
+            ----    Divergence: 1.5232
+            ----    Time: 13.52s
+============= Communication Round 499 =============
+Selected Clients:  0,  9, 11, 22, 26, 34, 52, 57, 64, 65, 72, 78, 81, 82, 84, 98
+   Train    ----    Loss: 0.4664,   Accuracy: 0.8414
+    Test    ----    Loss: 0.8208,   Accuracy: 0.7598
+            ----    Divergence: 1.5046
+            ----    Time: 17.80s
+============= Communication Round 500 =============
+Selected Clients: 30, 32, 45, 55, 57, 65, 84, 95
+   Train    ----    Loss: 0.5638,   Accuracy: 0.8180
+    Test    ----    Loss: 0.9333,   Accuracy: 0.7374
+            ----    Divergence: 1.2767
+            ----    Time: 9.55s
+##=============================================##
+##                   Summary                   ##
+##=============================================##
+     Communication round   --->   T = 500       
+    Average Time / round   --->   12.20s        
+     Top-1 Test Acc (T)    --->   76.94% (458) 

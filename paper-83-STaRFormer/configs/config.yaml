@@ -1,0 +1,27 @@
+seed: 42
+dataset: null
+task: classification
+
+run: null
+
+hydra:  
+  output_subdir: null  
+  run:  
+    dir: .
+
+defaults:
+  - _self_
+  - callbacks/early_stop: default
+  - callbacks/model_ckpt: default
+  - callbacks/lr_scheduler: default
+  - datamodule: null
+  - loss: ce
+  - optimizer: sgd
+  - model: lstm
+  - system: system
+  - training: null
+  - logger: tensorboard
+
+  # Disable log files 
+  - override hydra/job_logging: default
+  - override hydra/hydra_logging: disabled 

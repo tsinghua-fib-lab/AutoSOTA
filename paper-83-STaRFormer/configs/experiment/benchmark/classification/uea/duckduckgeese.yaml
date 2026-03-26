@@ -1,0 +1,135 @@
+# @package _global_
+seed: 42
+dataset: DuckDuckGeese
+task: classification
+run: 2025-05-26_17:19:25
+callbacks:
+  early_stop:
+    monitor: val/loss_ce
+    mode: min
+    patience: 30
+    verbose: true
+  model_ckpt:
+    monitor: val/acc
+    verbose: false
+    save_last: true
+    mode: max
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.8
+    patience: 15
+    min_lr: 1.0e-06
+    monitor: val/loss_ce
+  ema:
+    apply: true
+    decay: 0.7
+  lr_scheudler:
+    monitor: val/loss_ce
+    patience: 30
+datamodule:
+  dataset: DuckDuckGeese
+  batch_size: 32
+  num_workers: 0
+  seed: 42
+  training_method: centralized
+  max_trajectory_length: null
+  aws_profile: null
+  s3_bucket_path: null
+  use_threads: null
+  val_batch_size: 32
+  test_batch_size: 32
+  num_train: null
+  num_val: null
+  num_test: null
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  display_labels:
+  - black-bellied_whistling_duck
+  - canadian_goose
+  - greylag_goose
+  - pink-footed_goose
+  - white-faced_whistling_duck
+  dataset_instance: 2025-05-25_22:49:01
+loss:
+  loss_fn: darem_sscl
+  method: sscl
+  lambda_cl: 1.426254422433582
+  lambda_fuse_cl: 0.5
+  temp: 0.5
+  batch_size: 16
+  pred_type: multiclass
+  task: classification
+  task_loss_fn: mean_squarred_error
+optimizer:
+  name: adam
+  beta1: 0.9104101798838844
+  beta2: 0.9377369818094456
+  eps: 1.0e-08
+  weight_decay: 0.0004182979459149407
+model:
+  sequence_model:
+    name: starformer
+    embedding:
+      d_features: 1345
+      max_seq_len: 271
+    d_model: 128
+    n_head: 2
+    num_encoder_layers: 6
+    dim_feedforward: 512
+    dropout: 0.4207974603806152
+    activation: relu
+    layer_norm_eps: 1.0e-05
+    batch_first: false
+    bias: true
+    enable_nested_tensor: true
+    mask_check: true
+    masking: darem
+    mask_threshold: 0.2
+    mask_region_bound: 0.2
+    ratio_highest_attention: 0.1
+    aggregate_attn_per_batch: false
+    precision: 32
+    reconstruction: false
+    task: classification
+    batch_size: 16
+    cls_method: cls_token
+  text_model:
+    aligner:
+      kernel_size: null
+      activation: null
+  output_head:
+    task: classification
+    batch_size: 32
+    d_out: 5
+    d_hidden: null
+    activation: silu
+    reduced: false
+    cls_method: cls_token
+system:
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training:
+  epochs: 500
+  batch_size: 32
+  val_batch_size: 32
+  test_batch_size: 32
+  learning_rate: 0.0014857851172679906
+  fast_dev: false
+  precision: 32
+  devices: null
+  multi_gpu_training: false
+logger:
+  name: wandb # tensorboard (to use tensorboard change name)
+  sweep: false 
+  entity: null # add your wandb entity here
+  exp_name: null
+  project: starformer-reruns
+  run_1_config_path: null
+  sweep_id: null

@@ -1,0 +1,27 @@
+OPTIMIZER:
+  name: AdamW
+  args:
+    lr: 0.001
+    weight_decay: 0.01
+
+CRITERION:
+  name: CrossEntropyLoss
+  source: pytorch
+
+
+workers: 4
+lr: 0.001
+epochs: 3
+bs: 128
+pin_mem: False
+world_size: 1
+dataset: CIFAR10
+data_dir: ./data/
+phase2_epoch: 60
+lr_schedule: 'cosine'
+dump_path: ./checkpoints/
+
+LR_SCHEDULER:
+  name: CosineAnnealingLR
+  args:
+    T_max: 3

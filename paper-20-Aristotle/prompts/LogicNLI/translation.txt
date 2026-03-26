@@ -1,0 +1,80 @@
+Task Description: You are given a context description and a conjecture. The task is to: 
+1) define all the predicates in the context
+2) parse the problem into logic rules based on the defined predicates. Make sure to identify compound predicates and translated them using "or". Please note that conditional statement containing "if" is not considered as rules with compound predicates.
+3) write all the facts mentioned in the problem
+4) parse the conjecture into the logic form
+5) Please make sure to differentiate ‘or’ and ‘either…or…’. For ‘or’, you should translate it with the’ inclusive or’ (V) operator. For ‘either…or…’, you should translate it with the ‘exclusive or’ (⊕) operator.
+6) For general terms like "people," use a universal quantifier (e.g., "x"), as in "Red(x, True) -> Green(x, True)" for "Red people are green." For specific individuals, use their name, as in "Cold(Anne, True)" for "Anne is cold."
+------
+Below is an example:
+Context:
+Medwin is doubtful. Roberto is not bitter. Roberto is not grieving. Adley is not financial. Adley is bitter. Roberto is pure. Gavin is bitter. Axel is grieving. Lynda is bitter. Axel is not sociable. Bernard is grieving. Medwin is not financial.
+If there is someone who is not sociable, then Axel is not pure and Medwin is not bitter.
+If someone is not bitter, then he is not grieving.
+Medwin being not sociable implies that Medwin is not pure.
+If there is someone who is either not pure or not doubtful, then Lynda is not grieving.
+Someone who is not doubtful is always not bitter.
+If there is at least one people who is financial and grieving, then Medwin is doubtful and Bernard is not sociable.
+If someone is grieving, then he is sociable.
+If there is at least one people who is doubtful or not bitter, then Adley is financial. 
+Axel being bitter and Lynda being financial imply that Bernard is sociable. 
+If someone is sociable, then he is not doubtful, and vice versa. 
+If someone is both not grieving and not sociable, then he is not bitter. 
+If Lynda is doubtful and Axel is bitter, then Gavin is not pure.
+Someone being both difficult and not embarrassed is equivalent to being not colorful and not known.
+Someone is not known and clean if and only if he is blue and cheerful.
+Bradley being not huge is equivalent to Byron being inexpensive and Troy being unlikely, and vice versa.
+If Craig is not relieved, then Craig is not wide-eyed and Clayton is not cheerful, and vice versa.
+
+### Final Translation:
+
+**Facts:**
+1. Doubtful(Medwin, True) ::: Medwin is doubtful.
+2. Bitter(Roberto, False) ::: Roberto is not bitter.
+3. Grieving(Roberto, False) ::: Roberto is not grieving.
+4. Financial(Adley, False) ::: Adley is not financial.
+5. Bitter(Adley, True) ::: Adley is bitter.
+6. Pure(Roberto, True) ::: Roberto is pure.
+7. Bitter(Gavin, True) ::: Gavin is bitter.
+8. Grieving(Axel, True) ::: Axel is grieving.
+9. Bitter(Lynda, True) ::: Lynda is bitter.
+10. Sociable(Axel, False) ::: Axel is not sociable.
+11. Grieving(Bernard, True) ::: Bernard is grieving.
+12. Financial(Medwin, False) ::: Medwin is not financial.
+
+**Rules:**
+1. Sociable($x, False) >>> Pure(Axel, False) ∧ Bitter(Medwin, False) ::: If there is someone who is not sociable, then Axel is not pure and Medwin is not bitter.
+2. Bitter($x, False) >>> Grieving($x, False) ::: If someone is not bitter, then he is not grieving.
+3. Sociable(Medwin, False) >>> Pure(Medwin, False) ::: Medwin being not sociable implies that Medwin is not pure.
+4. Pure($x, False) ⊕ Doubtful($x, False) >>> Grieving(Lynda, False) ::: If there is someone who is either not pure or not doubtful, then Lynda is not grieving.
+5. Doubtful($x, False) >>> Bitter($x, False) ::: Someone who is not doubtful is always not bitter.
+6. Financial($x, True) ∧ Grieving($x, True) >>> Doubtful(Medwin, True) ∧ Sociable(Bernard, False) ::: If there is at least one person who is financial and grieving, then Medwin is doubtful and Bernard is not sociable.
+7. Grieving($x, True) >>> Sociable($x, True) ::: If someone is grieving, then he is sociable.
+8. Doubtful($x, True) ∨ Bitter($x, False) >>> Financial(Adley, True) ::: If there is at least one person who is doubtful or not bitter, then Adley is financial.
+9. Bitter(Axel, True) ∧ Financial(Lynda, True) >>> Sociable(Bernard, True) ::: Axel being bitter and Lynda being financial imply that Bernard is sociable.
+10. Sociable($x, True) ⇔ Doubtful($x, False) ::: If someone is sociable, then he is not doubtful, and vice versa.
+11. Grieving($x, False) ∧ Sociable($x, False) >>> Bitter($x, False) ::: If someone is both not grieving and not sociable, then he is not bitter.
+12. Difficult($x, True) ∧ Embarrassed($x, False) >>> Colorful($x, False) ∧ Known($x, False) ::: Someone being both difficult and not embarrassed is equivalent to being not colorful and not known.
+13. (Known($x, False) ∧ Clean($x, True)) ⇔ (Blue($x, True) ∧ Cheerful($x, True)) ::: Someone is not known and clean if and only if he is blue and cheerful.
+14. Huge(Bradley, False) ⇔ (Inexpensive(Byron, True) ∧ Unlikely(Troy, True)) ::: Bradley being not huge is equivalent to Byron being inexpensive and Troy being unlikely, and vice versa.
+15. Relieved(Craig, False) ⇔ (WideEyed(Craig, False) ∧ Cheerful(Clayton, False)) ::: If Craig is not relieved, then Craig is not wide-eyed and Clayton is not cheerful, and vice versa.
+
+**Conjecture:**
+Bitter(Bernard, False) ::: Bernard is not bitter.
+-----
+Please carefully and fully understand this important requirement before translation:
+For compound predicates (statements involving multiple properties) by ",", make sure you used "or" to connect them.
+Please note that for conditional statement containing "if" is not rule with compound predicates but conditional rule.
+Please make sure you translate every single clause. Do not miss any clause even they are similar or repetitive.
+Please make sure every term has a boolean value "True" or "False".
+please make sure you specify "Final Translation" so that we can directly extract it afterwards.
+Please be careful when translating clauses with words "equivalent", "vice versa" and "if and only if". Make sure you use the biconditional "⇔" in those translation.
+Please be careful when translating "or" and "either...or...". If the statements do not contain "either" but only contain "or", you should use the "∨" operator. If the statements contain "either", then you should use "⊕" operator.
+-----
+Below is the one you need to translate:
+Context:
+[[PREMISES]]
+
+Conjecture:
+[[CONJECTURE]]
+###

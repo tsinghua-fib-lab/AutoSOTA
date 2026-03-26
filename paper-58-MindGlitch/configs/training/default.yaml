@@ -1,0 +1,51 @@
+
+name: null  # Experiment name (can be overridden via command line)
+dev: false  # Run in development mode (skip WANDB)
+
+dtype: "bfloat16"
+batch_size: 8
+lr: 1e-3
+weight_decay: 0.0
+epochs: 20
+scheduler_step: 10
+load_ckpt: null
+losses:
+  - bce
+
+data:
+  train:
+    dataset_name: "default"
+    dataset_path: null
+    img_size: null
+    num_training_samples: -1
+    seed: 42 # Used to sample the training set if num_training_samples is not -1
+    train_val_split: 0.9
+    num_visualization_samples: 15
+    filtering: # Filter samples based on different criteria
+      skewness_thresh: -1
+      lpips_thresh: -1
+      source_target_rel_sz_diff: -1
+      matching_score_thresh: 0.7
+    augmentations:
+      enabled: false
+      horizontal_flip_prob: 0.5
+      color_jitter_prob: 0.5
+      brightness_range: [0.9, 1.1]
+      contrast_range: [0.8, 1.3]
+      saturation_range: [0.8, 1.3]      
+  val:
+    dataset_name: "default"
+    dataset_path: null
+    img_size: null
+    num_training_samples: -1
+    seed: 42 # Used to sample the training set if num_training_samples is not -1
+    train_val_split: 0.9
+    num_visualization_samples: 15
+    filtering:
+      matching_score_thresh: 0.7
+    augmentations:
+      enabled: false      
+
+model:
+  name: "base_model"
+  masked: true

@@ -1,0 +1,91 @@
+program: scripts/training/train.py
+
+method: bayes
+metric: 
+  name: test/acc
+  goal: maximize
+    #name: test/fbeta
+    #goal: maximize
+project: facedetection_sweeps
+
+parameters:
+  training.learning_rate:
+    max: 0.01
+    min: 0.00001
+    distribution: uniform
+  training.batch_size:
+    values:
+      - 16
+      - 32
+    distribution: categorical
+  optimizer.beta1:
+    max: 0.99     
+    min: 0.8
+    distribution: uniform
+  optimizer.beta2: 
+    max: 0.9999 
+    min: 0.9
+    distribution: uniform
+  optimizer.weight_decay: 
+    max: 0.0005
+    min: 0.0
+    distribution: uniform
+  ## model
+  model.d_model:
+    values:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+    distribution: categorical
+  model.n_head:
+    values:
+      - 2
+      - 4
+      - 8
+    distribution: categorical
+  model.num_encoder_layers:
+    values:
+      - 2
+      - 4
+      - 6
+      - 8 
+    distribution: categorical
+  model.dim_feedforward:
+    values:
+      - 8
+      - 16
+      - 32
+      - 64
+      - 128
+    distribution: categorical
+  model.dropout:
+    max: 0.3
+    min: 0.0
+    distribution: uniform
+  model.activation:
+    values:
+      - elu
+      - relu
+      - selu
+      - gelu
+      - silu
+      - tanh
+    distribution: categorical
+
+early_terminate:
+  type: hyperband
+  s: 2
+  eta: 3
+  max_iter: 27
+
+
+command:
+ - python
+ - ${program}
+ - +experiment=ucr_uea/facedetection/sweep.yaml
+ - system.accelerator=cpu
+ - model.output_head.train_mtm=false
+ - loss=bce
+ - logger.run_1_config_path='configs/experiment/ucr_uea/facedetection/run_1_configs_transformer.yaml'

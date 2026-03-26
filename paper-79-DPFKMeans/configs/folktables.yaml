@@ -1,0 +1,28 @@
+# Data Arguments
+dataset: folktables
+filter_label: 2
+samples_per_mixture_server: 10
+num_uniform_server: 1000
+
+# Privacy Arguments
+datapoint_privacy: True
+
+outer_product_epsilon: 1
+weighting_epsilon: 1
+center_init_gaussian_epsilon: 1
+center_init_epsilon_split: 0.5
+fedlloyds_epsilon: 1
+fedlloyds_epsilon_split: 0.5
+
+outer_product_clipping_bound: 2.65
+weighting_clipping_bound: 1
+center_init_clipping_bound: 2.65
+center_init_laplace_clipping_bound: 1
+fedlloyds_clipping_bound: 2.65
+fedlloyds_laplace_clipping_bound: 1
+
+# Algorithm Arguments
+initialization_algorithm: FederatedClusterInitExact
+clustering_algorithm: FederatedLloyds
+minimum_server_point_weight: 5
+fedlloyds_num_iterations: 1

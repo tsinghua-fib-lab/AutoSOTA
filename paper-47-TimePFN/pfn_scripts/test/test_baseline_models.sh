@@ -1,0 +1,299 @@
+export CUDA_VISIBLE_DEVICES=0
+
+model_name="seasonal_naive"
+model_identifier="u_last"
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/electricity/ \
+    --data_path electricity.csv \
+    --model_id ${model_identifier}_ECL_96_96 \
+    --model $model_name \
+    --data custom \
+    --features S \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTh1.csv \
+    --model_id ${model_identifier}_ETTh1_96_96 \
+    --model $model_name \
+    --data ETTh1 \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTh2.csv \
+    --model_id ${model_identifier}_ETTh2_96_96 \
+    --model $model_name \
+    --data ETTh2 \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTm1.csv \
+    --model_id ${model_identifier}_ETTm1_96_96 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/ETT-small/ \
+    --data_path ETTm2.csv \
+    --model_id ${model_identifier}_ETTm2_96_96 \
+    --model $model_name \
+    --data ETTm2 \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/exchange_rate/ \
+    --data_path exchange_rate.csv \
+    --model_id ${model_identifier}_Exchange_96_96 \
+    --model $model_name \
+    --data custom \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/traffic/ \
+    --data_path traffic.csv \
+    --model_id ${model_identifier}_traffic_96_96 \
+    --model $model_name \
+    --data custom \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/weather/ \
+    --data_path weather.csv \
+    --model_id ${model_identifier}_weather_96_96 \
+    --model $model_name \
+    --data custom \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \
+
+
+python -u run.py \
+    --is_training 0 \
+    --root_path ./dataset/Solar/ \
+    --data_path solar_AL.txt \
+    --model_id ${model_identifier}_Solar_96_96 \
+    --model $model_name \
+    --data Solar \
+    --features M \
+    --seq_len 96 \
+    --pred_len 96 \
+    --e_layers 8 \
+    --enc_in 160 \
+    --dec_in 160 \
+    --c_out 160 \
+    --des 'Exp' \
+    --d_model 1024 \
+    --d_ff 512 \
+    --itr 1 \
+    --patch_size=16 \
+    --exp_name MTSF \
+    --embed_dim 256 \
+    --n_heads 8 \
+    --patience 3 \
+    --learning_rate 0.0002 \
+    --batch_size 16 \
+    --train_epochs 8 \
+    --decay 0.8 \
+    --stride 8 \
+    --checkpoints ./checkpoints_PFN/ \
+    --data_amount -1 \
+    --optimizer adamw \

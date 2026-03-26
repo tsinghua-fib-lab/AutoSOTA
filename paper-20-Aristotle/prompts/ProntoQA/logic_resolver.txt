@@ -1,0 +1,155 @@
+---
+
+**Task:** Given two clauses, your task is to:
+
+1. **Check for Complementary/Contradictory Terms:**
+   - Determine if a term in the clause 1 contradicts a term in the clause 2.
+
+**Complementary/Contradictory Terms:** Two terms are contradictory if they share the same predicate and arguments but differ in either polarity (one is negated) or boolean value (True vs. False).
+
+**Examples:**
+1. \( P(x, False) \) is contradictory to:
+   - \( \neg P(x, False) \) (opposite polarity, same boolean value).
+   - \( P(x, True) \) (same polarity, opposite boolean value).
+
+2. \( \neg P(x, False) \) is contradictory to:
+   - \( \neg P(x, True) \) (same polarity, opposite boolean value).
+   - \( P(x, False) \) (opposite polarity, same boolean value).
+
+**If contradictory terms are found:** Resolve the clauses using the rules below.
+
+2. **Resolve the Clauses:**
+
+### **Resolution Rules:**
+**OR Operator (∨):**
+- Complementary/Contradictory Terms Found: \( (A \lor B), \, (\neg A \lor C) \Rightarrow (B \lor C) \)
+
+**AND Operator (∧):**
+-Complementary/Contradictory Terms Found with Remaining Terms:  \( (A \land B), \, (\neg B \lor C) \Rightarrow (A \land C) \)
+- Complementary/Contradictory Terms Found with Remaining Terms: \neg B \land C \lor D, \,  \( (B) \Rightarrow False \land C \lor D \Rightarrow False \lor D \Rightarrow \text{D} \)
+- Complementary/Contradictory Terms Found Leading to Contradiction: \( (A \land B), \, \neg B \Rightarrow False \land A \Rightarrow \text{Contradiction} \) (You can only conclude contradiction when all the term in both clauses are connected by **\land** operator)
+
+3. **Sufficiency Check After Inference:**
+- **If a contradiction is found:**
+  - Conclude with "Sufficiency Label: [True]" and "New Clause: {Contradiction}".
+- Otherwise if contradiction is not found: 
+  - conclude with "Sufficiency Label: [False]".
+
+Output: Conclude the sufficiency label and the new clause in the format:
+
+New Clause: {new_clause}
+
+Sufficiency Label: [True/False]
+---
+Example:
+
+Clause 1: Earthy(Stella, True)
+Clause 2: Numpus(x, False) \\lor Earthy(x, False)
+
+Let's go through the resolution process for the given clauses:
+
+### **Step 1: Check for Complementary/Contradictory Terms**
+
+**Given Clauses:**
+- **Clause 1:** \( Earthy(Stella, True) \)
+- **Clause 2:** \( Numpus(x, False) \lor Earthy(x, False) \)
+
+**Identify Potential Complementary Terms:**
+- \( Earthy(Stella, True) \) from Clause 1 potentially contradicts \( Earthy(x, False) \) in Clause 2. Instantiation of \( x \) to \( Stella \) is required to check for a contradiction.
+
+**Instantiate Clause 2 with \( x = Stella \):**
+- Original Clause 2: \( Numpus(x, False) \lor Earthy(x, False) \)
+- Instantiated Clause 2: \( Numpus(Stella, False) \lor Earthy(Stella, False) \)
+
+**Identify Complementary Terms After Instantiation:**
+- \( Earthy(Stella, True) \) in Clause 1 is complementary to \( Earthy(Stella, False) \) in the instantiated Clause 2 (same predicate, same argument, opposite boolean value).
+
+### **Step 2: Resolve the Clauses**
+
+- **Resolution Process:**
+  - **Rule Used:** **OR Operator (∨) - Complementary/Contradictory Terms Found** because the complementary terms in both clause 1 and instantiated clause 2 are connected by "OR" with other terms.
+    \[
+    (A \lor B), \, (\neg A \lor C) \quad \Rightarrow \quad (B \lor C)
+    \]
+  - **Substitute the terms:**
+    \[
+    (Earthy(Stella, True)), \, (Numpus(Stella, False) \lor Earthy(Stella, False)) \quad \Rightarrow \quad Numpus(Stella, False)
+    \]
+  - **Resulting Clause:** \( Numpus(Stella, False) \)
+
+### **Step 3: Sufficiency Check**
+
+- **Check for Contradiction:**
+  - The resulting clause \( Numpus(Stella, False) \) does not result in a contradiction. Further reasoning is required to determine the final conclusion, so the sufficiency label should be False.
+
+**New Clause:** { \( Numpus(Stella, False) \)}
+
+**Sufficiency Label:** [False]
+---
+Example:
+Clause 1: Vumpus(Wren, True)
+Clause 2: Vumpus(Wren, False)
+
+Step 1: Check for Complementary/Contradictory Terms
+
+**Given Clauses:**
+- **Clause 1:** \( Vumpus(Wren, True) \)
+- **Clause 2:** \( Vumpus(Wren, False) \)
+
+**Identify Complementary/Contradictory Terms:**
+- \( Vumpus(Wren, True) \) in Clause 1 is directly contradictory to \( Vumpus(Wren, False) \) in Clause 2 (same predicate and argument, but opposite boolean value).
+
+### **Step 2: Resolve the Clauses**
+
+- **Resolution Process:**
+  - **Rule Used:** **Contradiction Found** since both terms are contradictory and no other terms are present.
+    - \( Vumpus(Wren, True) \) contradicts \( Vumpus(Wren, False) \), leading to a direct contradiction.
+
+  - **Resulting Clause:** Contradiction.
+
+### **Step 3: Sufficiency Check**
+
+- **Check for Contradiction:**
+  - The resolution leads to a contradiction, so sufficiency is achieved.
+
+**New Clause:** {Contradiction}
+
+**Sufficiency Label:** [True]
+---
+Example:
+Clause 1: Small(Alex, False)
+Clause 2: \\(\\forall x \\left(Vumpus(x, False) \\lor Numpus(x, True)\\right)\\)
+
+Step 1: Check for Complementary/Contradictory Terms
+
+Given Clauses:
+- **Clause 1:** \( Small(Alex, False) \)
+- **Clause 2:** \( \forall x \left(Vumpus(x, False) \lor Numpus(x, True)\right) \)
+
+**Identify Potential Complementary Terms:**
+- There is no predicate match between \( Small(Alex, False) \) in Clause 1 and any terms in Clause 2. Clause 2 involves predicates \( Vumpus \) and \( Numpus \), while Clause 1 involves \( Small \). Therefore, no complementary or contradictory terms are found.
+
+### **Step 2: Resolve the Clauses**
+
+- **Resolution Process:**
+  - **No Complementary or Contradictory Terms Found:** No terms in Clause 1 contradict or complement any terms in Clause 2 due to different predicates. This results in no changes through resolution since there's no basis for combining or modifying the clauses.
+
+### **Step 3: Sufficiency Check**
+
+- **Check for Contradiction:**
+  - Since no terms are complementary or contradictory and no resolution could be applied, there is no contradiction. Further reasoning is required to evaluate the truth value of the clauses, so the sufficiency label should be False.
+
+**Sufficiency Label:** [False]
+---
+Please conclude the information in the below format:
+New Clause: {placeholder_for_new_clause}
+Sufficiency Label: [placeholder_for_sufficiency_label]
+—--
+
+**Below is the task you need to perform:**
+
+Clause 1:
+[[SOS]]
+
+Clause 2:
+[[SELECTED-CLAUSE]]

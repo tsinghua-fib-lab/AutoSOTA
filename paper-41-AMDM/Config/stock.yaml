@@ -1,0 +1,66 @@
+model:
+  target: Models.autoregressive_diffusion.armd.ARMD
+  params:
+    seq_length: 96
+    feature_size: 5
+    timesteps: 96
+    sampling_timesteps: 1
+    loss_type: 'l2'
+    beta_schedule: 'cosine'
+    w_grad: True
+
+solver:
+  base_lr: 1.0e-3
+  max_epochs: 2000
+  results_folder: ./Checkpoints_etth
+  gradient_accumulate_every: 2
+  save_cycle: 1800  # max_epochs // 10
+  ema:
+    decay: 0.995
+    update_interval: 10
+  
+  scheduler:
+    target: engine.lr_sch.ReduceLROnPlateauWithWarmup
+    params:
+      factor: 0.5
+      patience: 4000
+      min_lr: 1.0e-5
+      threshold: 1.0e-1
+      threshold_mode: rel
+      warmup_lr: 8.0e-4
+      warmup: 500 
+      verbose: False
+
+dataloader:
+  train_dataset:
+    target: Utils.Data_utils.real_datasets.CustomDataset
+    params:
+      name: etth
+      proportion: 0.8  # Set to rate < 1 if training conditional generation
+      data_root: ./Data/datasets/stock_data.csv
+      window: 192  # seq_length
+      save2npy: True
+      neg_one_to_one: True
+      seed: 2024
+      period: train
+
+  test_dataset:
+    target: Utils.Data_utils.real_datasets.CustomDataset
+    params:
+      name: etth
+      proportion: 0.2  # rate
+      data_root: ./Data/datasets/stock_data.csv
+      window: 192  # seq_length
+      save2npy: True
+      neg_one_to_one: True
+      seed: 2024
+      period: test
+      style: separate
+      distribution: geometric
+    coefficient: 1.0e-2
+    step_size: 5.0e-2
+    sampling_steps: 200
+
+  batch_size: 128
+  sample_size: 256
+  shuffle: True

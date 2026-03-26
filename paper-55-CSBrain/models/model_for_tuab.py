@@ -1,0 +1,92 @@
+import torch
+import torch.nn as nn
+
+from .CSBrain import *
+
+
+class Model(nn.Module):
+    def __init__(self, param):
+        super(Model, self).__init__()
+
+        # Brain region encoding: Frontal (0) | Parietal (1) | Temporal (2) | Occipital (3) | Central (4)
+        TUAB_brain_regions = [
+            0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 4, 1, 0, 0, 4, 1
+        ]
+
+        # Signal electrodes (reference removed)
+        TUAB_signal_electrodes = [
+            "FP1", "F7", "T3", "T5",
+            "FP2", "F8", "T4", "T6",
+            "FP1", "F3", "C3", "P3",
+            "FP2", "F4", "C4", "P4"
+        ]
+
+        # Topological sorting within brain regions
+        TUAB_topology = {
+            0: ["FP1", "F3", "F7", "FZ", "F4", "F8", "FP2"],  # Frontal
+            4: ["C3", "CZ", "C4"],  # Central
+            1: ["P3", "PZ", "P4"],  # Parietal
+            2: ["T3", "T5", "T6", "T4"],  # Temporal
+            3: ["O1", "O2"],  # Occipital
+        }
+
+        # Group signal electrodes by brain region
+        TUAB_region_groups = {}
+        for i, region in enumerate(TUAB_brain_regions):
+            if region not in TUAB_region_groups:
+                TUAB_region_groups[region] = []
+            TUAB_region_groups[region].append((i, TUAB_signal_electrodes[i]))
+
+        # Sort by topological relationship
+        TUAB_sorted_indices = []
+        for region in sorted(TUAB_region_groups.keys()):
+            region_electrodes = TUAB_region_groups[region]
+            sorted_electrodes = sorted(region_electrodes, key=lambda x: TUAB_topology[region].index(x[1]))
+            TUAB_sorted_indices.extend([e[0] for e in sorted_electrodes])
+
+        print("Sorted Indices:", TUAB_sorted_indices)
+
+        if param.model == 'CSBrain':
+            self.backbone = CSBrain(
+                in_dim=200, out_dim=200, d_model=200,
+                dim_feedforward=800, seq_len=30,
+                n_layer=12, nhead=8,
+                brain_regions=TUAB_brain_regions,
+                sorted_indices=TUAB_sorted_indices
+            )
+        else:
+            return 0
+
+        if param.use_pretrained_weights:
+            map_location = torch.device(f'cuda:{param.cuda}')
+            state_dict = torch.load(param.foundation_dir, map_location=map_location)
+            # Remove "module." prefix
+            new_state_dict = {key.replace("module.", ""): value for key, value in state_dict.items()}
+            
+            model_state_dict = self.backbone.state_dict()
+
+            # Filter matching weights by shape
+            matching_dict = {k: v for k, v in new_state_dict.items() if k in model_state_dict and v.size() == model_state_dict[k].size()}
+
+            model_state_dict.update(matching_dict)
+            self.backbone.load_state_dict(model_state_dict)
+
+        self.backbone.proj_out = nn.Sequential()
+
+        self.classifier = nn.Sequential(
+            nn.Linear(16 * 10 * 200, 10 * 200),
+            nn.ELU(),
+            nn.Dropout(param.dropout),
+            nn.Linear(10 * 200, 200),
+            nn.ELU(),
+            nn.Dropout(param.dropout),
+            nn.Linear(200, 1)
+        )
+
+    def forward(self, x):
+        bz, ch_num, seq_len, patch_size = x.shape
+        feats = self.backbone(x)
+        feats = feats.contiguous().view(bz, ch_num * seq_len * patch_size)
+        out = self.classifier(feats)
+        out = out.contiguous().view(bz)
+        return out

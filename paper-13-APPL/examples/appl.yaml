@@ -1,0 +1,56 @@
+settings:
+  logging:
+    # log_file:
+    #   enabled: true
+    display:
+      configs: false
+      # llm_call_args: false # true
+      # llm_response: false # true
+      # llm_cache: false # true
+      # llm_cost: false # true
+  tracing:
+    enabled: true
+
+# default_servers:
+#   default: azure-gpt35 # override the default server according to your needs
+
+# example for setting up servers
+servers:
+  azure-gpt35: # the name of the server
+    model: azure/gpt35t # the model name
+    # temperature: 1.0 # set the default temperature for the calls to this server
+  gpt4-preview:
+    model: gpt-4-0125-preview
+  claude-35-sonnet:
+    model: claude-3-5-sonnet-20240620
+  claude-3-opus:
+    model: claude-3-opus-20240229
+  moonshot-8k:
+    model: moonshot-v1-8k
+    provider: custom # https://docs.litellm.ai/docs/providers/custom
+    api_key: os.environ/MOONSHOT_API_KEY # setup your API key in the environment variable
+    base_url: "https://api.moonshot.cn/v1"
+    # add cost, see also https://docs.litellm.ai/docs/proxy/custom_pricing
+    input_cost_per_token: 1.2e-5
+    output_cost_per_token: 1.2e-5
+    cost_currency: "CNY"
+  # litellm has supported deepseek now, you can simply set up the deepseek server like this:
+  # deepseek-chat:
+  #   model: deepseek/deepseek-chat
+  # deepseek-coder:
+  #   model: deepseek/deepseek-coder
+  # Below use deepseek apis to illustrate how to set up a group of apis that not (yet) supported by litellm
+  deepseek-chat:
+    model: deepseek-chat
+    provider: custom
+    api_key: os.environ/DEEPSEEK_API_KEY
+    base_url: "https://api.deepseek.com/v1"
+    input_cost_per_token: 1.0e-6
+    output_cost_per_token: 2.0e-6
+    cost_currency: "CNY"
+  deepseek-coder:
+    template: deepseek-chat
+    model: deepseek-coder
+  srt-llama2: # llama2 served using SRT
+    model: custom/default # the default is just a irrelevant name, could be changed to your preference
+    base_url: "http://127.0.0.1:30000/v1" # the example address of the SRT server

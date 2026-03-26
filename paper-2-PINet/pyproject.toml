@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pinet-hcnn"
+version = "0.1.0"
+description = "A differentiable orthogonal projection layer for training hard-constrained neural networks."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Panagiotis Grontas", email = "pgrontas@control.ee.ethz.ch" },
+    { name = "Antonio Terpin", email = "aterpin@ethz.ch" },
+]
+urls = { Homepage = "https://github.com/antonioterpin/pinet" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache-2.0 License",
+  "Operating System :: OS Independent",
+]
+
+# Core dependencies
+dependencies = [
+    "jax>=0.6.2",
+    "tqdm>=4.67.1",
+    "h5py>=3.13.0",
+    "ruamel.yaml>=0.18.10",
+    "imageio>=2.37.0",
+    "matplotlib>=3.10.1",
+    "optax>=0.2.4",
+    "flax>=0.10.2",
+    "cvxpy>=1.6.6",
+    "torch>=2.6.0",
+    "cvxpylayers>=0.1.9",
+    "jaxopt>=0.8.5",
+    "wandb>=0.20.1",
+]
+
+# Optional dependencies
+[project.optional-dependencies]
+dev = [
+    "snowballstemmer==2.2.0",
+    "pre_commit==4.0.1",
+    "pytest-cov",
+    "tomli"
+]
+cuda12 = [
+    "jax[cuda12_pip]>=0.6.2",
+]
+
+# Build system configuration
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pinet*"]

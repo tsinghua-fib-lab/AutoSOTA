@@ -1,0 +1,117 @@
+# @package _global_
+dataset: yahoo
+seed: 42
+task: anomaly_detection
+loss:
+  task: ${task}
+  temp: 0.5
+  method: sscl
+  loss_fn: darem_sscl
+  lambda_cl: 0.7959594118700971
+  pred_type: binary
+  batch_size: 16
+  task_loss_fn: null
+  lambda_fuse_cl: 0.5
+model: 
+  text_model:
+    aligner:
+      activation: null
+      kernel_size: null
+  output_head:
+    task: ${task}
+    d_out: 1
+    reduced: True
+    d_hidden: null
+    norm_dim: 512
+    activation: relu
+    batch_size: 16
+    cls_method: elementwise
+  sequence_model:
+    bias: True
+    name: starformer
+    n_head: 2
+    d_model: 16
+    dropout: 0.3
+    masking: "darem"
+    embedding: 
+      d_features: 1
+      max_seq_len: 512
+    precision: 32
+    activation: silu
+    mask_check: True
+    batch_first: False
+    layer_norm_eps: 0.00001
+    mask_threshold: 0.05
+    reconstruction: False
+    dim_feedforward: 16
+    mask_region_bound: 0.05
+    num_encoder_layers: 2
+    enable_nested_tensor: True
+    ratio_highest_attention: 0.2
+    aggregate_attn_per_batch: False
+logger:
+  name: wandb # tensorboard (to use tensorboard change name)
+  sweep: False #sweep: false
+  entity: null # add your wandb entity here
+  project: starformer-reruns #project: S{datatset}
+  exp_name: null #exp_name: null
+  sweep_id: null #sweep_id: null
+  run_1_config_path: null #run_1_config_path: null
+system:
+  devices: 1
+  accelerator: gpu
+  num_workers: 0
+training:
+  epochs: 500
+  devices: null
+  fast_dev: False
+  precision: 32
+  batch_size: 16
+  learning_rate: 0.003
+  val_batch_size: 16
+  test_batch_size: 16
+  log_every_n_steps: 10
+  multi_gpu_training: False
+callbacks: 
+  early_stop: 
+    mode: min
+    monitor: val/loss_task
+    verbose: True
+    patience: 30
+  model_ckpt: 
+    mode: max
+    monitor: val/f1
+    verbose: False
+    save_last: True
+  lr_scheduler: 
+    mode: min
+    name: ReduceLROnPlateau
+    apply: True
+    factor: 0.8
+    min_lr: 0.000001
+    monitor: val/loss_task
+    patience: 3
+optimizer: 
+  eps: 1e-8
+  name: adam
+  beta1: 0.9
+  beta2: 0.999
+  weight_decay: 0 
+datamodule:
+  seed: ${seed}
+  stride: 256
+  dataset: ${dataset}
+  num_val: null
+  num_test: null
+  num_train: null
+  batch_size: ${training.batch_size}
+  aws_profile: null
+  num_workers: 0
+  use_threads: null
+  window_size: 512
+  pad_sequence: True
+  s3_bucket_path: null
+  val_batch_size: ${training.val_batch_size}
+  test_batch_size: ${training.test_batch_size}
+  training_method: centralized
+  dataset_instance: 2025-05-12_12:34:58

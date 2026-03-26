@@ -1,0 +1,14 @@
+Found 1 datasets on the following paths: ['data/cvrp/test/50.npz']
+Loading checkpoint from  pretrained_moses_model/rf/50/multilora_denseroute_softplus.ckpt
+Traceback (most recent call last):
+  File "/repo/test.py", line 354, in <module>
+    policy = load_model_weights(policy, opts.checkpoint, device, strict=False)
+  File "/repo/test.py", line 129, in load_model_weights
+    _policy_weights = torch.load(path, map_location=torch.device("cpu"), weights_only=False)['state_dict']
+  File "/opt/conda/lib/python3.10/site-packages/torch/serialization.py", line 1014, in load
+    return _load(opened_zipfile,
+  File "/opt/conda/lib/python3.10/site-packages/torch/serialization.py", line 1422, in _load
+    result = unpickler.load()
+  File "/opt/conda/lib/python3.10/site-packages/torch/serialization.py", line 1415, in find_class
+    return super().find_class(mod_name, name)
+AttributeError: Can't get attribute 'CompositeSpec' on <module 'torchrl.data.tensor_specs' from '/opt/conda/lib/python3.10/site-packages/torchrl/data/tensor_specs.py'>

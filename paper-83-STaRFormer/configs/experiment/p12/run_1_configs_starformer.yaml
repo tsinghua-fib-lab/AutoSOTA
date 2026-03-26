@@ -1,0 +1,33 @@
+model:
+  sequence_model:
+    activation: selu # 'gelu' 'silu'
+    d_model: 32 #8
+    dim_feedforward: 16 #32
+    dropout: 0.4634167166036801
+    n_head: 4
+    num_encoder_layers: 5 #2 4
+    mask_threshold: 0.15
+    mask_region_bound: 0.3
+    ratio_highest_attention: 0.1
+  output_head:
+    reduced: False
+    activation: tanh
+  text_model:
+    name: roberta
+    hidden_size: 768
+    aligner:
+      kernel_size: 3
+      activation: gelu
+
+datamodule:
+  upsample_percentage: 0.75
+optimizer:
+  beta1: 0.9115843348695024
+  beta2: 0.95569532407211
+  weight_decay: 0.0003588503598401771
+training:
+  learning_rate: 0.0068356597063829894
+  batch_size: 256
+
+loss:
+  lambda_cl: 0.3289329136737672

@@ -1,0 +1,10 @@
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedAvg 2>&1 | tee -a  result/79.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedCM 2>&1 | tee -a  result/80.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method SCAFFOLD 2>&1 | tee -a  result/81.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedSAM 2>&1 | tee -a  result/82.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method MoFedSAM 2>&1 | tee -a  result/83.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedGamma 2>&1 | tee -a  result/84.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedSMOO 2>&1 | tee -a  result/85.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedLESAM_S 2>&1 | tee -a  result/86.txt
+CUDA_VISIBLE_DEVICES=3 nohup python train.py --non-iid --seed 0 --method FedWMSAM 2>&1 | tee -a  result/87.txt
+CUDA_VISIBLE_DEVICES=4 nohup python train.py --non-iid --seed 10 --method FedAvg 2>&1 | tee -a  result/88.txt

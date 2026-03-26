@@ -1,0 +1,107 @@
+# @package _global_
+seed: 42
+dataset: beijingpm25quality
+task: regression
+run: null
+callbacks:
+  early_stop:
+    monitor: val/loss_task
+    mode: min
+    patience: 100
+    verbose: true
+  model_ckpt: null
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.5
+    patience: 50
+    min_lr: 1.0e-06
+    monitor: val/loss_task
+  ema:
+    apply: true
+    decay: 0.5
+datamodule: null
+loss:
+  loss_fn: darem_sscl
+  method: sscl
+  lambda_cl: 0.45584168925827456
+  lambda_fuse_cl: 0.5
+  temp: 0.5
+  batch_size: 16
+  pred_type: binary
+  task: regression
+  task_loss_fn: mean_squarred_error
+optimizer:
+  name: adam
+  beta1: 0.8233109343782902
+  beta2: 0.905446073174142
+  eps: 1.0e-08
+    weight_decay: 0.00014643333106435436
+model:
+  sequence_model:
+    name: starformer
+    embedding:
+      d_features: 9
+      max_seq_len: 24
+    d_model: 64
+    n_head: 8
+    num_encoder_layers: 2
+    dim_feedforward: 128
+    dropout: 0.05220258280384964
+    activation: selu
+    layer_norm_eps: 1.0e-05
+    batch_first: false
+    bias: true
+    enable_nested_tensor: true
+    mask_check: true
+    masking: darem
+    mask_threshold: 0.25
+    mask_region_bound: 0.25
+    ratio_highest_attention: 0.3
+    aggregate_attn_per_batch: false
+    precision: 32
+    reconstruction: false
+    task: regression
+    batch_size: 16
+    cls_method: pooling
+  text_model:
+    aligner:
+      kernel_size: null
+      activation: null
+  output_head:
+    task: regression
+    batch_size: 16
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: true
+    cls_method: pooling
+system:
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training:
+  epochs: 1000
+  batch_size: 512
+  val_batch_size: 16
+  test_batch_size: 16
+  learning_rate: 0.009068944113936378
+  fast_dev: false
+  precision: 32
+  device: null
+  multi_gpu_training: false
+  log_every_n_steps: 10
+logger:
+  name: wandb # tensorboard (to use tensorboard change name)
+  sweep: false 
+  entity: null # add your wandb entity here
+  exp_name: null
+  project: starformer-reruns
+  run_1_config_path: null #configs/experiment/tsr/bpm25/run_1_configs_starformer.yaml
+  sweep_id: null
+norm: standard
+pytorch: true
+sweep_id: null 
+synthetic_labels:
+    n_clusters: 4

@@ -1,0 +1,128 @@
+baseline_metrics:
+  test_acc: 0.9738
+  test_f1: 0.9755
+  test_precision: 0.98
+  test_recall: 0.9716
+container_name: paper_opt_paper-3938
+docker_image: autosota/paper-3938:reproduced
+docker_run_extra_args: ''
+eval_command: CUDA_VISIBLE_DEVICES=0 python scripts/training/train.py +experiment=benchmark/classification/pam.yaml
+  logger.name=tensorboard
+eval_command_file: train.py
+eval_output_format: 'The script prints a Lightning-style table at the end, like:
+
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+
+  ┃        Test metric        ┃       DataLoader 0        ┃
+
+  ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+
+  │         test/acc          │    0.9738482236862183     │
+
+  │          test/f1          │    0.9755123853683472     │
+
+  │       test/loss_ce        │    0.14982345700263977    │
+
+  │      test/precision       │    0.9800432324409485     │
+
+  │        test/recall        │    0.9716342091560364     │
+
+  └───────────────────────────┴───────────────────────────┘
+
+  Metric keys in output use slash notation (test/acc, test/f1, etc.).
+
+  Map to snake_case: test/acc -> test_acc, test/f1 -> test_f1, etc.
+
+  '
+eval_timeout_minutes: 60
+gpu_devices: 2,3
+known_levers: '# Loss / contrastive learning
+
+  - loss.lambda_cl: float (currently 0.6001) — weight on contrastive loss term
+
+  - loss.temp: float (currently 0.5) — temperature for contrastive loss
+
+  - loss.lambda_fuse_cl: float (currently 0.5) — fused contrastive loss weight
+
+
+  # Transformer model hyperparameters
+
+  - model.sequence_model.n_head: int (currently 8) — number of attention heads
+
+  - model.sequence_model.d_model: int (currently 32) — model hidden dimension
+
+  - model.sequence_model.dropout: float (currently 0.1017) — dropout rate
+
+  - model.sequence_model.dim_feedforward: int (currently 128) — FFN hidden dim
+
+  - model.sequence_model.num_encoder_layers: int (currently 3) — transformer depth
+
+
+  # Dynamic attention-based regional masking (DAREM)
+
+  - model.sequence_model.mask_threshold: float (currently 0.2078) — attention threshold
+  for masking
+
+  - model.sequence_model.mask_region_bound: float (currently 0.1) — boundary for masked
+  regions
+
+  - model.sequence_model.ratio_highest_attention: float (currently 0.3) — fraction
+  of tokens to keep
+
+
+  # Training hyperparameters
+
+  - training.learning_rate: float (currently 0.00760) — initial learning rate
+
+  - training.batch_size: int (currently 256) — training batch size
+
+  - training.epochs: int (currently 300) — max epochs (early stop at patience=30)
+
+
+  # Output head
+
+  - model.output_head.activation: str (currently "selu") — activation in classifier
+  head
+
+
+  # Optimizer
+
+  - optimizer.beta1: float (currently 0.857) — Adam beta1
+
+  - optimizer.beta2: float (currently 0.939) — Adam beta2
+
+  - optimizer.weight_decay: float (currently 0.000410) — L2 regularization
+
+
+  # LR scheduler
+
+  - callbacks.lr_scheduler.factor: float (currently 0.8) — LR reduction factor
+
+  - callbacks.lr_scheduler.patience: int (currently 8) — epochs before LR reduction
+
+  - callbacks.early_stop.patience: int (currently 30) — early stopping patience
+
+  '
+max_debug_attempts: 3
+max_debug_minutes: 15
+max_iterations: 24
+metric_direction: higher
+openrouter_api_key: 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
+paper_repo_url: https://github.com/star-former/starformer
+paper_title: 'STaRFormer: Semi-Supervised Task-Informed Representation Learning via
+  Dynamic Attention-Based Regional Masking for Sequential Data'
+primary_metric: test_f1
+repo_path: /repo
+research_model: openai/o4-mini-deep-research
+research_timeout_minutes: 20
+setup_notes: "- Dataset: PAM (Physical Activity Monitoring), 8-class time-series classification\n\
+  - Data is pre-downloaded and pre-processed in /repo/data/pam/\n- Model checkpoints\
+  \ stored in /repo/model_ckpts/pam/centralized/harbor/<timestamp>/\n- TensorBoard\
+  \ logs stored in /repo/runs/tensorboard/pam/centralized/harbor/<timestamp>/\n- Use\
+  \ logger.name=tensorboard to avoid requiring wandb API key\n- The training script\
+  \ uses hydra config; hyperparameters can be overridden on the CLI\n  e.g.: python\
+  \ scripts/training/train.py +experiment=benchmark/classification/pam.yaml logger.name=tensorboard\
+  \ loss.lambda_cl=0.7\n- Early stopping is set to patience=30 on val/loss; typical\
+  \ convergence ~50-70 epochs\n- GPU required (A100 or similar); single-GPU training\
+  \ only (multi_gpu_training=False)\n- seed=42 is used for reproducibility\n"
+target_improvement_pct: 2.0

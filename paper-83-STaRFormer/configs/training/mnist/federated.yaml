@@ -1,0 +1,14 @@
+global_epochs: 10
+batch_size: 10
+val_batch_size: ${training.batch_size}
+test_batch_size: ${training.batch_size}
+learning_rate: 0.1 #0.01
+num_clients: ${datamodule.num_clients}
+cohort_size: 0 # s
+local_epochs: 1
+optimizer:
+  name: sgd
+  momentum: 0.5
+  weight_decay: 1e-04
+fast_dev: False
+test_every_n: 500

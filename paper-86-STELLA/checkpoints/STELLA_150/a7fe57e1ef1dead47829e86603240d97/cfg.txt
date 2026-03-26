@@ -1,0 +1,72 @@
+DESCRIPTION: STELLA model configuration
+RUNNER: <class 'basicts.runners.runner_zoo.simple_tsf_runner.SimpleTimeSeriesForecastingRunner'>
+DATASET_CLS: <class 'basicts.data.dataset.TimeSeriesForecastingDataset'>
+DATASET_NAME: global_wind
+DATASET_TYPE: Weather
+DATASET_INPUT_LEN: 48
+DATASET_OUTPUT_LEN: 24
+GPU_NUM: 1
+ENV:
+  SEED: 2010
+  CUDNN:
+    ENABLED: True
+MODEL:
+  NAME: STELLA
+  ARCH: <class 'stella.stella_arch.STELLA'>
+  PARAM:
+    num_nodes: 3850
+    num_features: 1
+    input_len: 48
+    d_model: 32
+    output_len: 24
+    num_layer: 2
+    if_rel: True
+    res_conn: True
+    root_path: ./datasets/global_wind
+    dropout: 0.2
+  FORWARD_FEATURES: [0, 1, 2, 3]
+  TARGET_FEATURES: [0]
+TRAIN:
+  LOSS: masked_mae
+  OPTIM:
+    TYPE: Adam
+    PARAM:
+      lr: 0.001
+      weight_decay: 0.0005
+  LR_SCHEDULER:
+    TYPE: MultiStepLR
+    PARAM:
+      milestones: [75]
+      gamma: 0.5
+  CLIP_GRAD_PARAM:
+    max_norm: 5.0
+  NUM_EPOCHS: 150
+  CKPT_SAVE_DIR: checkpoints/STELLA_150
+  DATA:
+    DIR: datasets/global_wind
+    BATCH_SIZE: 32
+    PREFETCH: False
+    SHUFFLE: True
+    NUM_WORKERS: 2
+    PIN_MEMORY: False
+VAL:
+  INTERVAL: 1
+  DATA:
+    DIR: datasets/global_wind
+    BATCH_SIZE: 32
+    PREFETCH: False
+    SHUFFLE: False
+    NUM_WORKERS: 2
+    PIN_MEMORY: False
+TEST:
+  INTERVAL: 10
+  DATA:
+    DIR: datasets/global_wind
+    BATCH_SIZE: 32
+    PREFETCH: False
+    SHUFFLE: False
+    NUM_WORKERS: 2
+    PIN_MEMORY: False
+EVAL:
+  HORIZONS: [24]
+MD5: a7fe57e1ef1dead47829e86603240d97

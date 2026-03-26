@@ -1,0 +1,1 @@
+python train_teacher.py --config ./config/teacher/stgcn/pems04/teacher_stgcn.yaml  

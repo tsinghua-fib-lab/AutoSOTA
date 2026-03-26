@@ -1,0 +1,35 @@
+# @package _global_
+dataset: spokenarabicdigits
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: ucr_uea
+  - override /callbacks/model_ckpt: ucr_uea
+  - override /datamodule: ucr_uea/spokenarabicdigits/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: drm_transformer
+  - override /optimizer: adam
+  - override /training: ucr_uea/centralized
+  
+
+training:
+  epochs: 300 #50
+model:
+  embedding:
+    d_features: 13
+    max_seq_len: 66
+  output_head:
+    batch_size: ${training.batch_size} 
+    d_out: 10
+logger:
+  project: spokenarabicdigits_sweeps
+  sweep: true
+datamodule:
+  s3_bucket_path: null
+callbacks:
+  lr_scheduler:
+    patience: 8
+  
+  
+  

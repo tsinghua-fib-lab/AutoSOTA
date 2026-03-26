@@ -1,0 +1,94 @@
+# @package _global_
+
+# needs update
+dataset: ppgdalia
+task: regression
+norm: standard  # none, standard, minmax
+pytorch: True
+
+defaults:
+  - /callbacks/ema: default
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  #- override /callbacks/model_ckpt: tsr
+  - override /datamodule: tsr/ae/centralized
+  - override /loss: darem_sscl
+  #- override /loss: mean_squarred_error # for transformer
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    patience: 100
+  model_ckpt: 
+  lr_scheduler: 
+    monitor: val/loss_task
+    apply: True
+    mode: min
+    factor: 0.5
+    patience: 10
+    min_lr: 1e-06
+
+datamodule:
+
+logger:
+  project: beijingpm10quality
+  entity: null
+
+loss:
+  lambda_cl: 3.
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: mean_squarred_error
+
+model:
+  sequence_model:
+    embedding:
+      d_features: 9
+      max_seq_len: 24 # 144 +1
+    d_model: 16
+    dropout: 0.3
+    n_head: 2
+    num_encoder_layers: 2
+    dim_feedforward: 16
+    masking: darem # null, random, darem
+    mask_threshold: 0.2 # 0.1
+    mask_region_bound: 0.1 # 0.1
+    ratio_highest_attention: 0.5 # 0.5
+    activation: relu
+    task: ${task}
+    batch_size: ${training.batch_size} 
+    cls_method: pooling
+  text_model:
+<<<<<<< HEAD
+=======
+  #  name: roberta
+  #  hidden_size: 768
+  #  aligner:
+  #    kernel_size: 3
+  #    activation: relu
+>>>>>>> develop/after_refactor
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+<<<<<<< HEAD
+    reduced: True 
+=======
+    reduced: False 
+>>>>>>> develop/after_refactor
+    cls_method: pooling #regr_token
+
+training:
+  epochs: 1000
+<<<<<<< HEAD
+  learning_rate: 0.001
+  batch_size: 16
+=======
+  learning_rate: 0.003
+  batch_size: 512
+>>>>>>> develop/after_refactor

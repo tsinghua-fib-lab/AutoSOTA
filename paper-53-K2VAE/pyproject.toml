@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=66"]
+
+[project]
+name = "k2vae"
+version = "0.1.0"
+description = "k2vae"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy",
+    "pandas==2.0.3",
+    "einops",
+    "matplotlib",
+    "tqdm",
+    "lightning @ https://github.com/Lightning-AI/lightning/archive/refs/heads/master.zip",
+    "gluonts~=0.15.1",
+    "typeshed-client==2.3.0",
+    "docstring-parser==0.15",
+    "orjson==3.9.0",
+    "einops>=0.6.1",
+    "pydantic==1.10.8",
+    "linear-attention-transformer==0.19.1",
+    "ray==2.8.1",
+    "tensorboardx==2.6.2",
+    "pyarrow==11.0.0",
+    "protobuf>=3.19",
+    "jsonargparse[signatures]==4.27.7",
+    "opt_einsum",
+    "psutil",
+    "reformer-pytorch",
+    "gdown",
+    "kagglehub",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+tsfm = [
+    "timm",
+    "accelerate",
+    "tokenizers",
+    "datasets",
+    "transformers",
+    "chronos @ git+https://github.com/amazon-science/chronos-forecasting.git", # for chronos
+    "jaxtyping",
+    "hydra-core==1.3",
+    "orjson",
+    "tensorboard",
+    "multiprocess",
+    "huggingface_hub>=0.23.0",
+    "safetensors",
+    "jax[cpu]",
+    "paxml>=1.4.0", # for timesfm
+    "praxis>=1.4.0",
+    "einshape>=1.0.0",
+    "numpy>=1.26.4",
+    "pandas==2.0.3",
+    "utilsforecast",
+    "pykeops",
+]
+
+[tool.setuptools]
+py-modules = []

@@ -1,0 +1,31 @@
+# Data Arguments
+dataset: GaussianMixtureUniform
+num_train_clients: 100
+samples_per_client: 1000
+samples_per_mixture_server: 100
+num_uniform_server: 100
+
+# Privacy Arguments
+datapoint_privacy: True
+
+outer_product_epsilon: 1
+weighting_epsilon: 1
+center_init_gaussian_epsilon: 1
+center_init_epsilon_split: 0.8
+fedlloyds_epsilon: 1
+fedlloyds_epsilon_split: 0.8
+
+outer_product_clipping_bound: 11
+weighting_clipping_bound: 1
+center_init_clipping_bound: 8
+center_init_laplace_clipping_bound: 0.5
+fedlloyds_clipping_bound: 1
+fedlloyds_laplace_clipping_bound: 0.01
+
+
+# Algorithm Arguments
+initialization_algorithm: FederatedClusterInitExact
+clustering_algorithm: FederatedLloyds
+minimum_server_point_weight: 1
+fedlloyds_num_iterations: 1
+variance: 0.49

@@ -1,0 +1,44 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 800
+  log_every_n_steps: 2
+  check_val_every_n_epoch: 2
+  default_root_dir: ./results
+  accumulate_grad_batches: 8
+model:
+  forecaster:
+    class_path: probts.model.forecaster.prob_forecaster.TimeGrad
+    init_args:
+      loss_type: l2
+      diff_steps: 50
+      beta_end: 0.1
+      beta_schedule: linear
+      conditional_length: 100
+      enc_hidden_size: 64
+      enc_num_layers: 4
+      enc_dropout: 0.1
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: false
+      feat_idx_emb_dim: 1
+      use_scaling: true
+  num_samples: 100
+  learning_rate: 0.001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: tourism_monthly
+      context_length_factor: 3
+      split_val: true
+      scaler: identity # identity, standard, temporal
+  batch_size: 1
+  test_batch_size: 1
+  num_workers: 8

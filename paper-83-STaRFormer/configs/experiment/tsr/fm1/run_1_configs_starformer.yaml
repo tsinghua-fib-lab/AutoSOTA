@@ -1,0 +1,32 @@
+model:
+  sequence_model:
+    activation: relu 
+    d_model: 32 
+    dim_feedforward: 32
+    dropout: 0.3 
+    n_head: 2
+    num_encoder_layers: 2
+    mask_threshold: 0.1 # 0.2 (mask_p)
+    mask_region_bound: 0.1 # 0.1
+    ratio_highest_attention: 0.5 # 0.5
+  output_head:
+    reduced: True
+    activation: relu
+  text_model:
+    name: null
+    hidden_size: null
+    aligner:
+      kernel_size: null
+      activation: null
+optimizer:
+  beta1: 0.9
+  beta2: 0.999 
+training:
+  learning_rate: 0.001
+  batch_size: 16
+callbacks:
+  lr_scheduler:
+    patience: 50
+loss:
+  lambda_cl: 10
+  lambda_fuse_cl: 0.5

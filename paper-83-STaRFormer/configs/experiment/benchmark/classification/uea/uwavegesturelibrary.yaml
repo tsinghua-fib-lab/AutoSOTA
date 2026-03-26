@@ -1,0 +1,126 @@
+# @package _global_
+defaults:
+  - override /datamodule: ucr_uea/uwavegesturelibrary/centralized
+
+callbacks:
+  early_stop:
+    monitor: val/loss
+    mode: min
+    patience: 30
+    verbose: true
+  model_ckpt:
+    monitor: val/loss
+    verbose: false
+    save_last: true
+    mode: min
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.8
+    patience: 8
+    min_lr: 1.0e-06
+    monitor: val/loss
+datamodule:
+  dataset: uwavegesturelibrary
+  batch_size: 32
+  num_workers: 0
+  seed: 42
+  training_method: centralized
+  train_splits:
+    train: 0.9
+    val: 0.1
+  aws_profile: null
+  s3_bucket_path: null
+  use_threads: null
+  val_batch_size: 32
+  test_batch_size: 32
+  num_train: null
+  num_val: null
+  num_test: null
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  display_labels:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  dataset_instance: 2024-09-06_18:12:20
+dataset: uwavegesturelibrary
+logger:
+  name: tensorboard
+  exp_name: null
+  project: uwavegesturelibrary
+  entity: null
+  sweep: null
+  run_1_config_path: null
+  sweep_id: null
+loss:
+  loss_fn: contrastive_loss
+  temp: 0.5
+  lambda_contrastive: 0.8149785201763137
+  lamdba_sim: 0.5
+model:
+  name: starformer
+  activation: elu
+  activation_cls: gelu
+  activation_masking: selu
+  aggregate_attn_per_batch: false
+  batch_first: false
+  bias: true
+  d_model: 128
+  dim_feedforward: 128
+  dropout: 0.1858330282916339
+  embedding:
+    d_features: 3
+    max_seq_len: 316
+  enable_nested_tensor: true
+  layer_norm_eps: 1.0e-05
+  n_head: 8
+  num_encoder_layers: 4
+  masking: drm
+  mask_check: true
+  mask_threshold: 0.3017903691607993
+  mask_region_bound: 0.2
+  output_head:
+    autoregressive_classification: false    
+    batch_size: 32
+    d_out: 8
+    per_element_in_sequence_pred: false
+    reduced: false
+    reconstruction: false
+  ratio_highest_attention: 0.4
+  return_attn: false
+optimizer:
+  name: adam
+  beta1: 0.8375902129204927
+  beta2: 0.9253801636076742
+  eps: 1.0e-08
+  weight_decay: 7.848357944567947e-05  
+run: 2024-10-16_21:45:04
+seed: 42
+system: 
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training: 
+  epochs: 300
+  batch_size: 32
+  val_batch_size: 32
+  test_batch_size: 32
+  learning_rate: 0.0008844751255202044
+  fast_dev: false
+  precision: 32
+  devices: null
+  multi_gpu_training: false  

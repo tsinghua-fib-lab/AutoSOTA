@@ -1,0 +1,13 @@
+# @package _global_
+dataset: pam
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: pam
+  - override /callbacks/model_ckpt: pam
+  - override /datamodule: pam/centralized
+  - override /loss: bce
+  - override /model: drm_transformer
+  - override /optimizer: adam
+  - override /training: pam/centralized
+

@@ -1,0 +1,122 @@
+# @package _global_
+dataset: pam
+loss:
+  temp: 0.5
+  loss_fn: contrastive_loss
+  lamdba_sim: 0.5
+  lambda_contrastive: 0.6001187935889417
+seed: 42
+model:
+  bias: true
+  name: starformer
+  n_head: 8
+  d_model: 32
+  dropout: 0.10172151423229432
+  masking: drm # slightly inconsistent with paper (darem)
+  embedding:
+    d_features: 17
+    max_seq_len: 241
+  activation: relu
+  mask_check: true
+  batch_first: false
+  output_head:
+    per_element_in_sequence_pred: false
+    autoregressive_classification: false
+    d_out: 8
+    reduced: false
+    batch_size: 256
+    reconstruction: false
+  return_attn: false
+  activation_cls: selu
+  layer_norm_eps: 1.0e-05
+  mask_threshold: 0.2077646024366467
+  reconstruction: false
+  dim_feedforward: 128
+  mask_region_bound: 0.1
+  activation_masking: silu
+  num_encoder_layers: 3
+  enable_nested_tensor: true
+  ratio_highest_attention: 0.3
+  aggregate_attn_per_batch: false
+logger:
+  name: tensorboard
+  sweep: false
+  entity: null
+  project: pam
+  exp_name: null
+  sweep_id: null
+  run_1_config_path: null
+system:
+  devices: 1
+  accelerator: gpu
+  num_workers: 0
+training:
+  device: null
+  epochs: 300
+  fast_dev: false
+  precision: 32
+  batch_size: 256
+  learning_rate: 0.007604760368366249
+  val_batch_size: 256
+  test_batch_size: 256
+  log_every_n_steps: 10
+callbacks:
+  early_stop:
+    mode: min
+    monitor: val/loss
+    verbose: true
+    patience: 30
+  model_ckpt:
+    mode: max
+    monitor: val/acc
+    verbose: false
+    save_last: true
+  lr_scheduler:
+    mode: min
+    name: ReduceLROnPlateau
+    apply: true
+    factor: 0.8
+    min_lr: 1.0e-06
+    monitor: val/loss
+    patience: 8
+optimizer:
+  eps: 1.0e-08
+  name: adam
+  beta1: 0.857390717437505
+  beta2: 0.9394514187252576
+  weight_decay: 0.0004104689621916005
+datamodule:
+  num_val: null
+  instance: null
+  num_test: null
+  num_train: null
+  batch_size: 256
+  aws_profile: null
+  num_workers: 0
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  use_threads: null
+  pad_sequence: true
+  display_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  s3_bucket_path: null
+  val_batch_size: 256
+  test_batch_size: 256
+  training_method: centralized
+  dataset_instance: null
+  train_split_index: 0
+

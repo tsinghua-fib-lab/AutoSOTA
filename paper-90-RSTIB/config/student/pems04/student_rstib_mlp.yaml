@@ -1,0 +1,87 @@
+control: 
+  model: rstib_mlp
+  t_model: stgcn
+  testonly: false
+  device: cuda:1
+  mdir: ./results/model/
+  logdir: ./results/log/
+  date: 2025y03m30d
+
+data:
+  dataset: PEMS4
+  val_ratio: 0.2
+  test_ratio: 0.2
+  lag: 12
+  horizon: 12
+  batch_size: 32
+  geo_graph: ./data/county/geo_geaph_county_full.cpt
+  num_nodes: 307 
+  pre_adj: true
+  adj_filename: ./data/PEMS04/PEMS04.csv
+  id_filename: None
+  adj_th: 0.00001
+  sigma: 100
+  norm: max01
+
+training:
+  patience: 20
+  model_path: ./results/model/2023y03m14d/teacher_stgcn_end_dim_128.pkl
+  mae_thresh: 0.0
+  mape_thresh: 0.0
+  lr: 0.002
+  weight_decay: 0.0
+  lr_decay_ratio: 0.5
+  steps: [1, 20, 50, 75, 100, 150, 200]
+  criterion: Smooth
+  max_epoch: 300
+  grad_norm: false
+  t_s_mode: t
+  start_epoch: 150
+
+  
+MLP_stu:
+  input_dim: 3
+  embed_dim: 64
+  num_layer: 3
+  if_node: true
+  node_dim: 64
+  if_T_i_D: true
+  if_D_i_W: true
+  temp_dim_tid: 64
+  temp_dim_diw: 64
+  time_of_day_size: 288
+  day_of_week_size: 7
+
+distill: 
+  split_tra: false
+  lamb_anneal: false
+  lamb_init: 0
+  lamb: 0.3
+
+  # node feat
+  if_in_out: false
+  in_out_size: 307
+
+  load_t_out: false
+  tea_smooth: false
+  smooth_th: 0.4
+
+ib: 
+  ema: false
+  info_anneal: false
+  info_init: 0
+  info_beta: 0.0
+  
+
+dynamic: 
+  if_dne: true
+  mid_dim: 64
+  # relu (default), leakyrelu, softplus, sigmoid, softmax, none
+  dne_act: softmax
+  is_sample: false
+  
+stgcn: 
+  end_channels: 128
+  adj_type: normlap
+  in_dim: 1
+  out_dim: 12

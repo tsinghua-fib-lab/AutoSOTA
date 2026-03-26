@@ -1,0 +1,12 @@
+_target_: src.models.nets.cyclenet.Model
+_partial_: true
+name: cyclenet_${.model_type}
+dim: 128
+input_size: ${data.input_size}
+output_size: ${data.output_size}
+num_channels: ${data.num_channels}
+model_type: mlp
+cycle_len: ${data.cycle_len}
+with_revin: true
+if_snr: true
+loss_names: ['loss_tar']

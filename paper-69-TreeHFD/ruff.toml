@@ -1,0 +1,37 @@
+line-length = 80
+indent-width = 4
+
+include = [
+  "src/treehfd/*.py",
+  "tests/*.py",
+  "examples/*.py"
+]
+
+[lint]
+select = [
+  "ALL"
+]
+ignore = [
+  "N803",
+  "N806"
+]
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.per-file-ignores]
+"__init__.py" = [
+  "F401"
+]
+"tests/*.py" = [
+  "PLR2004",
+  "S101"
+]
+"examples/*.py" = [
+  "T201",
+  "INP001"
+]
+"ensemble.py" = [
+  "FBT001",
+  "FBT002"
+]

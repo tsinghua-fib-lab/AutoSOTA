@@ -1,0 +1,100 @@
+metadata: {}
+
+settings:
+  logging:
+    format: >- # The format of the log message, change HH:mm:ss.SSS to HH:mm:ss for the default loguru format
+      <green>{time:YYYY-MM-DD HH:mm:ss}</green> |
+      <level>{level: <8}</level> |
+      <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> |
+      <level>{message}</level>
+    log_level: "INFO" # The level of the log messages
+    max_length: 800 # The maximum length of the log message in bash
+    suffix_length: 200 # The length of the suffix (when truncated)
+    enable_stderr: true  # enable logging to stderr
+    enable_file: true  # enable logging to a file
+    log_file:
+      path_format: './logs/{basename}_{time:YYYY_MM_DD__HH_mm_ss}'
+      # The path to the log file, ext will be added automatically
+      log_level: null # default to use the same log level as stdout
+    display:
+      configs: false # Display the configurations
+      configs_update: false # Display the updates of the configurations
+      docstring_warning: true # Display the warning message when docstring are excluded
+      llm_raw_call_args: false # Display the raw args for the llm calls
+      llm_raw_response: false # Display the raw response of the llm calls
+      llm_raw_usage: false # Display the raw usage of the llm calls
+      llm_call_args: false # Display the args for the llm calls
+      llm_response: true # Display the response of the llm calls
+      llm_usage: false # Display the usage of the llm calls
+      llm_cache: false # Display the cache info
+      llm_cost: true # Display the cost of the calls
+      tool_calls: true # Display the tool calls
+      tool_results: true # Display the results of the tool calls
+      streaming_mode: "print" # The mode to display the streaming output, choices are "live", "print", "none"
+      rich:
+        lexer: "markdown" # The language of the rich output
+        theme: "monokai" # The theme of the rich output
+        line_numbers: false # Whether to display the line numbers
+        word_wrap: true # Whether to wrap the words
+        refresh_per_second: 4 # The refresh rate of the rich output
+
+  caching:
+    enabled: true # default to enable the caching
+    folder: "~/.appl/caches" # The folder to store the cache files
+    max_size: 100000  # Maximum number of entries in cache
+    time_to_live: 43200 # Time-to-live in minutes (30 days)
+    cleanup_interval: 1440 # Cleanup interval in minutes (1 day)
+    allow_temp_greater_than_0: false # Whether to cache the generation results with temperature to be greater than 0
+
+  tracing:
+    enabled: false # default to not trace the calls
+    path_format: './dumps/traces/{basename}_{time:YYYY_MM_DD__HH_mm_ss}'
+    # The path to the trace file, ext will be added automatically
+    patch_threading: true # whether to patch `threading.Thread`
+    strict_match: true # when saving and loading cache, whether need to match the generation id
+    display_trace_info: true # whether to display the trace info
+    trace_to_resume: null  # the trace to resume
+
+  concurrency:
+    llm_max_workers: 10 # The maximum number of workers for the llm executor
+    thread_max_workers: 20 # The maximum number of workers for the threading executor
+    process_max_workers: 10 # The maximum number of workers for the processing executor
+
+  messages:
+    colors:
+      system: red
+      user: green
+      assistant: cyan
+      tool: magenta
+
+  misc:
+    suppress_litellm_debug_info: true
+
+prompts:
+  continue_generation: >-
+    The previous message was cut off due to length limit, please continue to
+    complete the message by starting with the last line (marked with
+    {last_marker}). Make sure the indentation is correct when continuing.
+    Begin your continuation with {last_marker}.
+  continue_generation_alt: >-
+    The previous message was cut off due to length limit, please continue to
+    complete the message by starting with the last part (marked with
+    {last_marker}). Make sure the newline and indentation are correct when
+    continuing. Begin your continuation with {last_marker}.
+
+# When using APIs through litellm,
+#   see the list of available models at https://docs.litellm.ai/docs/providers
+# You can directly use the model name as server name.
+default_servers:
+  default: null
+  small: null
+  large: null
+
+# When using SRT server,
+#   set model to "srt" and api_base to the address of the server.
+servers:
+  # create aliases for the models, you may use the model name as server name directly
+  # You can also set the default args for the server, for example:
+  # gpt-4o-t07:
+  #   model: gpt-4o
+  #   temperature: 0.7

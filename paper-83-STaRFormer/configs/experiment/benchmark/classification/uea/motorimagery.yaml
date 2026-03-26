@@ -1,0 +1,129 @@
+# @package _global_
+seed: 42
+dataset: MotorImagery
+task: classification
+run: 2025-05-27_13:48:53
+callbacks:
+  early_stop:
+    monitor: val/loss_ce
+    mode: min
+    patience: 30
+    verbose: true
+  model_ckpt:
+    monitor: val/acc
+    verbose: false
+    save_last: true
+    mode: max
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.8
+    patience: 20
+    min_lr: 1.0e-06
+    monitor: val/loss_ce
+  ema:
+    apply: true
+    decay: 0.5
+  lr_scheudler:
+    monitor: val/loss_ce
+    patience: 30
+datamodule:
+  dataset: MotorImagery
+  batch_size: 256
+  num_workers: 0
+  seed: 42
+  training_method: centralized
+  max_trajectory_length: 1024
+  aws_profile: null
+  s3_bucket_path: null
+  use_threads: null
+  val_batch_size: 256
+  test_batch_size: 256
+  num_train: null
+  num_val: null
+  num_test: null
+  text_labels:
+  - 0
+  - 1
+  display_labels:
+  - finger
+  - tongue
+  dataset_instance: 2025-05-26_00:42:24
+loss:
+  loss_fn: darem_sscl
+  method: sscl
+  lambda_cl: 1.9703440213074197
+  lambda_fuse_cl: 0.5
+  temp: 0.5
+  batch_size: 16
+  pred_type: binary
+  task: classification
+  task_loss_fn: mean_squarred_error
+optimizer:
+  name: adam
+  beta1: 0.8473144167814557
+  beta2: 0.9148940387677016
+  eps: 1.0e-08
+  weight_decay: 8.716007107571588e-05
+model:
+  sequence_model:
+    name: starformer
+    embedding:
+      d_features: 64
+      max_seq_len: 3001
+    d_model: 128
+    n_head: 2
+    num_encoder_layers: 1
+    dim_feedforward: 128
+    dropout: 0.04856286219466682
+    activation: gelu
+    layer_norm_eps: 1.0e-05
+    batch_first: false
+    bias: true
+    enable_nested_tensor: true
+    mask_check: true
+    masking: darem
+    mask_threshold: 0.1
+    mask_region_bound: 0.1
+    ratio_highest_attention: 0.5
+    aggregate_attn_per_batch: false
+    precision: 32
+    reconstruction: false
+    task: classification
+    batch_size: 16
+    cls_method: cls_token
+  text_model:
+    aligner:
+      kernel_size: null
+      activation: null
+  output_head:
+    task: classification
+    batch_size: 256
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: false
+    cls_method: cls_token
+system:
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training:
+  epochs: 500
+  batch_size: 256
+  val_batch_size: 256
+  test_batch_size: 256
+  learning_rate: 0.0003698957846184514
+  fast_dev: false
+  precision: 32
+  devices: null
+  multi_gpu_training: false
+logger:
+  name: wandb # tensorboard (to use tensorboard change name)
+  sweep: false 
+  entity: null # add your wandb entity here
+  exp_name: null
+  project: starformer-reruns
+  run_1_config_path: null
+  sweep_id: null

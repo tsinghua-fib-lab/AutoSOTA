@@ -1,0 +1,46 @@
+##=============================================##
+##     Federated Learning Simulator Starts     ##
+##=============================================##
+Namespace(dataset='CIFAR10', model='ResNet18', non_iid=True, split_rule='Dirichlet', split_coef=0.1, active_ratio=0.1, total_client=100, comm_rounds=500, local_epochs=5, batchsize=50, weight_decay=0.001, local_learning_rate=0.1, global_learning_rate=1.0, lr_decay=0.998, seed=20, cuda=1, data_file='./', out_file='out/', save_model=False, use_RI=False, alpha=0.1, beta=0.1, beta1=0.9, beta2=0.99, lamb=0.1, rho=0.1, gamma=1.0, epsilon=0.01, mode='normal', method='FedAvg')
+Data is already downloaded
+data loading finished.
+Initialize the Dataset     --->  CIFAR10 Dirichlet-0.1 100 clients
+Initialize the Model Func  --->  ResNet18 model
+                           --->  11181642 parameters
+Initialize the Server      --->  FedAvg
+Initialize the Public Storage:
+   Local Model Param List  --->  100 * 11181642
+ Local Updated Param List  --->  100 * 11181642
+   Train/Test [loss, acc]  --->  500 * 2
+  Consistency (Divergence) --->  500
+##=============================================##
+##           Training Process Starts           ##
+##=============================================##
+============= Communication Round 1 =============
+Selected Clients:  4, 15, 33, 61, 69, 80, 92
+Traceback (most recent call last):
+  File "/repo/train.py", line 135, in <module>
+    _server.train()
+  File "/repo/server/server.py", line 205, in train
+    _edge_device = self.Client(device=self.device, model_func=self.model_func, received_vecs=self.comm_vecs,
+  File "/repo/client/fedavg.py", line 5, in __init__
+    super(fedavg, self).__init__(device, model_func, received_vecs, dataset, lr, args)
+  File "/repo/client/client.py", line 21, in __init__
+    self.model = set_client_from_params(device=self.device, model=self.model_func(), params=self.received_vecs['Params_list'])
+  File "/repo/utils.py", line 28, in set_client_from_params
+    return model.to(device)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+  File "/opt/conda/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+RuntimeError: CUDA error: invalid device ordinal
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

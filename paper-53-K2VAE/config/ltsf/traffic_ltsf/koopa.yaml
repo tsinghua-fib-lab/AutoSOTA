@@ -1,0 +1,38 @@
+# lightning==2.3.0.dev0
+seed_everything: 0
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.Koopa.Koopa
+    init_args:
+      seg_len: 16
+      dynamic_dim: 128
+      hidden_dim: 64
+      hidden_layers: 4
+      num_blocks: 3
+      multistep: False
+      use_feat_idx_emb: false
+      use_time_feat: false
+      feat_idx_emb_dim: 1
+  num_samples: 100
+  learning_rate: 1e-4
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: traffic_ltsf
+      split_val: true
+      scaler: standard # identity, standard, temporal
+  batch_size: 16
+  test_batch_size: 32
+  num_workers: 8

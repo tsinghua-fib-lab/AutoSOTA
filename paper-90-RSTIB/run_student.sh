@@ -1,0 +1,1 @@
+python train_student.py --config ./config/student/pems04/student_rstib_mlp.yaml

@@ -1,0 +1,37 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 40
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.TSMixer
+    init_args:
+      num_blocks: 6
+      dropout_rate: 0.7
+      ff_dim: 64
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: false
+      feat_idx_emb_dim: 1
+  learning_rate: 0.0001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: etth1
+      split_val: true
+      scaler: standard # identity, standard, temporal
+      context_length: 96
+      prediction_length: 96
+  batch_size: 64
+  test_batch_size: 64
+  num_workers: 8

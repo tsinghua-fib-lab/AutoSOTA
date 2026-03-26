@@ -1,0 +1,124 @@
+# @package _global_
+defaults:
+  - override /datamodule: ucr_uea/pendigits/centralized
+
+callbacks: 
+  early_stop:
+    monitor: val/loss
+    mode: min
+    patience: 30
+    verbose: true
+  model_ckpt:
+    monitor: val/loss
+    verbose: false
+    save_last: true
+    mode: min
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.8
+    patience: 8
+    min_lr: 1.0e-06
+    monitor: val/loss
+datamodule:
+  dataset: pemssf
+  batch_size: 32
+  num_workers: 0
+  seed: 42
+  training_method: centralized
+  train_splits:
+    train: 0.9
+    val: 0.1
+  aws_profile: null
+  s3_bucket_path: null
+  use_threads: null
+  val_batch_size: 32
+  test_batch_size: 32
+  num_train: null
+  num_val: null
+  num_test: null
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  display_labels:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  dataset_instance: 2024-09-06_17:10:53
+dataset: pemssf
+loss:
+  loss_fn: contrastive_loss
+  temp: 0.5
+  lambda_contrastive: 0.3800815103329245
+  lamdba_sim: 0.5
+optimizer:
+  name: adam
+  beta1: 0.9531815642994704
+  beta2: 0.959080653984946
+  eps: 1.0e-08
+  weight_decay: 0.00048559246026885034
+model:
+  name: starformer
+  aggregate_attn_per_batch: false
+  activation: selu
+  activation_cls: silu
+  activation_masking: tanh
+  batch_first: false
+  bias: true
+  d_model: 16
+  dim_feedforward: 128
+  dropout: 0.01571518766249691
+  embedding:
+    d_features: 963
+    max_seq_len: 145
+  enable_nested_tensor: false
+  layer_norm_eps: 1.0e-05
+  masking: drm
+  mask_check: true
+  mask_threshold: 0.2690934374430899
+  mask_region_bound: 0.15
+  n_head: 4
+  num_encoder_layers: 6
+  output_head:
+    autoregressive_classification: false
+    d_out: 7
+    batch_size: 32
+    per_element_in_sequence_pred: false
+    reduced: true
+    reconstruction: false
+  ratio_highest_attention: 0.3
+  return_attn: false
+run: 2024-10-20_07:44:48
+seed: 42
+system:
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training:
+  epochs: 300
+  batch_size: 32
+  val_batch_size: 32
+  test_batch_size: 32
+  learning_rate: 0.0017145049668070838
+  fast_dev: false
+  precision: 32
+  devices: null
+  multi_gpu_training: false
+logger:
+  name: tensorboard
+  exp_name: null
+  project: pemssf
+  entity: null
+  sweep: false
+  run_1_config_path: null
+  sweep_id: null

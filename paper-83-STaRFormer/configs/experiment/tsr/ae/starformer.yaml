@@ -1,0 +1,70 @@
+# @package _global_
+dataset: appliancesenergy
+task: regression
+norm: standard
+python: True
+
+defaults:
+  #- override /callbacks/lr_scheduler: reduceLROnPlateau
+  #- override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /datamodule: tsr/ae/centralized
+  - override /loss: darem_sscl
+  #- override /loss: mean_squarred_error
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    monitor: val/loss_task
+    mode: min # if loss --> min, for acc --> max
+    patience: 100
+    verbose: True
+  lr_scheduler: 
+    monitor: val/loss_task
+    apply: True
+    mode: min
+    factor: 0.5
+    patience: 50
+    min_lr: 0.0001
+logger:
+  project: appliancesenergy
+loss:
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: mean_squarred_error
+model:
+  sequence_model:
+    embedding:
+      d_features: 24
+      max_seq_len: 145 # 144 +1
+    d_model: 32
+    dropout: 0.8
+    n_head: 2
+    num_encoder_layers: 2
+    dim_feedforward: 32
+    #masking: null
+    masking: darem
+    mask_threshold: 0.05 # 0.2 (mask_p)
+    mask_region_bound: 0.05 # 0.1
+    ratio_highest_attention: 0.2 # 0.5
+    activation: relu
+  #text_model:
+  #  name: roberta
+  #  hidden_size: 768
+  #  aligner:
+  #    kernel_size: 3
+  #    activation: relu
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: True 
+    cls_method: pooling #regr_token
+training:
+  epochs: 2000
+  learning_rate: 1e-3

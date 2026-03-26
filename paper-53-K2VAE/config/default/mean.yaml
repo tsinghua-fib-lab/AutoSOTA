@@ -1,0 +1,28 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 40
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.MeanForecaster
+    init_args:
+      mode: global
+  learning_rate: 0.001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: solar_nips
+      split_val: true
+      scaler: identity # identity, standard, temporal
+  batch_size: 64
+  test_batch_size: 64
+  num_workers: 8

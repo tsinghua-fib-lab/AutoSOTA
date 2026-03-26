@@ -1,0 +1,69 @@
+# the output files will be stored in the directory <exp_dir>/<exp_name>
+exp_dir: output/sp500
+exp_name: neural_bs
+
+seed: 1234
+
+dataset:
+  name: sp500               # name of the dataset, the pickle file should be data/<name>.pkl
+  training:                 # training period
+    - 2016/01
+    - 2016/02
+    - 2016/03
+    - 2016/04
+    - 2016/05
+    - 2016/06
+    - 2016/07
+    - 2016/08
+    - 2016/09
+    - 2016/10
+    - 2016/11
+    - 2016/12
+  validation:               # validation period
+    - 2017/01
+  testing:                  # testing period        
+    - 2017/02
+    - 2017/03
+    - 2017/04
+  overlap: 20               # note: for testing data, overlap is always fixed as seqlen - 1
+  seqlen: 21
+  predlen: 7
+  subset: null              # set to None to use the whole [training] dataset, otherwise a subset is used
+  subset_val: null
+  subset_test: null
+  overfit: false            # overfit the model on the training set
+  data_norm: max            # normalization method
+  
+
+model:
+  name: neural_bs                       # the name of the method
+  network: transformer                  # the name of the backbone network
+  num_layers: 4                         # number of transformer layers
+  feature_dims: 192                     # number of channels, same as ffn_embed_dim
+  num_attention_heads: 8                # number of attention heads
+  pre_layernorm: false                  # apply layernorm at each transformer encoder layer
+  activation_fn: relu                   # activation function
+  dropout: 0.1                          # embedding dropout rate
+  w_cond_mean_loss: 1.0                 # weight of the conditional mean loss
+  steps_per_unit_time: 5                # number of steps per unit time
+
+test:
+  batch_size: 4               # testing batch size  (w.r.t. graphs)
+
+train:
+  batch_size: 4               # training batch size (w.r.t. graphs)
+
+  lr_dacey: 0.0               # optimizer (Adam)
+  lr_init: 1.0e-4
+  lr_schedule: cosine
+  lr_min: 1.0e-6
+  weight_decay: 0.0
+
+  max_epoch: 51               # training epochs
+  save_interval: 5            # save the model after <save_interval> epochs
+  
+  huber_delta: 1.0            # huber loss delta
+
+  workers: 4                  # number of workers for data loading
+
+  ema_coef:                   # exponential moving average coefficient

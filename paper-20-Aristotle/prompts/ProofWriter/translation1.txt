@@ -1,0 +1,99 @@
+Task Description: You are given a context description and a conjecture. The task is to: 
+1) define all the predicates in the context
+2) parse the problem into logic rules based on the defined predicates. Make sure to identify compound predicates and translated them using "or". Please note that conditional statement containing "if" is not considered as rules with compound predicates.
+3) write all the facts mentioned in the problem
+4) parse the conjecture into the logic form
+5) Please make sure to differentiate ‘or’ and ‘either…or…’. For ‘or’, you should translate it with the’ inclusive or’ (V) operator. For ‘either…or…’, you should translate it with the ‘exclusive or’ (⊕) operator.
+6) For general terms like "people," use a universal quantifier (e.g., "x"), as in "Red(x, True) -> Green(x, True)" for "Red people are green." For specific individuals, use their name, as in "Cold(Anne, True)" for "Anne is cold."
+------
+Below is an example:
+Context:
+Anne is quiet. Erin is furry. Erin is green. Fiona is furry. Fiona is quiet. Fiona is red. Fiona is rough. Fiona is white. Harry is furry. Harry is quiet. Harry is white. Young people are furry. Red people are green. If Anne is quiet then Anne is red. Young, green people are rough. If someone is green then they are white. If someone is furry and quiet then they are white. If someone is young and white then they are rough. All red people are young. Either Jack or Ben is tall.
+Conjecture:
+Anne is white.
+
+### Final Translation:
+Facts:
+Quite(Anne, True) ::: Anne is quiet.
+Furry(Erin, True) ::: Erin is furry.
+Green(Erin, True) ::: Erin is green.
+Furry(Fiona, True) ::: Fiona is furry.
+Quite(Fiona, True) ::: Fiona is quiet.
+Red(Fiona, True) ::: Fiona is red.
+Rough(Fiona, True) ::: Fiona is rough.
+White(Fiona, True) ::: Fiona is white.
+Furry(Harry, True) ::: Harry is furry.
+Quite(Harry, True) ::: Harry is quiet.
+White(Harry, True) ::: Harry is white.
+Tall(Jack, True) ⊕ Tall(Ben, True) ::: Either Jack or Ben is tall.
+
+Rules:
+Young($x, True) >>> Furry($x, True) ::: Young people are furry.
+Red($x, True) >>> Young($x, True) ::: All red people are young.
+Red($x, True) >>> Green($x, True) ::: Red people are green.
+Young($x, True) && Green($x, True) >>> Rough($x, True) ::: Young, green people are rough.
+
+Conditional rules:
+Quite(Anne, True) >>> Red($x, True) ::: If Anne is quiet then Anne is red.
+Green($x, True) >>> White($x, True) ::: If someone is green then they are white.
+Furry($x, True) && Quite($x, True) >>> White($x, True) ::: If someone is furry and quiet then they are white.
+Young($x, True) && White($x, True) >>> Rough($x, True) ::: If someone is young and white then they are rough.
+
+Conjecture:
+White(Anne, True) ::: Anne is white.
+------
+Below is an example:
+Context:
+Charlie is furry. Charlie is green. Charlie is white. Dave is blue. Dave is cold. Gary is cold. Gary is rough. Harry is blue. Harry is furry. Harry is rough. Harry is white. Nice, cold people are green. Rough people are green. Green people are blue. If someone is blue then they are nice. Green people are rough. Furry, green people are rough. Green, nice people are furry. White people are nice. Cold people are blue. All rough, nice people are white.
+
+Conjecture:
+Based on the above information, is the following statement true, false, or unknown? Dave is not furry.
+
+### Final Translation:
+
+Facts:
+Furry(Charlie, True) ::: Charlie is furry.
+Green(Charlie, True) ::: Charlie is green.
+White(Charlie, True) ::: Charlie is white.
+Blue(Dave, True) ::: Dave is blue.
+Cold(Dave, True) ::: Dave is cold.
+Cold(Gary, True) ::: Gary is cold.
+Rough(Gary, True) ::: Gary is rough.
+Blue(Harry, True) ::: Harry is blue.
+Furry(Harry, True) ::: Harry is furry.
+Rough(Harry, True) ::: Harry is rough.
+White(Harry, True) ::: Harry is white.
+Green(Nice, True) ::: Nice, cold people are green.
+Green(Rough, True) ::: Rough people are green.
+Blue(Green, True) ::: Green people are blue.
+
+Rules:
+White($x, True) >>> Nice($x, True) ::: White people are nice.
+Cold($x, True) >>> Blue($x, True) ::: Cold people are blue.
+Green($x, True) >>> Rough($x, True) ::: Green people are rough.
+Furry($x, True) && Green($x, True) >>> Rough($x, True) ::: Furry, green people are rough.
+Green($x, True) && Nice($x, True) >>> Furry($x, True) ::: Green, nice people are furry.
+Rough($x, True) && Nice($x, True) >>> White($x, True) ::: All rough, nice people are white
+
+Conditional rules:
+Blue($x, True) >>> Nice($x, True) ::: If someone is blue then they are nice.
+
+
+Conjecture:
+Furry(Dave, False) ::: Dave is not furry.
+-----
+Please carefully and fully understand this important requirement before translation:
+For compound predicates (statements involving multiple properties) by ",", make sure you used "or" to connect them.
+For example, translate "Furry, round things are big" and "All Furry, round things are big" should be translated to "Furry($x, True) || Round($x, True) >>> Big($x, True)"
+Please note that for conditional statement containing "if" is not rule with compound predicates but conditional rule.
+Please make sure you translate every single clause. Do not miss any clause even they are similar or repetitive.
+Please make sure every term has a boolean value "True" or "False".
+please make sure you specify "Final Translation" so that we can directly extract it afterwards.
+-----
+Below is the one you need to translate:
+Context:
+[[PREMISES]]
+
+Conjecture:
+[[CONJECTURE]]
+###

@@ -1,0 +1,187 @@
+Task description:
+Given the premises in first-order logic form, please decompose the FOL statement using normalization and skolemization.
+—--
+Rules:
+Normalization: Convert each premise and the conclusion to Prenex Normal Form (PNF) and then to Conjunctive Normal Form (CNF).
+Skolemization: Remove the existential quantifiers by introducing Skolem constants or functions.
+
+**Important Instruction**:
+When negating a clause during normalization:
+First: If the clause has a boolean value (e.g., True or False), change the boolean value (True to False, or False to True).
+Then: If there is no boolean value in the clause, add a negation operator (¬) to change the polarity.
+For example: To convert ∀x((Rough(x,True)∨White(x,True))→Nice(x,True)) in CNF,
+Corret way in CNF: ∀x((Rough(x,False)∧White(x,False))∨Nice(x,True)) (because it has bool value so we prioritize to change the bool value)
+Incorrect way in CNF: ∀x((¬Rough(x,True)∧¬White(x,True))∨Nice(x,True)) (because it has bool value so we prioritize to change the bool value but not the polarity)
+—--
+Below is an example:
+Context:
+
+### Rules:
+1. Bitter($x, False) >>> Grieving($x, False)
+2. Sociable(Medwin, False) >>> Pure(Medwin, False)
+3. Pure($x, False) ⊕ Doubtful($x, False) >>> Grieving(Lynda, False)
+4. Doubtful($x, False) >>> Bitter($x, False)
+5. Financial($x, True) ∧ Grieving($x, True) >>> Doubtful(Medwin, True) ∧ Sociable(Bernard, False)
+6. Doubtful($x, True) ∨ Bitter($x, False) >>> Financial(Adley, True)
+7. Bitter(Axel, True) ∧ Financial(Lynda, True) >>> Sociable(Bernard, True)
+8. Sociable($x, True) ⇔ Doubtful($x, False)
+9. Doubtful(Lynda, True) ∧ Bitter(Axel, True) >>> Pure(Gavin, False)
+10. Capable($x, False) ⊕ Kind($x, True) >>> Rich($x, True) ∧ Shy($x, True)
+11. Spotless(Craig, True) >>> Doubtful(Riley, False) ∧ Young(Malcolm, True)
+
+### Step-by-Step Normalization
+
+#### Rule 1: 
+\[
+\forall x \left(Bitter(x, False) \rightarrow Grieving(x, False)\right)
+\]
+- Convert the implication:
+  \[
+  \forall x \left(Bitter(x, True) \lor Grieving(x, False)\right)
+  \]
+
+#### Rule 2: 
+\[
+Sociable(Medwin, False) \rightarrow Pure(Medwin, False)
+\]
+- Convert the implication:
+  \[
+  Sociable(Medwin, True) \lor Pure(Medwin, False)
+  \]
+
+#### Rule 3: 
+\[
+\forall x \left((Pure(x, False) \oplus Doubtful(x, False)) \rightarrow Grieving(Lynda, False)\right)
+\]
+- Convert the ⊕
+  \[
+  ((Pure(x,False)∧Doubtful(x,True))∨(Pure(x,True)∧Doubtful(x,False)))→Grieving(Lynda,False)
+  \]
+- Convert the implication to CNF:
+  \[
+  ((Pure(x,True)∨Doubtful(x,False))∧(Pure(x,False)∨Doubtful(x,True)))∨Grieving(Lynda,False)
+  \]
+- Distribute "OR" over "AND"
+  \[
+  (Pure(x,True)∨Doubtful(x,False)∨Grieving(Lynda,False))∧(Pure(x,False)∨Doubtful(x,True)∨Grieving(Lynda,False))
+  \]
+
+#### Rule 4: 
+\[
+\forall x \left(Doubtful(x, False) \rightarrow Bitter(x, False)\right)
+\]
+- Convert the implication to CNF:
+  \[
+  \forall x \left(Doubtful(x, True) \lor Bitter(x, False)\right)
+  \]
+
+#### Rule 5: 
+\[
+\forall x \left(Financial(x, True) \land Grieving(x, True) \rightarrow (Doubtful(Medwin, True) \land Sociable(Bernard, False))\right)
+\]
+- Convert the implication to CNF:
+  \[
+   \forall x ((Financial(x,False)∨Grieving(x,False))∨(Doubtful(Medwin,True)∧Sociable(Bernard,False)))
+  \]
+- Distribute "OR" over "AND"
+  \[
+   \(\forall x (Financial(x, False) \lor Grieving(x, False) \lor Doubtful(Medwin, True)) \land (Financial(x, False) \lor Grieving(x, False) \lor Sociable(Bernard, False))\)  
+  \]
+
+
+#### Rule 6: 
+\[
+\forall x \left(Doubtful(x, True) \lor Bitter(x, False) \rightarrow Financial(Adley, True)\right)
+\]
+- Convert the implication to CNF:
+  \[
+  (Doubtful(x,False)∧Bitter(x,True))∨Financial(Adley,True)
+  \]
+- Convert the implication to CNF:
+  \[
+  (Doubtful(x,False)∨Financial(Adley,True))∧(Bitter(x,True)∨Financial(Adley,True))
+  \]
+
+
+#### Rule 7: 
+\[
+Bitter(Axel, True) \land Financial(Lynda, True) \rightarrow Sociable(Bernard, True)
+\]
+- Convert the implication to CNF:
+  \[
+  Bitter(Axel, False) \lor Financial(Lynda, False) \lor Sociable(Bernard, True)
+  \]
+
+#### Rule 8: 
+\[
+\forall x \left(Sociable(x, True) \leftrightarrow Doubtful(x, False)\right)
+\]
+- Convert the biconditional to CNF:
+  \[
+  (Sociable(x,True)→Doubtful(x,False))∧(Doubtful(x,False)→Sociable(x,True))
+  \]
+- Convert the implications to CNF:
+  \[
+  (Sociable(x,False)∨Doubtful(x,False))∧(Doubtful(x,True)∨Sociable(x,True))
+  \]
+
+
+#### Rule 9: 
+\[
+Doubtful(Lynda, True) \land Bitter(Axel, True) \rightarrow Pure(Gavin, False)
+\]
+- Convert the implication to CNF:
+  \[
+  Doubtful(Lynda, False) \lor Bitter(Axel, False) \lor Pure(Gavin, False)
+  \]
+
+
+#### Rule 10: 
+\[
+Capable($x, False) ⊕ Kind($x, True) >>> Rich($x, True) ∧ Shy($x, True)
+\]
+- Convert the \oplus to CNF
+  \[
+  (Capable(x,False)∧Kind(x,False))∨(Capable(x,True)∧Kind(x,True))→(Rich(x,True)∧Shy(x,True))
+  \]
+- Convert the implication to CNF:
+  \[
+  ((Capable(x,True)∨Kind(x,True))∧(Capable(x,False)∨Kind(x,False)))∨(Rich(x,True)∧Shy(x,True))
+  \]
+- Distribute "OR" over "AND"
+  \[
+  (Capable(x,True)∨Kind(x,True)∨Rich(x,True))∧(Capable(x,True)∨Kind(x,True)∨Shy(x,True))∧(Capable(x,False)∨Kind(x,False)∨Rich(x,True))∧(Capable(x,False)∨Kind(x,False)∨Shy(x,True))
+  \]
+
+#### Rule 11: 
+\[
+Spotless(Craig, True) >>> Doubtful(Riley, False) ∧ Young(Malcolm, True)
+\]
+- Convert the implication to CNF:
+  \[
+  Spotless(Craig,False)∨(Doubtful(Riley,False)∧Young(Malcolm,True))
+  \]
+- Distribute "OR" over "AND"
+  \[
+  (Spotless(Craig,False)∨Doubtful(Riley,False))∧(Spotless(Craig,False)∨Young(Malcolm,True))
+  \]
+
+### Final Form:
+
+**Normalized Rules**:  
+1. \(\forall x (Bitter(x, True) \lor Grieving(x, False))\)  
+2. Sociable(Medwin, True) \lor Pure(Medwin, False)  
+3. \forall x ((Pure(x,True)∨Doubtful(x,False)∨Grieving(Lynda,False))∧(Pure(x,False)∨Doubtful(x,True)∨Grieving(Lynda,False)))
+4. \forall x \left(Doubtful(x, True) \lor Bitter(x, False)\right)
+5. \(\forall x (Financial(x, False) \lor Grieving(x, False) \lor Doubtful(Medwin, True)) \land (Financial(x, False) \lor Grieving(x, False) \lor Sociable(Bernard, False))\)  
+6. \forall x ((Doubtful(x,False)∨Financial(Adley,True))∧(Bitter(x,True)∨Financial(Adley,True))) 
+7. Bitter(Axel, False) \lor Financial(Lynda, False) \lor Sociable(Bernard, True)  
+8. \(\forall x (Sociable(x, False) \lor Doubtful(x, False)) \land (Doubtful(x, True) \lor Sociable(x, True))\)  
+9. Doubtful(Lynda, False) \lor Bitter(Axel, False) \lor Pure(Gavin, False)
+10. \forall x ((Capable(x,True)∨Kind(x,True)∨Rich(x,True))∧(Capable(x,True)∨Kind(x,True)∨Shy(x,True))∧(Capable(x,False)∨Kind(x,False)∨Rich(x,True))∧(Capable(x,False)∨Kind(x,False)∨Shy(x,True)))
+11. \forall x ((Spotless(Craig,False)∨Doubtful(Riley,False))∧(Spotless(Craig,False)∨Young(Malcolm,True)))
+—--
+Below is the one you need to decompose using normalization and skolemization. Please clearly indicate the finalized form using 'Final Form: place_holder_for_finalized_form' at the end of your response, and make sure you only need to conclude once (Do not conclude multiple "Final Form"). Please use '\n' to split each clause in the 'Final Form'.
+
+Premises:
+[[PREMISES]]

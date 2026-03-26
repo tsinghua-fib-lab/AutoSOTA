@@ -1,0 +1,82 @@
+import re
+import json
+from utils.readkey import set_env
+from prompt.hier_merge import SHORT_TERM_PROMPT_TEMPLATE, HIER_MERGE_PROMPT_TEMPLATE
+import openai
+
+set_env()
+
+iteration = 1
+prev = iteration-1
+curr = iteration
+fut = iteration+1
+
+def generate_short_term_persona(sample_json):
+    item_type = sample_json['item_type']  
+    items = sample_json[f'I{curr}']  
+    user_ratings = sample_json[f'U{curr}'] 
+    actual = '\n'.join([
+        str({"item_name": items[i], "user_rating": user_ratings[i]})
+        for i in range(10)
+    ])
+    persona_encode_prompt = SHORT_TERM_PROMPT_TEMPLATE.format(
+        item_type = item_type,
+        actual=actual
+    )
+    
+    max_retries = 1
+    attempts = 0
+
+    while attempts < max_retries:
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4o-mini-2024-07-18", 
+                messages=[
+                    {"role": "user", "content": persona_encode_prompt}
+                ],
+                max_tokens=16384,  
+                temperature=0  
+            )
+            result = response.choices[0].message.content.strip()
+            if result is not None:
+                return result 
+            else: 
+                attempts += 1  
+
+        except Exception as e:
+            print(f"API call error: {str(e)}")
+            attempts += 1  
+
+
+def hier_merge(sample_json):
+    item_type = sample_json['item_type']  
+    short_term_persona = generate_short_term_persona(sample_json)
+    long_term_persona = sample_json[f'S{prev}']  
+    persona_encode_prompt = HIER_MERGE_PROMPT_TEMPLATE.format(
+        item_type = item_type,
+        long_term_persona=long_term_persona,
+        short_term_persona=short_term_persona
+    )
+    
+    max_retries = 1
+    attempts = 0
+
+    while attempts < max_retries:
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4o-mini-2024-07-18", 
+                messages=[
+                    {"role": "user", "content": persona_encode_prompt}
+                ],
+                max_tokens=16384,  
+                temperature=0  
+            )
+            result = response.choices[0].message.content.strip()
+            if result is not None:
+                return result 
+            else: 
+                attempts += 1  
+
+        except Exception as e:
+            print(f"API call error: {str(e)}")
+            attempts += 1  

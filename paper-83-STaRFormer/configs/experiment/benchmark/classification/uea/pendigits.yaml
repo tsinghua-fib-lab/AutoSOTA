@@ -1,0 +1,130 @@
+# @package _global_
+defaults:
+  - override /datamodule: ucr_uea/pendigits/centralized
+
+callbacks:
+  early_stop:
+    monitor: val/loss
+    mode: min
+    patience: 30
+    verbose: true
+  model_ckpt:
+    monitor: val/acc
+    verbose: false
+    save_last: true
+    mode: max
+  lr_scheduler:
+    name: ReduceLROnPlateau
+    apply: true
+    mode: min
+    factor: 0.8
+    patience: 8
+    min_lr: 1.0e-06
+    monitor: val/loss
+datamodule:
+  dataset: pendigits
+  batch_size: 32
+  num_workers: 0
+  seed: 42
+  training_method: centralized
+  train_splits:
+    train: 0.9
+    val: 0.1
+  aws_profile: null
+  s3_bucket_path: null  
+  use_threads: null
+  val_batch_size: 32
+  test_batch_size: 32
+  num_train: null
+  num_val: null
+  num_test: null
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  display_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  dataset_instance: 2024-09-06_16:52:45
+dataset: pendigits
+loss:
+  loss_fn: contrastive_loss
+  temp: 0.5
+  lambda_contrastive: 0.9652987359087176
+  lamdba_sim: 0.5
+optimizer:
+  name: adam
+  beta1: 0.929249739010909
+  beta2: 0.9901924475351508
+  eps: 1.0e-08
+  weight_decay: 0.0002447392105419809
+model: 
+  name: starformer
+  activation: elu
+  activation_cls: elu
+  activation_masking: tanh
+  aggregate_attn_per_batch: false
+  batch_first: false
+  bias: true
+  d_model: 32
+  dim_feedforward: 8
+  dropout: 0.1366476820186807
+  embedding:
+    d_features: 2
+    max_seq_len: 9
+  enable_nested_tensor: true
+  layer_norm_eps: 1.0e-05
+  masking: drm
+  mask_check: true
+  mask_threshold: 0.3716715252707588
+  mask_region_bound: 0.25
+  n_head: 8
+  num_encoder_layers: 2
+  output_head:
+    autoregressive_classification: false
+    batch_size: 32
+    d_out: 10
+    per_element_in_sequence_pred: false
+    reduced: false
+    reconstruction: false
+  ratio_highest_attention: 0.5
+  return_attn: false
+run: 2024-10-21_21:53:09
+seed: 42
+system: 
+  accelerator: gpu
+  devices: 1
+  num_workers: 0
+training:
+  epochs: 300
+  batch_size: 32
+  val_batch_size: 32
+  test_batch_size: 32
+  learning_rate: 0.002222184617984481
+  fast_dev: false
+  precision: 32
+  devices: null
+  multi_gpu_training: false
+logger:
+  name: tensorboard
+  exp_name: null
+  project: pendigits
+  entity: null
+  sweep: false
+  run_1_config_path: null
+  sweep_id: null

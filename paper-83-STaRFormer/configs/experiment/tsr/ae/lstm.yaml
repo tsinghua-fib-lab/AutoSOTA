@@ -1,0 +1,45 @@
+# @package _global_
+dataset: appliancesenergy
+task: regression
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /datamodule: tsr/ae/centralized
+  #- override /loss: darem_sscl
+  - override /loss: mean_squarred_error
+  - override /model: lstm
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    monitor: val/rmse
+  lr_scheduler: 
+    monitor: val/rmse
+logger:
+  project: appliancesenergy
+loss:
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: mean_absolute_error
+model:
+  sequence_model:
+    input_size: 24 
+    hidden_size: 16 
+    output_size: 1
+    num_layers: 4  
+    dropout: 0.3
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: True 
+    cls_method: regr_token
+training:
+  epochs: 2000
+  learning_rate: 0.001

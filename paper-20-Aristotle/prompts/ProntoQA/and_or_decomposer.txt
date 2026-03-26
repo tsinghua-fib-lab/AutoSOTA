@@ -1,0 +1,73 @@
+Task description:
+Given the premises and conjecture in first-order logic form, please decompose the FOL statement using normalization and skolemization.
+—--
+Rules:
+
+Normalization: Convert each premise and the conjecture to Prenex Normal Form (PNF) and then to Conjunctive Normal Form (CNF).
+- In CNF conversion, negate the boolean value directly instead of adding a ¬ symbol at the front. For instance, transform "Jompus($x, True) >>> Shy($x, False)" into "- \(\forall x \left(Jompus(x, False) \lor Shy(x, False)\right)\)", instead of "- \(\forall x \left(\neg Jompus(x, True) \lor Shy(x, False)\right)\)"..
+
+Skolemization: Eliminate existential quantifiers by introducing Skolem constants or functions.
+
+**Important Note:** This prompt is structured to guide the language model in the decomposition process only. Do not attempt to solve the conjecture, and ensure the conjecture remains as stated without negation.
+—--
+Below is an example:
+Context:
+Facts:
+1. Yumpus(Max, True)
+Rules:
+1. Jompus($x, True) >>> Shy($x, False)
+2. Jompus($x, True) >>> Yumpus($x, True)
+3. Yumpus($x, True) >>> Aggressive($x, True)
+4. Yumpus($x, True) >>> Dumpus($x, True)
+5. Dumpus($x, True) >>> Wooden($x, False)
+6. Dumpus($x, True) >>> Wumpus($x, True)
+7. Wumpus($x, True) >>> Red($x, True)
+8. Wumpus($x, True) >>> Impus($x, True)
+9. Impus($x, True) >>> Opaque($x, True)
+10. Impus($x, True) >>> Tumpus($x, True)
+11. Numpus($x, True) >>> Sour($x, True)
+12. Tumpus($x, True) >>> Sour($x, False)
+13. Tumpus($x, True) >>> Vumpus($x, True)
+14. Vumpus($x, True) >>> Earthy($x, True)
+15. Vumpus($x, True) >>> Zumpus($x, True)
+16. Zumpus($x, True) >>> Small($x, True)
+17. Zumpus($x, True) >>> Rompus($x, True)
+
+Conjecture:
+Sour(Max, True)
+
+Decomposition:
+
+Final Form:
+Facts:
+1. - Yumpus(Max, True)
+
+Rules in CNF:
+1. - \(\forall x \left(Jompus(x, False) \lor Shy(x, False)\right)\)
+2. - \(\forall x \left(Jompus(x, False) \lor Yumpus(x, True)\right)\)
+3. - \(\forall x \left(Yumpus(x, False) \lor Aggressive(x, True)\right)\)
+4. - \(\forall x \left(Yumpus(x, False) \lor Dumpus(x, True)\right)\)
+5. - \(\forall x \left(Dumpus(x, False) \lor Wooden(x, False)\right)\)
+6. - \(\forall x \left(Dumpus(x, False) \lor Wumpus(x, True)\right)\)
+7. - \(\forall x \left(Wumpus(x, False) \lor Red(x, True)\right)\)
+8. - \(\forall x \left(Wumpus(x, False) \lor Impus(x, True)\right)\)
+9. - \(\forall x \left(Impus(x, False) \lor Opaque(x, True)\right)\)
+10. - \(\forall x \left(Impus(x, False) \lor Tumpus(x, True)\right)\)
+11. - \(\forall x \left(Numpus(x, False) \lor Sour(x, True)\right)\)
+12. - \(\forall x \left(Tumpus(x, False) \lor Sour(x, False)\right)\)
+13. - \(\forall x \left(Tumpus(x, False) \lor Vumpus(x, True)\right)\)
+14. - \(\forall x \left(Vumpus(x, False) \lor Earthy(x, True)\right)\)
+15. - \(\forall x \left(Vumpus(x, False) \lor Zumpus(x, True)\right)\)
+16. - \(\forall x \left(Zumpus(x, False) \lor Small(x, True)\right)\)
+17. - \(\forall x \left(Zumpus(x, False) \lor Rompus(x, True)\right)\)
+
+Conjecture:
+Sour(Max, True)
+—--
+Below is the one you need to decompose using normalization and skolemization. 
+Please conclude the decomposition in "Final Form" and make sure you include every single clause in your final form even if it does not need to be decomposed.
+Please make sure you strictly following the instruction and example. Do not do anything that is not instructed (e.g. do not negate the conjecture and fact).
+Please pay attention that you need to negate a term only when you are transforming an implication to CNF. If the clauses or terms do not contain implication (e.g. Fact or Conjecture), do not negate them.
+
+[[PREMISES]]
+

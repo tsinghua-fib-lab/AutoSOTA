@@ -1,0 +1,54 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.ElasTST
+    init_args:
+      l_patch_size: '8_16_32'
+      dropout: 0.0
+      f_hidden_size: 256
+      d_inner: 256
+      t_layers: 2
+      v_layers: 0
+      n_heads: 8
+      d_v: 64
+      d_k: 64
+      structured_mask: true
+      rotate: true
+      rope_theta_init: 'exp'
+      learnable_rope: true
+      min_period: 1
+      max_period: 1000
+      addv: false
+      bin_att: false
+      learn_tem_emb: false
+  learning_rate: 0.001
+  quantiles_num: 20
+  sampling_weight_scheme: random
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: etth1
+      split_val: true
+      scaler: standard # identity, standard, temporal
+      context_length: 96
+      prediction_length: 24-96-192-336-720-1024
+      train_ctx_len: 96
+      train_pred_len_list: 720
+      val_ctx_len: 96
+      val_pred_len_list: 720
+      continuous_sample: false 
+  batch_size: 32
+  test_batch_size: 32
+  num_workers: 8

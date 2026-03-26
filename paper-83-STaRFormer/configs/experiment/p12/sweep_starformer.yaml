@@ -1,0 +1,42 @@
+# @package _global_
+dataset: p12
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: p19
+  - override /callbacks/model_ckpt: p19
+  - override /datamodule: p12/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: p19/centralized
+  - override /logger: wandb
+  
+training:
+  epochs: 300 
+model:
+  sequence_model:
+    embedding:
+      d_features: 36
+      max_seq_len: 215
+    masking: darem
+  text_model:
+    name: roberta
+    hidden_size: 768 # default 768
+  output_head:
+    batch_size: ${training.batch_size} 
+    d_out: 1
+    cls_method: cls_token
+logger:
+  entity: null # add your wandb entity here
+  project: p12_sweeps
+  sweep: true
+datamodule:
+  preprocessing_method: raindrop
+  s3_bucket_path: null
+callbacks:
+  lr_scheduler:
+    patience: 8
+  
+  
+  

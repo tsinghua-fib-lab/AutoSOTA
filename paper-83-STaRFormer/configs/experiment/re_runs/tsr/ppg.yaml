@@ -1,0 +1,28 @@
+# @package _global_
+# @package _global_
+dataset: ppgdalia
+task: regression
+norm: standard  # none, standard, minmax
+pytorch: True
+sweep_id: null
+
+defaults:
+  - /callbacks/ema: default
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+run_url: null # add your wandb path here "<entity>/<project>/runs/<run_id>"
+
+change_config: {
+  "logger": {
+    "sweep": false, 
+    "project": "ppgdalia"
+  },
+  'norm': standard,
+}

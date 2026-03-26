@@ -1,0 +1,50 @@
+[build-system]
+requires = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
+
+
+[project]
+name = "hogwild"
+version = "0.0.2"
+authors = [
+  { name = "Erik Schultheis", email = "erik.schultheis@ist.ac.at" },
+  { name = "Vage Egiazarian", email = "vage.egiazarian@ist.ac.at" },
+]
+description = "Hogwild inference"
+readme = "README.md"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+test = [
+  "pytest >=6",
+  "pytest-cpp",
+  "pytest-cov >=3",
+]
+
+[tool.scikit-build]
+metadata.dependencies = {provider = "metadata_provider", provider-path = "."} # Local
+experimental = true
+wheel.py-api = "cp310"
+build-dir = "build/{wheel_tag}"
+build.targets = ["hogatt"]
+
+[tool.scikit-build.wheel.packages]
+"hogwild" = "python/hogwild"
+
+[tool.scikit-build.cmake.define]
+HOGDILD_TORCH_BINDINGS = "ON"
+HOGDILD_BENCHMARKS = "OFF"
+HOGWILD_TESTS = "OFF"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+  "error",
+]
+log_cli_level = "INFO"
+testpaths = [
+  "tests/python",
+]

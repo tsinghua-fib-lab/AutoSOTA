@@ -1,0 +1,45 @@
+# @package _global_
+dataset: p19
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: p19
+  - override /callbacks/model_ckpt: p19
+  - override /datamodule: p19/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: p19/centralized
+  - override /logger: wandb
+
+logger:
+  project: p19
+model:
+  sequence_model:
+    embedding:
+      d_features: 34
+      max_seq_len: 60
+    d_model: 32
+    dropout: 0.3
+    n_head: 2
+    num_encoder_layers: 2
+    dim_feedforward: 32
+    masking: darem
+    mask_threshold: 0.05 # 0.2 (mask_p)
+    mask_region_bound: 0.05 # 0.1
+    ratio_highest_attention: 0.2 # 0.5
+  text_model:
+    name: roberta
+    hidden_size: 768
+    aligner:
+      kernel_size: 3
+      activation: relu
+  output_head:
+    task: classification
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: True 
+    cls_method: cls_token
+ 

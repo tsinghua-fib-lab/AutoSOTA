@@ -1,0 +1,127 @@
+# @package _global_
+dataset: p19
+seed: 42
+task: classification
+
+loss:
+  task: ${task}
+  temp: 0.5
+  method: sscl
+  loss_fn: darem_sscl
+  lambda_cl: 0.6300672155139967
+  pred_type: binary
+  batch_size: 512
+  lambda_fuse_cl: 0.5
+model:
+  text_model:
+    name: roberta
+    aligner:
+      activation: selu
+      kernel_size: 7
+    hidden_size: 768
+  output_head:
+    task: ${task}
+    d_out: 1
+    reduced: True
+    d_hidden: null
+    activation: silu
+    batch_size: 512
+    cls_method: cls_token
+  sequence_model:
+    bias: True
+    name: starformer
+    n_head: 2
+    d_model: 128
+    dropout: 0.28195450774463493
+    masking: darem
+    embedding:
+      d_features: 34
+      max_seq_len: 61
+    precision: 32
+    activation: gelu
+    mask_check: True
+    batch_first: False
+    layer_norm_eps: 1.0e-05
+    mask_threshold: 0.05
+    reconstruction: False
+    dim_feedforward: 32
+    mask_region_bound: 0.2
+    num_encoder_layers: 5
+    enable_nested_tensor: True
+    ratio_highest_attention: 0.3
+    aggregate_attn_per_batch: False
+logger:
+  name: wandb # tensorboard (to use tensorboard change name)
+  sweep: False #sweep: false
+  entity: null # add your wandb entity here
+  project: starformer-reruns # project: ${dataset}
+  exp_name: null #exp_name: null
+  sweep_id: null #sweep_id: null
+  run_1_config_path: null #run_1_config_path: null
+system:
+  devices: 1
+  accelerator: gpu
+  num_workers: 0
+training:
+  device: null
+  epochs: 300
+  fast_dev: False
+  precision: 32
+  batch_size: 512
+  learning_rate: 0.004765735818535654
+  val_batch_size: 512
+  test_batch_size: 512
+  log_every_n_steps: 10
+  multi_gpu_training: False
+callbacks:
+  early_stop:
+    mode: min
+    monitor: val/loss
+    verbose: True
+    patience: 30
+  model_ckpt:
+    mode: max
+    monitor: val/auroc
+    verbose: False
+    save_last: True
+  lr_scheduler:
+    mode: min
+    name: ReduceLROnPlateau
+    apply: True
+    factor: 0.8
+    min_lr: 1.0e-06
+    monitor: val/loss_ce
+    patience: 8
+optimizer:
+  eps: 1.0e-08
+  name: adam
+  beta1: 0.8554063217317893
+  beta2: 0.9069466066805844
+  weight_decay: 0.0003179874617298927
+datamodule:
+  balance: random
+  num_val: null
+  instance: null
+  num_test: null
+  num_train: null
+  batch_size: 512
+  aws_profile: null
+  num_workers: 0
+  text_labels:
+  - 0
+  - 1
+  use_threads: null
+  pad_sequence: True
+  display_labels:
+  - 0
+  - 1
+  min_seq_length: null
+  s3_bucket_path: null
+  val_batch_size: 512
+  test_batch_size: 512
+  training_method: centralized
+  dataset_instance: 2025-04-05_12:11:09
+  train_split_index: 0
+  upsample_percentage: 0
+  preprocessing_method: raindrop
+  percentile_of_features_used: null

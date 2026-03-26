@@ -1,0 +1,63 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py task=test
+
+defaults:
+  - /model/scam@model.net
+  - /model/cyclenet@model.net.predictor.pred_model
+  # - /model/components/predictors/single_predictor@model.net.predictor
+  - /model/components/predictors/multi_predictor@model.net.predictor
+  - override /data: traffic
+  - override /trainer: gpu
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+if_sample: false
+sample_size: 64
+
+seed: 1234
+
+model:
+  loss_names: ${model.net.loss_names}
+  if_sample: ${if_sample}
+  sample_size: ${sample_size}
+  # cautious optimizer for faster convergence https://arxiv.org/abs/2411.16085
+  # optimizer:
+  #   _target_: src.utils.c_adamw.CautiousAdamW
+  #   lr: 0.001
+  #   weight_decay: 0.0
+
+
+  net:
+    input_size: ${data.input_size}
+    output_size: ${data.output_size}
+    num_channels: ${data.num_channels}
+
+trainer:
+  devices: [0]
+
+data:
+  input_size: 96
+  output_size: 96
+  batch_size: 32
+
+logger:
+  aim:
+    experiment: ${model.net.name}_if_snr=${model.net.predictor.pred_model.if_snr}
+
+callbacks:
+  model_checkpoint:
+    dirpath: 'ckpts/${model.net.name}/${data.name}_${data.input_size}_${data.output_size}'
+    filename: 'best'
+    monitor: 'val/mse'
+    mode: 'min'
+    save_last: False
+    save_top_k: 1
+
+tags:
+  - ${data.name}
+  - ${model.net.name}
+  - if_sample=${if_sample}
+  - input_size=${data.input_size}
+  - output_size=${data.output_size}

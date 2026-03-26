@@ -1,0 +1,78 @@
+Task Description: You are given a problem description and a question. The task is to: 
+1) parse the context into logic rules based on the defined predicates
+2) write all the facts mentioned in the problem, and make sure they are translated in logic form as well.
+3) parse the conjecture into the logic form
+4) please give the final output in the following format. Please ensure you translate in the following order: facts, rules, then conjecture.
+------
+Here is an example:
+Context:
+Each jompus is fruity. Every jompus is a wumpus. Every wumpus is not transparent. Wumpuses are tumpuses. Tumpuses are mean. Tumpuses are vumpuses. Every vumpus is cold. Each vumpus is a yumpus. Yumpuses are orange. Yumpuses are numpuses. Numpuses are dull. Each numpus is a dumpus. Every dumpus is not shy. Impuses are shy. Dumpuses are rompuses. Each rompus is liquid. Rompuses are zumpuses. Alex is a tumpus.
+Conjecture:
+Alex is not shy.
+###
+
+Facts:
+Alex is a tumpus ::: Tumpuses(Alex, True)
+
+Rules:
+Jompus($x, True) >>> Fruity($x, True)
+Jompus($x, True) >>> Wumpus($x, True)
+Wumpus($x, True) >>> Transparent($x, False)
+Wumpuses($x, True) >>> Tumpuses($x, True)
+Tumpuses($x, True) >>> Mean($x, True)
+Tumpuses($x, True) >>> Vumpuses($x, True)
+Vumpuses($x, True) >>> Cold($x, True)
+Vumpuses($x, True) >>> Yumpus($x, True)
+Yumpus($x, True) >>> Orange($x, True)
+Yumpus($x, True) >>> Numpus($x, True)
+Numpus($x, True) >>> Dull($x, True)
+Numpus($x, True) >>> Dumpus($x, True)
+Dumpus($x, True) >>> Shy($x, False)
+Impuses($x, True) >>> Shy($x, True) 
+Dumpus($x, True) >>> Rompus($x, True)
+Rompus($x, True) >>> Liquid($x, True)
+Rompus($x, True) >>> Zumpus($x, True)
+
+Conjecture:
+Shy(Alex, False)
+------
+Here is an example:
+Context:
+Jompuses are not shy. Jompuses are yumpuses. Each yumpus is aggressive.Each yumpus is a dumpus. Dumpuses are not wooden. Dumpuses are wumpuses. Wumpuses are red. Every wumpus is an impus. Each impus is opaque.Impuses are tumpuses. Numpuses are sour. Tumpuses are not sour. Tumpuses are vumpuses. Vumpuses are earthy. Every vumpus is a zumpus. Zumpuses are small. Zumpuses are rompuses. Max is a yumpus.
+
+Conjecture:
+Max is sour.
+###
+
+Facts:
+Max is a yumpus ::: Yumpus(Max, True)
+
+Rules:
+Jompus($x, True) >>> Shy($x, False)
+Jompus($x, True) >>> Yumpus($x, True)
+Yumpus($x, True) >>> Aggressive($x, True)
+Yumpus($x, True) >>> Dumpus($x, True)
+Dumpus($x, True) >>> Wooden($x, False)
+Dumpus($x, True) >>> Wumpus($x, True)
+Wumpus($x, True) >>> Red($x, True)
+Wumpus($x, True) >>> Impus($x, True)
+Impus($x, True) >>> Opaque($x, True)
+Impus($x, True) >>> Tumpus($x, True)
+Numpus($x, True) >>> Sour($x, True)
+Tumpus($x, True) >>> Sour($x, False)
+Tumpus($x, True) >>> Vumpus($x, True)
+Vumpus($x, True) >>> Earthy($x, True)
+Vumpus($x, True) >>> Zumpus($x, True)
+Zumpus($x, True) >>> Small($x, True)
+Zumpus($x, True) >>> Rompus($x, True)
+
+Conjecture:
+Sour(Max, True)
+
+-----
+Below is the one you need to translate:
+Context:
+[[PREMISES]]
+
+Conjecture:
+[[CONJECTURE]]

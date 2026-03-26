@@ -1,0 +1,41 @@
+name: Publish to PyPI on GitHub Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    if: >
+      github.repository == 'mmschlk/shapiq' &&
+      startsWith(github.event.release.tag_name, 'v') &&
+      !contains(github.event.release.tag_name, '-')
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.event.release.tag_name }}
+    secrets: inherit
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist/
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@v1.13.0
+        with:
+          attestations: true

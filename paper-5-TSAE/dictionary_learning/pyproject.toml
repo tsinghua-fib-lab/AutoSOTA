@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "dictionary-learning"
+version = "0.1.0"
+description = "Dictionary learning via sparse autoencoders on neural network activations"
+authors = ["Samuel Marks", "Adam Karvonen", "Aaron Mueller"]
+packages = [{ include = "dictionary_learning" }]
+license = "MIT"
+readme = "README.md"
+keywords = [
+    "deep-learning",
+    "sparse-autoencoders",
+    "mechanistic-interpretability",
+    "PyTorch",
+]
+classifiers = ["Topic :: Scientific/Engineering :: Artificial Intelligence"]
+repository = "https://github.com/saprmarks/dictionary_learning"
+homepage = "https://github.com/saprmarks/dictionary_learning"
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+circuitsvis = ">=1.43.2"
+datasets = ">=2.18.0"
+einops = ">=0.7.0"
+nnsight = ">=0.3.0,<0.4.0"
+pandas = ">=2.2.1"
+plotly = ">=5.18.0"
+tqdm = ">=4.66.1"
+zstandard = ">=0.22.0"
+wandb = ">=0.12.0"
+umap-learn = ">=0.5.6"
+llvmlite = ">=0.40.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_variables = ["dictionary_learning/__init__.py:__version__"]
+version_toml = ["pyproject.toml:tool.poetry.version"]
+branch = "main"
+build_command = "pip install poetry && poetry build"

@@ -1,0 +1,47 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 800
+  log_every_n_steps: 1
+  check_val_every_n_epoch: 2
+  default_root_dir: ./results
+  accumulate_grad_batches: 8
+model:
+  forecaster:
+    class_path: probts.model.forecaster.prob_forecaster.CSDI
+    init_args:
+      emb_time_dim: 128
+      emb_feature_dim: 16
+      channels: 64
+      n_layers: 4
+      num_heads: 8
+      num_steps: 50
+      diffusion_embedding_dim: 128
+      beta_start: 0.001
+      beta_end: 0.5
+      sample_size: 64
+      linear_trans: false
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: false
+      feat_idx_emb_dim: 1
+  num_samples: 100
+  learning_rate: 0.001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: etth2
+      split_val: true
+      scaler: standard # identity, standard, temporal
+      context_length: 96
+      prediction_length: 96
+  batch_size: 8
+  test_batch_size: 8
+  num_workers: 8

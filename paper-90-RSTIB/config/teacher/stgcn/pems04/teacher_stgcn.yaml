@@ -1,0 +1,46 @@
+control: 
+  model: stgcn
+  testonly: false
+  device: cuda:0
+  mdir: ./results/model/
+  logdir: ./results/log/
+  date: 2023y03m14d
+
+data:
+  dataset: PEMS4
+  val_ratio: 0.2
+  test_ratio: 0.2
+  lag: 12
+  horizon: 12
+  batch_size: 32
+  geo_graph: ./data/county/geo_geaph_county_full.cpt
+  num_nodes: 307
+  adj_filename: ./data/PEMS04/PEMS04.csv
+  id_filename: None
+  pre_adj: true
+  norm: max01 
+
+training:
+  patience: 20
+  model_path: ./results/model/2022y9m5d/STID.pkl
+  mae_thresh: 0.0
+  mape_thresh: 0.0
+  lr: 0.002
+  weight_decay: 0.0001
+  lr_decay_ratio: 0.5
+  steps: [1, 50, 100]
+  criterion: 'Smooth'
+  max_epoch: 200
+  grad_norm: true
+  debug: false
+  t_s_mode: t
+  start_epoch: 100
+
+model:
+  end_channels: 128
+  adj_type: normlap
+  in_dim: 1 
+  out_dim: 12 
+  
+sample:
+  is_sample: False 

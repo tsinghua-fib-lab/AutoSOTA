@@ -1,0 +1,23 @@
+data:
+    num_workers: 4
+
+model:
+    name: 'physense_for_pipe_crossattn_walk'
+    in_channels: 1
+    out_channels: 1
+    image_size: [128,48]
+    patch_size: [2,2]
+
+training:
+    batch_size: 50 # 1gpu in default
+    gpu_num: 1
+    n_epochs: 21
+    save_freq: 5
+    ckpt_path: './checkpoints'
+
+    sensor_number: 30
+    seed: 1
+    base_model_path: ./checkpoints/pipe_best_base_model.pth
+
+optim:
+    lr: 0.25

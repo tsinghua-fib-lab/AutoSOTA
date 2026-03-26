@@ -1,0 +1,44 @@
+# @package _global_
+dataset: appliancesenergy
+task: regression
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /datamodule: tsr/ae/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+model:
+  sequence_model:
+    embedding:
+      d_features: 24
+      max_seq_len: 145
+    masking: darem
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size} 
+    d_out: 1
+    cls_method: regr_token
+logger:
+  entity: null
+  project: appliancesenergy_sweeps
+  sweep: true
+loss:
+  lambda_fuse_cl: 1.0 # only use self-supervision, supervision unnecessary (no classes exist)
+  pred_type: binary
+  task: ${task}
+callbacks:
+  early_stop:
+    monitor: val/rmse
+  lr_scheduler: 
+    monitor: val/loss_task
+datamodule:
+  norm: null
+  
+  
+  

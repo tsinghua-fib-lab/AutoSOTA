@@ -1,0 +1,59 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  check_val_every_n_epoch: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 1
+  gradient_clip_val: 0.5
+model:
+  forecaster:
+    class_path: probts.model.forecaster.prob_forecaster.d3vae.D3VAE
+    init_args:
+      input_size: 128
+      target_dim: 1
+      sequence_length: 24
+      prediction_length: 24
+      diff_steps: 100
+      learning_rate: 0.001
+      weight_decay: 0.0
+      psi: 1.0
+      lambda1: 1.0
+      gamma: 1.0
+      freq: "t"
+      hidden_size: 64
+      num_layers: 2
+      dropout_rate: 0.1
+      beta_start: 0.0
+      beta_end: 0.01
+      beta_schedule: "linear"
+      scale: 0.1
+      embedding_dimension: 64
+      use_se: false
+      mult: 1.0
+      arch_instance: "res_mbconv"
+      num_channels_enc: 32
+      channel_mult: 2
+      num_preprocess_blocks: 1
+      num_preprocess_cells: 3
+      groups_per_scale: 2
+      num_postprocess_blocks: 1
+      num_postprocess_cells: 2
+      num_channels_dec: 32
+      num_latent_per_group: 8
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: solar_nips
+      split_val: true
+      scaler: standard # identity, standard, temporal
+  batch_size: 64
+  test_batch_size: 32
+  num_workers: 8

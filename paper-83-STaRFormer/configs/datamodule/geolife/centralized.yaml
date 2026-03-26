@@ -1,0 +1,18 @@
+batch_size: ${training.batch_size}
+num_workers: ${system.num_workers}
+seed: ${seed}
+training_method: centralized
+train_test_split: {'train': 0.7, 'val': 0.1, 'test': 0.2} #[0.7, 0.1, 0.2]
+identical_training_class_label_distribution: True
+synthetic_minority_upsampling: False
+noise_level: 0.05
+aws_profile: null
+s3_bucket_path: null
+pad_sequence: false
+val_batch_size: ${training.val_batch_size}
+test_batch_size: ${training.test_batch_size}
+num_train: null
+num_val: null
+num_test: null
+text_labels: [0, 1, 2, 3]
+display_labels: [bike, bus, car, walk]

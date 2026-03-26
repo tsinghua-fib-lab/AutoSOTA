@@ -1,0 +1,60 @@
+
+dataset:
+  name: "cifar10"
+  input_shape: [32, 32, 3]
+  root: "./data"
+  batch_size: 128
+  num_workers: 4
+  val_split: 0.1
+  forget_split: 0.1
+  seed: 142
+
+model:
+  name: "tiny_net_cifar"
+  n_classes: 10
+
+training:
+  epochs: 400
+  optim: "SGD"
+  max_lr: 0.06
+  momentum: 0
+  weight_decay: 0.0005
+  lr_schedule: "onecycle"
+  pretrained: "logs/iep18hnq/ckpt"
+
+unlearning:
+  epochs: 50
+  optim: "SGD"
+  momentum: 0
+  weight_decay: 1
+  lr_schedule: "constant"
+  noise_schedule: "constant" # 'constant' or 'decreasing'
+  max_lr: 0.1
+  init_model_clip: 1.0
+  init_model_clip_type: "clip" #clamp or clip
+  init_sigma: 0         # 0 for iteration
+  algorithm: 'iteration' # 'iteration' or 'contractive_coefficients'
+  delta: 0.00001
+  iteration:
+    epsilon_renyi_target: 100
+    grad_clip: 1.0
+    calc_intermediate_eps_renyi: False
+
+
+post_unlearning:
+  optim: "SGD"
+  momentum: 0
+  weight_decay: 0.0005
+  lr_schedule: "onecycle"
+  max_lr: 0.1
+  post_unlearn_clip: False
+
+wandb:
+
+  project: "unlearning-dp-camera"
+  entity: "unlearning-dynamics"
+  log_dir: "./wandb_logs"
+
+secure_rng: False
+save_every: 1
+global_seed: 1234

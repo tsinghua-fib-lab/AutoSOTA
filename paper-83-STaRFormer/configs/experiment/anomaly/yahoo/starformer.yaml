@@ -1,0 +1,58 @@
+# @package _global_
+dataset: yahoo
+task: anomaly_detection
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: anomaly
+  - override /callbacks/model_ckpt: anomaly
+  - override /datamodule: anomaly/yahoo/centralized
+  - override /loss: darem_sscl
+  #- override /loss: bce
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: anomaly/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    monitor: val/loss_task
+  lr_scheduler: 
+    monitor: val/loss_task
+    patience: 3
+logger:
+  project: yahoo
+loss:
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: null
+model:
+  sequence_model:
+    embedding:
+      d_features: 1
+      max_seq_len: ${datamodule.window_size}
+    d_model: 16
+    dropout: 0.3
+    n_head: 2
+    num_encoder_layers: 2
+    dim_feedforward: 16
+    masking: darem # null, random, darem
+    mask_threshold: 0.05 # null #0.05 # 0.2 (mask_p)
+    mask_region_bound: 0.05 # null #0.05 # 0.1
+    ratio_highest_attention: 0.2 # null #0.2 # 0.5
+  #text_model:
+  #  name: roberta
+  #  hidden_size: 768
+  #  aligner:
+  #    kernel_size: 3
+  #    activation: relu
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: True 
+    cls_method: elementwise
+    norm_dim: ${datamodule.window_size}
+ 

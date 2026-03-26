@@ -1,0 +1,63 @@
+seed: 42
+max_val_steps: 100
+val_freq: 100
+checkpoint_freq: 200
+checkpoint_dir: ./checkpoints
+lr: 1e-5
+max_steps: null
+
+grad_accum_steps: 1
+
+data:
+  _target_: external.cleandift.src.dataloader.DataModule
+  dataset_dir: ./data
+  batch_size: 8
+  img_size: 768
+
+model:
+  _target_: external.sd_feature_extraction.StableFeatureAligner
+  sd_version: sd21
+  t_max: 999 # Max timestep used during training
+  num_t_stratification_bins: 3
+  train_unet: True
+  learn_timestep: True
+  use_text_condition: true
+
+  ae:
+    _target_: external.cleandift.src.ae.AutoencoderKL
+    repo: Charles-Elena/stable-diffusion-2-1
+  mapping:
+    _target_: external.cleandift.src.utils.MappingSpec
+    depth: 2
+    width: 256
+    d_ff: 768
+    dropout: 0.0
+  adapter_layer_class: external.sd_feature_extraction.FFNStack
+  adapter_layer_params:
+    depth: 3
+    ffn_expansion: 1
+    dim_cond: ${..mapping.width}
+  feature_extractor_cls: external.sd_feature_extraction.SD21UNetFeatureExtractor
+  feature_dims:
+    mid: 1280
+    us1: 1280
+    us2: 1280
+    us3: 1280
+    us4: 1280
+    us5: 1280
+    us6: 1280
+    us7: 640
+    us8: 640
+    us9: 640
+    us10: 320
+
+
+lr_scheduler:
+  name: constant_with_warmup
+  num_warmup_steps: 2000
+  num_training_steps: null
+  scheduler_specific_kwargs: {}
+
+hydra:
+  job:
+    chdir: false

@@ -1,0 +1,46 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+  accumulate_grad_batches: 4
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.NHiTS
+    init_args:
+      n_blocks: [1,1,1]
+      hidden_size: 512
+      pooling_mode: 'max'
+      interpolation_mode: 'linear'
+      activation: 'ReLU'
+      initialization: 'lecun_normal'
+      batch_normalization: false
+      shared_weights: false
+      naive_level: 
+      dropout: 0
+      n_layers: 2
+      use_lags: false
+      use_feat_idx_emb: true
+      use_time_feat: true
+      feat_idx_emb_dim: 1
+  learning_rate: 0.001
+  num_samples: 100
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: ettm2
+      split_val: true
+      scaler: standard # identity, standard, temporal
+      context_length: 24
+      prediction_length: 24
+  batch_size: 64
+  test_batch_size: 64
+  num_workers: 8

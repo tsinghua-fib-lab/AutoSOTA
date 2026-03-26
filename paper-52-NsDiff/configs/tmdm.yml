@@ -1,0 +1,106 @@
+data:
+    dataset: "8gauss"
+    true_function: None
+    dataset_size: 10240
+    seed: 2000
+    no_multimodality: False
+    inverse_xy: False
+    x_dict: {"ct_toy_name": "8gaussians"}
+    noise_dict: {}
+    train_ratio: 0.8
+    num_workers: 0
+    normalize_x: False
+    normalize_y: False
+
+model:
+    type: "simple"
+    data_dim: 2
+    x_dim: 1
+    y_dim: 1
+    z_dim: 2
+    cat_x: True
+    cat_y_pred: True
+    feature_dim: 128
+    var_type: fixedlarge
+    ema_rate: 0.9999
+    ema: True
+
+diffusion:
+    beta_schedule: linear  # cosine_anneal
+    beta_start: 0.0001
+    beta_end: 0.02
+    timesteps: 1000
+    vis_step: 100
+    num_figs: 10
+    conditioning_signal: "NN"
+    nonlinear_guidance:
+        pre_train: True
+        joint_train: False
+        n_pretrain_epochs: 100
+        logging_interval: 10
+        hid_layers: [100, 50]
+        use_batchnorm: False
+        negative_slope: 0.01
+        dropout_rate: 0.0
+        apply_early_stopping: False
+        n_pretrain_max_epochs: 1000
+        train_ratio: 0.6  # for splitting original train into train and validation set for hyperparameter tuning
+        patience: 50
+        delta: 0  # hyperparameter for improvement measurement in the early stopping scheme
+
+training:
+    batch_size: 256
+    n_epochs: 5000
+    n_iters: 100000
+    snapshot_freq: 1000000000
+    logging_freq: 1000
+    validation_freq: 128000
+    image_folder: 'training_image_samples'
+
+sampling:
+    batch_size: 256
+    sampling_size: 1000
+    last_only: True
+    image_folder: 'sampling_image_samples'
+
+testing:
+    batch_size: 256
+    sampling_size: 1000
+    last_only: True
+    plot_freq: 200
+    image_folder: 'testing_image_samples'
+    n_z_samples: 100 #1000
+    n_z_samples_depart: 1 #1000
+    n_bins: 10
+
+    compute_metric_all_steps: True
+    mean_t: 0
+    coverage_t: 0
+    nll_t: 0
+    vis_t: 0
+    trimmed_mean_range: [0.0, 100.0]
+    PICP_range: [2.5, 97.5]
+    make_plot: True
+    squared_plot: True
+    plot_true: True
+    plot_gen: True
+    fig_size: [8, 5]
+    one_fig_size: [4, 4]
+
+optim:
+    weight_decay: 0.000
+    optimizer: "Adam"
+    lr: 0.001
+    beta1: 0.9
+    amsgrad: false
+    eps: 0.00000001
+    grad_clip: 1.0
+
+aux_optim:
+    weight_decay: 0.000
+    optimizer: "Adam"
+    lr: 0.001
+    beta1: 0.9
+    amsgrad: True
+    eps: 0.00000001
+    grad_clip: 1.0

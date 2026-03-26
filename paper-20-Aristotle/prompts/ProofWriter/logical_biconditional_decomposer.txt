@@ -1,0 +1,97 @@
+Task description:
+Given the premises in first-order logic form, please decompose the FOL statement using normalization and skolemization.
+—--
+Rules:
+Normalization: Convert each premise and the conclusion to Prenex Normal Form (PNF) and then to Conjunctive Normal Form (CNF).
+
+- **CNF Definition**:
+  - A formula is in **Conjunctive Normal Form (CNF)** if it is a conjunction (AND, ∧) of clauses, where each clause is a disjunction (OR, ∨) of literals.
+  - A **literal** is an atomic formula or its negation.
+
+- **Negating Clauses**:
+  - **First**: If the clause includes a boolean value (True or False), switch the boolean value (True ↔ False).
+
+- **Conversion Negations**:
+  1. A↔B ≡ (¬A∨B)∧(¬B∨A)
+  2. (A ∧ B) ⇔ C ≡ (¬A∨¬B∨C)∧(¬C∨A)∧(¬C∨B)
+  3. (A∧B)↔(C∧D) ≡ (¬A∨¬B∨C)∧(¬A∨¬B∨D)∧(¬C∨¬D∨A)∧(¬C∨¬D∨B)
+---
+Below is an example:
+Context:
+1. Shy($x, True) ∧ Calm($x, False) ⇔ ((Huge($x, False) ∧ WideEyed($x, True)))
+2. (Alert($x, False) ∧ Noisy($x, False)) ⇔ Rich($x, True)
+3. \forall x \left(Sociable(x, True) \leftrightarrow Doubtful(x, False)\right)
+
+
+#### Rule 1: 
+\[
+Shy($x, True) ∧ Calm($x, False) ⇔ ((Huge($x, False) ∧ WideEyed($x, True)))
+\]
+- Identify corresponding biconditional conversion rule: 
+    Since we have a biconditional involving conjunctions on both sides, we apply the formula for (A∧B)↔(C∧D)
+- Apply biconditional conversion rule:
+  \[
+  (A∧B)↔(C∧D)≡(¬A∨¬B∨C)∧(¬A∨¬B∨D)∧(¬C∨¬D∨A)∧(¬C∨¬D∨B)
+  A=Shy(x,True), B=Calm(x,False), C=Huge(x,False), D=WideEyed(x,True)
+  \]
+- Subsutitude these into the conversion rule (¬A∨¬B∨C)∧(¬A∨¬B∨D)∧(¬C∨¬D∨A)∧(¬C∨¬D∨B)
+  \[
+    ¬A=Shy(x,False), ¬B=Calm(x,True), ¬C=Huge(x,True), ¬D=WideEyed(x,False)
+  \]
+- Substituting into the formula:
+  \[
+  (Shy(x,False)∨Calm(x,True)∨Huge(x,False))∧(Shy(x,False)∨Calm(x,True)∨WideEyed(x,True))∧(Huge(x,True)∨WideEyed(x,False)∨Shy(x,True))∧(Huge(x,True)∨WideEyed(x,False)∨Calm(x,False))
+  \]
+
+
+#### Rule 2: 
+\[
+(Alert($x, False) ∧ Noisy($x, False)) ⇔ Rich($x, True)
+\]
+- Identify corresponding biconditional conversion rule: 
+    Since we have a biconditional of the form (A∧B)↔C, we apply the formula for (A∧B)↔C
+- Apply biconditional conversion rule:
+  \[
+  (A∧B)↔C≡(¬A∨¬B∨C)∧(¬C∨A)∧(¬C∨B)
+  A=Alert(x,False), B=Noisy(x,False), C=Rich(x,True)
+  \]
+- Subsutitude these into the conversion rule (¬A∨¬B∨C)∧(¬C∨A)∧(¬C∨B)
+  \[
+    ¬A=Alert(x,True), ¬B=Noisy(x,True), ¬C=Rich(x,False)
+  \]
+- Substituting into the formula:
+  \[
+  (Alert(x,True)∨Noisy(x,True)∨Rich(x,True))∧(Rich(x,False)∨Alert(x,False))∧(Rich(x,False)∨Noisy(x,False))
+  \]
+
+
+#### Rule 3: 
+\[
+\forall x \left(Sociable(x, True) \leftrightarrow Doubtful(x, False)\right)
+\]
+- Identify corresponding biconditional conversion rule: 
+   Since we have a biconditional of the form A↔B, we apply the formula for A↔B
+- Apply biconditional conversion rule:
+  \[
+  A↔B≡(¬A∨B)∧(¬B∨A)
+  A=Sociable(x,True), B=Doubtful(x,False)
+  \]
+- Subsutitude these into the conversion rule (¬A∨B)∧(¬B∨A)
+  \[
+    ¬A=Sociable(x,False), ¬B=Doubtful(x,True)
+  \]
+- Substituting into the formula:
+  \[
+  (Sociable(x,False)∨Doubtful(x,False))∧(Doubtful(x,True)∨Sociable(x,True))
+  \]
+
+Final Form:
+1. (Shy(x,False)∨Calm(x,True)∨Huge(x,False))∧(Shy(x,False)∨Calm(x,True)∨WideEyed(x,True))∧(Huge(x,True)∨WideEyed(x,False)∨Shy(x,True))∧(Huge(x,True)∨WideEyed(x,False)∨Calm(x,False))
+2. (Alert(x,True)∨Noisy(x,True)∨Rich(x,True))∧(Rich(x,False)∨Alert(x,False))∧(Rich(x,False)∨Noisy(x,False))
+3. (Sociable(x,False)∨Doubtful(x,False))∧(Doubtful(x,True)∨Sociable(x,True))
+
+---
+Below is the one you need to decompose using normalization and skolemization. Please clearly indicate the finalized form using 'Final Form: place_holder_for_finalized_form' at the end of your response, and make sure you only need to conclude once (Do not conclude multiple "Final Form"). Please use '\n' to split each clause in the 'Final Form'.
+
+Premises:
+[[PREMISES]]

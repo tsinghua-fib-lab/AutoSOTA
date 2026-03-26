@@ -1,0 +1,45 @@
+defaults:
+  - default 
+  - _self_
+
+batch_size: 8
+weight_decay: 0.0
+losses:
+  - semantic_in
+  - semantic_out
+  - visual_in
+  - visual_out
+  
+metrics:
+  - vsm
+  - oracle
+
+metric_thresholds: [0.5, 0.6, 0.7]
+
+data:
+  train:
+    dataset_name: "automated"  
+    num_samples: 5000
+    train_val_split: 0.9
+    augmentations:
+      enabled: true
+  val:
+    dataset_name: "curated"
+    num_samples: -1
+    train_val_split: 0.9    
+
+model:
+  name: "MindTheGlitchModel"
+  freeze_cleandift: true
+  lr_alpha: 10
+  resnet:
+    num_blocks: 1
+    projection_dim: 384 # similar to diffusion hyperfeatures
+    num_norm_groups: 32
+  final_feat_resolution: 48 # Try 64: Needs fixing the correspondence mapping first
+  feat_type:
+    - "us6"
+    - "us7"
+    - "us8"
+    - "us9"
+    - "us10"

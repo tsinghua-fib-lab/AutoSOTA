@@ -1,0 +1,65 @@
+# @package _global_
+dataset: ArticularyWordRecognition
+task: classification
+
+defaults:
+  - /callbacks/ema: default
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: uea
+  - override /callbacks/model_ckpt: uea
+  - override /datamodule: uea/articularywordrecognition/centralized
+  - override /logger: wandb
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: uea/centralized
+  
+callbacks:
+  lr_scheduler: 
+    monitor: val/loss_ce
+  lr_scheudler:
+    monitor: val/loss_ce
+    patience: 30
+  ema:
+    apply: True
+model:
+  sequence_model:
+    embedding:
+      d_features: 9
+      max_seq_len: 145
+    masking: darem # null, random, darem
+    mask_threshold: 0.2 # 0.1
+    mask_region_bound: 0.1 # 0.1
+    ratio_highest_attention: 0.5 # 0.5
+    activation: relu
+    task: ${task}
+    batch_size: ${training.batch_size} 
+    cls_method: cls_token
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 25
+    d_hidden: null
+    activation: relu
+    reduced: False 
+    cls_method: cls_token
+
+logger:
+  project: articularywordrecognition_sweeps
+  sweep: true
+
+loss:
+  pred_type: multiclass
+  task: ${task}
+datamodule:
+  val_batch_size: 300 
+#  s3_bucket_path: null
+#callbacks:
+#  lr_scheduler:
+#    patience: 8
+#  model_ckpt:
+#    monitor: val/loss
+#    mode: min
+  
+  
+  

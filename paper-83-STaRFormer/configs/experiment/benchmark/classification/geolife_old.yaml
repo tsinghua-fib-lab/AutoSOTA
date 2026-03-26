@@ -1,0 +1,120 @@
+# @package _global_
+callbacks: 
+  early_stop:
+    mode: min
+    monitor: val/loss
+    verbose: true
+    patience: 30
+  model_ckpt:
+    mode: max
+    monitor: val/acc
+    verbose: false
+    save_last: true
+  lr_scheduler:
+    mode: min
+    name: ReduceLROnPlateau
+    apply: true
+    factor: 0.8
+    min_lr: 1.0e-06
+    monitor: val/loss
+    patience: 8
+datamodule: 
+  seed: 42
+  num_val: null
+  num_test: null
+  num_train: null
+  batch_size: 64
+  aws_profile: null
+  num_workers: 0
+  text_labels:
+  - 0
+  - 1
+  - 2
+  - 3
+  pad_sequence: true
+  display_labels:
+  - bike
+  - bus
+  - car
+  - walk
+  s3_bucket_path: null
+  val_batch_size: 64
+  test_batch_size: 64
+  training_method: centralized
+  dataset_instance: 2024-10-22_15:41:02
+  train_test_split:
+    val: 0.1
+    test: 0.2
+    train: 0.7
+  max_trajectory_length: 512
+  identical_training_class_label_distribution: false
+  synthetic_minority_upsampling: false
+  noise_level: 0.01
+dataset: geolife
+loss: 
+  temp: 0.5
+  loss_fn: contrastive_loss
+  lamdba_sim: 0.5
+  lambda_contrastive: 0.7733939099551443
+logger:
+  name: tensorboard
+  sweep: false
+  entity: null
+  project: geolife
+  exp_name: null
+  sweep_id: null
+  run_1_config_path: null
+model:
+  bias: true
+  name: starformer
+  n_head: 8
+  d_model: 32
+  dropout: 0.11918441460166762
+  masking: drm
+  embedding:
+    d_features: 10
+    max_seq_len: 9255
+  activation: silu
+  mask_check: true
+  batch_first: false
+  output_head:
+    per_element_in_sequence_pred: false
+    autoregressive_classification: false
+    reconstruction: false
+    d_out: 4
+    reduced: true
+    batch_size: 64
+  return_attn: false
+  activation_cls: tanh
+  layer_norm_eps: 1.0e-05
+  mask_threshold: 0.398759639393557
+  reconstruction: false
+  dim_feedforward: 128
+  mask_region_bound: 0.05
+  activation_masking: selu
+  num_encoder_layers: 3
+  enable_nested_tensor: true
+  ratio_highest_attention: 0.1
+  aggregate_attn_per_batch: false
+optimizer:
+  eps: 1.0e-08
+  name: adam
+  beta1: 0.884157993679976
+  beta2: 0.9011659252670148
+  weight_decay: 0.0004910602374212307
+seed: 42
+run: 2024-11-19_18:26:34
+system:
+  devices: 1
+  accelerator: gpu
+  num_workers: 0
+training: 
+  epochs: 300
+  devices: 2
+  fast_dev: false
+  precision: 32
+  batch_size: 64
+  learning_rate: 0.0011317951703405868
+  val_batch_size: 64
+  test_batch_size: 64
+  log_every_n_steps: 10

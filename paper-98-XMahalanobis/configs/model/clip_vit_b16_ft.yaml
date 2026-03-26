@@ -1,0 +1,26 @@
+backbone: "CLIP-ViT-B/16"
+resolution: 224
+
+output_dir: null
+print_freq: 10
+
+seed: 0
+deterministic: True
+gpu: 0
+num_workers: 8
+prec: "amp"
+
+num_epochs: 10
+batch_size: 128
+micro_batch_size: 128
+lr: 0.01
+weight_decay: 5e-4
+momentum: 0.9
+loss_type: "LA"
+classifier: "CosineClassifier"
+
+full_tuning: True
+partial: null
+
+init_head: "text_feat"
+test_ensemble: False

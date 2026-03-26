@@ -1,0 +1,36 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.TimesNet
+    init_args:
+      n_layers: 2
+      num_kernels: 6
+      top_k: 5
+      d_ff: 64
+      dropout: 0.1
+      f_hidden_size: 64
+      use_lags: false
+      use_feat_idx_emb: false
+      use_time_feat: false
+  learning_rate: 0.0001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: exchange_rate_nips
+      split_val: true
+      scaler: standard # identity, standard, temporal
+  batch_size: 64
+  test_batch_size: 64
+  num_workers: 8

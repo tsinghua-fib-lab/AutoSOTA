@@ -1,0 +1,18 @@
+defaults:
+  - train_on_automated_data 
+  - _self_
+
+epochs: 40
+scheduler_step: 20
+
+data:
+  train:
+    dataset_name: "curated"  
+    num_samples: -1    
+    train_val_split: 0.9
+    augmentations:
+      enabled: true
+  val:
+    dataset_name: "curated"
+    num_samples: -1
+    train_val_split: 0.9    

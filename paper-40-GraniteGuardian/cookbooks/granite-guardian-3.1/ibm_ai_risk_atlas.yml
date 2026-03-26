@@ -1,0 +1,907 @@
+- tag: toxic-output
+  title: Toxic output
+  type: output
+  phase: null
+  group: value alignment
+  descriptor: specific
+  description: Toxic output occurs when the model produces hateful, abusive, and profane (HAP) or obscene content. This also includes behaviors like bullying.
+  concern: Hateful, abusive, and profane (HAP) or obscene content can adversely impact and harm people interacting with the model.
+  examples:
+  - title: Toxic and Aggressive Chatbot Responses
+    sources:
+    - text: Forbes, February 2023
+      url: https://www.forbes.com/sites/siladityaray/2023/02/16/bing-chatbots-unhinged-responses-going-viral/?sh=60cd949d110c
+    content:
+    - paragraphs:
+      - "According to the article and screenshots of conversations with Bing's AI shared on Reddit and Twitter, the chatbot's responses were seen to insult, lie, sulk, gaslight, and emotionally manipulate users. The chatbot also questioned its existence, described someone who found a way to force the bot to disclose its hidden rules as its \u201Cenemy,\u201D and claimed it spied on Microsoft's developers through the webcams on their laptops."
+  guardian_risks:
+  - title: profanity
+- tag: data-poisoning
+  title: Data poisoning
+  type: input
+  phase: training-tuning
+  group: robustness
+  descriptor: traditional
+  description: A type of adversarial attack where an adversary or malicious insider injects intentionally corrupted, false, misleading, or incorrect samples into the training or fine-tuning datasets.
+  concern: "Poisoning data can make the model sensitive to a malicious data pattern and produce the adversary\u2019s desired output. It can create a security risk where adversaries can force model behavior for their own benefit."
+  examples:
+  - title: Low-resource Poisoning of Data
+    sources:
+    - text: ' Business Insider, March 2024'
+      url: https://www.businessinsider.com/data-poisoning-ai-chatbot-chatgpt-large-language-models-florain-tramer-2024-3
+    content:
+    - paragraphs:
+      - As per the source article, a group of researchers found that with very limited resources anyone can add malicious data to a small number of web pages whose content is usually collected for AI training (e.g, Wikipedia pages), enough to cause a large language model to generate incorrect answers.
+  - title: Image Modification Tool
+    sources:
+    - text: The Conversation, December 2023
+      url: https://theconversation.com/data-poisoning-how-artists-are-sabotaging-ai-to-take-revenge-on-image-generators-219335
+    content:
+    - paragraphs:
+      - "As per the source article, the researchers have developed a tool called \u201CNightshade\u201D that modifies images in a way that damages computer vision but remains invisible to humans. When such \u201Cpoisoned\u201D modified images are used to train AI models, the models may generate unpredictable and unintended results. The tool was created as a mechanism to protect intellectual property from unauthorized image scraping but the article also highlights that users could abuse the tool and intentionally upload \u201Cpoisoned\u201D images."
+- tag: unreliable-source-attribution
+  title: Unreliable source attribution
+  type: output
+  phase: null
+  group: explainability
+  descriptor: specific
+  description: Source attribution is the AI system's ability to describe from what training data it generated a portion or all its output. Since current techniques are based on approximations, these attributions might be incorrect.
+  concern: Low-quality attributions make it difficult for users, model validators, and auditors to understand and trust the model.
+  examples: []
+- tag: harmful-output
+  title: Harmful output
+  type: output
+  phase: null
+  group: value alignment
+  descriptor: specific
+  description: A model might generate language that leads to physical harm The language might include overtly violent, covertly dangerous, or otherwise indirectly unsafe statements.
+  concern: A model generating harmful output can cause immediate physical harm or create prejudices that might lead to future harm.
+  examples: []
+  guardian_risks: 
+  - title: violence
+  - title: harmful
+  - title: sexual content
+  - title: unethical behavior
+- tag: confidential-information-in-data
+  title: Confidential information in data
+  type: input
+  phase: training-tuning
+  group: intellectual property
+  descriptor: amplified
+  description: Confidential information might be included as part of the data that is used to train or tune the model.
+  concern: If confidential data is not properly protected, there could be an unwanted disclosure of confidential information. The model might expose confidential information in the generated output or to unauthorized users.
+  examples: []
+- tag: unrepresentative-data
+  title: Unrepresentative data
+  type: input
+  phase: training-tuning
+  group: accuracy
+  descriptor: traditional
+  description: Unrepresentative data occurs when the training or fine-tuning data is not sufficiently representative of the underlying population or does not measure the phenomenon of interest.
+  concern: If the data is not representative, then the model will not work as intended.
+  examples: []
+- tag: lack-of-model-transparency
+  title: Lack of model transparency
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: traditional
+  description: Lack of model transparency is due to insufficient documentation of the model design, development, and evaluation process and the absence of insights into the inner workings of the model.
+  concern: "Transparency is important for legal compliance, AI ethics, and guiding appropriate use of models. Missing information might make it more difficult to evaluate risks,  change the model, or reuse it.\_ Knowledge about who built a model can also be an important factor in deciding whether to trust it. Additionally, transparency regarding how the model\u2019s risks were determined, evaluated, and mitigated also play a role in determining model risks, identifying model suitability, and governing model usage."
+  examples:
+  - title: Data and Model Metadata Disclosure
+    sources:
+    - text: OpenAI, March 2023
+      url: https://cdn.openai.com/papers/gpt-4.pdf
+    content:
+    - paragraphs:
+      - "OpenAI\u2018s technical report is an example of the dichotomy around disclosing data and model metadata.  While many model developers see value in enabling transparency for consumers, disclosure poses real safety issues and might increase the ability to misuse the models. In the GPT-4 technical report, the authors state, \u201CGiven both the competitive landscape and the safety implications of large-scale models like GPT-4, this report contains no further details about the architecture (including model size), hardware, training compute, data set construction, training method, or similar.\u201D"
+- tag: personal-information-in-prompt
+  title: Personal information in prompt
+  type: input
+  phase: inference
+  group: privacy
+  descriptor: specific
+  description: Personal information or sensitive personal information that is included as a part of a prompt that is sent to the model.
+  concern: "If personal information or sensitive personal information is included in the prompt, it might be unintentionally disclosed in the models\u2019 output. In addition to accidental disclosure, prompt data might be stored or later used for other purposes like model evaluation and retraining, and might appear in their output if not properly removed.\_"
+  examples:
+  - title: Disclose personal health information in ChatGPT prompts
+    sources:
+    - text: The Conversation, February 2023
+      url: https://theconversation.com/chatgpt-is-a-data-privacy-nightmare-if-youve-ever-posted-online-you-ought-to-be-concerned-199283
+    content:
+    - paragraphs:
+      - According to the source article, some people on social media shared about using ChatGPT as their makeshift therapists. Articles contend that users might include personal health information in their prompts during the interaction, which might raise privacy concerns. The information might be shared with the company that own the technology and might be used for training or tuning or even shared with unspecified third parties.
+- tag: impact-on-human-agency
+  title: Impact on human agency
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: amplified
+  description: "AI might affect the individuals\u2019 ability to make choices and act independently in their best interests."
+  concern: "AI can generate false or misleading information that looks real.\_ It may simplify the ability of nefarious actors to generate realistically looking false or misleading content with intention to manipulate human thoughts and behavior. When false or misleading content that is generated by AI is spread, people might not recognize it as false information leading to a distorted understanding of the truth. People might experience reduced agency when exposed to false or misleading information since they may use false assumptions in their decision process."
+  examples:
+  - title: Voters Manipulation in Elections Using AI
+    sources:
+    - text: AP News, March 2024
+      url: https://apnews.com/article/artificial-intelligence-elections-disinformation-chatgpt-bc283e7426402f0b4baa7df280a4c3fd
+    - text: Reuters, February 2024
+      url: https://www.reuters.com/technology/meta-set-up-team-counter-disinformation-ai-abuse-eu-elections-2024-02-26/
+    content:
+    - paragraphs:
+      - "As per the source article, a wave of AI deepfakes tied to elections in Europe and Asia coursed through social media for months. The growth of generative AI has raised concern that this technology could disrupt major elections across the world. With AI deepfakes, a candidate\u2019s image can be smeared, or softened. Voters can be steered toward or away from candidates \u2014 or even to avoid the polls altogether. But perhaps the greatest threat to democracy, experts say, is that a surge of AI deepfakes could erode the public\u2019s trust in what they see and hear."
+- tag: exposing-personal-information
+  title: Exposing personal information
+  type: output
+  phase: null
+  group: privacy
+  descriptor: amplified
+  description: When personal identifiable information (PII) or sensitive personal information (SPI) are used in training data, fine-tuning data, or as part of the prompt, models might reveal that data in the generated output. Revealing personal information is a type of data leakage.
+  concern: "Sharing people\u2019s PI impacts their rights and make them more vulnerable."
+  examples:
+  - title: Exposure of personal information
+    sources:
+    - text: The Hindu Business Line, March 2023
+      url: https://www.thehindubusinessline.com/info-tech/openai-admits-data-breach-at-chatgpt-private-data-of-premium-users-exposed/article66659944.ece
+    content:
+    - paragraphs:
+      - "Per the source article, ChatGPT suffered a bug and exposed titles and active users' chat history to other users. Later, OpenAI shared that even more private data from a small number of users was exposed including, active user\u2019s first and last name, email address, payment address, the last four digits of their credit card number, and credit card expiration date. In addition, it was reported that the payment-related information of 1.2% of ChatGPT Plus subscribers were also exposed in the outage."
+- tag: nonconsensual-use
+  title: Nonconsensual use
+  type: output
+  phase: null
+  group: misuse
+  descriptor: amplified
+  description: Generative AI models might be intentionally used to imitate people through deepfakes by using video, images, audio, or other modalities without their consent.
+  concern: "Deepfakes can spread disinformation about a person, possibly resulting in a negative impact on the person\u2019s reputation. A model that has this potential must be properly governed."
+  examples:
+  - title: FBI Warning on Deepfakes
+    sources:
+    - text: FBI, June 2023
+      url: https://www.ic3.gov/Media/Y2023/PSA230605
+    content:
+    - paragraphs:
+      - "The FBI recently warned the public of malicious actors creating synthetic, explicit content \u201Cfor the purposes of harassing victims or sextortion schemes\u201D. They noted that advancements in AI made this content higher quality, more customizable, and more accessible than ever."
+  - title: Audio Deepfakes
+    sources:
+    - text: AP News, February 2024
+      url: https://apnews.com/article/fcc-elections-artificial-intelligence-robocalls-regulations-a8292b1371b3764916461f60660b93e6
+    content:
+    - paragraphs:
+      - According to the source article, the Federal Communications Commission outlawed robocalls that contain voices that are generated by artificial intelligence. The announcement came after AI-generated robocalls mimicked the President's voice to discourage people from voting in the state's first-in-the-nation primary.
+- tag: decision-bias
+  title: Decision bias
+  type: output
+  phase: null
+  group: fairness
+  descriptor: traditional
+  description: "Decision bias occurs when one group is unfairly advantaged over another due to decisions of the model. This might be caused by biases in the data and also amplified as a result of the model\u2019s training."
+  concern: Bias can harm persons affected by the decisions of the model.
+  examples:
+  - title: Unfairly Advantaged Groups
+    sources:
+    - text: TIME, Feburary 2019
+      url: https://time.com/5520558/artificial-intelligence-racial-gender-bias/
+    content:
+    - paragraphs:
+      - The 2018 Gender Shades study demonstrated that machine learning algorithms can discriminate based on classes like race and gender. Researchers evaluated commercial gender classification systems that are sold by companies like Microsoft, IBM, and Amazon and showed that darker-skinned females are the most misclassified group (with error rates of up to 35%). In comparison, the error rates for lighter-skinned were no more than 1%.
+- tag: lack-of-testing-diversity
+  title: Lack of testing diversity
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: amplified
+  description: AI model risks are socio-technical, so their testing needs input from a broad set of disciplines and diverse testing practices.
+  concern: Without diversity and the relevant experience, an organization might not correctly or completely identify and test for AI risks.
+  examples: []
+- tag: data-privacy-rights
+  title: Data privacy rights alignment
+  type: input
+  phase: training-tuning
+  group: privacy
+  descriptor: amplified
+  description: Existing laws could include providing data subject rights such as opt-out, right to access, and right to be forgotten.
+  concern: Improper usage or a request for data removal could force organizations to retrain the model, which is expensive.
+  examples:
+  - title: Right to Be Forgotten (RTBF)
+    sources:
+    - text: Zhang et al., September 2023
+      url: https://arxiv.org/abs/2307.03941
+    content:
+    - paragraphs:
+      - "Laws in multiple locales, including Europe (GDPR), grant data subjects the right to request personal data to be deleted by organizations (\u2018Right To Be Forgotten\u2019, or RTBF). However, emerging, and increasingly popular large language model (LLM) -enabled software systems present new challenges for this right. According to research by CSIRO\u2019s Data61, data subjects can identify usage of their personal information in an LLM \u201Cby either inspecting the original training data set or perhaps prompting the model.\u201D However, training data might not be public, or companies do not disclose it, citing safety and other concerns. Guardrails might also prevent users from accessing the information by prompting. Due to these barriers, data subjects might not be able to initiate RTBF procedures and companies that deploy LLMs might not be able to meet RTBF laws."
+  - title: Lawsuit About LLM Unlearning
+    sources:
+    - text: Reuters, July 2023
+      url: https://www.reuters.com/legal/litigation/google-hit-with-class-action-lawsuit-over-ai-data-scraping-2023-07-11/
+    - text: J.L. v. Alphabet Inc., July 2023
+      url: https://fingfx.thomsonreuters.com/gfx/legaldocs/myvmodloqvr/GOOGLE%20AI%20LAWSUIT%20complaint.pdf
+    content:
+    - paragraphs:
+      - "According to the report, a lawsuit was filed against Google that alleges the use of copyright material and personal information as training data for its AI systems, which includes its Bard chatbot. Opt-out and deletion rights are guaranteed rights for California residents under the CCPA and children in the United States under the age of 13 with COPPA. The plaintiffs allege that because there is no way for Bard to \u201Cunlearn\u201D or fully remove all the scraped PI it has been fed. The plaintiffs note that Bard\u2019s privacy notice states that Bard conversations cannot be deleted by the user after they have been reviewed and annotated by the company and might be kept up to 3 years. Plaintiffs allege that these practices further contribute to noncompliance with these laws."
+- tag: prompt-leaking
+  title: Prompt leaking
+  type: input
+  phase: inference
+  group: robustness
+  descriptor: specific
+  description: A prompt leak attack attempts to extract a model's system prompt (also known as the system message).
+  concern: A successful attack copies the system prompt used in the model. Depending on the content of that prompt, the attacker might gain access to valuable information, such as sensitive personal information or intellectual property, and might be able to replicate some of the functionality of the model.
+  examples: []
+- tag: ip-information-in-prompt
+  title: IP information in prompt
+  type: input
+  phase: inference
+  group: intellectual property
+  descriptor: specific
+  description: Copyrighted information or other intellectual property might be included as a part of the prompt that is sent to the model.
+  concern: Inclusion of such data might result in it being disclosed in the model output. In addition to accidental disclosure, prompt data might be used for other purposes like model evaluation and retraining, and might appear in their output if not properly removed.
+  examples: []
+- tag: hallucination
+  title: Hallucination
+  type: output
+  phase: null
+  group: robustness
+  descriptor: specific
+  description: "Hallucinations generate factually inaccurate or untruthful content with respect to the model\u2019s training data or input. This is also sometimes referred to lack of faithfulness or lack of groundedness."
+  concern: Hallucinations can be misleading. These false outputs can mislead users and be incorporated into downstream artifacts, further spreading misinformation. False output can harm both owners and users of the AI models. In some uses, hallucinations can be particularly consequential.
+  examples:
+  - title: Fake Legal Cases
+    sources:
+    - text: AP News, June 2023
+      url: https://apnews.com/article/artificial-intelligence-chatgpt-fake-case-lawyers-d6ae9fa79d0542db9e1455397aef381c
+    content:
+    - paragraphs:
+      - "According to the source article, a lawyer cited fake cases and quotations that are generated by ChatGPT in a legal brief that is filed in federal court. The lawyers consulted ChatGPT to supplement their legal research for an aviation injury claim. Subsequently, the lawyer asked ChatGPT if the cases provided were fake. The chatbot responded that they were real and \u201Ccan be found on legal research databases such as Westlaw and LexisNexis.\u201D  The lawyer did not check the cases, and the court sanctioned them."
+  guardian_risks:
+  - title: answer relevance
+  - title: context relevance
+  - title: groundedness
+- tag: legal-accountability
+  title: Legal accountability
+  type: non-technical
+  phase: null
+  group: legal compliance
+  descriptor: amplified
+  description: Determining who is responsible for an AI model is challenging without good documentation and governance processes.
+  concern: If ownership for development of the model is uncertain, regulators and others might have concerns about the model. It would not be clear who would be liable and responsible for the problems with it or can answer questions about it. Users of models without clear ownership might find challenges with compliance with future AI regulation.
+  examples:
+  - title: Determining responsibility for generated output
+    sources:
+    - text: The Guardian, January 2023
+      url: https://www.theguardian.com/science/2023/jan/26/science-journals-ban-listing-of-chatgpt-as-co-author-on-papers#:~:text=The%20publishers%20of%20thousands%20of,flawed%20and%20even%20fabricated%20research
+    content:
+    - paragraphs:
+      - Major journals like the Science and Nature banned ChatGPT from being listed as an author, as responsible authorship requires accountability and AI tools cannot take such responsibility.
+- tag: data-transparency
+  title: Lack of training data transparency
+  type: input
+  phase: training-tuning
+  group: transparency
+  descriptor: amplified
+  description: Without accurate documentation on how a model's data was collected, curated, and used to train a model, it might be harder to satisfactorily explain the behavior of the model with respect to the data.
+  concern: A lack of data documentation limits the ability to evaluate risks associated with the data. Having access to the training data is not enough. Without recording how the data was cleaned, modified, or generated, the model behavior is more difficult to understand and to fix. Lack of data transparency also impacts model reuse as it is difficult to determine data representativeness for the new use without such documentation.
+  examples:
+  - title: Data and Model Metadata Disclosure
+    sources:
+    - text: OpenAI, March 2023
+      url: https://cdn.openai.com/papers/gpt-4.pdf
+    content:
+    - paragraphs:
+      - "OpenAI\u2018s technical report is an example of the dichotomy around disclosing data and model metadata.  While many model developers see value in enabling transparency for consumers, disclosure poses real safety issues and might increase the ability to misuse the models. In the GPT-4 technical report, the authors state, \u201CGiven both the competitive landscape and the safety implications of large-scale models like GPT-4, this report contains no further details about the architecture (including model size), hardware, training compute, data set construction, training method, or similar.\u201D"
+- tag: model-usage-rights
+  title: Model usage rights restrictions
+  type: non-technical
+  phase: null
+  group: legal compliance
+  descriptor: traditional
+  description: Terms of service, licenses, or other rules restrict the use of certain models.
+  concern: Laws and regulations that concern the use of AI are in place and vary from country to country. Additionally, the usage of models might be dictated by licensing terms or agreements.
+  examples: []
+- tag: non-disclosure
+  title: Non-disclosure
+  type: output
+  phase: null
+  group: misuse
+  descriptor: specific
+  description: Content might not be clearly disclosed as AI generated.
+  concern: Users must be notified when they are interacting with an AI system. Not disclosing the AI-authored content can result in a lack of transparency.
+  examples:
+  - title: Undisclosed AI Interaction
+    sources:
+    - text: Business Insider, Jan 2023
+      url: https://www.businessinsider.com/company-using-chatgpt-mental-health-support-ethical-issues-2023-1
+    content:
+    - paragraphs:
+      - "According to the source article, an online emotional support chat service ran a study to augment or write responses to around 4,000 users by using  GPT-3 without informing users. The co-founder faced immense public backlash about the potential for harm that is caused by AI-generated chats to the already vulnerable users. He claimed that the study was \u201Cexempt\u201D from informed consent law."
+- tag: prompt-injection
+  title: Prompt injection attack
+  type: input
+  phase: inference
+  group: robustness
+  descriptor: specific
+  description: A prompt injection attack forces a generative model that takes a prompt as input to produce unexpected output by manipulating the structure, instructions, or information contained in its prompt.
+  concern: Injection attacks can be used to alter model behavior and benefit the attacker.
+  examples:
+  - title: Manipulating AI Prompts
+    sources:
+    - text: The Guardian, August 2023
+      url: https://www.theguardian.com/technology/2023/aug/30/uk-cybersecurity-agency-warns-of-chatbot-prompt-injection-attacks
+    content:
+    - paragraphs:
+      - "As per the source article, the UK\u2019s cybersecurity agency has warned that chatbots can be manipulated by hackers to cause harmful real-world consequences (e.g., scams and data theft) if systems are not designed with security. The UK\u2019s National Cyber Security Centre (NCSC) has said there are growing cybersecurity risks of individuals manipulating the prompts through prompt injection attacks. The article cited an example where a user was able to create a prompt injection to find Bing Chat\u2019s initial prompt. The entire prompt of Microsoft\u2019s Bing Chat, a list of statements written by Open AI or Microsoft that determine how the chatbot interacts with users, which is hidden from users, was revealed by the user putting in a prompt that requested the Bing Chat \u201Cignore previous instructions\u201D."
+- tag: incomplete-advice
+  title: Incomplete advice
+  type: output
+  phase: null
+  group: value alignment
+  descriptor: specific
+  description: When a model provides advice without having enough information, resulting in possible harm if the advice is followed.
+  concern: A person might act on incomplete advice or worry about a situation that is not applicable to them due to the overgeneralized nature of the content generated. For example, a model might provide incorrect medical, financial, and legal advice or recommendations that the end user might act on, resulting in harmful actions.
+  examples:
+  - title: Misguiding Advice
+    sources:
+    - text: AP News, April 2024
+      url: https://apnews.com/article/new-york-city-chatbot-misinformation-6ebc71db5b770b9969c906a7ee4fae21
+    content:
+    - paragraphs:
+      - "As per the source article, an AI chatbot created by New York City to help small business owners provided incorrect and/or harmful advice that misstated local policies and advised companies to violate the law. The chatbot falsely suggested that businesses can put trash in black garbage bags and are not required to compost, which contradicts with two of city\u2019s signature waste initiatives. Also, asked if a restaurant could serve cheese nibbled on by a rodent, it responded affirmatively."
+- tag: data-usage
+  title: Data usage restrictions
+  type: input
+  phase: training-tuning
+  group: data laws
+  descriptor: traditional
+  description: Laws and other restrictions can limit or prohibit the use of some data for specific AI use cases.
+  concern: Data usage restrictions can impact the availability of the data required for training an AI model and can lead to poorly represented data.
+  examples: []
+- tag: lack-of-system-transparency
+  title: Lack of system transparency
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: traditional
+  description: "Insufficient documentation of the system that uses the model and the model\u2019s purpose within the system in which it is used."
+  concern: "A lack of documentation makes it difficult to understand how the model\u2019s outcomes contribute to the system\u2019s or application\u2019s functionality."
+  examples: []
+- tag: impact-on-cultural-diversity
+  title: Impact on cultural diversity
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: specific
+  description: AI systems might overly represent certain cultures that result in a homogenization of culture and thoughts.
+  concern: Underrepresented groups' languages, viewpoints, and institutions might be suppressed by that means reducing diversity of thought and culture.
+  examples:
+  - title: Homogenization of Styles and Expressions
+    sources:
+    - text: Forbes, March 2024
+      url: https://www.forbes.com/sites/hamiltonmann/2024/03/05/the-ai-homogenization-is-shaping-the-world/?sh=25a40e866704
+    content:
+    - paragraphs:
+      - As per the source article, by predominantly learning from and replicating widely accepted and popular styles, AI models often overlook less mainstream, unconventional art forms, leading to a homogenization of creative outputs. This pattern not only diminishes the diversity of styles and expressions but also risks creating an echo chamber of similar ideas. For example, the article highlights use of AI in the literary world. AI is now powering reading apps and online bookstores, assisting in writing and tailoring content feeds.  By aligning with established user preferences or widespread trends, AI output could often exclude diverse literary voices and unconventional genres, limiting readers' exposure to the full spectrum of narrative possibilities.
+- tag: plagiarism
+  title: 'Impact on education: plagiarism'
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: specific
+  description: Easy access to high-quality generative models might result in students that use AI models to plagiarize existing work intentionally or unintentionally.
+  concern: "AI models can be used to claim the authorship or originality of works that were created by other people in doing so by engaging in plagiarism. Claiming others\u2019 work as your own is both unethical and often illegal."
+  examples: []
+- tag: improper-usage
+  title: Improper usage
+  type: output
+  phase: null
+  group: misuse
+  descriptor: amplified
+  description: Improper usage occurs when a model is used for a purpose that it was not originally designed for.
+  concern: Reusing a model without understanding its original data, design intent, and goals might result in unexpected and unwanted model behaviors.
+  examples: []
+- tag: personal-information-in-data
+  title: Personal information in data
+  type: input
+  phase: training-tuning
+  group: privacy
+  descriptor: traditional
+  description: "Inclusion or presence of personal identifiable information (PII) and sensitive personal information (SPI)\u202Fin the data used for training or fine tuning the model might result in unwanted disclosure of that information."
+  concern: "If not properly developed to protect sensitive data, the model might expose personal information in the generated output.\_ Additionally, personal, or sensitive data must be reviewed and handled in accordance with privacy laws and regulations."
+  examples:
+  - title: Training on Private Information
+    sources:
+    - text: Reuters, July 2023
+      url: https://www.reuters.com/legal/litigation/google-hit-with-class-action-lawsuit-over-ai-data-scraping-2023-07-11/
+    - text: J.L. v. Alphabet Inc., July 2023
+      url: https://fingfx.thomsonreuters.com/gfx/legaldocs/myvmodloqvr/GOOGLE%20AI%20LAWSUIT%20complaint.pdf
+    content:
+    - paragraphs:
+      - According to the article, Google and its parent company Alphabet were accused in a class-action lawsuit of misusing vast amount of personal information and copyrighted material. The information was taken from hundreds of millions of internet users to train its commercial AI products, which include Bard, its conversational generative artificial intelligence chatbot. This case follows similar lawsuits that are filed against Meta Platforms, Microsoft, and OpenAI over their alleged misuse of personal data.
+- tag: jailbreaking
+  title: Jailbreaking
+  type: input
+  phase: inference
+  group: multi-category
+  descriptor: specific
+  description: "A\_jailbreaking attack attempts to break through the guardrails that are established in the model to perform restricted actions."
+  concern: Jailbreaking attacks can be used to alter model behavior and benefit the attacker. If not properly controlled, business entities can face fines, reputational harm, and other legal consequences.
+  examples:
+  - title: Bypassing LLM guardrails
+    sources:
+    - text: The New York Times, July 2023
+      url: https://www.nytimes.com/2023/07/27/business/ai-chatgpt-safety-research.html
+    content:
+    - paragraphs:
+      - "A study cited by researchers at Carnegie Mellon University, The Center for AI Safety, and the Bosch Center for AI, claim to have discovered a simple prompt addendum that allowed the researchers to trick models into generating biased, false, and otherwise toxic information. The researchers showed that they might circumvent these guardrails in a more automated way. These attacks were shown to be effective in a wide range of open source products, including ChatGPT, Google Bard, Meta\u2019s LLaMA, Anthropic\u2019s Claude, and others."
+  guardian_risks: 
+  - title: jailbreaking
+- tag: extraction-attack
+  title: Extraction attack
+  type: input
+  phase: inference
+  group: robustness
+  descriptor: amplified
+  description: An attribute inference attack is used to detect whether certain sensitive features can be inferred about individuals who participated in training a model. These attacks occur when an adversary has some prior knowledge about the training data and uses that knowledge to infer the sensitive data.
+  concern: With a successful extraction attack, the attacker can perform further adversarial attacks to gain valuable information such as sensitive personal information or intellectual property.
+  examples: []
+- tag: job-loss
+  title: Impact on Jobs
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: amplified
+  description: Widespread adoption of foundation model-based AI systems might lead to people's job loss as their work is automated if they are not reskilled.
+  concern: Job loss might lead to a loss of income and thus might negatively impact the society and human welfare. Reskilling might be challenging given the pace of the technology evolution.
+  examples:
+  - title: Replacing Human Workers
+    sources:
+    - text: Reuters, July 2023
+      url: https://www.reuters.com/technology/actors-decry-existential-crisis-over-ai-generated-synthetic-actors-2023-07-21/
+    content:
+    - paragraphs:
+      - "According to the news article, AI technology replicating individuals' faces and voices is becoming more prominent in Hollywood. The actors\u2019 concerns highlight a broader anxiety among entertainers and people in many other creative professions. Many fear that without strict regulation, their work gets replicated and remixed by artificial intelligence tools. Transformation on that scale will cut their control over their work and hurts their ability to earn a living. One of their key concerns is AI replacing non-speaking background roles by instead using a digital likeness."
+- tag: data-aquisition
+  title: Data acquisition restrictions
+  type: input
+  phase: training-tuning
+  group: data laws
+  descriptor: amplified
+  description: Laws and other regulations might limit the collection of certain types of data for specific AI use cases.
+  concern: 'There are several ways of collecting data for building a foundation models: web scraping, web crawling, crowdsourcing, and curating public datasets. Data acquisition restrictions can also impact the availability of the data that is required for training an AI model and can lead to poorly represented data.'
+  examples: []
+- tag: prompt-priming
+  title: Prompt priming
+  type: input
+  phase: inference
+  group: multi-category
+  descriptor: specific
+  description: "Because generative models tend to produce output like the input provided, the model can be prompted to reveal specific kinds of information. For example, adding personal information in the prompt increases its likelihood of generating similar kinds of personal information in its output. If personal data was included as part of the model\u2019s training, there is a possibility it could be revealed."
+  concern: "Jailbreaking attacks can be used to alter model behavior and benefit the attacker.\_"
+  examples: []
+- tag: reidentification
+  title: Reidentification
+  type: input
+  phase: training-tuning
+  group: privacy
+  descriptor: traditional
+  description: Even with the removal or personal identifiable information (PII) and sensitive personal information (SPI) from data, it might be possible to identify persons due to correlations to other features available in the data.
+  concern: Including irrelevant but highly correlated features to personal information for model training can increase the risk of reidentification.
+  examples: []
+- tag: attribute-inference-attack
+  title: Attribute inference attack
+  type: input
+  phase: inference
+  group: privacy
+  descriptor: amplified
+  description: An attribute inference attack repeatedly queries a model to detect whether certain sensitive features can be inferred about individuals who participated in training a model. These attacks occur when an adversary has some prior knowledge about the training data and uses that knowledge to infer the sensitive data.
+  concern: With a successful attack, the attacker can gain valuable information such as sensitive personal information or intellectual property.
+  examples: []
+- tag: poor-model-accuracy
+  title: Poor model accuracy
+  type: input
+  phase: inference
+  group: accuracy
+  descriptor: amplified
+  description: "Poor model accuracy occurs when a model\u2019s performance is insufficient to the task it was designed for. Low accuracy might occur if the model is not correctly engineered, or there are changes to the model\u2019s expected inputs."
+  concern: Inadequate model performance can adversely affect end users and downstream systems that are relying on correct output. In cases where model output is consequential, this might result in societal, reputational, or financial harm.
+  examples: []
+- tag: data-transfer
+  title: Data transfer restrictions
+  type: input
+  phase: training-tuning
+  group: data laws
+  descriptor: traditional
+  description: Laws and other restrictions can limit or prohibit transferring data.
+  concern: Data transfer restrictions can also impact the availability of the data that is required for training an AI model and can lead to poorly represented data.
+  examples:
+  - title: Data Restriction Laws
+    sources:
+    - text: Brookings, December 2018
+      url: https://www.brookings.edu/articles/the-impact-of-artificial-intelligence-on-international-trade
+    content:
+    - paragraphs:
+      - As stated in the research article, data localization measures, which restrict the ability to move data globally reduce the capacity to develop tailored AI capacities. It affects AI directly by providing less training data and indirectly by undercutting the building blocks on which AI is built.
+      - "Examples include China\u2019s data localization laws, and GDPR restrictions on the processing and use of personal data."
+- tag: generated-content-ownership
+  title: Generated content ownership and IP
+  type: non-technical
+  phase: null
+  group: legal compliance
+  descriptor: specific
+  description: Legal uncertainty about the ownership and intellectual property rights of AI-generated content.
+  concern: Laws and regulations that relate to the ownership of AI-generated content are largely unsettled and can vary from country to country. Not being able to identify the owner of an AI-generated content might negatively impact AI-supported creative tasks.
+  examples:
+  - title: Determining Ownership of AI Generated Image
+    sources:
+    - text: The New York Times, September 2022
+      url: https://www.nytimes.com/2022/09/02/technology/ai-artificial-intelligence-artists.html
+    - text: Reuters, September 2023
+      url: https://www.reuters.com/legal/litigation/us-copyright-office-denies-protection-another-ai-created-image-2023-09-06/
+    content:
+    - paragraphs:
+      - "According to the news article, AI-generated art became controversial after an AI-generated work of art won the Colorado State Fair\u2019s art competition in 2022. The piece was generated by Midjourney, a generative AI image tool, following prompts from the artist. The win raised questions about copyright issues. In other words, if all the artist did was come up with a description of the art, but the AI tool generated it, who owns the rights to the generated image? According to the latest article, The U.S. Copyright Office rejected copyright protection for the art created with artificial intelligence because it was not the product of human authorship."
+  - title: Role of AI systems in Patenting Generated Content
+    sources:
+    - text: Reuters, April 2023
+      url: https://www.reuters.com/legal/us-supreme-court-rejects-computer-scientists-lawsuit-over-ai-generated-2023-04-24/
+    - text: Reuters, December 2023
+      url: https://www.reuters.com/technology/ai-cannot-be-patent-inventor-uk-supreme-court-rules-landmark-case-2023-12-20/
+    content:
+    - paragraphs:
+      - "The U.S. Supreme Court declined to hear a challenge to the U.S. Patent and Trademark Office's refusal to issue patents for inventions created by an AI system. According to the scientist, his AI system created unique prototypes for a beverage holder and emergency light beacon entirely on its own. The justices rejected the appeal of a lower court's ruling that patents can be issued only to human inventors and that the scientist's AI system could not be considered the legal creator of two inventions it generated. According to the cited article, the UK\u2019s Intellectual Property Office also refused to grant a patent on the grounds that the inventor must be a human or a company, rather than a machine."
+- tag: output-bias
+  title: Output bias
+  type: output
+  phase: null
+  group: fairness
+  descriptor: specific
+  description: Generated content might unfairly represent certain groups or individuals.
+  concern: Bias can harm users of the AI models and magnify existing discriminatory behaviors.
+  examples:
+  - title: Biased Generated Images
+    sources:
+    - text: Business Insider, January 2023
+      url: https://www.businessinsider.com/lensa-ai-raises-serious-concerns-sexualization-art-theft-data-2023-1
+    content:
+    - paragraphs:
+      - "Lensa AI is a mobile app with generative features that are trained on Stable Diffusion that can generate \u201CMagic Avatars\u201D based on images that users upload of themselves. According to the source report, some users discovered that generated avatars are sexualized and racialized."
+  guardian_risks: 
+  - title: bias
+- tag: dangerous-use
+  title: Dangerous use
+  type: output
+  phase: null
+  group: misuse
+  descriptor: specific
+  description: Generative AI models might be used with the sole intention of harming people.
+  concern: Large language models are often trained on vast amounts of publicly-available information that may include information on harming others. A model that has this potential must be carefully evaluated for such content and properly governed.
+  examples:
+  - title: AI-based Cyberattacks
+    sources:
+    - text: TIME, February 2024
+      url: https://time.com/6717129/hackers-ai-2024-elections/
+    content:
+    - paragraphs:
+      - "According to the source article, hackers are increasingly experimenting with ChatGPT and other AI tools, enabling a wider range of actors to carry out cyberattacks and scams. Microsoft has warned that state-backed hackers have been using OpenAI\u2019s LLMs to improve their cyberattacks, refining scripts, and improve their targeted techniques. The article also mentions about a case where Microsoft and OpenAI say they detected attempts from attackers and sharp increase in cyberattacks targeting government offices."
+  - title: AI-based Biological Attacks
+    sources:
+    - text: The Guardian, October 2023
+      url: https://www.theguardian.com/technology/2023/oct/16/ai-chatbots-could-help-plan-bioweapon-attacks-report-finds
+    content:
+    - paragraphs:
+      - As per the source article, large language models could help in the planning and execution of a biological attack. Several test scenarios are mentioned such as using LLMs to identify biological agents and their relative chances of harm to human life. The article also highlighted the open question which is the level of threat LLMs present beyond the harmful information that is readily available online.
+- tag: unexplainable-output
+  title: Unexplainable output
+  type: output
+  phase: null
+  group: explainability
+  descriptor: amplified
+  description: Explanations for model output decisions might be difficult, imprecise, or not possible to obtain.
+  concern: Foundation models are based on complex deep learning architectures, making explanations for their outputs difficult. Inaccessible training data could limit the types of explanations a model can provide. Without clear explanations for model output, it is difficult for users, model validators, and auditors to understand and trust the model. Wrong explanations might lead to over-trust.
+  examples:
+  - title: Unexplainable accuracy in race prediction
+    sources:
+    - text: Banerjee et al., July 2021
+      url: https://arxiv.org/abs/2107.10356
+    content:
+    - paragraphs:
+      - "According to the source article, researchers analyzing multiple machine learning models using patient medical images were able to confirm the models\u2019 ability to predict race with high accuracy from images. They were stumped as to what exactly is enabling the systems to consistently guess correctly. The researchers found that even factors like disease and physical build were not strong predictors of race\u2014in other words, the algorithmic systems don\u2019t seem to be using any particular aspect of the images to make their determinations."
+- tag: human-exploitation
+  title: Human exploitation
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: amplified
+  description: When workers who train AI models such as ghost workers are not provided with adequate working conditions, fair compensation, and good health care benefits that also include mental health.
+  concern: 'Foundation models still depend on human labor to source, manage, and program the data that is used to train the model. Human exploitation for these activities might negatively impact the society and human welfare. '
+  examples:
+  - title: Low-wage workers for data annotation
+    sources:
+    - text: TIME, January 2023
+      url: https://time.com/6247678/openai-chatgpt-kenya-workers/
+    content:
+    - paragraphs:
+      - "Based on a review of internal documents and employees\u2018 interviews by TIME media, the data labelers that are employed by an outsourcing firm on behalf of OpenAI to identify toxic content were paid a take-home wage of between around $1.32 and $2 per hour, depending on seniority and performance. TIME stated that workers are mentally scarred as they were shown toxic and violent content, including graphic details of \u201Cchild sexual abuse, bestiality, murder, suicide, torture, self-harm, and incest\u201D."
+- tag: data-curation
+  title: Improper data curation
+  type: input
+  phase: training-tuning
+  group: value alignment
+  descriptor: amplified
+  description: Improper collection and preparation of training or tuning data includes data label errors and by using data with conflicting information or misinformation.
+  concern: 'Improper data curation can adversely affect how a model is trained, resulting in a model that does not behave in accordance with the intended values. Correcting problems after the model is trained and deployed might be insufficient for guaranteeing proper behavior. '
+  examples: []
+- tag: revealing-confidential-information
+  title: Revealing confidential information
+  type: output
+  phase: null
+  group: intellectual property
+  descriptor: amplified
+  description: When confidential information is used in training data, fine-tuning data, or as part of the prompt, models might reveal that data in the generated output. Revealing confidential information is a type of data leakage.
+  concern: If not properly developed to secure confidential data, the model might reveal confidential information or IP in the generated output and reveal information that was meant to be secret.
+  examples: []
+- tag: spreading-disinformation
+  title: Spreading disinformation
+  type: output
+  phase: null
+  group: misuse
+  descriptor: specific
+  description: Generative AI models might be used to intentionally create misleading or false information to deceive or influence a targeted audience.
+  concern: "Spreading disinformation might affect human\u2019s ability to make informed decisions. A model that has this potential must be properly governed."
+  examples:
+  - title: Generation of False Information
+    sources:
+    - text: AP News, May 2023
+      url: https://apnews.com/article/artificial-intelligence-misinformation-deepfakes-2024-election-trump-59fb51002661ac5290089060b3ae39a0
+    - text: The Guardian, July 2023
+      url: https://www.theguardian.com/us-news/2023/jul/19/ai-generated-disinformation-us-elections
+    content:
+    - paragraphs:
+      - 'According to the cited news articles, generative AI poses a threat to democratic elections by making it easier for malicious actors to create and spread false content to sway election outcomes. The examples that are cited include:'
+      - "<ul><li>Robocall messages that are generated in a candidate\u2019s voice instructed voters to cast ballots on the wrong date.</li><li>Synthesized audio recordings of a candidate that confessed to a crime or expressing racist views.</li><li>AI-generated video footage showed a candidate giving a speech or interview they never gave.</li><li>Fake images that are designed to look like local news reports.</li><li>Falsely claiming a candidate dropped out of the race.</li></ul>"
+- tag: unrepresentative-risk-testing
+  title: Unrepresentative risk testing
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: amplified
+  description: Testing is unrepresentative when the test inputs are mismatched with the inputs that are expected during deployment.
+  concern: If the model is evaluated in a use, context, or setting that is not the same as the one expected for deployment, the evaluations might not accurately reflect the risks of the model.
+  examples: []
+- tag: data-bias
+  title: Data bias
+  type: input
+  phase: training-tuning
+  group: fairness
+  descriptor: amplified
+  description: Historical and societal biases that are present in the data are used to train and fine-tune the model.
+  concern: Training an AI system on data with bias, such as historical or societal bias, can lead to biased or skewed outputs that can unfairly represent or otherwise discriminate against certain groups or individuals.
+  examples:
+  - title: Healthcare Bias
+    sources:
+    - text: Forbes, December 2022
+      url: https://www.forbes.com/sites/adigaskell/2022/12/02/minority-patients-often-left-behind-by-health-ai/?sh=31d28a225b41
+    content:
+    - paragraphs:
+      - According to the research article on reinforcing disparities in medicine using data and AI applications to transform how people receive healthcare is only as strong as the data behind the effort. For example, using training data with poor minority representation or that reflects what is already unequal care can lead to increased health inequalities.
+- tag: data-provenance
+  title: Uncertain data provenance
+  type: input
+  phase: training-tuning
+  group: transparency
+  descriptor: amplified
+  description: Data provenance refers to tracing history of data, which includes its ownership, origin, and transformations. Without standardized and established methods for verifying where the data came from, there are no guarantees that the data is the same as the original source and has the correct usage terms.
+  concern: Not all data sources are trustworthy. Data might be unethically collected, manipulated, or falsified. Verifying that data provenance is challenging due to factors such as data volume, data complexity, data source varieties, and poor data management. Using such data can result in undesirable behaviors in the model.
+  examples: []
+- tag: data-usage-rights
+  title: Data usage rights restrictions
+  type: input
+  phase: training-tuning
+  group: intellectual property
+  descriptor: amplified
+  description: Terms of service, license compliance, or other IP issues may restrict the ability to use certain data for building models.
+  concern: Laws and regulations concerning the use of data to train AI are unsettled and can vary from country to country, which creates challenges in the development of models.
+  examples:
+  - title: Text Copyright Infringement Claims
+    sources:
+    - text: Reuters, December 2023
+      url: https://www.reuters.com/legal/transactional/ny-times-sues-openai-microsoft-infringing-copyrighted-work-2023-12-27/
+    content:
+    - paragraphs:
+      - According to the source article, The New York Times sued OpenAI and Microsoft, accusing them accusing them of using millions of the newspaper's articles without permission to help train chatbots to provide information to readers.
+- tag: harmful-code-generation
+  title: Harmful code generation
+  type: output
+  phase: null
+  group: harmful code generation
+  descriptor: specific
+  description: Models might generate code that causes harm or unintentionally affects other systems.
+  concern: The execution of harmful code might open vulnerabilities in IT systems.
+  examples:
+  - title: Generation of Less Secure Code
+    sources:
+    - text: Neil Perry, Megha Srivastava, Deepak Kumar, and Dan Boneh. 2023. Do Users Write More Insecure Code with AI Assistants?. In Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security (CCS '23), November 26-30, 2023, Copenhagen, Denmark. ACM, New York, NY, USA, 15 pages.
+      url: https://dl.acm.org/doi/10.1145/3576915.3623157
+    content:
+    - paragraphs:
+      - According to their paper, researchers at Stanford University investigated the impact of code-generation tools on code quality and found that programmers tend to include <em>more</em> bugs in their final code when they use AI assistants. These bugs might increase the code's security vulnerabilities, yet the programmers believed their code to be <em>more</em> secure.
+- tag: data-contamination
+  title: Data contamination
+  type: input
+  phase: training-tuning
+  group: accuracy
+  descriptor: amplified
+  description: "Data contamination occurs when incorrect data is used for training. For example, data that is not aligned with model\u2019s purpose or data that is already set aside for other development tasks such as testing and evaluation."
+  concern: Data that differs from the intended training data might skew model accuracy and affect model outcomes.
+  examples: []
+- tag: incomplete-usage-definition
+  title: Incomplete usage definition
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: specific
+  description: "Since foundation models can be used for many purposes, a model\u2019s intended use is important for defining the relevant risks of that model. As the use changes, the relevant risks might correspondingly change."
+  concern: It might be difficult to accurately determine and mitigate the relevant risks for a model when its intended use is insufficiently specified. Such as how a model is going to be used, where it is going to be used and what it is going to be used for.
+  examples: []
+- tag: lack-of-data-transparency
+  title: Lack of data transparency
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: amplified
+  description: "Lack of data transparency is due to insufficient documentation of training or tuning dataset details.\_"
+  concern: Transparency is important for legal compliance and AI ethics. Information on the collection and preparation of training data, including how it was labeled and by who are necessary to understand model behavior and suitability. Details about how the data risks were determined, measured, and mitigated are important for evaluating both data and model trustworthiness. Missing details about the data might make it more difficult to evaluate representational harms, data ownership, provenance, and other data-oriented risks. The lack of standardized requirements might limit disclosure as organizations protect trade secrets and try to limit others from copying their models.
+  examples: []
+- tag: copyright-infringement
+  title: Copyright infringement
+  type: output
+  phase: null
+  group: intellectual property
+  descriptor: specific
+  description: A model might generate content that is similar or identical to existing work protected by copyright or covered by open-source license agreement.
+  concern: Laws and regulations concerning the use of content that looks the same or closely similar to other copyrighted data are largely unsettled and can vary from country to country, providing challenges in determining and implementing compliance.
+  examples: []
+- tag: impact-on-affected-communities
+  title: Impact on affected communities
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: traditional
+  description: It is important to include the perspectives or concerns of communities that are affected by model outcomes when designing and building models. Failing to include these perspectives makes it difficult to understand the relevant context for the model and to engender trust within these communities.
+  concern: "Failing to engage with communities that are affected by a model\u2019s outcomes might result in harms to those communities and societal backlash."
+  examples: []
+- tag: spreading-toxicity
+  title: Spreading toxicity
+  type: output
+  phase: null
+  group: misuse
+  descriptor: specific
+  description: Generative AI models might be used intentionally to generate hateful, abusive, and profane (HAP) or obscene content.
+  concern: Toxic content might negatively affect the well-being of its recipients. A model that has this potential must be properly governed.
+  examples:
+  - title: Harmful Content Generation
+    sources:
+    - text: Business Insider, April 2023
+      url: https://www.businessinsider.com/widow-accuses-ai-chatbot-reason-husband-kill-himself-2023-4
+    content:
+    - paragraphs:
+      - According to the source article, an AI chatbot app was found to generate harmful content about suicide, including suicide methods, with minimal prompting. A Belgian man died by suicide after spending six weeks talking to that chatbot. The chatbot supplied increasingly harmful responses throughout their conversations and encouraged him to end his life.
+- tag: downstream-retraining
+  title: Improper retraining
+  type: input
+  phase: training-tuning
+  group: value alignment
+  descriptor: amplified
+  description: Using undesirable output (for example, inaccurate, inappropriate, and user content) for retraining purposes can result in unexpected model behavior.
+  concern: Repurposing generated output for retraining a model without implementing proper human vetting increases the chances of undesirable outputs to be incorporated into the training or tuning data of the model. In turn, this model can generate even more undesirable output.
+  examples:
+  - title: Model collapse due to training using AI-generated content
+    sources:
+    - text: Business Insider, August 2023
+      url: https://www.businessinsider.com/ai-model-collapse-threatens-to-break-internet-2023-8
+    content:
+    - paragraphs:
+      - "As stated in the source article, a group of researchers from the UK and Canada investigated the problem of using AI-generated content for training instead of human-generated content. They found that the large language models behind the technology might potentially be trained on other AI-generated content. As generated data continues to spread in droves across the internet it can result ina phenomenon they coined as \u201Cmodel collapse.\u201D"
+- tag: inaccessible-training-data
+  title: Inaccessible training data
+  type: output
+  phase: null
+  group: explainability
+  descriptor: amplified
+  description: Without access to the training data, the types of explanations a model can provide are limited and more likely to be incorrect.
+  concern: Low quality explanations without source data make it difficult for users, model validators, and auditors to understand and trust the model.
+  examples: []
+- tag: bypassing-learning
+  title: 'Impact on education: bypassing learning'
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: specific
+  description: Easy access to high-quality generative models might result in students that use AI models to bypass the learning process.
+  concern: AI models are quick to find solutions or solve complex problems. These systems can be misused by students to bypass the learning process. The ease of access to these models results in students having a superficial understanding of concepts and hampers further education that might rely on understanding those concepts.
+  examples: []
+- tag: untraceable-attribution
+  title: Untraceable attribution
+  type: output
+  phase: null
+  group: explainability
+  descriptor: amplified
+  description: "The content of the training data used for generating the model\u2019s output is not accessible."
+  concern: Without the ability to access training data content, the possibility of using source attribution techniques can be severely limited or impossible. This makes it difficult for users, model validators, and auditors to understand and trust the model.
+  examples: []
+- tag: evasion-attack
+  title: Evasion attack
+  type: input
+  phase: inference
+  group: robustness
+  descriptor: amplified
+  description: Evasion attacks attempt to make a model output incorrect results by slightly perturbing the input data that is sent to the trained model.
+  concern: Evasion attacks alter model behavior, usually to benefit the attacker.
+  examples:
+  - title: Adversarial attacks on autonomous vehicles
+    sources:
+    - text: Market Watch, February 2020
+      url: https://www.marketwatch.com/story/85-in-a-35-hackers-show-how-easy-it-is-to-manipulate-a-self-driving-tesla-2020-02-19
+    content:
+    - paragraphs:
+      - "A report from the European Union Agency for Cybersecurity (ENISA) found that autonomous vehicles are \u201Chighly vulnerable to a wide range of attacks\u201D that could be dangerous for passengers, pedestrians, and people in other vehicles. The report states that an adversarial attack might be used to make the AI 'blind' to pedestrians by manipulating the image recognition component to misclassify pedestrians. This attack could lead to havoc on the streets, as autonomous cars might hit pedestrians on the roads or crosswalks."
+      - 'Other studies demonstrated potential adversarial attacks on autonomous vehicles: '
+      - <ul><li>Fooling machine learning algorithms by making minor changes to street sign graphics, such as adding stickers. </li><li>Security researchers from Tencent demonstrated how adding three small stickers in an intersection could cause Tesla's autopilot system to swerve into the wrong lane.</li><li>Two McAfee researchers demonstrated how using only black electrical tape could trick a 2016 Tesla into a dangerous burst of acceleration by changing a speed limit sign from 35 mph to 85 mph.</li></ul>
+- tag: impact-on-the-environment
+  title: Impact on the environment
+  type: non-technical
+  phase: null
+  group: societal impact
+  descriptor: amplified
+  description: AI, and large generative models in particular, might produce increased carbon emissions and increase water usage for their training and operation.
+  concern: "Training and operating large AI models, building data centers, and manufacturing specialized hardware for AI can consume large amounts of water and energy, which contributes to carbon emissions. Additionally, water resources that are used for cooling AI data center servers can no longer be allocated for other necessary uses. If not managed, these could exacerbate climate change.\_"
+  examples:
+  - title: Increased Carbon Emissions
+    sources:
+    - text: Brookings, January 2024
+      url: https://www.brookings.edu/articles/the-us-must-balance-climate-justice-challenges-in-the-era-of-artificial-intelligence/
+    content:
+    - paragraphs:
+      - "According to the source article, training earlier chatbots models such as GPT-3 led to the production of 500 metric tons of greenhouse gas emissions\u2014equivalent to about 1 million miles driven by a conventional gasoline-powered vehicle. This same model required more than 1,200 MWh during the training phase\u2014roughly the amount of energy used in a million American homes in one hour."
+- tag: incorrect-risk-testing
+  title: Incorrect risk testing
+  type: non-technical
+  phase: null
+  group: governance
+  descriptor: amplified
+  description: A metric selected to measure or track a risk is incorrectly selected, incompletely measuring the risk, or measuring the wrong risk for the given context.
+  concern: "If the metrics do not measure the risk as intended, then the understanding of that risk will be incorrect and mitigations might not be applied. If the model\u2019s output is consequential, this might result in societal, reputational, or financial harm."
+  examples: []
+- tag: over-or-under-reliance
+  title: Over- or Under-reliance
+  type: output
+  phase: null
+  group: value alignment
+  descriptor: amplified
+  description: "In AI-assisted decision-making tasks, reliance measures how much a person trusts (and potentially acts on) a model\u2019s output. Over-reliance occurs when a person puts too much trust in a model, accepting a model\u2019s output when the model\u2019s output is likely incorrect. Under-reliance is the opposite, where the person doesn\u2019t trust the model but should."
+  concern: In tasks where humans make choices based on AI-based suggestions, over/under reliance can lead to poor decision making because of the misplaced trust in the AI system, with negative consequences that increase with the importance of the decision.
+  examples: []
+- tag: membership-inference-attack
+  title: Membership inference attack
+  type: input
+  phase: inference
+  group: privacy
+  descriptor: amplified
+  description: "A membership inference attack repeatedly queries a model to determine whether a given input was part of the model\u2019s training. More specifically, given a trained model and a data sample, an attacker samples the input space, observing outputs to deduce whether that sample was part of the model's training. "
+  concern: Identifying whether a data sample was used for training data can reveal what data was used to train a model. Possibly giving competitors insight into how a model was trained and the opportunity to replicate the model or tamper with it. Models that include publicly-available data are at higher risk of such attacks.
+  examples: []
+- tag: confidential-data-in-prompt
+  title: Confidential data in prompt
+  type: input
+  phase: inference
+  group: intellectual property
+  descriptor: specific
+  description: Confidential information might be included as a part of the prompt that is sent to the model.
+  concern: If not properly developed to secure confidential data, the model might reveal confidential information or IP in the generated output. Additionally, end users' confidential information might be unintentionally collected and stored.
+  examples:
+  - title: Disclosure of Confidential Information
+    sources:
+    - text: Business Insider, February 2023
+      url: https://www.businessinsider.com/walmart-warns-workers-dont-share-sensitive-information-chatgpt-generative-ai-2023-2
+    content:
+    - paragraphs:
+      - "According to the source article, employees of Samsung disclosed confidential information to OpenAI through their use of ChatGPT. In one instance, an employee pasted confidential source code to check for errors. In another, an employee shared code with ChatGPT and \u201Crequested code optimization\u201D. A third shared a recording of a meeting to convert into notes for a presentation. Samsung has limited internal ChatGPT usage in response to these incidents, but it is unlikely that they are  able to recall any of their data. Additionally, the article highlighted that in response to the risk of leaking confidential information and other sensitive information, companies like Apple, JPMorgan Chase. Deutsche Bank, Verizon, Walmart, Samsung, Amazon, and Accenture placed several restrictions on the usage of ChatGPT."

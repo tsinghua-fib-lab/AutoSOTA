@@ -1,0 +1,23 @@
+sequence_model:
+  name: gru
+  # GRU
+  input_size: 8
+  hidden_size: 16 # num of cell states
+  num_layers: 5
+  bias: True
+  batch_first: False
+  dropout: 0.3
+  bidirectional: False
+# text model
+text_model:
+  aligner:
+    kernel_size: null
+    activation: null
+# Output head
+output_head:
+  task: classification # other options: 'regression', 'forecasting'
+  d_out: 1 
+  d_hidden: null
+  activation: relu
+  reduced: True
+  cls_method: autoregressive # options: 'cls_token', 'autoregressive', 'elementwise'

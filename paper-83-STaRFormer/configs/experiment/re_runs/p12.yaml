@@ -1,0 +1,118 @@
+# @package _global_
+# p12
+dataset: p12
+task: classification
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: p19
+  - override /callbacks/model_ckpt: p19
+  - override /datamodule: p12/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: p19/centralized
+  - override /logger: wandb
+
+run_url: null # wandb run url
+change_config: {
+  'callbacks': {
+    'early_stop': {
+      'mode': 'min',
+      'monitor': 'val/loss_ce',
+      'patience': 30,
+      'verbose': true,
+    },
+  },
+  "logger": {
+    "sweep": false, 
+    "project": "p12"
+  },
+  # LSTM 
+  #'model': {
+  #  'sequence_model': {
+  #    'name': "lstm",
+  #    'input_size': 8,
+  #    'hidden_size': 16,
+  #    'num_layers': 5
+  #    'dropout': 0.3,
+  #    'bias': True,
+  #    'batch_first': False,
+  #    'bidirectional': False, 
+  #  },
+  #  # Output head
+  #  'output_head': {
+  #    'task': classification 
+  #    d_out: 1 
+  #    d_hidden: null
+  #    activation: relu
+  #    reduced: True
+  #    cls_method: autoregressive # options: 'cls_token', 'autoregressive', 'elementwise'
+  #  }
+  #}
+  # transformer / starformer-rm
+  "model": {
+    "text_model": {
+      "name": "roberta",
+      "aligner": {
+        "activation": "gelu",
+        "kernel_size": 3
+      },
+      "hidden_size": 768
+    },
+    "output_head": {
+      "task": "classification",
+      "d_out": 1,
+      "reduced": false,
+      "d_hidden": null,
+      "activation": "gelu",
+      "batch_size": 512,
+      "cls_method": "cls_token"
+    },
+    "sequence_model": {
+      "bias": true,
+      "name": "starformer",
+      "n_head": 2,
+      "d_model": 64,
+      "dropout": 0.45879852437026625,
+      "masking": random, # "darem", 'random'
+      "mask_threshold": 0.15, #0.15,
+      "mask_region_bound": 0.05, #0.05,
+      "ratio_highest_attention": 0.3, #0.3,
+      "embedding": {
+        "d_features": 36,
+        "max_seq_len": 216
+      },
+      "precision": 32,
+      "activation": "gelu",
+      "mask_check": true,
+      "batch_first": false,
+      "layer_norm_eps": 0.00001,
+      "reconstruction": false,
+      "dim_feedforward": 256,
+      "num_encoder_layers": 8,
+      "enable_nested_tensor": true,
+      "aggregate_attn_per_batch": false
+    }
+  },
+  'loss': {
+    'batch_size': 512,
+    'lambda_cl': 0.6695134629685365,
+    'lambda_fuse_cl': 0.5,
+    'loss_fn': "darem_sscl",
+    'method': "sscl",
+    'pred_type': "binary",
+    'task': "classification",
+    'task_loss_fn': "mean_squarred_error",
+    'temp': 0.5,
+    #'loss_fn': 'binary_cross_entropy',
+  },
+  datamodule: {
+    'train_split_index': 4
+  },
+  #"seed": 123
+  #"seed": 0
+  #"seed": 63
+  #"seed": 2024
+
+}

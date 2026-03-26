@@ -1,0 +1,12 @@
+# @package _global_
+dataset: geolife
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: geolife
+  - override /callbacks/model_ckpt: geolife
+  - override /datamodule: geolife/centralized
+  - override /loss: ce
+  - override /model: transformer
+  - override /optimizer: adam
+  - override /training: geolife/centralized

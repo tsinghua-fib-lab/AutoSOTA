@@ -1,0 +1,49 @@
+# @package _global_
+dataset: p19
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: p19
+  - override /callbacks/model_ckpt: p19
+  - override /datamodule: p19/centralized
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: pam/centralized
+  - override /logger: wandb
+  
+training:
+  epochs: 300 
+model:
+  sequence_model:
+    embedding:
+      d_features: 34
+      # if percentile_of_features_used =  0: --> 34
+      # if percentile_of_features_used = 50: --> 17
+      # if percentile_of_features_used = 70: --> 10
+      # if percentile_of_features_used = 90: -->  4
+      # non_zero_stats
+      max_seq_len: 60
+    masking: darem
+  text_model:
+    name: roberta
+    hidden_size: 768 # default 768
+  output_head:
+    batch_size: ${training.batch_size} 
+    d_out: 1
+    cls_method: cls_token
+logger:
+  entity: null # add your wandb entity here
+  project: p19_sweeps
+  sweep: true
+datamodule:
+  s3_bucket_path: null
+  preprocessing_method: vitst
+  min_seq_length: null
+  percentile_of_features_used: 0
+callbacks:
+  lr_scheduler:
+    patience: 8
+  
+  
+  

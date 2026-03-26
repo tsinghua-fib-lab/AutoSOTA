@@ -1,0 +1,41 @@
+[project]
+name = "temporal-saes"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Alex Oesterling"}
+]
+readme = "README.md"
+
+[tool.poetry]
+packages = [
+    { include = "src" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11 <3.13"
+torch = {source="torch"}
+torchaudio = {source="torch"}
+torchvision = {source="torch"}
+nnsight = ">=0.3.0,<0.4.0"
+dictionary-learning = {path = "dictionary_learning", develop = true}
+scikit-learn = "^1.7.1"
+numpy = "^1.26"
+spacy = "^3.8.7"
+datasets = "<4.0.0"
+tqdm = "^4.67.1"
+en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"}
+python-dotenv = "^1.1.1"
+matplotlib = "^3.10.7"
+seaborn = "^0.13.2"
+plotly = "^6.3.1"
+transformers = "^4.57.1"
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu128"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

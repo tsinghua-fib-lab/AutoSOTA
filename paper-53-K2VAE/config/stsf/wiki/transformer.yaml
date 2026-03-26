@@ -1,0 +1,38 @@
+# lightning==2.3.0.dev0
+seed_everything: 1
+trainer:
+  accelerator: gpu
+  devices: 1
+  strategy: auto
+  max_epochs: 50
+  use_distributed_sampler: false
+  limit_train_batches: 100
+  log_every_n_steps: 1
+  default_root_dir: ./results
+model:
+  forecaster:
+    class_path: probts.model.forecaster.point_forecaster.TransformerForecaster
+    init_args:
+      f_hidden_size: 32
+      num_heads: 8
+      num_encoder_layers: 3
+      num_decoder_layers: 3
+      dim_feedforward_scale: 4
+      dropout: 0.1
+      activation: gelu
+      use_lags: true
+      use_feat_idx_emb: true
+      use_time_feat: true
+      feat_idx_emb_dim: 1
+  learning_rate: 0.001
+  quantiles_num: 20
+data:
+  data_manager:
+    class_path: probts.data.data_manager.DataManager
+    init_args:
+      dataset: wiki2000_nips
+      split_val: true
+      scaler: standard # identity, standard, temporal
+  batch_size: 64
+  test_batch_size: 64
+  num_workers: 8

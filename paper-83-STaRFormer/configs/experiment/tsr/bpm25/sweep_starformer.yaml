@@ -1,0 +1,65 @@
+# @package _global_
+dataset: beijingpm25quality
+task: regression
+norm: standard  # none, standard, minmax
+pytorch: True
+sweep_id: null
+
+defaults:
+  - /callbacks/ema: default
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: tsr
+  - override /callbacks/model_ckpt: tsr
+  - override /loss: darem_sscl
+  - override /model: starformer
+  - override /optimizer: adam
+  - override /training: tsr/centralized
+  - override /logger: wandb
+
+callbacks:
+  early_stop:
+    patience: 100
+  model_ckpt: 
+  lr_scheduler: 
+    monitor: val/loss_task
+    apply: True
+    mode: min
+    factor: 0.5
+    patience: 10 # hyperparam
+    min_lr: 1e-06
+  ema:
+    apply: True
+    decay: 0.2
+datamodule:
+model:
+  sequence_model:
+    embedding:
+      d_features: 9
+      max_seq_len: 24 # 144 +1
+    masking: darem
+    task: ${task}
+    batch_size: ${training.batch_size} 
+    cls_method: pooling
+  output_head:
+    task: ${task}
+    batch_size: ${training.batch_size}
+    d_out: 1
+    d_hidden: null
+    activation: relu
+    reduced: False 
+    cls_method: pooling #regr_token
+logger:
+  project: beijingpm25quality_sweeps
+  entity: null
+  sweep: true
+loss:
+  lambda_cl: 1000.
+  pred_type: binary
+  task: ${task}
+  task_loss_fn: mean_squarred_error
+# added new
+synthetic_labels:
+  n_clusters: 6
+  
+  
+  

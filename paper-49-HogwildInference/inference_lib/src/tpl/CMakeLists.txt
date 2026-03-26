@@ -1,0 +1,4 @@
+SET(HOGWILD_KERNEL_INSTANTIATIONS
+    "src/tpl/kernel_v21.cu"
+    PARENT_SCOPE
+)

@@ -1,0 +1,37 @@
+# @package _global_
+dataset: selfregulationscp2
+
+defaults:
+  - override /callbacks/lr_scheduler: reduceLROnPlateau
+  - override /callbacks/early_stop: ucr_uea
+  - override /callbacks/model_ckpt: ucr_uea
+  - override /datamodule: ucr_uea/selfregulationscp2/centralized
+  - override /logger: wandb
+  - override /loss: ce
+  - override /model: drm_transformer
+  - override /optimizer: adam
+  - override /training: ucr_uea/centralized
+  
+
+training:
+  epochs: 300 #50
+model:
+  embedding:
+    d_features: 7
+    max_seq_len: 1153
+  output_head:
+    batch_size: ${training.batch_size} 
+    d_out: 1
+logger:
+  project: selfregulationscp2_sweeps
+  sweep: true
+datamodule:
+  s3_bucket_path: null
+callbacks:
+  lr_scheduler:
+    patience: 8
+  model_ckpt: # small validation set
+    monitor: val/loss
+    mode: min  
+  
+  
