@@ -1,4 +1,4 @@
-const GITHUB_REPO_URL = "https://github.com/Ericccc02/AutoSota_list";
+const GITHUB_REPO_URL = "https://github.com/tsinghua-fib-lab/AutoSOTA";
 const GITHUB_BLOB_BASE = `${GITHUB_REPO_URL}/blob/main/`;
 const GITHUB_TREE_BASE = `${GITHUB_REPO_URL}/tree/main/`;
 
