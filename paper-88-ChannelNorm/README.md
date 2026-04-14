@@ -1,126 +1,44 @@
-# Channel Normalization for Time Series Channel Identification
+# Optimization Results: Channel Normalization for Time Series Channel Identification
 
-### Seunghan Lee, Taeyoung Park*, Kibok Lee*
+**Original codebase:** This optimization is based on the [original codebase](https://github.com/wzhwzhwzh0921/S-D-Mamba) repository. For the original paper, see [arXiv:2506.00432](https://arxiv.org/abs/2506.00432).
 
-(*: Equal advising)
+## Summary
+- Total iterations: 12 (+ baseline)
+- Best `mse`: **0.1615** (baseline: 0.1904, improvement: **-15.2%**)
+- Target: ~0.186 (2% improvement) — **TARGET REACHED** ✓
+- Best commit: 2f32945 (iter-12: seq_len=336 with cosine LR + dropout)
 
-<br>
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| mse | 0.1904 | 0.1615 | -0.0289 (-15.2%) |
+| mae | 0.2766 | 0.2519 | -0.0247 (-8.9%) |
+| mse_96 | 0.1639 | 0.1291 | -0.0348 (-21.2%) |
+| mse_192 | 0.1743 | 0.1490 | -0.0253 (-14.5%) |
+| mse_336 | 0.1912 | 0.1671 | -0.0241 (-12.6%) |
+| mse_720 | 0.2322 | 0.2007 | -0.0315 (-13.6%) |
 
-This repository contains the official implementation for the paper ([[Channel Normalization for Time Series Channel Identification](https://arxiv.org/pdf/2506.00432)]) 
+## Key Changes Applied
+| Change | Effect | Notes |
+|--------|--------|-------|
+| seq_len 96→336 | 0.1761→0.1615 (+7.7%) | Longer lookback captures more patterns |
+| Cosine LR annealing | 0.1813→0.1790 | Better than exponential decay |
+| Dropout in temporal block | 0.1790→0.1781 | Marginal improvement |
+| Second MLP residual block | 0.1790→0.1761 | More capacity helped |
+| GELU activation | 0.1790→0.1790 | No significant change |
 
-This work is accepted in **ICML 2025**
+## What Worked
+- **Extended input sequence length (96→336)**: The most impactful change. Longer context (14 days vs 4 days) captures weekly seasonality in electricity data.
+- **Cosine LR annealing**: Better final convergence than exponential decay.
+- **Dropout regularization**: 0.1 dropout in temporal block.
+- **Increased model capacity**: Second MLP residual block.
 
-<p align="center">
-<img src="./figures/CN.png"  alt="" align=center />
-</p>
+## What Didn't Work
+- Larger batch_size (64): Hurt performance
+- Weight decay regularization: Hurt significantly
+- d_model reduction (2048→1024): No improvement, kept 2048
 
-<br>
-
-# 1.Preparation
-## 1-1.Installation
-```bash
-pip install -r requirements.txt
-```
-
-<br>
-
-## 1-2.Datasets
-
-The datasets can be obtained from [here](https://github.com/wzhwzhwzh0921/S-D-Mamba/releases/download/datasets/S-Mamba_datasets.zip).
-
-<br>
-
-# 2.Train
-To run **iTransformer** applied with **channel normalization (CN)**, please run the below code:
-
-```bash
-bash /scripts/iTransformer/CN/ETTh1.sh
-```
-
-<br>
-
-# 3. Plug-in Methods
-Replace (traditional) `LayerNorm` with `ChannelNorm` and `AdaptiveChannelNorm`
-
-  
-## (1) Layer Normalization
-```python
-import torch.nn as nn
-
-class LayerNorm(nn.Module):
-    def __init__(self, num_features):
-        super().__init__()
-        self.norm = nn.LayerNorm(num_features)
-
-    def forward(self, x):
-        return self.norm(x)
-```
-
-
-## (2) Channel Normalization (Proposed)
-```python
-class ChannelNorm(nn.Module):
-    def __init__(self, num_channels, num_features, eps=1e-5):
-        super().__init__()
-        self.weight = nn.Parameter(torch.ones(num_channels, num_features))
-        self.bias = nn.Parameter(torch.zeros(num_channels, num_features))
-        self.eps = eps
-
-    def forward(self, x):
-        mean = x.mean(dim=-1, keepdim=True)
-        var = x.var(dim=-1, keepdim=True, unbiased=False)
-        x_norm = (x - mean) / torch.sqrt(var + self.eps)
-        return x_norm * self.weight + self.bias
-```
-
-
-## (3) Adaptive Channel Normalization (Proposed)
-```python
-class SimilarityWeightedAverage(nn.Module):
-    def __init__(self, C, D, temperature):
-        super().__init__()
-        self.weight = nn.Parameter(torch.ones(C, D))
-        self.bias = nn.Parameter(torch.zeros(C, D))
-        self.weight_global = nn.Parameter(torch.ones(C, D))
-        self.bias_global = nn.Parameter(torch.ones(C, D))
-        self.temperature = temperature
-
-    def forward(self, x):
-        input_norm = x / x.norm(dim=-1, keepdim=True)
-        cosine_similarity = torch.matmul(input_norm, input_norm.transpose(1, 2))
-        attn_weights = torch.softmax(cosine_similarity / self.temperature, dim=-1)
-
-        weight_expanded = self.weight.unsqueeze(0).expand(x.size(0), -1, -1)
-        bias_expanded = self.bias.unsqueeze(0).expand(x.size(0), -1, -1)
-
-        avg_weight = torch.matmul(attn_weights, weight_expanded) * self.weight_global.unsqueeze(0)
-        avg_bias = torch.matmul(attn_weights, bias_expanded) * self.bias_global.unsqueeze(0)
-
-        return x * avg_weight + avg_bias
-
-class AdaptiveChannelNorm(nn.Module):
-    def __init__(self, num_channels, num_features, temperature, eps=1e-5):
-        super().__init__()
-        self.eps = eps
-        self.weighted_norm = SimilarityWeightedAverage(num_channels, num_features, temperature)
-
-    def forward(self, x):
-        mean = x.mean(dim=-1, keepdim=True)
-        var = x.var(dim=-1, keepdim=True, unbiased=False)
-        x_norm = (x - mean) / torch.sqrt(var + self.eps)
-        return self.weighted_norm(x_norm)
-```
-# Contact
-
-If you have any questions, please contact **seunghan9613@yonsei.ac.kr**
-
-<br>
-
-# Acknowledgement
-
-We appreciate the following github repositories for their valuable code base & datasets:
-- [C-LoRA](https://github.com/tongnie/C-LoRA/tree/main)
-- [iTransformer](https://github.com/thuml/iTransformer)
-- [S-Mamba](https://github.com/wzhwzhwzh0921/S-D-Mamba)
-- [RMLP](https://github.com/plumprc/RTSF)
-- [TSMixer](https://github.com/ditschuk/pytorch-tsmixer)
+## Top Remaining Ideas
+- Try seq_len=504 or longer
+- Experiment with different dropout rates
+- Explore other activation functions

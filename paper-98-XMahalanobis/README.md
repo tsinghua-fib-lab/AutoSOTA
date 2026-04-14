@@ -1,59 +1,50 @@
-# X-Mahalanobis: Transformer Feature Mixing for Reliable OOD Detection
-PyTorch Code for the following paper published at NeurIPS 2025
+# Optimization Report: paper-98
 
-<b>Title</b>: <i>X-Mahalanobis: Transformer Feature Mixing for Reliable OOD Detection</i> 
+**Original codebase:** This optimization is based on the the original codebase repository.
 
-<b>Abstract</b>
-Recognizing out-of-distribution (OOD) samples is essential for deploying robust machine learning systems in the open-world environments. Conventional OOD detection approaches rely on feature representations from the final layer of neuron networks, often neglecting the rich information encapsulated in shallow layers. Leveraging the strengths of transformer-based architectures, we introduce an adaptive fusion module, which dynamically assigns importance weights to representations learned by each Transformer layer and detects OOD samples using the Mahalanobis distance. Compared to existing approaches, our method enables a lightweight fine-tuning of pre-trained models, and retains all feature representations that are beneficial to the OOD detection. We also thoroughly study various parameter-efficient fine-tuning strategies. Our experiments show the benefit of using shallow features, and demonstrate the influence of different Transformer layers. We fine-tune pre-trained models in both class-balanced and long-tailed in-distribution classification tasks, and show that our method achieves state-of-the-art OOD detection performance averaged across nine OOD datasets. The source code is provided in the supplementary material.
+## Summary
 
+- **Paper**: X-Mahalanobis - Transformer Feature Mixing for Reliable OOD Detection
+- **Total iterations**: 12
+- **Best `auroc`**: 0.9833 (baseline: 0.9729, improvement: **+1.07%**)
+- **Best `fpr95`**: 0.0790 (baseline: 0.1389, improvement: **-43.1%**)
 
-## Train
+## Key Results
 
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| auroc | 0.9729 | 0.9833 | +1.07% |
+| fpr95 | 0.1389 | 0.0790 | -43.1% |
 
-CIFAR100:
+## Key Changes Applied
 
-```
-CUDA_VISIBLE_DEVICES=0 python main_train.py -d cifar100 -m in21k_vit_b16_peft \
-    batch_size 64   output_dir  cifar100_adpf   test_ensemble False   \
-    micro_batch_size 64  lr 0.01 \
-    adaptformer True  adapter False  lora False  vpt_deep  False  vpt_shallow False  bias_tuning  False  full_tuning False 
-```
+| Change | Effect | Notes |
+|--------|--------|-------|
+| Normalize features AFTER layer mixing | +0.0019 auroc | Most principled change for Mahalanobis embedding |
+| Increase cosine classifier scale: 25→35 | +0.0025 auroc | Sharper softmax predictions improve feature learning |
+| Increase AdaptFormer bottleneck dim: 4→16 | +0.0060 auroc | Auto-computed dim=4 was too small |
 
+## What Worked
 
-ImageNet-LT:
+1. **Normalize after mixing (not per-layer before)**: The original code normalized each layer's CLS features individually before the weighted sum. Changing to mix first then normalize creates a more coherent embedding space for Mahalanobis distance computation.
 
-```
-CUDA_VISIBLE_DEVICES=0 python main_train.py -d imagenet_lt -m clip_vit_b16_peft \
-    adaptformer True  batch_size 64   output_dir imagenetlt_adpf  test_ensemble False   \
-    lr 0.1   num_epochs 20   micro_batch_size 64 \
-    adaptformer True  adapter False  lora False  vpt_deep  False  vpt_shallow False  bias_tuning  False  full_tuning False 
-```
+2. **Cosine classifier scale=35**: A higher scale value creates a sharper softmax over class logits during training, which pushes features to be more tightly clustered around class prototypes.
 
-## Test for other baselines
+3. **adapter_dim=16**: The auto-computation formula `2^floor(log2(100/24)) = 4` gives a tiny bottleneck. Increasing to 16 allows AdaptFormer to learn richer task-specific features.
 
-CIFAR100:
+## What Didn't Work
 
-```
-CUDA_VISIBLE_DEVICES=0 python main_test.py -d cifar100 -m in21k_vit_b16_peft \
-    batch_size 64   output_dir  cifar100_adpf    test_ensemble False   \
-    micro_batch_size 64  lr 0.01 \
-    adaptformer True  adapter False  lora False  vpt_deep  False  vpt_shallow False  bias_tuning  False  full_tuning False \
-    test_only True model_dir  <where_to_save_the_ckpt>
-```
+- **LedoitWolf covariance**: Slightly hurt performance
+- **Higher CLIP similarity weight**: 0.1 weight is already well-tuned
+- **CrossEntropy loss**: LA (Logit Adjusted) loss produces better OOD features
+- **adapter_dim=32**: Overfitting - 16 is the sweet spot
 
-
-ImageNet-LT:
+## Optimization Trajectory
 
 ```
-CUDA_VISIBLE_DEVICES=0 python main_test.py -d imagenet_lt    -m clip_vit_b16_peft \
-    batch_size 64   output_dir  imagenetlt_adpf  test_ensemble False \
-    lr 0.1   num_epochs 20  micro_batch_size 64   \
-    adaptformer True  adapter False  lora False  vpt_deep  False  vpt_shallow False  bias_tuning  False  full_tuning False \
-    test_only True model_dir  <where_to_save_the_ckpt>
+Iter 0:  auroc=0.9729 (baseline)
+Iter 4:  auroc=0.9748 (normalize after mixing)
+Iter 6:  auroc=0.9767 (scale=30)
+Iter 7:  auroc=0.9773 (scale=35)
+Iter 11: auroc=0.9833 (adapter_dim=16) ← FINAL BEST
 ```
-
-Note: While reproducing the PEFT experiment, the corresponding PEFT method needs to be adjusted to True. 
-For different data sets, you can choose among "cifar100_ir100", "cifar100", "imagenet_lt", and "imagenet".
-For different pre-trained models, you can choose between "in21k_vit_b16_peft" and "clip_vit_b16_peft".
-
-

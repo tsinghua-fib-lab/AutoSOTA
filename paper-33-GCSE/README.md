@@ -2,6 +2,8 @@
 
 **Full title:** *Enhancing Unsupervised Sentence Embeddings via Knowledge-Driven Data Augmentation and Gaussian-Decayed Contrastive Learning*
 
+**Original codebase:** This optimization is based on the *Enhancing Unsupervised Sentence Embeddings via Knowledge-Driven Data Augmentation and Gaussian-Decayed Contrastive Learning* repository.
+
 **Registered metric movement (internal ledger, ASCII only):** +3.43%(81.98->84.79)
 
 # Final Optimization Report: GCSE Sentence Embeddings

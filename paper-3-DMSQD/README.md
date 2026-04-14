@@ -2,6 +2,8 @@
 
 **Full title:** *Discount Model Search for Quality Diversity Optimization in High-Dimensional Measure Spaces*
 
+**Original codebase:** This optimization is based on the *Discount Model Search for Quality Diversity Optimization in High-Dimensional Measure Spaces* repository.
+
 **Registered metric movement (internal ledger, ASCII only):** +7.32%(6500.85->6976.81)
 
 # Optimization Results: Discount Model Search for Quality Diversity Optimization in High-Dimensional Measure Spaces

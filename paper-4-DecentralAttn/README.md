@@ -1,91 +1,27 @@
-<div align="center">
-  <h2><b> Code for ICLR26 (Oral):</b></h2>
-  <h2><b> Decentralized Attention Fails Centralized Signals: Rethink Transformers for Medical Time Series </b></h2>
-</div>
+# Paper 4 — DecentralAttn
 
-<div align="center">
+**Full title:** *Decentralized Attention Fails Centralized Signals: Rethinking Transformers for Medical Time Series*
 
-**[<a href="https://openreview.net/forum?id=oZJFY2BQt2">Paper</a>]**
-**[<a href="https://zhuanlan.zhihu.com/p/1979237006845441203">中文解读1</a>]**
-**[<a href="https://paper.dou.ac/p/2602.18473">中文解读2</a>]**
+**Original codebase:** This optimization is based on the [*Decentralized Attention Fails Centralized Signals: Rethinking Transformers for Medical Time Series*](https://github.com/DL4mHealth/Medformer) repository.
 
-</div>
+**Registered metric movement (internal ledger, ASCII only):** +4.45%(0.8431->0.8806)
 
-## Introduction
+# Final Optimization Report: DecentralAttn (paper-4)
 
-### 1. Mismatch between centralized MedTS signals and decentralized Attention.
+## Summary
 
-<p align="center">
-<img width="1153" height="518" alt="image" src="https://github.com/user-attachments/assets/807c224c-1f43-45d9-906e-2848aed4e993" />
-</p>
+**PTB `ptb_accuracy`** improved from **0.8431 → 0.8806 (+4.45%)** with repro skipped. The shipped optimum matches **iter9**: widen the backbone (**`d_model` 256→384**), use **`v_layer=4`**, and set the core width to **`d_core = d_model // 2`**, together with **label smoothing** and **AdamW**. **Iter8** already cleared the internal **0.86** rubric bar at **0.8609** after moving **`d_core`** from **`d_model // 4` → `d_model // 2`**. Larger models (**`d_model` 512**), extra masking (**0.1**), and **`v_layer=5`** (iter10–12) regressed and were rolled back.
 
-### 2. Reprogram decentralized Attention into the centralized CoTAR block.
+## Key ideas (results ledger)
 
-<p align="center">
-<img width="1166" height="420" alt="image" src="https://github.com/user-attachments/assets/f20f535d-1eba-4858-8637-abfca6c0fb0a" />
-</p>
+- **Capacity**: **`d_model` 384** + **`v_layer=4`** for stronger decentralized attention on medical series.
+- **Width balance**: **`d_core = d_model // 2`** (vs `//4`) as the stable sweet spot before overscaling.
+- **Regularization**: **label smoothing** + **AdamW** for calibration on PTB-style accuracy.
 
-### 3. TeCh: a unified CoTAR-based framework that captures temporal, channel, or both via adaptive tokenization.
+## Caveats
 
-<p align="center">
-<img width="1156" height="543" alt="image" src="https://github.com/user-attachments/assets/89b07193-142b-4241-8ca4-894172db9341" />
-</p>
+- **Iter ordering matters**: treat **iter9** as the reference checkpoint; later iters were explicitly worse in the ledger.
 
-### 4. Improved effectiveness, higher efficiency, and stronger robustness.
+## Where to look next
 
-<p align="center">
-<img width="1146" height="599" alt="image" src="https://github.com/user-attachments/assets/c6bc4a55-9aa1-46a6-90b9-eafe2ac60840" />
-</p>
-
-## Usage
-
-1. Install requirements.
-```
-pip install -r requirements.txt
-```
-
-2. Prepare data. You can download all datasets from [**Medformer**](https://github.com/DL4mHealth/Medformer). **All the datasets are well pre-processed** *(except for the TDBrain dataset, which requires permission first)* and can be used easily thanks to their efforts. Then, place all datasets under the folder
-```
-./dataset
-```
-
-4. Train the model. We provide the experiment scripts of all benchmarks under the folder
-```
-./scripts
-```
-5. For example, you can use the command line  below to get the result of  **APAVA**. The whole training history is under the ***'./logs'*** folder.
-```
-bash ./scripts/APAVA.sh
-```
-
-## Citation
-If you find this repo helpful, please cite our paper.
-
-```
-@inproceedings{
-yu2026tech,
-title={Decentralized Attention Fails Centralized Signals: Rethinking Transformers for Medical Time Series},
-author={Guoqi Yu and Juncheng Wang and Chen Yang and Jing Qin and Angelica I Aviles-Rivero and Shujun Wang},
-booktitle={The Fourteenth International Conference on Learning Representations},
-year={2026},
-url={https://openreview.net/forum?id=oZJFY2BQt2}
-}
-```
-
-## Acknowledgement
-
-This project is built on the code in the repo [**Medformer**](https://github.com/DL4mHealth/Medformer).
-**Thanks a lot for their amazing work!**
-
-***Please also star their project and cite their paper if you find this repo useful.***
-```
-@article{wang2024medformer,
-  title={Medformer: A multi-granularity patching transformer for medical time-series classification},
-  author={Wang, Yihe and Huang, Nan and Li, Taida and Yan, Yujun and Zhang, Xiang},
-  journal={Advances in Neural Information Processing Systems},
-  volume={37},
-  pages={36314--36341},
-  year={2024}
-}
-```
-
+- **`README.md`** and training config for **iter9** hyperparameters and eval hooks.

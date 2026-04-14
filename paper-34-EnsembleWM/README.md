@@ -2,6 +2,8 @@
 
 **Full title:** *Ensemble Watermarks for Large Language Models*
 
+**Original codebase:** This optimization is based on the *Ensemble Watermarks for Large Language Models* repository.
+
 **Registered metric movement (internal ledger, ASCII only):** +3.46%(86.67->89.67)
 
 # Final Report: Ensemble Watermarks for Large Language Models (paper-34)

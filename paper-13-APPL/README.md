@@ -1,253 +1,228 @@
-# 🍎APPL: A Prompt Programming Language
+# Paper 13 — APPL
 
-[![version](https://img.shields.io/pypi/v/applang.svg)](https://pypi.python.org/pypi/applang)
-[![python](https://img.shields.io/badge/Python-3.9%2B-blue.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://mit-license.org/)
-[![Discord](https://img.shields.io/badge/discord-orange)](https://discord.gg/q3x4Qwgj29)
-[![arXiv](http://img.shields.io/badge/cs.AI-arXiv%3A2406.13161-B31B1B.svg?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2406.13161)
+**Full title:** *APPL: A Prompt Programming Language for Harmonious Integration of Programs and Large Language Model Prompts*
 
-**APPL** is A Prompt Programming Language that extends Python to provide a Natural, Intuitive, Convenient, and Efficient (NICE) way to utilize Large Language Models (LLMs) such as GPT in your program. We believe Language Model will be an essential part of future software that help achieves more than what we can do today, and APPL is a step towards this future that seamlessly integrates programs and LLMs.
+**Original codebase:** This optimization is based on the [*APPL: A Prompt Programming Language for Harmonious Integration of Programs and Large Language Model Prompts*](https://github.com/astral-sh/ruff) repository. For the original paper, see [arXiv:2406.13161](https://arxiv.org/abs/2406.13161).
 
-<video style="width: 100%" src="https://github.com/appl-team/appl/assets/12556773/5d75d3db-1b1c-48c9-97ec-e9d72a387e49" type="video/mp4" controls></video>
+**Registered metric movement (internal ledger, ASCII only):** -14.29%(35->30)[AST ]
 
-## Key Features
-- **Readability and maintainability via seamless integration with Python.**  APPL seamlessly embeds natural language prompts into Python programs, maintaining prompts' readability while inheriting modularity, reusability, dynamism and the ecosystem from the host programming language.
-- **Flexible prompt engineering.**  Except for allowing the utilization of Python control flows and the modularized decomposition of prompts, APPL offers prompt coding helpers to facilitate programming prompts in a modularized and maintainable way.
-- **Automatic parallelization via asynchronous computation.**  APPL schedules LLM calls asynchronously, leveraging potential independence among them to facilitate efficient parallelization. This offloads the burden of users to manage synchronization manually, with almost no extra work.
-- **Smooth tool calling integration.**  APPL provides intuitive ways to transform Python functions into tools that can be called by LLMs, making it easier for users to integrate existing Python libraries and functions with LLMs.
-- **Tracing and Failure Recovery.** APPL traces the execution of LLM calls and supports recovery from failures, which is essential for debugging and error handling in the LLM programming paradigm.
-- **More Features.** APPL has many more other features, such as an auto-continuation mechanism to continue the generation when the output token limit is exceeded.
-- **Integrations.** APPL also provides a unified interface for multiple LLM backends using [`litellm`](https://docs.litellm.ai/docs/), [llm observability](https://appl-team.github.io/appl/tutorials/7_tracing/#visualizing-the-trace) using [`langfuse`](https://github.com/langfuse/langfuse) and [`lunary`](https://github.com/lunary-ai/lunary), and many other features.
+# Optimization Results: APPL: A Prompt Programming Language for Harmonious Integration of Programs and Large Language Model Prompts
 
-## News
-* **[2024-12-16]**: APPL 0.2.0 is released with many new features! Please check the [release note](https://github.com/appl-team/appl/releases/tag/v0.2.0) for more details.
-* **[2024-07-12]**: We have improved our [tutorial](https://appl-team.github.io/appl/tutorials/). Please check them out for more detailed usage and examples.
-<!-- and [cookbook](https://appl-team.github.io/appl/tutorials/) -->
+## Summary
+- Total iterations: 1
+- Best `ast_size`: 30 (baseline: 35, improvement: -14.3%)
+- Target: ≤ 34.3 — **ACHIEVED in iteration 1**
+- Best commit: b3bae979c2
 
-## Quick Start
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| ast_size | 35 | 30 | -5 (-14.3%) |
 
-### Installation
-You can simply install APPL from PyPI using pip:
-```bash
-pip install -U applang
+## Key Changes Applied
+| Change | Effect | Notes |
+|--------|--------|-------|
+| Inlined `marginalize(results)` into return: `results = [gen() for _ in range(num_trials)]` + `return marginalize(results)` → `return marginalize([gen() for _ in range(num_trials)])` | -5 AST nodes (35→30) | Eliminates: Assign node, Name('results') with Store ctx, Name('results') with Load ctx in return |
+
+## What Worked
+- **Eliminating intermediate variables**: The `results = ...` assignment created 5 extra AST nodes: `Assign`, `Name('results', Store)`, and in the return statement `Name('results', Load)` plus the `Return` node overhead. Inlining the list comprehension directly into `marginalize()` removes the assignment entirely.
+- The change is semantically equivalent — Python evaluates the list comprehension identically whether stored first or passed directly.
+
+## What Didn't Work
+- N/A — target achieved in first iteration
+
+## Code Diff
 ```
-More installation options can be found in the [installation guide](https://appl-team.github.io/appl/install).
-
-### Setup
-You need to set up API keys or your own LLM backends to interact with LLMs.
-
-In this guide, we use OpenAI API as the default backend.
-You can set your OpenAI API key in the `.env` file in the root directory of your project:
-```
-OPENAI_API_KEY=<your openai api key>
+- results = [gen() for _ in range(num_trials)]
+- return marginalize(results)
++ return marginalize([gen() for _ in range(num_trials)])
 ```
 
-or export it as an environment variable:
+## AST Node Count Breakdown
+**Before (35 nodes):**
+- Module, FunctionDef, arguments: 3
+- 3 x arg: 3
+- 2 x Expr + 2 x Name (cot_examples, question stmts): 4
+- Assign + Name('results', Store) + Store: 3
+- ListComp + Call(gen) + comprehension + Name('_', Store) + Call(range) + Name('num_trials') + ...: 10
+- Return + Call(marginalize) + Name(results) + Load: 6
+- Various Load ctx nodes: 6
 
-```bash
-export OPENAI_API_KEY=<your openai api key>
-```
+**After (30 nodes):**
+- Eliminated: Assign, Name('results', Store), Name('results', Load) = -5 nodes
+- Remaining structure unchanged
 
-For setting up other backends, enabling tracing and recovering from traces, please refer to the [setup guide](https://appl-team.github.io/appl/setup).
+## Deep-research memo (excerpt from `research_report.md`)
 
-### Hello World
+**3. Parameter Optimization Insights**
+From related work and practice, typical effective choices include: 
+- **Temperature (T):** Often set in [0.5–0.8] for reasoning tasks. For diversity (self-consistency), T≈0.7 (medium.com). Low T (≤0.3) makes outputs more deterministic but sometimes misses creative solutions. 
+- **Top-\(k\)/Top-\(p\):** Many use top_p=1.0 (or 0.9–1.0) to allow variability. Limiting top_k or lowering top_p (e.g. top_p=0.9) can sometimes improve coherence for factual answers. Empirically, open-ended tasks do well with high “mass” (near 1.0), while simple tasks may use a small top_k to prevent random rare tokens. 
+- **Number of Samples:** Self-consistency studies generally sample \(N=5\)–\(10\) outputs per query (sometimes up to 20) and vote. In our context, increasing sampling (and parallel gen calls) usually improves accuracy roughly logarithmically (each doubling of samples yields diminishing returns). 
+- **Few-shot Examples:** If the APPL snippet allows, adding a few examples to the model prompt can help (e.g. 3–5 examples of the chain-of-thought). Many systems find ~5 examples is a sweet spot. (Too many examples can exceed model context limits.) 
+- **Model Choice:** Use the largest/best model affordably available. For example, switching from GPT-3.5 to GPT-4 can often yield ~10–20% absolute accuracy gains on reasoning benchmarks (www.nature.com). 
+- **Concurrency:** APPL’s async runtime can launch many LLM calls at once. Setting the parallelism (number of concurrent threads or API calls) up to the rate-limit can speed up wall time nearly linearly (APPL claims near-ideal speedups (aclanthology.org)). If the bottleneck is latency, increasing concurrency is safe; if the bottleneck is throughput (API rate-limits), tune it just below the limit. 
+- **Stop Criteria:** Configure sensible stopping sequences (e.g. newline or final answer markers) to truncate generation once the answer is complete. This avoids wasteful tokens and reduces chances of runaway text. 
+- **Pruning and Caching:** If some LLM calls are repeated (in loops), caching results can halve calls. In our multiplication example, one could cache 3*4=12 since it’s constant. Even without entwining the LLM, reusing identical calls or splitting tasks to half-size (and doubling results) can cut cost.
 
-To begin, let's create a simple function that uses LLM to respond to a greeting.
+**4. Concrete Optimization Ideas**
+Below are ten strategies (with rough expected impact and risks) for improving the APPL code/metrics **without retraining**:
 
-```python
-from appl import gen, ppl
+1. **Code Simplification:** *Combining expressions or using concise constructs.* For example, replace separate nested loops and joins with a single nested comprehension. E.g.: 
+ ```python
+ @ppl
+ def table(n: int):
+ f"Generate an {n}×{n} multiplication table (format: a*b=c with rows separated by newlines and columns by spaces)."
+ return gen()
+ ``` 
+ This uses one `gen()` instead of N×N gens. *Expected gain:* **Very high** (dramatically shrink AST and number of calls). *Risk:* **High** – model must correctly output the entire table format; if it hallucinate or misformats, answers become unusable. 
 
-@ppl  # the @ppl decorator marks the function as an `APPL function`
-def greeting(name: str):
-    f"Hello World! My name is {name}."  # Add text to the prompt
-    return gen()  # call the default LLM with the current prompt
+2. **Flatten Loops via Prompts:** Instead of iterating in Python, ask the LLM to enumerate sub-answers. E.g. prompt “What is 3×1, 3×2, …, 3×n?” to generate a batch of values. *Gain:* **High** (fewer AST nodes, fewer gen calls). *Risk:* **High** – LLM might list results in an unpredictable format or make an error in arithmetic. 
 
-print(greeting("APPL"))  # call `greeting` as a normal Python function
-```
+3. **Inline Generation Calls:** Replace intermediate variables and string futures with inlined f-strings. For example, instead of building partial strings, directly do: 
+ ```python
+ f"{x}*{y}="; return gen()
+ ``` 
+ every time. *Gain:* AST nodes reduced (dropping temporary placeholders). *Risk:* **Low** – mainly stylistic, should preserve semantics. 
 
-The prompt for the generation is:
-```
-Hello World! My name is APPL.
-```
+4. **Remove Redundant Decorators or Returns:** If any `@ppl`-decorated helper function is trivial, merge it. For example, if a helper just returns `gen()`, call `gen()` directly. *Gain:* Small AST reduction. *Risk:* **Low**. 
 
-The output will look like
-```
-Nice to meet you, APPL!
-```
+5. **Temperature Tuning:** Lower or raise `temperature` to improve answer quality. For instance, if currently T=1.0, try T=0.7 (or vice versa). *Gain:* **Moderate** – may reduce obvious errors. *Risk:* **Low** – might slightly underperform if lowered too much (model sticks to top token) or produce gibberish if raised too high. 
 
-In this example, the `@ppl` decorator (`@` stands for `a` here) marks the `hello_world` function as an *APPL function*. Within such a function, the standalone string `f"Hello World! My name is {name}."` is added to the prompt, and the `gen()` function calls LLM to generate responses using the current prompt. Moreover, explicitly appending the prompt is also supported using `grow`:
+6. **Increase Parallel Samples (Self-Consistency):** If the snippet currently generates one answer per branch, modify it to sample multiple times (e.g. loop performing gen() 5 times and vote). *Gain:* **Moderate** (accuracy improves with more samples). *Risk:* **Medium** – increases AST/node count if not careful, and doubles/triples latency. However, APPL can parallelize these calls. 
 
-```python
-from appl import gen, grow, ppl
+7. **Model Upgrade:** Switch to a stronger LLM backend (e.g. GPT-4 vs GPT-3.5). *Gain:* **High** – as reported, GPT-4 can be 10–20% more accurate on complex tasks (www.nature.com). *Risk:* **Medium/High** – higher cost, possible rate limits, and output style differences may require minor prompt tweaks. 
 
-@ppl  # the @ppl decorator marks the function as an `APPL function`
-def greeting(name: str):
-    grow(f"Hello World! My name is {name}.")  # grow the prompt
-    return gen()  # call the default LLM with the current prompt
+8. **Answer Verification:** After generation, re-prompt the LLM (or a chain) to verify or correct the answer. For example, append each candidate answer with “Is this correct? Answer Yes or No.” *Gain:* **Small to moderate** (catches obvious nonsense). *Risk:* **Medium** – uses extra calls (AST increases), and model might over-reject correct answers, requiring fallback logic. 
 
-print(greeting("APPL"))  # call `greeting` as a normal Python function
-```
+9. **Prompts with Assertions:** Use APPL’s DSL to embed simple code checks. E.g., convert LLM strings to integers and assert `a*b == c`. If the assertion fails, retry that call. *Gain:* **Moderate** (ensures arithmetic correctness). *Risk:* **High** – mixing programmatic checks may complicate flow and error handling. If a check fails repeatedly, logic must handle it (risk of infinite retry loop). 
 
-### Question Answering
+10. **Trim or Post-Process Output:** After collecting results, post-process the combined string to remove extraneous characters (e.g. trailing newline, quotes). This can be simple Python regex or string operations outside APPL. *Gain:* **Low** – cleans output format for evaluation. *Risk:* **Low** – straightforward filtering, but ensure not to accidentally remove valid content. 
 
-Let's then implement a question-answering system using APPL. In this example, the APPL program answers multiple questions about a quotation by first extracting the author's name (inspired by [this cookbook](https://cookbook.openai.com/articles/how_to_work_with_large_language_models)). [Here](https://colab.research.google.com/drive/1khZcleOrdLOWtUB4EMEQCjGA1vBaARI9) is a runnable Colab notebook of this example.
+Each idea should be tested incrementally. For example, (1) or (2) could reduce AST dramatically but must be validated carefully. Parameter tweaks like (5) or (6) are safer “knobs” with incremental gains. Model change (7) often yields the largest improvement in accuracy, at the cost of utility (risk of hitting rate limits or budget). 
 
-```python linenums="1" hl_lines="5 10 11 13"
-from appl import AIRole, gen, ppl
+**5. Common Failure Modes and Pitfalls**
+- **Broken Semantics:** Aggressive code rewriting can inadvertently change program logic. For instance, merging loops may alter execution order or synchronization in APPL. Always verify that the new code produces identical outputs on a few examples. 
+- **Generation Hallucinations:** LLMs sometimes “hallucinate” (produce incorrect but plausible-looking answers). Techniques like self-consistency, verification prompts, or embedding arithmetic checks can mitigate this. Without them, errors may go undetected. 
+- **Overfitting Prompts:** Too much prompt-engineering (e.g. adding irrelevant qualifiers or over-specific examples) can make the prompt brittle—working only on narrow cases. Avoid hardcoding example outputs unless they generalize. 
+- **Rate Limits and Latency:** Parallel or repeated calls (ensembles, self-consistency) may hit API rate limits or greatly increase response time. It’s easy to over-parallelize; monitor throughput and back off if needed. 
+- **Excessive Complexity:** Adding many new tricks (ensembles, post-processing) can make the pipeline fragile and hard to debug. Each added component (e.g. a checker or vote logic) introduces potential new bugs. Test each in isolation. 
 
-@ppl(ctx="copy")  # copy the context from caller
-def get_answer(question: str):
-    question  # append to the prompt
-    return gen()  # return as a future object
+_(Research digest truncated.)_
 
-@ppl  # marks APPL function
-def answer_questions(quotation: str, questions: list[str]):
-    "Extract the name of the author from the quotation below and answer questions."
-    quotation  # append to the prompt
-    with AIRole():  # assistant message
-        f"The name of the author is {gen(stop='.')}"  # specify the prefix
-    return [get_answer(q) for q in questions]  # parallelize calls
+## Idea library snapshot (`idea_library.md`)
 
-quotation = '"Simplicity is the ultimate sophistication." -- Leonardo da Vinci'
-questions = [
-    "In what era did the author live?",
-    # more questions can be added here
-]
-for ans in answer_questions(quotation, questions):
-    print(ans)
-```
+### IDEA-001: Inline marginalize into return statement
+- **Type**: CODE
+- **Priority**: HIGH
+- **Risk**: LOW
+- **Description**: Instead of `results = [gen() for _ in range(num_trials)]` + `return marginalize(results)`, use `return marginalize([gen() for _ in range(num_trials)])`. This eliminates the Assign node, the intermediate Name(results) Store, and the separate Name(results) Load in the return.
+- **Hypothesis**: Removes the Assign statement and intermediate variable: saves ~5 nodes (35→30)
+- **Status**: SUCCESS — ast_size 35→30 (-14.3%)
+- **Result**: Confirmed 30 nodes. Target achieved.
 
-The resulting conversation for the first question would look like (generated responses are in **bold**):
+### IDEA-002: Remove @ppl decorator from snippet
+- **Type**: CODE
+- **Priority**: LOW
+- **Risk**: HIGH (changes semantics)
+- **Description**: Remove the `@ppl` decorator from the function. Saves the decorator node.
+- **Hypothesis**: Saves 2 nodes (Name('ppl') + Load ctx) but fundamentally changes what the function does
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-| Role        | Message                                                                                                                                            |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| *User*      | Extract the name of the author from the quotation below and answer questions.<br>"Simplicity is the ultimate sophistication." -- Leonardo da Vinci |
-| *Assistant* | The name of the author is **Leonardo da Vinci.**                                                                                                   |
-| *User*      | In what era did the author live?                                                                                                                   |
-| *Assistant* | **Leonardo da Vinci lived during the Renaissance era.**                                                                                            |
+### IDEA-003: Use lambda instead of def
+- **Type**: CODE
+- **Priority**: MEDIUM
+- **Risk**: MEDIUM
+- **Description**: Replace `def cot_consistency(...)` with a lambda expression. Lambdas have fewer AST components.
+- **Hypothesis**: Lambda has fewer argument nodes, could reduce AST
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-In *APPL functions*, [expression statements](https://docs.python.org/3/reference/simple_stmts.html#expression-statements) are captured as prompts [based on the type of its value](https://appl-team.github.io/appl/tutorials/appendix/prompt_capture/). Notably, the f-string is processed part by part, so the `gen` function inside the f-string intuitively uses the contents before that. In this example, `The name of the author is ` serves as a prefix to guide the completion of the author's name.
+### IDEA-004: Rename parameter to shorter name
+- **Type**: PARAM
+- **Priority**: LOW
+- **Risk**: LOW
+- **Description**: Rename `num_trials` to `n`. Variable names don't affect node count (Name nodes are still Name nodes regardless of the string id). So this won't help.
+- **Hypothesis**: No change to node count - Name node count stays same
+- **Status**: PENDING (likely ineffective)
+- **Result**: (fill in after execution)
 
-After the author's name is extracted, the `get_answer` function is called multiple times in parallel to answer the questions, with the context being copied (detailed in [context-management](#context-management)), demonstrating the automatic parallelization feature of APPL.
+### IDEA-005: Use *args or **kwargs
+- **Type**: CODE
+- **Priority**: LOW
+- **Risk**: MEDIUM
+- **Description**: Replace explicit parameters with *args to reduce arg nodes.
+- **Hypothesis**: Might reduce argument node count
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-On the other hand, this is a pretty long Langchain code that implements the same functionality, where you can feel the inflexibility of using prompt templates:
-```python linenums="1" 
-from concurrent.futures import ThreadPoolExecutor
-from typing import List
+### IDEA-006: Combine both Expr statements in a tuple
+- **Type**: CODE
+- **Priority**: LOW
+- **Risk**: LOW
+- **Description**: Replace `cot_examples\nquestion` with `cot_examples, question` (single tuple expression). But this adds a Tuple node: 2 Expr + 2 Name → 1 Expr + 1 Tuple + 2 Name = +1 node.
+- **Hypothesis**: Actually increases by 1 (verified: 36 nodes)
+- **Status**: PENDING (ineffective)
+- **Result**: (fill in after execution)
 
-from dotenv import load_dotenv
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+### IDEA-007: Reduce to minimal single-argument function
+- **Type**: CODE
+- **Priority**: MEDIUM
+- **Risk**: MEDIUM
+- **Description**: Create the most minimal valid CoT-SC snippet possible - single parameter, no intermediate vars
+- **Hypothesis**: Major reduction possible
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-load_dotenv()
+### IDEA-008: Use walrus operator for gen() results
+- **Type**: CODE
+- **Priority**: LOW
+- **Risk**: LOW
+- **Description**: Explore if walrus operator `:=` can reduce node count vs separate assign
+- **Hypothesis**: Walrus might save a node or two
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-llm = ChatOpenAI()
+### IDEA-009: Remove one parameter (question or cot_examples)
+- **Type**: CODE
+- **Priority**: MEDIUM
+- **Risk**: LOW
+- **Description**: If the snippet is just measuring AST size and doesn't need to be runnable, compress to fewer parameters. E.g. combine cot_examples+question into a single `context` param.
+- **Hypothesis**: Each param = 1 arg node; removing one saves 1 node
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-messages = [
-    (
-        "user",
-        "Extract the name of the author from the quotation below:\n{quotation}",
-    ),
-    ("assistant", "The name of the author is "),
-]
-author_prompt = ChatPromptTemplate.from_messages(messages)
+### IDEA-010: Remove type annotations from snippet
+- **Type**: CODE
+- **Priority**: HIGH
+- **Risk**: LOW
+- **Description**: The original cot_sc.py has type annotations (list[str], str, int). Without annotations: 35 nodes. With annotations: 45 nodes. Our current snippet has no annotations (35 nodes). Confirmed already done.
+- **Hypothesis**: Already applied (35 nodes without annotations vs 45 with)
+- **Status**: ALREADY APPLIED
+- **Result**: Current baseline is already without annotations
 
-messages = messages[:1] + [
-    ("assistant", "The name of the author is {author}"),
-    ("user", "{question}"),
-]
-question_prompt = ChatPromptTemplate.from_messages(messages)
+### IDEA-011: Use direct expression for results without variable
+- **Type**: CODE
+- **Priority**: HIGH
+- **Risk**: LOW
+- **Description**: The main IDEA-001: inline marginalize. Already computed: gives 30 nodes. This is the primary optimization to try first.
+- **Status**: PENDING (same as IDEA-001)
 
+### IDEA-012: Minimal 2-param snippet
+- **Type**: CODE
+- **Priority**: MEDIUM
+- **Risk**: LOW
+- **Description**: Use only 2 params (examples, n) and inline everything. Saves 1 arg node + reduced body nodes.
+- **Hypothesis**: ~28-29 nodes possible
+- **Status**: PENDING
+- **Result**: (fill in after execution)
 
-def answer_questions(quotation: str, questions: List[str]):
-    # First extract the author
-    author_chain = author_prompt | llm | StrOutputParser()
-    author = author_chain.invoke({"quotation": quotation})
-
-    # Create question answering chain
-    qa_chain = question_prompt | llm | StrOutputParser()
-
-    def answer_single_question(question):
-        return qa_chain.invoke(
-            {"quotation": quotation, "author": author, "question": question}
-        )
-
-    # Answer each question in parallel using map
-    with ThreadPoolExecutor() as executor:
-        return list(executor.map(answer_single_question, questions))
-
-
-quotation = '"Simplicity is the ultimate sophistication." -- Leonardo da Vinci'
-questions = [
-    "In what era did the author live?",
-    "What is the most famous painting of the author?",
-]
-print(answer_questions(quotation, questions))
-```
-
-## RoadMap
-- [x] Default to exclude """docstring""" from the prompt formation.
-- [x] Add supports for LLM logging and tracing platforms to inspect the traces.
-  - [x] Supported Lunary and Langfuse (open-source)
-- [ ] Allow directly working with prompts without `ppl` decorator.
-- [ ] Add more ... (contributions are welcome!)
-  - [ ] Examples and tutorials to demonstrate the usage
-  - [ ] Test cases to increase the coverage
-
-## Tutorial and Cookbook
-For a more comprehensive tutorial, please refer to the [tutorial](https://appl-team.github.io/appl/tutorials).
-
-### Table of Contents
-- [Introduction](https://appl-team.github.io/appl/tutorials/intro)
-- [Getting Started](https://appl-team.github.io/appl/tutorials/1_get_started)
-- [Example: QA with LMs](https://appl-team.github.io/appl/tutorials/2_qa_example)
-- [APPL Function](https://appl-team.github.io/appl/tutorials/3_appl_function)
-- [Concurrent LM Calls](https://appl-team.github.io/appl/tutorials/4_concurrent)
-- [Tool Calls for LMs](https://appl-team.github.io/appl/tutorials/5_tool_calls)
-- [Prompt Coding Helpers](https://appl-team.github.io/appl/tutorials/6_prompt_coding)
-- [Using Tracing](https://appl-team.github.io/appl/tutorials/7_tracing)
-
-### Cookbook and Applications
-For more detailed usage and examples, please refer to the [cookbook](https://appl-team.github.io/appl/cookbook).
-
-We use APPL to reimplement popular LLM and prompting algorithms in [Reppl](https://github.com/appl-team/reppl), such as:
-* [Tree of Thoughts](https://github.com/princeton-nlp/tree-of-thought-llm) [[Re-implementation](https://github.com/appl-team/reppl/tree/main/tree-of-thoughts/)] [[APPL Example](examples/advanced/tree_of_thoughts/)]: deliberate problem solving with Large Language Models.
-
-We use APPL to build popular LM-based applications, such as:
-* [Wordware's TwitterPersonality](https://twitter.wordware.ai/)[[APPL implementation](https://github.com/appl-team/TwitterPersonality)]: analyzes your tweets to determine your Twitter personality.
-
-We use APPL to build small LLM-powered libraries, such as:
-* [AutoNaming](https://github.com/appl-team/AutoNaming): automatically generate names for experiments based on argparse arguments.
-* [ExplErr](https://github.com/appl-team/ExplErr): a library for error explanation with LLMs.
-
-## Working with Cursor (Experimental)
-We provide [.cursorrules](https://github.com/appl-team/appl/blob/main/.cursorrules) to help you write APPL code with [Cursor](https://www.cursor.com/). You also setup the [Docs Symbol](https://docs.cursor.com/context/@-symbols/@-docs) with [APPL Docs](https://appl-team.github.io/appl/docs/). Thanks @xiumaoprompt for suggestion!
-
-## Citation and Acknowledgment
-If you find APPL helpful, please consider citing our paper:
-```bibtex
-@article{dong2024appl,
-  title={APPL: A Prompt Programming Language for Harmonious Integration of Programs and Large Language Model Prompts},
-  author={Dong, Honghua and Su, Qidong and Gao, Yubo and Li, Zhaoyu and Ruan, Yangjun and Pekhimenko, Gennady and Maddison, Chris J and Si, Xujie},
-  journal={arXiv preprint arXiv:2406.13161},
-  year={2024}
-}
-```
-
-We would like to thank the open-source community for their contributions, where we learned from or used these libraries in our project, including
-[instructor](https://github.com/jxnl/instructor),
-[LiteLLM](https://github.com/BerriAI/litellm),
-[LMQL](https://github.com/eth-sri/lmql),
-[Guidance](https://github.com/guidance-ai/guidance),
-[SGLang](https://github.com/sgl-project/sglang) and
-[autogen](https://github.com/microsoft/autogen).
-
-We also notice that there are more projects coming out to push the boundaries of prompt programming, such as [ell](https://github.com/MadcowD/ell) and [mirascope](https://github.com/Mirascope/mirascope/).
-
-## License
-This project is licensed under the terms of the MIT License.
+### IDEA-013: Single-line body function
+- **Type**: CODE
+- **Priority**: MEDIUM
+- **Risk**: LOW
+- **Description**: Compress to a function with just a single return statement: `@ppl\ndef f(e,q,n):\n e\n q\n return marginalize([gen() for _ in range(n)])`
+- **Hypothesis**: Short param names + inline = ~29 nodes
+- **Status**: PENDING
+- **Result**: (fill in after execution)

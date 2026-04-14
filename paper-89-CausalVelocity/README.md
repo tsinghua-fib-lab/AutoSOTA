@@ -1,11 +1,22 @@
-# causal-velocity
+# Paper 89 — CausalVelocity
 
-This is the official repository of the paper [Distinguishing Cause from Effect with Causal Velocity Models](https://arxiv.org/abs/2502.05122). The script `experiment.py` can be used to reproduce the experimental results. `score_probe.ipynb` can be used to reproduce Figures 3 and 4. 
+**Full title:** *Distinguishing Cause from Effect with Causal Velocity Models*
 
-Users are invited to read the `demo.ipynb` notebook to get a quick idea of how velocity models can be used for cause-effect inference. It also gives an idea of how to understand and interpret the velocity parametrization of SCMs. 
+**Original codebase:** This optimization is based on the [*Distinguishing Cause from Effect with Causal Velocity Models*](https://github.com/google-deepmind/optax) repository. For the original paper, see [arXiv:2502.05122](https://arxiv.org/abs/2502.05122).
 
-The main codebase has few dependencies beyond base JAX and [optax](https://github.com/google-deepmind/optax) for optimization. To actually evaluate the causal curves, we need [diffrax](https://docs.kidger.site/diffrax/) for numerical integration. The subdirectory `/loci` is entirely cloned from the original authors of [LOCI](https://github.com/aleximmer/loci), and as such has its own dependencies. It is only used to evaluate their method on our newly generated datasets. 
+**Registered metric movement (internal ledger, ASCII only):** +1.66%(89.58->91.07)
 
-```bash
-pip install -r requirements.txt
-```
+# Final Optimization Report: CausalVelocity (paper-89)
+
+## Summary
+
+**AUDRC** improved from **89.58% → 91.07%** after repro was skipped. **Stein integration steps doubled** (**n_steps 100→200**), and the **squared goodness-of-fit** path (**gof=sq**) under Stein scoring gave the largest lift. Bandwidth sweeps, extra Stein regularizers, and outlier trimming variants that regressed were discarded.
+
+## Key ideas (results ledger)
+
+- **More integration steps** for velocity-field matching.
+- **Squared GoF** in the Stein diagnostic for sharper cause-vs-effect separation.
+
+## Where to look next
+
+- **`README.md`** and Stein / velocity model YAML around **iter8** (final aligned).

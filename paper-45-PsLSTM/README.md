@@ -1,113 +1,53 @@
-# Unlocking the Power of LSTM for Long Term Time Series Forecasting (P-sLSTM)
+# Paper 45 — PsLSTM
 
-This repository contains the official implementation for the paper: **"Unlocking the Power of LSTM for Long Term Time Series Forecasting" (AAAI-25)**. [[Paper]](https://ojs.aaai.org/index.php/AAAI/article/view/33303)
+**Full title:** *Unlocking the Power of LSTM for Long Term Time Series Forecasting*
 
+**Original codebase:** This optimization is based on the [*Unlocking the Power of LSTM for Long Term Time Series Forecasting*](https://github.com/Eleanorkong/P-sLSTM.git) repository.
 
-## 📜 Abstract
+**Registered metric movement:** -0.86% (MSE: 0.1492 → 0.1479)
 
-Traditional recurrent neural network architectures, such as long short-term memory neural networks (LSTM), have historically held a prominent role in time series forecasting (TSF) tasks. While the recently introduced sLSTM for Natural Language Processing (NLP) introduces exponential gating and memory mixing that are beneficial for long term sequential learning, its potential short memory issue is a barrier to applying sLSTM directly in TSF. To address this, we propose a simple yet efficient algorithm named **P-sLSTM**, which is built upon sLSTM by incorporating **patching** and **channel independence**. These modifications substantially enhance sLSTM's performance in TSF, achieving state-of-the-art results. Furthermore, we provide theoretical justifications for our design, and conduct extensive comparative and analytical experiments to fully validate the efficiency and superior performance of our model.
+---
 
+# Final Optimization Report
 
-## 🏗️ Model Architecture
+## Results Summary
 
-P-sLSTM enhances the sLSTM architecture for long-term time series forecasting by integrating two key techniques:
+| Metric | Baseline | Best Achieved | Delta | Target |
+|--------|----------|---------------|-------|--------|
+| **MSE** | 0.14922569 | **0.14794841** | **-0.86%** | ≤0.1462 (-2.0%) |
+| MAE | 0.20801531 | 0.20630378 | -0.82% | — |
 
-* **Patching:** The input time series is segmented into patches. This allows the sLSTM backbone to capture local temporal information within each patch, overcoming the potential short memory limitations of standard RNNs when processing very long sequences.
-* **Channel Independence (CI):** Each channel (variate) of the multivariate time series is processed independently with a shared sLSTM backbone. This strategy has been shown to prevent overfitting and improve generalization in time series models.
+**Target was NOT fully achieved** (target: -2.0%, achieved: -0.86%). Best result is **0.86% below baseline**, representing a real improvement but falling short of the 2% goal.
 
-<img width="1418" height="456" alt="PsLSTM_Overview_CMYK" src="https://github.com/user-attachments/assets/ab270c14-749f-4933-855b-a584343f1179" />
+---
 
+## Key Changes Applied
 
-## ⚙️ Environment
-
-The model implementation requires a specific Python and PyTorch environment.
-
-* **Python:** Version `3.9` or newer is required.
-* **PyTorch/CUDA:** Ensure your PyTorch version is compatible with your installed CUDA version.
-
-The following setups are confirmed to work:
-* PyTorch 2.1.0, Python 3.10, and CUDA 12.1
-* PyTorch 2.3.0, Python 3.12, and CUDA 12.1
-
-Additionally, please ensure `ninja` is installed:
-```bash
-pip install ninja
+### 1. `models/P_sLSTM.py` — Bug Fix: Dropout propagation
+```diff
++            dropout=configs.dropout,
 ```
+The `dropout=0.1` CLI argument was not being passed to `xLSTMBlockStackConfig`, causing the xLSTM blocks to use `dropout=0.0` (no dropout). Adding this single line fixed the bug and enabled proper regularization.
 
-## 🚀 Setup and Data Preparation
+### 2. `exp/exp_main.py` — MC Dropout + Input Perturbation Ensemble
+- `model.train()` during inference (enables dropout stochasticity)
+- **MC Dropout**: K=20 forward passes with different dropout masks
+- **Input Perturbation**: 5 noise levels (σ=0.01), first pass uses clean input
+- Total: 100 forward passes per test sample, averaged for variance reduction
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/Eleanorkong/P-sLSTM.git
-cd P-sLSTM
-````
+---
 
-### 2\. Dependency Installation
+## What Worked
+1. **Dropout Bug Fix** (critical): Model was trained with `dropout=0.0` despite `--dropout 0.1` being specified.
+2. **MC Dropout Ensemble**: Running K=10-30 stochastic forward passes with `model.train()` reduced test-time variance.
+3. **Input Perturbation**: Adding small Gaussian noise (σ=0.01) to inputs across 5 passes further diversified the ensemble.
 
-Install the required dependencies using pip:
+## What Didn't Work
+- **RevIN (Reversible Instance Normalization)**: Caused distribution mismatch
+- **Alternative LR schedules**: Type1's aggressive halving caused early plateau
+- **Higher dropout (0.2)**: Overregularized the model
 
-```bash
-pip install -r requirements.txt
-```
+---
 
-### 3\. Data Acquisition
-
-The experiments are conducted on publicly available datasets benchmarked in Time-Series-Library. Datasets can be downloaded following the instructions at:
-
-  * [https://github.com/thuml/Time-Series-Library](https://github.com/thuml/Time-Series-Library)
-  * [https://github.com/thuml/iTransformer](https://github.com/thuml/iTransformer)
-
-### 4\. Data Configuration
-
-Downloaded datasets must be placed in the `./dataset` directory. The expected directory structure is as follows:
-
-```
-P-sLSTM/
-├── dataset/
-│   ├── weather.csv
-│   ├── electricity.csv
-│   └── ...
-├── scripts/
-└── ...
-```
-
-## 📊 Experiment Replication
-
-Example scripts are provided for replicating the experimental results presented in the paper. For detailed guidance on script usage and structure, please refer to the conventions established in the [Time-Series-Library](https://github.com/thuml/Time-Series-Library) repository.
-
-**Example Usage:**
-
-To execute the P-sLSTM model for long-term forecasting on the Weather dataset, run the provided script:
-
-```sh
-sh scripts/EXP-LongForecasting/P_sLSTM/weather.sh
-```
-
-This script can be adapted for other datasets and forecasting horizons.
-
-
-## 🙏 Acknowledgements
-
-The implementation of P-sLSTM builds upon and utilizes components from the following outstanding repositories. We gratefully acknowledge the authors of these repositories for making their work publicly available.
-
-  * **Time-Series-Library:** [https://github.com/thuml/Time-Series-Library](https://github.com/thuml/Time-Series-Library)
-  * **iTransformer:** [https://github.com/thuml/iTransformer](https://github.com/thuml/iTransformer)
-  * **PatchTST:** [https://github.com/yuqinie98/PatchTST](https://github.com/yuqinie98/PatchTST) 
-  * **xLSTM (sLSTM):** [https://github.com/NX-AI/xlstm](https://github.com/NX-AI/xlstm)
-
-
-## Citation
-
-If you utilize this code or find our work beneficial to your research, please consider citing the original paper:
-
-```bibtex
-@inproceedings{kong2025unlocking,
-  title={Unlocking the power of lstm for long term time series forecasting},
-  author={Kong, Yaxuan and Wang, Zepu and Nie, Yuqi and Zhou, Tian and Zohren, Stefan and Liang, Yuxuan and Sun, Peng and Wen, Qingsong},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={39},
-  number={11},
-  pages={11968--11976},
-  year={2025}
-}
-```
+## Conclusion
+The main limitation was architectural: the P-sLSTM processes only 6 patches (336/56) with no overlap — very coarse temporal granularity. The model reached a convergence plateau by epoch 8 regardless of training duration.

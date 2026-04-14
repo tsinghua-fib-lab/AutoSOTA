@@ -2,6 +2,8 @@
 
 **Full title:** *Least squares variational inference*
 
+**Original codebase:** This optimization is based on the *Least squares variational inference* repository.
+
 **Registered metric movement (`results.md`):** ELBO / KL-style objective **367.7902 → 367.7304** (**↓0.0598**, ~**0.016%**; lower is better). **Rubric “−2% vs baseline” target not met** — see “Why the bar is unreachable” below.
 
 **Latest pipeline run:** `run_20260323_230402` (sota-5 `auto-pipeline`).

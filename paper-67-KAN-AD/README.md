@@ -2,6 +2,8 @@
 
 **Full title:** *KAN-AD: Time Series Anomaly Detection with Kolmogorov-Arnold Networks*
 
+**Original codebase:** This optimization is based on the *KAN-AD: Time Series Anomaly Detection with Kolmogorov-Arnold Networks* repository.
+
 **Registered metric movement (internal ledger):** +0.89%(0.9106→0.9187 F1)
 
 ## Summary

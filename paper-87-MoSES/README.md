@@ -1,5 +1,7 @@
 # Optimization Report: MoSES
 
+**Original codebase:** This optimization is based on the the original codebase repository.
+
 **Paper ID**: 87  
 **Repository folder**: `paper-87-MoSES`  
 **Source**: AutoSota optimizer run artifact (`final_report.md`).  

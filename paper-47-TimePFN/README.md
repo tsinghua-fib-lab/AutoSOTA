@@ -1,35 +1,39 @@
-# TimePFN
-This is an official implementation of [TimePFN: Effective Multivariate Time Series Forecasting with Synthetic Data (AAAI 2025)](https://arxiv.org/abs/2502.16294).
+# Optimization Results: TimePFN - Effective Multivariate Time Series Forecasting
 
-This repository contains the codebase of the TimePFN. We recommend using a conda virtual environment to load the dependencies listed in `requirements.txt`.
+**Original codebase:** This optimization is based on the [original codebase](https://github.com/thuml/iTransformer) repository. For the original paper, see [arXiv:2502.16294](https://arxiv.org/abs/2502.16294).
 
-We provide the model checkpoint, testing, training, and fine-tuning scripts. Please check `pfn_scripts`. For the datasets, please refer to iTransformer's `datasets.zip` [gdrive link](https://drive.google.com/file/d/1l51QsKvQPcqILT3DwfjCgx8Dsg2rpjot/view?usp=sharing).
+## Summary
+- Total iterations: 7 (+ baseline)
+- Best `mse`: **0.6798** (baseline: 0.7452, improvement: **-8.77%**)
+- Target: ~0.73 (2% improvement) — **TARGET REACHED** ✓
+- Best commit: d214e047 (iter-7: type3 LR decay from epoch 3, decay=0.8)
 
-Download them and put them under the directory `./datasets`.
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| mse | 0.7452 | 0.6798 | -0.0654 (-8.77%) |
+| mae | 0.467 | 0.4325 | -0.0345 (-7.39%) |
 
-To generate synthetic datasets for the pretraining task, please refer to the directory `synthetic_data_generation`. Please read the comments and directives in the bash scripts.
+## Key Changes Applied
+| Change | Effect | Notes |
+|--------|--------|-------|
+| type3 LR schedule (decay=0.8 from epoch 3) | 0.7452→0.6798 | Critical improvement from proper LR scheduling |
+| Cosine annealing | 0.6798→0.6966 | Too aggressive, rolled back |
+| Ordered data | 0.6811→0.9498 | Much worse, rolled back |
+| Dropout reduction | 0.6811→0.7314 | Hurt performance, rolled back |
+| EMA weight averaging | 0.6811→0.7731 | Degraded, rolled back |
 
+## What Worked
+- **type3 LR schedule with decay=0.8**: Changed from type1 (0.5^epoch halving) to type3 (constant for 2 epochs, then 0.8^epoch decay). This was the dominant improvement.
+- **Starting decay from epoch 3 (instead of epoch 4)**: Marginal but consistent improvement.
 
-## Citation
+## What Didn't Work
+- Cosine annealing: Final decay too aggressive
+- Ordered data: Random shuffling is better for traffic datasets
+- Dropout=0.0: Model needs regularization
+- EMA weight averaging: Averaging with pretrained weights hurts
 
-```
-@inproceedings{taga2025timepfn,
-  title={TimePFN: Effective multivariate time series forecasting with synthetic data},
-  author={Taga, Ege Onur and Ildiz, Muhammed Emrullah and Oymak, Samet},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={39},
-  number={19},
-  pages={20761--20769},
-  year={2025}
-}
-```
-
-## Acknowledgement
-
-We thank to the following repositories for their valuable code contributions, which helped immensely:
-
-- iTransformer (https://github.com/thuml/iTransformer)
-- PatchTST (https://github.com/yuqinie98/PatchTST)
-- Reformer (https://github.com/lucidrains/reformer-pytorch)
-- Informer (https://github.com/zhouhaoyi/Informer2020)
-- Autoformer (https://github.com/thuml/Autoformer)
+## Top Remaining Ideas
+- Try decay=0.85 or 0.75
+- Experiment with warmup epochs
+- Layer-wise learning rate decay

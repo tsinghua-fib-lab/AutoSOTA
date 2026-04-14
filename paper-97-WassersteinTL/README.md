@@ -1,102 +1,73 @@
-# Wasserstein Transfer Learning (WaTL)
+# Optimization Report: Wasserstein Transfer Learning
 
-This repository contains the implementation of **Wasserstein Transfer Learning (WaTL)** algorithm, as described in the Wasserstein Transfer Learning paper.
+**Original codebase:** This optimization is based on the the original codebase repository. For the original paper, see [arXiv:2505.17404](https://arxiv.org/abs/2505.17404).
 
-## Repository Structure
-
-```
-Codes/
-├── README.md                    # This file
-├── Simulation/
-│   ├── Simulation.R            # Main simulation script (Section 5)
-│   └── SimulationFunc.R        # Helper functions for simulation
-└── RealData/
-    ├── RealData.R              # Main real data analysis script (Section 6)
-    └── RealDataFunc.R          # Helper functions for real data analysis
-```
+**Paper ID**: 97
+**Repository folder**: `paper-97-WassersteinTL`
+**Source**: AutoSota optimizer run artifact (`final_report.md`).
+**Synced to AutoSota_list**: 2026-03-26
 
 ---
 
-## Algorithm Implementation
+# Optimization Results: Wasserstein Transfer Learning (paper-97)
 
-### Algorithm 1: Wasserstein Transfer Learning (WaTL)
+## Summary
+- Total iterations: 9
+- Best `rmspr`: 0.03161 (baseline: 0.03284, improvement: -3.74%)
+- Best commit: a735afd1ea815c71b7bd801406d37cd11afe9208
+- Target (≤0.0321): ACHIEVED
 
-#### Step 1: Weighted Auxiliary Estimator
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| RMSPR | 0.03284 | 0.03161 | -3.74% |
+| RMSPR CI low | 0.03250 | 0.03132 | -3.63% |
+| RMSPR CI high | 0.03317 | 0.03189 | -3.86% |
 
-**Simulation (Global Fréchet):**
-- `SimulationFunc.R`, function `compute_f1_hat()`, lines 278-333
-- Aggregates target ($k=0$) and all sources ($k=1,\ldots,K$)
-- Weighted by sample sizes $n_k$
+## Key Changes Applied (cumulative, all active in final best)
+| Change | Effect | Notes |
+|--------|--------|-------|
+| lambda=2.0 (was 0.25) | -0.76% | Higher regularization toward f1_hat reduces target-data noise |
+| K_src=80 nearest sources | -0.28% | Select 80 nearest developing countries by TFR distance |
+| Lambda ensemble {2.0, 2.5, 3.0} | -0.19% | Average predictions over 3 lambda values |
+| Gaussian kernel sv weights | -2.60% | Use Gaussian kernel for bias correction weights (biggest win) |
 
-**Real Data (Local Fréchet):**
-- `RealDataFunc.R`, function `compute_f1_hat()`, lines 279-341
-- Uses local linear weights instead of global weights
-- Aggregates target and all sources
+## What Worked
 
-#### Step 2: Bias Correction Using Target Data
+### 1. Gaussian Kernel for Bias Correction Weights (sv) — Biggest Win (+2.60%)
+The key insight was that the linear kernel `sv_i = 1 + (X_i - X̄)/σ² × (X_V - X̄)` in the bias correction step (`compute_f_L2`) assigns **large negative weights** to distant training countries. These negative weights cause gradient instability and suboptimal bias correction.
 
-**Code implementation:**
-- `SimulationFunc.R` / `RealDataFunc.R`, function `compute_f_L2()`
-- Uses gradient descent to minimize the objective
-- Regularization parameter $\lambda$ selected via cross-validation
+Replacing with Gaussian kernel `sv_i = exp(-0.5 × (X_i - X_V)² / h²)` ensures:
+- All weights are non-negative (0 to 1)
+- Larger weights for nearby countries (more informative)
+- Numerically stable gradient descent
 
-#### Step 3: Projection to Wasserstein Space
+### 2. Lambda = 2.0 (up from 0.25) — Second Biggest Win (+0.76%)
+The regularization parameter λ controls how much the bias correction pulls toward f1_hat. Higher λ means the final prediction stays closer to the auxiliary estimator f1_hat. With only n=14 target samples, f1_hat (which leverages all 156+ source countries) is more informative than the noisy bias correction. Lambda=2.0 optimally balances the two.
 
-**Code implementation:**
-- **Simulation:** Implicitly satisfied (quantile functions already monotone in data generation)
-- **Real Data:** `RealDataFunc.R`, function `Project()`, lines 348-373
-  - Uses OSQP solver to enforce monotonicity constraint
-  - Called in `RealData.R`, line 171
+### 3. K_src=80 Nearest Source Countries (+0.28%)
+Instead of using all 156 developing countries as source, selecting the 80 most TFR-similar countries per test point improves signal-to-noise ratio. Countries with very different TFR from the test point are effectively irrelevant.
 
----
+### 4. Lambda Ensemble {2.0, 2.5, 3.0} (+0.19%)
+Averaging predictions across 3 lambda values reduces variance without increasing bias, providing a small but consistent improvement.
 
-## Running the Code
+## What Didn't Work
+- **Isotonic projection**: GD already converges to monotone functions; projection has no effect
+- **Gaussian kernel in f1_hat**: Changing f1_hat weights doesn't matter much — the dominant step is bias correction
+- **Nesterov momentum**: The gradient structure (with potentially negative sv weights) causes catastrophic divergence
+- **2D predictor (TFR + e0)**: Near-singular covariance matrix → numerically unstable
+- **Higher lambda ensemble {3.5, 4.0, 4.5}**: Looks better in 200-rep probe but worse in 1000-rep; higher lambda has more variance
+- **Adding top-21 developed countries as source**: No improvement — developing countries already cover needed diversity
 
-### Simulation
+## Key Insights
+1. **The bias correction is the bottleneck**: Improving f1_hat weights doesn't matter because bias correction overrides them. The real lever is the bias correction itself.
+2. **Linear weights have pathological negatives**: The Taylor expansion kernel assigns large negative weights to distant training points, which destabilizes gradient descent.
+3. **Source selection works**: K_src=80 is optimal; using all 156 countries introduces irrelevant data.
+4. **Lambda tuning is essential**: Default λ=0.25 significantly underperforms. Higher λ means less bias correction, which is better with n=14 target samples.
 
-```bash
-Rscript Simulation/Simulation.R <M> <n_t> <seed> <setting> <tau>
-```
-
-**Arguments:**
-- `M`: Grid size for quantile functions (e.g., 100)
-- `n_t`: Target sample size (200-800)
-- `seed`: Random seed
-- `setting`: Data generation setting (1 or 2)
-- `tau`: Source sample multiplier (100 or 200)
-
-**Example:**
-```bash
-Rscript Simulation/Simulation.R 100 200 42 1 100
-```
-
-### Real Data
-
-```bash
-Rscript RealData/RealData.R <seed> <race> <M> <rate> <gender>
-```
-
-**Arguments:**
-- `seed`: Random seed
-- `race`: Race index (1=Black, 2=White)
-- `M`: Grid size for quantile functions (e.g., 100)
-- `rate`: Source data sampling rate (0-1, typically 1.0)
-- `gender`: Gender (0=Female, 1=Male)
-
-**Example:**
-```bash
-Rscript RealData/RealData.R 42 1 100 1.0 0
-```
-
-## Citation
-
-```
-@article{zhang2025wasserstein,
-  title={Wasserstein Transfer Learning},
-  author={Zhang, Kaicheng and Zhang, Sinian and Zhou, Doudou and Zhou, Yidong},
-  journal={arXiv preprint arXiv:2505.17404},
-  year={2025}
-}
-```
-
-
+## Top Remaining Ideas (for future runs)
+1. Per-test-point lambda selection via LOO-CV on training set (adaptive λ per test point)
+2. Quadratic or polynomial kernel for sv weights instead of Gaussian
+3. Joint tuning of bandwidth h and lambda together
+4. Try target countries beyond bottom 24 by e0 (e.g., random selection from all 45 developed)
+5. Stochastic gradient descent with mini-batches for bias correction

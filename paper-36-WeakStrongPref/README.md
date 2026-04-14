@@ -2,6 +2,8 @@
 
 **Full title:** *Synergistic Weak-Strong Collaboration by Aligning Preferences*
 
+**Original codebase:** This optimization is based on the *Synergistic Weak-Strong Collaboration by Aligning Preferences* repository.
+
 **Registered metric movement (internal ledger, ASCII only):** +28.42%(0.7734->0.9931)
 
 ## Iteration trace (`scores.jsonl`)

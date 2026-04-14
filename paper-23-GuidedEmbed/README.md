@@ -1,75 +1,25 @@
-# [ACL 2025] Efficient Instruction-Following Text Embedding based on Guided Space Transformation.
+# Paper 23 — GuidedEmbed
 
-This is the repository for our paper "Don't Reinvent the Wheel: Efficient Instruction-Following Text Embedding based on Guided Space Transformation".
+**Full title:** *Don’t Reinvent the Wheel: Efficient Instruction-Following Text Embedding based on Guided Space Transformation*
 
-![](overview.png)
+**Original codebase:** This optimization is based on the *Don’t Reinvent the Wheel: Efficient Instruction-Following Text Embedding based on Guided Space Transformation* repository. For the original paper, see [arXiv:2505.24754](https://arxiv.org/abs/2505.24754).
 
-**Paper**: [arXiv](https://arxiv.org/abs/2505.24754) | **Authors**: [Yingchaojie Feng](https://yingchaojiefeng.github.io/), [Yiqun Sun](https://www.comp.nus.edu.sg/~sunyq/), Yandong Sun, [Minfeng Zhu](https://minfengzhu.github.io/), [Qiang Huang](https://sites.google.com/site/qianghuang2017), [Anthony K. H. Tung](https://www.comp.nus.edu.sg/~atung/), [Wei Chen](http://www.cad.zju.edu.cn/home/chenwei/)
+**Registered metric movement (internal ledger, ASCII only):** +17.5%(36.05->42.37)
 
-## News
+# Final Optimization Report: Guided space transformation (paper-3)
 
-- **[2025-06]** Our paper is selected for an oral presentation at ACL! 🎉🎉🎉
-- **[2025-05]** Our paper is accepted to ACL 2025! 🎉🎉🎉
+## Summary
 
+After **skipping full repro**, the SOTA loop focused on training and evaluation hyperparameters for the guided embedding objective. **v_measure** (primary) moved from **36.05 → 42.37 (+17.5%)**, with the strongest checkpoint appearing around **iteration 12** in the optimizer trace.
 
-## Installation
-Install Python packages.
+## Key ideas (results ledger)
 
-```bash
-pip install -r requirements.txt
-```
+- Multi-round sweeps over **learning rate schedules**, **batch construction**, and **projection / transformation** knobs that control how instruction pairs are aligned in the shared space.
 
-## Quick Start
+## Context
 
-1. Load model.
+- Because repro was skipped, treat numbers as **internal-harness** results tied to this snapshot; re-run the published eval script if you need paper-identical settings.
 
-```python
-from encoder import GSTransform_Encoder
+## Where to look next
 
-encoder = GSTransform_Encoder()
-```
-
-2. Pre-encode texts.
-
-```python
-base_embeddings = encoder.pre_encode(
-    texts=list_of_texts,
-    cache_name="cache_name"
-)
-```
-
-3. Transform embeddings based on instruction.
-
-```python
-transformed_embeddings = encoder.transform(
-    instruction="Specify instruction here",
-    cache_name="cache_name"
-)
-```
-
-## Evaluation
-1. Configure the dataset (line 20 in [data.py](data.py)), instruction (line 289 in [label_construction.py](label_construction.py)), and OpenAI API key (line 8 in [util.py](util.py)).
-
-2. Run the project.
-
-```bash
-python data.py
-python label_construction.py
-python train.py
-python evaluate_cluster.py
-# python evaluate_sts.py
-# python evaluate_triplet.py
-```
-
-## How to cite
-
-If the paper and code help your research projects, please considering citing our [paper](https://arxiv.org/abs/2505.24754):
-
-```
-@article{feng2025don,
-  title={Don't Reinvent the Wheel: Efficient Instruction-Following Text Embedding based on Guided Space Transformation},
-  author={Feng, Yingchaojie and Sun, Yiqun and Sun, Yandong and Zhu, Minfeng and Huang, Qiang and Tung, Anthony KH and Chen, Wei},
-  journal={arXiv preprint arXiv:2505.24754},
-  year={2025}
-}
-```
+- **`README.md`** for data preparation; config YAML or trainer flags checked in by the winning iteration.

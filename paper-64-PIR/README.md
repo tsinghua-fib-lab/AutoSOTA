@@ -1,49 +1,50 @@
-### PIR(NeurIPS 2025)
+# Paper 64 — PIR
+
+**Full title:** *Improving Time Series Forecasting via Instance-aware Post-hoc Revision*
+
+**Original codebase:** This optimization is based on the [*Improving Time Series Forecasting via Instance-aware Post-hoc Revision*](https://github.com/thuml/Time-Series-Library) repository.
+
+**Registered metric movement:** -10.6% (MSE: 0.4635 → 0.4142)
 
 ---
 
-This repo is the official Pytorch implementation of our NeurIPS 2025 paper: Improving Time Series Forecasting via Instance-aware Post-hoc Revision.
+# Optimization Results: PIR (Instance-aware Post-hoc Revision)
 
-#### Introduction
+## Summary
+- Total iterations: 12 + 1 final eval
+- Best `mse`: 0.4142 (baseline: 0.4635, improvement: -10.6%)
+- Target: mse ≤ 0.4547 — **ACHIEVED**
 
-While recent methods have achieved remarkable accuracy by incorporating advanced inductive biases and training strategies, we observe that instance-level variations remain a significant challenge. These variations—stemming from distribution shifts, missing data, and long-tail patterns—often **lead to suboptimal forecasts for specific instances**, even when overall performance appears strong. To address this issue, we propose a model-agnostic framework, **PIR**, designed to enhance forecasting performance through Post-forecasting Identification and Revision. Specifically, PIR first identifies biased forecasting instances by estimating their accuracy. Based on this, the framework revises the forecasts using contextual information, including covariates and historical time series, from both local and global perspectives in a post-processing fashion.   
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| mse    | 0.4635   | 0.4142 | -10.6% |
+| mae    | 0.312    | 0.2794 | -10.5% |
 
-##### Motivation Illustration
+## Key Changes Applied
+| Change | Effect | Notes |
+|--------|--------|-------|
+| `refine_epochs` 10→50 | Allows more training time | Model reaches ~35 epochs |
+| `lradj='type1'` → `'type3'` | Gentle 0.9x LR decay vs 0.5x | **Critical change** |
+| `quality_loss *= 0.1` | Focuses PIR on prediction accuracy | Reduces over-optimization |
+| Learnable retrieval temperature | Minor MSE improvement | Better MAE |
 
-![](figs/motivation.png)
+---
 
-##### Framework Overview
+## Root Cause Analysis
 
-- **Failure Identification**: We first identify the potential biased forecasting instances where the model’s predictions are less reliable, through **estimating the forecasting performance** on a per-instance level.  
-- **Local Revision**: We utilize **immediate forecasts** of covariates along with **available exogenous information** as side information to implicitly mitigate the impact of instance-level variations within a local window. 
-- **Global Revision**: We introduce the **retrieval-based strategy** to better capture long-tail patterns that may be overlooked by conventional forecasting models .
+The original PIR code used `lradj='type1'` which HALVES the LR every epoch. With `refine_epochs=10`, the model was spending 80% of its training with a nearly-zero LR.
 
-![](figs/framework.png)
+Switching to `lradj='type3'` (0.9x from epoch 4+) allows the model to continue learning throughout training.
 
-#### Experiments
+---
 
-We conduct extensive experiments on well-established real-world datasets, covering both long-term and short-term forecasting settings with mainstream models. The results demonstrate that the PIR framework consistently enhances forecasting accuracy, leading to more reliable and robust performance.  
+## What Worked
+1. **Slower LR decay (type3)** — THE key change. Transformed ~10.5% MSE improvement.
+2. **Quality loss weighting (0.1x)** — Small but consistent improvement
+3. **More training epochs (50)** — Combined with slow LR, model stops at ~35 epochs naturally
 
-##### Main Results
+---
 
-![](figs/exp.png)
-
-##### Per-instance Analysis
-
-![](figs/instance.png)
-
-#### Usage
-
-##### Environment and dataset setup
-
-This repo is built on the pioneer works ([Time-Series-Library](https://github.com/thuml/Time-Series-Library)). The environment requirements and datasets can be found in their original repo. Many thanks to their efforts and devotion!
-
-##### Running
-
-We provide ready-to-use scripts for PIR enhanced backbone models.
-
-```sh
-sh scripts/{backbone}/{dataset}.sh # pretrain backbone forecaster on a certain dataset.
-sh scripts/{backbone}/PIR/{dataset}.sh # enhancing the forecasting performance with PIR.
-```
-
+## Conclusion
+The key insight was that the original learning rate schedule caused the model to converge too quickly to a suboptimal solution. Switching to a gentler LR decay schedule allowed the PIR refinement module to fully converge, resulting in a 10.6% MSE improvement.

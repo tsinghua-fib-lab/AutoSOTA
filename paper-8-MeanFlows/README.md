@@ -2,6 +2,8 @@
 
 **Full title:** *Mean Flows for One-step Generative Modeling*
 
+**Original codebase:** This optimization is based on the *Mean Flows for One-step Generative Modeling* repository.
+
 **Registered metric movement (internal ledger, ASCII only):** -0.14%(2.8112->2.8074) FID lower is better
 
 # Final Optimization Report: MeanFlows (paper-8)

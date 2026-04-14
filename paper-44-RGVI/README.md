@@ -1,100 +1,105 @@
-# RGVI
+# Optimization Report: RGVI
 
-This is the official PyTorch implementation of our paper:
+**Original codebase:** This optimization is based on the [original codebase](https://github.com/suhwan-cho/awesome-video-inpainting) repository. For the original paper, see [arXiv:2412.08975](https://arxiv.org/abs/2412.08975).
 
-> **Elevating Flow-Guided Video Inpainting with Reference Generation**, *AAAI 2025*\
-> Suhwan Cho, Seoung Wug Oh, Sangyoun Lee, Joon-Young Lee\
-> Link: [[AAAI]](https://ojs.aaai.org/index.php/AAAI/article/download/32255/34410) [[arXiv]](https://arxiv.org/abs/2412.08975)
+**Paper ID**: 44  
+**Repository folder**: `paper-44-RGVI`  
+**Source**: AutoSota optimizer run artifact (`final_report.md`).  
+**Synced to AutoSota_list**: 2026-03-22  
 
-<img src="https://github.com/user-attachments/assets/04bd58ff-330e-4e6e-8b5f-402d0afade6d" width=800>
+---
 
+# Final Report: RGVI (paper-6) Optimization
 
-You can also explore other related works at [awesome-video-inpainting](https://github.com/suhwan-cho/awesome-video-inpainting).
+**Date**: 2026-03-20
+**Paper**: "Elevating Flow-Guided Video Inpainting with Reference Generation"
+**Task**: Maximize PSNR on HQVI dataset (240p, 10 sequences, 100 frames each)
 
+## Results Summary
 
-## Demo Video
-https://github.com/user-attachments/assets/5654ae19-4c8b-458a-872c-9cdf6bedf699
+| Metric | Baseline (paper) | Our Best | Improvement |
+|--------|-----------------|----------|-------------|
+| PSNR   | 31.27           | **32.24** | **+0.97 (+3.1%)** |
+| SSIM   | 0.9537          | 0.9557   | +0.0020     |
+| LPIPS  | 0.0326          | 0.0328   | -0.0002     |
+| VFID   | 0.1738          | 0.1512   | +0.0226     |
 
+**Target**: 31.8954 (+2%) — **EXCEEDED** (achieved +3.1%)
 
-## Abstract
-Existing VI approaches face challenges due to the inherent ambiguity between known content propagation and new content generation. 
-To address this, we propose a robust VI framework that integrates **a large generative model** to decouple this ambiguity. To further 
-improve pixel distribution across frames, we introduce an advanced pixel propagation protocol named **one-shot pulling**. Furthermore, 
-we present the **HQVI benchmark**, a dataset specifically designed to evaluate VI performance in diverse and realistic scenarios.
+## Per-Sequence Results
 
+| Sequence | Baseline | Best | Delta |
+|----------|---------|------|-------|
+| city     | 32.98   | 33.57 | +0.59 |
+| forest   | 20.75   | 22.68 | +1.93 |
+| garden   | 34.39   | 35.34 | +0.95 |
+| house    | 34.05   | 34.05 | 0.00  |
+| lot      | 41.19   | 41.21 | +0.02 |
+| mountain | 31.80   | 32.03 | +0.23 |
+| paint    | 37.65   | 37.91 | +0.26 |
+| park     | 29.21   | 29.21 | 0.00  |
+| snow     | 22.04   | 27.47 | +5.43 |
+| tree     | 28.55   | 28.96 | +0.41 |
+| **avg**  | **31.26** | **32.24** | **+0.98** |
 
-## Setup
-1\. Download [YouTube-VOS](https://competitions.codalab.org/competitions/19544#participate-get-data) from the official website (necessary only for PFCNet training).
+## Optimization Journey (12 Iterations)
 
-2\. For convenience, I also provide the [pre-processed version](https://drive.google.com/file/d/1DcD94HyluwyZgQtN1Y82kM4BHvb2454k/view?usp=drive_link) (resized to 240p).
+### Successful Changes (accumulated in final model)
 
-3\. Download [HQVI](https://drive.google.com/file/d/1eiscxJO2o8qVlHX52sul2Pz8elOwSWUP/view?usp=drive_link) and 
-[DAVIS](https://drive.google.com/file/d/1fBdMdhyStDGurVqgIp8_1SMVb0uIRqIH/view?usp=drive_link) to evaluate video object removal performance.
+1. **IDEA-010: SD2 at 512×512 native resolution** (+0.38 PSNR, iter-1)
+   - SD2-inpainting was originally receiving 240×432 images but is trained at 512×512
+   - Upscaling to 512×512 before SD2, then downscaling back dramatically helped snow (+4.28!)
+   - This was the single largest gain
 
-4\. Download [DAVI](https://drive.google.com/file/d/1i-hNki4Jrmiqg6226AIgN1v5PIL1Epm6/view?usp=drive_link) and 
-[YTVI](https://drive.google.com/file/d/1MpJCdakKkMZIHg3cqQ2epVxRo0YKCrGY/view?usp=drive_link) to evaluate video restoration performance.
+2. **IDEA-013: DPM++ 2M Karras scheduler** (+0.01 PSNR, iter-3)
+   - Replaced default PNDM scheduler with DPM++ 2M Karras (use_karras_sigmas=True)
+   - Marginal but positive improvement
 
-5\. Download [FCNet](https://drive.google.com/file/d/1KNetMWeYVlgrhgguw45uRfoJDmljw5hT/view?usp=drive_link) and [I3D](https://drive.google.com/file/d/1NhI0rDu7BeqNm0oyxS0jHxjQqhfelx8I/view?usp=drive_link) weights and place them in the ``weights/`` directory.
+3. **IDEA-006 → IDEA-014: Multi-seed ensemble with average blend** (+0.50 PSNR total)
+   - Iter-4: Pick-best by sharpness (3 seeds) → +0.09
+   - Iter-9: Switch to average blend (3 seeds) → +0.34 net (vs pick-best baseline)
+   - Iter-10: 5 seeds → +0.10 more
+   - Iter-11: 7 seeds → +0.06 more
+   - **Key insight**: Averaging multiple SD2 outputs reduces stochastic variance, especially for difficult sequences (forest, snow, garden). More seeds = more stable averaging with diminishing returns.
 
+### Failed Changes
 
+| Idea | What | Why Failed |
+|------|------|-----------|
+| IDEA-001 | SD2 steps=50 | Already default (no change) |
+| IDEA-004 | CFG=9.0 | Snow -0.60; default 7.5 is optimal |
+| IDEA-003 | threshold=0.5 | House -0.18; net -0.01 |
+| IDEA-005 | Natural bg prompt | Mountain devastated -3.13; original prompt is optimal |
+| IDEA-011 | Feathered blending | Catastrophic -1.89; contaminates known pixels |
 
+## Final Model Configuration
 
-## Running
+Changes to `rgvi.py` relative to paper original:
 
-### Training
-Train PFCNet on the YouTube-VOS dataset using the conventional random masking strategy.
+1. **SD2 model path**: `stabilityai/stable-diffusion-2-inpainting` → `/sd2_inpaint`
+2. **DPM++ scheduler**: Added after SDI init:
+   ```python
+   from diffusers import DPMSolverMultistepScheduler
+   self.sdi.scheduler = DPMSolverMultistepScheduler.from_config(
+       self.sdi.scheduler.config, use_karras_sigmas=True)
+   ```
+3. **512×512 upscaling**: Resize crop to 512×512 before SD2, resize back after
+4. **7-seed average ensemble**: Generate 7 SD2 outputs, average pixel-wise in numpy
 
-PFCNet does not significantly impact RGVI's stability, so you are free to use any custom network of your choice.
+## Key Insights
 
+1. **SD2 native resolution is critical**: Always run SD2-inpainting at 512×512. The model was trained at this resolution, and feeding 240×432 degraded quality significantly.
 
-### Testing
-Run RGVI with:
-```
-python run.py
-```
+2. **Average > pick-best selection**: Selecting the sharpest SD2 output misses the forest for the trees. Simple pixel-averaging across multiple seeds produces smoother, more consistent inpainting that scores better on PSNR/SSIM.
 
-Verify the following before running:\
-✅ Testing dataset selection\
-✅ GPU availability and configuration\
-✅ Input resolution selection\
-✅ Text prompt for generation mode\
-✅ Pre-trained model path
+3. **More seeds = better averaging**: 3→5→7 seeds all improved, with diminishing but positive returns. The averaging is converging to the mean of the SD2 distribution, which is more accurate than the peak of a sharpness-selection criterion.
 
+4. **Prompts are fragile**: Changing 'Empty background, high resolution' to descriptive natural language prompts severely hurt the mountain sequence (-3.13 PSNR). The original abstract prompt is optimal for this diverse dataset.
 
-Run the evaluation code with:
-```
-python post.py
-```
+5. **Known-pixel regions are sacred**: Any blending approach that contaminates known (unmasked) pixels is catastrophic. Feathered blending at mask boundaries corrupted all known regions.
 
-Verify the following before running:\
-✅ Dataset root specification\
-✅ Input resolution selection
+6. **Threshold is robust at 1.0**: The flow consistency threshold doesn't meaningfully affect results when changed by ±0.5; the existing value is already optimal.
 
+## Relation to Paper
 
-## Attachments
-[Pre-trained model (PFCNet)](https://drive.google.com/file/d/1wknOIQmOnzPtLpN1Ydfb698tUZVOYuKF/view?usp=drive_link)\
-[Pre-computed results (STTN)](https://drive.google.com/file/d/1o7UpiQMtoRFDO080JeDM6h27yPsaMRAA/view?usp=drive_link)\
-[Pre-computed results (FGVC)](https://drive.google.com/file/d/17mrUlb23Mr4HVaPVDVVaJZmtIq_qEc9V/view?usp=drive_link)\
-[Pre-computed results (FuseFormer)](https://drive.google.com/file/d/1wX4phJ2TRt_pGw8xhLLZWDbPtwztw0XZ/view?usp=drive_link)\
-[Pre-computed results (E2FGVI)](https://drive.google.com/file/d/1XYDJPqytDok9DwL0kzPJD3GVZhRCRKC3/view?usp=drive_link)\
-[Pre-computed results (ProPainter)](https://drive.google.com/file/d/1S_cA788ThoZ6kujB67CdX0YyAwMdnb2N/view?usp=drive_link)\
-[Pre-computed results (RGVI)](https://drive.google.com/file/d/1d65KFF91rV8Rvu8io5hVb7yJKOT5Jsbo/view?usp=drive_link)
-
-
-## Contact
-Code and models are only available for non-commercial research purposes.\
-For questions or inquiries, feel free to contact:
-```
-E-mail: suhwanx@gmail.com
-```
-
-
-## License
-The files ``evaluator.py``, ``pfcnet.py``, ``post.py``, ``rgvi.py``, ``run.py``, and other related materials 
-including model checkpoints and experimental data, are licensed under the
-[CC BY-NC License](https://creativecommons.org/licenses/by-nc/4.0/).
-
-
-The files ``fcnet.py`` and ``i3d.py`` are from [ProPainter](https://github.com/sczhou/ProPainter) and are licensed 
-under the [NTU S-Lab License 1.0](https://github.com/sczhou/ProPainter/blob/main/LICENSE).
-
+The key finding — that SD2 native resolution (512×512) and multi-seed averaging dramatically improve quality — is not discussed in the original paper. The paper likely ran SD2 at the input resolution and with a single fixed seed. These implementation improvements can be applied to any diffusion-based video inpainting framework.

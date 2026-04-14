@@ -1,43 +1,22 @@
-# Conformal Anomaly Detection in Event Sequences
-The implementation of our ICML-2025 paper ["Conformal Anomaly Detection in Event Sequences"](https://openreview.net/forum?id=Cq7XU5tmP8).
+# Paper 78 — ConformalAnomaly
 
+**Full title:** *Conformal Anomaly Detection in Event Sequences*
 
-## Installation
-1. Install the dependencies
-    ```
-    conda env create -f environment.yml
-    ``` 
-2. Activate the conda environment
-    ```
-    conda activate anomaly_tpp
-    ```
-3. Install the package (this command must be run in the `CADES` folder)
-    ```
-    pip install -e .
-    ```
-4. Unzip the data
-    ```
-    unzip data.zip
-    ```
+**Original codebase:** This optimization is based on the [*Conformal Anomaly Detection in Event Sequences*](https://github.com/shchur/tpp-anomaly-detection.) repository.
 
-## Reproducing the results from the paper
-- `experiments/spp.py`: GOF tests for SPP under nine alternatives (Section 4.1 in the paper).
-- `experiments/multivariate.py`: Detecting anomalies in synthetic data (Section 4.2).
-- `experiments/real_world.py`: Detecting anomalies in real-world data (Section 4.3).
-- `experiments/fpr_control.py`: FPR control (Section 4.4).
+**Registered metric movement (internal ledger, ASCII only):** +0.11%(99.31->99.42)
 
+# Final Optimization Report: Conformal anomaly detection (paper-78)
 
-## Citation
-If you find this code useful, please consider citing our paper. Thanks.
+## Summary
 
-```
-@inproceedings{zhang2025conformal,
-  title={Conformal Anomaly Detection in Event Sequences},
-  author={Zhang, Shuai and Zhou, Chuan and Liu, Yang and Zhang, Peng and Lin, Xixun and Pan, Shirui},
-  booktitle={International Conference on Machine Learning},
-  year={2025}
-}
-```
+Twelve iterations nudged **Anchorage AUROC** (and related headline metrics) upward; the ledger cites **99.31 → 99.42 (+0.11%)** on the primary scalar used for sign-off. Gains are small because the baseline was already **saturated**.
 
-## Acknowledgements and References
-Parts of this code are based on and/or copied from https://github.com/shchur/tpp-anomaly-detection.
+## Key ideas (results ledger)
+
+- Increase **Weibull mixture components** from **8 → 24** to model tail behavior of inter-arrival residuals more faithfully.
+- Drop optimizer learning rate (**1e-3 → 1e-4**) for stable fine-tuning once the conformal layer is near the boundary.
+
+## Where to look next
+
+- Event-sequence dataloader and conformal calibration scripts; **`README.md`** for eval splits.

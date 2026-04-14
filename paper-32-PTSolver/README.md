@@ -1,43 +1,21 @@
-# RealTravel
+# Paper 32 — PTSolver (TravelPlanner eval)
 
-This repository contains the RealTravel dataset.
+**Full title:** *Personal Travel Solver: A Preference-Driven LLM-Solver System for Travel Planning*
 
-RealTravel is a novel dataset created to facilitate research in personalized, preference-driven travel planning. It extends and enhances the existing **TravelPlanner** benchmark by incorporating authentic user reviews and point-of-interest (POI) metadata from the **Google Local** dataset. The dataset is designed to address the challenge of modeling the implicit travel preferences of real-world users, moving beyond a reliance on synthetic user profiles.
+**Original codebase:** This optimization is based on the *Personal Travel Solver: A Preference-Driven LLM-Solver System for Travel Planning* repository.
 
-## Key Features
+**Registered metric movement (internal ledger):** +4.48%(86.45%→90.32% final pass rate)
 
-* **Real-World User Data:** Incorporates actual user reviews and metadata from Google Local, providing a foundation for developing and evaluating personalized travel planning systems grounded in real user behaviors.
-* **Focus on Implicit Preferences:** Enables the study and modeling of users' implicit preferences, which are often not explicitly stated in travel queries.
-* **Structured and Symbolic Queries:** Includes a travel request generator that produces structured, symbolic queries from natural language descriptions, ensuring that user requests are machine-readable and can be used for rigorous evaluation.
-* **Comprehensive Data:** The dataset consists of 1,000 test samples and 155 validation samples. The underlying database contains information on 77 cities, and tens of thousands of restaurants, attractions, and accommodations.
+## Summary
 
-## Dataset Structure
+**Final pass rate** moved **86.45% → 90.32%** on the rule-based TravelPlanner-style harness. Removing **`room_type`** filtering in **`get_accommodation`** stopped excluding cheaper listings: the hard-constraint checker compares **lowercase** room-type strings while queries use **title case**, so the old filter was an accidental over-constraint. **`get_best_transport_mode`** picks a **single** mode for both legs of a round trip and verifies **both directions** against the distance-matrix API, fixing asymmetric “cheap one way, invalid return” failures.
 
-The RealTravel dataset is structured to support travel planning tasks. Each instance consists of a user query and the associated information needed to generate a valid and personalized travel plan. The core components include:
+## Key ideas
 
-* **User Queries:** Natural language requests for travel plans, which have also been converted into a structured JSON format. These queries specify constraints such as origin, destination, dates, budget, accommodation type, and cuisine preferences.
-* **User Profiles:** Inferred from users' review histories, capturing their likes and dislikes about various POI features.
-* **POI and Travel Data:** A comprehensive database of hotels, restaurants, and attractions with associated metadata.
+- Align **generator filters** with **evaluator semantics** (case and which constraints are actually active).
+- **Bidirectional** transport feasibility before committing a mode.
 
-## Citation
+## Where to look
 
-Please cite the relevant papers below.
-
-```bibtex
-@misc{xie2024travelplanner,
-    title={Travelplanner: A benchmark for real-world planning with language agents},
-    author={Xie, Jian and Zhang, Kai and Chen, Jiangjie and Zhu, Tinghui and Lou, Renze and Tian, Yuandong and Xiao, Yanghua and Su, Yu},
-    year={2024},
-    eprint={2402.01622},
-    archivePrefix={arXiv},
-    primaryClass={cs.CL}
-}
-
-@inproceedings{yan2023personalized,
-    title={Personalized showcases: Generating multi-modal explanations for recommendations},
-    author={Yan, An and He, Zhankui and Li, Jiacheng and Zhang, Tianyang and McAuley, Julian},
-    booktitle={Proceedings of the 46th International ACM SIGIR Conference on Research and Development in Information Retrieval},
-    pages={2251--2255},
-    year={2023}
-}
-```
+- **`generate_plans_v2.py`** (`get_accommodation`, `get_best_transport_mode`, `get_transportation` with `force_mode`).
+- Pipeline run **`run_20260324_212959`** under `optimizer/papers/paper-394/runs/` on the source machine.

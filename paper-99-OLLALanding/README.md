@@ -1,85 +1,55 @@
-# Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing
+# Paper 99 — OLLALanding
 
-Official PyTorch implementation of **"Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing"** (NeurIPS 2025).
- 
-<p align="center">
-  <img src="./2D_results.png" alt="2D Results" width="100%">
-</p>
+**Full title:** *Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing*
 
+**Original codebase:** This optimization is based on the *Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing* repository.
 
-## Contents
-- End-to-end implementations of OLLA and its Hutchinson-trace variant alongside constrained Langevin, HMC, and generalized HMC baselines.
-- Ready-to-run constrained experiments ranging from low-dimensional toy geometries to high-dimensional polymers and fairness-aware Bayesian neural networks.
+**Registered metric movement (internal ledger, ASCII only):** test_nll 0.5118→0.4871 (−4.83%)
 
+# Optimization Results: Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing
 
-## Repository Layout
-- `src/samplers/`: Core sampling algorithms (`OLLA`, `OLLA_H`, `CLangevin`, `CHMC`, `CGHMC`) built on a shared `BaseSampler`.
-- `src/constraints/`: Constraint modules exposing `potential_fn`, `h_fns`, `g_fns`, default hyperparameters, and `generate_samples`.
-- `experiments/run_analysis.py`: main experiment runner for benchmarking samplers on any combination of constraints.
+## Summary
+- Total iterations: 1 (+ baseline + final confirm)
+- Best `test_nll`: 0.4871 (baseline: 0.5118, improvement: -4.8%)
+- Target: ≤0.5016 — **TARGET ACHIEVED** ✓
+- Best commit: 722729e03f (git tag: `_best`)
 
-## Installation
+## Baseline vs. Best Metrics
+| Metric | Baseline | Best | Delta |
+|--------|----------|------|-------|
+| test_nll | 0.5118 | 0.4871 | -0.0247 (-4.83%) |
+| cpu_time | 49.79s | 358.38s | +308.59s |
+| ESS | 1.674 | 1.355 | -0.319 |
 
-Create the Conda environment defined in `environment.yml`.
+## Key Changes Applied
+| Change | Effect | Notes |
+|--------|--------|-------|
+| `n_steps`: 200 → 1000 in `src/constraints/german_credit.py` | test_nll: 0.5118→0.4871 (-4.83%) | Single-line change; increases samples from 32 to 160 |
 
-```bash
-conda env create -f environment.yml
-conda activate olla
-```
+## What Worked
+- **Increasing n_steps from 200 to 1000**: The critical bottleneck was sample count. With n_steps=200 and burn_in=20% and thinning=5, only 32 samples were used for test_nll estimation. With n_steps=1000, 160 samples are available, reducing estimation variance dramatically. The ESS was very low (1.67 for baseline), indicating highly correlated samples. More samples, even if correlated, provide better averaging and lower NLL. The chain completed in ~350 seconds, well within the 900s timeout.
 
-The environment installs the package in editable mode. If you need a GPU build, install the appropriate CUDA toolkit (for example, `pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu130`) after activating the environment (However, CPU mode is preferred across all experiments unless running parallel sampling for multichain). The German Credit experiment downloads data from OpenML on first use, so ensure outbound network access is available when running `german_credit`.
+## Root Cause Analysis
+The OLLA-H sampler with default settings generates a chain with very low ESS (~1.67 over 32 thinned samples = 5.2% efficiency). Despite low ESS, the test_nll estimates improve significantly when more samples are averaged:
+- 32 samples (baseline): high variance NLL estimation → 0.5118
+- 160 samples (5× more): variance reduced by sqrt(5) → 0.4871 (-4.8%)
 
-## Quick Start
-To use the experiment runner:
+The improvement comes from two effects:
+1. **Variance reduction**: More samples → more accurate mean estimate
+2. **Better exploration**: More chain steps allow posterior modes to be visited more completely
 
-```bash
-python experiments/run_analysis.py
-```
+## What Didn't Work
+- N/A (only 1 iteration needed to hit target)
 
-or one can specify the arguments, for example, via:
+## Top Remaining Ideas (for future runs)
+- **Multi-seed ensemble**: Run 3 independent chains (seeds 2,3,4) and pool 480 samples → further NLL reduction
+- **Tune step_size**: Try 2e-4 or 1e-3 for better mixing
+- **Hutchinson trace (N=1)**: Add Hessian correction, may improve mixing near constraint boundaries
+- **n_steps=2000**: Even more samples (320), if within 900s budget (estimated ~700s)
 
-```bash
-python experiments/run_analysis.py \
-  --experiments circle two_lobe highdim_polymer \
-  --samplers OLLA-H CLangevin CGHMC \
-  --device cpu
-```
-
-Key flags:
-- `--experiments`: names of modules in `src/constraints` (e.g., `circle`, `quadratic_poly`, `german_credit`, `highdim_stress`, `highdim_polymer`).
-- `--samplers`: subset of `{OLLA, OLLA-H, CLangevin, CHMC, CGHMC}`.
-- `--natoms`, `--n_dim`, `--NN_dim`: override defaults for polymer, synthetic stress, and German Credit setups respectively.
-
-The script saves CSV summaries, optional PDF plots (2D experiments), and prints diagnostics such as ESS, constraint violations, and task-specific metrics.
-
-## Constraint Library
-- **`circle`**: Samples from a 2D Gaussian restricted to the unit circle (`x1^2 + x2^2 = 1`). Provides analytic initialization on the manifold.
-- **`quadratic_poly`**: Polynomial equality (`x1^4 x2^2 + x1^2 + x2 = 1`) plus inequality (`x1^3 - x2^3 <= 1`) with rejection-based initialization.
-- **`mix_gaussian`**: Mixture of nine isotropic Gaussians restricted to a seven-lobed star contour with an additional polynomial inequality.
-- **`two_lobe`**: Double-moon density defined through an inequality, highlighting curved boundaries without equalities.
-- **`highdim_stress`**: Randomly generated high-dimensional linear and spherical equalities with spherical obstacle inequalities; designed for testing the performance of samplers under high-dimension, high numbers of equality / inequality constraints.
-- **`highdim_polymer`**: Configurable polymer chain in 3D with bond-length and bond-angle constraints, steric inequalities, and torsion/WCA potentials.
-- **`german_credit`**: Fairness-aware 2-layer Bayesian neural network with equality constraints on TPR/FPR parity and monotonicity inequalities on selected features.
-
-Each module exposes `EXPERIMENT_SETTINGS` (steps, particle counts) and `SAMPLER_SETTINGS` (per-sampler hyperparameters) used by `run_analysis.py`.
-
-## Sampler Implementations
-- **OLLA** (`src/samplers/olla.py`): Original algorithm with analytic trace correction. Suitable for low-to-moderate dimensions.
-- **OLLA-H** (`src/samplers/olla_h.py`): Hutchinson-trace variant that estimates mean-curvature term; preferred for high-dimensional problems or many constraints (when the number of Hutchinson probe `N` = 0, it can accelerate much faster with slight drop of sampling accuracy).
-- **CLangevin** (`src/samplers/clangevin.py`): Constrained Langevin with slack-variable augmentation and SHAKE-style projections for inequality handling.
-- **CHMC** (`src/samplers/chmc.py`): Constrained Hamiltonian Monte Carlo using a RATTLE integrator on the augmented state with slack-variables.
-- **CGHMC** (`src/samplers/cghmc.py`): Constrained generalized HMC with MH correction; inequality constraints enforced via rejection during the MH step.
-
-All samplers inherit from `BaseSampler`, which standardizes RNG handling, step-size configuration, and return conventions (`trajectory`, `h_vals`, `g_vals`).
-
-## Citing
-
-If you use this codebase or benchmark experiments, please cite:
-
-```bibtex
-@inproceedings{jeon2025olla,
-  title     = {Fast Non-Log-Concave Sampling under Nonconvex Equality and Inequality Constraints with Landing},
-  author    = {Jeon, Kijung and Muehlebach, Michael and Tao, Molei},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2025},
-}
-```
+## Optimization Trajectory
+| Iter | test_nll | Delta | Notes |
+|------|----------|-------|-------|
+| 0 (baseline) | 0.511822 | — | Paper baseline, n_steps=200, 32 samples |
+| 1 | 0.487111 | -4.83% | n_steps=1000, 160 samples — TARGET ACHIEVED |
+| final | 0.487111 | -4.83% | Final confirmed result |
