@@ -18,6 +18,16 @@
 
 ---
 
+## 🛠️ AutoSota CLI
+
+We also provide **AutoSota CLI**, a command-line tool for automatically optimizing research codebases.
+
+With AutoSota CLI, you can provide a runnable codebase and an optimization goal, and the tool will iteratively propose strategies, modify code, run experiments, and report improved results.
+
+For installation and usage instructions, please see [cli_guide.md](./cli_guide.md).
+
+---
+
 ## 🏆 Optimized Papers
 
 *Sorted by Paper ID.* 🚀 `>10%` 
