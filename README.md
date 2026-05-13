@@ -28,6 +28,16 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 
 ---
 
+## 📢 News
+
+- **2026-05-13** 📝 补充了 DeepSeek 官方直连和经 OpenRouter 调 DeepSeek 两种配置方式的详细说明。
+- **2026-05-12** 🚀 发布 **v0.2.0** — 支持 DeepSeek 等国产模型直接接入（不用再绑死 OpenRouter），代码优化和文献调研可以分开用不同的 API key，新增评测脚本防篡改保护。
+- **2026-04-29** 🔧 发布 **v0.1.1** — 新增轮间暂停功能（`-i`），跑着跑着想看看进度、加点指示不用杀进程了；新增 `ask / steer / sessions` 等交互命令。
+- **2026-04-22** 🎉 发布 **v0.1.0** — 首版发布，实现论文代码自动优化闭环：自动探索仓库配置、查阅相关文献、多轮迭代改代码，结束后自动导出最优代码和 patch。
+- **2026-04-21** 💻 在实验室服务器初始化 AutoSOTA 项目。
+
+---
+
 ## 🏆 Optimized Papers
 
 *Sorted by Paper ID.* 🚀 `>10%` 
