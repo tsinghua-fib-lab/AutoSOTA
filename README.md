@@ -38,7 +38,7 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 
 - **2026-04-22** 🎉 Released v0.1.0 — Initial release, achieving a closed loop for automated research code optimization: automatically explores repository configurations, reviews relevant literature, iteratively modifies code, and exports the optimal code and patch upon completion.
 
-- **2026-04-21** 💻 Initialized the AutoSOTA project on the laboratory server.
+- **2026-04-21** 💻 Initialized the AutoSOTA CLI project on the laboratory server.
 
 ---
 
