@@ -30,11 +30,15 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 
 ## 📢 News
 
-- **2026-05-13** 📝 补充了 DeepSeek 官方直连和经 OpenRouter 调 DeepSeek 两种配置方式的详细说明。
-- **2026-05-12** 🚀 发布 **v0.2.0** — 支持 DeepSeek 等国产模型直接接入（不用再绑死 OpenRouter），代码优化和文献调研可以分开用不同的 API key，新增评测脚本防篡改保护。
-- **2026-04-29** 🔧 发布 **v0.1.1** — 新增轮间暂停功能（`-i`），跑着跑着想看看进度、加点指示不用杀进程了；新增 `ask / steer / sessions` 等交互命令。
-- **2026-04-22** 🎉 发布 **v0.1.0** — 首版发布，实现论文代码自动优化闭环：自动探索仓库配置、查阅相关文献、多轮迭代改代码，结束后自动导出最优代码和 patch。
-- **2026-04-21** 💻 在实验室服务器初始化 AutoSOTA 项目。
+- **2026-05-13** 📝 Added detailed configuration instructions for both DeepSeek official direct connection and calling DeepSeek via OpenRouter.
+
+- **2026-05-12** 🚀 Released v0.2.0 — Supported direct access to domestic models like DeepSeek (no longer tied to OpenRouter), allowed the use of separate API keys for code optimization and literature review, and added anti-tampering protection for evaluation scripts.
+
+- **2026-04-29** 🔧 Released v0.1.1 — Added inter-round pause functionality (-i), allowing you to check progress or add instructions without killing the process; introduced new interactive commands including ask, steer, and sessions.
+
+- **2026-04-22** 🎉 Released v0.1.0 — Initial release, achieving a closed loop for automated research code optimization: automatically explores repository configurations, reviews relevant literature, iteratively modifies code, and exports the optimal code and patch upon completion.
+
+- **2026-04-21** 💻 Initialized the AutoSOTA project on the laboratory server.
 
 ---
 
