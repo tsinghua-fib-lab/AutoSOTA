@@ -30,6 +30,8 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 
 ## 📢 News
 
+- **2026-05-15** 🔧 Released **v0.2.1** — fixes CLI invocation failure on clean machines after global install; adds `autosota login` for one-time terms-of-service acceptance.
+
 - **2026-05-13** 📝 Added detailed configuration instructions for both DeepSeek official direct connection and calling DeepSeek via OpenRouter.
 
 - **2026-05-12** 🚀 Released v0.2.0 — Supported direct access to domestic models like DeepSeek (no longer tied to OpenRouter), allowed the use of separate API keys for code optimization and literature review, and added anti-tampering protection for evaluation scripts.
