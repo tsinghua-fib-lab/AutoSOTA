@@ -17,15 +17,15 @@
 
 ## 一分钟上手（离线包全局安装）
 
-> 前置：Node 18+、Python 3.10+、`bash`（Linux/macOS/WSL）、`git`。Claude Code CLI 会随 autosota 自动安装，无需单独安装。
+> 前置：Node 18+、Python 3.10+、`bash`（Linux/macOS/WSL）、`git`。模型调用所需的所有依赖会随 autosota 一起装好，无需单独安装。
 
 ```bash
-# 1. 用开发者发的 .tgz 离线包全局安装（同时自动安装 Claude Code CLI）
+# 1. 用开发者发的 .tgz 离线包全局安装
 npm install -g ./autosota-X.Y.Z.tgz
 # 升级到新版本时同样用这条命令覆盖装即可（详见 1.1 升级到新版本）
 
-# 2. 第一次运行 claude，接受服务条款（只需一次）
-claude
+# 2. 第一次启动交互式登录，接受服务条款（只需一次）
+autosota login
 # 按提示同意条款后退出（/exit 或 Ctrl+C）
 
 # 3. 新建（或进入）你的工作目录，生成脚手架
@@ -135,23 +135,23 @@ git clone --branch master --depth 1 \
   && bash install.sh
 ```
 
-#### 0.2 配置 API Key（用于初次跑通 `claude` CLI）
+#### 0.2 配置 API Key（用于初次跑通 `autosota login`）
 
-> 注意：autosota 自身的运行**只读 `config.yaml`**，并在内部为 `claude` 子进程
-> 注入正确的 `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN`。这一节只是为了让你
-> 第一次手动跑 `claude` 接受服务条款时能跑通。
+> 注意：autosota 真正运行时**只读 `config.yaml`**——下面这套 `~/.bashrc` 环境变量
+> **只在第一次 `autosota login`（接受服务条款）时被读到**。后续 `autosota --repo ...`
+> 跑优化时，autosota 会自动从 `config.yaml` 读取 key 并注入子进程，env 是否设置都不影响。
 
 任选一种渠道，把对应 env 加到 `~/.bashrc`：
 
 ```bash
-# 选项 A：OpenRouter（一个 key 同时跑 Claude 和 Research）
+# 选项 A：OpenRouter（一个 key 同时跑模型推理和 Research）
 cat <<EOF >> ~/.bashrc
 export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
 export ANTHROPIC_AUTH_TOKEN="你的openrouter_key"
 export ANTHROPIC_API_KEY=""
 EOF
 
-# 选项 B：Anthropic 官方 / Coding Plan（更便宜，仅 Claude；调研另配 research_api_key）
+# 选项 B：Anthropic 官方 / Coding Plan（更便宜；调研另配 research_api_key）
 cat <<EOF >> ~/.bashrc
 export ANTHROPIC_BASE_URL="https://api.anthropic.com"
 export ANTHROPIC_AUTH_TOKEN="sk-ant-你的key"
@@ -161,12 +161,12 @@ EOF
 source ~/.bashrc
 ```
 
-验证 Claude Code 可用：
+验证登录可用：
 
 ```bash
-claude
+autosota login
 /model anthropic/claude-sonnet-4.6
-# 随便说一句话，看是否正常回复
+# 随便说一句话看是否正常回复，然后 /exit
 ```
 
 ---
@@ -186,11 +186,11 @@ nvm install 20 && nvm use 20
 #        Ubuntu/Debian:  sudo apt install -y nodejs npm
 #        macOS:          brew install node
 
-# (2) 用开发者发的 .tgz 离线包全局安装（同时自动安装 Claude Code CLI）
+# (2) 用开发者发的 .tgz 离线包全局安装
 npm install -g ./autosota-X.Y.Z.tgz
 
-# (3) 首次运行 claude 接受服务条款（只需一次）
-claude       # 按提示同意条款后，/exit 退出
+# (3) 首次运行交互式登录，接受服务条款（只需一次）
+autosota login   # 按提示同意条款后，/exit 退出
 ```
 
 ### 1.1 升级到新版本
@@ -867,6 +867,6 @@ autosota --skip-onboard --skip-research
 
 - 本机已配置好的 GPU 驱动 / CUDA（若评测需要 GPU）
 - Python 3.10+（用于 venv 创建）
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)（随 `npm install -g ./autosota-X.Y.Z.tgz` 自动安装）
+- 模型调用 CLI（随 `npm install -g ./autosota-X.Y.Z.tgz` 自动落盘到 autosota 包内，不暴露到全局 PATH，无需单独安装）
 - [OpenRouter](https://openrouter.ai/) API Key
 
