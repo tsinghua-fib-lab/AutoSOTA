@@ -1,13 +1,3 @@
-const GITHUB_REPO = "https://github.com/tsinghua-fib-lab/AutoSOTA";
-const GITHUB_BLOB = `${GITHUB_REPO}/blob/main/`;
-
-const state = {
-  items: [],
-  activeFilter: "all",
-  activeQuery: "",
-  activeSort: "id-asc",
-};
-
 // --- DOM refs ---
 const $ = (sel) => document.querySelector(sel);
 const heroHeadline = $("#hero-headline");
@@ -25,110 +15,20 @@ const modalClose = $("#modal-close");
 const fbTotal = $("#fb-total");
 const fbStrong = $("#fb-strong");
 
+const state = {
+  items: [],
+  activeFilter: "all",
+  activeQuery: "",
+  activeSort: "id-asc",
+};
+
 $("#year").textContent = String(new Date().getFullYear());
-
-// --- Utilities ---
-function cleanMD(text) {
-  return text.replace(/<[^>]+>/g, " ").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[*_`]/g, "").replace(/\s+/g, " ").trim();
-}
-
-function esc(text) {
-  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-function parsePct(text) {
-  const s = cleanMD(text).replace(/↓/g, "-").replace(/↑/g, "+").replace(/−/g, "-");
-  const m = s.match(/([+-]?\d+(?:\.\d+)?)\s*%/);
-  return m ? Number(m[1]) : 0;
-}
-
-function formatPct(v) {
-  if (!Number.isFinite(v)) return "--";
-  return (v >= 10 ? v.toFixed(1) : v.toFixed(2)) + "%";
-}
-
-function gradeInfo(v) {
-  const a = Math.abs(v);
-  if (a >= 10) return { grade: "strong", label: "Strong" };
-  if (a >= 3) return { grade: "moderate", label: "Moderate" };
-  return { grade: "modest", label: "Modest" };
-}
-
-function metricColor(v) {
-  const a = Math.abs(v);
-  if (a >= 10) return "amber";
-  if (a >= 3) return "green";
-  return "";
-}
-
-// --- Parse README ---
-function parseLeaderboard(md) {
-  const lines = md.split(/\r?\n/);
-  // Find simplified header: | ID | Paper Title | Ours\_Optimization |
-  const hIdx = lines.findIndex(l => l.includes("| ID | Paper Title | Ours\\_Optimization |"));
-  if (hIdx === -1) return [];
-  const entries = [];
-  for (let i = hIdx + 2; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line.startsWith("|")) break;
-    const cells = line.split("|").slice(1, -1).map(c => c.trim());
-    if (cells.length < 3) continue;
-    const id = Number(cleanMD(cells[0]).replace(/\D/g, ""));
-    const title = cleanMD(cells[1]);
-    const imp = parsePct(cells[2]);
-    const impDisp = cells[2].trim();
-    const gi = gradeInfo(imp);
-    entries.push({ id, title, improvement: imp, improvementDisplay: impDisp, grade: gi.grade, gradeLabel: gi.label });
-  }
-  return entries;
-}
-
-function parseSummaries(md) {
-  const section = (md.split("## Per-paper optimization summaries")[1] || "");
-  const blocks = section.split(/\n(?=###\s+\d+\s+[—-]\s+)/).map(b => b.trim()).filter(b => b.startsWith("### "));
-  const map = new Map();
-  for (const block of blocks) {
-    const chunks = block.split(/\n\s*\n/).map(c => c.trim()).filter(Boolean).filter(c => c !== "---");
-    if (!chunks.length) continue;
-    const hm = chunks[0].match(/^###\s+(\d+)\s+[—-]\s+(.+)$/);
-    if (!hm) continue;
-    const id = Number(hm[1]);
-    const method = cleanMD(hm[2]);
-    const title = chunks[1] ? cleanMD(chunks[1]) : "";
-    const lc = chunks.find(c => c.includes("](./"));
-    const lm = lc ? lc.match(/\((\.\/[^)]+)\)/) : null;
-    const relPath = lm ? lm[1] : "";
-    const paragraphs = chunks.slice(2).filter(c => !c.startsWith("**[")).map(c => cleanMD(c)).filter(Boolean);
-    map.set(id, { method, title, summary: paragraphs[0] || "", paragraphs, relPath,
-      blobUrl: relPath ? `${GITHUB_BLOB}${relPath.replace(/^\.\//, "")}` : GITHUB_REPO,
-      treeUrl: relPath ? `${GITHUB_REPO}/tree/main/${relPath.replace(/^\.\//, "").replace(/\/[^/]+$/, "")}` : GITHUB_REPO,
-    });
-  }
-  return map;
-}
-
-function mergeData(lb, summaries) {
-  return lb.map(e => {
-    const s = summaries.get(e.id) || {};
-    const method = s.method || e.title;
-    const ftitle = s.title || e.title;
-    const summary = s.summary || "";
-    return {
-      ...e, method, fullTitle: ftitle,
-      summary, paragraphs: s.paragraphs || [],
-      blobUrl: s.blobUrl || GITHUB_REPO,
-      treeUrl: s.treeUrl || GITHUB_REPO,
-      searchText: [e.id, method, ftitle, summary].join(" ").toLowerCase(),
-    };
-  });
-}
 
 // --- Render ---
 function renderStats(items) {
   const n = items.length;
   const strongN = items.filter(i => i.grade === "strong").length;
-  const validGains = items.map(i => Math.abs(i.improvement)).filter(v => isFinite(v));
+  const validGains = items.map(i => Math.abs(i.improvement)).filter(v => Number.isFinite(v));
   const avgGain = validGains.length ? validGains.reduce((sum, v) => sum + v, 0) / validGains.length : 0;
   const best = items.reduce((a, b) => Math.abs(a.improvement) > Math.abs(b.improvement) ? a : b, items[0]);
 
@@ -152,7 +52,7 @@ function renderFeatured(items) {
 
   featuredGrid.innerHTML = featured.map(item => {
     const gi = gradeInfo(item.improvement);
-    return `<article class="featured-card" data-id="${item.id}">
+    return `<article class="featured-card" data-id="${item.id}" tabindex="0" role="button" aria-label="View details for ${esc(item.method || item.fullTitle)}">
       <div class="featured-card-header">
         <span class="featured-id">paper ${item.id}</span>
         <span class="status-pill status-${gi.grade}">${gi.label}</span>
@@ -169,11 +69,14 @@ function renderFeatured(items) {
 
   featuredGrid.querySelectorAll(".featured-card").forEach(card => {
     card.addEventListener("click", () => openModal(Number(card.dataset.id)));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openModal(Number(card.dataset.id)); }
+    });
   });
 }
 
 function filterItems() {
-  let items = state.items;
+  const items = [...state.items];
   const q = state.activeQuery.trim().toLowerCase();
   if (state.activeFilter !== "all") {
     items = items.filter(i => i.grade === state.activeFilter);
@@ -184,13 +87,13 @@ function filterItems() {
   // Sort
   switch (state.activeSort) {
     case "improvement-desc":
-      items = [...items].sort((a, b) => Math.abs(b.improvement) - Math.abs(a.improvement));
+      items.sort((a, b) => Math.abs(b.improvement) - Math.abs(a.improvement));
       break;
     case "improvement-asc":
-      items = [...items].sort((a, b) => Math.abs(a.improvement) - Math.abs(b.improvement));
+      items.sort((a, b) => Math.abs(a.improvement) - Math.abs(b.improvement));
       break;
     default: // id-asc
-      items = [...items].sort((a, b) => a.id - b.id);
+      items.sort((a, b) => a.id - b.id);
   }
   return items;
 }
@@ -207,7 +110,7 @@ function renderRuns() {
   runsList.innerHTML = visible.map(item => {
     const gi = gradeInfo(item.improvement);
     const mc = metricColor(item.improvement);
-    return `<article class="run-card" data-id="${item.id}">
+    return `<article class="run-card" data-id="${item.id}" tabindex="0" role="button" aria-label="View details for ${esc(item.method || item.fullTitle)}">
       <span class="run-card-id">#${item.id}</span>
       <div class="run-card-title">
         <h3>${esc(item.method || item.fullTitle)}</h3>
@@ -225,13 +128,19 @@ function renderRuns() {
 
   runsList.querySelectorAll(".run-card:not(.run-card-empty)").forEach(card => {
     card.addEventListener("click", () => openModal(Number(card.dataset.id)));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openModal(Number(card.dataset.id)); }
+    });
   });
 }
+
+let lastFocusedEl = null;
 
 // --- Modal ---
 function openModal(id) {
   const item = state.items.find(i => i.id === id);
   if (!item) return;
+  lastFocusedEl = document.activeElement;
   const gi = gradeInfo(item.improvement);
   const mc = metricColor(item.improvement);
   const summaryHTML = (item.paragraphs.length ? item.paragraphs : [item.summary || "No summary available."])
@@ -248,20 +157,22 @@ function openModal(id) {
     </div>
     <div class="modal-summary">${summaryHTML}</div>
     <div class="modal-links">
-      <a class="button" href="${esc(item.blobUrl)}" target="_blank" rel="noreferrer">View OPTIMIZATION.md</a>
-      <a class="button" href="${esc(item.treeUrl)}" target="_blank" rel="noreferrer">Browse Folder</a>
+      <a class="button" href="${item.blobUrl}" target="_blank" rel="noreferrer">View README.md</a>
+      <a class="button" href="${item.treeUrl}" target="_blank" rel="noreferrer">Browse Folder</a>
       <a class="button" href="${GITHUB_REPO}/issues/new" target="_blank" rel="noreferrer">Report Issue</a>
     </div>
   `;
   modalOverlay.classList.add("is-open");
   modalOverlay.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+  modalClose.focus();
 }
 
 function closeModal() {
   modalOverlay.classList.remove("is-open");
   modalOverlay.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+  if (lastFocusedEl && typeof lastFocusedEl.focus === "function") lastFocusedEl.focus();
 }
 
 modalClose.addEventListener("click", closeModal);
@@ -269,7 +180,15 @@ modalOverlay.addEventListener("click", (e) => {
   if (e.target === modalOverlay) closeModal();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && modalOverlay.classList.contains("is-open")) closeModal();
+  if (e.key === "Escape" && modalOverlay.classList.contains("is-open")) { closeModal(); return; }
+  if (e.key === "Tab" && modalOverlay.classList.contains("is-open")) {
+    const focusable = modalOverlay.querySelectorAll("button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!first) return;
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 });
 
 // --- Filters ---
@@ -286,9 +205,11 @@ filterGrade.addEventListener("click", (e) => {
   renderRuns();
 });
 
+let searchTimer = null;
 searchInput.addEventListener("input", (e) => {
   state.activeQuery = e.target.value;
-  renderRuns();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => renderRuns(), 200);
 });
 
 sortSelect.addEventListener("change", (e) => {
