@@ -3,53 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoSOTA — Optimized Research Papers</title>
-  <meta name="description" content="AutoSOTA: automatically optimized research codebases from top AI conferences." />
-  <meta property="og:title" content="AutoSOTA Results" />
-  <meta property="og:description" content="Browse 105+ automatically optimized papers with detailed metrics and analysis." />
+  <title>AutoSOTA Live @ CVPR 2026</title>
+  <meta name="description" content="AutoSOTA Live @ CVPR 2026 — stress-testing, reproducing, and pushing papers further in real time." />
+  <meta property="og:title" content="AutoSOTA Live @ CVPR 2026" />
+  <meta property="og:description" content="While CVPR presents new ideas, AutoSOTA stress-tests, reproduces, and pushes them further." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="cvpr.css" />
 </head>
 <body>
   <div class="page-noise" aria-hidden="true"></div>
 
   <header class="site-header">
-    <a class="brand" href="#top">
+    <a class="brand" href="index.html">
       <span class="brand-mark"></span>
       <span class="brand-text">AutoSOTA</span>
     </a>
     <nav class="site-nav">
-      <a href="#featured">Featured</a>
-      <a href="#papers">Papers</a>
-      <a href="#feedback">Feedback</a>
+      <a href="index.html" class="active">CVPR 2026</a>
+      <a href="results.html">Enchanted Results</a>
     </nav>
     <a class="repo-link" href="https://github.com/tsinghua-fib-lab/AutoSOTA" target="_blank" rel="noreferrer">GitHub</a>
   </header>
 
   <main id="top">
-
-    <!-- Hero -->
     <section class="hero section">
       <div class="hero-intro">
-        <p class="eyebrow">AutoSOTA / Results Board</p>
-        <h1>AutoSOTA</h1>
+        <p class="eyebrow">AutoSOTA Live @ CVPR</p>
+        <h1>AutoSOTA Live @ CVPR</h1>
         <p class="hero-copy">
-          Automatically optimized research codebases. Each paper below went through
-          an automated optimization pipeline — from idea generation to code changes to evaluation.
+          While CVPR presents new ideas, AutoSOTA stress-tests, reproduces, and pushes them further in real time.
         </p>
       </div>
 
       <article class="hero-panel">
         <div class="hero-panel-copy">
-          <p class="panel-kicker">Live Results</p>
+          <p class="panel-kicker">Live @ CVPR 2026</p>
           <h2 id="hero-headline">Loading papers...</h2>
-          <p id="hero-summary" class="hero-summary">Parsing repository README and optimization notes.</p>
-          <div class="hero-actions">
-            <a class="button button-strong" href="https://github.com/tsinghua-fib-lab/AutoSOTA" target="_blank" rel="noreferrer">Open Repository</a>
-            <a class="button" href="#papers">Browse Papers</a>
-          </div>
+          <p id="hero-summary" class="hero-summary">Fetching CVPR 2026 paper data.</p>
         </div>
         <div id="stats-grid" class="stats-grid" aria-live="polite">
           <div class="stat-card"><span class="stat-value">--</span><span class="stat-label">Loading</span></div>
@@ -60,56 +53,37 @@
       </article>
     </section>
 
-    <!-- Featured -->
-    <section class="section" id="featured">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Top Gains</p>
-          <h2>Best optimization results.</h2>
-        </div>
-        <p class="section-note">Papers with the strongest relative improvements, picked from the full leaderboard.</p>
-      </div>
-      <div id="featured-grid" class="featured-grid" aria-live="polite">
-        <article class="featured-card featured-card-loading"><p>Loading featured...</p></article>
-      </div>
-    </section>
-
-    <!-- All Papers -->
+    <!-- Day Tabs -->
     <section class="section" id="papers">
       <div class="section-head section-head-runs">
         <div>
-          <p class="eyebrow">All Papers</p>
-          <h2>Complete optimization ledger.</h2>
+          <p class="eyebrow">Papers</p>
+          <h2>Full paper list.</h2>
         </div>
         <div class="controls">
           <label class="search-field">
             <span class="search-label">Search</span>
-            <input id="search-input" type="search" placeholder="ID, title, method, metric..." />
+            <input id="search-input" type="search" placeholder="Paper ID, title..." />
           </label>
           <div class="filter-row">
-            <div class="filter-group" id="filter-grade">
-              <button class="filter-button is-active" data-filter="all">All</button>
-              <button class="filter-button" data-filter="strong">Strong ≥10%</button>
-              <button class="filter-button" data-filter="moderate">Moderate 3-10%</button>
-              <button class="filter-button" data-filter="modest">Modest &lt;3%</button>
-            </div>
-            <span class="sort-label">Sort by</span>
-            <select id="sort-select" class="sort-select">
-              <option value="improvement-desc">Best gain</option>
-              <option value="id-asc" selected>Paper ID</option>
-              <option value="improvement-asc">Smallest gain</option>
-            </select>
+            <button class="filter-chip" id="improved-toggle">⭐ Improved Only</button>
           </div>
         </div>
       </div>
 
+      <div class="day-tabs" id="day-tabs" role="tablist" aria-label="CVPR presentation days"></div>
+
       <div class="runs-shell">
         <div class="runs-meta">
           <p id="runs-summary">Loading...</p>
-          <a href="https://github.com/tsinghua-fib-lab/AutoSOTA/blob/main/README.md" target="_blank" rel="noreferrer">README source</a>
+          <div class="paper-type-legend">
+            <span class="type-badge type-highlight">Highlight</span>
+            <span class="type-badge type-oral">Oral</span>
+            <span class="type-badge type-poster">Poster</span>
+          </div>
         </div>
-        <div id="runs-list" class="runs-list" aria-live="polite">
-          <article class="run-card run-card-loading"><p>Loading optimized papers...</p></article>
+        <div id="runs-list" class="runs-list cvpr-list" aria-live="polite">
+          <article class="run-card run-card-loading"><p>Loading CVPR papers...</p></article>
         </div>
       </div>
     </section>
@@ -121,11 +95,11 @@
           <p class="eyebrow">Community</p>
           <h2>Provide feedback.</h2>
           <p>
-            Found an issue with an optimization result? Have a suggestion for a paper we should run?
-            Open a GitHub Issue and we'll take a look.
+            Notice an incorrect category? Have a GitHub repo we missed?
+            Want to report an issue with a paper's results? Let us know.
           </p>
           <div class="feedback-actions">
-            <a class="button button-strong" href="https://github.com/tsinghua-fib-lab/AutoSOTA/issues/new" target="_blank" rel="noreferrer">
+            <a class="button button-strong" href="https://github.com/tsinghua-fib-lab/AutoSOTA/issues/new?labels=cvpr2026&template=cvpr_feedback.md" target="_blank" rel="noreferrer">
               Open Issue
             </a>
             <a class="button" href="https://github.com/tsinghua-fib-lab/AutoSOTA/discussions" target="_blank" rel="noreferrer">
@@ -139,34 +113,31 @@
             <span class="stat-label">papers tracked</span>
           </div>
           <div class="stat-card">
-            <span class="stat-value" id="fb-strong">--</span>
-            <span class="stat-label">strong wins</span>
+            <span class="stat-value" id="fb-cats">--</span>
+            <span class="stat-label">status categories</span>
           </div>
         </div>
       </div>
     </section>
-
   </main>
-
-  <!-- Detail Modal -->
-  <div class="modal-overlay" id="modal-overlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <button class="modal-close" id="modal-close" type="button" aria-label="Close">&times;</button>
-      <div class="modal-content" id="modal-content"></div>
-    </div>
-  </div>
 
   <footer class="site-footer">
     <p>AutoSOTA</p>
-    <p>Static site driven by README.md — updated with each optimization run.</p>
-    <p>&copy; <span id="year"></span></p>
+    <div class="footer-logos">
+      <a href="https://www.tsinghua.edu.cn/" target="_blank" rel="noreferrer">
+        <img src="https://www.tsinghua.edu.cn/image/logo180.png" alt="Tsinghua University" height="40" />
+      </a>
+      <a href="https://www.bza.edu.cn/" target="_blank" rel="noreferrer">
+        <img src="https://www.bza.edu.cn/adminapi/public/default/logo.png" alt="Zhongguancun Academy (BZA)" height="40" />
+      </a>
+    </div>
+    <p>&copy; 2026</p>
   </footer>
 
   <noscript>
-    <div class="noscript-banner">This page uses JavaScript to parse README.md and render the optimization leaderboard.</div>
+    <div class="noscript-banner">This page uses JavaScript to load and display CVPR paper data.</div>
   </noscript>
 
-  <script src="lib/parser.js"></script>
-  <script src="script.js"></script>
+  <script src="cvpr.js"></script>
 </body>
 </html>
