@@ -45,27 +45,43 @@ function esc(text) {
 
 // --- Stats ---
 function renderStats() {
-  const total = state.papers.day1.length + state.papers.day2.length + state.papers.day3.length;
+  const all = [...state.papers.day1, ...state.papers.day2, ...state.papers.day3];
+  const total = all.length;
+  const succeeded = all.filter(p => p.AutoSOTA_status === "√").length;
+  const improved = all.filter(p => p["指标提升百分比(绝对值)"] != null).length;
+  const sotaRate = total ? ((improved / total) * 100).toFixed(1) + "%" : "--";
 
-  const cards = [
-    { v: "—", l: "papers indexed", c: "", tip: "Total CVPR 2026 papers tracked and monitored by AutoSOTA across all three conference days." },
-    { v: "—", l: "SOTA ratio", c: "", tip: "Percentage of indexed papers where AutoSOTA achieved a measurable improvement over the reported state-of-the-art results." },
-    { v: "—", l: "reproduced", c: "", tip: "Papers whose code repositories were successfully cloned, built, and verified to produce the original reported outputs." },
-    { v: "—", l: "enchanted", c: "", tip: "Papers where AutoSOTA's automated pipeline went beyond reproduction to discover and apply novel optimizations that improve performance." },
-  ];
-  statsGrid.innerHTML = cards.map(card => `<article class="stat-card">
-    <span class="stat-value ${card.c}">${esc(card.v)}</span>
-    <div class="stat-label-row">
-      <span class="stat-label">${esc(card.l)}</span>
-      <span class="stat-tip" tabindex="0" role="tooltip" aria-label="${esc(card.tip)}">?</span>
-    </div>
-  </article>`).join("");
+  statsGrid.innerHTML = `<article class="stat-card countdown-card">
+    <span class="countdown-label">Next update</span>
+    <span class="countdown-timer" id="countdown-timer">--:--:--</span>
+    <span class="countdown-sub">Daily at 10 PM · GMT+8</span>
+  </article>`;
 
-  heroHeadline.textContent = `Day by day, as CVPR unfolds.`;
-  heroSummary.textContent = `AutoSOTA runs every paper, updates results daily — June 5–7, live from the conference floor.`;
+  heroHeadline.innerHTML = `When AutoSOTA Meets<br>Top Conference Papers`;
 
-  fbTotal.textContent = String(total);
-  fbCats.textContent = "—";
+  fbTotal.textContent = String(succeeded);
+  fbCats.textContent = sotaRate;
+
+  startCountdown();
+}
+
+// --- Countdown ---
+function startCountdown() {
+  function tick() {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(22, 0, 0, 0);
+    if (now >= target) target.setDate(target.getDate() + 1);
+    const diff = target - now;
+    if (diff <= 0) { document.getElementById("countdown-timer").textContent = "Updating..."; return; }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById("countdown-timer").textContent =
+      String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+  tick();
+  setInterval(tick, 1000);
 }
 
 // --- Day tabs ---
@@ -100,7 +116,7 @@ const STATUS_RANK = { "Oral": 0, "Highlight": 1, "Poster": 2 };
 function getVisiblePapers() {
   let papers = state.papers[state.activeDay];
   if (state.showImprovedOnly) {
-    papers = papers.filter(p => p["指标提升相对百分比"] != null);
+    papers = papers.filter(p => p["指标提升百分比(绝对值)"] != null);
   }
   if (state.activeFilters.size > 0) {
     papers = papers.filter(p => state.activeFilters.has(p.AutoSOTA_Category || "Uncategorized"));
@@ -115,8 +131,8 @@ function getVisiblePapers() {
   }
   // Sort: improved first, then by status rank (Oral > Highlight > Poster)
   papers = [...papers].sort((a, b) => {
-    const aImp = a["指标提升相对百分比"] != null ? 0 : 1;
-    const bImp = b["指标提升相对百分比"] != null ? 0 : 1;
+    const aImp = a["指标提升百分比(绝对值)"] != null ? 0 : 1;
+    const bImp = b["指标提升百分比(绝对值)"] != null ? 0 : 1;
     if (aImp !== bImp) return aImp - bImp;
     const aRank = STATUS_RANK[a.status] ?? 3;
     const bRank = STATUS_RANK[b.status] ?? 3;
@@ -129,8 +145,10 @@ function formatImprovement(raw) {
   if (raw == null) return null;
   const s = String(raw).replace(/[？?]/g, "").trim();
   const n = parseFloat(s);
-  if (isNaN(n)) return s; // multi-metric text, return as-is
-  return (n * 100).toFixed(1) + "%";
+  if (isNaN(n)) return s;
+  // Values < 1 are ratios (0.1148 = 11.48%), >= 1 are already percentages
+  const pct = n < 1 ? (n * 100).toFixed(1) : n.toFixed(1);
+  return pct + "%";
 }
 
 function renderRuns() {
@@ -159,37 +177,37 @@ function renderRuns() {
     const group = catGroup(p.AutoSOTA_Category);
     const cat = p.AutoSOTA_Category || "Uncategorized";
     const statusClass = (p.status || "").toLowerCase();
-    const impPct = p["指标提升相对百分比"];
+    const impPct = p["指标提升百分比(绝对值)"];
     const hasImprovement = impPct != null;
+    const optNoteRaw = p["优化说明"];
+    const optNote = optNoteRaw && !/^Performance\s*enhanced\s*successfully/i.test(optNoteRaw) ? optNoteRaw : null;
 
     const issueTitle = encodeURIComponent(`[CVPR 2026] ${p.paper_id}: ${(p.title || "").slice(0, 80)}`);
     const issueURL = `${GITHUB_REPO}/issues/new?labels=cvpr2026&title=${issueTitle}`;
 
     const links = [];
     if (p.pdf_url) links.push(`<a href="${esc(p.pdf_url)}" target="_blank" rel="noreferrer">PDF</a>`);
-    if (p.arxiv) links.push(`<a href="https://arxiv.org/abs/${esc(p.arxiv)}" target="_blank" rel="noreferrer">arXiv:${esc(p.arxiv)}</a>`);
-    if (p.github_url) links.push(`<a href="${esc(p.github_url)}" target="_blank" rel="noreferrer">GitHub</a>`);
+    if (p.arxiv && /^\d{4}\.\d{4}/.test(p.arxiv)) links.push(`<a href="https://arxiv.org/abs/${esc(p.arxiv)}" target="_blank" rel="noreferrer">arXiv:${esc(p.arxiv)}</a>`);
+    const gh = p.github_url;
+    if (gh && gh.startsWith("http") && !gh.includes("thecvf.com") && gh !== p.pdf_url) {
+      links.push(`<a href="${esc(gh)}" target="_blank" rel="noreferrer">GitHub</a>`);
+    }
 
     const impDisplay = formatImprovement(impPct);
     const metricHTML = hasImprovement
       ? `<span class="metric-delta positive">↑ ${esc(impDisplay)}</span>`
       : "";
 
-    const absShort = (p.abstract || "").slice(0, 200);
-
     return `<article class="cvpr-row${hasImprovement ? " has-improvement" : ""}" data-id="${esc(p.paper_id)}">
       <div class="cvpr-row-main">
-        <button class="cvpr-row-title-btn" onclick="this.closest('.cvpr-row').classList.toggle('is-expanded')" aria-expanded="false">
-          ${esc(p.title)}
-        </button>
-        ${absShort ? `<p class="cvpr-row-abstract">${esc(absShort)}${(p.abstract || "").length > 200 ? "…" : ""}</p>` : ""}
+        <span class="cvpr-row-title">${esc(p.title)}</span>
+        ${hasImprovement && optNote ? `<p class="cvpr-row-optnote">AutoSOTA: ${esc(optNote)}</p>` : ""}
         <div class="cvpr-row-links">${links.join(" · ") || '<span style="color:var(--muted)">No links</span>'}</div>
       </div>
       <div class="cvpr-row-status">
         <span class="status-badge status-${statusClass}">${esc(p.status)}</span>
       </div>
       <div class="cvpr-row-category">
-        ${cat !== "Reproduction Succeeded" ? `<span class="cat-label cat-${group}">${esc(cat)}</span>` : ""}
         ${hasImprovement ? `<span class="cat-meta">${metricHTML}</span>` : ""}
       </div>
       <div class="cvpr-row-actions">

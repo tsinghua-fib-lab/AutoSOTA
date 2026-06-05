@@ -32,8 +32,8 @@
   border-radius: 999px; font-family: "IBM Plex Mono", monospace;
   font-size: .64rem; letter-spacing: .08em;
 }
+.type-oral { color: var(--green); border: 1px solid rgba(156,255,179,.3); }
 .type-highlight { color: var(--amber); border: 1px solid rgba(255,219,148,.28); }
-.type-oral { color: var(--accent); border: 1px solid rgba(168,192,255,.28); }
 .type-poster { color: var(--muted); border: 1px solid rgba(154,164,178,.24); }
 
 /* Category filter chips */
@@ -54,7 +54,7 @@
 .cvpr-list { gap: 1px; padding: 0; }
 .cvpr-row {
   display: grid;
-  grid-template-columns: 1fr 100px 200px 90px;
+  grid-template-columns: 1fr 100px 120px 90px;
   align-items: start; gap: 16px; padding: 18px 20px;
   border-bottom: 1px solid rgba(255,255,255,.06);
   background: rgba(255,255,255,.01);
@@ -93,25 +93,57 @@
   border-radius: 999px; font-family: "IBM Plex Mono", monospace;
   font-size: .64rem; letter-spacing: .06em;
 }
+.status-oral { color: var(--green); border: 1px solid rgba(156,255,179,.3); }
 .status-highlight { color: var(--amber); border: 1px solid rgba(255,219,148,.28); }
-.status-oral { color: var(--accent); border: 1px solid rgba(168,192,255,.28); }
 .status-poster { color: var(--muted); border: 1px solid rgba(154,164,178,.24); }
 
-/* Expandable abstract */
-.cvpr-row-abstract {
-  grid-column: 2; font-size: .82rem; color: var(--muted); line-height: 1.7;
-  margin-top: 4px; display: none;
+/* Optimization note for improved papers */
+.cvpr-row-optnote {
+  margin: 4px 0 0; font-size: .78rem; color: var(--amber); line-height: 1.5;
+  font-style: italic;
 }
-.cvpr-row.is-expanded .cvpr-row-abstract { display: block; }
-.cvpr-row-title-btn {
-  cursor: pointer; background: none; border: none; padding: 0;
-  color: inherit; font: inherit; text-align: left;
+.cvpr-row-title {
+  font-size: .92rem; line-height: 1.5; letter-spacing: -.01em;
 }
-.cvpr-row-title-btn:hover { color: var(--accent); }
 
 /* Metric in category col */
 .metric-delta { font-weight: 600; font-size: 1.12rem; }
 .metric-delta.positive { color: var(--amber); }
+
+.hero h1 { white-space: nowrap !important; font-size: clamp(1.7rem, 4vw, 3.2rem) !important; }
+
+/* Hero panel for CVPR page */
+.hero-panel { grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr) !important; overflow: visible !important; }
+.hero-panel h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem) !important; max-width: 30ch !important; line-height: 1.15 !important; }
+.hero-panel-copy { max-width: 100%; }
+.hero-summary { display: none; }
+.hero-panel::before, .hero-panel::after { overflow: hidden; }
+
+/* Countdown */
+.countdown-card {
+  text-align: center; justify-content: center !important; gap: 8px;
+  border-color: rgba(168,192,255,.18) !important; min-height: 160px;
+}
+.countdown-label {
+  font-family: "IBM Plex Mono", monospace; font-size: .68rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.countdown-timer {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(1.05rem, 2vw, 1.4rem); letter-spacing: .04em;
+  color: var(--accent); white-space: nowrap;
+}
+.countdown-sub {
+  font-size: .72rem; color: var(--muted);
+}
+
+/* Home page CVPR promo — news style */
+.news-banner {
+  position: relative; padding: 40px 44px;
+  border: 1px solid rgba(168,192,255,.18); border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(168,192,255,.06) 0%, rgba(6,7,9,.96) 40%, rgba(6,7,9,.96) 100%);
+  overflow: hidden;
+}
 
 /* Stat tooltip */
 .stat-label-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
@@ -140,11 +172,6 @@
   transition: opacity var(--transition);
   z-index: 100;
 }
-
-/* Allow tooltips to escape hero-panel */
-.hero-panel { overflow: visible; }
-.hero-panel::before, .hero-panel::after { overflow: hidden; }
-.stat-tip:hover::after, .stat-tip:focus-visible::after { opacity: 1; }
 
 /* Pagination */
 .page-nav { display: flex; align-items: center; gap: 10px; }
@@ -184,6 +211,43 @@
 /* Improved toggle */
 #improved-toggle.is-active {
   background: var(--amber-soft); border-color: rgba(255,219,148,.4); color: var(--amber);
+}
+
+/* Home page CVPR promo — news style */
+.news-banner {
+  position: relative; padding: 40px 44px;
+  border: 1px solid rgba(168,192,255,.18); border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(168,192,255,.06) 0%, rgba(6,7,9,.96) 40%, rgba(6,7,9,.96) 100%);
+  overflow: hidden;
+}
+.news-banner::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--amber), transparent);
+  opacity: .7;
+}
+.news-banner-body { position: relative; z-index: 1; }
+.news-kicker {
+  margin: 0 0 16px; color: var(--muted);
+  font-family: "IBM Plex Mono", monospace; font-size: .74rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.live-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,.6);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+.news-banner h2 {
+  margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem);
+  letter-spacing: -.03em; line-height: 1.1;
+}
+.news-desc {
+  max-width: 65ch; margin: 16px 0 24px;
+  color: var(--muted); font-size: 1.05rem; line-height: 1.7;
 }
 
 /* Footer logos */
