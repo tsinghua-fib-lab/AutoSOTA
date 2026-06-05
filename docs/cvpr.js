@@ -13,7 +13,6 @@ const state = {
 
 const $ = (sel) => document.querySelector(sel);
 const heroHeadline = $("#hero-headline");
-const heroSummary = $("#hero-summary");
 const statsGrid = $("#stats-grid");
 const dayTabs = $("#day-tabs");
 const runsSummary = $("#runs-summary");
@@ -22,22 +21,6 @@ const searchInput = $("#search-input");
 const improvedToggle = $("#improved-toggle");
 const fbTotal = $("#fb-total");
 const fbCats = $("#fb-cats");
-
-// --- Category classification ---
-const CATEGORY_GROUPS = {
-  "Reproduction Succeeded": "success",
-  "Metrics Below Paper Claims": "success",
-  "Incomplete Repository; Not Fully Reproducible": "failure",
-  "No GitHub Repo Found Or Clone Failed": "failure",
-  "Non-Methodological Paper": "na",
-  "Data/Model Resources Unavailable": "failure",
-  "Storage/Compute/Network Infrastructure Drawback": "failure",
-  "Environment/Dependency Setup Failed": "failure",
-  "Reproduction Pending": "pending",
-  "Other Reproduction Failure": "failure",
-};
-
-function catGroup(cat) { return CATEGORY_GROUPS[cat] || "failure"; }
 
 function esc(text) {
   return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -174,8 +157,6 @@ function renderRuns() {
   }
 
   runsList.innerHTML = visible.map(p => {
-    const group = catGroup(p.AutoSOTA_Category);
-    const cat = p.AutoSOTA_Category || "Uncategorized";
     const statusClass = (p.status || "").toLowerCase();
     const impPct = p["指标提升百分比(绝对值)"];
     const hasImprovement = impPct != null;

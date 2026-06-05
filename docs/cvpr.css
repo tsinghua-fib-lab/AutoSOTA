@@ -78,14 +78,7 @@
 
 .cvpr-row-status { text-align: center; }
 .cvpr-row-category { font-size: .84rem; line-height: 1.5; }
-.cvpr-row-category .cat-label { display: block; }
 .cvpr-row-category .cat-meta { display: block; margin-top: 2px; font-family: "IBM Plex Mono", monospace; font-size: .66rem; color: var(--muted); }
-
-/* Category colors */
-.cat-success { color: var(--green); }
-.cat-failure { color: var(--amber); }
-.cat-pending { color: var(--accent); }
-.cat-na { color: var(--muted); }
 
 /* Status column small badge */
 .status-badge {
@@ -117,6 +110,10 @@
 .hero-panel h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem) !important; max-width: 30ch !important; line-height: 1.15 !important; }
 .hero-panel-copy { max-width: 100%; }
 .hero-summary { display: none; }
+.hero-panel {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--accent), var(--amber), transparent) 1;
+}
 .hero-panel::before, .hero-panel::after { overflow: hidden; }
 
 /* Countdown */
@@ -135,42 +132,6 @@
 }
 .countdown-sub {
   font-size: .72rem; color: var(--muted);
-}
-
-/* Home page CVPR promo — news style */
-.news-banner {
-  position: relative; padding: 40px 44px;
-  border: 1px solid rgba(168,192,255,.18); border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, rgba(168,192,255,.06) 0%, rgba(6,7,9,.96) 40%, rgba(6,7,9,.96) 100%);
-  overflow: hidden;
-}
-
-/* Stat tooltip */
-.stat-label-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
-.stat-label-row .stat-label { margin-top: 0; }
-.stat-tip {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 1px solid var(--border); color: var(--muted);
-  font-family: "IBM Plex Mono", monospace; font-size: .6rem;
-  cursor: help; position: relative;
-  transition: color var(--transition), border-color var(--transition);
-}
-.stat-tip:hover, .stat-tip:focus-visible { color: var(--text); border-color: var(--border-strong); }
-.stat-tip::after {
-  content: attr(aria-label);
-  position: absolute; bottom: calc(100% + 10px); left: 50%;
-  transform: translateX(-50%);
-  width: 360px; padding: 14px 18px;
-  border-radius: 10px; border: 1px solid var(--border-strong);
-  background: #0d1014; color: var(--text);
-  font-family: "Space Grotesk", sans-serif; font-size: .82rem;
-  line-height: 1.6; letter-spacing: 0; text-transform: none;
-  white-space: normal; word-wrap: break-word;
-  pointer-events: none; opacity: 0;
-  box-shadow: 0 16px 48px rgba(0,0,0,.6);
-  transition: opacity var(--transition);
-  z-index: 100;
 }
 
 /* Pagination */
@@ -232,6 +193,7 @@
   letter-spacing: .1em; text-transform: uppercase;
   display: flex; align-items: center; gap: 10px;
 }
+.hero-panel-copy .news-kicker { margin-bottom: 12px; }
 .live-dot {
   display: inline-block; width: 10px; height: 10px; border-radius: 50%;
   background: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,.6);
@@ -261,7 +223,6 @@
   .cvpr-row { grid-template-columns: 1fr auto; gap: 6px; padding: 16px; }
   .cvpr-row > * { border-left: none; padding-left: 0; }
   .cvpr-row-status { text-align: left; }
-  .cvpr-row-abstract { grid-column: 1; }
   .cvpr-row-actions { grid-column: 2; grid-row: 1; }
 }
 @media (max-width: 760px) {
