@@ -162,6 +162,7 @@ function renderRuns() {
     const hasImprovement = impPct != null;
     const optNoteRaw = p["优化说明"];
     const optNote = optNoteRaw && !/^Performance\s*enhanced\s*successfully/i.test(optNoteRaw) ? optNoteRaw : null;
+    const optCat = p["优化类别"];
 
     const issueTitle = encodeURIComponent(`[CVPR 2026] ${p.paper_id}: ${(p.title || "").slice(0, 80)}`);
     const issueURL = `${GITHUB_REPO}/issues/new?labels=cvpr2026&title=${issueTitle}`;
@@ -175,24 +176,29 @@ function renderRuns() {
     }
 
     const impDisplay = formatImprovement(impPct);
-    const metricHTML = hasImprovement
-      ? `<span class="metric-delta positive">↑ ${esc(impDisplay)}</span>`
+    const catTag = optCat && /^[A-Da-d]$/.test(optCat)
+      ? `<span class="opt-cat-tag opt-cat-${optCat.toUpperCase()}" title="Category ${optCat.toUpperCase()}"></span>`
       : "";
 
     return `<article class="cvpr-row${hasImprovement ? " has-improvement" : ""}" data-id="${esc(p.paper_id)}">
       <div class="cvpr-row-main">
         <span class="cvpr-row-title">${esc(p.title)}</span>
-        ${hasImprovement && optNote ? `<p class="cvpr-row-optnote">AutoSOTA: ${esc(optNote)}</p>` : ""}
         <div class="cvpr-row-links">${links.join(" · ") || '<span style="color:var(--muted)">No links</span>'}</div>
       </div>
       <div class="cvpr-row-status">
         <span class="status-badge status-${statusClass}">${esc(p.status)}</span>
       </div>
-      <div class="cvpr-row-category">
-        ${hasImprovement ? `<span class="cat-meta">${metricHTML}</span>` : ""}
+      <div class="cvpr-row-metric">
+        ${hasImprovement ? `<span class="metric-delta positive">↑ ${esc(impDisplay)}</span>` : ""}
+      </div>
+      <div class="cvpr-row-cat">
+        ${catTag}
+      </div>
+      <div class="cvpr-row-enchant">
+        ${hasImprovement && optNote ? `<span class="enchant-label">AutoSOTA Enchants</span><span class="enchant-text">${esc(optNote)}</span>` : ""}
       </div>
       <div class="cvpr-row-actions">
-        <a class="issue-link" href="${issueURL}" target="_blank" rel="noreferrer">Report Issue</a>
+        <a class="issue-link" href="${issueURL}" target="_blank" rel="noreferrer">Feedback</a>
       </div>
     </article>`;
   }).join("");
