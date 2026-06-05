@@ -33,14 +33,14 @@ function renderStats(items) {
   const best = items.reduce((a, b) => Math.abs(a.improvement) > Math.abs(b.improvement) ? a : b, items[0]);
 
   statsGrid.innerHTML = [
-    { v: n, l: "papers optimized", c: "" },
+    { v: n, l: "papers enchanted", c: "" },
     { v: strongN, l: "strong wins (≥10%)", c: "amber" },
     { v: best ? best.improvementDisplay : "--", l: "best gain — " + (best ? esc(best.method || best.fullTitle).slice(0, 30) : ""), c: metricColor(best ? best.improvement : 0) },
     { v: formatPct(avgGain), l: "average gain", c: "" },
   ].map(card => `<article class="stat-card"><span class="stat-value ${card.c}">${esc(String(card.v))}</span><span class="stat-label">${esc(card.l)}</span></article>`).join("");
 
-  heroHeadline.textContent = `${n} papers optimized, one pipeline.`;
-  heroSummary.textContent = `${strongN} papers cleared the 10% threshold. Every entry links to its optimization note and source folder.`;
+  heroHeadline.textContent = `${n} papers enchanted, one pipeline.`;
+  heroSummary.textContent = `${strongN} papers cleared the 10% threshold. Every entry links to its results note and source folder.`;
 
   fbTotal.textContent = String(n);
   fbStrong.textContent = String(strongN);
@@ -118,7 +118,7 @@ function renderRuns() {
       </div>
       <div class="run-card-metric">
         <span class="metric-value ${mc}">${esc(item.improvementDisplay)}</span>
-        <span class="metric-label">optimization gain</span>
+        <span class="metric-label">improvement</span>
       </div>
       <div class="run-card-status">
         <span class="status-pill status-${gi.grade}">${gi.label}</span>
@@ -152,7 +152,7 @@ function openModal(id) {
     <p class="modal-title">${esc(item.fullTitle)}</p>
     <div class="modal-meta">
       <div class="modal-meta-item"><span class="mm-label">Paper ID</span><span class="mm-value">#${item.id}</span></div>
-      <div class="modal-meta-item"><span class="mm-label">Optimization</span><span class="mm-value ${mc}">${esc(item.improvementDisplay)}</span></div>
+      <div class="modal-meta-item"><span class="mm-label">Improvement</span><span class="mm-value ${mc}">${esc(item.improvementDisplay)}</span></div>
       <div class="modal-meta-item"><span class="mm-label">Grade</span><span class="mm-value ${mc}">${gi.label}</span></div>
     </div>
     <div class="modal-summary">${summaryHTML}</div>
