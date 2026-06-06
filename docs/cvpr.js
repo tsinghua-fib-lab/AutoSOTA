@@ -184,6 +184,10 @@ function renderRuns() {
     if (gh && gh.startsWith("http") && !gh.includes("thecvf.com") && gh !== p.pdf_url) {
       links.push(`<a href="${esc(gh)}" target="_blank" rel="noreferrer">GitHub</a>`);
     }
+    const autosotaRepo = p.autosota_repo_url;
+    if (autosotaRepo && autosotaRepo.startsWith("http")) {
+      links.unshift(`<a class="autosota-code-link" href="${esc(autosotaRepo)}" target="_blank" rel="noreferrer" aria-label="Open AutoSOTA optimized code repository"><span class="autosota-code-kicker">AutoSOTA</span><span>Optimized Code Repo</span><span class="autosota-code-arrow" aria-hidden="true">↗</span></a>`);
+    }
 
     const impDisplay = formatImprovement(impPct);
     const catCls = CAT_COLORS[cat] || "";

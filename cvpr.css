@@ -67,13 +67,37 @@
 .cvpr-row-title {
   margin: 0; font-size: 1.08rem; line-height: 1.45; letter-spacing: -.01em;
 }
-.cvpr-row-links { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.cvpr-row-links { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 .cvpr-row-links a {
   font-family: "IBM Plex Mono", monospace; font-size: .68rem;
   color: var(--accent); letter-spacing: .04em;
   transition: color var(--transition);
 }
 .cvpr-row-links a:hover { color: var(--text); }
+
+.autosota-code-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 24px; padding: 2px 9px 2px 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(156,255,179,.28);
+  background: linear-gradient(90deg, rgba(156,255,179,.13), rgba(255,219,148,.08));
+  color: var(--green);
+  font-family: "IBM Plex Mono", monospace; font-size: .68rem;
+  letter-spacing: .04em; white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(255,219,148,.04) inset;
+  transition: color var(--transition), border-color var(--transition), background-color var(--transition);
+}
+.autosota-code-link:hover {
+  color: var(--text); border-color: rgba(255,219,148,.5);
+  background: linear-gradient(90deg, rgba(156,255,179,.18), rgba(255,219,148,.14));
+}
+.autosota-code-kicker {
+  display: inline-flex; align-items: center; min-height: 20px;
+  padding: 0 6px; border-radius: 999px;
+  background: rgba(255,219,148,.16); color: var(--amber);
+  text-transform: uppercase; font-size: .58rem; letter-spacing: .08em;
+}
+.autosota-code-arrow { color: var(--amber); }
 
 .cvpr-row-status { text-align: center; }
 .cvpr-row-metric { text-align: center; display: flex; align-items: flex-start; justify-content: center; }
