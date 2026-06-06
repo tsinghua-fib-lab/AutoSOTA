@@ -1,8 +1,7 @@
 # CVPR 2026 — AutoSOTA Optimized Repositories
 
-This directory contains 16 CVPR 2026 paper repositories that were
-post-hoc optimized by the AutoSOTA pipeline
-(`tsinghua-fib-lab/AutoSOTA`).
+This directory contains CVPR 2026 paper repositories that were post-hoc optimized by the AutoSOTA pipeline (tsinghua-fib-lab/AutoSOTA). 
+(Continuously Updated)
 
 Each `paper-<id>-<abbr>/` subdirectory holds:
 
