@@ -3,7 +3,7 @@ const GITHUB_REPO = "https://github.com/tsinghua-fib-lab/AutoSOTA";
 
 const state = {
   papers: { day1: [], day2: [], day3: [] },
-  activeDay: "day1",
+  activeDay: "day2",
   activeQuery: "",
   showImprovedOnly: false,
   showAllCategories: false,
@@ -245,9 +245,9 @@ async function loadDay(dayKey) {
 }
 
 async function init() {
-  // Load Day 1 first and render immediately
-  await loadDay("day1");
-  if (!state.papers.day1.length) {
+  // Load the default day first and render immediately.
+  await loadDay(state.activeDay);
+  if (!state.papers[state.activeDay].length) {
     heroHeadline.textContent = "Could not load CVPR data.";
     runsList.innerHTML = '<article class="run-card run-card-empty"><p>Could not load CVPR data. Please try again later.</p></article>';
     return;
@@ -257,8 +257,8 @@ async function init() {
   renderDayTabs();
   renderRuns();
 
-  // Load Day 2/3 in background and refresh tabs when ready
-  Promise.all([loadDay("day2"), loadDay("day3")]).then(() => {
+  // Load the other days in background and refresh tabs when ready.
+  Promise.all(["day1", "day2", "day3"].filter(day => day !== state.activeDay).map(loadDay)).then(() => {
     renderDayTabs();
   });
 }
