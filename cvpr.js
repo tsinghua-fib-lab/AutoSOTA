@@ -42,8 +42,7 @@ function startCountdown() {
   function tick() {
     const now = new Date();
     const target = new Date(now);
-    target.setHours(22, 0, 0, 0);
-    if (now >= target) target.setDate(target.getDate() + 1);
+    target.setHours(24, 0, 0, 0);
     const diff = target - now;
     if (diff <= 0) { document.getElementById("countdown-timer").textContent = "Updating..."; return; }
     const h = Math.floor(diff / 3600000);
@@ -104,10 +103,13 @@ const CAT_COLOR_RANK = {
 function getVisiblePapers() {
   let papers = state.papers[state.activeDay];
   if (!state.showAllCategories) {
-    papers = papers.filter(p => CAT_COLORS[p["AutoSOTA_Category"]] !== "cat-gray");
+    papers = papers.filter(p => {
+      const color = CAT_COLORS[p["AutoSOTA_Category"]];
+      return color && color !== "cat-gray";
+    });
   }
   if (state.showImprovedOnly) {
-    papers = papers.filter(p => !!p["指标提升百分比(绝对值)"]);
+    papers = papers.filter(p => p["AutoSOTA_Category"] === "Succeeded");
   }
   const q = state.activeQuery.trim().toLowerCase();
   if (q) {
@@ -119,8 +121,8 @@ function getVisiblePapers() {
   }
   // Sort: improved first, then status, then category color
   papers = [...papers].sort((a, b) => {
-    const aImp = a["指标提升百分比(绝对值)"] ? 0 : 1;
-    const bImp = b["指标提升百分比(绝对值)"] ? 0 : 1;
+    const aImp = a["AutoSOTA_Category"] === "Succeeded" ? 0 : 1;
+    const bImp = b["AutoSOTA_Category"] === "Succeeded" ? 0 : 1;
     if (aImp !== bImp) return aImp - bImp;
     const aStatus = STATUS_RANK[a.status] ?? 3;
     const bStatus = STATUS_RANK[b.status] ?? 3;
@@ -166,10 +168,10 @@ function renderRuns() {
   runsList.innerHTML = visible.map(p => {
     const statusClass = (p.status || "").toLowerCase();
     const impPct = p["指标提升百分比(绝对值)"];
-    const hasImprovement = !!impPct;
+    const cat = p["AutoSOTA_Category"];
+    const hasImprovement = cat === "Succeeded";
     const optNoteRaw = p["优化说明"];
     const optNote = optNoteRaw && !/^Performance\s*enhanced\s*successfully/i.test(optNoteRaw) ? optNoteRaw : null;
-    const cat = p["AutoSOTA_Category"];
 
     const seqLabel = p.seq ? `seq ${p.seq} · ` : "";
     const issueTitle = encodeURIComponent(`[CVPR 2026] ${seqLabel}${p.paper_id}: ${(p.title || "").slice(0, 80)}`);
@@ -196,7 +198,7 @@ function renderRuns() {
         <span class="status-badge status-${statusClass}">${esc(p.status)}</span>
       </div>
       <div class="cvpr-row-metric">
-        ${hasImprovement ? `<span class="metric-delta positive">↑ ${esc(impDisplay)}</span>` : ""}
+        ${impDisplay ? `<span class="metric-delta positive">↑ ${esc(impDisplay)}</span>` : ""}
       </div>
       <div class="cvpr-row-cat">
         ${catTag}
