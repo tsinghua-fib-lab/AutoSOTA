@@ -1,0 +1,43 @@
+###########################
+## EVALUATE TRAINING SET ##
+###########################
+
+# root folder where results are located
+METHOD_FOLDER=${1};
+# filename (with relative path) for the evaluation file
+EVAL_FILENAME=${2};
+
+# collect tracks
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars2/Tracks30.dat" > ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars3/Tracks19.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars6/Tracks30.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars7/Tracks24.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars8/Tracks24.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cars9/Tracks60.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple1/Tracks328.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple3/Tracks323.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple5/Tracks94.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple8/Tracks72.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple10/Tracks460.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple11/Tracks173.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/marple13/Tracks75.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/bear01/Tracks100.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/bear02/Tracks458.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cats02/Tracks120.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cats04/Tracks98.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cats05/Tracks87.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/cats07/Tracks193.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/ducks01/Tracks400.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/horses01/Tracks500.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/horses03/Tracks240.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/horses06/Tracks720.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/lion02/Tracks416.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/meerkats01/Tracks220.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/people04/Tracks320.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/people05/Tracks260.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/rabbits01/Tracks290.dat" >> ${EVAL_FILENAME};
+echo "TrainingSet/Results/${METHOD_FOLDER}/rabbits05/Tracks420.dat" >> ${EVAL_FILENAME};
+
+# run evaluation
+./MoSegEvalAllPR allShotsTrainingSet.txt all ${EVAL_FILENAME} 0.75;
+
