@@ -139,8 +139,8 @@ function formatImprovement(raw) {
   const s = String(raw).replace(/[？?]/g, "").trim();
   const n = parseFloat(s);
   if (isNaN(n)) return s;
-  // Values < 1 are ratios (0.1148 = 11.48%), >= 1 are already percentages
-  const pct = n < 1 ? (n * 100).toFixed(1) : n.toFixed(1);
+  // Values with % are already percentages; bare values < 1 are ratios.
+  const pct = s.includes("%") ? n.toFixed(1) : (n < 1 ? (n * 100).toFixed(1) : n.toFixed(1));
   return pct + "%";
 }
 
