@@ -1,0 +1,29 @@
+# Base Configuration for CIFAR-10 experiments
+# Pathological distribution, 10 clients
+#
+# 公共配置 - 一改全改！
+# 所有算法共享的训练参数都在这里定义
+#
+# 使用方法：
+#   uv run scripts/run_pfllib.py configs/cifar-10/noniid_pat_10/algorithms/<algorithm>.yaml
+
+dataset:
+  name: cifar10
+  config: noniid_pat_10
+  num_classes: 10
+  num_clients: 10
+model:
+  name: CNN
+training:
+  global_rounds: 2000
+  local_epochs: 1
+  batch_size: 50
+  learning_rate: 0.005
+  join_ratio: 1.0
+  eval_gap: 10
+device:
+  type: cuda
+  id: "0"
+experiment:
+  goal: baseline
+  times: 1

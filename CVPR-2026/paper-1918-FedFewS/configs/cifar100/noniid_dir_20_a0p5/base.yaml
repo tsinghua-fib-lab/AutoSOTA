@@ -1,0 +1,33 @@
+# Base Configuration for CIFAR-100 experiments
+# Dirichlet(α=0.5), 20 clients
+#
+# 公共配置 - 一改全改！
+# 所有算法共享的训练参数都在这里定义
+#
+# 使用方法：
+#   uv run scripts/run_pfllib.py configs/cifar-100/noniid_dir_20_a0p5/algorithms/<algorithm>.yaml
+
+dataset:
+  name: cifar100
+  config: noniid_dir_20_a0p5
+  num_classes: 100
+  num_clients: 20
+model:
+  name: CNN
+training:
+  # Optimizer Iter-5: 1000 rounds (was 2000). Cosine schedule adapted.
+  # Optimizer Iter-1: LR 0.01 (was 0.005) for CosineAnnealingLR
+  global_rounds: 1000
+  local_epochs: 1
+  batch_size: 50
+  learning_rate: 0.01
+  learning_rate_decay: true
+  learning_rate_decay_gamma: 0.99
+  join_ratio: 1.0
+  eval_gap: 10
+device:
+  type: cuda
+  id: "0"
+experiment:
+  goal: baseline
+  times: 1
