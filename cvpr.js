@@ -178,8 +178,12 @@ function renderRuns() {
     const issueURL = `${GITHUB_REPO}/issues/new?labels=cvpr2026&title=${issueTitle}`;
 
     const links = [];
-    if (p.pdf_url) links.push(`<a href="${esc(p.pdf_url)}" target="_blank" rel="noreferrer">PDF</a>`);
-    if (p.arxiv && /^\d{4}\.\d{4}/.test(p.arxiv)) links.push(`<a href="https://arxiv.org/abs/${esc(p.arxiv)}" target="_blank" rel="noreferrer">arXiv:${esc(p.arxiv)}</a>`);
+    const hasArxiv = p.arxiv && /^\d{4}\.\d{4}/.test(p.arxiv);
+    if (hasArxiv) {
+      links.push(`<a href="https://arxiv.org/abs/${esc(p.arxiv)}" target="_blank" rel="noreferrer">arXiv:${esc(p.arxiv)}</a>`);
+    } else if (p.pdf_url) {
+      links.push(`<a href="${esc(p.pdf_url)}" target="_blank" rel="noreferrer">PDF</a>`);
+    }
     const gh = p.github_url;
     if (gh && gh.startsWith("http") && !gh.includes("thecvf.com") && gh !== p.pdf_url) {
       links.push(`<a href="${esc(gh)}" target="_blank" rel="noreferrer">GitHub</a>`);
