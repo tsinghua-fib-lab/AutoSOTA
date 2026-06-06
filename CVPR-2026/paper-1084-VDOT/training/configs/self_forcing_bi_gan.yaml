@@ -1,0 +1,67 @@
+generator_ckpt: false
+generator_fsdp_wrap_strategy: size
+real_score_fsdp_wrap_strategy: size
+fake_score_fsdp_wrap_strategy: size
+gen_name: Wan2.1-VACE-14B
+real_name: Wan2.1-VACE-14B
+fake_name: Wan2.1-VACE-14B
+text_encoder_fsdp_wrap_strategy: size
+denoising_step_list:
+- 1000
+- 750
+- 500
+- 250
+warp_denoising_step: true # need to remove - 0 in denoising_step_list if warp_denoising_step is true
+use_lora: true # use acc wan to initialize the generator
+ts_schedule: false
+num_train_timestep: 1000
+timestep_shift: 5.0
+guidance_scale: 3.0
+denoising_loss_type: flow
+mixed_precision: true
+seed: 42
+wandb_key: 
+wandb_entity: 
+wandb_project: 
+sharding_strategy: full
+lr: 2.0e-06
+lr_critic: 4.0e-07
+discriminator_lr_multiplier: 1
+beta1: 0.0
+beta2: 0.999
+beta1_critic: 0.0
+beta2_critic: 0.999
+data_path: artgrid-multitask-76k.csv
+batch_size: 1
+ema_weight: 0
+ema_start_step: 200
+log_iters: 100
+negative_prompt: '色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走'
+dfake_gen_update_ratio: 5
+min_score_timestep: 0
+image_or_video_shape:
+- 1
+- 21
+- 16
+- 60
+- 104
+distribution_loss: bi_dmd_gan
+trainer: score_distillation_vace
+gradient_checkpointing: true
+num_frame_per_block: 3
+load_raw_video: false
+
+relativistic_discriminator: true
+concat_time_embeddings: true
+discriminator_warmup_steps: 0
+critic_timestep_shift: 12
+gradient_accumulation_steps: 3
+gan_g_weight: 0.1
+gan_d_weight: 0.1
+r1_weight: 0
+r2_weight: 0
+r1_sigma: 0.05
+r2_sigma: 0.05
+
+model_kwargs:
+  timestep_shift: 5.0
