@@ -1,0 +1,133 @@
+# semnticposs config file
+name: "poss"
+labels:
+  0: "unlabeled"
+  1: "not know"
+  4: "1 person"
+  5: "2+ person"
+  6: "rider"
+  7: "car"
+  8: "trunk"
+  9: "plants"
+  10: "traffic sign 1" # standing sign
+  11: "traffic sign 2" # hanging sign
+  12: "traffic sign 3" # high/big hanging sign
+  13: "pole"
+  14: "trashcan"
+  15: "building"
+  16: "cone/stone"
+  17: "fence"
+  18: "not know"
+  19: "not know"
+  20: "not know"
+  21: "bike"
+  22: "ground" # class definition
+color_map: # bgr
+  0: [0, 0, 0]
+  1: [0, 0, 0]
+  4: [30, 30, 255]
+  5: [30, 30, 255]
+  6: [200, 40, 255]
+  7: [245, 150, 100]
+  8: [0, 60, 135]
+  9: [0, 175, 0]
+  10: [0, 0, 255] # standing sign
+  11: [0, 0, 255] # hanging sign
+  12: [0, 0, 255] # high/big hanging sign
+  13: [150, 240, 255]
+  14: [0, 255, 125]
+  15: [0, 200, 255]
+  16: [255, 255, 50]
+  17: [50, 120, 255]
+  18: [0, 0, 0]
+  19: [0, 0, 0]
+  20: [0, 0, 0]
+  21: [245, 230, 100]
+  22: [128, 128, 128] # class definition
+content: # as a ratio with the total number of points
+  0: 0.020862830428742977
+  1: 2.469082128891203e-08
+  4: 0.015402000989588365
+  5: 0.0030953055529133635
+  6: 0.004473705218516682
+  7: 0.08265452422115742
+  8: 0.012670218398511653
+  9: 0.3590911520036982
+  10: 0.0032106116883325827
+  11: 0.0012968804500358467
+  12: 0.00163708540024725
+  13: 0.00486631890599593
+  14: 0.0008666823943906168
+  15: 0.21372203059566083
+  16: 0.0009603445558679757
+  17: 0.015234582406756767
+  18: 0.0007389617140273326
+  19: 3.6991788455048e-05
+  20: 0.0005476522925165844
+  21: 0.05418175057745164
+  22: 0.20445034572631166
+## classes that are indistinguishable from single scan or inconsistent in
+# ground truth are mapped to their closest equivalent
+learning_map:
+  0: 0
+  1: 0
+  4: 1
+  5: 1
+  6: 2
+  7: 3
+  8: 4
+  9: 5
+  10: 6 # standing sign
+  11: 6 # hanging sign
+  12: 6 # high/big hanging sign
+  13: 7
+  14: 8
+  15: 9
+  16: 10
+  17: 11
+  18: 0
+  19: 0
+  20: 0
+  21: 12
+  22: 13 # class definition
+learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 4      # "car"
+  2: 6      # "bicycle"
+  3: 7      # "motorcycle"
+  4: 8      # "truck"
+  5: 9      # "other-vehicle"
+  6: 10     # "person"
+  7: 13     # "bicyclist"
+  8: 14     # "motorcyclist"
+  9: 15     # "road"
+  10: 16    # "parking"
+  11: 17    # "sidewalk"
+  12: 21    # "other-ground"
+  13: 22    # "building"
+learning_ignore: # Ignore classes
+  0: True      # "unlabeled", and others ignored
+  1: False     # "car"
+  2: False     # "bicycle"
+  3: False     # "motorcycle"
+  4: False     # "truck"
+  5: False     # "other-vehicle"
+  6: False     # "person"
+  7: False     # "bicyclist"
+  8: False     # "motorcyclist"
+  9: False     # "road"
+  10: False    # "parking"
+  11: False    # "sidewalk"
+  12: False    # "other-ground"
+  13: False    # "building"
+split: # sequence numbers
+  train:
+    - 0
+    - 1
+    - 3
+    - 4
+    - 5
+  valid:
+    - 2
+  test:
+    - 2

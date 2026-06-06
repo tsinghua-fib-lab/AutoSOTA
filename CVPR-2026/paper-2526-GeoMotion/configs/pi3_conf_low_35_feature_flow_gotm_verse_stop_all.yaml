@@ -1,0 +1,113 @@
+# Motion Segmentation Configuration for Pi3
+cfg_name: "pi3_conf_low_35_feature_flow_gotm_verse_stop_all"
+
+# =============================================================================
+# Dataset Configuration
+# =============================================================================
+train_dataset: ["got10k","hoi4d", "dynamic_stereo", 'gotmoving', 'dynamicverse']
+train_root: ['data/GOT10k/GOT-10k_Train_split_01', "data/HOI4D_clean", "data/dynamic_replica_data", 'data/gotmoving', 'data/DynamicVerse']
+
+# Test datasets (optional, can be same as train or different)
+test_dataset: ["test"]  
+test_root: ["data/test"]
+
+# Data loading settings
+num_workers: 4
+batch_size: 1  # Small batch size due to video sequences and GPU memory
+# 数据增强设置
+enable_augmentation: true    # 是否启用增强 (训练时)
+crop_strategy: "center"       # 裁剪策略: smart/center/random
+
+# 数据设置
+img_size: 518               # 目标图像尺寸
+sequence_length: 12          # 视频序列长度
+sample_stride: 6            # 帧采样间隔
+
+# =============================================================================
+# pi3 Model Configuration  
+# =============================================================================
+# Pre-trained pi3 model path
+model_name: "pi3_conf_low_35_feature_flow_gotm_verse_stop_all"
+vggt_model_path: "checkpoint/model.safetensors"  # Update this path with pi3 model
+raft_model_path: null  # Optional; can also be set via RAFT_MODEL_PATH
+freeze_backbone: true
+
+# 损失函数权重
+bce_weight: 1.0
+dice_weight: 1.0
+
+# Training monitoring
+gradient_clip: 1.0
+save_freq: 3000 #1000
+print_freq: 5         # Print frequency during training
+
+# pi3 model parameters
+patch_size: 14          # Patch size for VGGT
+embed_dim: 1024         # Embedding dimension
+
+# =============================================================================
+# Training Configuration
+# =============================================================================
+max_epochs: 20
+lr: 0.00005             # Learning rate for mask head (changed from 1e-4)
+weight_decay: 0.05    # Weight decay (changed from 1e-4)
+min_lr: 0.000005        # Minimum learning rate (changed from 1e-6)
+
+# =============================================================================
+# Logging and Visualization
+# =============================================================================
+log_dir: "pi3_conf_low_35_feature_flow_gotm_verse_stop_all"
+vis: true              # Whether to enable visualization
+
+
+# =============================================================================
+# Data Augmentation (Optional)
+# =============================================================================
+augmentation:
+  enabled: false         # Enable data augmentation
+  horizontal_flip: 0.5   # Probability of horizontal flip
+  color_jitter: 0.1      # Color jittering strength
+  brightness: 0.1        # Brightness adjustment
+  contrast: 0.1          # Contrast adjustment
+
+# =============================================================================
+# Evaluation Configuration
+# =============================================================================
+eval:
+  metrics: ["iou", "precision", "recall", "f1"]  # Evaluation metrics
+  threshold: 0.5         # Binary threshold for evaluation
+  save_predictions: true # Whether to save prediction masks
+  
+# =============================================================================
+# Hardware Configuration
+# =============================================================================
+device: "cuda"
+mixed_precision: true   # Use mixed precision training
+
+# =============================================================================
+# Legacy Parameters (Not Used in Motion Segmentation)
+# =============================================================================
+# These are kept for compatibility but not used in motion segmentation
+track_method: null      # Not needed for motion segmentation
+depth_type: null        # Not needed for motion segmentation
+dino: false            # VGGT handles features internally
+extra_info: false      # Not needed for motion segmentation
+two_label: false       # Not applicable for motion segmentation
+time_embed: false
+
+# Probabilistic dataset mixing (not used for single task)
+dataset_sampling_strategy: 'probabilistic' 
+# cfg.dataset_sampling_strategy = 'concat'  # or don't set it
+dataset_probabilities: [0.15, 0.2, 0.2, 0.25, 0.2]
+
+# Model architecture flags (legacy)
+tracks: false          # Not used in motion segmentation
+depths: false          # Not used in motion segmentation
+time_att: false        # Handled by VGGT
+pos_embed: false       # Handled by VGGT
+oanet: false          # Not used
+efficient: false       # Not used
+out_dim: 1            # Output dimension (binary mask)
+
+# Resume training
+resume_path: null      # Path to checkpoint for resuming training
