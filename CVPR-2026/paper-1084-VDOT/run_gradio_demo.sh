@@ -1,0 +1,1 @@
+torchrun --nproc_per_node=4 --nnodes=1 inference/vdot_gradio.py

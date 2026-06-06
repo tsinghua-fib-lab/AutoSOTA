@@ -1,0 +1,33 @@
+from setuptools import setup
+
+setup(
+    name="mvczigal",
+    version="0.0.1",
+    packages=["mvczigal"],
+    python_requires=">=3.10",
+    install_requires=[
+        "diffusers==0.31.0",
+        "transformers==4.46.3",
+        "peft",
+        "numpy==1.26.2",
+        "huggingface_hub==0.24.6",
+        "accelerate==1.1.1",
+        "opencv-python",
+        "safetensors",
+        "pillow",
+        "omegaconf",
+        "trimesh",
+        "einops",
+        "gradio==4.44.1",
+        "timm",
+        "scikit-image",
+        "kornia",
+        "hydra-core",
+        "inflect==7.0.0",
+        "wandb",
+        "tqdm",
+        "clip",
+        "image-reward",
+        "hpsv2",
+    ],
+)

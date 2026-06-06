@@ -1,0 +1,115 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train P-Flow (indi_denoiser)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train_UMF.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_pflow.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--batch_size",
+                "64",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Train S-Flow (reac_denoiser)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train_react.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_sflow.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--batch_size",
+                "64",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Train VAE (stage1)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train_UMF.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_vae.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--batch_size",
+                "64",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Test P-Flow (indi_denoiser cfg)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_pflow.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Test S-Flow (reac_denoiser cfg)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_sflow.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Test VAE",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--cfg",
+                "configs/config_vae.yaml",
+                "--cfg_assets",
+                "configs/assets.yaml",
+                "--nodebug"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

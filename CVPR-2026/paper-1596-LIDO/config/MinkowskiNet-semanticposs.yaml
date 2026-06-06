@@ -1,0 +1,67 @@
+# Config format schema number
+format_version: 1
+
+###################
+## Model options
+model_params:
+  model_architecture: "minkowskinet"
+
+  input_dims: 4
+  voxel_size: 0.05 # 0.05 for SemanticPOSS (?)
+  cr: 1
+  layer_num:
+    - 32
+    - 32
+    - 64
+    - 128
+    - 256
+    - 256
+    - 128
+    - 96
+    - 96
+
+###################
+## Dataset options
+dataset:
+  pc_dataset_type: "SemanticPOSS"
+  collate_type: "sparse_collate_fn"
+  ignore_label: 0
+  data_config: "./config/labels/semantic-poss.yaml"
+  num_classes: 14
+  sensor:
+    name: "HDL64"
+    type: "spherical" # projective
+    fov_up: 7
+    fov_down: -16
+
+###################
+## Train params
+train:
+  epochs: 64 # default 128
+  learning_rate: 2.4e-1 # 1.0e-2 for SGD | 1.0e-4 for AdamW
+  weight_decay: 1.0e-4
+  optimizer: SGD # [SGD, AdamW]
+  batch_size: 4   # batch size (default 8)
+  workers: 4     # number of threads to get data
+  epsilon_w: 0.001       # class weight w = 1 / (content + epsilon_w)
+  momentum: 0.9
+  nesterov: True
+
+  mav_loss: True  # features loss
+  cont_loss: True  # contrastive loss
+  obj_loss: True  # objectosphere loss
+
+  scheduler:
+    name: "WarmupCosine"  # [OneCycle, WarmupCosine]
+    #OneCycleLR: # Old decay with warmup and cosine annealing 
+    max_lr: 0.01 # Equal to optimizer.lr
+    total_steps: 1000 # Equal to max_epochs * iterations_per_epoch
+    pct_start: 0.02 # The percentage of the cycle (in number of steps) spent increasing the learning rate (warmup).
+
+  report_epoch: 1 # report every epoch
+  show_scans: False # show scans during training
+
+  #lr_scheduler: CosineAnnealingWarmRestarts  # [StepLR, ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts]
+  #momentum: 0.9
+  #nesterov: True
+  #weight_decay: 1.0e-4

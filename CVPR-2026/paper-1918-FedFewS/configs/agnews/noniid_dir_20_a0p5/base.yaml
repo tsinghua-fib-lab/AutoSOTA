@@ -1,0 +1,41 @@
+# Base Configuration for AGNews experiments
+# Dirichlet(α=0.5) distribution, 20 clients
+#
+# 公共配置 - 一改全改！
+# 所有算法共享的训练参数都在这里定义
+#
+# 使用方法：
+#   uv run scripts/run_pfllib.py configs/agnews/noniid_dir_20_a0p5/algorithms/<algorithm>.yaml
+
+# Dataset configuration
+dataset:
+  name: agnews
+  config: noniid_dir_20_a0p5
+  num_classes: 4
+  num_clients: 20
+
+# Model configuration
+model:
+  name: TextCNN
+  vocab_size: 32000
+  max_len: 200
+
+# Training configuration
+# ⚠️ 修改这里会影响所有算法！
+training:
+  global_rounds: 2000 # 全局训练轮次
+  local_epochs: 1 # 本地训练 epoch 数
+  batch_size: 100 # batch size
+  learning_rate: 0.005 # 学习率
+  join_ratio: 1.0 # 客户端参与比例
+  eval_gap: 10 # 评估间隔
+
+# Device configuration
+device:
+  type: cuda
+  id: "0"
+
+# Experiment metadata (默认值，可被算法配置覆盖)
+experiment:
+  goal: baseline
+  times: 1

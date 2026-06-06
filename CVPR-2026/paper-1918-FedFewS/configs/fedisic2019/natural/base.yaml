@@ -1,0 +1,29 @@
+# Base Configuration for FedISIC2019 experiments
+# Natural distribution, 6 clients
+#
+# 公共配置 - 一改全改！
+# 所有算法共享的训练参数都在这里定义
+#
+# 使用方法：
+#   uv run scripts/run_pfllib.py configs/fedisic2019/natural/algorithms/<algorithm>.yaml
+
+dataset:
+  name: FedISIC2019
+  config: natural_6centers
+  num_classes: 8
+  num_clients: 6
+model:
+  name: ResNet18
+training:
+  global_rounds: 1000
+  local_epochs: 1
+  batch_size: 50 # 从 50 → 100（减少梯度方差）
+  learning_rate: 0.005
+  join_ratio: 1.0
+  eval_gap: 10
+device:
+  type: cuda
+  id: "0"
+experiment:
+  goal: baseline
+  times: 1

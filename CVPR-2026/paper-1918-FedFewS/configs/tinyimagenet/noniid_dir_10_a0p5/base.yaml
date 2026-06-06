@@ -1,0 +1,29 @@
+# Base Configuration for TinyImageNet experiments
+# Dirichlet(α=0.5), 10 clients
+#
+# 公共配置 - 一改全改！
+# 所有算法共享的训练参数都在这里定义
+#
+# 使用方法：
+#   uv run scripts/run_pfllib.py configs/tinyimagenet/noniid_dir_10_a0p5/algorithms/<algorithm>.yaml
+
+dataset:
+  name: tinyimagenet
+  config: noniid_dir_10_a0p5
+  num_classes: 200
+  num_clients: 10
+model:
+  name: CNN
+training:
+  global_rounds: 2000
+  local_epochs: 1
+  batch_size: 50
+  learning_rate: 0.0005
+  join_ratio: 1.0
+  eval_gap: 10
+device:
+  type: cuda
+  id: "0"
+experiment:
+  goal: baseline
+  times: 1
