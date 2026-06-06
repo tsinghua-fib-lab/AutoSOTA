@@ -1,0 +1,48 @@
+wandb:
+  log: true
+  project_name: "mvczigal"
+  run_name: ""
+
+pretrained:
+  base_model: "stabilityai/stable-diffusion-xl-base-1.0"
+  vae_model: "madebyollin/sdxl-vae-fp16-fix"
+  unet_model: ""
+  custom_adapter: "huanngzh/mv-adapter"
+  lora_model: ""
+
+training:
+  logdir: "logs"
+  save_interval: 1
+  use_lora: true
+  lora_scale: 1.0
+  lora_rank: 4
+  gradient_checkpointing: true
+  seed: 42
+  image_height: 768
+  image_width: 768
+  num_views: 6
+  num_inference_steps: 16
+  guidance_scale: 7.0
+  scheduler: "ddim"
+  eta: 1.0
+  lr: 5e-5
+  sample_batch_size_per_gpu: 2
+  train_batch_size_per_gpu: 1
+  num_sample_iters: 2
+  clip_range: 1e-4
+  max_grad_norm: 5
+  adv_clip_max: 10
+  gradient_accumulation_steps: 64
+  num_epochs: 70
+  batches_per_epoch: 10
+  num_inner_epochs: 1
+  lambda_init: 0.0
+  lambda_lr: 0.1
+  lambda_max: 5.0
+  lambda_update_delay_steps: 0
+  ema_beta: 0.99
+  constrain_threshold_init: 0
+  prompt_set: SimpleAnimals
+  negative_prompt: "watermark, ugly, deformed, noisy, blurry, low contrast"
+  reward_fn: pick_score
+  mv_reward_fn: hyper_score
