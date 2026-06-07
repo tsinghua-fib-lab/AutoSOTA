@@ -1,0 +1,156 @@
+# MASS mask-guided self-supervised pretraining.
+
+seed: 42
+# Processed npy arrays use [D, H, W], so spacing is [z, y, x] in mm.
+target_spacing: [1.5, 1.5, 1.5]
+
+run:
+  output_dir: runs/pretrain
+
+data:
+  train:
+    type: MaskGuidedSelfSupervisedDataset
+    data_root: ./data/mass_h5
+    datasets:
+      - amos_ct
+      - amos_mr
+      - autopet_suv
+      - autopet_ct
+      - bcv
+      - brats18_flair
+      - brats18_t1
+      - brats18_t2
+      - kits
+      - lits
+      - mnm
+      - structseg_thoracic_oar
+      - structseg_head_oar
+      - totalseg_ct
+      - totalseg_mr
+    
+    max_in_batch: 13
+    aug_device: cpu
+
+  incontext:
+    type: 'MetaUniversalDataset'
+    datasets:
+      - structseg_thoracic_oar
+      - kits
+      - amos_mr
+      - structseg_head_oar
+      - bcv
+
+    mode: 'test_incontext'
+    data_root: ./data/mass_h5
+    reference_mode: fixed
+
+  loader:
+    batch_size: 4
+    num_workers: 8
+    pin_memory: true
+    persistent_workers: true
+    drop_last: false
+    shuffle: true
+
+model:
+  type: iris
+  in_ch: 1
+  channels: [32, 64, 128, 256, 512]
+  scale: [2, 2, 2, 2]
+  kernel_size: [3, 3, 3, 3, 3]
+  block: BasicBlock
+  num_block: [2, 2, 2, 2]
+  pool: true
+  norm: in
+  tn: 73
+  num_prior_stage: 3
+  ema_moment: 0.99
+
+trainer:
+  type: mask_guided_self_supervised
+
+epochs: 100
+start_epoch: 0
+max_iter_per_epoch: 1000
+training_size: [128, 128, 128]
+val_frequency: 5
+print_freq: 5
+log_freq: 5
+checkpoint_freq_epoch: 1
+checkpoint_freq_iter: null
+
+optimizer:
+  type: Lamb
+  lr: 0.002
+  betas: [0.9, 0.999]
+  weight_decay: 0.00001
+
+scheduler:
+  type: OneCycleLR
+  max_lr: 0.002
+  total_steps: null
+  pct_start: 0.05
+  div_factor: 25.0
+  final_div_factor: 1000.0
+
+augmentation:
+  overlap_ratio: 0.67
+  weak_affine_prob: 0.5
+  weak_scale: [0.3, 0.3, 0.3]
+  weak_rotate: [30, 30, 30]
+  weak_translate: [0.0, 0.0, 0.0]
+  weak_shear: [0.0, 0.0, 0.0]
+  weak_brightness_range: [0.9, 1.1]
+  weak_brightness_additive_std: 0.1
+  weak_gamma_range: [0.8, 1.2]
+  weak_contrast_range: [0.8, 1.2]
+  weak_blur_range: [0.8, 1.2]
+  weak_gaussian_noise_std: 0.02
+  weak_aug_prob: 0.2
+  strong_affine_prob: 0.8
+  strong_scale: [0.3, 0.3, 0.3]
+  strong_rotate: [30, 30, 30]
+  strong_translate: [0.0, 0.0, 0.0]
+  strong_shear: [0.1, 0.1, 0.1]
+  strong_brightness_range: [0.8, 1.3]
+  strong_brightness_additive_std: 0.15
+  strong_gamma_range: [0.8, 1.3]
+  strong_contrast_range: [0.8, 1.3]
+  strong_blur_range: [0.7, 1.5]
+  strong_gaussian_noise_std: 0.04
+  strong_aug_prob: 0.2
+
+loss:
+  dice:
+    type: BinaryDiceLoss
+    weight: 1.0
+  bce:
+    type: BinaryCrossEntropyLoss
+    weight: 1.0
+
+amp:
+  enabled: true
+  dtype: bfloat16
+
+ema:
+  enabled: true
+  decay: 0.99
+
+compile:
+  enabled: false
+  mode: default
+  dynamic: true
+
+evaluation:
+  # Set calculate_surface_metrics to true to report ASD and HD95 during online
+  # in-context evaluation. It is disabled by default because surface metrics
+  # are much slower than Dice-only validation.
+  # calculate_surface_metrics: true
+  sliding_window: true
+  window_size: [128, 128, 128]
+  overlap: 0.5
+
+distributed:
+  backend: nccl
+  master_addr: localhost
+  master_port: 29521

@@ -1,0 +1,2 @@
+"""CoFiDA package."""
+

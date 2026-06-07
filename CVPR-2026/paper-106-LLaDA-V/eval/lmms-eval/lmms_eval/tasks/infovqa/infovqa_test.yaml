@@ -1,0 +1,18 @@
+task: "infovqa_test"
+test_split: test
+output_type: generate_until
+process_results: !function utils.infovqa_test_process_results
+metric_list:
+  - metric: submission
+    aggregation: !function utils.infovqa_test_aggregate_results
+    higher_is_better: true
+lmms_eval_specific_kwargs:
+  default:
+    pre_prompt: ""
+    post_prompt: "\nAnswer the question using a single word or phrase."
+generation_kwargs:
+  max_new_tokens: 32
+  temperature: 0
+  do_sample: False
+include: _default_template_infovqa_yaml
+  

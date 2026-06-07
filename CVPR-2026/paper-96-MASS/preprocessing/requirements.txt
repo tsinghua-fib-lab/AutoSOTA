@@ -1,0 +1,50 @@
+# Tested preprocessing environment.
+# Python 3.10 is recommended. PyTorch wheels below target CUDA 12.1.
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# Core deep learning / SAM2
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
+torchaudio==2.5.1+cu121
+-e git+https://github.com/facebookresearch/sam2.git@2b90b9f5ceec907a1c18123530e92e794ad901a4#egg=SAM_2
+
+# SAM2 configuration/runtime dependencies
+antlr4-python3-runtime==4.9.3
+hydra-core==1.3.2
+iopath==0.1.10
+omegaconf==2.3.0
+yacs==0.1.8
+einops==0.8.1
+PyYAML==6.0.3
+
+# Medical image I/O and processing
+SimpleITK==2.4.1
+nibabel==5.3.2
+opencv-python==4.11.0.86
+scipy==1.15.2
+scikit-image==0.25.2
+Pillow==12.1.0
+imageio==2.37.0
+imagecodecs==2025.3.30
+
+# Scientific computing / storage
+numpy==1.26.4
+h5py>=3.9.0
+pandas==2.2.3
+scikit-learn==1.6.1
+matplotlib==3.10.1
+tqdm==4.67.1
+numexpr==2.10.2
+
+# Optional but used by AutoPET, TotalSegmentator dataset preprocessing, and
+# unlabeled ROI_MODE="body".
+TotalSegmentator==2.7.0
+acvl_utils==0.2.5
+batchgenerators==0.25.1
+batchgeneratorsv2==0.2.3
+connected-components-3d==3.23.0
+dicom2nifti==2.6.0
+dynamic_network_architectures==0.3.1
+nnunetv2==2.6.0
+pydicom==3.0.1
+python-gdcm==3.0.24.1

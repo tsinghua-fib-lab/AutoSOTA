@@ -1,0 +1,19 @@
+task: "docvqa_val"
+test_split: validation
+metric_list:
+  - metric: anls
+    aggregation: mean
+    higher_is_better: true
+process_results: !function utils.docvqa_process_results
+lmms_eval_specific_kwargs:
+  default:
+    pre_prompt: ""
+    post_prompt: "\nGive the reason and then write your final answer in the format 'Answer: X' where X is the answer to the question."
+  qwen_vl:
+    pre_prompt: ""
+    post_prompt: " Answer:"
+generation_kwargs:
+  max_new_tokens: 1024
+  temperature: 0
+  do_sample: False
+include: _default_template_docvqa_yaml

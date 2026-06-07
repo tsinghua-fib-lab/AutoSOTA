@@ -1,0 +1,107 @@
+# Downstream classification linear probing example using the MASS/Iris encoder.
+
+seed: 42
+
+run:
+  output_dir: runs/downstream/classification_linear_probe
+
+trainer:
+  type: classification
+
+classification:
+  num_classes: 2
+  multi_label: false
+
+  encoder:
+    type: iris
+    pretrained_checkpoint: null
+    use_ema_checkpoint: true
+    freeze: true
+
+  head:
+    pooling_type: attention
+    dropout: 0.1
+
+  encoder_lr: 0.00001
+  head_lr: 0.0001
+
+model:
+  type: iris
+  in_ch: 1
+  channels: [32, 64, 128, 256, 512]
+  scale: [2, 2, 2, 2]
+  kernel_size: [3, 3, 3, 3, 3]
+  block: BasicBlock
+  num_block: [2, 2, 2, 2]
+  pool: true
+  norm: in
+  tn: 73
+  num_prior_stage: 3
+  ema_moment: 0.99
+
+data:
+  train:
+    data_root: ./data/classification_data
+    datasets: [example_classification]
+    mode: train
+    training_size: [96, 128, 192]
+    num_classes: 2
+    multi_label: false
+    label_csv_name: labels.csv
+    image_extension: .npy
+    verify_images: true
+    class_weights: true
+    aug_device: cpu
+
+  val:
+    data_root: ./data/classification_data
+    datasets: [example_classification]
+    mode: test
+    training_size: [96, 128, 192]
+    num_classes: 2
+    multi_label: false
+    label_csv_name: labels.csv
+    image_extension: .npy
+    verify_images: true
+    aug_device: cpu
+
+  loader:
+    batch_size: 8
+    num_workers: 8
+    pin_memory: true
+
+epochs: 100
+start_epoch: 0
+training_size: [96, 128, 192]
+
+optimizer:
+  type: AdamW
+  weight_decay: 0.0001
+
+scheduler:
+  type: CosineAnnealingLR
+  T_max: 100
+  eta_min: 0.000001
+
+augmentation:
+  affine_prob: 0.4
+  scale: [0.2, 0.2, 0.2]
+  rotate: [15, 15, 15]
+  translate: [0, 0, 0]
+  shear: [0.0, 0.0, 0.0]
+  aug_prob: 0.2
+  brightness_range: [0.9, 1.1]
+  brightness_additive_std: 0.05
+  gamma_range: [0.9, 1.1]
+  contrast_range: [0.9, 1.1]
+  blur_range: [0.9, 1.1]
+  gaussian_noise_std: 0.02
+
+amp:
+  enabled: true
+  dtype: bfloat16
+
+distributed:
+  backend: nccl
+  master_addr: localhost
+  master_port: 29524

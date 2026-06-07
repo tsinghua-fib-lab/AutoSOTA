@@ -1,0 +1,114 @@
+{
+  "results": {
+    "mmmu_val": {
+      "alias": "mmmu_val",
+      "mmmu_acc,none": 0.48667,
+      "mmmu_acc_stderr,none": "N/A",
+      "submission,none": [],
+      "submission_stderr,none": []
+    }
+  },
+  "group_subtasks": {
+    "mmmu_val": []
+  },
+  "configs": {
+    "mmmu_val": {
+      "task": "mmmu_val",
+      "dataset_path": "lmms-lab/MMMU",
+      "test_split": "validation",
+      "full_docs": false,
+      "process_results_use_image": false,
+      "doc_to_visual": "<function mmmu_doc_to_visual at 0x7f354eb74310>",
+      "doc_to_text": "<function mmmu_doc_to_text at 0x7f354eb74f70>",
+      "doc_to_target": "answer",
+      "process_results": "<function mmmu_process_results at 0x7f354eb75d80>",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "mmmu_acc",
+          "aggregation": "<function mmmu_aggregate_results at 0x7f354eb76cb0>",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "max_new_tokens": 16,
+        "until": [
+          "\n\n"
+        ],
+        "temperature": 0,
+        "cfg": 0,
+        "remasking": "low_confidence",
+        "gen_length": 2,
+        "block_length": 2,
+        "gen_steps": 2,
+        "think_mode": "no_think"
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 0.0,
+        "interleaved_format": false
+      }
+    }
+  },
+  "versions": {
+    "mmmu_val": 0.0
+  },
+  "n-shot": {
+    "mmmu_val": 0
+  },
+  "higher_is_better": {
+    "mmmu_val": {
+      "mmmu_acc": true
+    }
+  },
+  "n-samples": {
+    "mmmu_val": {
+      "original": 900,
+      "effective": 900
+    }
+  },
+  "config": {
+    "model": "llava_onevision_llada",
+    "model_args": "pretrained=/root/.cache/huggingface/hub/models--GSAI-ML--LLaDA-V/snapshots/main/,conv_template=llava_llada,model_name=llava_llada",
+    "batch_size": "1",
+    "batch_sizes": [],
+    "device": null,
+    "use_cache": null,
+    "limit": null,
+    "bootstrap_iters": 100000,
+    "gen_kwargs": {
+      "temperature": 0,
+      "cfg": 0,
+      "remasking": "low_confidence",
+      "gen_length": 2,
+      "block_length": 2,
+      "gen_steps": 2,
+      "think_mode": "no_think"
+    },
+    "random_seed": 0,
+    "numpy_seed": 1234,
+    "torch_seed": 1234,
+    "fewshot_seed": 1234
+  },
+  "git_hash": null,
+  "date": "20260602_023034",
+  "task_hashes": {
+    "mmmu_val": "aa39ba588ca21db4256757f9c805ced05f4df0748d4ae0f88a6435acbf613bfd"
+  },
+  "model_source": "llava_onevision_llada",
+  "model_name": "/root/.cache/huggingface/hub/models--GSAI-ML--LLaDA-V/snapshots/main/",
+  "model_name_sanitized": "main__",
+  "system_instruction": null,
+  "system_instruction_sha": null,
+  "fewshot_as_multiturn": false,
+  "chat_template": null,
+  "chat_template_sha": null,
+  "start_time": 10001644.010135472,
+  "end_time": 10004137.33869306,
+  "total_evaluation_time_seconds": "2493.32855758816"
+}
