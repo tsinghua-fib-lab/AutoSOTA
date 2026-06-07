@@ -333,7 +333,7 @@ class ReasonModelAPI:
 
         response = dashscope.MultiModalConversation.call(
             #若没有配置环境变量， 请用百炼API Key将下行替换为： api_key ="sk-xxx"
-            api_key = 'sk-e56763764b9c493f948f45d2862d49ef',
+            api_key = '<REDACTED:OPENAI_KEY>',
             model = 'qwen-vl-plus',
             messages = messages,
             vl_high_resolution_images=True
