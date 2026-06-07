@@ -1,0 +1,64 @@
+{
+    "seed": 2023,
+
+    "dataset": {
+        "default": {
+            "dataset_name": "coco2014",
+            "batch_size": 1024
+        },
+        "train": {
+            "role": "train"
+        },
+        "val": {
+            "role": "val"
+        },
+        "test": {
+            "role": "test"
+        }
+    },
+
+    "predictor": {
+        "type": "ar",
+        "num_samples_to_infer": 150,
+        "metric_to_infer": "f1",
+        "temperature": 1,
+        "net":{
+            "type": "mlp",
+            "head": "ar",
+            "n_features": 1000,
+            "n_classes": 80,
+            "hidden_size_per_layer": [512, 512],
+            "dropout_rate": 0.3,
+            "dag_type": "ar"
+        }
+    },
+
+    "trainer": {
+        "save_dir": "./output/ar/coco2014",
+        "pivot_metric": "neg_loss",
+        "device": "cpu",
+        "n_epochs": 200,
+        "val_period": 10,
+        "split_val": true,
+        "early_stop_patience": 20,
+        
+        "optimizer": {
+            "type": "Adam",
+            "args":{
+                "lr": 0.001
+            }
+        },
+        "lr_scheduler": {
+            "type": "CosineAnnealingLR",
+            "args": {
+
+            }
+        },
+        "metrics": [
+            "hamming_accuracy",
+            "hamming_loss",
+            "instance_f1",
+            "subset_acc"
+        ]
+    }
+}

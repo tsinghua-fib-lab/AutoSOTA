@@ -1,0 +1,45 @@
+# Usage:
+#   accelerate launch train.py --config experiments/train/dfm_sit_xl_512.yaml
+#   accelerate launch train.py --config experiments/train/dfm_sit_xl_512.yaml --resume-step -1
+
+# ── experiment ──
+exp_name: dfm-sit-xl-2-512px
+output_dir: exps
+report_to: wandb
+
+# ── model ──
+model: DFM-SiT-XL/2
+
+# ── dataset ──
+data_dir: /path/to/imagenet_512/train
+s3_cache_dir: /lssd/imagenet_512_cache/
+resolution: 512
+batch_size: 256
+
+# ── precision ──
+allow_tf32: true
+mixed_precision: bf16
+
+# ── optimization ──
+learning_rate: 1.0e-4
+max_train_steps: 400000
+checkpointing_steps: 50000
+sampling_steps: 10000
+
+# ── loss ──
+path_type: linear
+prediction: v
+weighting: lognormal
+
+
+enc_type: none
+proj_coeff: 0.0
+
+# ── DFM-specific ──
+stages_count: 2
+stage_weights: [0.9, 0.1]
+num_steps_per_scale: [40, 10]
+stage_sampling_thresholds: [0.1]
+
+seed: 0
+resume_step: -1

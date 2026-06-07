@@ -1,0 +1,26 @@
+name: PromptStereo
+train_iters: 16
+valid_iters: 32
+instance:
+  _target_: model.promptstereo.PromptStereo
+  cfg:
+    feat_dim: [64, 128, 192, 256]
+    stem_dim: [32, 64, 128, 192, 256]
+    gwc_max_disp: 192
+    gwc_group: 8
+    corr_level: 2
+    corr_radius: 4
+    n_downsample: 2
+    pretrained_model:
+      name: DepthAnythingV2
+      checkpoint: checkpoint/depth_anything_v2_vitl.pth
+      features: 256
+      out_channels: [256, 512, 1024, 1024]
+      use_bn: False
+      instance:
+        _target_: model.depth_anything_v2.DepthAnythingV2
+        encoder: vitl
+        features: ${..features}
+        out_channels: ${..out_channels}
+        use_bn: False
+        use_clstoken: False

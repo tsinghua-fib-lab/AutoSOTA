@@ -1,0 +1,50 @@
+{
+    "backbone_path": "google/paligemma2-3b-mix-448",
+    "processor_path": "google/paligemma2-3b-mix-448",
+    "image_size": 448,
+    "seed": 42,
+    "batch_size": 8,
+    "total_batch_size": 256,
+    "use_bf16": true,
+    "output_root": "./checkpoints/",
+    "task_name": "hispatial_paligemma2_3b",
+    "learning_rate": 2e-5,
+    "min_lr_scale": 1e-2,
+    "lr_scheduler_type": "constant",
+    "weight_decay": 0.1,
+    "resume": true,
+    "model_load_path": null,
+    "warmup_ratio": 0.01,
+    "save_steps": 8000,
+    "wandb_project": "hispatial",
+    "wandb_entity": "YOUR_WANDB_ENTITY",
+    "train_dataset": {
+        "vqa": true,
+        "general": true,
+        "vqa_type": "mix",
+        "num_workers": 8,
+        "prefetch_factor": 8,
+        "coyo_dir": "/path/to/coyo_shards/",
+        "o365_dir": "/path/to/objects365_shards/",
+        "general_data_dir": "/path/to/general_vqa_shards/",
+        "ca1m_data_dir": "/path/to/ca1m_shards/"
+    },
+    "trainer": {
+        "accelerator": "gpu",
+        "strategy": "fsdp_paligemma2",
+        "enable_gradient_checkpointing": true,
+        "enable_mixed_precision_training": true,
+        "gradient_clip_val": 1.0,
+        "log_every_n_steps": 10,
+        "max_epochs": 50,
+        "check_val_every_n_epoch": null,
+        "max_steps": 100000,
+        "reduce_in_full_precision": false
+    },
+    "mix_weights": {
+        "coyo_vqa": 0.35,
+        "o365_vqa": 0.33,
+        "general": 0.12,
+        "ca1m": 0.20
+    }
+}

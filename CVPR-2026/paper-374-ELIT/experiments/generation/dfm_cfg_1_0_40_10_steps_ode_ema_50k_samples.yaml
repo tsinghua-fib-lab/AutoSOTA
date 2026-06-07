@@ -1,0 +1,26 @@
+# ─────────────────────────────────────────────────────────────────
+# Eval config: DFM-SiT-B/2  |  256×256
+# ─────────────────────────────────────────────────────────────────
+# Usage:
+#   torchrun --nproc_per_node=8 generate.py \
+#       --train-config experiments/train/dfm_sit_xl_512.yaml \
+#       --eval-config  experiments/generation/dfm_sit_b_256.yaml \
+#       --ckpt exps/dfm-sit-b-2-256px/checkpoints/0400000.pt
+
+# ── sampling ──
+mode: ode
+cfg_scale: 1.0
+guidance_low: 0.0
+guidance_high: 1.0
+path_type: linear
+heun: false
+
+# ── DFM multiscale ──
+num_steps_per_scale: [40, 10]
+stage_sampling_thresholds: [0.1]
+
+# ── output ──
+num_fid_samples: 50000
+per_proc_batch_size: 16
+vae: ema
+global_seed: 0

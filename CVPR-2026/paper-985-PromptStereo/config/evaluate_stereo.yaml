@@ -1,0 +1,108 @@
+defaults:
+ - model: promptstereo
+ - _self_
+
+gpus: ${oc.env:CUDA_VISIBLE_DEVICES, '0,1,2,3'}
+checkpoint: checkpoint/unlimited_192.safetensors
+max_disp: ${model.instance.cfg.gwc_max_disp}
+
+accelerator:
+  _target_: accelerate.Accelerator
+  mixed_precision: bf16
+  dataloader_config:
+    _target_: accelerate.DataLoaderConfiguration
+    split_batches: True
+
+dataset:
+  KITTI2012:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.KITTI
+      root: /data/datasets/kitti
+      year: '2012'
+      split: training
+      mask: all
+  KITTI2015:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.KITTI
+      root: /data/datasets/kitti
+      year: '2015'
+      split: training
+      mask: all
+  Middlebury:
+    outlier: 2
+    instance:
+      _target_: dataset.stereo_dataset.Middlebury
+      root: /data/datasets/middlebury
+      year: MiddEval3
+      split: training
+      resolution: H
+      mask: noc
+  Middlebury2021:
+    outlier: 2
+    instance:
+      _target_: dataset.stereo_dataset.Middlebury
+      root: /data/datasets/middlebury
+      year: '2021'
+      split: null
+      resolution: null
+      mask: noc
+  ETH3D:
+    outlier: 1
+    instance:
+      _target_: dataset.stereo_dataset.ETH3D
+      root: /data/datasets/eth3d
+      split: training
+      mask: noc
+  DrivingStereoCloudy:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.DrivingStereo
+      root: /data/datasets/drivingstereo
+      split: cloudy
+      mask: null
+      resolution: H
+  DrivingStereoFoggy:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.DrivingStereo
+      root: /data/datasets/drivingstereo
+      split: foggy
+      mask: null
+      resolution: H
+  DrivingStereoRainy:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.DrivingStereo
+      root: /data/datasets/drivingstereo
+      split: rainy
+      mask: null
+      resolution: H
+  DrivingStereoSunny:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.DrivingStereo
+      root: /data/datasets/drivingstereo
+      split: sunny
+      mask: null
+      resolution: H
+  BoosterQ:
+    outlier: 2
+    instance:
+      _target_: dataset.stereo_dataset.Booster
+      root: /data/datasets/booster_q
+      split: train
+      light: balanced
+      mask: null
+
+dataloader:
+  split: True
+  batch_size_per_gpu: 1
+  total_batch_size: null
+  param:
+    batch_size: null
+    num_workers: null
+    pin_memory: True
+    shuffle: False
+    drop_last: False

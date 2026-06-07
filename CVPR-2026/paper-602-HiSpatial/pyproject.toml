@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hispatial"
+version = "1.0.0"
+description = "HiSpatial: Taming Hierarchical 3D Spatial Understanding in Vision-Language Models"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Microsoft Research"},
+]
+dependencies = [
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "transformers==4.50.0",
+    "pillow",
+    "numpy<2",
+    "opencv-python-headless",
+    "huggingface_hub",
+    "tokenizers>=0.21",
+    "accelerate",
+    "tqdm>=4.65.0",
+    "einops",
+    "timm",
+    "protobuf",
+    "utils3d @ git+https://github.com/EasternJournalist/utils3d@c5daf6f6c244d251f252102d09e9b7bcef791a38",
+]
+
+[project.optional-dependencies]
+train = [
+    "wandb>=0.19.0",
+    "webdataset",
+    "rich",
+    "tensorboard>=2.13.0",
+    "tensorboardX>=2.6.2",
+    "jsonlines",
+    "imagehash",
+    "OpenEXR",
+    "Imath",
+    "scikit-image",
+]
+eval = [
+    "datasets>=2.12.0",
+    "pycocotools",
+]
+depth = [
+    "moge @ git+https://github.com/microsoft/MoGe.git",
+]
+dev = [
+    "pytest",
+    "ruff",
+]
+all = [
+    "hispatial[train,eval,depth,dev]",
+]
+
+[project.urls]
+Homepage = "https://github.com/microsoft/HiSpatial"
+Paper = "https://arxiv.org/abs/2603.25411"
+
+[tool.setuptools.packages.find]
+include = ["hispatial*", "prismatic*"]

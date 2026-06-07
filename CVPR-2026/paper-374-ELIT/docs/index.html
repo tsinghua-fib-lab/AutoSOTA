@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELIT — Elastic Latent Interface Transformer</title>
+  <meta name="description" content="Project page for 'One Model, Many Budgets: Elastic Latent Interfaces for Diffusion Transformers' (CVPR 2026).">
+  <link rel="stylesheet" href="./static/css/index.css" type="text/css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="venue-badge">CVPR 2026</div>
+      <h1 class="paper-title">
+        One Model, Many Budgets:<br>
+        <span class="title-accent">Elastic Latent Interfaces</span> for Diffusion Transformers
+      </h1>
+
+      <!-- Authors -->
+      <div class="authors">
+        <span class="author"><a href="https://moayedha.com/" target="_blank">Moayed Haji-Ali</a><sup>1,2,†</sup></span>
+        <span class="author"><a href="https://www.willimenapace.com" target="_blank">Willi Menapace</a><sup>2</sup></span>
+        <span class="author"><a href="https://skor.sh" target="_blank">Ivan Skorokhodov</a><sup>2</sup></span>
+        <span class="author"><a href="https://dogyunpark.github.io/" target="_blank">Dogyun Park</a><sup>2,†</sup></span>
+        <span class="author"><a href="https://anilkagak2.github.io/" target="_blank">Anil Kag</a><sup>2</sup></span>
+        <span class="author"><a href="#" target="_blank">Michael Vasilkovsky</a><sup>2</sup></span>
+        <span class="author"><a href="https://stulyakov.com" target="_blank">Sergey Tulyakov</a><sup>2</sup></span>
+        <span class="author"><a href="https://vislang.ai/" target="_blank">Vicente Ordonez</a><sup>1</sup></span>
+        <span class="author"><a href="https://aliaksandrsiarohin.github.io/aliaksandr-siarohin-website" target="_blank">Aliaksandr Siarohin</a><sup>2</sup></span>
+      </div>
+
+      <div class="affiliations">
+        <span class="affiliation"><sup>1</sup> Rice University</span>
+        <span class="affiliation"><sup>2</sup> Snap Inc.</span>
+  </div>
+      <div class="author-note">† Work partially done during an internship at Snap Inc.</div>
+
+      <!-- Logos -->
+      <div class="affiliation-logos">
+        <img src="./assets/logos/rice.svg" alt="Rice University" class="logo-rice">
+        <img src="./assets/logos/snap.png" alt="Snap Inc." class="logo-snap">
+  </div>
+
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <a href="https://arxiv.org/abs/2603.12245" class="btn btn-primary" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Paper
+        </a>
+        <a href="https://arxiv.org/abs/2603.12245" class="btn btn-outline" target="_blank">
+          <img src="./assets/icons/arxiv-logo.png" alt="arXiv" style="height:18px; vertical-align: middle; margin-right: 4px; filter: brightness(0) invert(1);">
+          
+        </a>
+        <a href="https://github.com/snap-research/elit" class="btn btn-outline" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          Code
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TL;DR ==================== -->
+  <section class="container">
+    <div class="tldr-box">
+      <div class="tldr-label">TL;DR</div>
+      <p>
+        We found that DiTs waste substantial compute by allocating it uniformly across pixels, despite large variation in regional difficulty. <strong>ELIT</strong> addresses this by introducing a variable-length set of <em>latent tokens</em> and two lightweight cross-attention layers (Read & Write) that concentrate computation on the most important input regions, delivering up to <strong>53% FID</strong> and <strong>58% FDD improvements</strong> on ImageNet-1K at 512px. At inference time, the number of latent tokens becomes a user-controlled knob, providing a smooth <strong>quality–FLOPs trade-off</strong> while enabling <strong>~33% cheaper guidance</strong> out of the box.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== TEASER ==================== -->
+  <section class="container">
+    <div class="teaser-section">
+      <img src="./assets/figures/teaser/teaser.png" alt="ELIT Teaser — Flexible compute allocation" class="teaser-image">
+      <p class="caption">
+        <strong>Flexible compute allocation with ELIT.</strong> Starting from a vanilla DiT, we add a variable-length set of latent tokens — the <em>latent interface</em> — and two lightweight cross-attention layers, Read and Write. At inference, the number of latent tokens is a user-controlled knob that yields a smooth quality–FLOPs trade-off across DiT, U-ViT, HDiT, and MM-DiT backbones.
+      </p>
+  </div>
+  </section>
+
+  <!-- ==================== ABSTRACT ==================== -->
+  <section class="container section-block" id="abstract">
+    <h2 class="section-title"><span class="section-icon">📄</span> Abstract</h2>
+    <div class="abstract-text">
+      <p>
+        Diffusion transformers (DiTs) achieve high generative quality but lock FLOPs to image resolution, limiting principled latency-quality trade-offs, and allocate computation uniformly across input spatial tokens, wasting resource allocation to unimportant regions. We introduce <strong>Elastic Latent Interface Transformer (ELIT)</strong>, a drop-in, DiT-compatible mechanism that decouples input image size from compute. Our approach inserts a <em>latent interface</em>, a learnable variable-length token sequence on which standard transformer blocks can operate. Lightweight Read and Write cross-attention layers move information between spatial tokens and latents and prioritize important input regions. By training with random dropping of tail latents, ELIT learns to produce importance-ordered representations with earlier latents capturing global structure while later ones contain information to refine details. At inference, the number of latents can be dynamically adjusted to match compute constraints. ELIT is deliberately minimal, adding two cross-attention layers while leaving the rectified flow objective and the DiT stack unchanged. Across datasets and architectures (DiT, U-ViT, HDiT, MM-DiT), ELIT delivers consistent gains. On ImageNet-1K 512px, ELIT delivers an average gain of <strong>35.3%</strong> and <strong>39.6%</strong> in FID and FDD scores.
+      </p>
+  </div>
+  </section>
+
+  <!-- ==================== KEY CONTRIBUTIONS ==================== -->
+  <section class="container section-block" id="contributions">
+    <h2 class="section-title"><span class="section-icon">🎯</span> Key Contributions</h2>
+    <div class="contributions-grid">
+      <div class="contribution-card">
+        <div class="card-icon">⚡</div>
+        <h3>Adaptive Computation</h3>
+        <p>Compute is concentrated where it matters — Read cross-attention learns to allocate more latent tokens to challenging image regions rather than spreading compute uniformly.</p>
+      </div>
+      <div class="contribution-card">
+        <div class="card-icon">🚀</div>
+        <h3>Faster <br> Convergence</h3>
+        <p>Thanks to the non-uniform adaptive compute allocation of ELIT latent tokens, ELIT consistently converges faster than the baseline.</p>
+      </div>
+      <div class="contribution-card">
+        <div class="card-icon">🎛️</div>
+        <h3>Variable Inference Budget</h3>
+        <p>A single set of weights enables a spectrum of latency-quality trade-offs by simply selecting the number of latent tokens at inference.</p>
+      </div>
+      <div class="contribution-card">
+        <div class="card-icon">🔌</div>
+        <h3>Drop-in Training</h3>
+        <p>Only two lightweight Read/Write layers are added, while keeping everything else unchanged, making ELIT compatible with standard DiT training pipelines. Demonstrated on DiT, U-ViT, HDiT, and MM-DiT.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MOTIVATION ==================== -->
+  <section class="container section-block" id="motivation">
+    <h2 class="section-title"><span class="section-icon">💡</span> Motivation</h2>
+
+    <p class="section-description">
+      Standard DiTs allocate computation <strong>uniformly</strong> across all spatial tokens regardless of content difficulty. In a synthetic experiment, we show that DiTs cannot reallocate compute from trivial regions to informative ones — even when given extra tokens. ELIT solves this by learning where to spend compute.
+    </p>
+
+    <div class="result-block">
+      <div class="result-image">
+        <img src="./assets/figures/synthetic_experiment/synthetic_experiment.png" alt="Synthetic experiment: DiT cannot reallocate compute">
+      </div>
+      <p class="caption">
+        <strong>Uniform compute in DiTs.</strong> <strong style="color: blue;">(Blue)</strong> DiT-B/2-Synth has 4× more tokens (zero-padded) but fails to improve, matching DiT-B/2 but underperforming DiT-B/1 at similar compute. <strong style="color: red;">(Red)</strong> ELIT-DiT-B/2-Synth repurposes compute from zeroed regions to enhance generation, matching DiT-B/1 quality.
+      </p>
+  </div>
+  </section>
+
+  <!-- ==================== METHOD ==================== -->
+  <section class="container section-block" id="method">
+    <h2 class="section-title"><span class="section-icon">🔬</span> Method</h2>
+
+    <p class="section-description">
+      ELIT introduces a minimal change to DiT-like architectures: a <strong>latent interface</strong> — a variable-length token sequence — coupled with lightweight <strong>Read</strong> and <strong>Write</strong> cross-attention layers. 
+    </p>
+
+    <!-- Architecture Toggle -->
+    <div class="architecture-viewer">
+      <div class="arch-tabs">
+        <button class="arch-tab active" onclick="showArch('core', event)">Architecture Overview</button>
+      </div>
+
+      <div class="arch-content">
+        <div class="arch-panel" id="panel-core" style="display:flex;">
+          <div class="arch-image">
+            <img src="./assets/figures/architecture/architecture.png" alt="ELIT Architecture Overview">
+          </div>
+          <div class="arch-description">
+            <h3>ELIT Architecture</h3>
+            <p>
+              We create a latent domain by instantiating a <strong>latent interface</strong> of <em>K</em> tokens. A lightweight <strong>Read</strong> cross-attention layer pulls information from spatial tokens into the latent interface, prioritizing harder regions. This forms a compact latent domain on which most transformer blocks operate. A <strong>Write</strong> cross-attention layer maps the latent updates back to the spatial grid. Grouped cross-attention partitions spatial tokens into <em>G</em> non-overlapping groups, reducing cost from O(NK) to O(NK/G). Additionally, we randomly drop tail latents during training, making the latent interface importance-ordered. At inference, the number of latents serves as a user-controlled compute knob.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LOOKING INSIDE ELIT ==================== -->
+  <section class="container section-block" id="inside-elit">
+    <h2 class="section-title"><span class="section-icon">🔍</span> Looking Inside ELIT</h2>
+
+    <p class="section-description">
+      How does the <strong>Read</strong> layer decide where to focus? And what does each latent token actually encode? Below we visualize ELIT's internals, revealing that the architecture learns meaningful spatial and importance structure — without any explicit supervision beyond the standard flow-matching loss.
+    </p>
+
+    <!-- Read Attention vs Loss -->
+    <div class="inside-card">
+      <div class="inside-card-header">
+        <span class="inside-badge">Read Attention</span>
+        <h3>Attention Follows Difficulty</h3>
+      </div>
+      <p>
+        The Read cross-attention layer pulls information from spatial tokens into the latent interface. Visualizing the <strong>aggregated Read attention</strong> (middle row) alongside the <strong>per-patch flow-matching loss</strong> (bottom row) reveals a striking pattern: latent tokens autonomously learn to attend most strongly to the spatial regions that contribute most to the loss — object boundaries, fine textures, and semantically complex areas. Easy background regions receive minimal attention, allowing the latent core to focus its compute budget where it matters most.
+      </p>
+      <div class="result-image">
+        <img src="./assets/figures/synthetic_experiment/attn_mask.png" alt="ELIT Read attention maps aligned with per-patch loss">
+      </div>
+      <p class="caption">
+        <strong>Top:</strong> Input images. <strong>Middle:</strong> Aggregated Read attention — brighter regions attract more latent tokens. <strong>Bottom:</strong> Per-patch flow-matching loss — higher-loss regions (object detail, boundaries) align with higher attention, confirming that ELIT concentrates compute on the most informative content.
+      </p>
+    </div>
+
+    <!-- Per-Token Importance -->
+    <div class="inside-card" style="margin-top: 40px;">
+      <div class="inside-card-header">
+        <span class="inside-badge">Token Importance</span>
+        <h3>Importance-Ordered Latent Representations</h3>
+      </div>
+      <p>
+        Thanks to tail-dropping during training, latent tokens form an <strong>importance-ordered</strong> sequence. We visualize individual token attention maps overlaid on the input. The <strong>first (most important) tokens</strong> attend broadly to global structure — capturing the background, subject, and key shapes. The <strong>last (least important) tokens</strong> attend to finer details — information that can be dropped at lower budgets with graceful quality degradation.
+      </p>
+      <div class="result-image">
+        <img src="./assets/figures/synthetic_experiment/per_tok_attn_map.jpg" alt="Per-token attention maps showing importance ordering">
+      </div>
+      <p class="caption">
+        <strong>Left:</strong> Input image. <strong>Center:</strong> First three latent tokens attend to the most salient regions (subject, global structure). <strong>Right:</strong> Last three latent tokens attend to residual detail and background. This ordering emerges naturally from tail-dropping training and enables smooth variable-budget inference.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ==================== ELASTIC INFERENCE ==================== -->
+  <section class="container section-block" id="elastic">
+    <h2 class="section-title"><span class="section-icon">🎛️</span> Elastic Inference Perks</h2>
+
+    <p class="section-description">
+      Beyond improved generation quality, ELIT's latent interface unlocks a range of practical benefits — from faster training to cheaper guidance — all from a <strong>single model</strong> with <strong>no extra training objectives</strong>.
+    </p>
+
+    <!-- Row 1: Convergence + Scalability -->
+    <div class="elastic-grid">
+      <div class="elastic-card">
+        <div class="perk-badge">🚀 Training</div>
+        <h3>Faster Convergence</h3>
+        <p>By concentrating compute on informative regions, ELIT reaches the same FDD as DiT in roughly <strong>4× fewer training steps</strong> at 512px. The adaptive latent interface accelerates learning across both resolutions.</p>
+        <div class="result-image">
+          <img src="./assets/figures/results/convergance.png" alt="ELIT converges ~4× faster than DiT">
+        </div>
+      </div>
+
+      <div class="elastic-card">
+        <div class="perk-badge">📈 Scaling</div>
+        <h3>Scalability</h3>
+        <p>ELIT adds only two lightweight cross-attention layers — minimal parameter overhead. Yet its improvements <strong>grow with model and resolution scale</strong>: FDD gains increases with larger models and resolutions, suggesting the ELIT is suitabel for large-scale high resolution generation.</p>
+        <div class="result-image">
+          <img src="./assets/figures/results/flops_vs_fid.png" alt="ELIT gains scale with model size">
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: TeaCache + Autoguidance -->
+    <div class="elastic-grid" style="margin-top: 20px;">
+      <div class="elastic-card">
+        <div class="perk-badge">🎛️ Flexibility</div>
+        <h3>Better Compute-Quality Tradeoff</h3>
+        <p>When targeting a specific FLOPs budget, ELIT's token-count knob provides a <strong>superior compute–quality trade-off</strong> compared to simply reducing the number of sampling steps. </p>
+        <div class="result-image">
+          <img src="./assets/figures/ablations/budget_vs_step.png" alt="ELIT provides better quality-FLOPs trade-off than step reduction">
+        </div>
+      </div>
+
+      <div class="elastic-card">
+        <div class="perk-badge">🎯 Guidance</div>
+        <h3>Free Autoguidance &amp; Cheap CFG</h3>
+        <p>Variable budgets give ELIT a <strong>built-in weaker model</strong>. Using a low-budget forward pass as the guidance term yields AutoGuidance (AG) for free. Combining this with class dropping produces <strong>Cheap CFG (CCFG)</strong>, which improves quality across all metrics while cutting guidance cost by <strong>~33%</strong>.</p>
+        <div class="result-image">
+          <img src="./assets/figures/ablations/cfg_plot.png" alt="CCFG improves quality while reducing FLOPs by ~33%">
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Budget vs Steps — centered -->
+    <div class="elastic-grid elastic-grid-centered" style="margin-top: 20px;">
+      <div class="elastic-card elastic-card-wide">
+        <div class="perk-badge">⚡ Acceleration</div>
+        <h3>TeaCache Compatible</h3>
+        <p>ELIT is <strong>fully orthogonal</strong> to training-free acceleration. When combined with TeaCache — which caches and reuses network outputs across similar timesteps — ELIT attains comparable speedup gains as the baseline, stacking both sources of efficiency.</p>
+        <div class="result-image">
+          <img src="./assets/figures/ablations/teacache.png" alt="TeaCache provides orthogonal speedups on top of ELIT">
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== RESULTS ==================== -->
+  <section class="container section-block" id="results">
+    <h2 class="section-title"><span class="section-icon">📊</span> Results</h2>
+
+    <!-- Convergence -->
+    <!-- <div class="result-block">
+      <h3>Training Convergence</h3>
+      <p>
+        ELIT consistently converges <strong>faster</strong> than the DiT baseline across both 256px and 512px resolutions, achieving better FID and FDD throughout training.
+      </p>
+      <div class="result-image">
+        <img src="./assets/figures/results/convergance.png" alt="Convergence comparison — ELIT vs DiT">
+          </div>
+    </div> -->
+
+    <!-- Main Quantitative Table -->
+    <div class="result-block">
+      <h3>Quantitative Comparison on ImageNet-1K</h3>
+      <p>
+        We evaluate FID↓, FDD↓, and IS↑ without classifier-free guidance (–G). TFLOPs (TF) indicate single training iteration TFLOPs. Superscripts show percentage improvement of ELIT MultiBudget (MB) relative to the baseline.
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Model</th>
+              <th colspan="4">ImageNet 256×256</th>
+              <th colspan="4">ImageNet 512×512</th>
+        </tr>
+        <tr>
+              <th>FID↓</th>
+              <th>FDD↓</th>
+              <th>IS↑</th>
+              <th>TF</th>
+              <th>FID↓</th>
+              <th>FDD↓</th>
+              <th>IS↑</th>
+              <th>TF</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- DiT Block -->
+            <tr class="baseline-row">
+              <td><strong>DiT-XL</strong></td>
+              <td>13.0</td>
+              <td>346.3</td>
+              <td>66.2</td>
+              <td>182</td>
+              <td>18.8</td>
+              <td>339.2</td>
+              <td>53.0</td>
+              <td>806</td>
+            </tr>
+            <tr class="ours-row">
+              <td>↳ ELIT</td>
+              <td>8.2</td>
+              <td>200.2</td>
+              <td>93.0</td>
+              <td>188</td>
+              <td>11.1</td>
+              <td>175.6</td>
+              <td>80.0</td>
+              <td>831</td>
+            </tr>
+            <tr class="ours-row ours-mb">
+              <td>↳ ELIT-MB</td>
+              <td>7.8 <span class="improv">−40%</span></td>
+              <td>203.7 <span class="improv">−41%</span></td>
+              <td>99.0 <span class="improv">+50%</span></td>
+              <td>190</td>
+              <td>10.1 <span class="improv">−46%</span></td>
+              <td>164.1 <span class="improv">−52%</span></td>
+              <td>88.8 <span class="improv">+68%</span></td>
+              <td>804</td>
+            </tr>
+            <tr class="separator-row"><td colspan="9"></td></tr>
+
+            <!-- UViT Block -->
+            <tr class="baseline-row">
+              <td><strong>UViT-XL</strong></td>
+              <td>8.3</td>
+              <td>220.2</td>
+              <td>84.4</td>
+              <td>196</td>
+              <td>11.6</td>
+              <td>202.7</td>
+              <td>72.5</td>
+              <td>861</td>
+            </tr>
+            <tr class="ours-row">
+              <td>↳ ELIT</td>
+              <td>7.5</td>
+              <td>203.8</td>
+              <td>95.2</td>
+              <td>202</td>
+              <td>8.9</td>
+              <td>155.3</td>
+              <td>85.8</td>
+              <td>886</td>
+            </tr>
+            <tr class="ours-row ours-mb">
+              <td>↳ ELIT-MB</td>
+              <td>7.1 <span class="improv">−14%</span></td>
+              <td>203.2 <span class="improv">−8%</span></td>
+              <td>100.3 <span class="improv">+19%</span></td>
+              <td>204</td>
+              <td>7.7 <span class="improv">−34%</span></td>
+              <td>135.8 <span class="improv">−33%</span></td>
+              <td>98.0 <span class="improv">+35%</span></td>
+              <td>858</td>
+            </tr>
+            <tr class="separator-row"><td colspan="9"></td></tr>
+
+            <!-- HDiT Block -->
+            <tr class="baseline-row">
+              <td><strong>HDiT-XL</strong></td>
+              <td>12.8</td>
+              <td>361.6</td>
+              <td>68.7</td>
+              <td>182</td>
+              <td>13.0</td>
+              <td>260.3</td>
+              <td>69.4</td>
+              <td>776</td>
+            </tr>
+            <tr class="ours-row">
+              <td>↳ ELIT</td>
+              <td>9.4</td>
+              <td>272.2</td>
+              <td>89.5</td>
+              <td>188</td>
+              <td>10.1</td>
+              <td>164.1</td>
+              <td>88.8</td>
+              <td>801</td>
+            </tr>
+            <tr class="ours-row ours-mb">
+              <td>↳ ELIT-MB</td>
+              <td>9.4 <span class="improv">−27%</span></td>
+              <td>271.8 <span class="improv">−25%</span></td>
+              <td>92.3 <span class="improv">+34%</span></td>
+              <td>191</td>
+              <td>9.6 <span class="improv">−26%</span></td>
+              <td>171.2 <span class="improv">−34%</span></td>
+              <td>94.7 <span class="improv">+36%</span></td>
+              <td>791</td>
+        </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">All metrics reported without guidance (–G). ELIT delivers consistent improvements across all architectures with gains becoming more pronounced at 512px where pixel redundancy is greater.</p>
+    </div>
+  </section>
+
+  <!-- ==================== QUALITATIVE ==================== -->
+  <section class="container section-block" id="qualitative">
+    <h2 class="section-title"><span class="section-icon">🖼️</span> Qualitative Results</h2>
+
+    <!-- ImageNet Main Qualitatives -->
+    <div class="result-block">
+      <h3>Class-Conditional Image Generation (ImageNet-1K 512px)</h3>
+      <p>ELIT produces images with better structure, fine details, and class fidelity compared to the DiT baseline at the same compute budget.</p>
+      <div class="result-image">
+        <img src="./assets/figures/imagenet_512/main_qualitatives.jpg" alt="ELIT vs DiT qualitative comparison on ImageNet-1K 512px">
+      </div>
+    </div>
+
+    <!-- Variable Budget Qualitatives
+    <div class="result-block">
+      <h3>Variable Budget Inference</h3>
+      <p>A single ELIT model generates images at different quality-compute operating points by adjusting the number of latent tokens. Earlier tokens capture global structure; later tokens refine details.</p>
+      <div class="result-image">
+        <img src="./assets/figures/variable_budgets/variable_budgets_web.jpg" alt="ELIT variable budget inference qualitatives">
+      </div>
+    </div> -->
+
+    <!-- Large-Scale Qwen -->
+    <div class="result-block">
+      <h3>Large-Scale Text-to-Image: ELIT-Qwen-Image (20B MM-DiT)</h3>
+      <p>
+        ELIT applied on top of <strong>Qwen-Image</strong> (20B MM-DiT) enables multi-budget inference at scale.
+        ELIT-Qwen-Image cuts sampling FLOPs by up to <strong>63%</strong> (~2.7× speedup) while gracefully trading off speed for quality.
+        On DPG-Bench, average score gracefully degrades from <strong>90.45</strong> (full budget) to <strong>88.02</strong> (12.5% tokens).
+      </p>
+      <div class="result-image">
+        <img src="./assets/figures/qwen/qwen_qualitatives_web.png" alt="ELIT-Qwen-Image qualitatives at various budgets">
+      </div>
+
+      <!-- DPG-Bench table -->
+      <div class="results-table-wrapper" style="margin-top: 24px;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Tokens</th>
+              <th>FLOPs</th>
+              <th>Entity</th>
+              <th>Relation</th>
+              <th>Attribute</th>
+              <th>Global</th>
+              <th>Avg.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="baseline-row">
+              <td>Qwen-Image</td>
+              <td>4096</td>
+              <td>1×</td>
+              <td>90.51</td>
+              <td>92.21</td>
+              <td>91.03</td>
+              <td>91.70</td>
+              <td>91.27</td>
+            </tr>
+            <tr class="ours-row">
+              <td>ELIT 100%</td>
+              <td>4096</td>
+              <td>0.69×</td>
+              <td>90.30</td>
+              <td>92.18</td>
+              <td>88.97</td>
+              <td>89.18</td>
+              <td>90.45</td>
+      </tr>
+            <tr class="ours-row">
+              <td>ELIT 50%</td>
+              <td>2048</td>
+              <td>0.49×</td>
+              <td>90.15</td>
+              <td>89.94</td>
+              <td>89.05</td>
+              <td>89.06</td>
+              <td>89.81</td>
+      </tr>
+            <tr class="ours-row">
+              <td>ELIT 25%</td>
+              <td>1024</td>
+              <td>0.41×</td>
+              <td>89.31</td>
+              <td>91.87</td>
+              <td>89.71</td>
+              <td>84.79</td>
+              <td>89.79</td>
+      </tr>
+            <tr class="ours-row">
+              <td>ELIT 12.5%</td>
+              <td>512</td>
+              <td>0.37×</td>
+              <td>91.20</td>
+              <td>90.35</td>
+              <td>88.77</td>
+              <td>79.84</td>
+              <td>88.02</td>
+      </tr>
+          </tbody>
+    </table>
+      </div>
+      <p class="table-note">ELIT-Qwen-Image evaluation on DPG-Bench. CCFG guidance enables ~33% FLOPs savings vs standard CFG at comparable quality.</p>
+    </div>
+
+  </section>
+
+ 
+  <!-- ==================== CITATION ==================== -->
+  <section class="container section-block" id="citation">
+    <h2 class="section-title"><span class="section-icon">📝</span> Citation</h2>
+    <p>If you find this work useful in your research, please consider citing:</p>
+    <div class="bibtex-container">
+      <button class="copy-btn" onclick="copyBibtex()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+      <pre id="bibtex-text">@article{elit,
+        title={One Model, Many Budgets: Elastic Latent Interfaces for Diffusion Transformers},
+        author={Haji-Ali, Moayed and Menapace, Willi and Skorokhodov, Ivan and Park, Dogyun and Kag, Anil and Vasilkovsky, Michael and Tulyakov, Sergey and Ordonez, Vicente and Siarohin, Aliaksandr},
+        journal={arXiv preprint arXiv:2603.12245},
+        year={2026}
+      }</pre>
+  </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <p>This page template is adapted from <a href="https://nerfies.github.io/" target="_blank">Nerfies</a>. We thank the authors for open-sourcing their template.</p>
+  </footer>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script>
+    function showArch(type, event) {
+      document.querySelectorAll('.arch-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('panel-' + type).style.display = 'flex';
+      document.querySelectorAll('.arch-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function copyBibtex() {
+      const text = document.getElementById('bibtex-text').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => {
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+        }, 2000);
+      });
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.section-block, .result-block, .contribution-card, .elastic-card').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>

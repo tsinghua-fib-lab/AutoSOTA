@@ -1,0 +1,66 @@
+{
+    "seed": 2023,
+
+    "dataset": {
+        "default": {
+            "dataset_name": "bibtex",
+            "batch_size": 1024
+        },
+        "train": {
+            "role": "train"
+        },
+        "val": {
+            "role": "val"
+        },
+        "test": {
+            "role": "test"
+        }
+    },
+
+    "predictor": {
+        "type": "br",
+        "loss": {
+            "type": "asl",
+            "params": {
+                "gamma_pos": 1
+            }
+        },
+        "net":{
+            "type": "mlp",
+            "head": "br",
+            "n_features": 1836,
+            "n_classes": 159,
+            "hidden_size_per_layer": [512, 512],
+            "dropout_rate": 0.3
+        }
+    },
+
+    "trainer": {
+        "save_dir": "./output/asl/bibtex",
+        "pivot_metric": "neg_loss",
+        "device": "cpu",
+        "n_epochs": 200,
+        "val_period": 10,
+        "split_val": true,
+        "early_stop_patience": 20,
+        
+        "optimizer": {
+            "type": "Adam",
+            "args":{
+                "lr": 0.001
+            }
+        },
+        "lr_scheduler": {
+            "type": "CosineAnnealingLR",
+            "args": {
+
+            }
+        },
+        "metrics": [
+            "hamming_accuracy",
+            "hamming_loss",
+            "instance_f1",
+            "subset_acc"
+        ]
+    }
+}

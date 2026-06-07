@@ -1,0 +1,38 @@
+defaults:
+ - model: promptstereo
+ - _self_
+
+gpus: ${oc.env:CUDA_VISIBLE_DEVICES, '0,1,2,3'}
+checkpoint: checkpoint/unlimited_192.safetensors
+max_disp: ${model.instance.cfg.gwc_max_disp}
+
+accelerator:
+  _target_: accelerate.Accelerator
+  dataloader_config:
+    _target_: accelerate.DataLoaderConfiguration
+    split_batches: True
+
+dataset:
+  Middlebury:
+    outlier: 2
+    instance:
+      _target_: dataset.stereo_dataset.Middlebury
+      root: /data/datasets/middlebury
+      year: MiddEval3
+      split: training
+      resolution: H
+      mask: noc
+
+dataloader:
+  split: True
+  batch_size_per_gpu: 1
+  total_batch_size: null
+  param:
+    batch_size: null
+    num_workers: null
+    pin_memory: True
+    shuffle: False
+    drop_last: False
+
+disp_dir: result/middlebury/MiddEval3/training/H
+base_index: -2

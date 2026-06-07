@@ -1,0 +1,121 @@
+defaults:
+  - model: promptstereo.yaml
+  - _self_
+
+seed: 666
+gpus: ${oc.env:CUDA_VISIBLE_DEVICES, '0,1,2,3'}
+checkpoint: null
+
+accelerator:
+  _target_: accelerate.Accelerator
+  mixed_precision: bf16
+  dataloader_config:
+    _target_: accelerate.DataLoaderConfiguration
+    split_batches: True
+    use_seedable_sampler: True
+  log_with: wandb
+
+tracker:
+  project_name: PromptStereo
+  init_kwargs:
+    wandb:
+      entity: null
+      name: sceneflow
+
+aug_params:
+  crop_size: [384, 768]
+  color_jitter:
+    brightness: [0.6, 1.4]
+    contrast: [0.6, 1.4]
+    saturation: [0, 1.4]
+    hue: 0.5
+    asymmetric_prob: 0.2
+  random_erase:
+    max_time: 2
+    bound: [50, 100]
+    prob: 0.5
+  random_scale:
+    min_scale: -0.2
+    max_scale: 0.4
+    max_stretch: 0.2
+    stretch_prob: 0.8
+    scale_prob: 1.0
+  y_jitter: True
+
+train_set:
+  SceneFlow:
+    instance:
+      _target_: dataset.stereo_dataset.SceneFlow
+      aug_params: ${aug_params}
+      root: /data/datasets/sceneflow
+      dstype: frames_finalpass
+      things_test: False
+      mask: null
+
+weight: [1]
+
+valid_set:
+  KITTI:
+    outlier: 3
+    instance:
+      _target_: dataset.stereo_dataset.KITTI
+      root: /data/datasets/kitti
+      year: '2015'
+      split: training
+      mask: all
+  Middlebury:
+    outlier: 2
+    instance:
+      _target_: dataset.stereo_dataset.Middlebury
+      root: /data/datasets/middlebury
+      year: MiddEval3
+      split: training
+      resolution: H
+      mask: noc
+  ETH3D:
+    outlier: 1
+    instance:
+      _target_: dataset.stereo_dataset.ETH3D
+      root: /data/datasets/eth3d
+      split: training
+      mask: noc
+
+train_loader:
+  split: False
+  batch_size_per_gpu: null
+  total_batch_size: 8
+  param:
+    batch_size: null
+    num_workers: null
+    pin_memory: True
+    shuffle: True
+    drop_last: True
+
+valid_loader:
+  split: True
+  batch_size_per_gpu: 1
+  total_batch_size: null
+  param:
+    batch_size: null
+    num_workers: null
+    pin_memory: True
+    shuffle: False
+    drop_last: False
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 2e-4
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.OneCycleLR
+  max_lr: 2e-4
+  total_steps: 200000
+  pct_start: 0.01
+  cycle_momentum: False
+  anneal_strategy: linear
+
+max_disp: ${model.instance.cfg.gwc_max_disp}
+max_norm: 1.0
+save_path: null
+save_freq: 10000
+valid_freq: 10000

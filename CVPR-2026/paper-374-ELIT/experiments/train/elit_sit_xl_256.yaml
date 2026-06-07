@@ -1,0 +1,42 @@
+# Usage:
+#   accelerate launch train.py --config experiments/train/elit_sit_xl_256.yaml
+#   accelerate launch train.py --config experiments/train/elit_sit_xl_256.yaml --resume-step -1
+
+# ── experiment ──
+exp_name: elit-sit-xl-2-256px
+output_dir: exps
+report_to: wandb
+
+# ── model ──
+model: ELIT-SiT-XL/2
+
+# ── dataset ──
+data_dir: /path/to/imagenet_256/train
+resolution: 256
+batch_size: 256
+
+# ── precision ──
+allow_tf32: true
+mixed_precision: bf16
+
+# ── optimization ──
+learning_rate: 1.0e-4
+max_train_steps: 400000
+checkpointing_steps: 50000
+sampling_steps: 10000
+
+# ── loss ──
+path_type: linear
+prediction: v
+weighting: lognormal
+
+
+enc_type: none
+proj_coeff: 0.0
+
+# ── ELIT-specific ──
+elit_max_mask_prob: 0.0
+elit_group_size: 4
+
+seed: 0
+resume_step: -1
