@@ -1,0 +1,10 @@
+1012:    def guidance_scale(self):
+1013:        return self._guidance_scale
+1019:    # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
+1020:    # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
+1024:        return self._guidance_scale > 1
+1208:        guidance_scale: float = 7.0,
+1259:        self._guidance_scale = guidance_scale
+1390:                    # guidance decays from w_max to w_min over the denoising trajectory
+1392:                    w_max, w_min = 3.0, 1.5
+1393:                    w_t = w_max - (w_max - w_min) * t_ratio

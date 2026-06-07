@@ -1,0 +1,4 @@
+1390:                    # guidance decays from w_max to w_min over the denoising trajectory
+1392:                    w_max, w_min = 3.0, 1.5
+1393:                    w_t = w_max - (w_max - w_min) * t_ratio
+1394:                    noise_pred = noise_pred_uncond + w_t * (noise_pred_text - noise_pred_uncond)

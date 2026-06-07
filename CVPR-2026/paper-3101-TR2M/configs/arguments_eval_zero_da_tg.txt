@@ -1,0 +1,26 @@
+# Backbone + ScaleMap settings
+depth_model = da_s
+text_encoder = ViT-L/14
+img_encoder = vitl
+
+# Pretrained weights (TR2M / ScaleMap)
+load_ckpt_path = ./weights/da_s_vitl_vitl.pth
+
+# Inverse-depth scale/shift coefficients (must match training)
+coef_scale = 0.01
+coef_shift = 0.01
+
+# Feature channels (must match training)
+image_channels = 1024
+text_channels = 768
+
+# Zero-shot dataset roots — set only the datasets you have locally; unset roots are skipped
+sunrgbd_root  = /path/to/SUNRGB-D
+ibims_root    = /path/to/iBims1/ibims1_core_raw
+diode_root    = /path/to/DIODE/val/outdoor
+hypersim_root = /path/to/HyperSim
+simcol_root   = /path/to/SimCol
+
+# Mirror stdout/stderr to a log file. Use "auto" for logs/eval_zero_<timestamp>.log,
+# or pass an explicit path. Comment out / leave unset to disable.
+log_file = auto

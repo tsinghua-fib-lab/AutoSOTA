@@ -1,0 +1,3 @@
+root       20988  0.0  0.0   4360  1820 ?        S    10:01   0:00 bash -c cd /repo && MKL_SERVICE_FORCE_INTEL=1 MKL_THREADING_LAYER=GNU timeout 3600 python eval.py --data_dir /datasets/g3495 --checkpoint_path /tmp/checkpoint/checkpoint --output_dir /tmp/output --order paired > /repo/_baseline_eval.log 2>&1 & echo "EVAL PID: $!" echo "Started at $(date)"
+root       20990  0.0  0.0   2796  1012 ?        S    10:01   0:00 timeout 3600 python eval.py --data_dir /datasets/g3495 --checkpoint_path /tmp/checkpoint/checkpoint --output_dir /tmp/output --order paired
+root       20991  2.2  0.0 20182812 658284 ?     Sl   10:01   0:11 python eval.py --data_dir /datasets/g3495 --checkpoint_path /tmp/checkpoint/checkpoint --output_dir /tmp/output --order paired

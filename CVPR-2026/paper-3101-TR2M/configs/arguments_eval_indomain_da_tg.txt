@@ -1,0 +1,26 @@
+# Backbone + ScaleMap settings
+depth_model = da_s
+text_encoder = ViT-L/14
+img_encoder = vitl
+
+# Pretrained weights (TR2M / ScaleMap)
+load_ckpt_path = ./weights/da_s_vitl_vitl.pth
+
+# Inverse-depth scale/shift coefficients (must match training)
+coef_scale = 0.01
+coef_shift = 0.01
+
+# Feature channels (must match training)
+image_channels = 1024
+text_channels = 768
+
+# Dataset roots — set only the datasets you have locally; unset roots are skipped
+nyu_root = /container_pip/repo/nyuv2_test_output
+# kitti_root   = /path/to/kitti_raw_data
+# kitti_gt_root = /path/to/kitti_ground_truth
+# void_root    = /path/to/void_release
+# c3vd_root    = /path/to/C3VD_undistort
+
+# Mirror stdout/stderr to a log file. Use "auto" for logs/eval_indomain_<timestamp>.log,
+# or pass an explicit path. Comment out / leave unset to disable.
+log_file = auto

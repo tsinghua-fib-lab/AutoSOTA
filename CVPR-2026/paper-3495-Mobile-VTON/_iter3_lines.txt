@@ -1,0 +1,20 @@
+307: 
+308:                 images = pipe(
+309:                     prompt_embeds=prompt_embeds,
+310:                     negative_prompt_embeds=negative_prompt_embeds,
+311:                     pooled_prompt_embeds=pooled_prompt_embeds,
+312:                     negative_pooled_prompt_embeds=negative_pooled_prompt_embeds,
+313:                     num_inference_steps=args.num_inference_steps,
+314:                     generator=generator,
+315:                     height=args.height,
+316:                     width=args.width,
+317:                     guidance_scale=args.guidance_scale,
+318:                     text_embeds_cloth=prompt_embeds_c,
+319:                     negative_text_embeds_cloth=negative_prompt_embeds_c,
+320:                     cloth=batch["cloth_pure"].to(pipe_device), 
+321:                     image=(batch["image"].to(pipe_device) + 1.0) / 2.0, 
+322:                     ip_adapter_image=ip_imgs.to(pipe_device), 
+323:                     device=pipe_device,
+324:                 )[0]
+325: 
+326:             for i, pil_img in enumerate(images):

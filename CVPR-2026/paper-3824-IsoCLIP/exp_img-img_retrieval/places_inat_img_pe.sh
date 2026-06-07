@@ -1,0 +1,38 @@
+#!/bin/bash
+#!/bin/bash
+
+filename=$0
+filename=${filename%.*}
+
+# Set the GPU device
+export CUDA_VISIBLE_DEVICES=0
+
+# Define Python path and root directory
+PYTHON=""    # Specify the conda environment (e.g. /home/user/miniconda3/envs/isoclip/bin/python3.10 )
+ROOT_DIR=""  # Specify the project dir (e.g. /home/user/IsoCLIP/ )
+DATA_ROOT="" # Specify the dataset dir (e.g. /path/to/datasets/ )
+
+
+# List of datasets
+DATASETS=("places365" "inaturalist2021")
+
+# Run combinations
+k_top=300
+k_bottom=50 
+
+for dataset in "${DATASETS[@]}"; do
+    $PYTHON -u "$ROOT_DIR/src/retrieval.py" \
+    --iso_ktop "$k_top" \
+    --iso_kbottom "$k_bottom" \
+    --dataroot "$DATA_ROOT" \
+    --dataset_name "$dataset" \
+    --clip_model_name "PE-Core-B-16" \
+    --query_eval_type "image" \
+    --gallery_eval_type "image" \
+    --out_path $filename  \
+    --use_open_clip \
+    --open_clip_pretrained "meta"
+ 
+done 
+
+ 

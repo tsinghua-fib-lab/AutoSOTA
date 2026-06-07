@@ -1,0 +1,66 @@
+Total lines: 377
+L306: 0s |
+L307: 0s |
+L308: 16s |                # TTA: run inference twice (normal + horizontal flip), average outputs
+L309: 16s |                person_image = (batch["image"].to(pipe_device) + 1.0) / 2.0
+L310: 16s |                cloth_img = batch["cloth_pure"].to(pipe_device)
+L311: 0s |
+L312: 16s |                # Normal pass
+L313: 16s |                images_normal = pipe(
+L314: 20s |                    prompt_embeds=prompt_embeds,
+L315: 20s |                    negative_prompt_embeds=negative_prompt_embeds,
+L316: 20s |                    pooled_prompt_embeds=pooled_prompt_embeds,
+L317: 20s |                    negative_pooled_prompt_embeds=negative_pooled_prompt_embeds,
+L318: 20s |                    num_inference_steps=args.num_inference_steps,
+L319: 20s |                    generator=generator,
+L320: 20s |                    height=args.height,
+L321: 20s |                    width=args.width,
+L322: 20s |                    guidance_scale=args.guidance_scale,
+L323: 20s |                    text_embeds_cloth=prompt_embeds_c,
+L324: 20s |                    negative_text_embeds_cloth=negative_prompt_embeds_c,
+L325: 20s |                    cloth=cloth_img,
+L326: 20s |                    image=person_image,
+L327: 20s |                    ip_adapter_image=ip_imgs.to(pipe_device),
+L328: 20s |                    device=pipe_device,
+L329: 16s |                )[0]
+L330: 0s |
+L331: 16s |                # Flipped pass
+L332: 16s |                person_flipped = torch.flip(person_image, dims=[-1])
+L333: 16s |                cloth_flipped = torch.flip(cloth_img, dims=[-1])
+L334: 16s |                ip_flipped = torch.flip(ip_imgs.to(pipe_device), dims=[-1])
+L335: 0s |
+L336: 16s |                images_flipped = pipe(
+L337: 20s |                    prompt_embeds=prompt_embeds,
+L338: 20s |                    negative_prompt_embeds=negative_prompt_embeds,
+L339: 20s |                    pooled_prompt_embeds=pooled_prompt_embeds,
+L340: 20s |                    negative_pooled_prompt_embeds=negative_pooled_prompt_embeds,
+L341: 20s |                    num_inference_steps=args.num_inference_steps,
+L342: 20s |                    generator=generator,
+L343: 20s |                    height=args.height,
+L344: 20s |                    width=args.width,
+L345: 20s |                    guidance_scale=args.guidance_scale,
+L346: 20s |                    text_embeds_cloth=prompt_embeds_c,
+L347: 20s |                    negative_text_embeds_cloth=negative_prompt_embeds_c,
+L348: 20s |                    cloth=cloth_flipped,
+L349: 20s |                    image=person_flipped,
+L350: 20s |                    ip_adapter_image=ip_flipped,
+L351: 20s |                    device=pipe_device,
+L352: 16s |                )[0]
+L353: 0s |
+L354: 16s |                # Flip back and average
+L355: 16s |                images = []
+L356: 16s |                for n, f in zip(images_normal, images_flipped):
+L357: 20s |                    f_unflipped = f.transpose(Image.FLIP_LEFT_RIGHT)
+L358: 20s |                    arr_n = np.array(n).astype(np.float32)
+L359: 20s |                    arr_f = np.array(f_unflipped).astype(np.float32)
+L360: 20s |                    arr_avg = ((arr_n + arr_f) / 2.0).astype(np.uint8)
+L361: 20s |                    images.append(Image.fromarray(arr_avg))
+L362: 12s |            for i, pil_img in enumerate(images):
+L363: 16s |                im_name = batch["im_name"][i]
+L364: 16s |                c_name = batch["c_name"][i]
+L365: 16s |                out_name = f"{im_name[:-4]}_{c_name}"
+L366: 16s |                x = pil_to_tensor(pil_img)
+L367: 16s |                torchvision.utils.save_image(x, os.path.join(args.output_dir, out_name))
+L368: 0s |
+L369: 12s |            progress.update(1)
+L370: 0s |
