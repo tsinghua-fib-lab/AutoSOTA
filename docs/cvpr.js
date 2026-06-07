@@ -3,7 +3,7 @@ const GITHUB_REPO = "https://github.com/tsinghua-fib-lab/AutoSOTA";
 
 const state = {
   papers: { day1: [], day2: [], day3: [] },
-  activeDay: "day2",
+  activeDay: "day3",
   activeQuery: "",
   showImprovedOnly: false,
   showAllCategories: false,
