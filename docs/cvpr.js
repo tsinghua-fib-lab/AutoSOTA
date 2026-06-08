@@ -28,31 +28,11 @@ function esc(text) {
 // --- Stats ---
 function renderStats() {
   statsGrid.innerHTML = `<article class="stat-card countdown-card">
-    <span class="countdown-label">Next update</span>
-    <span class="countdown-timer" id="countdown-timer">--:--:--</span>
+    <span class="countdown-label">Final update</span>
+    <span class="countdown-timer">Complete</span>
   </article>`;
 
-  heroHeadline.innerHTML = `When AutoSOTA Meets<br>Top Conference Papers`;
-
-  startCountdown();
-}
-
-// --- Countdown ---
-function startCountdown() {
-  function tick() {
-    const now = new Date();
-    const target = new Date(now);
-    target.setHours(24, 0, 0, 0);
-    const diff = target - now;
-    if (diff <= 0) { document.getElementById("countdown-timer").textContent = "Updating..."; return; }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById("countdown-timer").textContent =
-      String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-  }
-  tick();
-  setInterval(tick, 1000);
+  heroHeadline.innerHTML = `When AutoSOTA Met<br>Top Conference Papers`;
 }
 
 // --- Day tabs ---
