@@ -155,6 +155,27 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 | 103 | Distributed Conformal Prediction via Message Passing | 6.33% |
 | 104 | Balanced Active Inference | 24.80% |
 | 105 | Aligning Evaluation with Clinical Priorities: Calibration, Label Shift, and Error Costs | 2.40% |
+
+---
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tsinghua-fib-lab/AutoSOTA&type=Date)](https://star-history.com/#tsinghua-fib-lab/AutoSOTA&Date)
+
+---
+
+## 📝 Citation
+
+If you find AutoSOTA useful for your research, please cite:
+
+```bibtex
+@article{li2026autosota,
+  title={Autosota: An end-to-end automated research system for state-of-the-art ai model discovery},
+  author={Li, Yu and Shao, Chenyang and Liu, Xinyang and Zhao, Ruotong and Liu, Peijie and Su, Hongyuan and Chen, Zhibin and Yang, Qinglong and Xu, Anjie and Fang, Yi and others},
+  journal={arXiv preprint arXiv:2604.05550},
+  year={2026}
+}
+```
 ---
 
 ## Per-paper optimization summaries
