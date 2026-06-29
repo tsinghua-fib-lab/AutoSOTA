@@ -1,17 +1,28 @@
 # autosota
 
-自动化 SOTA 代码优化流水线。给定一篇 ML 论文的**本地已克隆代码仓库**（及可跑通评测的环境）和优化目标，由 AI 自主探索、研究、修改代码，迭代提升性能指标。当前 CLI 0.2.0 版本。
+自动化 SOTA 代码优化流水线。给定一篇 ML 论文的**本地已克隆代码仓库**（及可跑通评测的环境）和优化目标，由 AI 自主探索、研究、修改代码，迭代提升性能指标。当前 CLI 0.3.0 版本。
 
 ---
 
 ## 📣 News
 
-- **2026-05-15** 🔧 发布 **v0.2.1** — 修复 v0.2.0 离线包全局安装后部分环境下命令调用失败的问题；新增 `autosota login` 子命令一次性完成首次服务条款接受。
-- **2026-05-13** 📝 补充了 DeepSeek 官方直连和经 OpenRouter 调 DeepSeek 两种配置方式的详细说明。
+- **2026-06-28** 🚀 发布 **v0.3.0** — 把最新一代多智能体框架的优化"大脑"迁进 CLI（仍是纯本地、无 Docker）。详见下方 [v0.3.0 更新内容](#v030-更新内容)：
+  - **断点续跑**：`autosota --resume` 复用上次的 `scores.jsonl` 与 git 标签，从中断处继续，旧分数继续可用。
+  - **不再提前 aborted**：内置"续跑监督器"，模型提前结束而预算未用完时自动带上下文重启，直到跑满 `max_iterations`（修复 flash 3 轮 / pro 14 轮就停的问题）。
+  - **收尾独立评估**：优化结束后由一个独立、只读的会话做红线审计与结果复核，产出 `evaluation_verdict.json`。
+  - **结构化优化目标 + 取消早停**：移除 `target_improvement_pct` 这一"够了就停"的成功标准，预算仅由 `max_iterations` + `max_total_hours` 控制；支持多指标目标与"护栏指标不可牺牲"。
+  - **联网检测**：deep research 调用后检查返回引用，打印 `web_search VERIFIED / UNVERIFIED`，一眼判断模型是否真的联网。
+  - **修复工作区串台**：工作区严格跟随当前目录，遗留的 `AUTOSOTA_WORKSPACE` 环境变量不再把新任务带回旧任务。
+- **2026-05-15** 🔧 发布 **v0.2.1** — 修复全局安装后在干净机器上 CLI 无法调用的问题；新增 `autosota login` 一次性接受服务条款。
+- **2026-05-13** 📝 新增 DeepSeek 官方直连、以及经 OpenRouter 调用 DeepSeek 两种方式的详细配置说明。
 - **2026-05-12** 🚀 发布 **v0.2.0** — 支持 DeepSeek 等国产模型直接接入（不用再绑死 OpenRouter），代码优化和文献调研可以分开用不同的 API key，新增评测脚本防篡改保护。
 - **2026-04-29** 🔧 发布 **v0.1.1** — 新增轮间暂停功能（`-i`），跑着跑着想看看进度、加点指示不用杀进程了；新增 `ask / steer / sessions` 等交互命令。
 - **2026-04-22** 🎉 发布 **v0.1.0** — 首版发布，实现论文代码自动优化闭环：自动探索仓库配置、查阅相关文献、多轮迭代改代码，结束后自动导出最优代码和 patch。
-- **2026-04-21** 💻 在实验室服务器初始化 AutoSOTA CLI 项目。
+- **2026-04-21** 💻 在实验室服务器上初始化 AutoSOTA CLI 项目。
+
+---
+
+> 📸 **想看每一步的实际效果？** 跟着 [docs/walkthrough.md](docs/walkthrough.md) 看一遍带截图的完整教程——以优化 SAVVY 论文为例，从安装、初始化、跑优化到最终拿到 `optimization_curve.png` 全流程。
 
 ---
 
@@ -274,6 +285,11 @@ research_base_url: ""                         # 留空回退到 https://openrout
 
 普通 chat 模型（`deepseek-v4-pro`、`gpt-4o` 等）也能填，但不会联网，只凭训练数据作答，适合 2024 年以前的经典方向或快速冒烟。
 
+> ⚠️ **国内机器需开代理（翻墙）**：deep research 走的是 `https://openrouter.ai`，国内直连基本不通，必须先按 [0.1 安装代理](#01-安装代理国内机器访问-github--anthropic-需要) 把 clash 起来。
+> 脚本会自动读取 `http_proxy` / `https_proxy` / `all_proxy` 环境变量（Python `openai`/`httpx`、`curl` 都认），所以**只要 clash 开着、代理 env 在，就能自动走代理**，无需在 config 里额外配置。
+> 注意：deep research 模型是**服务端浏览**（由 OpenRouter/OpenAI 的服务器去搜网页），你的机器只需能连上 `openrouter.ai` 这一个域名，不需要自己去连 Google。
+> 排查：`unset https_proxy http_proxy all_proxy` 后 `curl https://openrouter.ai/api/v1/models` 若超时，说明确实依赖代理。
+
 常见组合示例：
 
 ```yaml
@@ -452,10 +468,15 @@ autosota [paper_name] [选项]
   --skip-export             跳过优化后的代码导出
   --export-on-failure       optimize 非 0 退出时仍导出 optimized_code/（默认仅成功时导出）
   --dry-run                 只生成 prompt，不实际运行
+  --workspace <dir>         指定工作区（默认: 当前目录）
+
+可选 — 续跑 / 收尾：
+  --resume                  断点续跑：复用上次 run 的 scores.jsonl 与 git 标签，从中断处继续
+  --max-relaunch N          续跑监督器最多重启模型次数（默认 max_iterations + 2）
+  --skip-eval               跳过结尾的独立评估 / 验证环节
 
 可选 — 优化参数覆盖（覆盖 config.yaml 中的对应值）：
   --max-iter N              最大迭代轮数
-  --target-pct N            目标提升百分比（如: 10 表示 10%）
   --max-debug N             每轮最大调试次数
   --max-debug-min N         每次调试超时分钟数
   --research-timeout N      文献调研超时分钟数
@@ -709,15 +730,28 @@ eval_output_format: "..."      # 告诉 Claude 如何解析评测输出
 primary_metric: ETTh1_MSE      # 主优化指标
 metric_direction: lower         # lower / higher
 baseline_metrics:
-  ETTh1_MSE: 0.3616
+  ETTh1_MSE: 0.3616            # 主指标外的其它指标会自动成为"不可牺牲的护栏"
   ETTh1_MAE: 0.3650
-target_improvement_pct: 5.0    # 目标提升百分比（可用 --target-pct 覆盖）
-max_iterations: 24             # 最大迭代轮数（可用 --max-iter 覆盖）
+max_iterations: 24             # 最大迭代轮数（可用 --max-iter 覆盖）；v0.3.0 起这是唯一的预算之一
 max_debug_attempts: 3          # 每轮最大调试次数（可用 --max-debug 覆盖）
 max_debug_minutes: 15          # 每次调试超时分钟（可用 --max-debug-min 覆盖）
 research_timeout_minutes: 60   # 文献调研超时分钟（可用 --research-timeout 覆盖）
 max_total_hours: 15.0          # Claude 进程墙钟上限（小时；可用 --max-total-minutes 覆盖）
 gpu_devices: "0,1"             # 由 autosota 根据 --devices 写入 config
+
+# ── 联网调研（可选，默认 true）──
+# research_enable_web_search: true   # 调研后会打印 web_search VERIFIED/UNVERIFIED
+
+# ── 多指标优化目标（可选）──
+# 不写则用 primary_metric + baseline_metrics 自动退化为单指标目标。
+# optimization_objective:
+#   metrics:
+#     - {name: ETTh1_MSE, role: primary,   direction: lower}
+#     - {name: ETTh1_MAE, role: guardrail, direction: lower}
+#   notes: "MSE 优先；MAE 不得高于基线"
+
+# 注：v0.3.0 已移除 target_improvement_pct —— 不再有固定目标或早停，
+#     预算仅由 max_iterations + max_total_hours 控制。
 
 # ── 评测脚本保护（可选，默认关闭）──
 # 不写这一段 → 行为跟以前完全一样（Claude 可以改 repo 里任何文件）
@@ -853,13 +887,68 @@ autosota --skip-onboard --ideas-file ./paper/priors/ideas.md
 
 ---
 
-## 崩溃恢复
+## 崩溃恢复 / 断点续跑
 
-优化中断后，直接加 `--skip-onboard` 重启（无需重新 onboard，会创建新 run）：
+优化中断（断电、被 kill、墙钟超时）后，加 `--resume` 重启即可**复用之前的进度继续跑**——不会从头再来，旧分数继续有效：
+
+```bash
+autosota --resume --skip-onboard <paper_name>
+```
+
+它复用上一次 run 的 `scores.jsonl`、`idea_library.md` 和仓库里的 `_baseline / _best` git 标签，从下一轮迭代接着优化。
+
+如果你想要的是**重新开一个新 run**（而不是接着旧的），去掉 `--resume`、只用 `--skip-onboard` 即可：
 
 ```bash
 autosota --skip-onboard --skip-research
 ```
+
+---
+
+## v0.3.0 更新内容
+
+v0.3.0 把最新一代多智能体框架里经过验证、确实更优的优化逻辑迁进了 CLI，同时保持**纯本地、无 Docker**、命令行用法完全不变。
+
+### 1. 断点续跑（新功能）
+跑大数据集中途中断后，加 `--resume` 即可从断点继续，**复用之前已跑出的分数**：
+
+```bash
+autosota --resume --skip-onboard <paper_name>
+```
+
+它会复用上一次 run 的 `scores.jsonl`、`idea_library.md` 以及仓库里的 `_baseline / _best` git 标签，从下一轮迭代继续，而不是从头再来。
+
+### 2. 续跑监督器：不再提前 aborted
+过去模型常常没跑满预算就结束会话（flash 约 3 轮、pro 约 14 轮就停）。现在优化器在外层做监督：**只要预算（`max_iterations` / `max_total_hours`）没用完、还在产出新迭代，就自动带上续跑上下文重启模型**，直到跑满预算或所有 CLEARED idea 真正耗尽。带停滞检测（连续两次无新迭代才收手），`--max-relaunch N` 可调上限。
+
+### 3. 取消早停 + 结构化优化目标
+- **移除 `target_improvement_pct`**：它既不再是成功标准，也不再触发早停。"涨得够多就停"会鼓励模型浅尝辄止，现在 **better is always better**，预算只由 `max_iterations` + `max_total_hours` 控制。
+- **结构化优化目标**：只填单个 `primary_metric` 时会自动退化为单指标目标，其余 baseline 指标自动作为**不可牺牲的护栏**；需要多指标显式目标时可在 per-paper `config.yaml` 写 `optimization_objective`（见下文）。强制每轮诚实上报所有指标，不允许只报主指标掩盖护栏回退。
+
+### 4. 收尾独立评估（默认开，`--skip-eval` 关）
+优化结束后，由一个**独立、只读**的会话（没参与优化）读取 `scores.jsonl` 与 `_baseline.._best` 的 diff，做红线审计、必要时复跑确认，产出：
+
+```
+runs/latest/results/evaluation_verdict.json   # real / uncertain / invalid + 违规项
+runs/latest/results/evaluation_report.md      # 人读版结论
+```
+
+用来兜住"自评虚高"和偷改评测协议这类单一自报模型容易漏掉的问题。
+
+### 5. deep research 联网检测
+联网其实分两跳，对应日志里两类标记，跑完 `grep DeepResearch <run>/logs/*.log` 即可对照排查：
+
+1. **你的机器 → OpenRouter**（这一跳国内要翻墙，见 [0.1 安装代理](#01-安装代理国内机器访问-github--anthropic-需要)）。通了打印 `[DeepResearch] Sending request...` → `Done in Xs`；连不上（代理没开 / 超时 / key 余额不足）打印 `[DeepResearch] FAILED: ...`，并写一个占位 `research_report.md` 后 `exit 0`，不会卡死主流程。
+2. **模型 → 互联网搜索**（服务端浏览）。调用结束后检查返回的 URL 引用 / annotations 数量，打印 `web_search VERIFIED — N citations`（确实联网搜到了东西）或 `UNVERIFIED — 0 citations`（疑似只凭记忆作答）。
+
+对非原生深研模型会自动挂上 OpenRouter `web` 插件；可用 `research_enable_web_search: false` 关闭。
+
+> ⚠️ **联网只在 OpenRouter 上有效**：`web` 插件是 OpenRouter 专属的。如果 `research_base_url` 指向的是普通 OpenAI 兼容中转（第三方代理），插件会被静默忽略——此时若 `research_model` 又是普通对话模型（如 `gpt-5`），就**只会凭训练记忆作答、不会真联网**。这种情况现在会打印 `web_search: REQUESTED but UNSUPPORTED on this endpoint` 并给出修复建议。要真联网，请把 `research_*` 指到 OpenRouter + 深研模型（`research_base_url: https://openrouter.ai/api/v1`，`research_model: openai/o4-mini-deep-research`）。
+
+### 6. 工作区串台修复
+工作区现在**严格跟随当前目录**：以前遗留的 `AUTOSOTA_WORKSPACE` / `AUTOSOTA_DATA_DIR` 环境变量会盖过当前目录，导致"在新 init 的文件夹里却跑了旧任务"。现在会忽略遗留变量并打印提示；要刻意指定别的工作区用 `--workspace <dir>`。
+
+> 其它保留：失败 sidecar 排障、SOTA postcondition 校验、idea 选择纪律、长任务后台 ledger、`protected_paths` 防篡改、`steer/pause/continue` 等命令一并保留。
 
 ---
 
@@ -869,4 +958,3 @@ autosota --skip-onboard --skip-research
 - Python 3.10+（用于 venv 创建）
 - 模型调用 CLI（随 `npm install -g ./autosota-X.Y.Z.tgz` 自动落盘到 autosota 包内，不暴露到全局 PATH，无需单独安装）
 - [OpenRouter](https://openrouter.ai/) API Key
-
