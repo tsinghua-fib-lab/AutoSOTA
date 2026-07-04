@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoSOTA @ ICML 2026</title>
+  <meta name="description" content="AutoSOTA tracking and optimization progress for selected ICML 2026 papers." />
+  <meta property="og:title" content="AutoSOTA @ ICML 2026" />
+  <meta property="og:description" content="Browse ICML 2026 papers tracked by AutoSOTA, with reproduction and optimization status." />
+  <link rel="icon" href="favicon.svg?v=20260607" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="cvpr.css?v=20260704-icml-r6" />
+</head>
+<body>
+  <div class="page-noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"></span>
+      <span class="brand-text">AutoSOTA</span>
+    </a>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="icml.html" class="active">ICML 2026</a>
+      <a href="cvpr.html">CVPR 2026</a>
+    </nav>
+    <a class="repo-link" href="https://github.com/tsinghua-fib-lab/AutoSOTA" target="_blank" rel="noreferrer">GitHub</a>
+  </header>
+
+  <main id="top">
+    <section class="hero section icml-hero">
+      <div class="hero-intro">
+        <h1>AutoSOTA @ ICML 2026</h1>
+        <p class="hero-copy">
+          Tracking selected ICML 2026 papers from reproduction through AutoSOTA optimization.
+        </p>
+      </div>
+
+      <article class="hero-panel icml-hero-panel">
+        <div class="hero-panel-copy">
+          <p class="news-kicker"><span class="live-dot live-dot-prep"></span> Preparing &middot; July 6–11, 2026 &middot; Seoul</p>
+          <h2 id="hero-headline">Loading papers...</h2>
+          <p id="hero-summary" class="hero-summary">Fetching ICML 2026 paper data.</p>
+          <div id="hero-facts" class="icml-hero-facts" aria-live="polite"></div>
+        </div>
+        <div id="stats-grid" class="stats-grid icml-stats-grid" aria-live="polite">
+          <article class="stat-card countdown-card">
+            <span class="countdown-label">Overall progress</span>
+            <span class="countdown-timer">Loading</span>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="papers">
+      <div class="section-head section-head-runs">
+        <div>
+          <h2>Paper List</h2>
+        </div>
+        <div class="controls">
+          <label class="search-field">
+            <span class="search-label">Search</span>
+            <input id="search-input" type="search" placeholder="Paper ID, title, repo..." />
+          </label>
+          <div class="filter-row">
+            <div class="filter-group" id="status-filters" aria-label="Filter papers by AutoSOTA status">
+              <button class="filter-button is-active" data-status-filter="all">All</button>
+              <button class="filter-button" data-status-filter="not_started">Not Started</button>
+              <button class="filter-button" data-status-filter="research">Researching</button>
+              <button class="filter-button" data-status-filter="success">Success</button>
+              <button class="filter-button" data-status-filter="failed">Failed</button>
+            </div>
+            <span class="sort-label">Sort by</span>
+            <select id="sort-select" class="sort-select">
+              <option value="id-asc" selected>Paper ID</option>
+              <option value="status-asc">Status</option>
+              <option value="title-asc">Title</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="runs-shell">
+        <div class="runs-meta">
+          <p id="runs-summary">Loading...</p>
+          <div class="paper-type-legend icml-legend">
+            <span class="type-badge type-oral">Oral</span>
+            <span class="status-badge status-not-started">Not Started</span>
+            <span class="status-badge status-research">Researching</span>
+            <span class="status-badge status-success">Success</span>
+            <span class="status-badge status-failed">Failed</span>
+          </div>
+        </div>
+        <div id="runs-list" class="runs-list cvpr-list icml-list" aria-live="polite">
+          <article class="run-card run-card-loading"><p>Loading ICML papers...</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>AutoSOTA</p>
+    <div class="footer-logos">
+      <a href="https://www.tsinghua.edu.cn/" target="_blank" rel="noreferrer">
+        <img src="https://www.tsinghua.edu.cn/image/logo180.png" alt="Tsinghua University" height="40" />
+      </a>
+      <a href="https://www.bza.edu.cn/" target="_blank" rel="noreferrer">
+        <img src="https://www.bza.edu.cn/adminapi/public/default/logo.png" alt="Zhongguancun Academy (BZA)" height="40" />
+      </a>
+    </div>
+    <p>&copy; 2026</p>
+  </footer>
+
+  <noscript>
+    <div class="noscript-banner">This page uses JavaScript to load and display ICML paper data.</div>
+  </noscript>
+
+  <script src="icml-data.js?v=20260704-icml-r6"></script>
+  <script src="icml.js?v=20260704-icml-r6"></script>
+  <!-- Cloudflare Web Analytics -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"16c73e7f6bcd477f98ab1ff71a4db519"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
