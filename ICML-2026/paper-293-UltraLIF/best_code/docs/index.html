@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UltraLIF: Fully Differentiable SNNs via Ultradiscretization</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --gray: #6b7280;
+      --border: #e5e7eb;
+      --text: #111827;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: "Inter", sans-serif; color: var(--text); background: #fff; }
+
+    /* ---- Layout ---- */
+    .page-section { padding: 3.5rem 1.5rem; }
+    .page-section.alt { background: #f9fafb; }
+    .inner { max-width: 860px; margin: 0 auto; }
+    .inner.wide { max-width: 1040px; }
+
+    /* ---- Header block ---- */
+    #header { padding: 4rem 1.5rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }
+    #header h1 {
+      font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+      font-weight: 700;
+      line-height: 1.35;
+      max-width: 760px;
+      margin: 0 auto 1rem;
+      white-space: nowrap;
+    }
+    @media (max-width: 700px) {
+      #header h1 { white-space: normal; font-size: 1.3rem; }
+    }
+    .venue-tag {
+      display: inline-block;
+      border: 1.5px solid var(--blue);
+      color: var(--blue);
+      border-radius: 4px;
+      padding: 0.15em 0.6em;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    .author { font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
+    .affil { font-size: 0.9rem; color: var(--gray); margin-bottom: 1.5rem; }
+
+    /* ---- Link buttons ---- */
+    .link-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .link-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .link-btn:hover { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+    .link-btn svg { width: 16px; height: 16px; }
+
+    /* ---- Section title ---- */
+    .sec-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--blue);
+    }
+
+    /* ---- Abstract ---- */
+    .abstract-text {
+      font-size: 0.97rem;
+      line-height: 1.85;
+      color: #374151;
+      text-align: justify;
+    }
+
+    /* ---- Teaser ---- */
+    .teaser img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .fig-caption {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.75rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Lay summary ---- */
+    .lay-text {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #374151;
+      border-left: 3px solid var(--blue);
+      padding-left: 1.2rem;
+    }
+
+    /* ---- Interactive ---- */
+    .interactive-wrap {
+      display: grid;
+      gap: 1.5rem;
+    }
+    .interactive-wrap.two-col { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 640px) { .interactive-wrap.two-col { grid-template-columns: 1fr; } }
+
+    .plot-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem;
+    }
+    .plot-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: #374151;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    /* Slider row */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 0.9rem;
+    }
+    .slider-label {
+      font-size: 0.82rem;
+      white-space: nowrap;
+      min-width: 80px;
+      color: #374151;
+    }
+    .slider-label span { font-weight: 700; font-family: monospace; }
+    input[type=range] { flex: 1; accent-color: var(--blue); cursor: pointer; }
+    .slider-note {
+      font-size: 0.78rem;
+      color: var(--gray);
+      margin-top: 0.4rem;
+    }
+
+    /* Callout box */
+    .callout {
+      background: var(--blue-light);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 6px 6px 0;
+      padding: 0.8rem 1rem;
+      font-size: 0.88rem;
+      color: #1e40af;
+      margin-top: 1rem;
+    }
+
+    /* ---- Results tables ---- */
+    .results-intro {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #374151;
+      margin-bottom: 1.2rem;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .data-table th {
+      background: #f3f4f6;
+      font-weight: 600;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--border);
+      color: #374151;
+    }
+    .data-table tr:nth-child(even) td { background: #f9fafb; }
+    .data-table .best { font-weight: 700; color: #111; }
+    .data-table .delta { color: var(--blue); font-weight: 600; }
+    .data-table .delta-large { color: #dc2626; font-weight: 700; }
+    .data-table .collapse { color: #9ca3af; font-style: italic; }
+
+    /* ---- BibTeX ---- */
+    .bibtex-wrap { position: relative; }
+    .bibtex-block {
+      background: #1f2937;
+      color: #d1d5db;
+      font-family: "Courier New", monospace;
+      font-size: 0.84rem;
+      line-height: 1.7;
+      padding: 1.2rem 1.4rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.7rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #d1d5db;
+      border-radius: 4px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ---- Footer ---- */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.82rem;
+      color: var(--gray);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================
+     TITLE / AUTHOR / LINKS
+     ========================================================= -->
+<!-- =========================================================
+     NAVBAR
+     ========================================================= -->
+<nav style="position:fixed; top:0; left:0; right:0; z-index:100; background:#fff; border-bottom:1px solid var(--border); height:48px; display:flex; align-items:center; padding:0 1.5rem;">
+  <span style="font-weight:700; font-size:0.95rem; color:var(--text);">UltraLIF</span>
+  <div style="margin-left:auto; display:flex; gap:0.2rem;">
+    <a href="https://openreview.net/forum?id=QdDli9UoLK" target="_blank" style="font-size:0.85rem; color:var(--gray); text-decoration:none; padding:0 0.6rem;">Paper</a>
+    <a href="https://arxiv.org/abs/2602.11206" target="_blank" style="font-size:0.85rem; color:var(--gray); text-decoration:none; padding:0 0.6rem;">arXiv</a>
+    <a href="https://github.com/JomaMinoza/UltraLIF" target="_blank" style="font-size:0.85rem; color:var(--gray); text-decoration:none; padding:0 0.6rem;">Code</a>
+  </div>
+</nav>
+
+<section id="header" style="padding-top:5rem;">
+  <span class="venue-tag">ICML 2026</span>
+  <h1>UltraLIF: Fully Differentiable Spiking Neural Networks<br>via Ultradiscretization and Max-Plus Algebra</h1>
+  <p class="author">Jose Marie Antonio Mi&ntilde;oza</p>
+  <p class="affil">Center for AI Research PH</p>
+  <div class="link-row">
+    <a class="link-btn" href="https://openreview.net/forum?id=QdDli9UoLK" target="_blank">
+      <!-- PDF icon -->
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
+      Paper
+    </a>
+    <a class="link-btn" href="https://arxiv.org/abs/2602.11206" target="_blank">
+      <!-- arXiv icon (simple A) -->
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/></svg>
+      arXiv
+    </a>
+    <a class="link-btn" href="https://github.com/JomaMinoza/UltraLIF" target="_blank">
+      <!-- GitHub icon -->
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577v-2.165c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22v3.293c0 .319.21.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Code
+    </a>
+  </div>
+</section>
+
+<!-- =========================================================
+     ABSTRACT
+     ========================================================= -->
+<section class="page-section alt">
+  <div class="inner">
+    <div class="sec-title">Abstract</div>
+    <p class="abstract-text">
+      Spiking Neural Networks (SNNs) offer energy-efficient, biologically plausible computation but suffer from
+      non-differentiable spike generation, necessitating reliance on heuristic surrogate gradients. This paper
+      introduces <strong>UltraLIF</strong>, a principled framework that replaces surrogate gradients with
+      <em>ultradiscretization</em>, a mathematical formalism from tropical geometry providing continuous
+      relaxations of discrete dynamics. The central insight is that the max-plus semiring underlying
+      ultradiscretization naturally models neural threshold dynamics: the log-sum-exp function serves as a
+      differentiable soft-maximum that converges to hard thresholding as a learnable temperature parameter
+      <em>&epsilon; &rarr; 0</em>. Two neuron models are derived from distinct dynamical systems: UltraLIF
+      from the LIF ordinary differential equation (temporal dynamics) and UltraDLIF from the diffusion equation
+      modeling gap junction coupling across neuronal populations (spatial dynamics). Both yield fully
+      differentiable SNNs trainable via standard backpropagation with no forward-backward mismatch. Theoretical
+      analysis establishes pointwise convergence to tropical LIF dynamics with quantitative error bounds and
+      bounded non-vanishing gradients. Experiments on six benchmarks spanning static images, neuromorphic
+      vision, and audio demonstrate improvements over surrogate gradient baselines, with gains most pronounced
+      in the ultra-low latency regime (<em>T</em>=1) on neuromorphic and temporal datasets. An optional
+      sparsity penalty enables significant energy reduction while maintaining competitive accuracy.
+    </p>
+  </div>
+</section>
+
+<!-- =========================================================
+     TEASER FIGURE
+     ========================================================= -->
+<section class="page-section">
+  <div class="inner">
+    <div class="sec-title">Spike Mechanisms</div>
+    <div class="teaser">
+      <img src="static/images/teaser.png" alt="Comparison of spike activation functions" />
+    </div>
+    <p class="fig-caption">
+      <strong>Figure 1.</strong> Spike activation functions and their gradients. (a) The Heaviside (hard threshold)
+      has zero gradient almost everywhere. Surrogate gradient methods replace it with a smooth proxy during
+      training only, creating a mismatch. UltraLIF uses the same smooth function in both forward and backward
+      passes &mdash; no mismatch by construction. (b) Gradients: UltraLIF provides bounded, non-vanishing
+      gradients for all membrane potentials.
+    </p>
+  </div>
+</section>
+
+<!-- =========================================================
+     LAY SUMMARY
+     ========================================================= -->
+<section class="page-section alt">
+  <div class="inner">
+    <div class="sec-title">Lay Summary</div>
+    <p class="lay-text">
+      Spiking Neural Networks are brain-inspired AI models that communicate through brief electrical pulses,
+      making them far more energy-efficient than conventional AI. However, a fundamental training challenge has
+      persisted as an open problem: the &ldquo;spike&rdquo; is like an on/off switch, and on/off switches have
+      no smooth middle ground for standard learning algorithms to work with. Current methods work around this by
+      teaching the network using a smoothed approximation of the spike during training, then switching to the
+      real discrete spike at test time, creating a mismatch between how the model learns and how it actually
+      runs. This inconsistency is a known limitation of virtually all existing SNN training methods.
+    </p>
+    <p class="lay-text" style="margin-top:1rem;">
+      This work introduces UltraLIF, a spiking neuron derived from first principles using a mathematical
+      technique from physics called ultradiscretization. Rather than approximating the spike, the smooth
+      trainable operation emerges directly from the neuron&rsquo;s governing equation, making training and
+      inference identical by construction. A temperature parameter, learned automatically during training,
+      controls how sharp each spike is and adapts to the complexity of the task.
+    </p>
+    <p class="lay-text" style="margin-top:1rem;">
+      UltraLIF outperforms existing methods across six benchmarks, including spoken word recognition,
+      moving-object detection from event-driven cameras, and standard image classification. It also scales
+      to larger, deeper architectures where conventional spiking neurons permanently switch off and stop
+      learning &mdash; a failure mode UltraLIF resolves through its self-adjusting firing sensitivity.
+    </p>
+  </div>
+</section>
+
+<!-- =========================================================
+     INTERACTIVE 1: EPSILON EXPLORER
+     ========================================================= -->
+<section class="page-section">
+  <div class="inner wide">
+    <div class="sec-title">Interactive: Temperature Parameter <em>&epsilon;</em></div>
+    <p class="results-intro">
+      In UltraLIF, a single learnable parameter <em>&epsilon;</em> controls the softness of the spike function
+      <strong>s&nbsp;=&nbsp;&sigma;(V&nbsp;/&nbsp;&epsilon;)</strong> and its gradient. Drag the slider to see
+      both effects simultaneously. At small <em>&epsilon;</em> the neuron fires sharply (near-binary), but
+      gradients become concentrated near the threshold. At large <em>&epsilon;</em> the response is smooth and
+      gradients are wide &mdash; but spikes lose discriminability.
+    </p>
+
+    <div class="interactive-wrap two-col">
+      <!-- Left: spike function -->
+      <div class="plot-card">
+        <div class="plot-title">Spike function &mdash; s = &sigma;(V / &epsilon;)</div>
+        <canvas id="c_spike" height="220"></canvas>
+        <div class="slider-row">
+          <span class="slider-label">&epsilon; = <span id="v_eps">1.00</span></span>
+          <input id="sl_eps" type="range" min="0.05" max="5.0" step="0.05" value="1.0" />
+        </div>
+        <p class="slider-note">Small &epsilon; &rarr; near-Heaviside. Large &epsilon; &rarr; gentle sigmoid.</p>
+      </div>
+
+      <!-- Right: gradient -->
+      <div class="plot-card">
+        <div class="plot-title">Gradient &mdash; &part;s/&part;V = s(1&minus;s) / &epsilon;</div>
+        <canvas id="c_grad" height="220"></canvas>
+        <div class="slider-row">
+          <span class="slider-label" style="color:var(--gray); font-size:0.75rem;">same &epsilon; as left</span>
+        </div>
+        <p class="slider-note">Gradient is bounded for all &epsilon;&nbsp;&gt;&nbsp;0. No dead neurons.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem;">
+      The key advantage: unlike surrogate gradients (which are a <em>different</em> function from the forward
+      spike), UltraLIF&rsquo;s gradient is the <em>exact</em> derivative of the same spike function used in the
+      forward pass &mdash; no mismatch.
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     INTERACTIVE 2: EPSILON + BETA
+     ========================================================= -->
+<section class="page-section alt">
+  <div class="inner wide">
+    <div class="sec-title">Interactive: Membrane Update &amp; Spike Scale</div>
+    <p class="results-intro">
+      In standard UltraLIF a single &epsilon; does two jobs at once: it sets the softness of the
+      max-plus (LSE) membrane update <strong>and</strong> the spike sharpness (= 1/&epsilon;), so the
+      two are coupled. The decoupled variant (UltraLIF-DS) adds a separate spike scale &beta;, giving
+      each parameter one clean role: <strong>&epsilon; = membrane smoothness</strong> and
+      <strong>&beta; = spike sharpness</strong>, set independently. Drag &epsilon; to reshape the
+      membrane (left); drag &beta; to sharpen the spike (right) without touching the membrane.
+    </p>
+
+    <div class="interactive-wrap two-col">
+      <!-- Left: membrane dynamics, own eps slider -->
+      <div class="plot-card">
+        <div class="plot-title">
+          Membrane update &mdash; LSE<sub>&epsilon;</sub>(a,&thinsp;0) vs max(a,&thinsp;0)
+        </div>
+        <canvas id="c_lse" height="220"></canvas>
+        <div class="slider-row">
+          <span class="slider-label">&epsilon; = <span id="v_lse_eps">1.00</span></span>
+          <input id="sl_lse_eps" type="range" min="0.05" max="5.0" step="0.05" value="1.0" />
+        </div>
+        <p class="slider-note">
+          <span style="color:var(--blue);">&#9646;</span> LSE (soft max-plus) &nbsp;&nbsp;
+          <span style="color:#dc2626;">&#9135;&#9135;</span> Hard max (&epsilon;&rarr;0)
+        </p>
+      </div>
+
+      <!-- Right: spike with independent beta -->
+      <div class="plot-card">
+        <div class="plot-title">
+          Spike sharpness &mdash; s = &sigma;(&beta;&thinsp;&middot;&thinsp;V)
+        </div>
+        <canvas id="c_ds_spike" height="220"></canvas>
+        <div class="slider-row">
+          <span class="slider-label">&beta; = <span id="v_beta">5.0</span></span>
+          <input id="sl_beta" type="range" min="0.5" max="25.0" step="0.5" value="5.0" />
+        </div>
+        <p class="slider-note">
+          <span style="color:#2563eb;">&#9646;</span> &sigma;(V/&epsilon;) standard &nbsp;&nbsp;
+          <span style="color:#7c3aed;">&#9646;</span> &sigma;(&beta;&thinsp;&middot;&thinsp;V) independent &nbsp;&nbsp;
+          <span style="color:#bbb;">&#9135;&#9135;</span> Heaviside
+        </p>
+      </div>
+    </div>
+
+    <!-- Gradient row -->
+    <div class="interactive-wrap two-col" style="margin-top:1rem;">
+      <div class="plot-card">
+        <div class="plot-title">Gradient of LSE &mdash; &part;/&part;a&thinsp;LSE<sub>&epsilon;</sub>(a,&thinsp;0) = &sigma;(a/&epsilon;)</div>
+        <canvas id="c_lse_grad" height="200"></canvas>
+        <p class="slider-note" style="margin-top:0.5rem;">
+          <span style="color:#2563eb;">&#9646;</span> LSE gradient &nbsp;&nbsp;
+          <span style="color:#bbb;">&#9135;&#9135;</span> Hard max gradient (step)
+        </p>
+      </div>
+      <div class="plot-card">
+        <div class="plot-title">Spike gradients &mdash; &part;s/&part;V for each curve</div>
+        <canvas id="c_ds_grad" height="200"></canvas>
+        <p class="slider-note" style="margin-top:0.5rem;">
+          <span style="color:#2563eb;">&#9646;</span> (1/&epsilon;)&thinsp;&sigma;(V/&epsilon;)(1&minus;&sigma;(V/&epsilon;)) &nbsp;
+          <span style="color:#7c3aed;">&#9646;</span> &beta;&thinsp;&sigma;(&beta;V)(1&minus;&sigma;(&beta;V))
+        </p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem;">
+      In standard UltraLIF spike sharpness is locked to 1/&epsilon;, so you cannot sharpen the spikes
+      without also hardening the membrane. Decoupling adds &beta;: &epsilon; keeps the membrane smooth
+      and trainable while &beta; sharpens the spikes toward binary, independently.
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     RESULTS 1: MAIN T=1 RESULTS
+     ========================================================= -->
+<section class="page-section">
+  <div class="inner wide">
+    <div class="sec-title">Results: Ultra-Low Latency (T = 1)</div>
+    <p class="results-intro">
+      The primary advantage of UltraLIF appears at a single timestep (<em>T</em>=1), where surrogate gradient
+      methods suffer most from forward-backward mismatch. Results below compare the best UltraLIF variant
+      against the best surrogate-gradient baseline on each dataset (1-layer FC, hidden=64, 100 epochs).
+      Gains are largest on temporally-structured data: +11.22% on spoken digits (SHD), +7.96% on event-camera
+      gestures (DVS-Gesture), +3.91% on spiking MNIST (N-MNIST).
+    </p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Dataset</th>
+          <th>Type</th>
+          <th>Best Ultra (T=1)</th>
+          <th>Model</th>
+          <th>Best Baseline</th>
+          <th>Baseline Model</th>
+          <th>Gain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MNIST</td><td>Static</td>
+          <td class="best">95.67%</td><td>UltraDLIF</td>
+          <td>95.58%</td><td>DSpike+</td>
+          <td class="delta">+0.09%</td>
+        </tr>
+        <tr>
+          <td>Fashion-MNIST</td><td>Static</td>
+          <td class="best">83.02%</td><td>UltraPLIF</td>
+          <td>82.67%</td><td>DSpike+</td>
+          <td class="delta">+0.35%</td>
+        </tr>
+        <tr>
+          <td>CIFAR-10</td><td>Static</td>
+          <td class="best">43.27%</td><td>UltraPLIF</td>
+          <td>40.26%</td><td>DSpike+</td>
+          <td class="delta">+3.01%</td>
+        </tr>
+        <tr>
+          <td>N-MNIST</td><td>Neuromorphic</td>
+          <td class="best">94.14%</td><td>UltraDLIF</td>
+          <td>90.23%</td><td>DSpike</td>
+          <td class="delta">+3.91%</td>
+        </tr>
+        <tr>
+          <td>DVS-Gesture</td><td>Neuromorphic</td>
+          <td class="best">60.23%</td><td>UltraPLIF</td>
+          <td>52.27%</td><td>PLIF</td>
+          <td class="delta-large">+7.96%</td>
+        </tr>
+        <tr>
+          <td>SHD</td><td>Audio spike</td>
+          <td class="best">51.24%</td><td>UltraDLIF</td>
+          <td>40.02%</td><td>FullPLIF</td>
+          <td class="delta-large">+11.22%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:1.8rem;">
+      <table class="data-table" style="margin-top:0.5rem;">
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Best Ultra</th>
+            <th>Best Baseline</th>
+            <th>Gain (pp)</th>
+            <th>Relative gain</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>MNIST</td><td class="best">95.67%</td><td>95.58%</td><td class="delta">+0.09</td><td class="delta">+0.1%</td></tr>
+          <tr><td>Fashion-MNIST</td><td class="best">83.02%</td><td>82.67%</td><td class="delta">+0.35</td><td class="delta">+0.4%</td></tr>
+          <tr><td>CIFAR-10</td><td class="best">43.27%</td><td>40.26%</td><td class="delta">+3.01</td><td class="delta">+7.5%</td></tr>
+          <tr><td>N-MNIST</td><td class="best">94.14%</td><td>90.23%</td><td class="delta">+3.91</td><td class="delta">+4.3%</td></tr>
+          <tr><td>DVS-Gesture</td><td class="best">60.23%</td><td>52.27%</td><td class="delta-large">+7.96</td><td class="delta-large">+15.2%</td></tr>
+          <tr><td>SHD</td><td class="best">51.24%</td><td>40.02%</td><td class="delta-large">+11.22</td><td class="delta-large">+28.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     RESULTS 2: DEPTH ROBUSTNESS
+     ========================================================= -->
+<section class="page-section alt">
+  <div class="inner wide">
+    <div class="sec-title">Results: Depth Robustness (1L / 2L / 3L)</div>
+    <p class="results-intro">
+      Standard LIF suffers dramatic accuracy collapse when depth increases at T=1, because forward-backward
+      mismatch compounds across layers. UltraLIF degrades minimally. The most striking example is SHD: adding
+      a second hidden layer causes LIF to collapse from 37.9% to 19.5% (&minus;18.4pp), while UltraDLIF
+      drops only from 53.8% to 50.8% (&minus;2.9pp). Ultra wins all 6 datasets at 3 layers, T=1.
+    </p>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">2-Layer FC &mdash; T=1</p>
+    <table class="data-table">
+      <thead>
+        <tr><th>Dataset</th><th>LIF</th><th>UltraDLIF</th><th>UltraDPLIF</th><th>UltraLIF</th><th>UltraPLIF</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MNIST</td><td>95.97%</td><td>96.10%</td><td>96.10%</td><td>95.90%</td><td class="best">96.22%</td></tr>
+        <tr><td>Fashion</td><td>82.65%</td><td>83.43%</td><td>83.43%</td><td>83.07%</td><td class="best">83.45%</td></tr>
+        <tr><td>CIFAR-10</td><td>40.89%</td><td>44.20%</td><td>44.20%</td><td>43.44%</td><td class="best">44.63%</td></tr>
+        <tr><td>N-MNIST</td><td>90.01%</td><td class="best">94.94%</td><td class="best">94.94%</td><td>90.74%</td><td>94.10%</td></tr>
+        <tr><td>DVS-Gesture</td><td>52.27%</td><td>51.52%</td><td>51.52%</td><td>53.41%</td><td class="best">56.44%</td></tr>
+        <tr><td>SHD</td><td class="collapse">19.48% (&minus;18.4pp)</td><td class="best">50.84%</td><td class="best">50.84%</td><td>36.09%</td><td>42.01%</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin:1.4rem 0 0.6rem;">3-Layer FC &mdash; T=1</p>
+    <table class="data-table">
+      <thead>
+        <tr><th>Dataset</th><th>LIF</th><th>UltraDLIF</th><th>UltraDPLIF</th><th>UltraLIF</th><th>UltraPLIF</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MNIST</td><td>95.90%</td><td>96.22%</td><td>96.22%</td><td>95.63%</td><td class="best">96.35%</td></tr>
+        <tr><td>Fashion</td><td>82.90%</td><td class="best">83.55%</td><td class="best">83.55%</td><td>82.23%</td><td>83.42%</td></tr>
+        <tr><td>CIFAR-10</td><td>40.35%</td><td>43.64%</td><td>43.64%</td><td>43.01%</td><td class="best">44.15%</td></tr>
+        <tr><td>N-MNIST</td><td class="collapse">87.82%</td><td class="best">94.87%</td><td class="best">94.87%</td><td>93.45%</td><td>93.68%</td></tr>
+        <tr><td>DVS-Gesture</td><td class="collapse">50.38%</td><td class="best">51.14%</td><td class="best">51.14%</td><td>39.39%</td><td>43.94%</td></tr>
+        <tr><td>SHD</td><td class="collapse">21.73%</td><td class="best">45.67%</td><td class="best">45.67%</td><td>24.25%</td><td>30.70%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- =========================================================
+     RESULTS 3: ENERGY + ARCHITECTURE SCALABILITY
+     ========================================================= -->
+<section class="page-section">
+  <div class="inner wide">
+    <div class="sec-title">Results: Energy Efficiency &amp; Architecture Scalability</div>
+
+    <p class="results-intro">
+      A sparsity penalty &lambda; on the mean spike rate is added to the cross-entropy loss:
+      Loss = CE + &lambda;&thinsp;&middot;&thinsp;s&#772;. This directly reduces synaptic operations
+      (energy &prop; spike rate &times; T) with minimal accuracy cost, since UltraLIF&rsquo;s learnable
+      &epsilon; can adapt to compensate.
+    </p>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">Energy efficiency with sparsity penalty (&lambda; = 0.1) &mdash; UltraPLIF across all datasets</p>
+    <table class="data-table" style="margin-bottom:2rem;">
+      <thead>
+        <tr><th>Dataset</th><th>T</th><th>Acc. (&lambda;=0)</th><th>Acc. (&lambda;=0.1)</th><th>Spike rate (&lambda;=0)</th><th>Spike rate (&lambda;=0.1)</th><th>Reduction</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MNIST</td><td>1</td><td>95.67%</td><td class="best">95.71% &uarr;</td><td>0.445</td><td>0.268</td><td class="delta">40%</td></tr>
+        <tr><td>MNIST</td><td>10</td><td>97.35%</td><td class="best">97.35%</td><td>0.473</td><td>0.239</td><td class="delta">50%</td></tr>
+        <tr><td>Fashion-MNIST</td><td>1</td><td>82.79%</td><td class="best">83.05% &uarr;</td><td>0.428</td><td>0.266</td><td class="delta">38%</td></tr>
+        <tr><td>Fashion-MNIST</td><td>10</td><td>85.69%</td><td class="best">85.74% &uarr;</td><td>0.456</td><td>0.279</td><td class="delta">39%</td></tr>
+        <tr><td>CIFAR-10</td><td>1</td><td>43.11%</td><td>43.04%</td><td>0.480</td><td>0.339</td><td class="delta">29%</td></tr>
+        <tr><td>CIFAR-10</td><td>10</td><td>45.75%</td><td>45.32%</td><td>0.469</td><td>0.340</td><td class="delta">28%</td></tr>
+        <tr><td>N-MNIST</td><td>10</td><td>97.38%</td><td>96.93%</td><td>0.475</td><td>0.292</td><td class="delta">39%</td></tr>
+        <tr><td>SHD</td><td>10</td><td>68.90%</td><td class="best">70.27% &uarr;</td><td>0.469</td><td>0.383</td><td class="delta">18%</td></tr>
+      </tbody>
+    </table>
+
+    <p class="results-intro">
+      Architecture scalability across fully-connected (FC), convolutional (Conv), and ResNet backbones.
+      On ResNet50, standard LIF produces dead neurons at all timesteps while UltraLIF variants remain
+      stable, demonstrating that the self-adjusting &epsilon; resolves the dead neuron failure mode
+      even at large depth.
+    </p>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">Architecture scalability &mdash; CIFAR-10</p>
+    <table class="data-table" style="margin-bottom:2rem;">
+      <thead>
+        <tr><th>Architecture</th><th>T</th><th>LIF</th><th>Best Ultra</th><th>Model</th><th>Gain</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>FC 1-layer</td><td>1</td><td>41.79%</td><td class="best">46.40%</td><td>UltraDPLIF</td><td class="delta">+4.61pp</td></tr>
+        <tr><td>FC 2-layer</td><td>1</td><td>40.89%</td><td class="best">44.63%</td><td>UltraPLIF</td><td class="delta">+3.74pp</td></tr>
+        <tr><td>FC 3-layer</td><td>1</td><td>40.35%</td><td class="best">44.15%</td><td>UltraPLIF</td><td class="delta">+3.80pp</td></tr>
+        <tr><td>Conv 2-layer</td><td>1</td><td class="best">74.37%</td><td>70.54%</td><td>UltraDLIF</td><td class="collapse">&minus;3.83pp</td></tr>
+        <tr><td>ResNet18 + spiking FC</td><td>1</td><td>93.12%</td><td class="best">93.37%</td><td>UltraLIF / UltraDPLIF</td><td class="delta">+0.25pp</td></tr>
+        <tr><td>ResNet18 + spiking FC</td><td>10</td><td>93.10%</td><td class="best">93.50%</td><td>UltraLIF</td><td class="delta">+0.40pp</td></tr>
+        <tr><td>ResNet50 + spiking FC</td><td>1</td><td class="collapse">31.83% (dead)</td><td class="best">92.78%</td><td>UltraPLIF</td><td class="delta-large">+60.95pp</td></tr>
+        <tr><td>ResNet50 + spiking FC</td><td>5</td><td class="collapse">35.09% (dead)</td><td class="best">92.88%</td><td>UltraPLIF</td><td class="delta-large">+57.79pp</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">ResNet18 backbone &mdash; all datasets (T=1 / T=5 / T=10)</p>
+    <table class="data-table" style="margin-bottom:2rem;">
+      <thead>
+        <tr><th>Dataset</th><th>LIF T=1</th><th>Best Ultra T=1</th><th>LIF T=5</th><th>Best Ultra T=5</th><th>LIF T=10</th><th>Best Ultra T=10</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>CIFAR-10</td>
+          <td>93.12%</td><td class="best">93.37% <span style="font-size:0.8em;color:var(--gray);">(UltraLIF)</span></td>
+          <td>93.01%</td><td class="best">93.39% <span style="font-size:0.8em;color:var(--gray);">(UltraDLIF)</span></td>
+          <td>93.10%</td><td class="best">93.50% <span style="font-size:0.8em;color:var(--gray);">(UltraLIF)</span></td>
+        </tr>
+        <tr>
+          <td>Fashion-MNIST</td>
+          <td>93.81%</td><td class="best">93.95% <span style="font-size:0.8em;color:var(--gray);">(UltraPLIF)</span></td>
+          <td>93.65%</td><td class="best">93.89% <span style="font-size:0.8em;color:var(--gray);">(UltraDPLIF)</span></td>
+          <td>93.86%</td><td class="best">94.24% <span style="font-size:0.8em;color:var(--gray);">(UltraDLIF)</span></td>
+        </tr>
+        <tr>
+          <td>N-MNIST</td>
+          <td>99.20%</td><td class="best">99.23% <span style="font-size:0.8em;color:var(--gray);">(UltraDLIF)</span></td>
+          <td>99.13%</td><td class="best">99.23% <span style="font-size:0.8em;color:var(--gray);">(UltraDLIF)</span></td>
+          <td>99.13%</td><td class="best">99.23% <span style="font-size:0.8em;color:var(--gray);">(UltraDLIF)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:0.88rem; font-weight:600; color:#374151; margin-bottom:0.6rem;">ResNet50 backbone &mdash; CIFAR-10 (T=1 / T=5 / T=10)</p>
+    <table class="data-table" style="margin-bottom:2rem;">
+      <thead>
+        <tr><th>Model</th><th>T=1</th><th>T=5</th><th>T=10</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>LIF</td><td class="collapse">31.83% (dead)</td><td class="collapse">35.09% (dead)</td><td class="collapse">23.23% (dead)</td></tr>
+        <tr><td>UltraDLIF</td><td>92.23%</td><td>92.41%</td><td>92.54%</td></tr>
+        <tr><td>UltraDPLIF</td><td>92.22%</td><td>92.73%</td><td>90.42%</td></tr>
+        <tr><td>UltraLIF</td><td>91.92%</td><td>91.85%</td><td>91.77%</td></tr>
+        <tr><td>UltraPLIF</td><td class="best">92.78%</td><td class="best">92.88%</td><td class="best">92.82%</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:0.5rem;">
+      <img src="static/images/eps_ablation.png" alt="Epsilon ablation" style="width:100%; border-radius:6px; border:1px solid var(--border);" />
+      <p class="fig-caption">
+        <strong>Figure.</strong> Epsilon ablation on MNIST (T=1, 100 epochs). Learned &epsilon; shows a
+        characteristic trajectory: initial sharpening then recovery to a model-specific optimum. Learned
+        &epsilon; consistently matches or exceeds all fixed configurations across all four UltraLIF variants.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     BIBTEX
+     ========================================================= -->
+<section class="page-section alt">
+  <div class="inner">
+    <div class="sec-title">Citation</div>
+    <div class="bibtex-wrap">
+      <pre class="bibtex-block" id="bibtex">@inproceedings{minoza2026ultralif,
+  title     = {UltraLIF: Fully Differentiable Spiking Neural Networks
+               via Ultradiscretization and Max-Plus Algebra},
+  author    = {Mi{\~n}oza, Jose Marie Antonio},
+  booktitle = {International Conference on Machine Learning},
+  year      = {2026},
+}</pre>
+      <button class="copy-btn" onclick="copyBibtex()">Copy</button>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+<footer>
+  <p>
+    Website template based on <a href="https://nerfies.github.io" target="_blank">Nerfies</a>
+    (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>).
+    &copy; 2026 Jose Marie Antonio Mi&ntilde;oza, Center for AI Research PH.
+  </p>
+</footer>
+
+<!-- =========================================================
+     INTERACTIVE JAVASCRIPT
+     ========================================================= -->
+<script>
+// ---- Shared math -------------------------------------------------
+const sigmoid = x => 1 / (1 + Math.exp(-x));
+const lse2 = (a, b, eps) => {
+  const m = Math.max(a, b);
+  return m + eps * Math.log(Math.exp((a - m) / eps) + Math.exp((b - m) / eps));
+};
+
+// ---- Canvas state (initialized once, reused on every draw) -------
+const CV = {};
+
+function initCanvas(id, logicalH) {
+  const el = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  // Measure parent width for responsive sizing; subtract card padding
+  const logicalW = Math.max((el.parentElement ? el.parentElement.clientWidth - 24 : 0), 280);
+  el.width  = Math.round(logicalW * dpr);
+  el.height = Math.round(logicalH * dpr);
+  el.style.height = logicalH + 'px';
+  const ctx = el.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // absolute — not cumulative
+  CV[id] = { ctx, W: logicalW, H: logicalH };
+}
+
+// ---- Generic line chart helper -----------------------------------
+function drawChart(ctx, W, H, xRange, yRange, series, opts) {
+  const pad = opts.pad || { t:18, r:20, b:28, l:38 };
+  const N = 400;
+  const toX = v => pad.l + (v - xRange[0]) / (xRange[1] - xRange[0]) * (W - pad.l - pad.r);
+  const toY = v => H - pad.b - (v - yRange[0]) / (yRange[1] - yRange[0]) * (H - pad.t - pad.b);
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = '#f0f0f0';
+  ctx.lineWidth = 1;
+  if (opts.yTicks) opts.yTicks.forEach(y => {
+    ctx.beginPath();
+    ctx.moveTo(pad.l, toY(y));
+    ctx.lineTo(W - pad.r, toY(y));
+    ctx.stroke();
+  });
+
+  // Axes
+  ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1;
+  // x-axis
+  ctx.beginPath(); ctx.moveTo(pad.l, toY(yRange[0])); ctx.lineTo(W - pad.r, toY(yRange[0])); ctx.stroke();
+  // y-axis
+  ctx.beginPath(); ctx.moveTo(toX(0), pad.t); ctx.lineTo(toX(0), H - pad.b); ctx.stroke();
+
+  // Tick labels
+  ctx.fillStyle = '#9ca3af'; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center';
+  if (opts.xTicks) opts.xTicks.forEach(x => ctx.fillText(x, toX(x), H - pad.b + 12));
+  ctx.textAlign = 'right';
+  if (opts.yTicks) opts.yTicks.forEach(y => ctx.fillText(y, pad.l - 4, toY(y) + 3));
+
+  // Axis labels
+  if (opts.xlabel) {
+    ctx.textAlign = 'center'; ctx.fillStyle = '#6b7280'; ctx.font = '11px Inter, sans-serif';
+    ctx.fillText(opts.xlabel, (pad.l + W - pad.r) / 2, H - 4);
+  }
+  if (opts.ylabel) {
+    ctx.save(); ctx.translate(10, (pad.t + H - pad.b) / 2);
+    ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center';
+    ctx.fillText(opts.ylabel, 0, 0); ctx.restore();
+  }
+
+  // Series
+  series.forEach(s => {
+    const xs = Array.from({length: N}, (_, i) => xRange[0] + (xRange[1] - xRange[0]) * i / (N - 1));
+    const ys = xs.map(s.fn);
+    ctx.save();
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.2;
+    ctx.setLineDash(s.dash || []);
+    ctx.beginPath();
+    xs.forEach((x, i) => {
+      const cx = toX(x), cy = toY(ys[i]);
+      if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    });
+    ctx.stroke();
+    ctx.restore();
+
+    // Legend entry
+    if (s.label) {
+      const lx = pad.l + 8, ly = pad.t + (series.indexOf(s)) * 16 + 12;
+      ctx.save();
+      ctx.strokeStyle = s.color; ctx.lineWidth = 2; ctx.setLineDash(s.dash || []);
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 18, ly); ctx.stroke();
+      ctx.fillStyle = '#374151'; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(s.label, lx + 22, ly + 3);
+      ctx.restore();
+    }
+  });
+}
+
+// ---- Interactive 1: epsilon explorer ----------------------------
+let eps = 1.0;
+
+function redrawEpsilon() {
+  const padS = {t:18, r:16, b:30, l:40};
+  const { ctx: c1, W: W1, H: H1 } = CV['c_spike'];
+  drawChart(c1, W1, H1, [-4, 4], [-0.05, 1.1], [
+    { fn: v => v < 0 ? 0 : 1, color: '#d1d5db', dash: [5,4], width:1.5, label: 'Heaviside' },
+    { fn: v => sigmoid(v / eps),  color: '#2563eb', width: 2.5, label: 's = sigmoid(V/eps)' },
+  ], { xTicks: [-3,-2,-1,0,1,2,3], yTicks: [0,0.25,0.5,0.75,1], xlabel: 'V', ylabel: 's', pad: padS });
+
+  const maxG = 1 / (4 * eps);
+  const { ctx: c2, W: W2, H: H2 } = CV['c_grad'];
+  drawChart(c2, W2, H2, [-4, 4], [-0.01, Math.max(maxG * 1.2, 0.35)], [
+    { fn: v => { const s = sigmoid(v / eps); return s * (1 - s) / eps; }, color: '#059669', width: 2.5, label: 'ds/dV' },
+  ], { xTicks: [-3,-2,-1,0,1,2,3], yTicks: [0, +(maxG*0.5).toFixed(2), +maxG.toFixed(2)], xlabel: 'V', ylabel: 'ds/dV', pad: padS });
+}
+
+document.getElementById('sl_eps').addEventListener('input', function() {
+  eps = parseFloat(this.value);
+  document.getElementById('v_eps').textContent = eps.toFixed(2);
+  redrawEpsilon(); // Interactive 1 only
+});
+
+// ---- Interactive 2: independent eps + beta ----------------------
+let lseEps = 1.0, beta = 5.0;
+
+function redrawLSE() {
+  const { ctx, W, H } = CV['c_lse'];
+  // Show LSE_eps(a, 0) vs max(a, 0) as function of net input a.
+  // Equivalent to softplus(a/eps)*eps vs ReLU(a). Kink at a=0, no flat regions.
+  drawChart(ctx, W, H, [-4, 4], [-0.2, 4.2], [
+    { fn: a => Math.max(a, 0),       color: '#dc2626', dash: [5,4], width: 1.5, label: 'hard max (eps->0)' },
+    { fn: a => lse2(a, 0, lseEps),   color: '#2563eb', width: 2.5,  label: 'LSE_eps' },
+  ], { xTicks: [-3,-2,-1,0,1,2,3], yTicks: [0,1,2,3,4], xlabel: 'net input a', ylabel: 'output', pad: {t:18,r:16,b:30,l:40} });
+}
+
+function redrawLSEGrad() {
+  const { ctx, W, H } = CV['c_lse_grad'];
+  // d/da LSE_eps(a,0) = sigmoid(a/eps). Hard max gradient = step H(a).
+  const maxG = 1.0; // sigmoid peaks at 1
+  drawChart(ctx, W, H, [-4, 4], [-0.05, 1.1], [
+    { fn: a => a < 0 ? 0 : 1,           color: '#d1d5db', dash: [5,4], width: 1.5, label: 'hard max grad' },
+    { fn: a => sigmoid(a / lseEps),      color: '#2563eb', width: 2.5,  label: 'LSE grad = sigma(a/eps)' },
+  ], { xTicks: [-3,-2,-1,0,1,2,3], yTicks: [0,0.25,0.5,0.75,1], xlabel: 'a', ylabel: 'dOutput/da', pad: {t:18,r:16,b:30,l:40} });
+}
+
+function redrawDSGrad() {
+  const { ctx, W, H } = CV['c_ds_grad'];
+  // Gradient of sigma(V/eps): (1/eps)*s*(1-s)  where s=sigma(V/eps)
+  // Gradient of sigma(beta*V): beta*s*(1-s)    where s=sigma(beta*V)
+  const maxG = Math.max(1/(4*lseEps), beta/4, 0.3);
+  const s_eps  = v => sigmoid(v / lseEps);
+  const s_beta = v => sigmoid(beta * v);
+  drawChart(ctx, W, H, [-3, 3], [-0.02, maxG * 1.15], [
+    { fn: v => s_eps(v)  * (1 - s_eps(v))  / lseEps,  color: '#2563eb', width: 2.0, label: 'grad sigma(V/eps)' },
+    { fn: v => beta * s_beta(v) * (1 - s_beta(v)),     color: '#7c3aed', width: 2.5, label: 'grad sigma(beta*V)' },
+  ], {
+    xTicks: [-2,-1,0,1,2],
+    yTicks: [0, +(maxG*0.5).toFixed(2), +maxG.toFixed(2)],
+    xlabel: 'V', ylabel: 'ds/dV',
+    pad: {t:18,r:16,b:30,l:44}
+  });
+}
+
+document.getElementById('sl_lse_eps').addEventListener('input', function() {
+  lseEps = parseFloat(this.value);
+  document.getElementById('v_lse_eps').textContent = lseEps.toFixed(2);
+  redrawLSE();
+  redrawLSEGrad();
+  redrawDSSpike();
+  redrawDSGrad();
+});
+
+function redrawDSSpike() {
+  const { ctx, W, H } = CV['c_ds_spike'];
+  // Show both: standard UltraLIF spike (1/eps sharpness) and independent beta spike.
+  // When eps changes the blue curve moves; when beta changes the purple curve moves.
+  drawChart(ctx, W, H, [-3, 3], [-0.05, 1.1], [
+    { fn: v => v < 0 ? 0 : 1,          color: '#d1d5db', dash: [5,4], width: 1.5, label: 'Heaviside' },
+    { fn: v => sigmoid(v / lseEps),     color: '#2563eb', width: 2.0,  label: 'sigma(V/eps)  [standard]' },
+    { fn: v => sigmoid(beta * v),       color: '#7c3aed', width: 2.5,  label: 'sigma(beta*V) [beta]' },
+  ], { xTicks: [-2,-1,0,1,2], yTicks: [0,0.25,0.5,0.75,1], xlabel: 'V', ylabel: 's', pad: {t:18,r:16,b:30,l:40} });
+}
+
+document.getElementById('sl_beta').addEventListener('input', function() {
+  beta = parseFloat(this.value);
+  document.getElementById('v_beta').textContent = beta.toFixed(1);
+  redrawLSE();
+  redrawLSEGrad();
+  redrawDSSpike();
+  redrawDSGrad();
+});
+
+// ---- Init + resize (init reinitializes canvas sizes; draw reuses stored state) ----
+function initCanvases() {
+  initCanvas('c_spike',    220);
+  initCanvas('c_grad',     220);
+  initCanvas('c_lse',      220);
+  initCanvas('c_lse_grad', 200);
+  initCanvas('c_ds_spike', 220);
+  initCanvas('c_ds_grad',  200);
+}
+
+function drawAll() {
+  redrawEpsilon();
+  redrawLSE();
+  redrawLSEGrad();
+  redrawDSSpike();
+  redrawDSGrad();
+}
+
+window.addEventListener('load', () => { initCanvases(); drawAll(); });
+window.addEventListener('resize', () => { initCanvases(); drawAll(); });
+
+// ---- BibTeX copy ------------------------------------------------
+function copyBibtex() {
+  const text = document.getElementById('bibtex').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>

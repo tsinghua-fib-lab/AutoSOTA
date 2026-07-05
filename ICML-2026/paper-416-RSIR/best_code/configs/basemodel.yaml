@@ -1,0 +1,43 @@
+train: 
+  batch_size: 256
+  early_stop_mode: max
+  early_stop_patience: 20
+  epochs: 1000
+  device: 3
+  optimizer: adam
+  learning_rate: 0.001
+  enable_conditional_loss: False 
+  weight_decay: 0
+  num_neg: 512
+  seed: 2023
+  weighting_metric: 'loss'
+  weighting_mode: 'threshold'
+  topk_ratio: 0.95
+  
+  hard_neg_epoch_threshold: 10000
+  hard_neg_prob: 0.00001
+  
+  enable_sample_analysis: true 
+  sample_analysis_freq: 5
+
+
+model: 
+  embed_dim: 64
+  loss_fn: 'sampled_softmax'
+
+eval:
+  batch_size: 2048
+  cutoff: [20, 10, 5, 3, 1]
+  val_metrics: [ndcg, recall, precision, f1, mrr]
+  test_metrics: [ndcg, recall, precision, f1, mrr]
+  topk: 100
+  save_path: './saved/'
+
+
+generation:
+  enabled: true
+  interval: 5
+  m: 5
+  k: 20000000
+  local_prob: 0.5
+

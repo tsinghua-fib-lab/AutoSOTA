@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flashtrace"
+version = "0.1.1"
+description = "Efficient multi-token attribution for reasoning language models."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Wenbo Pan" },
+]
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "accelerate>=1.11.0",
+    "matplotlib>=3.6",
+    "networkx>=3.3",
+    "numpy>=2.0",
+    "seaborn>=0.13.2",
+    "spacy>=3.8",
+    "torch>=2.5",
+    "tqdm>=4.67",
+    "transformers>=5.2.0",
+    "wordfreq>=3.1.1",
+]
+
+[project.optional-dependencies]
+baselines = [
+    "bert-score>=0.3.13",
+    "evaluate>=0.4.6",
+    "sentence-transformers>=4.1.0",
+]
+eval = [
+    "datasets>=2.21",
+    "evaluate>=0.4.6",
+]
+dev = [
+    "pytest>=8.0",
+]
+demo = [
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "uvicorn[standard]>=0.34",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+flashtrace = "flashtrace.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/wbopan/flashtrace"
+Repository = "https://github.com/wbopan/flashtrace"
+Issues = "https://github.com/wbopan/flashtrace/issues"
+
+[tool.setuptools.packages.find]
+include = ["flashtrace*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

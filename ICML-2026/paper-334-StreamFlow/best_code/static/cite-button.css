@@ -1,0 +1,46 @@
+/* Cite Button Styles */
+
+/* 确保标题是相对定位，以便按钮绝对定位 */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+    position: relative;
+    scroll-margin-top: 70px;
+}
+
+/* Cite 按钮样式 */
+.markdown-body .cite-button {
+    position: absolute;
+    right: -55px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    color: #666;
+    font-weight: normal;
+    font-size: 11px;  /* 统一的小字体 */
+    padding: 2px 6px;
+    border: 1px solid #ccc;  /* 细边框 */
+    border-radius: 3px;
+}
+
+/* 鼠标悬停在标题上时显示 Cite 按钮 */
+.markdown-body h1:hover .cite-button,
+.markdown-body h2:hover .cite-button,
+.markdown-body h3:hover .cite-button,
+.markdown-body h4:hover .cite-button,
+.markdown-body h5:hover .cite-button,
+.markdown-body h6:hover .cite-button {
+    opacity: 1;
+}
+
+/* Cite 按钮悬停样式 */
+.markdown-body .cite-button:hover {
+    color: #3366cc;
+    border-color: #3366cc;
+    text-decoration: none;
+}

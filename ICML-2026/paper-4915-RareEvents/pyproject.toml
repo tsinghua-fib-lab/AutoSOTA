@@ -1,0 +1,24 @@
+[project]
+name = "rea_of_llms_supplementary_code"
+version = "0.1.0"
+description = "Env to run supplementary code for Rare Event Analysis of Large Language Models."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.1.0",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.1",
+    "pandas>=3.0.0",
+    "pymbar>=4.0.3",
+    "textstat>=0.7.12",
+    "torch>=2.10.0",
+    "transformers>=5.0.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]

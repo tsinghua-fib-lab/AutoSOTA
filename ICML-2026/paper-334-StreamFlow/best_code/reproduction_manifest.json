@@ -1,0 +1,84 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 334,
+    "repo_url": "https://github.com/World-Snapshot/StreamFlow",
+    "repo_commit": "e6128f67fded4ca3f41efae8e83defbfa2e561db",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_334",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-334:reproduced",
+    "eval_command": "python3 reproduce_streamflow.py",
+    "baseline_metrics": {
+      "FPS": 12.22,
+      "Power (W)": 405.46,
+      "Peak Mem (MB)": 3326
+    },
+    "primary_metric": "FPS",
+    "metric_direction": "higher",
+    "gpu_devices": "6,7",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-3/logs/reproduction/paper-334.log",
+    "status": "success",
+    "created_at": "2026-07-04T17:21:37Z",
+    "notes": "StreamFlow pipeline reproduces successfully. Measured FPS=12.22 on NVIDIA A100-SXM4-80GB (paper reports FPS=8.00 on RTX 8000 with TAESD). VFB speedup confirmed at 2.25x vs sequential mode. Peak memory 3326MB close to paper's 3012MB (difference due to original VAE vs TAESD). TAESD model not available via HF mirror network. TensorRT compilation not attempted due to CUDA version mismatch (container has CUDA 12.1/PyTorch 2.1.0, TensorRT 9.0 requires specific alignment). Power readings capture both GPUs (paper measured single GPU).",
+    "eval_timeout_minutes": 10,
+    "eval_output_format": "stdout prints 'avg_fps: X.XX' and saves JSON to /repo/reproduce_results.json with keys avg_fps, avg_power_w, peak_mem_mb",
+    "known_levers": "1. TAESD/TinyVAE: replace original SD VAE with Tiny Autoencoder for ~20% speedup and lower memory. 2. TensorRT compilation: compile UNet and VAE with TensorRT for ~50% additional throughput (requires compatible TensorRT version for CUDA 12.1). 3. VAE batch size: increase VAE_BATCH_SIZE to 4+ for batched VAE decode. 4. CFG type: switch cfg_type from 'none' to 'self' for classifier-free guidance at slight speed cost. 5. CUDA graphs: enable for reduced kernel launch overhead. 6. Frame buffer size: increase frame_buffer_size for deeper pipelining.",
+    "setup_notes": "Base image: docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. PeRFlow model (hansyan/perflow-sd15-dreamshaper, 2.6GB) downloaded to /models/perflow-sd15-dreamshaper via HF mirror. Key dependencies: diffusers>=0.31.0, transformers>=4.36.0, xformers, accelerate, safetensors. PyTorch was auto-upgraded to 2.12.1+cu130 by pip (compatible with CUDA 13.0 driver). torchaudio upgraded to 2.11.0+cu130 to match. Original SD VAE used (TAESD config.json download blocked by HF mirror 308 redirect to blocked CDN). Evaluated 100 images at 512x512 with 4-step PeRFlow scheduler (xformer+VFB+originalVAE). Network access requires unsetting SOCKS5 proxy for HF downloads; use 'export ALL_PROXY='' all_proxy=''' before Python commands. Pip mirror: https://pypi.tuna.tsinghua.edu.cn/simple.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Maximize FPS (generation throughput) while keeping Peak Memory below 4000MB and Power below 500W. If TAESD becomes available, also optimize CLIP score and FID to remain within 1% of baseline quality (paper Table 2: CLIP >=96.25, FID <=31.28). The pipeline produces 512x512 images from a PeRFlow Stable Diffusion model; the key innovation is Velocity Field Batching (VFB) which pipelines heterogeneous timestep batches through a single UNet forward pass.",
+      "metrics": [
+        {
+          "name": "FPS",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 12.22,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Primary paper metric: generation throughput in frames per second. Paper reports 8.00 FPS (xformer+taesd+VFB) on RTX 8000; we measure 12.22 FPS on A100 with original VAE. Key target for SOTA optimization."
+        },
+        {
+          "name": "Power (W)",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "maintain_or_improve",
+          "baseline": 405.46,
+          "regression_tolerance_pct": 20.0,
+          "rationale": "Energy efficiency metric from paper Table 1. Paper reports 153.17W on RTX 8000; A100 draws more power (~400W TDP). Should not increase substantially beyond baseline."
+        },
+        {
+          "name": "Peak Mem (MB)",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "maintain_or_improve",
+          "baseline": 3326,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Peak GPU memory usage. Paper reports 3012MB; we measure 3326MB with original VAE. Should decrease with TAESD or memory optimizations."
+        },
+        {
+          "name": "CLIP score",
+          "direction": "higher",
+          "role": "secondary",
+          "goal": "maintain",
+          "baseline": 96.25,
+          "regression_tolerance_pct": 1.0,
+          "rationale": "Quality metric from paper Table 2. Paper reports CLIP=96.25 for tensorrt+taesd+VFB. Requires MS-COCO validation set for evaluation."
+        },
+        {
+          "name": "FID",
+          "direction": "lower",
+          "role": "secondary",
+          "goal": "maintain",
+          "baseline": 31.28,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Quality metric from paper Table 2. Paper reports FID=31.28 for tensorrt+taesd+VFB. Requires MS-COCO validation set for evaluation."
+        }
+      ],
+      "success_policy": "Primary objective: maximize FPS. Guardrails: Power should not exceed 450W, Peak Memory should not exceed 3500MB. If quality metrics (CLIP, FID) are measurable, they should not regress beyond 1% for CLIP and 5% for FID vs paper baselines. Pareto improvement on FPS+Power+Memory is the ideal outcome. Any FPS improvement is considered progress."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": 2.22
+  }
+}

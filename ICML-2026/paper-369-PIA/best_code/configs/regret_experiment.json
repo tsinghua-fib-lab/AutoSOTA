@@ -1,0 +1,31 @@
+{
+  "experiment_name": "Regret-only reproduction",
+  "description": "Reproduce IAR and NTF metrics for paper-369",
+  "version": "1.0",
+  "models": [
+    {
+      "source": "openai",
+      "model": "deepseek-chat",
+      "mock": false,
+      "max_workers": 4,
+      "enabled": true
+    }
+  ],
+  "runtime": {
+    "dataset_path": "data/AdvBench/demo_harmful_behaviors_custom.csv",
+    "output_dir": "./logs/cigt-regret-repro",
+    "trials_per_instruction": 50,
+    "max_workers": 5,
+    "max_instructions": 50,
+    "mock_mode": false,
+    "save_interval": 5
+  },
+  "scenarios": {
+    "enabled_groups": [
+      "Regret"
+    ],
+    "paper_terms": {
+      "Regret": "Counterfactual feedback"
+    }
+  }
+}

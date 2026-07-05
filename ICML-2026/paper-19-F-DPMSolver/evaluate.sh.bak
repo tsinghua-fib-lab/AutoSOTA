@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+cd /repo
+
+echo "=== Generating 50K CIFAR-10 samples (F-DDIM, NFE=4) ==="
+torchrun --standalone --nproc_per_node=2 main.py \
+    --subdirs cifar10_uncond_eval \
+    --seeds=0-49999 \
+    --NFE=4 \
+    --batch=64 \
+    --algorithm_name="F-DPMSolver" \
+    --model_name "CIFAR10-uncond" \
+    --order=1
+
+echo "=== Computing FID ==="
+python3 -c "
+from cleanfid import fid
+score = fid.compute_fid(\"sample/cifar10_uncond_eval\", dataset_name=\"cifar10\", dataset_res=32, dataset_split=\"train\", mode=\"clean\", num_workers=0)
+print(f\"FID: {score:.2f}\")
+"

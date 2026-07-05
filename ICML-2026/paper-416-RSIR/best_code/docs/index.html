@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSIR: Recursive Self-Improving Recommendation</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #53657a;
+      --line: #d8e0ea;
+      --paper: #ffffff;
+      --soft: #f3f6fa;
+      --blue: #2454d6;
+      --green: #087443;
+      --gold: #9f6700;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; overflow-x: hidden; }
+    body {
+      color: var(--ink);
+      background: linear-gradient(180deg, #ffffff 0, #f6f8fb 360px, #eef2f7 100%);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.62;
+    }
+    a { color: var(--blue); font-weight: 700; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 18px; }
+    .site-header { background: #fff; border-bottom: 1px solid var(--line); }
+    .hero { padding: 48px 0 34px; }
+    .eyebrow { margin: 0 0 10px; color: var(--green); font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+    h1 { margin: 0; max-width: 980px; font-size: clamp(32px, 5vw, 56px); line-height: 1.06; letter-spacing: 0; overflow-wrap: anywhere; word-break: break-word; }
+    .subtitle { max-width: 860px; margin: 18px 0 0; color: var(--muted); font-size: 18px; }
+    .quick-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 38px; border: 1px solid #b9c5d8; border-radius: 6px;
+      padding: 0 13px; background: var(--paper); color: #263650; font-size: 14px;
+    }
+    main.wrap { padding: 34px 18px 64px; }
+    .toc {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 14px; margin: 0 0 26px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.78);
+    }
+    .toc a { font-size: 13px; padding: 6px 8px; border-radius: 6px; background: #eef3fb; color: #26405f; }
+    .content {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 32px;
+      box-shadow: 0 18px 44px rgba(15, 23, 42, .06);
+    }
+    h2 { margin: 42px 0 14px; padding-top: 4px; border-top: 1px solid var(--line); font-size: 30px; line-height: 1.22; letter-spacing: 0; }
+    h2:first-child { margin-top: 0; border-top: 0; }
+    h3 { margin: 28px 0 10px; font-size: 22px; line-height: 1.25; letter-spacing: 0; }
+    p, li, td, th, .toc a, .button { overflow-wrap: anywhere; word-break: break-word; }
+    p { margin: 0 0 16px; }
+    ul, ol { padding-left: 24px; }
+    li { margin: 6px 0; }
+    img { max-width: 100%; height: auto; border-radius: 6px; }
+    p > img:only-child { display: block; margin: 18px auto; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(15, 23, 42, .08); }
+    pre { max-width: 100%; overflow-x: auto; white-space: pre; margin: 16px 0; padding: 16px; border-radius: 8px; background: #111827; color: #e5e7eb; line-height: 1.5; }
+    code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; }
+    :not(pre) > code { padding: .12em .35em; border-radius: 4px; background: #eef2f7; color: #17304f; }
+    table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 16px 0; }
+    th, td { padding: 9px 10px; border: 1px solid var(--line); vertical-align: top; }
+    th { background: #f4f7fb; text-align: left; }
+    blockquote { margin: 18px 0; padding: 10px 16px; border-left: 4px solid var(--blue); background: #f4f7fb; color: #334155; }
+    footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 760px) {
+      .wrap { padding: 0 12px; }
+      .hero { padding: 34px 0 26px; }
+      h1 { max-width: 100%; font-size: 30px; }
+      .subtitle { font-size: 16px; }
+      .quick-links { display: grid; grid-template-columns: minmax(0, 1fr); }
+      .button { min-width: 0; width: 100%; padding: 7px 8px; }
+      .content { padding: 22px 16px; }
+      main.wrap { padding: 28px 12px 56px; }
+      h2 { font-size: 25px; }
+      h3 { font-size: 20px; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Academic Project Page</p>
+        <h1>RSIR: Recursive Self-Improving Recommendation</h1>
+        <p class="subtitle">RSIR is a closed-loop framework for sequential recommendation. Instead of relying on external data or a separate teacher model, the current recommender generates plausible user interaction sequences, filters them through fidelity-based quality control, and trains a successor model on the enriched dataset.</p>
+        <div class="quick-links"><a class="button" href="https://arxiv.org/abs/2602.15659">Paper</a><a class="button" href="https://arxiv.org/pdf/2602.15659">PDF</a><a class="button" href="https://ustc-starteam.github.io/RSIR/">Project Page</a><a class="button" href="#citation">Citation</a><a class="button" href="https://github.com/USTC-StarTeam/RSIR">GitHub Repo</a></div>
+      </div>
+    </section>
+  </header>
+  <main class="wrap">
+    <div class="toc"><a href="#1-paper">1. Paper</a><a href="#2-highlights">2. Highlights</a><a href="#3-method-at-a-glance">3. Method At A Glance</a><a href="#4-repository-structure">4. Repository Structure</a><a href="#5-installation">5. Installation</a><a href="#6-data">6. Data</a><a href="#7-quick-start">7. Quick Start</a><a href="#8-reproducing-paper-results">8. Reproducing Paper Results</a><a href="#9-generation-hyperparameters">9. Generation Hyperparameters</a><a href="#10-experimental-highlights">10. Experimental Highlights</a><a href="#11-notes-for-maintainers">11. Notes For Maintainers</a><a href="#12-citation">12. Citation</a><a href="#13-contact">13. Contact</a></div>
+    <article class="content">
+<p><a href="https://arxiv.org/abs/2602.15659"><img src="https://img.shields.io/badge/arXiv-2602.15659-b31b1b.svg" alt="arXiv"></a>
+<a href="https://icml.cc/"><img src="https://img.shields.io/badge/ICML-2026-2454d6.svg" alt="Conference"></a>
+<a href="https://github.com/USTC-StarTeam/RSIR"><img src="https://img.shields.io/badge/GitHub-USTC--StarTeam%2FRSIR-172033.svg" alt="Code"></a></p>
+<p>Official code for the ICML 2026 paper on recursive self-improvement for sequential recommendation.</p>
+<h2 id="1-paper">1. Paper</h2>
+<p>Luankang Zhang, Hao Wang, Zhongzhou Liu, Mingjia Yin, Yonghao Huang, Jiaqi Li, Wei Guo, Yong Liu, Huifeng Guo, Defu Lian, and Enhong Chen. <strong>Can Recommender Systems Teach Themselves? A Recursive Self-Improving Framework with Fidelity Control.</strong> In <em>Proceedings of the 43rd International Conference on Machine Learning (ICML 2026)</em>, Seoul, South Korea, 2026.</p>
+<p><a href="https://arxiv.org/abs/2602.15659">Paper</a> / <a href="https://arxiv.org/pdf/2602.15659">PDF</a> / <a href="https://ustc-starteam.github.io/RSIR/">Project Page</a> / <a href="#citation">Citation</a></p>
+<p>RSIR is a closed-loop framework for sequential recommendation. Instead of relying on external data or a separate teacher model, the current recommender generates plausible user interaction sequences, filters them through fidelity-based quality control, and trains a successor model on the enriched dataset.</p>
+<h2 id="2-highlights">2. Highlights</h2>
+<ul>
+<li><strong>Recursive self-improvement:</strong> a recommender uses its own predictive signal to generate additional training sequences.</li>
+<li><strong>Fidelity control:</strong> generated sequences are accepted only when they remain consistent with the user's approximate preference manifold.</li>
+<li><strong>Cumulative gains:</strong> the paper reports consistent improvements across recursive iterations, datasets, and backbone models.</li>
+<li><strong>No external teacher required:</strong> RSIR improves sparse recommendation data without relying on LLM-generated data or curated side information.</li>
+<li><strong>Current code release:</strong> this repository contains the SASRec implementation, the RSIR generation loop, evaluation utilities, and preprocessed data splits.</li>
+</ul>
+<h2 id="3-method-at-a-glance">3. Method At A Glance</h2>
+<p align="center">
+  <img src="assets/rsir-overview.png" alt="Overview of the Recursive Self-Improving Recommendation framework" width="860">
+</p>
+<p>At iteration <code>k</code>, RSIR performs four steps:</p>
+<ol>
+<li><strong>Train</strong> a recommendation model <code>theta_k</code> on the current dataset <code>D_k</code>.</li>
+<li><strong>Generate</strong> synthetic user interaction sequences with the trained model.</li>
+<li><strong>Filter</strong> generated steps through fidelity-based quality control.</li>
+<li><strong>Retrain</strong> a successor model on the expanded dataset <code>D_{k+1}</code>.</li>
+</ol>
+<p>The main implementation path is:</p>
+<table>
+<thead><tr>
+<th>Paper concept</th>
+<th>Repository entry point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base recommender training</td>
+<td><code>run.py</code> with <code>--mode recommendation</code></td>
+</tr>
+<tr>
+<td>RSIR sequence generation</td>
+<td><code>run.py</code> with <code>--mode generation</code></td>
+</tr>
+<tr>
+<td>Fidelity check and sequence saving</td>
+<td><code>model/basemodel.py::generate_and_save_sequences_parallel</code></td>
+</tr>
+<tr>
+<td>Dataset loading by iteration suffix</td>
+<td><code>data/dataset.py</code></td>
+</tr>
+<tr>
+<td>SASRec backbone</td>
+<td><code>model/sasrec.py</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-repository-structure">4. Repository Structure</h2>
+<pre><code class="language-text">RSIR/
+|-- configs/              # Dataset, model, training, and generation configs
+|-- data/                 # Dataset wrappers and loaders
+|-- dataset/              # Preprocessed splits and generated iteration files
+|-- evaluation/           # Ranking metrics
+|-- model/                # Base model and SASRec implementation
+|-- module/               # Layers, functional helpers, and augmentation modules
+|-- quickstart/           # Training and generation routines
+|-- utils/                # Arguments, config loading, logging, callbacks
+\-- run.py                # Main command-line entry point</code></pre>
+<h2 id="5-installation">5. Installation</h2>
+<p>Create a Python environment and install the core dependencies:</p>
+<pre><code class="language-bash">conda create -n rsir python=3.8 -y
+conda activate rsir
+
+pip install torch numpy pandas pyyaml tqdm wandb torchmetrics matplotlib scipy faiss-cpu</code></pre>
+<p>If you use a CUDA-specific PyTorch build, install PyTorch from the official command for your CUDA version before installing the remaining packages.</p>
+<h2 id="6-data">6. Data</h2>
+<p>This release includes preprocessed splits and generated iteration files under <code>dataset/</code>.</p>
+<table>
+<thead><tr>
+<th>Dataset</th>
+<th>Domain folder</th>
+<th>Provided generated iterations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Amazon-Beauty</td>
+<td><code>dataset/amazon-beauty/beauty/</code></td>
+<td><code>train_1th.pth</code></td>
+</tr>
+<tr>
+<td>Amazon-Sport</td>
+<td><code>dataset/amazon-sport/sport/</code></td>
+<td><code>train_1th.pth</code> to <code>train_8th.pth</code></td>
+</tr>
+<tr>
+<td>Amazon-Toys</td>
+<td><code>dataset/amazon-toys/toy/</code></td>
+<td><code>train_1th.pth</code></td>
+</tr>
+<tr>
+<td>Yelp</td>
+<td><code>dataset/yelp/yelp/</code></td>
+<td><code>train_1th.pth</code> to <code>train_8th.pth</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each dataset folder follows the same layout:</p>
+<pre><code class="language-text">inter.csv
+train.pth
+val.pth
+test.pth
+train_1th.pth
+...</code></pre>
+<p>The command-line argument <code>--trainfile</code> controls which training file is loaded:</p>
+<ul>
+<li><code>--trainfile ""</code> loads <code>train.pth</code>.</li>
+<li><code>--trainfile "_1th"</code> loads <code>train_1th.pth</code>.</li>
+<li><code>--trainfile "_8th"</code> loads <code>train_8th.pth</code>.</li>
+</ul>
+<h2 id="7-quick-start">7. Quick Start</h2>
+<h3 id="7-1-train-a-base-recommender">7.1 Train a base recommender</h3>
+<p>Train SASRec on the original Amazon-Toys training split:</p>
+<pre><code class="language-bash">python run.py -m SASRec -d amazon-toys --trainfile &quot;&quot; --mode recommendation --device 0</code></pre>
+<p>The best checkpoint is saved under the configured <code>eval.save_path</code>, currently <code>./saved/</code>.</p>
+<h3 id="7-2-generate-rsir-augmented-data">7.2 Generate RSIR augmented data</h3>
+<p>After training, pass the checkpoint path to the generation mode:</p>
+<pre><code class="language-bash">python run.py \
+  -m SASRec \
+  -d amazon-toys \
+  --trainfile &quot;&quot; \
+  --mode generation \
+  --theta_r_path saved/SASRec/amazon-toys/&lt;checkpoint&gt;.ckpt \
+  --output_trainfile &quot;_1th&quot; \
+  --device 0</code></pre>
+<p>The generation routine loads the trained model, creates synthetic sequences, applies the fidelity check, merges valid generated sequences with the original training data, and saves the result under the corresponding dataset folder.</p>
+<p>The <code>--output_trainfile</code> argument controls the output suffix in generation mode. For example, <code>--output_trainfile "_1th"</code> saves:</p>
+<pre><code class="language-text">dataset/amazon-toys/toy/train_1th.pth</code></pre>
+<p>The same suffix is used later with <code>--trainfile "_1th"</code> when training or evaluating on the generated iteration.</p>
+<h3 id="7-3-train-on-a-generated-iteration">7.3 Train on a generated iteration</h3>
+<p>Use a provided RSIR iteration file directly:</p>
+<pre><code class="language-bash">python run.py -m SASRec -d amazon-sport --trainfile &quot;_8th&quot; --mode recommendation --device 0</code></pre>
+<p>This command loads:</p>
+<pre><code class="language-text">dataset/amazon-sport/sport/train_8th.pth</code></pre>
+<h2 id="8-reproducing-paper-results">8. Reproducing Paper Results</h2>
+<p>The paper evaluates RSIR on multiple recommendation datasets and backbones. This code release currently provides the SASRec path and pre-generated iteration files for direct verification.</p>
+<p>Suggested verification commands:</p>
+<pre><code class="language-bash"># Original training data
+python run.py -m SASRec -d amazon-sport --trainfile &quot;&quot; --mode recommendation --device 0
+
+# RSIR 1st iteration
+python run.py -m SASRec -d amazon-sport --trainfile &quot;_1th&quot; --mode recommendation --device 0
+
+# RSIR 8th iteration
+python run.py -m SASRec -d amazon-sport --trainfile &quot;_8th&quot; --mode recommendation --device 0</code></pre>
+<p>For Yelp:</p>
+<pre><code class="language-bash">python run.py -m SASRec -d yelp --trainfile &quot;&quot; --mode recommendation --device 0
+python run.py -m SASRec -d yelp --trainfile &quot;_8th&quot; --mode recommendation --device 0</code></pre>
+<h2 id="9-generation-hyperparameters">9. Generation Hyperparameters</h2>
+<p>Generation settings are configured in <code>configs/basemodel.yaml</code>:</p>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generation.m</code></td>
+<td>Number of synthetic trajectories generated per user sequence</td>
+</tr>
+<tr>
+<td><code>generation.k</code></td>
+<td>Rank threshold used by the fidelity check</td>
+</tr>
+<tr>
+<td><code>generation.local_prob</code></td>
+<td>Probability of sampling from the user's historical item set</td>
+</tr>
+<tr>
+<td><code>data.max_seq_len</code></td>
+<td>Maximum sequence length</td>
+</tr>
+</tbody>
+</table>
+<p>The fidelity control step is implemented in <code>model/basemodel.py</code>. A generated step is accepted only when at least one remaining item from the user's real sequence is still ranked within the threshold after the synthetic context update.</p>
+<h2 id="10-experimental-highlights">10. Experimental Highlights</h2>
+<p>The paper reports results across four datasets and three sequential recommendation backbones. The tables and figures below summarize the main empirical conclusions after the code usage sections.</p>
+<h3 id="10-1-main-accuracy-gains">10.1 Main Accuracy Gains</h3>
+<p>SASRec results from Table 1 show that the best RSIR variant improves Recall@10 on every benchmark compared with the strongest non-RSIR baseline.</p>
+<table>
+<thead><tr>
+<th>Dataset</th>
+<th style="text-align:right">Best non-RSIR Recall@10</th>
+<th style="text-align:right">Best RSIR Recall@10</th>
+<th style="text-align:right">Relative gain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Amazon-Toys</td>
+<td style="text-align:right">0.0834</td>
+<td style="text-align:right">0.0872</td>
+<td style="text-align:right">+4.56%</td>
+</tr>
+<tr>
+<td>Amazon-Beauty</td>
+<td style="text-align:right">0.0557</td>
+<td style="text-align:right">0.0594</td>
+<td style="text-align:right">+6.64%</td>
+</tr>
+<tr>
+<td>Amazon-Sport</td>
+<td style="text-align:right">0.0495</td>
+<td style="text-align:right">0.0512</td>
+<td style="text-align:right">+3.43%</td>
+</tr>
+<tr>
+<td>Yelp</td>
+<td style="text-align:right">0.0379</td>
+<td style="text-align:right">0.0399</td>
+<td style="text-align:right">+5.28%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> RSIR gives consistent single-iteration gains across sparse e-commerce and local-business recommendation datasets.</p>
+<h3 id="10-2-recursive-self-improvement">10.2 Recursive Self-Improvement</h3>
+<p align="center">
+  <img src="assets/rsir-recursive-iterations.png" alt="RSIR performance over recursive iterations on Amazon-Sport and Yelp" width="720">
+</p>
+<p>Figure 3 and Table 8 show that the gains compound over multiple recursive rounds. On Amazon-Sport, Recall@10 rises from 0.0474 at the base round to 0.0528 by the 3rd RSIR round; on Yelp, it rises from 0.0371 to 0.0420.</p>
+<p><strong>Conclusion:</strong> the self-improving loop can keep adding useful signal over successive generations before performance saturates.</p>
+<h3 id="10-3-fidelity-control-matters">10.3 Fidelity Control Matters</h3>
+<p>Table 2 isolates the fidelity-based quality control module on Amazon-Sport.</p>
+<table>
+<thead><tr>
+<th>Setting</th>
+<th style="text-align:right">NDCG@10</th>
+<th style="text-align:right">Recall@10</th>
+<th>Readout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SASRec base</td>
+<td style="text-align:right">0.0271</td>
+<td style="text-align:right">0.0474</td>
+<td>Original training data</td>
+</tr>
+<tr>
+<td>RSIR-1st with fidelity control</td>
+<td style="text-align:right">0.0293</td>
+<td style="text-align:right">0.0512</td>
+<td>Immediate gain</td>
+</tr>
+<tr>
+<td>RSIR-3rd without fidelity control</td>
+<td style="text-align:right">0.0119</td>
+<td style="text-align:right">0.0210</td>
+<td>Recursive collapse</td>
+</tr>
+<tr>
+<td>RSIR-3rd with fidelity control</td>
+<td style="text-align:right">0.0298</td>
+<td style="text-align:right">0.0528</td>
+<td>Stable improvement</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> simply accepting all generated interactions amplifies model errors, while fidelity control keeps recursive generation useful.</p>
+<h3 id="10-4-generated-data-quality">10.4 Generated Data Quality</h3>
+<p align="center">
+  <img src="assets/rsir-generated-data-analysis.png" alt="Analysis of generated data density and information density" width="680">
+</p>
+<p>Figure 5 shows that RSIR increases both data density and information density. The generated data density grows from 0.0004 in the raw data to 0.0016 by RSIR-8th, and the Approximate Entropy score reaches 0.3861, while naive insertion drops to 0.3136.</p>
+<p><strong>Conclusion:</strong> RSIR does not just add more interactions; it adds denser and more informative training sequences.</p>
+<h3 id="10-5-robustness-under-noise">10.5 Robustness Under Noise</h3>
+<p align="center">
+  <img src="assets/rsir-noise-robustness.png" alt="RSIR robustness under different synthetic noise ratios" width="760">
+</p>
+<p>Appendix Figure 7 injects random noise into the training data. RSIR stays above the base model across the full tested noise range on both Amazon-Sport and Yelp.</p>
+<p><strong>Conclusion:</strong> fidelity-controlled generation acts as a denoising regularizer instead of reinforcing noisy off-manifold interactions.</p>
+<h2 id="11-notes-for-maintainers">11. Notes For Maintainers</h2>
+<p>Before making the repository the public ICML release, we recommend checking the following items:</p>
+<ul>
+<li>Add <code>requirements.txt</code> or <code>environment.yml</code> with tested package versions.</li>
+<li>Add <code>LICENSE</code> and, optionally, <code>CITATION.cff</code>.</li>
+<li>Replace hard-coded local defaults such as checkpoint paths and GPU ids with portable defaults.</li>
+<li>Consider moving large <code>.pth</code> files to GitHub Releases, Hugging Face, or Zenodo, then keep lightweight download instructions in this README.</li>
+<li>Enable GitHub Pages from the <code>docs/</code> directory so the project page is served at <code>https://ustc-starteam.github.io/RSIR/</code>.</li>
+</ul>
+<p><a id="citation"></a></p>
+<h2 id="12-citation">12. Citation</h2>
+<p>If you find this work useful, please cite:</p>
+<pre><code class="language-bibtex">@inproceedings{zhang2026rsir,
+  title = {Can Recommender Systems Teach Themselves? A Recursive Self-Improving Framework with Fidelity Control},
+  author = {Zhang, Luankang and Wang, Hao and Liu, Zhongzhou and Yin, Mingjia and Huang, Yonghao and Li, Jiaqi and Guo, Wei and Liu, Yong and Guo, Huifeng and Lian, Defu and Chen, Enhong},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning},
+  series = {Proceedings of Machine Learning Research},
+  volume = {306},
+  year = {2026}
+}</code></pre>
+<p>The arXiv version is available as:</p>
+<pre><code class="language-bibtex">@article{zhang2026can,
+  title = {Can Recommender Systems Teach Themselves? A Recursive Self-Improving Framework with Fidelity Control},
+  author = {Zhang, Luankang and Wang, Hao and Liu, Zhongzhou and Yin, Mingjia and Huang, Yonghao and Li, Jiaqi and Guo, Wei and Liu, Yong and Guo, Huifeng and Lian, Defu and Chen, Enhong},
+  journal = {arXiv preprint arXiv:2602.15659},
+  year = {2026}
+}</code></pre>
+<h2 id="13-contact">13. Contact</h2>
+<p>For paper questions, please contact:</p>
+<ul>
+<li>First author: Luankang Zhang (<code>zhanglk5@mail.ustc.edu.cn</code>)</li>
+<li>Corresponding authors: Hao Wang (<code>wanghao3@ustc.edu.cn</code>) and Wei Guo (<code>guowei67@huawei.com</code>)</li>
+</ul>
+<p>For repository issues, please open a GitHub issue in this repository.</p>
+
+    </article>
+  </main>
+  <footer>
+    <div class="wrap">This project page mirrors the public-facing README content for quick paper, code, result, citation, and contact access.</div>
+  </footer>
+</body>
+</html>
