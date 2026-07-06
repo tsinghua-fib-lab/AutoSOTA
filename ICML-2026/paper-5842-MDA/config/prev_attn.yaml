@@ -1,0 +1,34 @@
+# config/prev_attn.yaml
+
+model:
+  path: "/root/trainbin1/nomask/nomask1200"
+  alias: "Pythia-14mlocal"
+
+data:
+  npy_path: "/root/indicies0-1999.npy"
+  num_train_samples: 1228800
+  seq_length: 2048
+  batch_size_ekfac: 10
+  batch_size_influence: 1
+  num_workers: 2
+
+target:
+  layer: 2
+  head: 2
+  mode: "qk"
+
+ekfac:
+  damping: 1e-5
+  damping_alpha: 0.1
+
+probe:
+  type: "prev_attn"
+  num_samples: 32
+  seq_len: 64
+  seed: 12345
+
+dtype: "bfloat16"
+
+output:
+  dir: "/root/14m1200/influence_prevattn_qkonly"
+  top_k: 204800

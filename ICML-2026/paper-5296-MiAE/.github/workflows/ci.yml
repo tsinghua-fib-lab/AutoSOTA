@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Import checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed for setuptools-scm
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package (core only)
+        run: pip install -e . --no-deps
+
+      - name: Verify top-level API
+        run: |
+          python -c "
+          import tedbench
+          assert tedbench.__version__ != '', 'version is empty'
+          models = tedbench.list_models()
+          assert len(models) == 12, f'expected 12 models, got {len(models)}'
+          print('tedbench OK — version:', tedbench.__version__)
+          "
+
+      - name: Verify all subpackages are discoverable
+        run: |
+          python -c "
+          import importlib.util
+
+          packages = [
+              'tedbench',
+              'tedbench.model',
+              'tedbench.data',
+              'tedbench.layer',
+              'tedbench.utils',
+              'minesm',
+              'minesm.layers',
+              'minesm.models',
+              'minesm.tokenization',
+              'minesm.utils',
+              'minesm.utils.constants',
+              'minesm.utils.structure',
+          ]
+          for pkg in packages:
+              spec = importlib.util.find_spec(pkg)
+              assert spec is not None, f'package not found: {pkg}'
+              print(f'  OK  {pkg}')
+          print('all subpackages discoverable')
+          "

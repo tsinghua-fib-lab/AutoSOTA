@@ -1,0 +1,74 @@
+\section{\method: CUDA kernel}
+\label{sec:kernel}
+
+This section describes \method, the CUDA implementation of \sketchfamily.
+\method achieves high performance through two main optimizations:
+\begin{enumerate}
+  \item It leverages the block sparsity structure of \sketchfamily to completely eliminate global atomic operations, while still maintaining a scatter-add structure local to each thread-block to maximize occupancy and memory throughput.
+  \item It generates all sketch randomness on the fly within each thread-block, reducing bandwidth demand as well as global memory footprint.
+\end{enumerate}
+
+We elaborate on these two optimizations below.
+
+\subsection{Eliminating Global Atomics}
+Let $Y=SA\in\R^{\dout\times\npts}$ with $\dout=M\Br$, and $S \sim$ \sketchfamily.
+To compute $Y$, we launch a 2D grid of thread blocks, indexed by $(g,j)$ where $g\in[M]$ selects an output block-row and $j$ selects a tile of $\Tn$ columns.
+Thread block $(g,j)$ computes the tile
+$
+  Y[{g \Br: (g+1)\Br,\;j\Tn:(j+1)\Tn}]\in\R^{\Br\times\Tn}
+$
+(we follow \emph{NumPy} indexing notation).
+
+For a fixed output block $g$, the kernel generates its random block neighborhood $\mathcal{N}(g)=\{\pi_\ell(g)\}_{\ell=1}^\kappa$ on the fly.
+For each input block $h\in\mathcal{N}(g)$, we stream the corresponding rows of $A$ through shared memory in tiles of height $\Tk$ and width $\Tn$.
+We allocate two shared arrays:
+\(
+sA\in\R^{\Tk\times\Tn}\) for the input tile and
+\(sY\in\R^{\Br\times\Tn}\) for the output tile.
+Each loaded element of $sA$ participates in $\spar$ signed updates into $sY$, where the update destinations and signs are generated from a per-element hash.
+Since $sY$ is private to the thread-block, these updates use shared-memory atomics rather than global atomics, which are much faster and have lower contention costs.
+After processing all $\kappa$ neighbor blocks and all row tiles within each block, the thread-block cooperatively writes $sY$ to global memory once.
+
+\subsection{On-The-Fly Randomness Generation}
+The kernel never materializes $S$.
+Instead, it generates (i) the block wiring $\pi_\ell(g)$ and (ii) the intra-block SJLT hashes on the fly.
+For the wiring, we use a structured permutation family so that $\pi_\ell(g)$ can be computed using simple integer arithmetic.
+Specific details are in \Cref{sec:app_perm_wiring}.
+For intra-block hashing, each input row index within the current input block is combined with $(g,h)$ and a seed to produce $\spar$ target rows in $[\Br]$ and $\spar$ independent signs.
+This design eliminates the bandwidth and cache pressure associated with reading a sparse index structure, and it keeps the inner loop branch-free.
+For reference, we include pseudocode for one thread-block of the \method kernel in \Cref{alg:flashsketch}.
+
+\begin{algorithm}[h]
+  \caption{\method (one thread-block)}
+  \label{alg:flashsketch}
+  \begin{algorithmic}[1]
+    \STATE \textbf{Input:} $A\in\R^{\din\times\npts}$, block id $g$, column tile $j$, params $(M,\Br,\Bc,\kappa,\spar,\Tk,\Tn)$.
+    \STATE Compute random neighborhood $\mathcal{N}(g)=\{\pi_\ell(g)\}_{\ell=1}^\kappa$.
+    \STATE Initialize shared output tile $sY\leftarrow 0$.
+    \FOR{each $h\in\mathcal{N}(g)$}
+    \FOR{$u_0=0,\Tk,2\Tk,\dots,\Bc-\Tk$}
+    \STATE Load $A[h\Bc+u_0:h\Bc+u_0+\Tk,\;j\Tn:(j+1)\Tn]$ into shared tile $sA$.
+    \FOR{each element $(u,t)$ of $sA$ in parallel}
+    \FOR{$i=1$ to $\spar$}
+    \STATE Hash $(g,h,u_0+u,i)$ to unique destination $r_i\in[\Br]$ and sign $\sigma_i$.
+    \STATE $\texttt{atomicAdd}(sY[r_i,t],\;\sigma_i\cdot sA[u,t])$.
+    \ENDFOR
+    \ENDFOR
+    \ENDFOR
+    \ENDFOR
+    \STATE Scale $sY$ by $\frac{1}{\sqrt{\kappa \spar}}$.
+    \STATE Write $sY$ to $Y[g\Br:(g+1)\Br,\;j\Tn:(j+1)\Tn]$.
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Comparison to prior GPU SJLT kernels}
+The specialized GPU SJLT GraSS sketch kernel~\cite{hu2025grass} and the GPU CountSketch implementations in \cite{higgins2025high} follow a \emph{global} scatter-add pattern: each input element contributes to $\spar$ output rows and resolves collisions with \emph{global} atomic adds.
+For dense $A$, this induces $\Theta(\spar\,\din\,\npts)$ global atomic updates and forces contention whenever many coordinates hash to the same output rows.
+This can severely degrade memory performance, especially in the $d \gg k$ regime.
+
+By construction, all $\spar$ updates per input element in \method are performed in shared memory private to each thread-block (using shared memory atomics), eliminating global atomic contention.
+As a result, \method performs \emph{no global atomics} and only $\Theta(\dout\,\npts)$ global writes, which are naturally coalesced.
+Further, the kernel in \cite{hu2025grass} requires forming the sparse sketch as an input to the kernel, which incurs additional memory overhead and bandwidth.
+
+We provide a detailed discussion of tuning \method and handling low-occupancy cases in \Cref{sec:app_kernel}.
+Additionally, we provide a fast but fragile block-row sampling alternative in \Cref{sec:blockrowsketch}.

@@ -1,0 +1,71 @@
+# Docker Compose 配置 - 支持分布式部署
+version: '3.8'
+
+services:
+  # 主节点 - 协调器
+  coordinator:
+    build: .
+    container_name: trading_coordinator
+    volumes:
+      - ./save:/app/save
+      - ./logs:/app/logs
+    environment:
+      - MODE=coordinator
+      - WORKERS=4
+    command: python main_parallel.py --mode parallel --executor thread --workers 4
+    networks:
+      - trading_network
+
+  # Worker 节点 1
+  worker1:
+    build: .
+    container_name: trading_worker1
+    volumes:
+      - ./save:/app/save
+      - ./logs:/app/logs
+    environment:
+      - MODE=worker
+      - WORKER_ID=1
+      - WORKERS=2
+    command: python main_parallel.py --mode parallel --executor thread --workers 2
+    networks:
+      - trading_network
+    depends_on:
+      - coordinator
+
+  # Worker 节点 2
+  worker2:
+    build: .
+    container_name: trading_worker2
+    volumes:
+      - ./save:/app/save
+      - ./logs:/app/logs
+    environment:
+      - MODE=worker
+      - WORKER_ID=2
+      - WORKERS=2
+    command: python main_parallel.py --mode parallel --executor thread --workers 2
+    networks:
+      - trading_network
+    depends_on:
+      - coordinator
+
+  # 数据库服务（可选，如果需要独立数据库）
+  # db:
+  #   image: postgres:13
+  #   container_name: trading_db
+  #   environment:
+  #     POSTGRES_DB: trading
+  #     POSTGRES_USER: trading
+  #     POSTGRES_PASSWORD: trading
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   networks:
+  #     - trading_network
+
+networks:
+  trading_network:
+    driver: bridge
+
+# volumes:
+#   db_data:

@@ -1,0 +1,139 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moretro"
+version = "0.1.0"
+authors = [
+    {name = "Friedrich Hastedt"},
+]
+description = "Multi-Objective Synthesis Planning"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "botorch==0.16.1",
+    "chemprop==2.0.0",
+    "configargparse==1.7.1",
+    "gin-config==0.5.0",
+    "graphviz",
+    "joblib==1.5.1",
+    "lightning==2.5.5",
+    "lightning-utilities==0.15.2",
+    "networkx==3.5",
+    "pandas==2.3.2",
+    "plotly==6.5.2",
+    "pymoo==0.6.1.5",
+    "PyYAML==6.0.2",
+    "rdchiral==1.1.0",
+    "rdkit==2023.9.6",
+    "numpy<2",
+    "requests",
+    "scikit-learn==1.7.1",
+    "scipy==1.16.1",
+]
+
+[project.optional-dependencies]
+cpu = ["torch==2.5.0"]
+gpu = ["torch==2.5.0"]
+
+[dependency-groups]
+dev = ["pytest==8.4.1", "ruff"]
+
+[tool.uv]
+conflicts = [
+  [{ extra = "cpu" }, { extra = "gpu" }]
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu118", extra = "gpu" },
+  { index = "pytorch-cpu",   extra = "cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["moretro*"]
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "__pycache__",
+    "moretro/external",
+]
+
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W", "I", "N", "UP", "B", "C90", "PL"
+]
+fixable = ["E", "F", "W", "I", "UP"]
+ignore = [
+    "E501", "E203", "PLR0913", "PLR0915", "PLR0917",
+    "PLR0914", "PLR6301", "PLR2004", "N806", "PLR0912", "PLW0603"
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.pylint]
+max-args = 8
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+known-first-party = ["moretro"]
+split-on-trailing-comma = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--ignore=tests/test_one_step_model.py",
+]

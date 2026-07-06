@@ -1,0 +1,43 @@
+\section{\blockrowsketch: A Fast but Fragile Alternative}
+\label{sec:blockrowsketch}
+
+While designing \method, our choices were guided by balancing the tension between GPU efficiency and sketching robustness.
+An interesting direction we also explored is block-row sampling sketches, which are designed to maximize GPU friendliness with less concern for robustness.
+Existing theoretical work explores these ideas.
+We refer the reader to~\cite{drineas2012fast,tropp2011improved,chenakkod2024optimal} for more details.
+The primary bottlenecks in \method are the shared-memory atomics, and the need to repeatedly stream $\kappa$ input blocks per output block.
+The latter is a consequence of the fixed block column sparsity pattern of \sketchfamily, which was designed specifically to maintain theoretical robustness of the sketch.
+An alternative is to relax this requirement, and simply independently sample $\kappa$ blocks per row of $S$, and simplify the kernel to pure gather operations without any atomics at any level.
+We call this approach \blockrowsketch.
+
+A natural consequence is that we are no longer able to guarantee a fixed number of nonzeros per column of $S$, and in fact it is possible for some columns to have no nonzeros.
+This is terrible for sketching quality, as those input coordinates are completely ignored.
+Specifically, its distortion depends on (block) leverage scores and can deteriorate in high-coherence regimes, especially when $\din$ is large and $\dout$ is small.
+This fragility means that we cannot obtain OSE style guarantees for \blockrowsketch.
+However, the simplified gather-reduce implementation is extremely fast as it both eliminates global atomics and reduces the number of times the input is read from $\kappa$ to $1$.
+
+Interestingly, we find that despite its theoretical fragility, \blockrowsketch can perform well in practice on a small subset of datasets, while being significantly faster than \method and all other baselines.
+We show this in the ablations in \Cref{sec:app_additional_experiments}.
+
+For reference, we include pseudocode for one thread-block of the \blockrowsketch kernel in \Cref{alg:blockrowsketch}.
+
+\begin{algorithm}[H]
+  \caption{\blockrowsketch thread-block level pseudocode}
+  \label{alg:blockrowsketch}
+  \begin{algorithmic}[1]
+    \REQUIRE $A\in\R^{\din\times\npts}$, block sizes $\Bc,\Br$, tile width $\Tn$, and integers $\kappa,\spar$
+    \STATE Partition $A$ into input blocks $A^{(h)}\in\R^{\Bc\times\npts}$ for $h\in[M]$
+    \FOR{each thread-block indexed by $(g,j)$ with $g\in[M]$ and $j\in\{0,\ldots,\lceil\npts/\Tn\rceil-1\}$}
+    \STATE Sample a block neighborhood $\mathcal{N}_{\mathrm{row}}(g)\subset[M]$ with $|\mathcal{N}_{\mathrm{row}}(g)|=\kappa$
+    \STATE Initialize a shared memory output tile $sY\in\R^{\Br\times\Tn}$ to zero
+    \FOR{each $h\in\mathcal{N}_{\mathrm{row}}(g)$}
+    \STATE Load $A^{(h)}_{:,\,j\Tn:(j+1)\Tn}$ into shared memory
+    \FOR{$r=1$ to $\Br$}
+    \STATE Sample indices $i_1,\dots,i_{\spar}\in[\Bc]$ uniformly and signs $\sigma_1,\dots,\sigma_{\spar}\in\{\pm 1\}$
+    \STATE $sY_{r,:}\leftarrow sY_{r,:} + \tfrac{1}{\sqrt{\kappa\spar}}\sqrt{\tfrac{\din}{\dout}}\sum_{t=1}^{\spar}\sigma_t\,A^{(h)}_{i_t,\,j\Tn:(j+1)\Tn}$
+    \ENDFOR
+    \ENDFOR
+    \STATE Write $sY$ to $SA[g\Br:(g+1)\Br,\,j\Tn:(j+1)\Tn]$
+    \ENDFOR
+  \end{algorithmic}
+\end{algorithm}

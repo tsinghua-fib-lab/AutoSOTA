@@ -1,0 +1,29 @@
+# Test configuration for MORetro - minimal setup without loading heavy models
+# This config is used for testing to avoid loading large model files
+
+# Mock file paths (these don't need to exist for basic tests)
+retro_model = "test_models/mock_model_retro.pt"
+condition_model = "test_models/mock_model_condition.pt"
+retro_templates = "test_models/mock_idx2template_retro.json"
+building_blocks = "test_models/mock_bb_smaller.json"
+
+# Objectives (same as production)
+objective_functions = ["economic_cost", "env_cost"]
+
+# Weight Selection Parameters (reduced for faster testing)
+MOGraph.weight_samples = 4
+MOGraph.no_weights = 2
+MOGraph.weight_initial = "sobol"
+MOGraph.include_extreme = False
+MOGraph.pareto_objectives = 2
+MOGraph.max_dominated_solutions = 5
+ 
+# Search Parameters (reduced for faster testing)
+MOSearch.top_n = 5
+MOSearch.max_depth = 2
+MOSearch.iteration_budget = 10
+MOSearch.weight_iter_budget = 5
+MOSearch.time_budget = 30
+
+# NOTE: We intentionally don't configure the OneStepModel or ConditionPrediction
+# classes here since they require actual model files and are tested separately

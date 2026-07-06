@@ -1,0 +1,53 @@
+name: release
+
+# Publish to PyPI via Trusted Publishing (OIDC — no API token) when a vX.Y.Z tag
+# is pushed. Requires, on PyPI (ai-engram -> Publishing): a trusted publisher with
+# owner=jeakwon, repo=ai-engram, workflow=release.yml, environment=pypi.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Node.js 20 is deprecated on GitHub runners (forced to Node 24 from 2026-06-16).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tag must match the package version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          VER="$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+          echo "tag=$TAG  pyproject=$VER"
+          test "$TAG" = "$VER" || { echo "::error::tag v$TAG != pyproject version $VER"; exit 1; }
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi              # PyPI trusted publisher must list this environment
+    permissions:
+      id-token: write             # OIDC token for trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,15 @@
+\section{Additional details on \method}
+\label{sec:app_kernel}
+
+\subsection{Split-$\Bc$ fallback}
+\label{sec:splitB_fallback}
+\method assigns each output tile to exactly one thread-block and performs no global atomics.
+When $M\cdot\lceil \npts/\Tn\rceil$ is too small to saturate the GPU and achieve maximum occupancy (e.g., small $\npts$ and large $\din$), we resort to a split-$\Bc$ fallback analogous to split-$K$ GEMM~\cite{osama2023stream}:
+we slice each input block along rows, launch an extra grid dimension for the slice id, and accumulate partial tiles with global atomics.
+While this materially deviates from our guiding principle of eliminating global atomics, it still reduces global atomics by a factor of the number of slices which is less than prior kernels such as \cite{hu2025grass}, and it enables high occupancy for small problems.
+
+\subsection{Tuning}
+\method has several kernel parameters that we encode as compile-time constants via templates: the block sizes $(\Br,\Bc)$ and the tile sizes $(\Tk,\Tn)$.
+Tile sizes affect performance by controlling shared memory usage and occupancy.
+In our evaluation, we tune these parameters once over a small menu of $(\Br,\Tn,\Tk,\kappa,\spar)$ templates for different input shapes and dispatch the best choice of tiling based on observed performance.
+Our tuning procedure is not exhaustive, and we leave a more thorough exploration of the kernel design space to future work.

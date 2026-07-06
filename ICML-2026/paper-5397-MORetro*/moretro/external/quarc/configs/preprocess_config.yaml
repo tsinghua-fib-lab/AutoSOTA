@@ -1,0 +1,108 @@
+# QUARC Preprocessing Configuration
+dirs:
+  raw_dir: &raw_dir "quarc/data/raw" # Raw JSON files from Pistachio database
+  log_dir: &log_dir "quarc/logs" # Preprocessing logs and debug information
+
+  # Intermediate data directories
+  dump_dir: &dump_dir "data/interim/dump" # Initial chunks from raw JSON
+  grouped_dir: &grouped_dir "data/interim/grouped" # Regrouped larger chunks
+  temp_dedup_dir: &temp_dedup_dir "data/interim/temp_dedup" # Temporary storage for locally deduplicated chunks
+  split_dir: &split_dir data/interim/split" # Train/val/test splits by document ID
+
+  # Key intermediate files
+  final_dedup_path: &final_dedup_path "/app/quarc/data/interim/final_deduped.pickle" # Globally deduplicated reactions
+  final_dedup_filtered_path: &final_dedup_filtered_path "/app/quarc/data/interim/final_deduped_filtered.pickle" # After initial filtering
+
+  # Processed data directories and files
+  agent_encoder_list_path: &agent_encoder_list_path "quarc/data/processed/agent_encoder_new/agent_encoder_list.json" # Agent vocabulary list
+  agent_other_dict_path: &agent_other_dict_path "quarc/data/processed/agent_encoder_new/agent_other_dict.json" # Rare agent mappings
+  conv_rules_path: &conv_rules_path "quarc/data/processed/agent_encoder_new/agent_rules_v1.json" # Agent standardization rules
+
+  # Stage-specific filtered data
+  stage1_dir: &stage1_dir "/app/quarc/data/processed/stage1" # Agent data
+  stage2_dir: &stage2_dir "/app/quarc/data/processed/stage2" # Temperature data
+  stage3_dir: &stage3_dir "/app/quarc/data/processed/stage3" # Reactant amount data
+  stage4_dir: &stage4_dir "/app/quarc/data/processed/stage4" # Agent amount data
+  overlap_dir: &overlap_dir "/app/quarc/data/processed/overlap" # Overlapping reactions
+
+chunking:
+  raw_input_dir: *raw_dir
+  initial_chunks_dir: *dump_dir
+  grouped_chunks_dir: *grouped_dir
+  num_workers: 8
+  chunk_size: 500000
+  group_batch_size: 10
+
+data_collection:
+  input_dir: *grouped_dir
+  temp_dedup_dir: *temp_dedup_dir
+  output_path: *final_dedup_path
+
+generate_agent_class:
+  input_path: *final_dedup_path
+  output_encoder_path: *agent_encoder_list_path # agent vocab
+  output_other_dict_path: *agent_other_dict_path # other_{Pd/Rh/...}
+  conv_rules_path: *conv_rules_path
+  minocc: 50
+  metal_minocc: 50
+
+initial_filter:
+  input_path: *final_dedup_path
+  output_path: *final_dedup_filtered_path
+  length_filters:
+    product:
+      min: 1
+      max: 1
+    reactant:
+      min: 1
+      max: 5
+    agent:
+      min: 0
+      max: 5
+  atom_filters:
+    max_reactant_atoms: 50
+    max_product_atoms: 50
+
+document_split:
+  input_path: *final_dedup_filtered_path
+  output_dir: *split_dir
+  split_ratios:
+    train: 0.75
+    val: 0.05
+    test: 0.20
+  seed: 42
+  save_split_info: true # Save document IDs used in each split
+
+# Agent Filters
+stage_1_filter:
+  input_dir: *split_dir
+  output_dir: *stage1_dir
+
+# Temperature Filters
+stage_2_filter:
+  input_dir: *split_dir
+  output_dir: *stage2_dir
+  temperature_range: # in Celsius
+    lower: -100
+    upper: 200
+
+# Reactant Amount Filters
+stage_3_filter:
+  input_dir: *split_dir
+  output_dir: *stage3_dir
+  ratio_range:
+    lower: 0.001
+    upper: 7.0
+
+# Agent Amount Filters
+stage_4_filter:
+  input_dir: *split_dir
+  output_dir: *stage4_dir
+  ratio_range:
+    lower: 0.001
+    upper: 1000.0
+
+# Run all filters to get overlapping reactions
+all_filters:
+  input_dir: *split_dir
+  output_dir: *overlap_dir

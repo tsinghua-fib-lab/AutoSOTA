@@ -1,0 +1,78 @@
+% Appendix: permutation wiring details for BlockPerm-SJLT / FlashSketch.
+
+\section{Permutation Wiring and On-The-Fly Generation}
+\label{sec:app_perm_wiring}
+
+The block-level sparsity pattern of \sketchfamily can be viewed as a bipartite graph between
+output blocks $g\in[M]$ (rows of $S$ grouped into blocks of size $\Br$) and input blocks
+$h\in[M]$ (rows of the input grouped into blocks of size $\Bc$).
+In the paper we describe this pattern as a \emph{union of permutations}:
+we draw $\kappa$ bijections $\{\pi_\ell\}_{\ell=1}^{\kappa}$ on $[M]$, and connect
+each output block $g$ to the $\kappa$ input blocks $\pi_1(g),\ldots,\pi_\kappa(g)$.
+
+\paragraph{Multiset versus set union.}
+It is worth being precise about what ``union'' means.
+If we keep the $\kappa$ matchings as a \emph{multiset}, then each $g$ has exactly $\kappa$
+incident edges and each $h$ also appears exactly $\kappa$ times when edges are counted
+with multiplicity.
+This multiset view is the one used in our proofs.
+It is also consistent with the kernel: if two matchings place an edge on the same
+block position $(g,h)$, the resulting sketch simply adds two independent SJLT blocks
+into the same output tile.
+
+If instead we interpret the block pattern as a $0/1$ sparsity mask (a \emph{set} of edges),
+then two distinct permutations can overlap on some edges.
+In that case, the number of \emph{distinct} nonzero blocks in a block row can be
+smaller than $\kappa$.
+For example, with $M=4$, the identity permutation and a swap of the first two entries
+are distinct, but their set union gives only one distinct neighbor for $g=3$ and $g=4$.
+For our purposes this overlap is undesirable because it reduces mixing and can lead to
+redundant reads.
+
+\paragraph{Edge-disjoint block wiring.}
+To avoid such overlaps, \sketchfamily uses the stronger block wiring in which the
+$\kappa$ neighbors of every $g$ are distinct.
+Equivalently, the $\kappa$ perfect matchings are edge-disjoint.
+This yields a simple $\kappa$-regular bipartite graph and ensures that every block row and
+block column contains exactly $\kappa$ nonzero blocks.
+
+\paragraph{Full-cycle affine construction.}
+Rather than materializing $\kappa$ permutation tables, the kernel generates neighbors
+on the fly using an affine map modulo $M$.
+Let
+\begin{equation}
+  f(x) \defeq (a x + b) \bmod M.
+\end{equation}
+The kernel chooses integers $a$ and $b$ such that the recurrence
+$x_{t+1}=f(x_t)$ has period $M$.
+One sufficient set of conditions is the classical full-period criterion for linear congruential
+generators\footnote{These conditions are also used by \method to ensure that iterates visit all
+  block indices before repeating.
+} \cite{hull1962random}:
+\begin{enumerate}[label=(\alph*)]
+  \item $\gcd(b,M)=1$,
+  \item $a-1$ is divisible by every prime factor of $M$,
+  \item if $4\mid M$, then $4\mid (a-1)$.
+\end{enumerate}
+
+Under these conditions, for any starting value $x_0\in[M]$, the sequence
+$x_0,x_1,\ldots,x_{M-1}$ visits every element of $[M]$ exactly once.
+
+We then define the $\kappa$ neighbors of block $g$ by iterating this map:
+\begin{equation}
+  \pi_\ell(g) \defeq f^{\ell}(g),\qquad \ell=1,\ldots,\kappa,
+\end{equation}
+where $f^{\ell}$ denotes $\ell$-fold composition.
+As long as $\kappa\le M$, these neighbors are distinct for every $g$, and the resulting
+block sparsity pattern is exactly $\kappa$-regular as desired.
+This is the permutation wiring used by \method.
+
+\paragraph{Within-block hashing.}
+Once a block neighbor $h\in\mathcal{N}(g)$ is selected, \method applies a row-partitioned SJLT
+within the corresponding $(g,h)$ block.
+The kernel does not store row indices.
+Instead, it uses a fast 32-bit mixing hash to generate, for each input row inside the block,
+both a destination row index in $[\Br]$ and an independent Rademacher sign.
+It generates $\spar$ unique row indices using an affine permutation map similar to the one above, with scale and shift parameters generated from the hash.
+This realizes the distributional definition of \sketchfamily while keeping the kernel fully
+on-the-fly.

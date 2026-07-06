@@ -1,0 +1,47 @@
+tag:
+  - math_word_problems
+task: gsm8k_cot_zeroshot
+dataset_path: gsm8k
+dataset_name: main
+output_type: generate_until
+training_split: train
+fewshot_split: train
+test_split: test
+doc_to_text: "Solve the following math problem. Present the final answer in the format:\nFinal Answer: \\boxed{your_answer}.\n\nProblem: {{question}}\n\nAnswer:"
+doc_to_target: "{{answer}}" 
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+    ignore_case: true
+    ignore_punctuation: false
+    regexes_to_ignore:
+      - ","
+      - "\\$"
+      - "(?s).*#### "
+      - "\\.$"
+generation_kwargs:
+  max_gen_toks: 2048
+  until:
+    - "Q:"
+    - "</s>"
+    - "<|im_end|>"
+    - '<|eot_id|>'
+    - '<|start_header_id|>user<|end_header_id|>'
+  do_sample: false
+repeats: 1
+num_fewshot: 0
+filter_list:
+  - name: "strict-match"
+    filter:
+      - function: "regex"
+        regex_pattern: "Final Answer: \\\\boxed\\{(\\-?[0-9\\.\\,]*[0-9]+)\\}"
+      - function: "take_first"
+  - name: "flexible-extract"
+    filter:
+      - function: "regex"
+        group_select: -1
+        regex_pattern: "(-?[$0-9.,]{2,})|(-?[0-9]+)"
+      - function: "take_first"
+metadata:
+  version: 3.0

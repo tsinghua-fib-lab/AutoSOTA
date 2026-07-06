@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BHPI — Disentangling Latent Risk Pathways via Bayesian Hypergraph Inference (ICML 2026)</title>
+<meta name="description" content="BHPI reframes multi-disease EHR modeling as inferring a latent hypergraph: diseases group into overlapping pathways, risk factors act on pathways, with calibrated uncertainty. ICML 2026 (Oral), Yale University.">
+<!-- Open Graph / link preview -->
+<meta property="og:title" content="Disentangling Latent Risk Pathways via Bayesian Hypergraph Inference">
+<meta property="og:description" content="ICML 2026 (Oral) · Yale University. A Bayesian hypergraph framework for interpretable, uncertainty-aware multi-disease modeling.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="workflow_v3.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+<style>
+:root{
+  --ink:#1A2230; --body:#444B57; --mute:#8C909A; --line:#E6E8EC;
+  --yale:#00356B; --steel:#4E7CA8; --coral:#A8556E; /* deck rose accent (#A8556E), matches PPTX + poster */
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:#fff; color:var(--body);
+  font-family:Arial,Helvetica,sans-serif; -webkit-font-smoothing:antialiased;
+  line-height:1.6; font-size:17px;
+}
+.wrap{max-width:880px; margin:0 auto; padding:0 22px}
+
+/* ---- top bar ---- */
+.topbar{border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex; align-items:center; justify-content:space-between; padding-top:16px; padding-bottom:16px}
+.venue{font-size:13px; font-weight:800; letter-spacing:.06em; color:var(--yale); text-transform:uppercase}
+.topbar img{height:30px; width:auto}
+
+/* ---- hero ---- */
+.hero{padding:46px 0 8px; position:relative; overflow:hidden}
+.hero h1{font-size:34px; font-weight:700; line-height:1.18; letter-spacing:-.015em; color:var(--yale); max-width:720px}
+.hero h1 .lt{color:var(--yale); font-weight:400}
+.rule{width:60px; height:5px; background:var(--coral); border-radius:2px; margin:24px 0 22px}
+.authors{font-size:18px; color:var(--ink); line-height:1.5}
+.authors u{text-decoration-thickness:2px; text-underline-offset:3px}
+.authors a{color:inherit; text-decoration:none; transition:color .15s}
+.authors a:hover{color:var(--yale)}
+.affil{font-size:15px; color:var(--body); margin-top:10px}
+.affil-logo{height:34px; width:auto; display:block}
+.subvenue{font-size:14px; color:var(--mute); margin-top:14px; font-weight:700; letter-spacing:.02em}
+.hero .wrap{position:relative}
+.motif{position:absolute; right:0; top:50%; transform:translateY(-58%); width:285px; height:230px; opacity:.72; pointer-events:none}
+@media(max-width:760px){ .motif{display:none} .hero h1{font-size:27px} }
+
+/* ---- action buttons ---- */
+.actions{display:flex; flex-wrap:wrap; gap:12px; margin:28px 0 8px}
+.btn{
+  display:inline-flex; align-items:center; gap:9px; padding:12px 20px; border-radius:9px;
+  font-size:15.5px; font-weight:700; text-decoration:none; border:1.5px solid var(--yale);
+  color:#fff; background:var(--yale); transition:.15s; line-height:1;
+}
+.btn:hover{background:#002a55}
+.btn.ghost{background:#fff; color:var(--yale)}
+.btn.ghost:hover{background:#EDF2F8}
+.btn.pending{background:#fff; color:var(--mute); border-color:var(--line); cursor:default}
+.btn .tag{font-size:11px; font-weight:700; letter-spacing:.04em; opacity:.85; text-transform:uppercase}
+.btn .ico{width:17px; height:17px; flex:none}
+
+/* ---- sections ---- */
+section{padding:34px 0; border-top:1px solid var(--line)}
+section:first-of-type{border-top:none}
+h2{font-size:24px; font-weight:700; color:var(--ink); letter-spacing:-.01em; margin-bottom:16px}
+p{margin-bottom:14px}
+.lead{font-size:17px; color:var(--ink)}
+
+/* callouts (full-bordered tinted panels — no left stripe) */
+.callout{padding:18px 24px; border-radius:10px; font-size:17px; line-height:1.55; color:var(--ink); margin:6px 0 4px}
+.callout.coral{background:#F4E5EA; border:1px solid #E3C3CF}
+.callout.blue{background:#DCE8F2; border:1px solid #C2D6E8}
+.callout b{color:var(--yale)} .callout .c{color:var(--coral); font-weight:700}
+
+.eq{text-align:center; font-size:25px; color:var(--ink); margin:22px 0}
+
+/* figures */
+figure{margin:18px 0 6px}
+figure img{width:100%; height:auto; border:1px solid var(--line); border-radius:8px; display:block}
+figcaption{font-size:13.5px; color:var(--mute); margin-top:10px; line-height:1.5}
+
+/* stats strip */
+.stats{display:flex; flex-wrap:wrap; gap:18px; margin:18px 0 4px}
+.stat{flex:1; min-width:150px; border:1px solid var(--line); border-radius:10px; padding:18px 20px}
+.stat .n{font-size:34px; font-weight:800; color:var(--yale); line-height:1; letter-spacing:-.02em}
+.stat .l{font-size:13.5px; color:var(--body); margin-top:9px; line-height:1.45}
+
+/* comparison table (mirrors deck p3) */
+.cmp{width:100%; border-collapse:collapse; margin:8px 0 4px; font-size:15px;
+  border-top:2px solid var(--yale); border-bottom:2px solid var(--yale)}
+.cmp th,.cmp td{padding:11px 12px; text-align:center}
+.cmp thead th{color:var(--yale); font-weight:700; border-bottom:1.5px solid var(--yale)}
+.cmp tbody tr{border-bottom:1px solid #EBEEF1}
+.cmp tbody tr:last-child{border-bottom:none}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.cmp .yes{color:#348B82; font-weight:800; font-size:16px}
+.cmp .no{color:#BDC2CA; font-weight:700}
+.cmp .par{color:var(--mute); font-style:italic; font-size:13px}
+.cmp tr.ours{background:#DCE8F2}
+.cmp tr.ours td{font-weight:700; color:var(--yale)}
+@media(max-width:620px){ .cmp{font-size:12.5px} .cmp th,.cmp td{padding:8px 6px} }
+
+/* bibtex */
+.bib{position:relative}
+pre{
+  background:#0E1B2A; color:#D7E2F0; border-radius:10px; padding:20px 22px; overflow-x:auto;
+  font-family:ui-monospace,"Cascadia Code",Consolas,monospace; font-size:13px; line-height:1.6;
+}
+.copy{position:absolute; top:12px; right:12px; background:#1E3350; color:#cfe0f5; border:none;
+  border-radius:6px; padding:7px 13px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:Arial}
+.copy:hover{background:#2c4a72}
+
+/* footer */
+footer{border-top:1px solid var(--line); padding:28px 0 50px; font-size:14px; color:var(--mute)}
+footer a{color:var(--yale); text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar"><div class="wrap">
+  <span class="venue">ICML 2026 · Oral</span>
+</div></div>
+
+<!-- HERO -->
+<header class="hero"><div class="wrap">
+  <svg class="motif" viewBox="0 0 392 320" fill="none" aria-hidden="true">
+    <ellipse cx="165" cy="128" rx="112" ry="70" stroke="#00356B" stroke-width="2" opacity="0.6"/>
+    <ellipse cx="222" cy="204" rx="108" ry="66" stroke="#A8556E" stroke-width="2" stroke-dasharray="7 5" opacity="0.6"/>
+    <ellipse cx="250" cy="126" rx="84" ry="84" stroke="#4E7CA8" stroke-width="2" stroke-dasharray="1.5 6" stroke-linecap="round" opacity="0.7"/>
+    <g fill="#00356B" opacity="0.82">
+      <circle cx="130" cy="106" r="7"/><circle cx="190" cy="140" r="7"/><circle cx="206" cy="200" r="7"/>
+      <circle cx="256" cy="184" r="7"/><circle cx="280" cy="116" r="7"/><circle cx="168" cy="170" r="7"/>
+    </g>
+  </svg>
+  <h1>Disentangling Latent Risk Pathways<br>via Bayesian Hypergraph Inference</h1>
+  <div class="rule"></div>
+  <div class="authors"><u><a href="https://naomi-ding.github.io/" target="_blank" rel="noopener">Shengxian Ding</a></u> · Haonan Gao · Pangpang Liu · Xinyuan Tian · Yize Zhao</div>
+  <div class="affil"><img src="yale-sig.svg" alt="Yale University" class="affil-logo"></div>
+
+  <div class="actions">
+    <a class="btn" href="https://arxiv.org/abs/2606.07677">Paper (arXiv)</a>
+    <!-- TODO: replace with the PMLR proceedings URL when live (July) -->
+    <a class="btn pending" href="#" aria-disabled="true">Proceedings (PMLR) <span class="tag">Jul 2026</span></a>
+    <a class="btn" href="https://github.com/Naomi-Ding/BHPI">Code</a>
+    <a class="btn ghost" href="#cite">BibTeX</a>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<!-- TL;DR -->
+<section>
+  <div class="callout coral">
+    <b>TL;DR.</b> BHPI reframes multi-disease EHR modeling as inferring a <span class="c">latent hypergraph</span>:
+    diseases group into overlapping <span class="c">pathways</span>, risk factors act on pathways rather than single
+    diseases, and structured Bayesian inference delivers calibrated uncertainty — with the largest gains on rare diseases.
+  </div>
+</section>
+
+<!-- ABSTRACT -->
+<section>
+  <h2>Abstract</h2>
+  <p>Electronic health records (EHR) pose large-scale multi-disease modeling problems in which many outcomes are rare and strongly influenced by shared risk factors. While modern approaches achieve strong predictive performance, they often treat diseases independently or rely on black-box architectures, offering limited insight into how risk factors organize disease risk and little principled uncertainty quantification.</p>
+  <p>We introduce a Bayesian hypergraph inference framework that reframes multi-disease modeling around <b>latent, risk-factor–modulated disease pathways</b>. Risk factors act on hyperedges — latent disease subsets with shared risk patterns — allowing diseases to participate in multiple distinct pathways and enabling interpretable, higher-order structure beyond pairwise associations. A repulsion prior encourages parsimonious and identifiable structure, while posterior inference provides calibrated uncertainty over both disease groupings and risk-factor influence.</p>
+  <p>To enable scalable inference on large EHR datasets, we develop a structured variational inference algorithm that preserves logical dependencies among hyperedge existence, disease membership, and pathway-level effects. Experiments on simulated data and the UK Biobank demonstrate stable and interpretable disease pathway structure, well-calibrated uncertainty, improved estimation for rare diseases, and competitive predictive performance.</p>
+</section>
+
+<!-- HOW IT COMPARES -->
+<section>
+  <h2>How it compares</h2>
+  <table class="cmp">
+    <thead><tr>
+      <th>Approach</th>
+      <th>Borrows strength</th>
+      <th>Risk-factor–specific</th>
+      <th>Higher-order (&gt; pairwise)</th>
+      <th>Uncertainty over structure</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Independent logistic</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+      <tr><td>Multi-task / black-box</td><td class="yes">✓</td><td class="no">✗</td><td class="par">partial</td><td class="no">✗</td></tr>
+      <tr><td>Disease networks</td><td class="par">partial</td><td class="no">✗</td><td class="no">✗</td><td class="no">✗</td></tr>
+      <tr class="ours"><td>BHPI (ours)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13.5px; color:var(--mute); margin-top:10px">BHPI is the only approach that borrows strength across diseases, keeps effects risk-factor–specific, captures higher-order (beyond pairwise) structure, <em>and</em> quantifies uncertainty over that structure.</p>
+</section>
+
+<!-- METHOD -->
+<section>
+  <h2>How it works</h2>
+  <div class="eq">\( \boldsymbol{\beta}_{j,v} \;=\; d_v^{-1}\sum_{e=1}^{E}\, H_{v,e}\,\mu_{j,e} \)</div>
+  <div class="callout blue">
+    A disease&rsquo;s effect is <b>composed from shared hyperedge effects</b>: <b>H</b> says which diseases belong to
+    each pathway (learned, with uncertainty), <b>&mu;</b> is how a risk factor acts through a pathway, and <b>d</b>
+    keeps the effect scale stable as the number of pathways grows. A <b>repulsion prior</b> keeps pathways
+    non-redundant and identifiable; <b>structured variational inference</b> preserves the
+    existence&nbsp;&rarr;&nbsp;membership&nbsp;&rarr;&nbsp;effect logic for calibrated uncertainty.
+  </div>
+  <figure>
+    <img src="workflow_v3.jpg" alt="BHPI workflow: data layer, latent hypergraph layer, and effect propagation">
+    <figcaption>The BHPI workflow. (a) Patient covariates and multiple disease outcomes. (b) A latent disease hypergraph models higher-order structure via hyperedges, with uncertain existence and membership. (c) Risk factors act on hyperedges to induce structured, disentangled effects across diseases; shaded regions denote posterior uncertainty.</figcaption>
+  </figure>
+</section>
+
+<!-- RESULTS -->
+<section>
+  <h2>Results on the UK Biobank</h2>
+  <div class="stats">
+    <div class="stat"><div class="n">66</div><div class="l">diseases jointly modeled</div></div>
+    <div class="stat"><div class="n">71</div><div class="l">baseline risk factors</div></div>
+    <div class="stat"><div class="n">~277K</div><div class="l">UK Biobank patients</div></div>
+    <div class="stat"><div class="n">0.005</div><div class="l">calibration error (ECE) — well-calibrated</div></div>
+  </div>
+  <p class="lead" style="margin-top:18px">BHPI is most valuable exactly where it is hardest — <b style="color:var(--yale)">rare diseases</b> — where independent baselines collapse with heavy negative tails. On the rarest diseases (&lt;2% prevalence) it improves mean AUC by <b style="color:var(--yale)">+1.2 points</b> over optimally tuned logistic regression (<i>p</i> = 3×10⁻⁵). By borrowing strength across shared pathways, BHPI yields stable, interpretable estimates and competitive prediction.</p>
+  <figure>
+    <img src="auc_violins.jpg" alt="Per-disease change in AUROC relative to logistic regression, stratified by disease prevalence">
+    <figcaption>Per-disease &Delta;AUC relative to tuned logistic regression, stratified by disease prevalence. Discriminative baselines (LightGBM, Classifier Chains) show high-variance failure modes — long negative tails — on rare diseases, while BHPI stays robust across the prevalence spectrum.</figcaption>
+  </figure>
+  <figure>
+    <img src="pathways.jpg" alt="Discovered bipartite risk-factor to disease pathways in the UK Biobank">
+    <figcaption>Discovered latent pathways linking risk factors (top) and diseases (bottom) through hyperedges (center) in the UK Biobank.</figcaption>
+  </figure>
+</section>
+
+<!-- CITE -->
+<section id="cite">
+  <h2>Cite</h2>
+  <div class="bib">
+    <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('bib').textContent).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
+<pre id="bib">@inproceedings{ding2026bhpi,
+  title     = {Disentangling Latent Risk Pathways via Bayesian Hypergraph Inference},
+  author    = {Ding, Shengxian and Gao, Haonan and Liu, Pangpang and
+               Tian, Xinyuan and Zhao, Yize},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  publisher = {PMLR},
+  year      = {2026},
+  eprint    = {2606.07677},
+  archivePrefix = {arXiv}
+}</pre>
+  </div>
+</section>
+
+</div>
+
+<!-- FOOTER -->
+<footer><div class="wrap">
+  Contact: <a href="mailto:naomi.ding@yale.edu">naomi.ding@yale.edu</a> &middot; <a href="https://naomi-ding.github.io">naomi-ding.github.io</a>
+</div></footer>
+
+</body>
+</html>

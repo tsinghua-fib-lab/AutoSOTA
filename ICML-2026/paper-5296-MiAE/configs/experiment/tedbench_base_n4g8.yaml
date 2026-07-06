@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - override /datamodule: afdbfs_stream
+
+datamodule:
+  batch_size: 32
+  num_workers: 12
+
+train:
+  optimizer:
+    lr: 0.0024
+
+trainer:
+  num_nodes: 4
+  accumulate_grad_batches: 4
+
+model:
+  name: miae_b

@@ -1,0 +1,50 @@
+\section{Additional details on GraSS}
+\subsection{GraSS pipeline}
+\label{sec:app_additional_experiments_grass}
+At a high level, GraSS constructs a \emph{feature cache} for the training set:
+for each training example $z_i$, it computes a per-example gradient vector $g_i$ (or a structured per-layer analogue), applies gradient sparsification/compression, and then applies a random projection to produce a low-dimensional representation $\phi_i \in \R^k$ that is stored for fast querying.
+Given a test/query example $z$, GraSS computes an analogous representation $\phi_z$ and then produces an attribution vector $\tau(z)\in\R^n$ (one score per training example) using the cached features and a small downstream solve.
+In GraSS, the random projection step is a key bottleneck: it is invoked for every training example during cache construction (and for every query at inference time), so kernel efficiency directly impacts end-to-end wall time.
+We refer the reader to \cite{hu2025grass} for further details on the GraSS pipeline.
+
+\subsection{Details on linear datamodeling score (LDS)}
+GraSS evaluates quantitative data-attribution quality using the linear datamodeling score (LDS) introduced by TRAK~\cite{park2023trak} and adopted by GraSS~\cite{hu2025grass}.
+We summarize the protocol here to make our end-to-end evaluation fully explicit.
+
+Let $S=\{z_i\}_{i=1}^N$ denote the training set and let $f(z;\theta)$ denote a scalar model output of interest evaluated at an example $z$ (e.g., a logit or loss, depending on the task and configuration).
+LDS is a counterfactual benchmark: it compares (a) true model outputs obtained by retraining on randomly subsampled training sets to (b) predictions obtained by summing attribution scores over the same subsampled sets.
+
+\paragraph{Training subsets.}
+Following GraSS, we sample $m=50$ random subsets $\{S_j\}_{j=1}^m$ of the training set, each of size $|S_j|=\alpha N$ with $\alpha=0.5$ (i.e., 50\% subsampling).
+For each subset $S_j$, we train a model to obtain parameters $\theta^\star(S_j)$ using the same training procedure as the GraSS implementation.
+
+\paragraph{Attribution-derived counterfactual predictor.}
+A data attribution method $\tau$ produces a per-example score vector $\tau(z,S)\in\mathbb{R}^N$ for a fixed example of interest $z$ (typically a validation/test example).
+TRAK defines the attribution-derived prediction for the counterfactual output on subset $S_j$ as the sum of the scores of the training examples included in that subset:
+\begin{equation}
+  g_\tau(z,S_j;S)
+  := \sum_{i:\, z_i\in S_j} \tau(z,S)_i
+  = \tau(z,S)^\top \mathbf{1}_{S_j},
+\end{equation}
+where $\mathbf{1}_{S_j}\in\{0,1\}^N$ is the indicator vector of $S_j$.
+This is the “additive datamodel” prediction used by TRAK.
+
+\paragraph{Definition of LDS.}
+For each example of interest $z$, we form two length-$m$ sequences:
+\begin{align}
+  y_j(z)      & := f\!\left(z;\theta^\star(S_j)\right), \\
+  \hat y_j(z) & := g_\tau(z,S_j;S).
+\end{align}
+The LDS for the example $z$ is the Spearman rank correlation~\cite{spearman1961proof} between these sequences:
+\begin{equation}
+  \mathrm{LDS}(\tau,z)
+  := \rho_{\mathrm{Spearman}}\left(\{y_j(z)\}_{j=1}^m,\{\hat y_j(z)\}_{j=1}^m\right).
+\end{equation}
+The reported LDS is the average of $\mathrm{LDS}(\tau,z)$ over the evaluation examples $z$ used by the GraSS protocol.
+
+In our integration experiments, the only change to GraSS is the SJLT projection kernel used inside the gradient-compression step.
+All other components and the LDS evaluation code path are identical to the official GraSS repository~\cite{grass_github}.
+The model used is the default in the GraSS repo, a 3-layer MLP with ReLU activations and a total of $109,386$ parameters.
+We use the same training hyperparameters as in GraSS, and sketch down from dimension $4k$ to $k$ for $k \in\{1024,2048,4096\}$.
+We use LDS as our primary measure of attribution quality and report Pareto frontiers of LDS vs.
+projection time.

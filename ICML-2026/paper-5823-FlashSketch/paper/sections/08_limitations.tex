@@ -1,0 +1,28 @@
+%
+\section{Limitations and Future Directions}
+\label{sec:discussion}
+We discuss limitations and future directions for \method from theoretical and practical perspectives.
+
+%
+\paragraph{What regimes does \method help and fail in?}
+\method is most advantageous when (i) $A$ is dense, and (ii) $k\ll d$ but $k$ is large enough to saturate the GPU.
+In the low $k$ regime, low occupancy limits speedups.
+We resolve this to an extent using a split-$\Bc$ approach discussed in \Cref{sec:splitB_fallback}.
+Additionally, while $\kappa$ can be tuned to trade off mixing and memory efficiency, very large $\kappa$ increases input reads, which can limit speedups.
+
+%
+\paragraph{Statistics--hardware tradeoffs.}
+While a primary contribution of \method is the tunable parameter $\kappa$ that directly trades off sketch quality and GPU efficiency, the optimal choice of $\kappa$ depends on the input data statistics and the hardware characteristics.
+In this work, we empirically choose the optimal $\kappa$ on the Pareto frontier.
+An interesting future direction is to more deeply explore this tradeoff and develop a principled, perhaps adaptive approach to select $\kappa$.
+
+%
+\paragraph{Theoretical limitations.}
+Our theoretical analysis in \Cref{sec:theory} focuses on OSE guarantees for \sketchfamily using independent uniform permutations.
+In practice, we sample edge-disjoint permutations which introduce dependence between neighborhoods.
+While this is mild in the $\kappa \ll M$ regime we focus on, it is an interesting open question to analyze \sketchfamily with such dependent permutations.
+
+%
+\paragraph{Beyond OSE.}
+We focus on OSE-style guarantees because they capture the geometric fidelity needed in many RandNLA algorithms.
+An appealing direction is to derive tighter guarantees tailored to the Gram-matrix metrics we evaluate, and to connect those directly to end-to-end downstream performance in learning pipelines.

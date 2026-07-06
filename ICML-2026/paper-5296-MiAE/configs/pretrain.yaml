@@ -1,0 +1,64 @@
+# @package _global_
+defaults:
+  - _self_
+  - datamodule: afdbfs_stream
+  - experiment: tedbench_base
+  - mode: default
+
+seed: 42
+debug: false
+wandb: false
+
+mask_ratio: 0.9
+noise: 0.0
+
+datamodule:
+  batch_size: 16
+  pin_memory: true
+  num_workers: 8
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: auto
+  max_steps: 100000
+  strategy: auto
+  devices: auto
+  default_root_dir: ${logs.path}
+  num_sanity_val_steps: 0
+  val_check_interval: 1000
+  check_val_every_n_epoch: null
+  # gradient_clip_val: 1.0
+  accumulate_grad_batches: 1
+
+train:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 0.0004
+    weight_decay: 0.05
+    betas: [0.9, 0.95]
+  lr_scheduler:
+    _target_: tedbench.lr_schedulers.get_cosine_schedule_with_warmup
+    warmup_steps: 5000
+    max_steps: ${eval:0.99 * ${trainer.max_steps}}
+    min_factor: 0.1
+  ckpt_path: null
+  compile: false
+
+model:
+  _target_: tedbench.model.miae_model
+  name: miae_b
+  use_seq_input: false
+  masking_strategy: random
+  use_inverse_folding_loss: true
+
+logs:
+  prefix: logs/pretrain/${datamodule.dataset_name}/${seed}
+  path: ${logs.prefix}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+# output directory, generated dynamically on each run
+hydra:
+  run:
+    dir: ${logs.path}
+  sweep:
+    dir: ${logs.prefix}/multiruns/pretrain/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

@@ -1,0 +1,70 @@
+\section{Additional Experiments and Ablations for RandNLA Tasks}
+\label{sec:app_additional_experiments}
+
+\subsection{Metrics}
+We define all error metrics exactly as they are computed in the benchmark code.
+Let $A\in\R^{\din\times\npts}$, let $S\in\R^{\dout\times\din}$, and set $SA\in\R^{\dout\times\npts}$.
+
+\subsubsection{Gram approximation}
+We form $G=A^\top A$ and $\hat G=(SA)^\top(SA)$ and report the relative Frobenius error.
+\begin{align*}
+  E_{\mathrm{Gram}}     & = \|\hat G - G\|_F, \\
+  E_{\mathrm{Gram,rel}} & =
+  \begin{cases}
+    \|\hat G - G\|_F / \|G\|_F, & \|G\|_F > 0, \\
+    \|\hat G - G\|_F,           & \|G\|_F = 0.
+  \end{cases}
+\end{align*}
+
+\subsubsection{OSE spectral error}
+We build an orthonormal basis $Q\in\R^{\din\times r}$.
+The default is the column-space variant $Q=\mathrm{qr}(A)$ with $r=\min(\texttt{r},\din,\npts)$, while probing uses a Gaussian $Q$ with $r=\texttt{probes}$.
+\begin{align*}
+  \hat Q           & = SQ,                             \\
+  E_{\mathrm{OSE}} & = \|\hat Q^\top \hat Q - I_r\|_2.
+\end{align*}
+
+\subsubsection{Ridge regression residual}
+For $b\in\R^{\din}$ and $\lambda>0$, we solve
+\begin{align*}
+  x                  & = \arg\min_x \|SAx - Sb\|_2^2 + \lambda\|x\|_2^2, \\
+  E_{\mathrm{ridge}} & =
+  \begin{cases}
+    \|Ax-b\|_2/\|b\|_2, & \|b\|_2 > 0, \\
+    \|Ax-b\|_2,         & \|b\|_2 = 0.
+  \end{cases}
+\end{align*}
+
+\subsubsection{Sketch-and-solve least squares}
+We solve $x=\arg\min_x \|SAx - Sb\|_2$ and report the same residual definition $E_{\mathrm{ridge}}$.
+
+% \subsubsection{Sketch-and-precondition least squares}
+% We compute a reduced QR factorization $SA=QR$ and set $R^\dagger=\mathrm{pinv}(R)$.
+% \begin{align*}
+%   y                    & = \arg\min_y \|A R^\dagger y - b\|_2,                    \\
+%   x                    & = R^\dagger y,                                           \\
+%   E_{\mathrm{precond}} & = E_{\mathrm{ridge}}\ \text{(same residual definition)}.
+% \end{align*}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/appendix/fig_ablation_legend_universal_nvidia_geforce_rtx_4090_legend_k.pdf}
+  \caption{\textbf{Legend for sketch dimension.}
+    Marker shapes indicate sketch dimension $k$ for the ablation plots in this appendix.
+  }
+  \label{fig:app_ablation_legend_k}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/appendix/fig_ablation_legend_universal_nvidia_geforce_rtx_4090_legend_methods.pdf}
+  \caption{\textbf{Legend for methods and parameters.}
+    Line colors/styles indicate method families and $(\kappa,\spar)$ settings used across the appendix ablations.
+  }
+  \label{fig:app_ablation_legend_methods}
+\end{figure}
+
+\input{sections/95_appendix_ablation_figs.tex}
+\clearpage
+\section{Additional Experiments and Ablations (RTX A6000)}
+\input{sections/95_appendix_ablation_figs_a6000.tex}

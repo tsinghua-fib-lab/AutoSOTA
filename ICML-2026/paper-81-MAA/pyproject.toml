@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maa"
+version = "0.1.0"
+description = "Manifold-Adversarial Adapters for robust LLaVA models."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "torch==2.9.1",
+    "torchvision==0.24.1",
+    "transformers==4.46.3",
+    "tokenizers==0.20.3",
+    "sentencepiece==0.1.99",
+    "accelerate==1.12.0",
+    "einops==0.6.1",
+    "einops-exts==0.0.4",
+    "timm==0.6.13",
+    "pillow==10.4.0",
+    "numpy==1.26.4",
+    "packaging==25.0",
+    "tqdm==4.67.1",
+    "shortuuid==1.0.13",
+    "requests==2.32.5",
+    "safetensors==0.6.2",
+    "huggingface-hub==0.35.3",
+]
+
+[project.optional-dependencies]
+quantization = [
+    "bitsandbytes==0.45.5; platform_system == 'Linux'",
+    "peft==0.10.0",
+]
+serve = [
+    "gradio==6.0.2",
+    "gradio_client==2.0.1",
+    "fastapi==0.118.0",
+    "uvicorn==0.37.0",
+    "httpx==0.28.1",
+]
+llava-train = [
+    "deepspeed==0.12.6; platform_system == 'Linux'",
+    "ninja==1.13.0",
+    "wandb==0.22.1",
+]
+build = ["build", "twine"]
+
+[project.urls]
+"Homepage" = "https://github.com/acnul/MAA"
+"Bug Tracker" = "https://github.com/acnul/MAA/issues"
+
+[tool.setuptools.packages.find]
+exclude = ["assets*", "benchmark*", "docs", "dist*", "eval*", "playground*", "scripts*", "tests*"]
+
+[tool.wheel]
+exclude = ["assets*", "benchmark*", "docs", "dist*", "eval*", "playground*", "scripts*", "tests*"]

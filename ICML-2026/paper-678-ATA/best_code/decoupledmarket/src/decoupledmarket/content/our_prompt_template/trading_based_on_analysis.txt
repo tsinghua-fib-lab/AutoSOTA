@@ -1,0 +1,27 @@
+Variables: 
+!<INPUT 0>! -- Cash amount
+!<INPUT 1>! -- Minimum living expense
+!<INPUT 2>! -- Stock basic information
+!<INPUT 3>! -- Existing Investments
+!<INPUT 4>! -- Gossip
+
+<commentblockmarker>###</commentblockmarker>
+
+Facts:
+- You current financial situation:
+    - Your total cash is $!<INPUT 0>! now, and you need to hold at least $!<INPUT 1>! cash for living.
+    - !<INPUT 2>!
+
+- The stocks that avaliable in the market are:
+!<INPUT 3>!
+
+Gossip from other people:
+!<INPUT 4>!
+
+
+- Based on the information, decide the quantity and ask price of which stock should be bought, sold, or held:
+    - Always keep at least $!<INPUT 1>! cash after trading.
+    - If your cash balance would fall below 0, or below the minimum living expense, sell part of your holdings until cash is above the requirement.
+    - The sell orders can be scheduled for the next trading round.
+- Ensure the decision follows your investment strategy and market conditions.
+- Never allow $!<INPUT 0>! to fall below $!<INPUT 1>!. If it would, sell sufficient stocks immediately to restore the balance above $!<INPUT 1>!.

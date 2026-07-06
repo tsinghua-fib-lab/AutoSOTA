@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TEDBench"
+authors = [
+    {name = "Dexiong Chen", email = "dchen@biochem.mpg.de"},
+    {name = "Andrei Manolache", email = "andrei.manolache@ki.uni-stuttgart.de"}
+]
+description = "TEDBench: Large-Scale Protein Fold Classification Benchmark and MiAE Pretraining"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["protein fold classification", "masked autoencoder", "protein structure", "geometric deep learning", "benchmark"]
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dynamic = ["version"]
+dependencies = [
+    "torch",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "torchmetrics",
+    "lightning",
+    "hydra-core",
+    "biotite",
+    "biopython",
+    "transformers",
+    "huggingface_hub",
+    "datasets",
+    "cloudpathlib",
+    "msgpack_numpy",
+    "zstd",
+    "brotli",
+    "einops",
+    "joblib",
+    "rich",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+baselines = ["fair-esm"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tedbench*", "minesm*"]
+exclude = ["baselines*", "configs*", "datasets*", "tmp*"]
+
+[tool.setuptools.package-data]
+tedbench = ["py.typed"]
+
+[tool.setuptools_scm]
+write_to = "tedbench/_version.py"

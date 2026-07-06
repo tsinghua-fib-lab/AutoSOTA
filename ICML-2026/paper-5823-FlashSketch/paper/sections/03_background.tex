@@ -1,0 +1,82 @@
+\section{Background}
+\label{sec:background}
+
+\subsection{Notation}
+We write $A\in\R^{\din\times\npts}$ for the input matrix and $S\in\R^{\dout\times\din}$ for a random sketch, with input dimension $\din$, sketch dimension $\dout$, and number of vectors $\npts$.
+The sketched output is $Y \defeq SA \in \R^{\dout\times\npts}$.
+We use $\|\cdot\|_2$ for the spectral norm and $\|\cdot\|_F$ for the Frobenius norm.
+
+\subsection{Johnson--Lindenstrauss and Oblivious Subspace Embeddings (OSEs)}
+The Johnson--Lindenstrauss (JL) lemma states that for \emph{any} set of $n$ points $\{x_i\}_{i=1}^n\subset\R^{\din}$ and distortion $\varepsilon\in(0,1)$, a random projection into dimension $\dout=\bigO(\varepsilon^{-2}\log n)$ preserves all pairwise distances up to $(1\pm\varepsilon)$ multiplicative factors with high probability~\cite{johnson1984extensions,freksen2021introduction}.
+For this work, we focus on the \emph{oblivious subspace embedding} (OSE) model, which demands guarantees for all vectors in an arbitrary $\npts$-dimensional subspace simultaneously~\cite{clarkson2017low,woodruff2014sketching}.
+
+\begin{definition}[OSE]
+  A distribution over $S\in\R^{\dout\times\din}$ is an $(\varepsilon,\delta,\npts)$ OSE if for all orthonormal $U\in\R^{\din\times \npts}$,
+  \begin{equation}
+    \Prb\Big[\;\|U^\top S^\top S U - I_{\npts}\|_2 \le \varepsilon\;\Big] \ge 1-\delta.
+    \label{eq:ose_def}
+  \end{equation}
+\end{definition}
+
+OSEs are a useful model for sketching because they yield strong theoretical guarantees for downstream tasks like least squares and regression~\cite{clarkson2017low,martinsson2020randomized}.
+The canonical example is a dense Gaussian sketch with $S_{ij}\sim\mathcal{N}(0,1/\dout)$, which is an $(\varepsilon,\delta,\npts)$ OSE with sketch dimension $\dout=\bigO(\varepsilon^{-2}(\npts+\log(1/\delta)))$.
+Similarly, dense Rademacher sketches with $S_{ij}\sim\mathrm{Unif}\{\pm 1/\sqrt{\dout}\}$ are also OSEs with similar parameters~\cite{woodruff2014sketching}.
+
+\subsection{Sparse JL Transforms and OSNAP}
+Sparse sketches aim to reduce the cost of applying $S$ to $A$ by imposing sparsity structure on $S$.
+The canonical example is the sparse Johnson--Lindenstrauss transform (SJLT), where each column of $S$ contains a small, fixed number of nonzeros, $s$ (usually chosen to be Rademacher variables with scale $1/\sqrt{s}$)~\cite{dasgupta2010sparse,kane2014sparser}.
+OSNAP further refines the construction and analysis to obtain sparse OSEs that enable input-sparsity-time algorithms~\cite{nelson2013osnap,clarkson2017low}.
+SJLTs and OSNAP are also OSEs for sufficiently large sparsity $s=\bigO(\varepsilon^{-1}\log(\npts/\delta))$ and sketch dimension $\dout=\bigO(\varepsilon^{-2}\npts\log(\npts/\delta))$.
+
+\subsection{Localized Sketching}
+Localized sketching \cite{srinivasa2020localized} further imposes structure on sketches by studying block-diagonal JLTs.
+This is an alternative route to sparsity for reducing application cost.
+Localized sketches also have OSE guarantees, but the required sketch dimension now depends on a \emph{block-coherence} parameter of the input subspace.
+\begin{definition}[Block coherence~\cite{srinivasa2020localized}]
+  \label{def:block_coherence}
+  Let $U\in\R^{d\times r}$ have orthonormal columns.
+  Partition the rows into $M$ contiguous blocks of size $\Bc=d/M$, and write
+  $U=[U^{(1)};\ldots;U^{(M)}]$ with $U^{(h)}\in\R^{\Bc\times r}$.
+  The block coherence of $U$ is
+  \begin{equation}
+    \label{eq:mu_blk_def}
+    \mu_{\mathrm{blk}}(U)
+    \;:=\;
+    M\max_{h\in[M]}\,\|U^{(h)}\|_2^2.
+  \end{equation}
+\end{definition}
+
+\subsection{GPUs and the Memory Hierarchy}
+We provide a brief overview of the architectural details of GPUs that are relevant to this paper; further details can be found in the CUDA programming guide \citep{nvidia2011nvidia}.
+A GPU consists of thousands of CUDA cores that can independently execute threads of computation in parallel.
+Along with a large number of compute units, the GPU also has a hierarchy of memory that the cores can access.
+The hierarchy stems from a fundamental trade-off between memory size, latency, and bandwidth.
+The fastest memory is the register memory, which is local to each thread and is used to store intermediate results.
+The next level of memory is the shared memory, which is shared between a local group of threads.
+The global memory is the largest and slowest memory, but it is accessible by all threads.
+However, if multiple threads attempt to read or write to the same location in global memory simultaneously, it can lead to contention and we need to use \emph{atomic} operations to maintain correctness.
+These operations lead to serialization of memory accesses, which can significantly degrade performance.
+
+\subsection{GPU bottlenecks for Sparse Sketching}
+Sparse sketching on GPUs is bottlenecked by memory bandwidth, since compute is relatively cheap compared to moving data through the memory hierarchy.
+Further, existing sparse sketching kernels such as those of \cite{hu2025grass, higgins2025high} rely on global atomic operations to handle collisions in the sketching matrix.
+Specifically, they implement a \textbf{scatter-add} approach, where each thread processes an input row (or a tile of rows) and writes $s$ signed contributions into output rows.
+Correctness requires that these writes be atomic because hashed updates can collide.
+Since the sparsity patterns of SJLT/CountSketch are random and irregular, it is difficult to leverage the memory hierarchy effectively.
+Specifically, shared memory reuse cannot be done reliably.
+
+An alternative approach is to explicitly form the sparse sketching matrix $S$ in memory and perform a sparse-dense matrix multiplication (SpMM) to compute $Y=SA$.
+This avoids custom kernels and leverages existing highly-optimized SpMM libraries like cuSPARSE \cite{naumov2010cusparse}.
+However, this approach requires materializing $S$ in a sparse format, which incurs overheads in both memory and computation.
+Additionally, it cannot exploit the specific structure of the entries of $S$, like the Rademacher signs in SJLT/CountSketch, which can be generated on-the-fly.
+
+The common architectural point is that global memory traffic is expensive and synchronization across thread blocks is slow.
+By contrast, shared memory supports fast, block-local communication, and shared-memory atomics are often far cheaper than global atomics.
+
+% This motivates our \textbf{co-design} goal: simultaneously design the structure of sparse sketches and GPU algorithms to avoid global atomic contention and maximize shared memory reuse, while maintaining the theoretical guarantees of sparse OSEs.
+
+% \begin{figure}[t]
+%   \centering
+%   \caption{\textbf{Why sparse sketching is hard on GPUs.} (Left) Standard SJLT/CountSketch scatter-add incurs global atomic contention. (Middle) Explicit sparse-matrix multiplication (SpMM) pays overheads and cannot exploit sketch structure. (Right) \method uses permutation-based block wiring so each CTA owns an output block, accumulates in shared memory, and performs a single global write.}
+%   \label{fig:gpu_bottleneck}
+% \end{figure}

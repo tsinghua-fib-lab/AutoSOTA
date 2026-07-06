@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-engram"
+version = "0.8.0"
+description = "Minimal, efficient covariance-based engram extraction for editing HuggingFace LLMs"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Jea Kwon" }]
+keywords = ["model-editing", "unlearning", "llm", "engram", "covariance", "pytorch", "transformers"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0",
+    "tqdm",
+    "transformers",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+docs = ["mkdocs-material", "mkdocstrings[python]", "black"]
+
+[project.urls]
+Homepage = "https://github.com/jeakwon/ai-engram"
+Repository = "https://github.com/jeakwon/ai-engram"
+
+# Distribution name is `ai-engram`; the import package is `engram` (src layout).
+[tool.hatch.build.targets.wheel]
+packages = ["src/engram"]
+
+# Keep the sdist lean: ship source + tests + metadata, not the large example notebooks.
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/engram",
+    "tests",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "pyproject.toml",
+]

@@ -1,0 +1,67 @@
+# @package _global_
+defaults:
+  - _self_
+  - datamodule: afdbfs_ted
+  - experiment: scratch_ted_base
+  - mode: default
+
+seed: 42
+debug: false
+wandb: false
+pretrained_model_path: null
+
+datamodule:
+  batch_size: 16
+  pin_memory: true
+  num_workers: 8
+  train_transform:
+    _target_: tedbench.data.transform.Compose
+    transforms:
+      - _target_: tedbench.data.transform.RandomCrop
+        size: 512
+      - _target_: tedbench.data.transform.RandomNoise
+        std: 0.2
+        mean: 0.0
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: auto
+  max_steps: 18300
+  strategy: auto
+  devices: auto
+  default_root_dir: ${logs.path}
+  num_sanity_val_steps: 0
+  accumulate_grad_batches: 1
+
+train:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 0.0016
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+  lr_scheduler:
+    _target_: tedbench.lr_schedulers.get_cosine_schedule_with_warmup
+    warmup_steps: 1830
+    max_steps: ${trainer.max_steps}
+  loss:
+    _target_: torch.nn.CrossEntropyLoss
+  llrd: 1.0
+  ckpt_path: null
+
+model:
+  _target_: tedbench.model.miae_encoder_model
+  name: miae_b
+  num_classes: 965
+  avg_pool: false
+
+logs:
+  prefix: logs/finetune/${datamodule.dataset_name}/${seed}
+  path: ${logs.prefix}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+# output directory, generated dynamically on each run
+hydra:
+  run:
+    dir: ${logs.path}
+  sweep:
+    dir: ${logs.prefix}/multiruns/finetune/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

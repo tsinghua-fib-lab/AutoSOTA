@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ dev ]
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        python-version: "3.12"
+        enable-cache: true
+
+    - name: Install system dependencies (Ubuntu)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libxrender1 libxtst6 libxi6
+
+    - name: Install Python dependencies (CPU)
+      run: uv sync --dev --extra cpu
+
+    - name: Run tests with pytest
+      run: uv run --no-sync pytest tests/ -v --tb=short
+
+  test-multi-os:
+    runs-on: ${{ matrix.os }}
+    # Only run multi-OS testing on PRs to main
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: [ "3.12" ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+
+    - name: Install Python dependencies (CPU)
+      run: uv sync --dev --extra cpu
+
+    - name: Run tests with pytest
+      run: uv run --no-sync pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        python-version: "3.12"
+        enable-cache: true
+
+    - name: Install linting dependencies
+      run: uv sync --dev --extra cpu
+
+    - name: Run Ruff (lint only, no auto-fix)
+      run: |
+        uv run --no-sync ruff check moretro/ --output-format=github
+        uv run --no-sync ruff format moretro/ --check --diff

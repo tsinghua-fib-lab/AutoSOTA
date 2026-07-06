@@ -1,0 +1,33 @@
+# @package _global_
+defaults:
+  - _self_
+  - datamodule: afdbfs_ted
+
+seed: 42
+
+datamodule:
+  batch_size: 64
+  num_workers: 32
+
+datamodule_test:
+  _target_: tedbench.data.LightningStructureDataset
+  root: ./datasets/cath
+  dataset_name: cath4.4
+  batch_size: 64
+  num_workers: 32
+
+model:
+  name: proteinmpnn
+  num_classes: 965
+
+logs:
+  prefix: logs/${model.name}/linprobe/${datamodule.dataset_name}/${seed}
+  path: ${logs.prefix}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+# output directory, generated dynamically on each run
+hydra:
+  run:
+    dir: ${logs.path}
+  sweep:
+    dir: ${logs.prefix}/multiruns/${model.name}/linprobe/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

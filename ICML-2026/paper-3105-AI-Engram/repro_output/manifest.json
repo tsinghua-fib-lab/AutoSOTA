@@ -1,0 +1,70 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 3105,
+    "repo_url": "https://github.com/jeakwon/ai-engram",
+    "repo_commit": "e9efaf39544bf0df322cea566d9f2b902f33b19c",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_3105",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-3105:reproduced",
+    "eval_command": "cd /repo && python3 reproduce_v2.py",
+    "baseline_metrics": {
+      "ToW": 0.9607
+    },
+    "primary_metric": "ToW",
+    "metric_direction": "higher",
+    "gpu_devices": "0,1",
+    "data_mounts": [
+      "/home/dataset-assist-0/Group/AutoSOTA_ICML26_oral_sota_ready/3105/data:/paper_data:ro"
+    ],
+    "cache_mounts": [
+      "/autosota_cache",
+      "/datasets",
+      "/models"
+    ],
+    "repro_log_path": "/home/dataset-assist-0/chenzhibin/autosota-v2.5-3/logs/reproduction/paper-3105.log",
+    "status": "success",
+    "created_at": "2026-07-05T08:25:00",
+    "notes": "Reproduced ToW=0.9607 on CIFAR-10/ResNet-18 for class 0, alpha=0.6. Within CI bounds [0.956, 0.9868]. Used notebook-inlined engram code with Conv2dHandler (critical for CNNs; installed package only handles nn.Linear). ToW uses approximate retrained-model accuracies (no retrained checkpoints available). DA/NMI not in repo.",
+    "eval_timeout_minutes": 20,
+    "eval_output_format": "Parse ToW (approximate): <value> from stdout or /repo/repro_output/results.json tow_results.ToW",
+    "known_levers": "alpha (edit_strength in [0.1, 2.0], best=0.6 per paper grid search): controls forgetting intensity. Higher = more forgetting but more retain degradation.",
+    "setup_notes": "Base: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Dependencies: torchvision transformers tqdm pandas seaborn matplotlib. Installed ai-engram from /repo. Key fix: notebook-inlined engram code (notebook_engram.py etc.) for Conv2dHandler \u2014 package only handles nn.Linear; ResNet-18 requires Conv2d support. Model: /paper_data/resnet18_cifar10/pytorch_model.bin (edadaltocg/resnet18_cifar10). CIFAR-10 from /datasets/cifar10 (replaced corrupted paper_data archive with valid one from paper 0010).",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Maximize ToW on CIFAR-10 class 0 forgetting with ResNet-18 (alpha=0.6). Guardrail: retain class accuracy must not degrade beyond 3%.",
+      "metrics": [
+        {
+          "name": "ToW",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.9607,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Primary paper metric (Table 2). Measures alignment between unlearned and retrained model."
+        },
+        {
+          "name": "retain_class_accuracy",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "maintain",
+          "baseline": 0.9316,
+          "regression_tolerance_pct": 3.0,
+          "rationale": "Accuracy on non-forgotten classes 1-9. Original=0.944."
+        },
+        {
+          "name": "forget_class_accuracy",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.018,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Accuracy on forgotten class 0. Should approach 0."
+        }
+      ],
+      "success_policy": "Improve ToW over 0.9607 baseline. Retain accuracy must stay above 0.90. Forget accuracy must stay below 0.10. Reject improvements that violate guardrails."
+    },
+    "metric_upper_bound": 0.9868,
+    "metric_lower_bound": 0.956
+  }
+}

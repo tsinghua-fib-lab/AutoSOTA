@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CurriSeg | ICML 2026</title>
+    <meta name="description" content="CurriSeg: Refining Context-Entangled Content Segmentation via Curriculum Selection and Anti-Curriculum Promotion.">
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%23080a0f"/><path d="M43 44c-3 3-7 5-12 5-10 0-18-8-18-17s8-17 18-17c5 0 9 2 12 5l-6 6c-2-2-4-3-7-3-5 0-9 4-9 9s4 9 9 9c3 0 5-1 7-3l6 6z" fill="%235eead4"/></svg>'>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="scrollbar" aria-hidden="true"></div>
+
+    <header class="site-header" data-glass>
+      <a class="brand" href="#top" aria-label="CurriSeg home">
+        <span class="brand-mark">C</span>
+        <span>CurriSeg</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#method">Method</a>
+        <a href="#visuals">Visuals</a>
+        <a href="#usage">Usage</a>
+        <a href="#related">Related</a>
+        <a href="#acknowledgement">Thanks</a>
+        <a href="#contact">Contact</a>
+        <a href="#citation">Citation</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <img class="hero-backdrop" src="assets/framework.png" alt="">
+        <canvas id="spectral-canvas" aria-hidden="true"></canvas>
+        <div class="hero-scrim" aria-hidden="true"></div>
+        <div class="hero-content reveal">
+          <p class="eyebrow">ICML 2026 Accepted</p>
+          <h1 id="hero-title">CurriSeg</h1>
+          <p class="subtitle">Refining Context-Entangled Content Segmentation via Curriculum Selection and Anti-Curriculum Promotion</p>
+          <p class="authors">Chunming He*, Rihan Zhang*, Fengyang Xiao†, Dingming Zhang, Zhiwen Cao, Sina Farsiu†</p>
+          <p class="affiliations">Duke University · Adobe · * Equal contribution · † Corresponding authors</p>
+          <div class="action-row" aria-label="Project links">
+            <a class="action primary" href="assets/paper.pdf">
+              <i data-lucide="file-text"></i>
+              <span>Paper</span>
+            </a>
+            <a class="action" href="https://github.com/ZRH-AHU/Curriseg">
+              <i data-lucide="code-2"></i>
+              <span>Code</span>
+            </a>
+            <a class="action muted" href="https://drive.google.com/drive/folders/1lxplDrCk84zgB-FQaJAvxcvyKBGenqA_?usp=sharing">
+              <i data-lucide="download"></i>
+              <span>Models</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-band">
+        <div class="summary-grid reveal">
+          <div>
+            <span class="metric">2</span>
+            <p>Learning phases that first stabilize optimization and then deliberately increase task difficulty.</p>
+          </div>
+          <div>
+            <span class="metric">0</span>
+            <p>Extra inference parameters introduced by the training framework.</p>
+          </div>
+          <div>
+            <span class="metric">CECS</span>
+            <p>Designed for context-entangled content segmentation, including camouflaged scenes.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="method" class="section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Method</p>
+          <h2>Stabilize, then challenge.</h2>
+          <p>CurriSeg models learning as a progression: robust curriculum selection first builds reliable representations, then anti-curriculum promotion forces the network to discover deeper contextual cues.</p>
+        </div>
+
+        <div class="method-timeline">
+          <article class="method-card reveal">
+            <span class="phase">Phase I</span>
+            <h3>Robust Curriculum Selection</h3>
+            <p>Temporal statistics of sample losses separate hard-but-informative images from ambiguous or noisy samples, forming a stable learning route.</p>
+          </article>
+          <article class="method-card reveal">
+            <span class="phase">Image + Pixel</span>
+            <h3>TSSW and PUE</h3>
+            <p>Temporal sample weighting and pixel-level uncertainty estimation reduce unstable early gradients while keeping useful difficulty signals.</p>
+          </article>
+          <article class="method-card reveal">
+            <span class="phase">Phase II</span>
+            <h3>Anti-Curriculum Promotion</h3>
+            <p>Spectral-Blindness Fine-Tuning suppresses high-frequency shortcuts, encouraging low-frequency structural and contextual reasoning.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="visual-section">
+        <div class="figure-wrap reveal">
+          <div class="figure-copy">
+            <p class="eyebrow">Framework</p>
+            <h2>Dual-phase training for context-entangled scenes.</h2>
+            <p>The framework combines temporal difficulty modeling, uncertainty-aware weighting, and spectral perturbation in one training pipeline.</p>
+          </div>
+          <img src="assets/framework.png" alt="CurriSeg framework diagram">
+        </div>
+      </section>
+
+      <section id="visuals" class="section contrast-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Visual Comparison</p>
+          <h2>Sharper masks across CECS scenarios.</h2>
+          <p>CurriSeg improves baselines over camouflaged object detection, polyp image segmentation, transparent object detection, and concealed defect detection examples.</p>
+        </div>
+        <div class="comparison-frame reveal">
+          <img src="assets/visual_compare.png" alt="CurriSeg visual comparison">
+        </div>
+      </section>
+
+      <section id="usage" class="section usage-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Usage</p>
+          <h2>Research code layout.</h2>
+          <p>The repository provides PyTorch training, anti-curriculum fine-tuning, and testing scripts. Common CECS/COD benchmarks can be found in <a href="https://github.com/ChunmingHe/awesome-concealed-object-segmentation">awesome-concealed-object-segmentation</a>.</p>
+        </div>
+        <div class="code-grid reveal">
+          <div class="code-panel">
+            <div class="panel-top">
+              <i data-lucide="play"></i>
+              <span>Train</span>
+            </div>
+            <pre><code>python Train.py \
+  --train_root YOUR_TRAININGSETPATH \
+  --val_root YOUR_VALIDATIONSETPATH \
+  --save_path YOUR_CHECKPOINTPATH</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="panel-top">
+              <i data-lucide="scan-line"></i>
+              <span>Promote</span>
+            </div>
+            <pre><code>python anti_curri_stage.py \
+  --train_root YOUR_TRAININGSETPATH \
+  --val_root YOUR_VALIDATIONSETPATH \
+  --save_path YOUR_ANTI_CURRI_CHECKPOINTPATH \
+  --load YOUR_CHECKPOINTPATH/Net_epoch_best.pth \
+  --use_sbft</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="panel-top">
+              <i data-lucide="check-circle"></i>
+              <span>Test</span>
+            </div>
+            <pre><code>python Test.py \
+  --pth_path YOUR_CHECKPOINTPATH/Net_epoch_best.pth \
+  --test_dataset_path YOUR_TESTINGSETPATH</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="related" class="section related-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Related Works</p>
+          <h2>Context for CurriSeg.</h2>
+          <p>CurriSeg builds on recent progress in concealed and camouflaged object segmentation.</p>
+        </div>
+        <div class="related-list reveal">
+          <a href="https://github.com/ChunmingHe/FEDER">Camouflaged Object Detection with Feature Decomposition and Edge Reconstruction, CVPR 2023.</a>
+          <a href="https://github.com/ChunmingHe/RUN">RUN: Reversible Unfolding Network for Concealed Object Segmentation, ICML 2025.</a>
+          <a href="https://github.com/CSYSI/FSEL">Frequency-Spatial Entanglement Learning for Camouflaged Object Detection, ECCV 2024.</a>
+          <a href="https://github.com/ChunmingHe/awesome-concealed-object-segmentation">More related papers in awesome-concealed-object-segmentation.</a>
+        </div>
+      </section>
+
+      <section id="acknowledgement" class="section acknowledgement-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Acknowledgement</p>
+          <h2>Built with respect for prior open work.</h2>
+          <p>This repository follows the research code style of prior CECS/COD projects such as <a href="https://github.com/ChunmingHe/FEDER">FEDER</a>, <a href="https://github.com/ChunmingHe/RUN">RUN</a>, and related open-source segmentation frameworks. We sincerely thank the authors for their valuable contributions to the community.</p>
+        </div>
+      </section>
+
+      <section id="contact" class="section contact-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Contact</p>
+          <h2>Questions and collaboration.</h2>
+          <p>Please contact us via email at <a href="mailto:chunminghe19990224@gmail.com">chunminghe19990224@gmail.com</a> or <a href="mailto:chunming.he@duke.edu">chunming.he@duke.edu</a>.</p>
+        </div>
+      </section>
+
+      <section id="resources" class="resource-band">
+        <div class="resource-content reveal">
+          <p class="eyebrow">Resources</p>
+          <h2>Paper and pretrained models are available now.</h2>
+          <div class="resource-actions">
+            <a class="action primary" href="assets/paper.pdf">
+              <i data-lucide="file-text"></i>
+              <span>Read Paper</span>
+            </a>
+            <a class="action muted" href="https://drive.google.com/drive/folders/1lxplDrCk84zgB-FQaJAvxcvyKBGenqA_?usp=sharing">
+              <i data-lucide="package-open"></i>
+              <span>Pretrained Models</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="citation" class="section citation-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Citation</p>
+          <h2>Cite CurriSeg.</h2>
+        </div>
+        <pre class="citation-box reveal"><code>@inproceedings{he2026curriseg,
+  title={Refining Context-Entangled Content Segmentation via Curriculum Selection and Anti-Curriculum Promotion},
+  author={He, Chunming and Zhang, Rihan and Xiao, Fengyang and Zhang, Dingming and Cao, Zhiwen and Farsiu, Sina},
+  booktitle={International Conference on Machine Learning (ICML)},
+  year={2026}
+}</code></pre>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>CurriSeg · ICML 2026</span>
+      <a href="https://github.com/ZRH-AHU/Curriseg">GitHub</a>
+    </footer>
+  </body>
+</html>

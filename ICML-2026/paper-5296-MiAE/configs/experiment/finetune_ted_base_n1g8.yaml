@@ -1,0 +1,22 @@
+# @package _global_
+
+datamodule:
+  batch_size: 64
+  num_workers: 12
+  train_transform:
+    transforms:
+      - _target_: tedbench.data.transform.RandomCrop
+        size: 512
+      - _target_: tedbench.data.transform.RandomNoise
+        std: 0.2
+        mean: 0.0
+
+train:
+  llrd: 0.8
+
+trainer:
+  accumulate_grad_batches: 2
+  max_steps: 18300
+
+model:
+  name: miae_b
