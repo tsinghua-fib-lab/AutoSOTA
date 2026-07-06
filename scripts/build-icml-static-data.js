@@ -155,8 +155,6 @@ function normalizePaper(row, index) {
     evaluation_status: getValue(row, "evaluation_status"),
     artifacts_status: getValue(row, "artifacts_status"),
     failed_stage: getValue(row, "failed_stage"),
-    failure_reason: getValue(row, "failure_reason"),
-    failure_reason_source: getValue(row, "failure_reason_source"),
     enhancement: getValue(row, "enhancement"),
     original_metric: getValue(row, "original_metric"),
     optimized_metric: getValue(row, "optimized_metric"),

@@ -106,14 +106,12 @@ function categoryFromStageName(stageName) {
 }
 
 function getFailureCategory(paper, stages) {
-  if (hasValue(paper.failure_reason)) return paper.failure_reason;
-  if (hasValue(paper.failure_reason_source)) return paper.failure_reason_source;
   if (hasValue(paper.failed_stage)) return categoryFromStageName(paper.failed_stage);
 
   const failedStage = stages.find((stage) => stage.state === "failed");
   if (failedStage) return categoryFromStageName(failedStage.label);
   if (isFailureValue(paper.pipeline_status)) return "Pipeline failed";
-  return "Failure reason pending";
+  return "Pipeline incomplete";
 }
 
 function derivePaperStatus(paper) {
@@ -309,19 +307,8 @@ function stageBadges(stages) {
   }).join("")}</div>`;
 }
 
-function stageFailureNote(derived) {
-  if (derived.key !== "failed" || !hasValue(derived.failureCategory)) return "";
-  const failedStage = derived.stages.find((stage) => stage.state === "failed") || derived.stages[0];
-  const offset = 11 + ((failedStage.index || 1) - 1) * 26;
-
-  return `<div class="icml-stage-failure" style="--failure-x:${offset}px">
-    <span class="icml-stage-failure-kicker">Stage ${failedStage.index} · ${esc(failedStage.label)}</span>
-    <span class="icml-stage-failure-text">${esc(derived.failureCategory)}</span>
-  </div>`;
-}
-
 function stageBlock(derived) {
-  return `${stageBadges(derived.stages)}${stageFailureNote(derived)}`;
+  return stageBadges(derived.stages);
 }
 
 function getVisiblePapers() {
@@ -338,7 +325,6 @@ function getVisiblePapers() {
       String(paper.paper_id || "").toLowerCase().includes(q) ||
       String(paper.title || "").toLowerCase().includes(q) ||
       String(paper.enhancement || "").toLowerCase().includes(q) ||
-      String(paper.failure_reason || "").toLowerCase().includes(q) ||
       String(paper.repo_url || "").toLowerCase().includes(q) ||
       String(paper.pdf_url || "").toLowerCase().includes(q)
     );
@@ -423,7 +409,7 @@ function renderRuns() {
         ${paper.derived.key === "success" ? metricPanel(paper) : '<span class="muted-dash">--</span>'}
       </div>
       <div class="cvpr-row-enchant">
-        ${enhancement ? `<span class="enchant-label">AutoSOTA Enhancement</span><span class="enchant-text">${esc(enhancement)}</span>` : '<span class="enchant-text muted-dash">--</span>'}
+        ${enhancement ? `<span class="enchant-label">Best Iteration Summary</span><span class="enchant-text">${esc(enhancement)}</span>` : '<span class="enchant-text muted-dash">--</span>'}
       </div>
       <div class="cvpr-row-actions">
         <a class="issue-link" href="${issueURL}" target="_blank" rel="noreferrer">Feedback</a>
