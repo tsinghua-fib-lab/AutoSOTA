@@ -37,6 +37,10 @@ const fieldAliases = {
   failure_reason: ["failure_reason", "failure reason", "failure category", "failure_reason_category"],
   failure_reason_source: ["failure_reason_source", "failure reason source"],
   enhancement: ["best_iter_optimization_summary", "summary", "enhancement", "optimization summary"],
+  original_metric: ["original_metric", "original metric", "baseline_metric", "baseline metric"],
+  optimized_metric: ["optimized_metric", "optimized metric", "best_metric", "best metric"],
+  improvement: ["improvement", "improvement_ratio", "improvement ratio", "metric_improvement", "metric improvement"],
+  sota_category: ["sota_category", "sota category", "category"],
   repo_url: ["repo_url", "repo url", "github_url", "github url", "code url"],
   pdf_url: ["pdf_url", "pdf url", "paper url", "openreview url"],
   autosota_repo: ["autosota_repo", "autosota repo", "auto sota repo", "autosota_repo_url", "autosota repo url"],
@@ -101,6 +105,18 @@ function cleanUrl(value) {
   return /^https?:\/\//i.test(text) ? text : "";
 }
 
+function normalizePaperId(value, fallback) {
+  const text = String(value || "").trim();
+  if (!text) return fallback;
+  return /^\d+$/.test(text) ? text.padStart(4, "0") : text;
+}
+
+function normalizePresentationStatus(value) {
+  const text = String(value || "Oral").trim();
+  if (!text) return "Oral";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
 function normalizeKey(key) {
   return String(key || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
@@ -121,10 +137,10 @@ function getValue(row, canonicalKey) {
 
 function normalizePaper(row, index) {
   return {
-    paper_id: getValue(row, "paper_id") || String(index + 1).padStart(4, "0"),
+    paper_id: normalizePaperId(getValue(row, "paper_id"), String(index + 1).padStart(4, "0")),
     seq: index + 1,
     title: getValue(row, "paper_title") || "",
-    presentation_status: getValue(row, "status") || "Oral",
+    presentation_status: normalizePresentationStatus(getValue(row, "status")),
     workspace: getValue(row, "workspace"),
     started_at_beijing: getValue(row, "started_at_beijing"),
     finished_at_beijing: getValue(row, "finished_at_beijing"),
@@ -142,6 +158,10 @@ function normalizePaper(row, index) {
     failure_reason: getValue(row, "failure_reason"),
     failure_reason_source: getValue(row, "failure_reason_source"),
     enhancement: getValue(row, "enhancement"),
+    original_metric: getValue(row, "original_metric"),
+    optimized_metric: getValue(row, "optimized_metric"),
+    improvement: getValue(row, "improvement"),
+    sota_category: getValue(row, "sota_category"),
     repo_url: cleanUrl(getValue(row, "repo_url")),
     pdf_url: cleanUrl(getValue(row, "pdf_url")),
     autosota_repo_url: cleanUrl(getValue(row, "autosota_repo")),
@@ -153,7 +173,9 @@ if (!fs.existsSync(csvPath)) {
 }
 
 const csvText = fs.readFileSync(csvPath, "utf8");
-const papers = parseCsv(csvText).map(normalizePaper);
+const papers = parseCsv(csvText)
+  .filter((row) => getValue(row, "paper_id") && getValue(row, "paper_title"))
+  .map(normalizePaper);
 const payload = { conference: "ICML 2026", papers };
 const jsonText = `${JSON.stringify(papers, null, 2)}\n`;
 const jsText = [

@@ -1,6 +1,5 @@
 // ICML 2026 Monitor
 const GITHUB_REPO = "https://github.com/tsinghua-fib-lab/AutoSOTA";
-const CONFERENCE_START = new Date("2026-07-06T00:00:00+09:00");
 
 const state = {
   papers: [],
@@ -153,8 +152,7 @@ function derivePaperStatus(paper) {
     hasValue(paper.finished_at_beijing) ||
     hasValue(paper.pipeline_status) ||
     stages.some((stage) => stage.state !== "pending");
-  const conferenceHasStarted = Date.now() >= CONFERENCE_START.getTime();
-  const key = hasActivity || conferenceHasStarted ? "research" : "not_started";
+  const key = hasActivity ? "research" : "not_started";
 
   return {
     key,
@@ -199,7 +197,7 @@ function renderStats() {
   const remaining = Math.max(total - completed, 0);
 
   heroHeadline.textContent = "ICML 2026";
-  heroSummary.textContent = "Live AutoSOTA coverage for selected papers, from reproduction through optimization and final artifacts.";
+  heroSummary.innerHTML = `AutoSOTA explores the potential of latest research as the conference unfold. <a class="icml-signup-link" href="https://docs.google.com/forms/d/e/1FAIpQLSdGKf1W2McOrmW9v0326f_mJAn0VhPVZNgF-W-BqlAsPjGiZA/viewform" target="_blank" rel="noreferrer">Sign up</a> your work for AutoSOTA.`;
   heroFacts.innerHTML = `
     <div class="icml-fact">
       <span>Tracked Papers</span>
@@ -211,7 +209,7 @@ function renderStats() {
     </div>
     <div class="icml-fact">
       <span>Current Phase</span>
-      <strong>${counts.research ? "Running" : "Ready"}</strong>
+      <strong>${counts.research ? "Running" : completed ? "Updated" : "Ready"}</strong>
     </div>
   `;
 
@@ -260,16 +258,70 @@ function presentationLabel(value) {
   return String(value || "Oral").trim() || "Oral";
 }
 
+function formatMetric(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const number = Number(text);
+  if (!Number.isFinite(number)) return text;
+  const abs = Math.abs(number);
+  if (abs >= 1000) return number.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  if (abs >= 100) return number.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  if (abs >= 10) return number.toLocaleString(undefined, { maximumFractionDigits: 3 });
+  if (abs >= 1) return number.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  return number.toLocaleString(undefined, { maximumSignificantDigits: 4 });
+}
+
+function formatImprovement(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (text.includes("%")) return text.startsWith("+") ? text : `+${text}`;
+  const number = Number(text);
+  if (!Number.isFinite(number)) return text;
+  return `+${(number * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+}
+
+function metricPanel(paper) {
+  const improvement = formatImprovement(paper.improvement);
+  const originalMetric = formatMetric(paper.original_metric);
+  const optimizedMetric = formatMetric(paper.optimized_metric);
+  const category = String(paper.sota_category || "").trim();
+
+  if (!improvement && !originalMetric && !optimizedMetric && !category) {
+    return '<span class="muted-dash">--</span>';
+  }
+
+  return `<div class="icml-metric-panel">
+    ${category ? `<span class="icml-category-pill">Class ${esc(category)}</span>` : ""}
+    ${improvement ? `<strong>${esc(improvement)}</strong>` : ""}
+    ${originalMetric || optimizedMetric ? `<span>${esc(originalMetric || "--")} &rarr; ${esc(optimizedMetric || "--")}</span>` : ""}
+  </div>`;
+}
+
 function statusBadge(derived) {
   const tooltip = derived.key === "failed" ? ` data-tooltip="${esc(derived.failureCategory)}" title="${esc(derived.failureCategory)}"` : "";
   return `<span class="status-badge ${derived.className}"${tooltip}>${esc(derived.label)}</span>`;
 }
 
 function stageBadges(stages) {
-  return stages.map((stage) => {
+  return `<div class="icml-stage-badges">${stages.map((stage) => {
     const tooltip = `${stage.index}. ${stage.label}: ${stage.display}`;
     return `<span class="stage-badge stage-${stage.state}" data-tooltip="${esc(tooltip)}" title="${esc(tooltip)}">${stage.index}</span>`;
-  }).join("");
+  }).join("")}</div>`;
+}
+
+function stageFailureNote(derived) {
+  if (derived.key !== "failed" || !hasValue(derived.failureCategory)) return "";
+  const failedStage = derived.stages.find((stage) => stage.state === "failed") || derived.stages[0];
+  const offset = 11 + ((failedStage.index || 1) - 1) * 26;
+
+  return `<div class="icml-stage-failure" style="--failure-x:${offset}px">
+    <span class="icml-stage-failure-kicker">Stage ${failedStage.index} · ${esc(failedStage.label)}</span>
+    <span class="icml-stage-failure-text">${esc(derived.failureCategory)}</span>
+  </div>`;
+}
+
+function stageBlock(derived) {
+  return `${stageBadges(derived.stages)}${stageFailureNote(derived)}`;
 }
 
 function getVisiblePapers() {
@@ -285,6 +337,8 @@ function getVisiblePapers() {
       String(paper.seq || "").includes(q) ||
       String(paper.paper_id || "").toLowerCase().includes(q) ||
       String(paper.title || "").toLowerCase().includes(q) ||
+      String(paper.enhancement || "").toLowerCase().includes(q) ||
+      String(paper.failure_reason || "").toLowerCase().includes(q) ||
       String(paper.repo_url || "").toLowerCase().includes(q) ||
       String(paper.pdf_url || "").toLowerCase().includes(q)
     );
@@ -363,7 +417,10 @@ function renderRuns() {
         ${statusBadge(paper.derived)}
       </div>
       <div class="icml-row-stages" aria-label="Pipeline stages">
-        ${stageBadges(paper.derived.stages)}
+        ${stageBlock(paper.derived)}
+      </div>
+      <div class="icml-row-metrics">
+        ${paper.derived.key === "success" ? metricPanel(paper) : '<span class="muted-dash">--</span>'}
       </div>
       <div class="cvpr-row-enchant">
         ${enhancement ? `<span class="enchant-label">AutoSOTA Enhancement</span><span class="enchant-text">${esc(enhancement)}</span>` : '<span class="enchant-text muted-dash">--</span>'}
