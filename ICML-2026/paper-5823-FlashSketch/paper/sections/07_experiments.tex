@@ -1,0 +1,85 @@
+
+\section{Experiments}
+\label{sec:experiments}
+
+We empirically evaluate \method at two levels.
+First, we treat sketching as a primitive and measure the runtime and distortion of computing $SA$ for dense $A$ across a broad range of shapes.
+Second, we integrate \method into end-to-end workloads where sketching sits on the critical path.
+As part of this, we consider a suite of standard RandNLA tasks as well as GraSS, an end-to-end ML application for data attribution~\cite{hu2025grass} in which sketching is a core component.
+We time using CUDA events and report the mean over 10 iterations (after warm-up iterations).
+We restrict our evaluation to FP32 arithmetic for both sketching and downstream tasks for consistency, since all our baselines support FP32.
+Our main kernel idea extends naturally to other precisions as well, but we leave concrete exploration of precision-specific optimizations to future work.
+
+\subsection{Baselines}
+We compare against dense and sparse GPU baselines.
+\begin{enumerate}
+  \item A dense JL transform with a standard Gaussian projection using cuBLAS.
+  \item A sparse JL transform using cuSPARSE SpMM.
+  \item A sparse JL transform using the GraSS SJLT kernel~\cite{hu2025grass}.
+  \item A subsampled randomized Hadamard transform (SRHT) using the Fast Hadamard Transform (FHT) kernel from Dao-AILab~\cite{daoailab_fast_hadamard_transform}.
+\end{enumerate}
+
+\subsection{Sketching}
+For the primitive sketching evaluation, we use the relative error in the computed Gram matrix $\|A^\top A-(SA)^\top(SA)\|_F/\|A^\top A\|_F$ as our quality metric.
+The preview in \Cref{fig:pareto_money} illustrates the quality--speed tradeoff on a representative input from GPT2-medium weights.
+More extensive ablations and Pareto frontiers across different shapes and inputs appear in \Cref{sec:app_additional_experiments}.
+
+\subsection{RandNLA tasks}
+We benchmark \method on three standard end-to-end RandNLA tasks:
+\begin{enumerate}
+  \item Sketch-and-solve least squares regression.
+  \item Sketch-and-ridge regression.
+  \item Oblivious subspace embedding (OSE).
+\end{enumerate}
+We run each task on a variety of input shapes and types.
+We use the following datasets for inputs:
+\begin{enumerate}
+  \item A synthetic Gaussian matrix.
+  \item A synthetic low-rank + noise matrix.
+  \item A sparse submatrix from the SuiteSparse collection (\Verb|spal_004|, with nonzero density $\approx 1.4\%$)~\cite{kolodziej2019suitesparse}.
+  \item A concatenated subset of weights from large language models (LLMs) (\Verb|GPT2-medium|~\cite{radford2019language} and \Verb|Qwen2-1.5B|~\cite{yang2024qwen2}).
+\end{enumerate}
+\Cref{fig:sketch_and_ridge_pareto} shows a representative quality--speed Pareto frontier for sketch-and-ridge regression on Qwen2-1.5B stacked weights.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_e2e_camera_ready_ridge_regression_qwen_qwen2_1_5b_qwen2_1p5b_weights_full_64k_512_residual_nvidia_geforce_rtx_4090.pdf}
+  \caption{\textbf{Sketch-and-ridge regression on Qwen2-1.5B stacked weights.}
+    We compare end-to-end runtime on an NVIDIA RTX 4090 GPU (x-axis) and quality measured using sketch-and-ridge regression residual (y-axis).
+    \textbf{Lower is better for both axes.}}
+  \label{fig:sketch_and_ridge_pareto}
+
+\end{figure}
+We present a table of aggregated speedups over baselines across all RandNLA tasks, input shapes, and datasets in \Cref{tab:randnla_speedup_summary} (run on a RTX 4090).
+\input{tables/randnla_speedup_summary.tex}
+Corresponding detailed plots and ablations appear in \Cref{sec:app_additional_experiments}.
+
+\subsection{End-to-end ML: GraSS for Data Attribution}
+We integrate \method into GraSS~\cite{hu2025grass}, a scalable data attribution pipeline built around compressing and storing per-example training gradients.
+At a high level, GraSS constructs a \emph{feature cache} for the training set by compressing per-example gradients using a sparsification followed by a random projection (or sketch).
+In the attribution phase, GraSS computes an analogous representation for a test/query example and produces an attribution vector using the cached features and a small downstream solve.
+In GraSS, the random projection step is a key bottleneck: it is invoked for every training example during cache construction (and for every query at inference time), so kernel efficiency directly impacts end-to-end wall time.
+
+We replace GraSS's sparse projection (its SJLT CUDA kernel) with \method while keeping all other pipeline components fixed.
+We adapt the code from their open-source repository directly~\cite{grass_github}.
+We focus our evaluation on the time spent in the projection/sketching step during feature cache construction.
+
+\paragraph{Attribution quality via the linear datamodeling score (LDS).}
+We evaluate attribution quality using the \emph{linear datamodeling score} (LDS) introduced in TRAK~\cite{park2023trak}, which GraSS also adopts.
+LDS is a counterfactual metric: it measures how well an attribution method predicts how the model's output on a fixed example $z$ would change if we retrained on different subsets of the training set.
+\textbf{Note that higher LDS is better.}
+
+\Cref{fig:grass_mnist_pareto} shows the quality--speed Pareto frontier for end-to-end GraSS on an MLP trained on MNIST~\cite{lecun2002gradient}.
+We refer the reader to \Cref{sec:app_additional_experiments_grass} and \cite{hu2025grass} for full details on the GraSS pipeline and the LDS metric.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_grass_camera_ready_mlp_mnist_pareto.pdf}
+  \includegraphics[width=\linewidth]{figures/fig_grass_camera_ready_mlp_mnist_proj_only_bar.pdf}
+  \caption{\textbf{End-to-end GraSS evaluation on MNIST.}
+    We compare sketching methods by sketch runtime per sample on an NVIDIA RTX A6000 GPU (x-axis), and quality measured using the LDS metric (y-axis).
+    \textbf{Lower is better for time (x-axis), higher is better for LDS (y-axis).}
+    \method pushes the Pareto frontier and achieves up to $\sim 3.2\times$ speedup over the GraSS baseline while maintaining attribution quality (top).
+  }
+  \label{fig:grass_mnist_pareto}
+
+\end{figure}

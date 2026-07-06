@@ -1,0 +1,53 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:          # gate the strict build on PRs too — catches docstring breaks BEFORE merge
+  workflow_dispatch:
+
+# deploy needs Pages write + OIDC; PR runs only build (deploy job is gated off below).
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# main/dispatch deploys are single-flight and never cancel each other ("docs-deploy");
+# PR builds get a per-branch group and cancel superseded runs so repeated pushes don't pile up.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('docs-pr-{0}', github.head_ref) || 'docs-deploy' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Node.js 20 is deprecated on GitHub runners (forced to Node 24 from 2026-06-16);
+# opt the JS actions into Node 24 now.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install mkdocs-material "mkdocstrings[python]" black
+      - run: mkdocs build --strict          # the gate; mkdocstrings reads src/ statically (no torch install)
+      # Pages artifact upload only matters for the deploy — skip it on PRs.
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'   # never deploy from a PR; main / manual dispatch only
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,24 @@
+\begin{table}[t]
+  \centering
+  \caption{Geomean speedups of \method vs baselines aggregated over shapes, datasets and configs. \textbf{Global geomean vs next best baseline: 1.73x.}}
+  \label{tab:randnla_speedup_summary}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{ccccc}
+    \toprule
+    Task & \shortstack{SJLT\\(cuSPARSE)} & \shortstack{SJLT\\(GraSS Kernel)} & \shortstack{Subsampled\\FHT} & \shortstack{Dense Gaussian\\(cuBLAS)} \\
+    \midrule
+    \shortstack{Gram matrix\\approximation} & 2.67 & 4.17 & 16.22 & 7.64 \\
+    \addlinespace[0.2em]
+    \cmidrule(lr){1-5}
+    OSE & 2.69 & 4.16 & 16.20 & 7.63 \\
+    \addlinespace[0.2em]
+    \cmidrule(lr){1-5}
+    \shortstack{Sketch-and-\\ridge regression} & 1.42 & 1.54 & 3.94 & 3.10 \\
+    \addlinespace[0.2em]
+    \cmidrule(lr){1-5}
+    \shortstack{Sketch+\\Solve} & 1.37 & 1.41 & 3.33 & 2.34 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}

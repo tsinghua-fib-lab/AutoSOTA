@@ -1,0 +1,86 @@
+\section{\sketchfamily: A Block-Permuted Sparse JL Transform}
+\label{sec:sketch}
+
+This section describes the sketch distribution used throughout the paper.
+The GPU implementation
+in \Cref{sec:kernel} exploits the particular block structure of this distribution.
+
+\paragraph{Block model.}
+Let $M$ be a positive integer.
+Partition the $\din$ input coordinates into $M$ contiguous blocks of size $\Bc\defeq \din/M$, and partition the $\dout$ output coordinates into $M$ blocks of size $\Br\defeq \dout/M$.
+For simplicity, we assume that $\din$ and $\dout$ are divisible by $M$.
+We deal with general cases in practice by padding.
+
+We index output blocks by $g\in[M]$ and input blocks by $h\in[M]$.
+
+The sketch matrix $S\in\R^{\dout\times \din}$ is therefore composed of $M\times M$ blocks, each of size $\Br\times \Bc$.
+Note that under this partition, the block sketch matrix $S$ is always square at the block level.
+
+\paragraph{Block-level wiring as a union of permutations.}
+This key structural element enables describing \sketchfamily as a union of $\kappa$ permutations at the block level.
+
+Specifically, sample $\kappa$ \textbf{edge-disjoint} permutations $\{\pi_\ell\}_{\ell=1}^{\kappa}$ of $[M]$.
+Note, importantly, that the permutations are edge-disjoint, meaning that no two permutations map the same output block to the same input block.
+Precisely, for all $g\in[M]$ and $\ell\ne\ell'$, we have $\pi_\ell(g)\ne\pi_{\ell'}(g)$.
+Equivalently, the permutations are pairwise derangements.
+This is necessary to ensure that each output block mixes information from $\kappa$ distinct input blocks.
+For each output block $g$, define the neighborhood of input blocks
+\[
+  \mathcal{N}(g) \;\defeq\; \{\pi_\ell(g)\}_{\ell=1}^{\kappa}\subseteq [M].
+\]
+We then define the block sparsity pattern of $S$ by connecting output block $g$ to input blocks in $\mathcal{N}(g)$ only.
+The edge-disjoint restriction implies that the induced block bipartite graph is $\kappa$-regular on both sides: each output block touches exactly $\kappa$ input blocks, and each input block participates in exactly $\kappa$ output blocks.
+
+\paragraph{Intra-block SJLT mixing.
+}
+For every nonzero block $(g,h)$ with $h\in\mathcal{N}(g)$, we draw an independent sparse JL matrix
+\(\Phi_{g,h}\in\R^{\Br\times\Bc}\)
+with exactly $\spar$ nonzeros per column, with entries $\pm 1/\sqrt{\spar}$ at uniformly random row positions.
+Then, we define the full sketch matrix $S$ using these blocks as
+\[
+  S_{g,h} \;=\;
+  \begin{cases}
+    \frac{1}{\sqrt{\kappa}}\,\Phi_{g,h} & \text{if }h\in\mathcal{N}(g), \\[2pt]
+    0                                   & \text{otherwise.}
+  \end{cases}
+\]
+Thus each input coordinate has exactly $\kappa\spar$ nonzeros in its column of $S$, each with magnitude $1/\sqrt{\kappa\spar}$.
+Note that this sketch is a structured subclass of SJLT and a generalization of localized JL with sparse blocks~\cite{srinivasa2020localized}.
+Specifically, when $\kappa=1$, this reduces to a localized, block-diagonal SJLT.
+
+We use the bi-regularity of the block sparsity both in the kernel design and the theoretical analysis.
+Increasing $\kappa$ expands each output neighborhood while reducing block locality, providing a tunable and quantitative tradeoff between mixing and memory efficiency.
+We will concretely see this tradeoff from the theory side in \Cref{sec:theory} and the systems side in \Cref{sec:experiments}.
+An example of \sketchfamily is illustrated in \Cref{fig:fig_example_blockperm_sjlt}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_camera_ready_flashsketch_m16_k4_seed2.pdf}
+  \caption{\textbf{Example $S \sim$ \sketchfamily.}
+    Sparsity is a union of edge-disjoint permutations (degree-$\kappa$ regular at the block level).
+    Each block is a sparse JL matrix with $\spar$ nonzeros per column.
+    Here, $M=16$, with block size $\Br=64$, $\Bc=128$.
+    The block degree is $\kappa=4$ and the intra-block sparsity is $\spar=2$.
+    The resulting sketch therefore has $\kappa \spar = 8$ nonzeros per column, input dimension $\din=M \Bc = 2048$ and output dimension $\dout=M \Br = 1024$.
+    Each of the $4$ permutations is colored differently for visualization.
+  }
+  \label{fig:fig_example_blockperm_sjlt}
+
+\end{figure}
+
+% On the systems side (\Cref{sec:kernel}), it lets us assign each output block to a unique thread block, avoiding inter-block global atomics, and restricting atomic operations to intra-block shared memory which is much faster.
+% On the theory side (\Cref{sec:theory}), introducing permutations encourages mixing beyond the localized block-diagonal sketch, which improves the dependence on input coherence to obtain an OSE guarantee.
+
+% \OrangeSectionStart
+% \paragraph{On-the-fly permutations and independence.
+% }
+% The kernel needs to evaluate $\pi_\ell(g)$ without storing a full $M\times \kappa$ table.
+% We therefore generate permutations from a small seed, using either a small lookup table (when $M$ is small) or a structured family such as affine permutations
+% \(
+% \pi_\ell(g) = (a_\ell g + b_\ell)\bmod M
+% \) with $\gcd(a_\ell,M)=1$.
+% For theory, we state guarantees for independent uniform permutations.
+% In practice, we generate $\kappa$ \emph{distinct} permutations (sampling without replacement from a lightweight family), which introduces weak dependence.
+% In the regime we use in practice---typically $\kappa\ll M$---this distinction is negligible at the level of the blockwise concentration events in our analysis; we note the mismatch explicitly in Appendix~\ref{sec:appendix-perm-practice}.
+
+% \OrangeSectionEnd

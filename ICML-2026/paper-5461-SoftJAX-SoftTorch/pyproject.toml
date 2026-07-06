@@ -1,0 +1,82 @@
+[project]
+name = "softjax"
+version = "0.1.1"
+description = "A library for soft differentiable relaxations of common JAX functions."
+readme = "README.md"
+authors = [
+    { name = "Anselm Paulus", email = "paulus.anselm@gmail.com" }
+]
+requires-python = ">=3.10"
+license = "Apache-2.0"
+keywords = ["differentiable", "soft", "relaxation", "sorting", "ranking", "jax"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
+]
+dependencies = [
+    "jax>=0.6.0",
+    "jaxtyping>=0.3.2",
+    "lineax>=0.0.8",
+    "ott-jax>=0.5.0",
+    "equinox>=0.13.1",
+    "optimistix>=0.0.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/a-paulus/softjax"
+Documentation = "https://a-paulus.github.io/softjax/"
+Repository = "https://github.com/a-paulus/softjax"
+Issues = "https://github.com/a-paulus/softjax/issues"
+
+[project.optional-dependencies]
+gpu = [
+  "jax[cuda12]>=0.8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["uv.lock", "benchmarks/", "docs/", "tests/", "mkdocs.yml"]
+
+[dependency-groups]
+dev = [
+    "pandas",
+    "hippogriffe>=0.2.2",
+    "ipykernel>=6.29.5",
+    "ipython>=9.3.0",
+    "matplotlib>=3.10.3",
+    "mkdocs>=1.6.1",
+    "mkdocs-include-exclude-files>=0.1.0",
+    "mkdocs-ipynb>=0.1.1",
+    "mkdocs-jupyter",
+    "mkdocs-material>=9.6.14",
+    "mkdocstrings>=0.29.1",
+    "mkdocstrings-python>=1.16.12",
+    "pymdown-extensions>=10.15",
+    "ruff>=0.11.12",
+    "pytest>=8.2.0",
+]
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+src = ["src"]
+
+[tool.ruff.lint]
+fixable = ["I001", "F401", "UP"]
+ignore = ["E402", "E721", "E731", "E741", "F722", "UP038", "E501"]
+select = ["E", "F", "I001", "UP"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+extra-standard-library = ["typing_extensions"]
+lines-after-imports = 2
+order-by-type = false

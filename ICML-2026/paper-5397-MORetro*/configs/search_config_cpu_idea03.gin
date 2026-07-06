@@ -1,0 +1,72 @@
+import moretro.moretro_star
+
+# Macros IMPORTANT
+device = "cpu" # used for ML models
+single_step_model = "template" # ["template", "pdvn", "g2e"]
+single_step_topk = 25
+building_blocks = "origin_dict.csv"
+
+# Macros Objectives
+objective_functions = ["sustainability_cost", "scaleup_cost", "toxicity_cost", "convergence_cost"]
+pareto_objectives = 3
+max_dominated_solutions = 10
+max_pareto_solutions = 150
+
+# Macros Search
+iteration_budget = 100
+single_step_call_budget = 120
+time_budget = 0
+max_node_depth = 15
+stop_on_full_pareto = True
+exclude_dominated_nodes = False
+epsilon_pruning = 0
+
+# Macros Weight Parameters
+sampling_strategy = "bo"
+no_concurrent_weights = 3
+iter_per_weight = 10
+no_samples = 128
+weight_sampling_strategy = "sobol"
+include_extreme = True
+
+# BO selector Parameters
+BOWeightSelector.kappa = 2.0
+BOWeightSelector.n_warmup = 5
+BOWeightSelector.decay_factor = 0.5
+BOWeightSelector.max_age = 2
+
+# ------------------------- CONFIGURATION OF CLASSES -------------------------
+prepare_starting_mols.file_path = %building_blocks
+prepare_heuristic_fns.heuristics = %objective_functions
+prepare_cost_models.cost_functions = %objective_functions
+prepare_cost_models.device = %device
+
+MOGraph.zero_bound = True
+MOGraph.weight_samples = %no_samples
+MOGraph.no_weights = %no_concurrent_weights
+MOGraph.weight_initial = %weight_sampling_strategy
+MOGraph.include_extreme = %include_extreme
+MOGraph.pareto_objectives = %pareto_objectives
+MOGraph.max_dominated_solutions = %max_dominated_solutions
+MOGraph.weight_update_strategy = %sampling_strategy
+
+MOSearch.top_n = %single_step_topk
+MOSearch.max_depth = %max_node_depth
+MOSearch.iteration_budget = %iteration_budget
+MOSearch.weight_iter_budget = %iter_per_weight
+MOSearch.time_budget = 0
+MOSearch.single_step_call_budget = %single_step_call_budget
+MOSearch.max_pareto_solutions = %max_pareto_solutions
+MOSearch.stop_on_full_pareto = %stop_on_full_pareto
+MOSearch.exclude_dominated_nodes = %exclude_dominated_nodes
+MOSearch.epsilon_pruning = %epsilon_pruning
+
+retro_prediction.OneStepModel.model_type = %single_step_model
+retro_prediction.OneStepModel.cost_functions = %objective_functions
+retro_prediction.OneStepModel.device = %device
+
+retro_prediction.ConditionModel.model_type = "quarc"
+retro_prediction.ConditionModel.config_path = "external/quarc/configs"
+retro_prediction.ConditionModel.device = %device
+retro_prediction.ConditionModel.top_k = 2
+retro_prediction.ConditionModel.beam_size = 5

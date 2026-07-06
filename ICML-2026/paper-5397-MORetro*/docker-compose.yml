@@ -1,0 +1,34 @@
+x-moretro-common: &moretro-common
+  image: moretro:latest
+  environment:
+    - PYTHONWARNINGS=ignore::SyntaxWarning
+  volumes:
+    - ./models:/app/models:ro             # download first: python moretro/preprocess/download_figshare.py
+    - ./configs:/app/configs:ro           # edit gin config on host, no rebuild needed
+    - ./data:/app/data:ro                 # place input CSVs here
+    - ./output:/app/output                # visualizations and JSON routes written here
+    - ./logs:/app/logs                    # log files written here
+
+services:
+  moretro:
+    <<: *moretro-common
+    build:
+      context: .
+      args:
+        TORCH_DEVICE: cpu
+
+  moretro-gpu:
+    <<: *moretro-common
+    build:
+      context: .
+      args:
+        TORCH_DEVICE: gpu
+    profiles:
+      - gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

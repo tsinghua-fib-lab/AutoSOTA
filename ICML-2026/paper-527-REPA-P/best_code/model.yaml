@@ -1,0 +1,52 @@
+c_data: 1 # given for completeness but should be kept at 1.
+c_residual: 0.01 # scale factor for residual virtual likelihood, 0 corresponds to no residual likelihood
+c_ineq: 0.0 # scale factor for inequality virtual likelihood, 0 corresponds to no inequality likelihood
+lambda_opt: 0.0 # lambda of exponential distribution used to introduce optimization likelihood, 0 corresponds to no optimization likelihood
+diff_steps: 100 # number of diffusion timesteps
+x0_estimation: 'mean' # 'mean' or 'sample'
+ddim_steps: 0 # DDIM steps, 0 corresponds to direct mapping to x1 as proposed in manuscript, only relevant if x0_estimation == 'sample'
+residual_grad_guidance: False # gradient guidance as in https://www.sciencedirect.com/science/article/pii/S0021999123000670
+correction_mode: xt # correct based on 'xt' or 'x0', CoCogen as presented in https://arxiv.org/abs/2312.10527 uses xt
+M_correction: 0 # correction steps after sampling x0, see https://arxiv.org/abs/2312.10527
+N_correction: 0 # correction steps before sampling x0, see https://arxiv.org/abs/2312.10527
+gov_eqs: darcy # governing equations: 'darcy', 'poisson', 'mechanics', or 'turbulent'
+fd_acc: 2 # accuracy of finite difference evaluation, mainly relevant for 'darcy'
+
+# Projection-head configuration.
+# Set use_projection_heads: False for the PIDM baseline.
+# Set use_projection_heads: True for REPA-P.
+use_projection_heads: True
+projection_positions:
+  - decoder # projection position: encoder, bottleneck, decoder, output
+projection_hidden_dim: 128
+c_projection: 0.01 # projection-head physics loss weight
+
+# Run configuration.
+run_name: darcy.repap.unet # output directory: trained_models/<run_name>/
+train_iterations: 150000
+train_batch_size: 64
+wandb_track: False
+load_model_flag: False
+resume_step: 0
+checkpoint_save_freq: 1000
+sample_freq: 5000
+test_eval_freq: 1000
+log_freq: 20
+no_samples: 20
+ema_start: 1000
+use_ema_for_eval: True
+
+# Optional: record denoising-step physics residuals during sampling inside training.
+collect_physics_per_step: False
+
+# Turbulent-only options. Ignored by other datasets.
+# The turbulent branch uses wall/smoothness regularizers on the resized field,
+# not a closed PDE residual.
+pixels_per_dim: 64
+turbulent_data_path: ./data/ch_2Dxysec.pickle
+turbulent_train_fraction: 0.9
+lambda_wall: 0.1
+lambda_smooth: 0.01
+lambda_gradient: 0.0
+lambda_near_wall: 0.0
+near_wall_rows: 3

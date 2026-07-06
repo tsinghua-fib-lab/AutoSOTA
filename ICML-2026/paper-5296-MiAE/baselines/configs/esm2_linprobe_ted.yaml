@@ -1,0 +1,34 @@
+# @package _global_
+defaults:
+  - _self_
+  - datamodule: afdbfs_ted
+
+seed: 42
+
+datamodule:
+  batch_size: 128
+  num_workers: 32
+
+datamodule_test:
+  _target_: tedbench.data.LightningStructureDataset
+  root: ./datasets/cath
+  dataset_name: cath4.4
+  batch_size: 128
+  num_workers: 32
+
+toks_per_batch: 32768
+model:
+  name: esm2_t33_650M_UR50D
+  num_classes: 965
+
+logs:
+  prefix: logs/esm2/linprobe/${datamodule.dataset_name}/${seed}
+  path: ${logs.prefix}/runs/${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+# output directory, generated dynamically on each run
+hydra:
+  run:
+    dir: ${logs.path}
+  sweep:
+    dir: ${logs.prefix}/multiruns/esm2/linprobe/${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

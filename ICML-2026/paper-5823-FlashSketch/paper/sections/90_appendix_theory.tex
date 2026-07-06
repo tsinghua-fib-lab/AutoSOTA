@@ -1,0 +1,776 @@
+\section{Additional theory and proofs}
+\label{sec:app_theory}
+
+This appendix contains the proofs for the theory in \Cref{sec:theory}.
+We focus on two results.
+First, we prove the OSE guarantee for \sketchfamily stated in \Cref{thm:ose_informal}.
+Second, we show that a union of random permutations reduces neighborhood coherence, which is the smoothing phenomenon discussed in \Cref{sec:theory_coherence}.
+
+The overall proof strategy follows the localized sketching framework of~\cite{srinivasa2020localized}.
+The main difference is the permutation wiring.
+It defines $\kappa$-block neighborhoods that retain locality while improving mixing.
+In the OSE analysis we condition on the wiring $\pi$ and analyze the randomness in the SJLT blocks.
+The final subsection then studies the randomness in $\pi$ itself.
+
+\subsection{Construction and Notation}
+
+Let $d=M\Bc$ and $k=M\Br$.
+For $x\in\R^d$, write $x=[x^{(1)};\ldots;x^{(M)}]$ with blocks $x^{(h)}\in\R^{\Bc}$.
+Given $\kappa$ edge-disjoint permutations $\{\pi_\ell\}_{\ell=1}^{\kappa}$ on $[M]$, define for each $g\in[M]$
+\[
+  \mathcal{N}(g) = \{\pi_\ell(g)\}_{\ell=1}^{\kappa}.
+\]
+Let $x_{\mathcal{N}(g)}\in\R^{\kappa \Bc}$ denote the concatenation of the blocks $\{x^{(h)}:h\in\mathcal{N}(g)\}$ in the order $(\pi_1(g),\ldots,\pi_\kappa(g))$.
+
+For each $(g,h)$ with $h\in\mathcal{N}(g)$, draw an independent row-partitioned SJLT
+$\Phi_{g,h}\in\R^{\Br\times \Bc}$ with exactly $s$ nonzeros per column and entries $\pm 1/\sqrt{s}$.
+Define the concatenated local sketch
+\begin{equation}
+  \label{eq:phi_g_concat}
+  \begin{aligned}
+    \Phi_g
+     & := \bigl[\Phi_{g,\pi_1(g)}\;\cdots\;\Phi_{g,\pi_\kappa(g)}\bigr], \\
+     & \qquad \Phi_g \in \R^{\Br \times (\kappa\Bc)}.
+  \end{aligned}
+\end{equation}
+Finally, define the full sketch $S\in\R^{k\times d}$ blockwise by
+\[
+  S_{g,h}=\begin{cases}
+    \frac{1}{\sqrt{\kappa}}\Phi_{g,h} & \text{if }h\in\mathcal{N}(g), \\
+    0                                 & \text{otherwise.}
+  \end{cases}
+\]
+Then the $g$-th output block of $Sx$ is
+\begin{equation}
+  \label{eq:block_output}
+  (Sx)^{(g)} = \frac{1}{\sqrt{\kappa}}\Phi_g\,x_{\mathcal{N}(g)}\in\R^{\Br}.
+\end{equation}
+
+This is identical to the construction of \sketchfamily in \Cref{sec:sketch}, we repeat it here for clarity.
+\subsection{Energy Identity from Permutation Wiring}
+
+The union of edge-disjoint permutations structure implies that each input block appears in exactly $\kappa$ neighborhoods.
+
+\begin{lemma}[Neighborhood energy identity]
+  \label{lem:energy_identity}
+  For any $x\in\R^d$,
+  \begin{equation}
+    \label{eq:energy_identity_vec}
+    \sum_{g=1}^M \|x_{\mathcal{N}(g)}\|_2^2 = \kappa \|x\|_2^2.
+  \end{equation}
+  Moreover, for any $U\in\R^{d\times r}$,
+  \begin{equation}
+    \label{eq:energy_identity_mat}
+    \sum_{g=1}^M U_{\mathcal{N}(g)}^\top U_{\mathcal{N}(g)} = \kappa U^\top U.
+  \end{equation}
+\end{lemma}
+
+\begin{proof}
+  For the vector identity, expand
+  \begin{equation}
+    \begin{aligned}
+      \sum_{g=1}^M \|x_{\mathcal{N}(g)}\|_2^2
+       & = \sum_{g=1}^M \sum_{\ell=1}^{\kappa}\bigl\|x^{(\pi_\ell(g))}\bigr\|_2^2  \\
+       & = \sum_{\ell=1}^{\kappa}\sum_{g=1}^M \bigl\|x^{(\pi_\ell(g))}\bigr\|_2^2.
+    \end{aligned}
+  \end{equation}
+  Each $\pi_\ell$ is a bijection, so $\sum_{g}\|x^{(\pi_\ell(g))}\|_2^2 = \sum_{h}\|x^{(h)}\|_2^2 = \|x\|_2^2$, and the claim follows.
+
+  The matrix identity follows by applying the same counting argument entrywise:
+  \begin{equation}
+    \begin{aligned}
+      \sum_{g=1}^M U_{\mathcal{N}(g)}^{\!\top}
+      U_{\mathcal{N}(g)}
+       & =\sum_{g=1}^M\sum_{\ell=1}^{\kappa} U^{(\pi_\ell(g))\top}U^{(\pi_\ell(g))} \\
+       & =\sum_{\ell=1}^{\kappa}\sum_{h=1}^M U^{(h)\top}U^{(h)}
+      =\kappa U^\top U.
+    \end{aligned}
+  \end{equation}
+\end{proof}
+
+\subsection{A fixed-vector bound for row-partitioned SJLT}
+
+We use the following standard fixed-vector tail bound for SJLT/OSNAP-style hashing matrices.
+
+\begin{lemma}[Fixed-vector norm preservation for row-partitioned SJLT]
+  \label{lem:sjlt_fixed_vector}
+  Let $\Phi\in\R^{m\times D}$ be a row-partitioned SJLT with exactly $s$ nonzeros per column and entries $\pm 1/\sqrt{s}$ with independent signs and row positions.
+  Then for any fixed $v\in\R^{D}$ and any $u\in(0,1)$,
+  \begin{equation}
+    \begin{aligned}
+       & \Pr\Bigl[\bigl|\|\Phi v\|_2^2-\|v\|_2^2\bigr| > u\,\|v\|_2^2\Bigr] \\
+       & \qquad\le 4\exp\!\bigl(-c\min\{u^2 m,\;u s\}\bigr).
+    \end{aligned}
+  \end{equation}
+  for an absolute constant $c>0$.
+\end{lemma}
+
+\noindent
+We will use \Cref{lem:sjlt_fixed_vector} as a black box throughout the appendix.
+For completeness (and to avoid any ambiguity about constants and notation), we give a short derivation of the stated tail form from the distributional JL guarantee for the \emph{block construction} (i.e., row-partitioned hashing) analyzed by \citet{kane2014sparser}.
+The proof is a simple ``parameter inversion'': we start from a statement of the form ``if $m$ and $s$ scale like $\varepsilon^{-2}\log(1/\delta)$ and $\varepsilon^{-1}\log(1/\delta)$ then failure probability is at most $\delta$'', and then solve for $\delta$ as a function of $m,s,u$.
+
+\begin{proof}[Derivation of \Cref{lem:sjlt_fixed_vector} from \citet{kane2014sparser}]
+  Fix $v\neq 0$ and set $x=v/\|v\|_2$ so that $\|x\|_2=1$.
+  Let $S\in\R^{m\times D}$ be the row-partitioned SJLT (``block construction'') with $s$ nonzeros per column and entries $\pm 1/\sqrt{s}$.
+  Following \citet{kane2014sparser}, define the distortion random variable
+  \begin{equation}
+    Z\;\coloneqq\;\|Sx\|_2^2-1.
+  \end{equation}
+  In the notation of \citet{kane2014sparser}, $m$ corresponds to their embedding dimension $k$, and this $Z$ is exactly the random variable defined in their Eq.
+  ~(3).
+
+  \paragraph{Step 1: start from a $(\varepsilon,\delta)$-style JL guarantee.}
+  \citet[Theorem~13]{kane2014sparser} shows (for the block construction) that there exist absolute constants $C_1,C_2>0$ such that for any $\varepsilon\in(0,1)$ and $\delta\in(0,1/2)$, if
+  \begin{equation}
+    \begin{aligned}
+      m & \;\ge\; C_1\,\varepsilon^{-2}\log(1/\delta), \\
+      s & \;\ge\; C_2\,\varepsilon^{-1}\log(1/\delta),
+    \end{aligned}
+  \end{equation}
+  then
+  \begin{equation}
+    \Pr\bigl[|Z| > 2\varepsilon-\varepsilon^2\bigr] \;\le\; \delta.
+  \end{equation}
+
+  \paragraph{Step 2: convert to a tail bound in terms of $u$.}
+  Let $u\in(0,1)$ and set $\varepsilon\coloneqq u/2$.
+  Since $2\varepsilon-\varepsilon^2 = u-u^2/4 < u$, we have the set inclusion
+  \begin{equation}
+    \{|Z|>u\} \;\subseteq\; \bigl\{|Z|>2\varepsilon-\varepsilon^2\bigr\}.
+  \end{equation}
+  Therefore, whenever the conditions on $m$ and $s$ above hold (with $\varepsilon=u/2$),
+  \begin{equation}
+    \Pr\bigl[|Z|>u\bigr] \;\le\; \Pr\bigl[|Z|>2\varepsilon-\varepsilon^2\bigr] \;\le\; \delta.
+  \end{equation}
+
+  \paragraph{Step 3: solve for $\delta$ as a function of $m,s,u$.}
+  With $\varepsilon=u/2$, the sufficient conditions become
+  \begin{equation}
+    \log(1/\delta) \;\le\; \frac{u^2 m}{4C_1}
+    \qquad\text{and}\qquad
+    \log(1/\delta) \;\le\; \frac{u s}{2C_2}.
+  \end{equation}
+  Equivalently, for any $c \le \min\{(4C_1)^{-1}, (2C_2)^{-1}\}$, choosing
+  \begin{equation}
+    \delta \;=\; \exp\bigl(-c\,\min\{u^2 m,\; u s\}\bigr)
+  \end{equation}
+  ensures the hypotheses of \citet[Theorem~13]{kane2014sparser} (with $\varepsilon=u/2$) are satisfied.
+  Substituting this choice of $\delta$ into the preceding display yields
+  \begin{equation}
+    \Pr\bigl[|Z|>u\bigr] \;\le\; \exp\bigl(-c\,\min\{u^2 m,\; u s\}\bigr).
+  \end{equation}
+  Finally, rescaling from $x=v/\|v\|_2$ back to $v$ gives
+  \begin{equation}
+    \begin{aligned}
+      \Pr\Bigl[\bigl|\|Sv\|_2^2-\|v\|_2^2\bigr| > u\,\|v\|_2^2\Bigr]
+      \\
+      \le\; \exp\bigl(-c\,\min\{u^2 m,\; u s\}\bigr).
+    \end{aligned}
+  \end{equation}
+  which is the desired tail form up to adjusting constants (we state a slightly looser version with a prefactor~$4$ for convenience).
+\end{proof}
+
+In particular, we will repeatedly invoke \Cref{lem:sjlt_fixed_vector} to control the centered error $\|\Phi v\|_2^2-\|v\|_2^2$ as a sub-exponential random variable (cf.
+\ the proof of \Cref{prop:fixed_vec_blockperm}).
+
+\subsection{Coherence metrics}
+\label{sec:app_coherence_metrics}
+
+We use two coherence parameters to track how vectors and subspaces align with the block partition.
+Block coherence measures concentration inside a single contiguous block.
+Neighborhood coherence measures concentration inside a union of $\kappa$ blocks selected by the wiring permutations.
+We use the same notation $\mu_{\mathrm{blk}}(\cdot)$ and $\mu_{\mathrm{nbr}}(\cdot;\pi)$ for vectors and matrices.
+
+\begin{definition}[Vector block and neighborhood coherence]
+  \label{def:vec_coherences}
+  Let $x\in\R^d$ be nonzero and partition it into contiguous blocks $x=[x^{(1)};\dots;x^{(M)}]$.
+  Define
+  \begin{align}
+    \mu_{\mathrm{blk}}(x)
+     & := \frac{M}{\|x\|_2^2}\max_{h\in[M]}\|x^{(h)}\|_2^2,
+    \label{eq:mu_blk_vec}                                                              \\
+    \mu_{\mathrm{nbr}}(x;\pi)
+     & := \frac{M}{\kappa\|x\|_2^2}\max_{g\in[M]}\bigl\|x_{\mathcal{N}(g)}\bigr\|_2^2.
+    \label{eq:mu_nbr_vec}
+  \end{align}
+\end{definition}
+
+\begin{definition}[Matrix block and neighborhood coherence~\cite{srinivasa2020localized}]
+  \label{def:mat_coherences}
+  Let $U\in\R^{d\times r}$ have orthonormal columns and write
+  $U=[U^{(1)};\dots;U^{(M)}]$ for its induced row-block partition.
+  Define
+  \begin{align}
+    \mu_{\mathrm{blk}}(U)
+     & := M\max_{h\in[M]}\|U^{(h)}\|_2^2,
+    \label{eq:mu_blk_U_app}                                                   \\
+    \mu_{\mathrm{nbr}}(U;\pi)
+     & := \frac{M}{\kappa}\max_{g\in[M]}\bigl\|U_{\mathcal{N}(g)}\bigr\|_2^2.
+    \label{eq:mu_nbr_U_app}
+  \end{align}
+  These agree with the definitions \eqref{eq:mu_blk_def}--\eqref{eq:mu_nbr_def} in the main text.
+\end{definition}
+
+\subsection{Fixed-vector guarantee for \sketchfamily}
+
+\begin{proposition}[Fixed-vector JL for \sketchfamily]
+  \label{prop:fixed_vec_blockperm}
+  Let $S\sim\sketchfamily$ with parameters $(M,\Br,\kappa,s)$ and independent $\{\Phi_g\}_{g=1}^M$.
+  Then for any fixed $x\in\R^d$ and any $u\in(0,1)$,
+  \begin{equation}
+    \label{eq:fixed_vec_blockperm_bound}
+    \begin{aligned}
+       & \Pr\Bigl[\bigl|\|Sx\|_2^2-\|x\|_2^2\bigr| > u\,\|x\|_2^2\Bigr] \\
+       & \qquad \le\;
+      2\exp\!\Bigl(
+      -c\min\Bigl\{
+      \frac{u^2 k}{\mu_{\mathrm{nbr}}(x;\pi)},
+      \; u\,\kappa s
+      \Bigr\}
+      \Bigr).
+    \end{aligned}
+  \end{equation}
+  where $k=M\Br$ and $c>0$ is an absolute constant.
+\end{proposition}
+
+\begin{proof}
+  Write the output norm as a sum over blocks using \eqref{eq:block_output}:
+  \[
+    \|Sx\|_2^2
+    = \sum_{g=1}^M \|(Sx)^{(g)}\|_2^2
+    = \frac{1}{\kappa}\sum_{g=1}^M \|\Phi_g x_{\mathcal{N}(g)}\|_2^2.
+  \]
+  Define random variables
+  \[
+    Z_g \;=\; \frac{1}{\kappa}\Bigl(\|\Phi_g x_{\mathcal{N}(g)}\|_2^2 - \|x_{\mathcal{N}(g)}\|_2^2\Bigr).
+  \]
+  Then $\E Z_g=0$ and $\{Z_g\}$ are independent across $g$.
+  \emph{(Here, the randomness is only over the independent SJLT blocks $\{\Phi_g\}_{g=1}^M$.
+  We treat the wiring $\pi$ as fixed; if $\pi$ is random, the argument holds conditional on $\pi$ and hence also unconditionally.)
+  }
+  Moreover,
+  \[
+    \|Sx\|_2^2 - \|x\|_2^2
+    = \sum_{g=1}^M Z_g
+    \quad\text{since}\quad
+    \frac{1}{\kappa}\sum_{g=1}^M\|x_{\mathcal{N}(g)}\|_2^2 = \|x\|_2^2
+  \]
+  by \Cref{lem:energy_identity}.
+
+  We now bound $\sum_g Z_g$ using Bernstein concentration for independent sub-exponential variables.
+  For completeness, we record the exact Bernstein inequality we use, together with a standard definition of the ``$(\nu^2,b)$'' parameters.
+
+  \begin{definition}[Sub-exponential with parameters $(\nu^2,b)$]
+    \label{def:subexp_params}
+    A centered random variable $X$ is sub-exponential with parameters $(\nu^2,b)$ if
+    \begin{equation}
+      \label{eq:subexp_mgf}
+      \E\exp(\lambda X)\;\le\;\exp\!\left(\tfrac{\lambda^2\nu^2}{2}\right)
+      \qquad\text{for all }|\lambda| < 1/b.
+    \end{equation}
+  \end{definition}
+
+  \begin{lemma}[Bernstein inequality for independent sub-exponential variables]
+    \label{lem:bernstein_subexp}
+    Let $\{X_i\}_{i=1}^N$ be independent, centered random variables.
+    Suppose each $X_i$ is sub-exponential with parameters $(\nu_i^2,b_i)$ in the sense of \Cref{def:subexp_params}.
+    Then there is an absolute constant $c>0$ such that for every $t\ge 0$,
+    \begin{equation}
+      \label{eq:bernstein_subexp_lemma}
+      \Pr\Bigl[\Bigl|\sum_{i=1}^N X_i\Bigr|\ge t\Bigr]
+      \;\le\;
+      2\exp\!\left(
+      -c\min\left\{
+      \frac{t^2}{\sum_i \nu_i^2},
+      \frac{t}{\max_i b_i}
+      \right\}
+      \right).
+    \end{equation}
+    This is \citet[Corollary~2.8.3]{vershynin2018hdp}.
+  \end{lemma}
+
+  Define
+  \[
+    \tilde Z_g := \|\Phi_g x_{\mathcal{N}(g)}\|_2^2 - \|x_{\mathcal{N}(g)}\|_2^2,
+    \qquad
+    q_g := \|x_{\mathcal{N}(g)}\|_2^2.
+  \]
+  Applying \Cref{lem:sjlt_fixed_vector} with $v=x_{\mathcal{N}(g)}$ yields, for all $u>0$,
+  \[
+    \Prb\bigl[|\tilde Z_g| > u q_g\bigr]
+    \le 4\exp\bigl(-c\min\{u^2\Br,\;u s\}\bigr).
+  \]
+  We now convert this tail bound into explicit sub-exponential parameters.
+  Rewrite the previous display in terms of an arbitrary threshold $t>0$ by setting $u=t/q_g$:
+  \begin{equation}
+    \label{eq:tildeZ_tail_t}
+    \Prb\bigl[|\tilde Z_g| > t\bigr]
+    \;\le\;
+    4\exp\!\Bigl(-c\min\Bigl\{\frac{\Br\,t^2}{q_g^2},\ \frac{s\,t}{q_g}\Bigr\}\Bigr).
+  \end{equation}
+  We now check the mgf condition in \Cref{def:subexp_params} directly.
+  Define
+  \begin{equation}
+    \label{eq:tildeZ_nu_b_defs}
+    \nu_{g,0}^2 \coloneqq \frac{q_g^2}{\Br}
+    \qquad\text{and}\qquad
+    b_{g,0} \coloneqq \frac{q_g}{s}.
+  \end{equation}
+  Then \eqref{eq:tildeZ_tail_t} can be rewritten as
+  \begin{equation}
+    \label{eq:tildeZ_tail_rewrite}
+    \Pr[|\tilde Z_g|>t]
+    \;\le\;
+    4\exp\Bigl(-c\min\{t^2/\nu_{g,0}^2,\ t/b_{g,0}\}\Bigr).
+  \end{equation}
+  We now derive a Bernstein-type mgf bound from \eqref{eq:tildeZ_tail_rewrite}.
+  Fix $\lambda\ge 0$ and use the identity
+  \begin{equation}
+    \label{eq:mgf_tail_identity}
+    \begin{aligned}
+      \E e^{\lambda\tilde Z_g}
+       & = 1 + \int_{0}^{\infty} \lambda e^{\lambda t}\Pr[\tilde Z_g>t]dt      \\
+       & \quad + \int_{0}^{\infty} \lambda e^{-\lambda t}\Pr[\tilde Z_g<-t]dt.
+    \end{aligned}
+  \end{equation}
+  Since $\Pr[\tilde Z_g>t]$ and $\Pr[\tilde Z_g<-t]$ are both bounded by \eqref{eq:tildeZ_tail_rewrite}, we obtain
+  \begin{equation}
+    \label{eq:mgf_tail_bound}
+    \begin{aligned}
+      \E e^{\lambda\tilde Z_g}
+      \; & \le\;
+      1 + 8|\lambda|\int_0^{\infty} e^{|\lambda| t}                             \\
+      \; & \quad\cdot\exp\Bigl(-c\min\{t^2/\nu_{g,0}^2,\ t/b_{g,0}\}\Bigr)\,dt.
+    \end{aligned}
+  \end{equation}
+  The same bound holds for $\lambda<0$ by applying \eqref{eq:mgf_tail_identity} to $-\tilde Z_g$.
+  Split the integral at $t_\star\coloneqq \nu_{g,0}^2/b_{g,0}$.
+  For $t\le t_\star$ we use the quadratic part of the minimum, which gives an integrand proportional to $\exp(|\lambda|t - c t^2/\nu_{g,0}^2)$.
+  Completing the square yields
+  \begin{equation}
+    \label{eq:mgf_small_t}
+    \begin{aligned}
+      \int_0^{t_\star} \exp\Bigl(|\lambda|t - c t^2/\nu_{g,0}^2\Bigr)dt
+      \; & \le\;
+      C\,\nu_{g,0}                                           \\
+      \; & \quad\cdot \exp\bigl(C\lambda^2\nu_{g,0}^2\bigr).
+    \end{aligned}
+  \end{equation}
+  for an absolute constant $C>0$.
+  For $t\ge t_\star$ we use the linear part of the minimum.
+  If $|\lambda|\le c/(2b_{g,0})$, then
+  \begin{align}
+    \label{eq:mgf_large_t}
+    \int_{t_\star}^{\infty} \exp\Bigl(-\bigl(c/b_{g,0}-|\lambda|\bigr)t\Bigr)\,dt \; \nonumber \\
+    \le\; \int_{t_\star}^{\infty} \exp\Bigl(-c t/(2b_{g,0})\Bigr)\,dt\;    \le\;C\,b_{g,0}.
+  \end{align}
+  Substituting \eqref{eq:mgf_small_t} and \eqref{eq:mgf_large_t} into \eqref{eq:mgf_tail_bound} shows that there are absolute constants $C_0,c_0>0$ such that
+  \begin{equation}
+    \label{eq:tildeZ_mgf_bound}
+    \begin{aligned}
+      \E\exp(\lambda\tilde Z_g)
+      \; & \le\;
+      \exp\!\left(\tfrac{\lambda^2\,C_0\nu_{g,0}^2}{2}\right)
+      \\
+      \; & \quad\text{for all }|\lambda| < c_0/b_{g,0}.
+    \end{aligned}
+  \end{equation}
+  Combining \eqref{eq:tildeZ_mgf_bound} with \Cref{def:subexp_params} gives the following explicit parameter bounds.
+  There exist absolute constants $C,c'>0$ such that $\tilde Z_g$ is sub-exponential with parameters
+  \begin{equation}
+    \label{eq:tildeZ_params}
+    \nu_g^2 \le C\,\frac{q_g^2}{\Br}
+    \qquad\text{and}\qquad
+    b_g \le C\,\frac{q_g}{s}.
+  \end{equation}
+  Since $Z_g=\tilde Z_g/\kappa$, scaling \eqref{eq:subexp_mgf} shows that $Z_g$ is sub-exponential with parameters
+  \begin{equation}
+    \label{eq:Zg_params}
+    \nu_g^2 \le C\,\frac{q_g^2}{\kappa^2\Br}
+    \qquad\text{and}\qquad
+    b_g \le C\,\frac{q_g}{\kappa s}.
+  \end{equation}
+  We now apply \Cref{lem:bernstein_subexp} with $X_g=Z_g$.
+  \begin{equation}
+    \label{eq:bernstein_subexp}
+    \begin{aligned}
+       & \Pr\Bigl[\Bigl|\sum_{g=1}^M Z_g\Bigr|>u\|x\|_2^2\Bigr] \\
+       & \qquad\le\;
+      2\exp\!\Bigl(
+      -c\min\Bigl\{
+      \frac{u^2\|x\|_2^4}{\sum_g \nu_g^2},
+      \\
+       & \hspace{3.2cm}
+      \frac{u\|x\|_2^2}{\max_g b_g}
+      \Bigr\}
+      \Bigr).
+    \end{aligned}
+  \end{equation}
+  It remains to bound $\sum_g \nu_g^2$ and $\max_g b_g$ in terms of $\mu_{\mathrm{nbr}}(x;\pi)$.
+  Recall $q_g := \|x_{\mathcal{N}(g)}\|_2^2$.
+  Then $\sum_g q_g = \kappa\|x\|_2^2$ by \Cref{lem:energy_identity}, and
+  \[
+    \sum_{g=1}^M q_g^2 \;\le\; \bigl(\max_g q_g\bigr)\sum_{g=1}^M q_g
+    = \kappa\|x\|_2^2\,\max_g q_g.
+  \]
+  Therefore
+  \[
+    \sum_{g=1}^M \nu_g^2
+    \;\lesssim\;
+    \frac{1}{\kappa^2\Br}\sum_g q_g^2
+    \;\lesssim\;
+    \frac{\|x\|_2^2\,\max_g q_g}{\kappa\Br}.
+  \]
+  Using $\max_g q_g = (\kappa\|x\|_2^2/M)\,\mu_{\mathrm{nbr}}(x;\pi)$ from \eqref{eq:mu_nbr_vec} yields
+  \[
+    \sum_g \nu_g^2 \;\lesssim\; \frac{\mu_{\mathrm{nbr}}(x;\pi)}{M\Br}\,\|x\|_2^4
+    = \frac{\mu_{\mathrm{nbr}}(x;\pi)}{k}\,\|x\|_2^4.
+  \]
+  Similarly,
+  \[
+    \max_g b_g \;\lesssim\; \frac{\max_g q_g}{\kappa s}
+    = \frac{\mu_{\mathrm{nbr}}(x;\pi)}{M s}\,\|x\|_2^2.
+  \]
+  Plugging these into Bernstein yields
+  \begin{equation}
+    \label{eq:bernstein_plugged}
+    \begin{aligned}
+       & \Pr\Bigl[\bigl|\|Sx\|_2^2-\|x\|_2^2\bigr| > u\,\|x\|_2^2\Bigr] \\
+       & \qquad\le\;
+      2\exp\!\Bigl(
+      -c\min\Bigl\{
+      \frac{u^2 k}{\mu_{\mathrm{nbr}}(x;\pi)},
+      \\
+       & \hspace{3.2cm}
+      \frac{u\,M s}{\mu_{\mathrm{nbr}}(x;\pi)}
+      \Bigr\}
+      \Bigr).
+    \end{aligned}
+  \end{equation}
+  Finally, since $\mu_{\mathrm{nbr}}(x;\pi)\le M/\kappa$, we have $Ms/\mu_{\mathrm{nbr}}(x;\pi)\ge \kappa s$, giving the stated bound.
+\end{proof}
+
+\subsection{Oblivious subspace embedding (OSE)}
+
+For a fixed $U\in\R^{d\times r}$ with orthonormal columns, define the neighborhood coherence
+\[
+  \mu_{\mathrm{nbr}}(U;\pi)
+  \;=\;
+  \frac{M}{\kappa}\max_{g\in[M]}\|U_{\mathcal{N}(g)}\|_2^2,
+\]
+matching \eqref{eq:mu_nbr_def}.
+For any $x=Uw$, we have
+$\|x_{\mathcal{N}(g)}\|_2 \le \|U_{\mathcal{N}(g)}\|_2\|w\|_2$,
+so $\mu_{\mathrm{nbr}}(x;\pi)\le \mu_{\mathrm{nbr}}(U;\pi)$.
+
+\begin{theorem}[OSE for \sketchfamily]
+  \label{thm:ose_blockperm}
+  Fix $U\in\R^{d\times r}$ with orthonormal columns.
+  Let $S\sim\sketchfamily$ with parameters $(M,\Br,\kappa,s)$, independent $\{\Phi_g\}$, and any fixed wiring $\pi$.
+  There exist absolute constants $C,c>0$ such that if
+  \begin{equation}
+    \label{eq:ose_blockperm_conditions}
+    \begin{aligned}
+      k=M\Br
+       & \;\ge\;
+      C\,\frac{\mu_{\mathrm{nbr}}(U;\pi)}{\varepsilon^2}\Bigl(r+\log\frac{1}{\delta}\Bigr), \\
+      \kappa s
+       & \;\ge\;
+      C\,\frac{1}{\varepsilon}\Bigl(r+\log\frac{1}{\delta}\Bigr),
+    \end{aligned}
+  \end{equation}
+  then with probability at least $1-\delta$,
+  \[
+    \bigl\|U^\top S^\top S U - I_r\bigr\|_2 \le \varepsilon,
+  \]
+  equivalently $S$ is an $(\varepsilon,\delta)$-OSE for $\mathrm{range}(U)$.
+\end{theorem}
+
+\begin{proof}
+  We prove a uniform quadratic form bound from the fixed-vector guarantee in \Cref{prop:fixed_vec_blockperm}.
+  Let
+  \[
+    A \coloneqq U^\top S^\top S U - I_r.
+  \]
+  Since $A$ is symmetric, $\|A\|_2 = \sup_{\|x\|_2=1} |x^\top A x|$.
+
+  \paragraph{Step 1: build an $\eta$-net.}
+  Fix $\eta=1/4$.
+  A set $\mathcal{T}\subseteq\{x\in\R^r:\|x\|_2=1\}$ is an $\eta$-net if for every unit vector $x$ there exists $t\in\mathcal{T}$ with $\|x-t\|_2\le \eta$.
+  There exists such a net with cardinality
+  \begin{equation}
+    \label{eq:net_cardinality}
+    |\mathcal{T}| \le \left(1+\frac{2}{\eta}\right)^r = 9^r.
+  \end{equation}
+  This follows, for example, from \citet[Corollary~4.2.13]{vershynin2018hdp}.
+
+  \paragraph{Step 2: control $\|SUt\|_2^2$ on the net.}
+  Fix $t\in\mathcal{T}$ and set $x=Ut$.
+  Then $\|x\|_2=1$ and $\mu_{\mathrm{nbr}}(x;\pi)\le \mu_{\mathrm{nbr}}(U;\pi)$.
+  Applying \Cref{prop:fixed_vec_blockperm} with $u=\varepsilon/2$ gives
+  \begin{equation}
+    \begin{aligned}
+       & \Pr\Bigl[\bigl|\|SUt\|_2^2-\|Ut\|_2^2\bigr| > \tfrac{\varepsilon}{2}\,\|Ut\|_2^2\Bigr] \\
+       & \qquad\le\;
+      2\exp\!\Bigl(
+      -c\min\Bigl\{
+      \frac{\varepsilon^2 k}{\mu_{\mathrm{nbr}}(U;\pi)},
+      \; \varepsilon\,\kappa s
+      \Bigr\}
+      \Bigr).
+    \end{aligned}
+  \end{equation}
+  Since $\|Ut\|_2=1$, this is the same as $\Pr[|t^\top A t|>\varepsilon/2]$.
+
+  \paragraph{Step 3: union bound over the net.}
+  Let $\mathcal{E}$ be the event that $|t^\top A t|\le \varepsilon/2$ holds for all $t\in\mathcal{T}$.
+  By \eqref{eq:net_cardinality} and a union bound,
+  \begin{equation}
+    \begin{aligned}
+      \Pr[\mathcal{E}^c]
+       & \le 2\cdot 9^r\,
+      \exp\!\Bigl(
+      -c\min\Bigl\{
+      \frac{\varepsilon^2 k}{\mu_{\mathrm{nbr}}(U;\pi)},
+      \; \varepsilon\,\kappa s
+      \Bigr\}
+      \Bigr).
+    \end{aligned}
+  \end{equation}
+  Under \eqref{eq:ose_blockperm_conditions} (for a suitable absolute constant $C$), we have $\Pr[\mathcal{E}]\ge 1-\delta$.
+
+  \paragraph{Step 4: extend from the net to the full sphere.}
+  We show that $\mathcal{E}$ implies $\|A\|_2\le \varepsilon$.
+  This is a standard argument based on covering the sphere by a net.
+  See, for example, \citet[Exercise~4.4.4]{vershynin2018hdp}.
+  Let $x_\star\in\R^r$ be a unit vector achieving $\|A\|_2 = |x_\star^\top A x_\star|$.
+  Pick $t\in\mathcal{T}$ with $\|x_\star-t\|_2\le \eta$.
+  Then
+  \begin{equation}
+    \label{eq:net_to_sphere_diff}
+    \begin{aligned}
+      |x_\star^\top A x_\star - t^\top A t|
+       & = |(x_\star-t)^\top A x_\star + t^\top A (x_\star-t)| \\
+       & \le 2\,\|x_\star-t\|_2\,\|A\|_2
+      \le 2\eta\,\|A\|_2.
+    \end{aligned}
+  \end{equation}
+  Rearranging \eqref{eq:net_to_sphere_diff} yields
+  \[(1-2\eta)\,\|A\|_2 \le \sup_{t\in\mathcal{T}} |t^\top A t|.
+  \]
+  On $\mathcal{E}$ we have $\sup_{t\in\mathcal{T}} |t^\top A t|\le \varepsilon/2$.
+  With $\eta=1/4$, this gives $\|A\|_2\le \varepsilon$.
+  This is equivalent to the OSE statement.
+\end{proof}
+
+% \begin{proof}
+%   Let $A:=U^\top S^\top S U-I_r$.
+%   For any $w\in\R^r$, note that
+%   \begin{equation}
+%     \label{eq:quadratic_form_A}
+%     w^\top A w
+%     \,=\,
+%     \|SUw\|_2^2-\|Uw\|_2^2.
+%   \end{equation}
+
+%   Let $\eta=1/4$ and let $\mathcal{T}$ be an $\eta$-net of the unit sphere $\mathbb{S}^{r-1}$ in $\R^r$; a standard volumetric argument gives $|\mathcal{T}|\le 9^r$.
+%   Fix $t\in\mathcal{T}$ and set $x=Ut$.
+%   Then $\|x\|_2=1$ and, since $\|x_{\mathcal{N}(g)}\|_2=\|U_{\mathcal{N}(g)}t\|_2\le \|U_{\mathcal{N}(g)}\|_2\|t\|_2$, we have $\mu_{\mathrm{nbr}}(x;\pi)\le \mu_{\mathrm{nbr}}(U;\pi)$.
+%   Applying \Cref{prop:fixed_vec_blockperm} with $u=\varepsilon/2$ therefore yields
+%   \begin{equation}
+%     \label{eq:ose_net_point_tail}
+%     \Pr\bigl[|t^\top A t|>\varepsilon/2\bigr]
+%     \;\le\;
+%     2\exp\!\Bigl(
+%     -c\min\Bigl\{
+%     \frac{\varepsilon^2 k}{\mu_{\mathrm{nbr}}(U;\pi)},
+%     \;\varepsilon\,\kappa s
+%     \Bigr\}
+%     \Bigr),
+%   \end{equation}
+%   where we used \eqref{eq:quadratic_form_A} and $\|Ut\|_2=1$.
+
+%   By a union bound over $\mathcal{T}$, the probability that there exists $t\in\mathcal{T}$ with $|t^\top A t|>\varepsilon/2$ is at most
+%   \[
+%     2\cdot 9^r\,
+%     \exp\!
+%     \Bigl(
+%     -c\min\Bigl\{
+%     \frac{\varepsilon^2 k}{\mu_{\mathrm{nbr}}(U;\pi)},
+%     \;\varepsilon\,\kappa s
+%     \Bigr\}
+%     \Bigr).
+%   \]
+%   Under the conditions in \eqref{eq:ose_blockperm_conditions}, this failure probability is at most $\delta$ (for a suitable absolute constant $C$).
+
+%   On the complementary event, $|t^\top A t|\le \varepsilon/2$ holds for all $t\in\mathcal{T}$.
+%   We now upgrade this bound from the net to all unit vectors.
+%   Let $w\in\mathbb{S}^{r-1}$ and choose $t\in\mathcal{T}$ with $\|w-t\|_2\le \eta$.
+%   Then
+%   \begin{equation}
+%     \label{eq:net_to_sphere_qf}
+%     \begin{aligned}
+%       |w^\top A w|
+%        & \le |t^\top A t| + |w^\top A w - t^\top A t| \\
+%        & \le \varepsilon/2
+%       + |(w-t)^\top A w| + |t^\top A (w-t)|           \\
+%        & \le \varepsilon/2 + 2\|A\|_2\,\|w-t\|_2
+%       \le \varepsilon/2 + \tfrac{1}{2}\|A\|_2,
+%     \end{aligned}
+%   \end{equation}
+%   where we used $w^\top A w - t^\top A t = (w-t)^\top A w + t^\top A (w-t)$ and $\eta=1/4$.
+%   Taking the supremum over $w\in\mathbb{S}^{r-1}$ in \eqref{eq:net_to_sphere_qf} and using $\|A\|_2=\sup_{\|w\|_2=1}|w^\top A w|$ yields $\|A\|_2\le \varepsilon$.
+%   This is equivalent to the OSE statement.
+% \end{proof}
+
+\subsection{How $\kappa$ enters the bounds}
+\label{sec:app_kappa_bounds}
+
+At this point, the fixed-vector and OSE bounds depend on the neighborhood coherence $\mu_{\mathrm{nbr}}(U;\pi)$.
+The following lemma relates it to the standard localized-sketching quantity $\mu_{\mathrm{blk}}(U)$.
+It yields inequality~\eqref{eq:mu_nbr_bounds} in the main text and shows that, in the worst case, increasing $\kappa$ can buy at most a factor-$1/\kappa$ improvement.
+The next subsection explains why randomized wirings can do substantially better: independent permutations \emph{smooth} neighborhood coherence toward one as $\kappa$ grows.
+
+\begin{lemma}[Bounding neighborhood coherence by block coherence]
+  \label{lem:mu_bounds}
+  Let $U=[U^{(1)};\ldots;U^{(M)}]$ and define $\mu_{\mathrm{blk}}(U)=M\max_h\|U^{(h)}\|_2^2$.
+  Then for any wiring $\pi$,
+  \[
+    \frac{1}{\kappa}\,\mu_{\mathrm{blk}}(U) \;\le\; \mu_{\mathrm{nbr}}(U;\pi) \;\le\; \mu_{\mathrm{blk}}(U).
+  \]
+\end{lemma}
+
+\begin{proof}
+  For any $g$,
+  \begin{equation}
+    \begin{aligned}
+      \|U_{\mathcal{N}(g)}\|_2^2
+       & = \left\|\begin{bmatrix}
+                    U^{(\pi_1(g))} \\
+                    \vdots         \\
+                    U^{(\pi_\kappa(g))}
+                  \end{bmatrix}\right\|_2^2          \\
+       & \le \sum_{\ell=1}^\kappa \|U^{(\pi_\ell(g))}\|_2^2 \\
+       & \le \kappa \max_h \|U^{(h)}\|_2^2 .
+    \end{aligned}
+  \end{equation}
+  Taking $\max_g$ and multiplying by $M/\kappa$ gives $\mu_{\mathrm{nbr}}(U;\pi)\le \mu_{\mathrm{blk}}(U)$.
+
+  For the lower bound, pick $h^\star\in\arg\max_h\|U^{(h)}\|_2^2$ and choose any $\ell$.
+  There exists $g^\star$ with $\pi_\ell(g^\star)=h^\star$ (since $\pi_\ell$ is a permutation), so
+  $\|U_{\mathcal{N}(g^\star)}\|_2^2\ge \|U^{(h^\star)}\|_2^2$.
+  Thus
+  \begin{equation}
+    \begin{aligned}
+      \mu_{\mathrm{nbr}}(U;\pi)
+       & = \frac{M}{\kappa}\max_g\|U_{\mathcal{N}(g)}\|_2^2 \\
+       & \ge \frac{M}{\kappa}\|U^{(h^\star)}\|_2^2
+      = \frac{1}{\kappa}\mu_{\mathrm{blk}}(U).
+    \end{aligned}
+  \end{equation}
+\end{proof}
+
+\subsection{Smoothing of Neighborhood Coherence with Randomized Permutations}
+\label{sec:perm_smoothing}
+
+The deterministic bounds in \Cref{lem:mu_bounds} capture the best- and worst-case effects of increasing
+$\kappa$.
+If the wiring is randomized, we can say more: a union of random permutations tends to \emph{balance}
+block mass across neighborhoods, which drives $\mu_{\mathrm{nbr}}(U;\pi)$ toward~$1$.
+
+\begin{lemma}[Matrix Chernoff (upper tail)]
+  \label{lem:matrix_chernoff}
+  Let $\{X_\ell\}_{\ell=1}^\kappa$ be independent random PSD matrices in $\R^{r\times r}$.
+  Assume $0\preceq X_\ell\preceq R I_r$ almost surely and $\E[X_\ell]=\mu I_r$ for some $\mu>0$.
+  Then for any $\tau\ge 0$,
+  \begin{align*}
+    \Prb\!
+    \left[\lambda_{\max}\!\left(\sum_{\ell=1}^\kappa X_\ell\right) \ge (1+\tau)\,\kappa\mu\right] \\
+    \;\le\; r\,\exp\!\left(-c\,\min\{\tau^2,\tau\}\,\frac{\kappa\mu}{R}\right)
+  \end{align*}
+  for an absolute constant $c>0$.
+\end{lemma}
+
+\noindent
+\Cref{lem:matrix_chernoff} is a standard matrix Chernoff inequality.
+One convenient reference is \citet[Corollary~5.2]{tropp2012userfriendly}.
+Our stated form follows by applying that corollary and using the elementary bound
+$\tfrac{\mathrm{e}^\tau}{(1+\tau)^{1+\tau}} \le \exp\bigl(-c\min\{\tau^2,\tau\}\bigr)$ for an absolute constant $c>0$.
+
+\begin{proposition}[Random permutations smooth neighborhood coherence]
+  \label{prop:perm_smoothing}
+  Let $U\in\R^{d\times r}$ have orthonormal columns and be partitioned into $M$ row blocks
+  $U=[U^{(1)};\ldots;U^{(M)}]$ of size $\Bc$.
+  Let $\mu_{\mathrm{blk}}(U)=M\max_{h\in[M]}\|U^{(h)}\|_2^2$.
+  Suppose the wiring permutations $\{\pi_\ell\}_{\ell=1}^\kappa$ are independent and uniformly random.
+  Then with probability at least $1-\delta$ over the choice of the permutations,
+  let $L := \log\!
+    \frac{2Mr}{\delta}$.
+  \begin{equation}
+    \label{eq:perm_smoothing_bound}
+    \begin{aligned}
+      \mu_{\mathrm{nbr}}(U;\pi)
+      \;\le\;
+      1 + C\left(
+      \sqrt{\frac{\mu_{\mathrm{blk}}(U)\,L}{\kappa}}
+      + \frac{\mu_{\mathrm{blk}}(U)\,L}{\kappa}
+      \right).
+    \end{aligned}
+  \end{equation}
+  for an absolute constant $C>0$.
+  In particular, when $\kappa \gtrsim \mu_{\mathrm{blk}}(U)\log\!
+    \bigl(\tfrac{Mr}{\delta}\bigr)$, we have
+  $\mu_{\mathrm{nbr}}(U;\pi)=\bigO(1)$ with probability $1-\delta$.
+\end{proposition}
+
+\begin{proof}
+  Define PSD matrices $A_h = U^{(h)\top}U^{(h)}\in\R^{r\times r}$.
+  Since $U$ has orthonormal columns, $\sum_{h=1}^M A_h = U^\top U = I_r$.
+  Let $\alpha := \max_h\|U^{(h)}\|_2^2$, so $\mu_{\mathrm{blk}}(U)=M\alpha$.
+  Let $L := \log\!
+    \bigl(\tfrac{2Mr}{\delta}\bigr)$.
+
+  Fix an output block $g\in[M]$ and consider the neighborhood Gram matrix
+  \[
+    G_g := U_{\mathcal{N}(g)}^{\top}U_{\mathcal{N}(g)}
+    = \sum_{\ell=1}^\kappa A_{\pi_\ell(g)}.
+  \]
+  Let $X_\ell := A_{\pi_\ell(g)}$.
+  For fixed $g$, the indices $\pi_\ell(g)$ are i.i.d.
+  uniform on $[M]$ (independent uniform permutations), hence
+  \[
+    \E[X_\ell] = \frac{1}{M}\sum_{h=1}^M A_h = \frac{1}{M}
+    I_r,
+    \qquad
+    0\preceq X_\ell\preceq \alpha I_r.
+  \]
+  Applying \Cref{lem:matrix_chernoff} with $R=\alpha$ and $\mu=1/M$ gives, for any $\tau\ge 0$,
+  \[
+    \Prb\!\left[\|G_g\|_2 \ge (1+\tau)\,\frac{\kappa}{M}\right]
+    \;\le\;
+    r\,\exp\!\left(-c\,\min\{\tau^2,\tau\}\,\frac{\kappa}{\alpha M}\right).
+  \]
+  Choose
+  $\tau \asymp \sqrt{\tfrac{\alpha M}{\kappa}
+      L} + \tfrac{\alpha M}{\kappa}L$
+  so that the RHS is at most $\delta/M$.
+  A union bound over $g\in[M]$ yields that with probability at least $1-\delta$,
+  \[
+    \max_{g\in[M]}\|G_g\|_2 \le (1+\tau)\frac{\kappa}{M}.
+  \]
+  Finally, $\mu_{\mathrm{nbr}}(U;\pi)=\tfrac{M}{\kappa}\max_g\|G_g\|_2 \le 1+\tau$.
+  Substituting $\alpha M = \mu_{\mathrm{blk}}(U)$ gives \eqref{eq:perm_smoothing_bound}.
+\end{proof}
+
+\begin{remark}[Theory vs.\ Practice: Independence vs.\ Distinctness]
+  \label{sec:appendix-perm-practice}
+  For theorems in \Cref{sec:app_theory} we model $\pi_1,\dots,\pi_\kappa$ as \emph{independent} uniform random permutations.
+  Our kernel \method instead generates $\kappa$ \emph{distinct} permutations from a structured family (see \Cref{sec:app_perm_wiring}),
+  which introduces mild dependence between the neighborhood indices $\{\pi_\ell(g)\}_{\ell=1}^\kappa$.
+  This mismatch is small in the intended regime $\kappa\ll M$: for events depending only on a single neighborhood,
+  sampling without replacement is close to sampling with replacement, and collisions $\pi_\ell(g)=\pi_{\ell'}(g)$ are rare when $\kappa^2\ll M$.
+  We therefore present the i.i.d.
+  model to keep the analysis clean and highlight the dominant scaling with $\kappa$.
+  Tightening the dependence analysis is left as an interesting direction for future work.
+\end{remark}

@@ -1,0 +1,24 @@
+# @package _global_
+# Fast fine-tuning config for MiAE-S optimization iterations
+# Uses fewer steps and more workers for faster turnaround
+
+datamodule:
+  batch_size: 64
+  num_workers: 8
+  train_transform:
+    transforms:
+      - _target_: tedbench.data.transform.RandomCrop
+        size: 512
+      - _target_: tedbench.data.transform.RandomNoise
+        std: 0.2
+        mean: 0.0
+
+train:
+  llrd: 0.8
+
+trainer:
+  accumulate_grad_batches: 16
+  max_steps: 6000
+
+model:
+  name: miae_s

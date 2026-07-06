@@ -1,0 +1,104 @@
+\section{Theory: Permutation-Coupled Localization}
+\label{sec:theory}
+
+We build our theoretical understanding of \sketchfamily on the framework of localized sketching developed in~\cite{srinivasa2020localized}.
+\emph{Localized sketching} studies block-diagonal (or block-local) sketches whose guarantees depend on how the target subspace distributes across the chosen blocks.
+Our sketch \sketchfamily follows a very similar locality principle with the key difference that a single output block mixes information from multiple input blocks via the union-of-permutations wiring.
+We formalize this via a new \emph{neighborhood coherence} quantity that is a natural generalization of the block coherence in~\cite{srinivasa2020localized}.
+
+\subsection{Coherence for Permutation-Coupled Localization}
+\label{sec:theory_coherence}
+We begin by defining our generalization of block-coherence~\Cref{def:block_coherence}, the \emph{neighborhood coherence}.
+
+\begin{definition}[Neighborhood coherence for permutation wiring]
+  \label{def:neighborhood_coherence}
+  Fix $\kappa$ \textbf{edge-disjoint} permutations $\pi_1,\ldots,\pi_\kappa$ on $[M]$ and define the neighborhood of output block $g\in[M]$ by
+  \begin{equation}
+    \label{eq:nbr_def}
+    \mathcal{N}(g) \;:=\; \{\pi_\ell(g)\}_{\ell=1}^\kappa.
+  \end{equation}
+  Let $U_{\mathcal{N}(g)}\in\R^{(\kappa\Bc)\times r}$ denote the matrix obtained by stacking the blocks
+  $U^{(h)}$ for $h\in\mathcal{N}(g)$.
+  The neighborhood coherence of $U$ under $\pi$ is
+  \begin{equation}
+    \label{eq:mu_nbr_def}
+    \mu_{\mathrm{nbr}}(U;\pi)
+    \;:=\;
+    \frac{M}{\kappa}\max_{g\in[M]}\,\|U_{\mathcal{N}(g)}\|_2^2.
+  \end{equation}
+\end{definition}
+Recall that the edge-disjoint condition ensures that each output block $g$ connects to $\kappa$ distinct input blocks.
+
+\subsection{Oblivious Subspace Embedding Guarantee}
+\label{sec:theory_ose}
+
+We now state our main theoretical result \Cref{thm:ose_informal}, which is an OSE guarantee for \sketchfamily controlled by neighborhood coherence.
+The flavor is very similar to the localized SJLT result of~\cite{srinivasa2020localized}, but with block coherence replaced by neighborhood coherence.
+
+\begin{theorem}[OSE for \sketchfamily]
+  \label{thm:ose_informal}
+  Fix $U\in\R^{d\times r}$ with orthonormal columns.
+  Let $S\sim\sketchfamily$ with parameters $(M,\Br,\kappa,s)$ and embedding dimension $k=M\Br$.
+  Let $t := r+\log\frac{1}{\delta}$.
+  There exist absolute constants $C,c>0$ such that, if we have
+  \begin{equation}
+    \label{eq:ose_informal_cond}
+    k \;\ge\; C\,\frac{\mu_{\mathrm{nbr}}(U;\pi)}{\varepsilon^2}\,t
+    \qquad\text{and}\qquad
+    \kappa s \;\ge\; C\,\frac{1}{\varepsilon}\,t,
+  \end{equation}
+  then with probability at least $1-\delta$ over $S$,
+  \begin{equation}
+    \label{eq:ose_informal_concl}
+    \bigl\|U^\top S^\top S U - I_r\bigr\|_2 \le \varepsilon.
+  \end{equation}
+\end{theorem}
+The proof follows the localized sketching blueprint closely.
+For a fixed vector $w$, we decompose $\|SUw\|_2^2$ into a sum of independent block contributions and combine a fixed-vector tail bound with a net argument.
+The union-of-permutations wiring enters through a simple energy identity that ensures the local neighborhoods collectively cover the input without bias.
+A detailed proof appears in \Cref{sec:app_theory}.
+Note that for $\kappa=1$, \Cref{thm:ose_informal} recovers the localized SJLT regime controlled by $\mu_{\mathrm{blk}}(U)$ from~\cite{srinivasa2020localized}.
+
+\subsection{Controlling Neighborhood Coherence with Randomized Permutations}
+We now discuss how neighborhood coherence interpolates between block coherence and fully mixed coherence, and how random permutations can improve it in practice.
+
+\paragraph{Worst-case comparison.}
+First, a simple worst case comparison between neighborhood coherence and block coherence shows that permutations can reduce coherence by up to a factor of $\kappa$, but in general we cannot do better than block coherence.
+For any fixed set of edge-disjoint permutations $\pi$,
+\begin{equation}
+  \label{eq:mu_nbr_bounds}
+  \frac{1}{\kappa}\,\mu_{\mathrm{blk}}(U)
+  \;\le\;
+  \mu_{\mathrm{nbr}}(U;\pi)
+  \;\le\;
+  \mu_{\mathrm{blk}}(U).
+\end{equation}
+The upper bound is a triangle inequality and the lower bound follows because every block appears in at least one neighborhood.
+A detailed derivation appears in \Cref{sec:app_theory}.
+
+\paragraph{Randomized Permutations.}
+Now, if we model the permutations $\pi_1,\ldots,\pi_\kappa$ as independent and uniformly random, then we can show a stronger upper bound that improves with $\kappa$ and pushes $\mu_{\mathrm{nbr}}(U;\pi)$ toward one.
+A precise statement appears as \Cref{prop:perm_smoothing} in \Cref{sec:app_theory}.
+Informally, we have the following smoothing bound.
+Let $L := \log\!
+  \bigl(\tfrac{Mr}{\delta}\bigr)$. With probability at least $1-\delta$ over the permutations, we have
+\begin{equation}
+  \label{eq:perm_smoothing_main}
+  \mu_{\mathrm{nbr}}(U;\pi)
+  \;\le\;
+  1 + C\left(
+  \sqrt{\frac{\mu_{\mathrm{blk}}(U)\,L}{\kappa}}
+  + \frac{\mu_{\mathrm{blk}}(U)\,L}{\kappa}
+  \right)
+\end{equation}
+for an absolute constant $C>0$.
+
+This rigorously justifies the benefit of using multiple permutations to improve mixing.
+When $\kappa$ is large enough, the neighborhood coherence approaches one, which is the optimal coherence for any $U$, improving the OSE guarantee in \Cref{thm:ose_informal}.
+
+\begin{remark}[Independent permutations in practice]
+  Our analysis models $\pi_1,\ldots,\pi_\kappa$ as independent uniformly random permutations.
+  In \method, we generate $\kappa$ distinct permutations using a lightweight family for efficiency, see \Cref{sec:app_perm_wiring}.
+  When $\kappa\ll M$, sampling distinct permutations is close to sampling independently, and collisions are rare.
+  This justifies our theoretical model.
+\end{remark}

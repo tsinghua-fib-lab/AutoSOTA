@@ -1,0 +1,62 @@
+base_model_dir: "models/quarc"
+
+models:
+  agent:
+    checkpoint_path: "gnn_agent_model.ckpt"
+    model_class: "AgentGNN"
+    model_type: "gnn"
+    params:
+      gnn_depth: 2
+      graph_input_dim: 1024
+      hidden_dim: 2048
+      n_blocks: 3
+      output_dim: 1376
+      agent_input_dim: 1376
+
+  temperature:
+    checkpoint_path: "ffn_temperature_model.ckpt"
+    model_class: "TemperatureFFN"
+    model_type: "ffn"
+    params:
+      fp_dim: 2048
+      agent_input_dim: 1376
+      output_dim: 32
+      hidden_dim: 2048
+      n_blocks: 6
+
+  reactant_amount:
+    checkpoint_path: "ffn_reactant_amount_model.ckpt"
+    model_class: "ReactantAmountFFN"
+    model_type: "ffn"
+    params:
+      fp_dim: 2048
+      agent_input_dim: 1376
+      output_dim: 15
+      hidden_dim: 2048
+      n_blocks: 2
+      activation: "ReLU"
+
+  agent_amount:
+    checkpoint_path: "ffn_agent_amount_model.ckpt"
+    model_class: "AgentAmountFFN"
+    model_type: "ffn"
+    params:
+      fp_dim: 2048
+      agent_input_dim: 1376
+      output_dim: 27
+      hidden_dim: 2048
+      n_blocks: 3
+      activation: "ReLU"
+
+optimized_weights:
+  use_geometric: True
+  use_top_5:
+    agent: 0.2
+    temperature: 0.1
+    reactant_amount: 0.45
+    agent_amount: 0.5
+  use_top_10:
+    agent: 0.15
+    temperature: 0.1
+    reactant_amount: 0.25
+    agent_amount: 0.4

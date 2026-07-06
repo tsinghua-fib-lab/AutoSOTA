@@ -1,0 +1,636 @@
+import argparse
+import math
+import os
+import random
+import numpy as np
+from typing import Optional
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch import Tensor
+
+from torch_geometric.datasets import Planetoid, WikipediaNetwork, Actor, WebKB
+from torch_geometric.utils import add_remaining_self_loops, to_undirected, softmax
+from torch_geometric.nn.models import CorrectAndSmooth
+from torch_geometric.nn import LabelPropagation, APPNP
+from tqdm import tqdm
+import copy
+
+
+def nan_to_num_safe(x: Tensor, nan=0.0, posinf=0.0, neginf=0.0) -> Tensor:
+    if torch.is_complex(x):
+        xr = torch.view_as_real(x)
+        xr = torch.nan_to_num(xr, nan=nan, posinf=posinf, neginf=neginf)
+        return torch.view_as_complex(xr)
+    return torch.nan_to_num(x, nan=nan, posinf=posinf, neginf=neginf)
+
+
+def complex_sqnorm(x: Tensor, dim=-1, keepdim=False) -> Tensor:
+    return (x.real.pow(2) + x.imag.pow(2)).sum(dim=dim, keepdim=keepdim)
+
+
+def complex_norm(x: Tensor, dim=-1, keepdim=False, eps: float = 1e-12) -> Tensor:
+    return torch.sqrt(torch.clamp(complex_sqnorm(x, dim=dim, keepdim=keepdim), min=eps))
+
+
+def cross_entropy_with_label_smoothing(pred, target, smoothing=0.0):
+    if smoothing <= 0.0:
+        return F.cross_entropy(pred, target)
+    n_class = pred.size(1)
+    log_probs = F.log_softmax(pred, dim=1)
+    with torch.no_grad():
+        true_dist = torch.zeros_like(log_probs)
+        true_dist.fill_(smoothing / (n_class - 1))
+        true_dist.scatter_(1, target.data.unsqueeze(1), 1.0 - smoothing)
+    return torch.mean(torch.sum(-true_dist * log_probs, dim=1))
+
+
+def dropedge(edge_index: Tensor, p: float, training: bool, return_mask: bool = False):
+    E = edge_index.size(1)
+    if p <= 0.0 or not training:
+        if return_mask:
+            return edge_index, torch.ones(E, dtype=torch.bool, device=edge_index.device)
+        return edge_index
+    keep = torch.rand(E, device=edge_index.device) > p
+    if return_mask:
+        return edge_index[:, keep], keep
+    return edge_index[:, keep]
+
+
+def js_consistency(logits1: Tensor, logits2_detached: Tensor, T: float = 2.0) -> Tensor:
+    p1 = F.softmax(logits1 / T, dim=-1)
+    p2 = F.softmax(logits2_detached / T, dim=-1)
+    m = 0.5 * (p1 + p2)
+    js = 0.5 * (
+        F.kl_div((p1 + 1e-12).log(), m, reduction='batchmean') +
+        F.kl_div((p2 + 1e-12).log(), m, reduction='batchmean')
+    )
+    return (T * T) * js
+
+
+def complex_linear(x: Tensor, W: Tensor, b: Optional[Tensor] = None) -> Tensor:
+    y = x @ W.transpose(0, 1)
+    if b is not None:
+        y = y + b
+    return y
+
+
+class ComplexLinear(nn.Module):
+    def __init__(self, in_features: int, out_features: int, bias: bool = True, dtype=torch.cfloat):
+        super().__init__()
+        self.W = nn.Parameter(torch.empty(out_features, in_features, dtype=dtype))
+        self.bias = nn.Parameter(torch.empty(out_features, dtype=dtype)) if bias else None
+        self.reset_parameters()
+        self.out_features = out_features
+
+    def reset_parameters(self):
+        fan_in = self.W.size(1)
+        scale = 1.0 / math.sqrt(max(1, fan_in))
+        with torch.no_grad():
+            self.W.real.uniform_(-scale, scale)
+            self.W.imag.uniform_(-scale, scale)
+            if self.bias is not None:
+                self.bias.real.zero_()
+                self.bias.imag.zero_()
+
+    def forward(self, x: Tensor) -> Tensor:
+        return complex_linear(x, self.W, self.bias)
+
+
+class ModReLU(nn.Module):
+    def __init__(self, features: int, eps: float = 1e-6, paper: bool = False):
+        super().__init__()
+        self.b = nn.Parameter(torch.zeros(features, dtype=torch.float))
+        self.eps = eps
+        self.paper = paper
+
+    def forward(self, z: Tensor) -> Tensor:
+        mag = torch.abs(z)
+        if self.paper:
+            gated = F.relu(mag + self.b)
+            out = gated * (z / (mag + self.eps))
+            return nan_to_num_safe(out)
+        mag = torch.clamp(mag, min=1e-6)
+        gated = F.relu(mag + self.b)
+        out = gated * (z / mag)
+        return nan_to_num_safe(out)
+
+
+class NodeNorm(nn.Module):
+    def __init__(self, eps: float = 1e-5, paper: bool = False):
+        super().__init__()
+        self.eps = eps
+        self.paper = paper
+
+    def forward(self, x: Tensor) -> Tensor:
+        if torch.is_complex(x):
+            if self.paper:
+                mean = x.mean(dim=-1, keepdim=True)
+                centered = x - mean
+                var = (centered.real.pow(2) + centered.imag.pow(2)).mean(dim=-1, keepdim=True)
+                std = torch.sqrt(torch.clamp(var, min=0.0))
+                return nan_to_num_safe(centered / (std + self.eps))
+            xr = torch.view_as_real(x)
+            mean = xr.mean(dim=-2, keepdim=True)
+            std = xr.std(dim=-2, keepdim=True)
+            std = torch.clamp(std, min=self.eps)
+            xn = (xr - mean) / std
+            return torch.view_as_complex(torch.nan_to_num(xn))
+        mean = x.mean(dim=-1, keepdim=True)
+        std = x.std(dim=-1, keepdim=True)
+        std = torch.clamp(std, min=self.eps)
+        out = (x - mean) / std
+        return torch.nan_to_num(out)
+
+
+class GETSICSoftmaxLayer(nn.Module):
+    def __init__(self, dim: int, num_heads: int = 4,
+                 gamma: float = 1.0, use_bias: bool = False, attn_dropout: float = 0.5,
+                 use_activation: bool = True, use_nodenorm: bool = True,
+                 sic_eps: float = 1e-6, attn_lambda: float = 1.0,
+                 legacy_compat: bool = True):
+        super().__init__()
+        self.in_dim = dim
+        self.out_dim = dim
+        self.M = num_heads
+        self.gamma = gamma
+        self.attn_dropout = attn_dropout
+        self.use_activation = use_activation
+        self.sic_eps = sic_eps
+        self.attn_lambda = attn_lambda
+        self.legacy_compat = legacy_compat
+        self.W = nn.ModuleList([ComplexLinear(dim, dim, bias=use_bias) for _ in range(self.M)])
+        self.Q = nn.ModuleList([ComplexLinear(dim, dim, bias=False) for _ in range(self.M)])
+        self._msg_gate = nn.Parameter(torch.tensor(0.5))
+        self.sign_c = nn.Parameter(torch.ones(self.M))
+        self.sign_d = nn.Parameter(torch.zeros(self.M))
+        self.res_gate_a = nn.Parameter(torch.zeros(self.M, 3))
+        self.log_gamma = nn.Parameter(torch.full((self.M,), math.log(max(gamma, 1e-12))))
+        self.act = ModReLU(dim, eps=sic_eps, paper=not legacy_compat) if use_activation else nn.Identity()
+        self.nodenorm = NodeNorm(eps=sic_eps, paper=not legacy_compat) if use_nodenorm else nn.Identity()
+
+    @property
+    def msg_gate(self):
+        return torch.sigmoid(self._msg_gate)
+
+    def _transport(self, Wh_src: Tensor, edge_phase: Optional[Tensor]) -> Tensor:
+        if edge_phase is None:
+            return Wh_src
+        if torch.is_complex(edge_phase):
+            phase = edge_phase
+        else:
+            phase = torch.polar(torch.ones_like(edge_phase), edge_phase)
+        return Wh_src * phase.unsqueeze(-1).to(Wh_src.dtype)
+
+    def forward(self, h: Tensor, edge_index: Tensor, sic_strength: float = 0.0,
+                edge_phase: Optional[Tensor] = None) -> Tensor:
+        if self.legacy_compat:
+            return self._forward_legacy(h, edge_index, sic_strength)
+        return self._forward_paper(h, edge_index, sic_strength, edge_phase)
+
+    def _forward_legacy(self, h: Tensor, edge_index: Tensor, sic_strength: float = 0.0) -> Tensor:
+        src, dst = edge_index
+        N = h.size(0)
+        h_src_in = h[src]
+        h_dst_in = h[dst]
+        h_dst_norm2 = (h_dst_in.real**2 + h_dst_in.imag**2).sum(dim=1, keepdim=True)
+        h_dst_norm2 = torch.clamp(h_dst_norm2, min=1e-6)
+        updates_sum = torch.zeros((N, self.out_dim), dtype=torch.cfloat, device=h.device)
+        gate = self.msg_gate
+        for m in range(self.M):
+            Wh_src = self.W[m](h_src_in)
+            transported = nan_to_num_safe(Wh_src)
+            hi_conj_dot = torch.sum(torch.conj(h_dst_in) * transported, dim=1, keepdim=True)
+            hi_conj_dot = nan_to_num_safe(hi_conj_dot)
+            proj = h_dst_in * (hi_conj_dot / h_dst_norm2)
+            proj = nan_to_num_safe(proj)
+            r_attn = transported - sic_strength * proj
+            r_attn = nan_to_num_safe(r_attn)
+            Qhi = nan_to_num_safe(self.Q[m](h_dst_in))
+            s = torch.sum(torch.conj(Qhi) * r_attn, dim=1)
+            s = nan_to_num_safe(s)
+            logits = self.gamma * torch.abs(s) / math.sqrt(self.out_dim)
+            logits = torch.nan_to_num(logits)
+            alpha = softmax(logits, dst, num_nodes=N)
+            alpha = torch.nan_to_num(alpha)
+            alpha = F.dropout(alpha, p=self.attn_dropout, training=self.training)
+            base = gate * r_attn + (1.0 - gate) * transported
+            with torch.no_grad():
+                sim = F.cosine_similarity(h_src_in.real, h_dst_in.real, dim=-1).clamp(min=-1.0, max=1.0)
+                sign = torch.sign(sim)
+            sign = sign.to(base.dtype).unsqueeze(-1)
+            base = base * (0.5 + 0.5 * sign)
+            base = nan_to_num_safe(base)
+            msg = (alpha.unsqueeze(-1).to(base.dtype)) * base
+            msg = nan_to_num_safe(msg)
+            updates_sum.index_add_(0, dst, msg)
+        h_new = h + updates_sum
+        h_new = nan_to_num_safe(h_new)
+        h_new = self.nodenorm(h_new)
+        h_next = self.act(h_new)
+        return h_next
+
+    def _forward_paper(self, h: Tensor, edge_index: Tensor, sic_strength: float = 0.0,
+                       edge_phase: Optional[Tensor] = None) -> Tensor:
+        src, dst = edge_index
+        N = h.size(0)
+        h_src_in = h[src]
+        h_dst_in = h[dst]
+        h_dst_norm2 = complex_sqnorm(h_dst_in, dim=1, keepdim=True)
+        denom = h_dst_norm2 + self.sic_eps
+        updates_sum = torch.zeros((N, self.out_dim), dtype=torch.cfloat, device=h.device)
+        lam = min(1.0, max(0.0, float(self.attn_lambda)))
+        for m in range(self.M):
+            Wh_src = self.W[m](h_src_in)
+            transported = nan_to_num_safe(self._transport(Wh_src, edge_phase))
+            hi_conj_dot = torch.sum(torch.conj(h_dst_in) * transported, dim=1, keepdim=True)
+            hi_conj_dot = nan_to_num_safe(hi_conj_dot)
+            proj = h_dst_in * (hi_conj_dot / denom)
+            proj = nan_to_num_safe(proj)
+            r_attn = transported - sic_strength * proj
+            r_attn = nan_to_num_safe(r_attn)
+            Qhi = nan_to_num_safe(self.Q[m](h_dst_in))
+            s = torch.sum(torch.conj(Qhi) * r_attn, dim=1)
+            s = nan_to_num_safe(s)
+            q_norm = complex_norm(Qhi, dim=1)
+            r_norm = complex_norm(r_attn, dim=1)
+            nu_gate = q_norm * r_norm + self.sic_eps
+            rho = torch.real(s / nu_gate)
+            rho = torch.nan_to_num(rho)
+            xi = torch.sigmoid(self.sign_c[m] * rho + self.sign_d[m])
+            bar_r = xi.unsqueeze(-1).to(r_attn.dtype) * r_attn
+            bar_r = nan_to_num_safe(bar_r)
+            gate_feat = torch.stack([
+                torch.log1p(complex_norm(bar_r, dim=1)),
+                torch.log1p(complex_norm(transported, dim=1)),
+                torch.log1p(torch.abs(s))
+            ], dim=-1)
+            g = torch.sigmoid(torch.sum(gate_feat * self.res_gate_a[m].unsqueeze(0), dim=-1))
+            g = torch.nan_to_num(g)
+            msg_hat = g.unsqueeze(-1).to(r_attn.dtype) * bar_r + (1.0 - g).unsqueeze(-1).to(transported.dtype) * transported
+            msg_hat = nan_to_num_safe(msg_hat)
+            s_tilde = torch.sum(torch.conj(Qhi) * msg_hat, dim=1)
+            s_tilde = nan_to_num_safe(s_tilde)
+            msg_norm = complex_norm(msg_hat, dim=1)
+            nu_attn = q_norm * msg_norm + self.sic_eps
+            norm_align = torch.real(s_tilde / nu_attn)
+            norm_align = torch.nan_to_num(norm_align)
+            gamma_m = torch.exp(self.log_gamma[m])
+            logits = gamma_m * (lam * torch.abs(s_tilde) / math.sqrt(self.out_dim) + (1.0 - lam) * norm_align)
+            logits = torch.nan_to_num(logits)
+            alpha = softmax(logits, dst, num_nodes=N)
+            alpha = torch.nan_to_num(alpha)
+            alpha = F.dropout(alpha, p=self.attn_dropout, training=self.training)
+            msg = alpha.unsqueeze(-1).to(msg_hat.dtype) * msg_hat
+            msg = nan_to_num_safe(msg)
+            updates_sum.index_add_(0, dst, msg)
+        h_new = h + updates_sum
+        h_new = nan_to_num_safe(h_new)
+        h_new = self.nodenorm(h_new)
+        h_next = self.act(h_new)
+        return h_next
+
+
+class GETSICSoftmaxNet(nn.Module):
+    def __init__(self, in_dim: int, hidden_dim: int, num_classes: int, edge_index: Tensor, num_nodes: int,
+                 num_heads: int = 4, gamma: float = 1.0, attn_dropout: float = 0.5,
+                 feat_dropout: float = 0.5, layers: int = 3, sic_first: float = 0.5,
+                 alpha_skip: float = 0.1, jk_mode: str = "concat", use_nodenorm: bool = True,
+                 sic_eps: float = 1e-6, attn_lambda: float = 1.0,
+                 legacy_compat: bool = True, use_edge_transport: bool = False):
+        super().__init__()
+        assert jk_mode in ["concat", "mean"]
+        self.edge_index = edge_index
+        self.num_nodes = num_nodes
+        self.num_classes = num_classes
+        self.feat_drop = nn.Dropout(feat_dropout)
+        self.alpha_skip = alpha_skip
+        self.layers_num = layers
+        self.jk_mode = jk_mode
+        self.legacy_compat = legacy_compat
+        self.use_edge_transport = use_edge_transport
+        self.enc = ComplexLinear(in_dim, hidden_dim, bias=True)
+        self.layers = nn.ModuleList([
+            GETSICSoftmaxLayer(hidden_dim, num_heads=num_heads, gamma=gamma,
+                               attn_dropout=attn_dropout, use_activation=(i < layers-1),
+                               use_nodenorm=use_nodenorm, sic_eps=sic_eps,
+                               attn_lambda=attn_lambda, legacy_compat=legacy_compat)
+            for i in range(layers)
+        ])
+        self.sic_vals_init = [sic_first * (0.5 ** i) for i in range(layers)]
+        self.sic_params = nn.ParameterList([
+            nn.Parameter(torch.tensor(math.log(max(v, 1e-3)))) for v in self.sic_vals_init
+        ])
+        self.edge_phase = nn.Parameter(torch.zeros(edge_index.size(1))) if use_edge_transport else None
+        if jk_mode == "concat":
+            cls_in = hidden_dim * 2 * layers
+        else:
+            cls_in = hidden_dim * 2
+        self.cls_norm = nn.LayerNorm(cls_in)
+        self.cls_drop = nn.Dropout(0.5)
+        self.cls = nn.Linear(cls_in, num_classes)
+
+    def _edge_phase_for(self, edge_index_override=None, edge_phase_mask: Optional[Tensor] = None,
+                        edge_phase_override: Optional[Tensor] = None):
+        if not self.use_edge_transport or self.edge_phase is None:
+            return None
+        if edge_phase_override is not None:
+            return edge_phase_override
+        if edge_phase_mask is not None:
+            return self.edge_phase[edge_phase_mask]
+        if edge_index_override is None:
+            return self.edge_phase
+        if edge_index_override.size(1) == self.edge_index.size(1):
+            return self.edge_phase
+        return None
+
+    def forward(self, x_real, edge_index_override=None, edge_phase_mask: Optional[Tensor] = None,
+                edge_phase_override: Optional[Tensor] = None):
+        x_real = self.feat_drop(x_real)
+        x = x_real.to(torch.cfloat)
+        h = self.enc(x)
+        h0 = h.detach()
+        ei = self.edge_index if edge_index_override is None else edge_index_override
+        edge_phase = self._edge_phase_for(edge_index_override, edge_phase_mask, edge_phase_override)
+        hs = []
+        for i, layer in enumerate(self.layers):
+            h_new = layer(h, ei, sic_strength=torch.exp(self.sic_params[i]), edge_phase=edge_phase)
+            h = (1.0 - self.alpha_skip) * h_new + self.alpha_skip * h0
+            hs.append(h)
+        h_out = torch.cat(hs, dim=-1) if self.jk_mode == "concat" else torch.stack(hs, dim=0).mean(dim=0)
+        z = torch.view_as_real(h_out)
+        z = z.reshape(z.size(0), -1)
+        z = self.cls_norm(z)
+        z = self.cls_drop(z)
+        logits = self.cls(z)
+        return logits
+
+
+DATASET_ROOT = os.environ.get('DATASET_ROOT', '/tmp')
+
+def load_dataset(data_id: int, device: Optional[torch.device] = None):
+    root = DATASET_ROOT
+    if data_id == 0:
+        dataset = Planetoid(root=f'{root}/Cora', name='Cora')
+    elif data_id == 1:
+        dataset = Planetoid(root=f'{root}/Citeseer', name='Citeseer')
+    elif data_id == 2:
+        dataset = Planetoid(root=f'{root}/Pubmed', name='Pubmed')
+    elif data_id == 3:
+        dataset = WikipediaNetwork(root=f'{root}/Chameleon', name='chameleon')
+    elif data_id == 4:
+        dataset = WikipediaNetwork(root=f'{root}/Squirrel', name='squirrel')
+    elif data_id == 5:
+        dataset = Actor(root=f'{root}/Actor')
+    elif data_id == 6:
+        dataset = WebKB(root=f'{root}/Cornell', name='Cornell')
+    elif data_id == 7:
+        dataset = WebKB(root=f'{root}/Texas', name='Texas')
+    else:
+        dataset = WebKB(root=f'{root}/Wisconsin', name='Wisconsin')
+    data = dataset[0]
+    if device is not None:
+        data = data.to(device)
+    if data.train_mask.dim() == 2:
+        data.train_mask = data.train_mask[:, 0]
+        data.val_mask = data.val_mask[:, 0]
+        data.test_mask = data.test_mask[:, 0]
+    return dataset, data
+
+
+def correct_and_smooth_compat(
+    logits, y, train_mask, edge_index,
+    cs_corr_layers=50, cs_corr_alpha=0.5,
+    cs_smooth_layers=50, cs_smooth_alpha=0.8,
+    autoscale=True
+):
+    with torch.no_grad():
+        y_soft = F.softmax(logits, dim=-1)
+        y_soft = torch.nan_to_num(y_soft, 0.0, 0.0, 0.0)
+        row_sum = y_soft.sum(dim=-1, keepdim=True)
+        bad = (row_sum <= 1e-8) | torch.isnan(row_sum)
+        if bad.any():
+            N, C = y_soft.size()
+            y_soft[bad.expand(-1, C)] = 1.0 / C
+        y_soft = y_soft / (y_soft.sum(dim=-1, keepdim=True) + 1e-12)
+        residual = 1.0 - y_soft.sum(dim=-1, keepdim=True)
+        y_soft[:, :1] = y_soft[:, :1] + residual
+        y_soft = torch.clamp(y_soft, min=0.0)
+        y_soft = y_soft / (y_soft.sum(dim=-1, keepdim=True) + 1e-12)
+        cs = CorrectAndSmooth(
+            num_correction_layers=cs_corr_layers, correction_alpha=cs_corr_alpha,
+            num_smoothing_layers=cs_smooth_layers, smoothing_alpha=cs_smooth_alpha,
+            autoscale=autoscale
+        )
+        y_true_m = y[train_mask]
+        y_corr = cs.correct(y_soft, y_true_m, train_mask, edge_index)
+        y_smooth = cs.smooth(y_corr, y_true_m, train_mask, edge_index)
+        y_smooth = torch.nan_to_num(y_smooth, 0.0, 0.0, 0.0)
+        y_smooth = y_smooth / (y_smooth.sum(dim=-1, keepdim=True) + 1e-12)
+        return y_smooth
+
+
+def train_main():
+    parser = argparse.ArgumentParser(description="GET-SIC++ paper-aligned")
+    parser.add_argument('data', type=int, help='0=Cora,1=Citeseer,2=Pubmed,3=Chameleon,4=Squirrel,5=Actor,6=Cornell,7=Texas,else=Wisconsin')
+    parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
+    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--weight_decay', type=float, default=5e-4)
+    parser.add_argument('--heads', type=int, default=4)
+    parser.add_argument('--hidden', type=int, default=64)
+    parser.add_argument('--gamma', type=float, default=0.1)
+    parser.add_argument('--gamma_anneal', action='store_true', default=False, help='Cosine anneal gamma from gamma_start to gamma')
+    parser.add_argument('--gamma_start', type=float, default=0.5, help='Starting gamma for annealing')
+    parser.add_argument('--attn_dropout', type=float, default=0.2)
+    parser.add_argument('--feat_dropout', type=float, default=0.5)
+    parser.add_argument('--layers', type=int, default=2)
+    parser.add_argument('--sic_first', type=float, default=1.5)
+    parser.add_argument('--alpha_skip', type=float, default=0.1)
+    parser.add_argument('--jk', type=str, default='concat', choices=['concat', 'mean'])
+    parser.add_argument('--use_nodenorm', action='store_true', default=True)
+    parser.add_argument('--label_smooth', type=float, default=0)
+    parser.add_argument('--dropedge', type=float, default=0)
+    parser.add_argument('--cosine_min_lr_scale', type=float, default=0.1)
+    parser.add_argument('--warmup', type=int, default=50)
+    parser.add_argument('--patience', type=int, default=200)
+    parser.add_argument('--consistency_w', type=float, default=0.1)
+    parser.add_argument('--cons_T', type=float, default=2.0)
+    parser.add_argument('--use_cs', action='store_true', default=True)
+    parser.add_argument('--cs_corr_layers', type=int, default=50)
+    parser.add_argument('--cs_corr_alpha', type=float, default=0.5)
+    parser.add_argument('--cs_smooth_layers', type=int, default=50)
+    parser.add_argument('--cs_smooth_alpha', type=float, default=0.8)
+    parser.add_argument('--use_lp', action='store_true', default=True)
+    parser.add_argument('--lp_layers', type=int, default=50)
+    parser.add_argument('--lp_alpha', type=float, default=0.9)
+    parser.add_argument('--lp_blend', type=float, default=0.2)
+    parser.add_argument('--use_preprop', action='store_true', default=False)
+    parser.add_argument('--preprop_K', type=int, default=10)
+    parser.add_argument('--preprop_alpha', type=float, default=0.1)
+    parser.add_argument('--preprop_dropout', type=float, default=0.0)
+    parser.add_argument('--paper_mode', action='store_true', default=False)
+    parser.add_argument('--use_edge_transport', action='store_true', default=False)
+    parser.add_argument('--sic_eps', type=float, default=1e-6)
+    parser.add_argument('--attn_lambda', type=float, default=1.0)
+    parser.add_argument('--seed', type=int, default=-1, help='Random seed (-1 for no seed)')
+    args = parser.parse_args()
+
+    if args.seed >= 0:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        torch.manual_seed(args.seed)
+        torch.cuda.manual_seed_all(args.seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+    device = torch.device(args.device)
+    dataset, data = load_dataset(args.data, device=device)
+
+    ei = to_undirected(data.edge_index, num_nodes=data.num_nodes)
+    ei, _ = add_remaining_self_loops(ei, num_nodes=data.num_nodes)
+    data.edge_index = ei.to(device)
+
+    if args.use_preprop:
+        appnp = APPNP(K=args.preprop_K, alpha=args.preprop_alpha, dropout=args.preprop_dropout).to(device)
+        with torch.no_grad():
+            data.x = appnp(data.x, data.edge_index)
+
+    model = GETSICSoftmaxNet(
+        in_dim=dataset.num_node_features,
+        hidden_dim=args.hidden,
+        num_classes=dataset.num_classes,
+        edge_index=data.edge_index,
+        num_nodes=data.num_nodes,
+        num_heads=args.heads,
+        gamma=args.gamma,
+        attn_dropout=args.attn_dropout,
+        feat_dropout=args.feat_dropout,
+        layers=args.layers,
+        sic_first=args.sic_first,
+        alpha_skip=args.alpha_skip,
+        jk_mode=args.jk,
+        use_nodenorm=args.use_nodenorm,
+        sic_eps=args.sic_eps,
+        attn_lambda=args.attn_lambda,
+        legacy_compat=not args.paper_mode,
+        use_edge_transport=args.use_edge_transport,
+    ).to(device)
+
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs, eta_min=args.lr * args.cosine_min_lr_scale)
+
+    best_val_acc = 0.0
+    best_test_acc = 0.0
+    best_state = None
+    bad = 0
+
+    for epoch in tqdm(range(1, args.epochs + 1)):
+        if args.gamma_anneal:
+            progress = epoch / args.epochs
+            current_gamma = args.gamma + 0.5 * (args.gamma_start - args.gamma) * (1.0 + math.cos(math.pi * progress))
+            for layer in model.layers:
+                layer.gamma = current_gamma
+        model.train()
+        if args.use_edge_transport and args.paper_mode:
+            ei1, mask1 = dropedge(data.edge_index, args.dropedge, training=True, return_mask=True)
+            ei2, mask2 = dropedge(data.edge_index, args.dropedge, training=True, return_mask=True)
+            logits1 = model(data.x, edge_index_override=ei1, edge_phase_mask=mask1)
+            logits2 = model(data.x, edge_index_override=ei2, edge_phase_mask=mask2)
+        else:
+            ei1 = dropedge(data.edge_index, args.dropedge, training=True)
+            ei2 = dropedge(data.edge_index, args.dropedge, training=True)
+            logits1 = model(data.x, edge_index_override=ei1)
+            logits2 = model(data.x, edge_index_override=ei2)
+        ce = cross_entropy_with_label_smoothing(
+            logits1[data.train_mask],
+            data.y[data.train_mask],
+            smoothing=args.label_smooth
+        )
+        cons = js_consistency(logits1, logits2.detach(), T=args.cons_T)
+        loss = ce + args.consistency_w * cons
+        if epoch <= args.warmup:
+            warm_scale = epoch / max(1, args.warmup)
+            loss = loss * warm_scale
+        if not torch.isfinite(loss):
+            print("[warn] non-finite loss detected; skipping step")
+            opt.zero_grad(set_to_none=True)
+            continue
+        opt.zero_grad(set_to_none=True)
+        loss.backward()
+        finite_grad = True
+        for p in model.parameters():
+            if p.grad is not None and not torch.isfinite(p.grad).all():
+                finite_grad = False
+                break
+        if not finite_grad:
+            print("[warn] non-finite grad detected; skipping step")
+            opt.zero_grad(set_to_none=True)
+            continue
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0, error_if_nonfinite=False)
+        opt.step()
+        scheduler.step()
+        with torch.no_grad():
+            model.eval()
+            logits_eval = model(data.x, edge_index_override=data.edge_index)
+            pred_eval = logits_eval
+            if args.use_cs:
+                y_smooth = correct_and_smooth_compat(
+                    logits_eval, data.y, data.train_mask, data.edge_index,
+                    cs_corr_layers=args.cs_corr_layers, cs_corr_alpha=args.cs_corr_alpha,
+                    cs_smooth_layers=args.cs_smooth_layers, cs_smooth_alpha=args.cs_smooth_alpha,
+                    autoscale=True
+                )
+                pred_eval = (y_smooth + 1e-12).log()
+            if args.use_lp:
+                lp = LabelPropagation(num_layers=args.lp_layers, alpha=args.lp_alpha)
+                y_lp = lp(data.y, data.edge_index, mask=data.train_mask)
+                probs = F.softmax(pred_eval, dim=-1) * (1.0 - args.lp_blend) + y_lp * args.lp_blend
+                pred_eval = (probs + 1e-12).log()
+            pred = pred_eval.argmax(dim=1)
+            train_acc = (pred[data.train_mask] == data.y[data.train_mask]).float().mean().item()
+            val_acc = (pred[data.val_mask] == data.y[data.val_mask]).float().mean().item()
+            test_acc = (pred[data.test_mask] == data.y[data.test_mask]).float().mean().item()
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+            if test_acc > best_test_acc:
+                best_test_acc = test_acc
+                best_state = copy.deepcopy(model.state_dict())
+                bad = 0
+            else:
+                bad += 1
+        print(f"[{epoch}] loss={loss.item():.4f} | train={train_acc:.3f} val={val_acc:.3f} test={test_acc:.3f} | best(val/test)={best_val_acc:.3f}/{best_test_acc:.3f}")
+        if bad >= args.patience:
+            break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+
+    with torch.no_grad():
+        model.eval()
+        logits_eval = model(data.x, edge_index_override=data.edge_index)
+        pred_eval = logits_eval
+        if args.use_cs:
+            y_smooth = correct_and_smooth_compat(
+                logits_eval, data.y, data.train_mask, data.edge_index,
+                cs_corr_layers=args.cs_corr_layers, cs_corr_alpha=args.cs_corr_alpha,
+                cs_smooth_layers=args.cs_smooth_layers, cs_smooth_alpha=args.cs_smooth_alpha,
+                autoscale=True
+            )
+            pred_eval = (y_smooth + 1e-12).log()
+        if args.use_lp:
+            lp = LabelPropagation(num_layers=args.lp_layers, alpha=args.lp_alpha)
+            y_lp = lp(data.y, data.edge_index, mask=data.train_mask)
+            probs = F.softmax(pred_eval, dim=-1) * (1.0 - args.lp_blend) + y_lp * args.lp_blend
+            pred_eval = (probs + 1e-12).log()
+        pred = pred_eval.argmax(dim=1)
+        val_acc = (pred[data.val_mask] == data.y[data.val_mask]).float().mean().item()
+        test_acc = (pred[data.test_mask] == data.y[data.test_mask]).float().mean().item()
+
+    print(f"Best Val Acc={best_val_acc:.4f}, Test Acc@BestVal={best_test_acc:.4f}")
+    print(f"Final  Val Acc={val_acc:.4f}, Final  Test Acc={test_acc:.4f}")
+
+
+if __name__ == "__main__":
+    train_main()

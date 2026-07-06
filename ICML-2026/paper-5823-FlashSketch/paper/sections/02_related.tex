@@ -1,0 +1,39 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Sketching in RandNLA.}
+Random projections for dimensionality reduction trace back to the seminal Johnson--Lindenstrauss lemma and are now foundational in RandNLA~\cite{johnson1984extensions,drineas2016randnla,martinsson2020randomized}.
+Theoretical guarantees for random projections are often framed in the oblivious subspace embedding (OSE) model developed in~\cite{clarkson2017low}.
+A thorough survey of oblivious subspace embeddings and sketching in general can be found in~\cite{woodruff2014sketching}.
+Sparse embeddings such as CountSketch, SJLT, and OSNAP reduce application cost by constructing sparse sketching matrices that still possess guarantees under the OSE framework with sparsity requirements~\cite{dasgupta2010sparse,nelson2013osnap,kane2014sparser,charikar2004finding}.
+
+\paragraph{Structured and localized sketches.}
+A long line of work designs structured embeddings that trade randomness for fast application, such as the subsampled Randomized Hadamard Transform (SRHT) and related Hadamard-based transforms~\cite{ailon2009fast}.
+Another approach to constructing sparse sketches is through the lens of expander graphs, and there is a rich literature on using expander-based constructions for JL and OSE guarantees~\cite{hoory2006expander,jafarpour2009efficient,berinde2008combining}.
+In particular,~\cite{puder2015expansion} explores constructions of expanders using union-of-permutations approaches.
+Localized sketching \cite{srinivasa2020localized} makes the locality--distortion tradeoff explicit: block-diagonal (or block-local) sketches can be analyzed in terms of how the target subspace distributes across a chosen partition.
+They show OSE guarantees for such block-diagonal SJLTs that depend on a natural \emph{block-coherence} parameter of the input subspace.
+Our sketch, \sketchfamily, is a generalization of this block-local SJLT construction using a union-of-permutations structure at the block level to improve mixing while retaining block locality.
+
+\paragraph{GPU implementations of sketches.}
+For dense sketches, GPUs benefit from mature GEMM kernel libraries like cuBLAS.
+Recent work has targeted tensor cores explicitly for random projection and mixed-precision RandNLA~\cite{ootomo2023mixed,carson2025mixed}.
+On the sparse side, kernels are less mature than their dense counterparts.
+\cite{hu2025grass} present an open-source CUDA implementation of SJLT.
+\cite{higgins2025high} develop a high-performance CountSketch kernel for streaming data applications in HPC, though do not release code.
+Both implementations follow the \emph{scatter-add} pattern and rely on global atomics to handle concurrent writes to the same output row.
+% These kernels are simple and portable, but global atomic contention can dominate and the irregular access pattern induced by SJLTs limits reuse.
+For Hadamard-based sketches, the state of GPU kernels is more mature, with \cite{agarwal2024hadacore} providing an open source tensor-core-native implementation of the Fast Hadamard Transform for 16-bit precision, and \cite{daoailab_fast_hadamard_transform} providing a general FHT kernel for FP32.
+A distributed block SRHT implementation appears in \cite{balabanov2022block}.
+% We compare against these prior GPU sketching kernels in our experimental evaluations in \Cref{sec:experiments}.
+
+% \paragraph{Co-design and hardware-aware structure.}
+% The broader systems literature contains successful examples of co-designing structure and kernels around the GPU memory hierarchy, such as IO-aware attention kernels~\cite{dao2022flashattention} and tensor-core-native Hadamard transforms~\cite{agarwal2024hadacore}.
+% Within sketching, autotuning has been explored for randomized regression pipelines~\cite{cho2025surrogate}, and GPU-parallelizable sparse-sign sketches have been proposed for sketch-and-precondition workflows~\cite{chen2025gpu}.
+% \method complements these efforts: rather than only optimizing an existing sketch kernel, we restrict the sparse sketch \emph{family} so that a high-throughput, GEMM-like schedule becomes possible without sacrificing robust distortion guarantees.
+
+% \paragraph{Sketching in modern ML pipelines.
+% }
+% Sketching appears as a compression primitive in attention, attribution, and linearized training dynamics.
+% GraSS~\cite{hu2025grass} is a recent example where sketching a large dense feature matrix is a dominant cost in a data attribution pipeline.
+% We use GraSS as a case study in \Cref{sec:experiments} to demonstrate the end-to-end benefits of \method in a real-world ML pipeline.

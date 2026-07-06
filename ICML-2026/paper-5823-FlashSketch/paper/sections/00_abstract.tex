@@ -1,0 +1,12 @@
+\begin{abstract}
+  % Sketching is a core primitive in randomized numerical linear algebra: it compresses high-dimensional vectors while approximately preserving geometry.
+  % Sparse sketches such as the sparse Johnson--Lindenstrauss transform (SJLT) are attractive in theory because they require less arithmetic and still offer strong approximation guarantees.
+  Sparse sketches such as the sparse Johnson--Lindenstrauss transform are a core primitive in randomized numerical linear algebra because they leverage random sparsity to reduce the arithmetic cost of sketching, while still offering strong approximation guarantees.
+  Their random sparsity, however, is at odds with efficient implementations on modern GPUs, since it leads to irregular memory access patterns that degrade memory bandwidth utilization.
+  Motivated by this tension, we pursue a sketch--kernel co-design approach: we design a new family of sparse sketches, \sketchfamily, whose sparsity structure is chosen to enable \method, a corresponding optimized CUDA kernel that implements these sketches efficiently.
+  The design of \sketchfamily introduces a tunable parameter that explicitly trades off the tension between GPU-efficiency and sketching robustness.
+  We provide theoretical guarantees for \sketchfamily under the oblivious subspace embedding (OSE) framework, and also analyze the effect of the tunable parameter on sketching quality.
+  We empirically evaluate \method on standard RandNLA benchmarks, as well as an end-to-end ML data attribution pipeline called GraSS.
+  \method pushes the Pareto frontier of sketching quality versus speed, across a range of regimes and tasks, and achieves a global geomean speedup of roughly $\geomeanSpeedup\times$ over the prior state-of-the-art GPU sketches.
+\end{abstract}
+\vspace{-2.5em}

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decoupledmarket"
+version = "0.1.0"
+description = "Multi-agent market simulation research codebase."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "openai",
+    "google-generativeai",
+    "timeout-decorator",
+    "matplotlib",
+    "mplfinance",
+    "python-dotenv",
+    "zai",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+decoupledmarket = ["content/**/*.txt", "arena_content/**/*.txt"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+# AFDB pretraining corpus loaded from HuggingFace Hub or a local HF directory.
+# HF equivalent of datamodule=afdbfs_stream (no labels, 4-tuple samples).
+# Set 'root' to either a HF repo ID or the path passed to --save-dir-afdb.
+_target_: tedbench.data.LightningStructureDataset
+root: TEDBench/afdb   # HF repo ID  — OR —  local path (e.g. ./hf_datasets/afdb)
+dataset_name: hf_afdb

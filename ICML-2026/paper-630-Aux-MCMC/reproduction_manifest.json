@@ -1,0 +1,78 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 630,
+    "repo_url": "https://github.com/ywwes26/Auxiliary-MCMC",
+    "repo_commit": "12bce15b9b8eadb65276014fcdf0b06515d73ea9",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_630",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-630:reproduced",
+    "eval_command": "cd /repo && julia --project=. eval/ess_gaussian_20d.jl",
+    "baseline_metrics": {
+      "PoissonMALA_ESS_s_Min": 1.147,
+      "PoissonMALA_ESS_s_Median": 2.172,
+      "PoissonMALA_ESS_s_Max": 31.974,
+      "PoissonMH_ESS_s_Min": 0.699,
+      "PoissonMH_ESS_s_Median": 1.248,
+      "PoissonMH_ESS_s_Max": 8.63
+    },
+    "primary_metric": "PoissonMALA_ESS_s_Min",
+    "metric_direction": "higher",
+    "gpu_devices": "0,1",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/chenzhibin/autosota-v2.5-3/logs/reproduction/paper-630.log",
+    "status": "success",
+    "created_at": "2026-07-05T05:44:03Z",
+    "notes": "Successful reproduction of the Heterogeneous Truncated Gaussian (d=20) experiment. PoissonMALA clearly outperforms PoissonMH baseline. Ran 10 rounds per acceptance rate (0.25, 0.4, 0.55) with 8-way parallelism on 128-core CPU system. Results use best-across-rates (max per statistic). Paper used 100 rounds; our 10-round estimates have higher variance. At rate 0.25 (closest to paper's best rate), PoissonMALA Min=0.783 (CI [0.40,0.884]), Median=1.509 (CI [0.66,1.749]), Max=8.111 (CI [4.67,25.757]) — all within CI bounds. The best-across-rates values exceed CI upper bounds due to lower round count amplifying extreme values. Julia 1.10.0 with project dependencies from Manifest.toml. No external datasets needed (synthetic data generated on the fly).",
+    "eval_timeout_minutes": 10,
+    "eval_output_format": "Parse stdout: find line matching 'ESS/s: PoisMALA', then read next line for 'Min: X Median: Y Max: Z'. Similarly for 'ESS/s: PoisMH'. Best across rates is max of each statistic over the three rate sections (0.25, 0.4, 0.55).",
+    "known_levers": "Step size tuning (get_stepsize_list in common.jl), number of MCMC steps (poismh_steps, pois_mala_steps), data_size (N), dimension (d), lambda constant (lam_const), beta parameter, balancing function, acceptance rate targets. The Poisson batch size (~6% of N) is controlled indirectly by lam_const and beta.",
+    "setup_notes": "Julia v1.10.0 installed from julialang.org into /usr/local. Julia depot at /autosota_cache/julia_depot (persisted across sessions via JULIA_DEPOT_PATH). All package dependencies installed via Pkg.instantiate() from Manifest.toml. Experiment result files (10 rounds × 3 rates = 30 .jld2 files, ~337MB total) stored in /repo/results/gaussian_20d/. To regenerate: cd /repo && for rate in 0.25 0.4 0.55; do for round in $(seq 1 10); do julia --project=. scripts/run_minimal.jl --target_rate $rate --round $round; done; done. The minimal runner script (scripts/run_minimal.jl) runs only PoissonMH (50000 steps) and PoissonMALA (20000 steps) — the two samplers needed for the rubric — using the same common code and parameters as the original full script. No external datasets needed for this experiment (synthetic data). Pre-downloaded /paper_data contains mnist/ for the Bayesian logistic regression experiment (not used here).",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Maximize PoissonMALA ESS/s (effective sample size per second), primarily the minimum across dimensions, while maintaining or improving the other summary statistics (median, max). PoissonMH serves as the baseline for comparison.",
+      "metrics": [
+        {
+          "name": "PoissonMALA_ESS_s_Min",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 1.147,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Minimum ESS/s across dimensions is the most conservative efficiency measure; higher values mean faster mixing in the worst-mixing dimension. This is the primary metric from Table 1 of the paper."
+        },
+        {
+          "name": "PoissonMALA_ESS_s_Median",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "improve",
+          "baseline": 2.172,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Median ESS/s across dimensions gives a typical-case measure of sampling efficiency. Should improve alongside Min ESS/s."
+        },
+        {
+          "name": "PoissonMALA_ESS_s_Max",
+          "direction": "higher",
+          "role": "secondary",
+          "goal": "improve",
+          "baseline": 31.974,
+          "regression_tolerance_pct": 20.0,
+          "rationale": "Maximum ESS/s shows best-case dimension mixing. Less critical than Min and Median but should not degrade significantly."
+        },
+        {
+          "name": "PoissonMH_ESS_s_Min",
+          "direction": "higher",
+          "role": "secondary",
+          "goal": "preserve",
+          "baseline": 0.699,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Baseline PoissonMH Min ESS/s. Maintain as a sanity check — PoissonMALA should consistently outperform PoissonMH."
+        }
+      ],
+      "success_policy": "Primary goal: improve PoissonMALA_ESS_s_Min. Guardrail: PoissonMALA_ESS_s_Median should not regress beyond tolerance. Secondary: PoissonMALA_ESS_s_Max and PoissonMH metrics should stay within tolerance. Improvements should come from algorithmic changes (step size tuning, balancing function, proposal design) rather than simply increasing step counts. Accept results where PoissonMALA Min ESS/s > baseline PoissonMH Min ESS/s, confirming the method's advantage."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": null
+  }
+}

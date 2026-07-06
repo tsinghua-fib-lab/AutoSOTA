@@ -1,0 +1,25 @@
+# @package _global_
+
+
+debug: true
+
+logs:
+  prefix: logs_debug/${datamodule.dataset_name}
+
+trainer:
+  accelerator: cpu
+  max_steps: 100
+  limit_train_batches: 5
+  limit_val_batches: 5
+  limit_test_batches: 5
+  log_every_n_steps: 5
+  val_check_interval: 40
+  accumulate_grad_batches: 1
+
+datamodule:
+  batch_size: 4
+  pin_memory: false
+  num_workers: 0
+
+model:
+  name: miae_s

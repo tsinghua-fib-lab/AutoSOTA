@@ -1,0 +1,51 @@
+% Macros for the FlashSketch paper
+% NOTE: Keep TODOs minimal in the main body; use sparingly.
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+\newcommand{\verbinline}{\Verb}
+\DefineVerbatimEnvironment{Code}{Verbatim}{fontsize=\small}
+\newcommand{\OrangeSectionStart}{\begingroup\color{orange}}
+\newcommand{\OrangeSectionEnd}{\endgroup}
+
+% Naming.
+% Convention used throughout:
+%   - \sketchfamily is the *distribution* (BlockPerm-SJLT).
+%   - \method is the *kernel / implementation* (FlashSketch).
+% Use \xspace so punctuation like "\method," does not render as "FlashSketch ,".
+\newcommand{\method}{\textsc{FlashSketch}\xspace}
+\newcommand{\sketchfamily}{\textsc{BlockPerm-SJLT}\xspace}
+
+% Fast baseline: block-row sampling.
+% We use the same name for the distribution and its kernel, since the
+% implementation is essentially "the method".
+\newcommand{\blockrowsketch}{\textsc{FlashBlockRow}\xspace}
+
+% Paper-facing labels (consistent legend strings)
+\newcommand{\labelFlash}{\method}
+\newcommand{\labelGrass}{\textsc{GraSS-SJLT} (baseline)}
+\newcommand{\labelBlockRow}{\blockrowsketch{} (fast, fragile)}
+
+% Notation
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prb}{\mathbb{P}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\ip}[2]{\left\langle #1, #2\right\rangle}
+\newcommand{\bigO}{\mathcal{O}}
+
+% Helpers
+\newcommand{\defeq}{\vcentcolon=}
+
+% Common dimensions
+\newcommand{\din}{d}
+\newcommand{\dout}{k}
+\newcommand{\npts}{n}
+
+% Kernel params
+\newcommand{\Br}{\ensuremath{B_r}}
+\newcommand{\Bc}{\ensuremath{B_c}}
+\newcommand{\Tn}{\ensuremath{T_n}}
+\newcommand{\Tk}{\ensuremath{T_k}}
+\newcommand{\spar}{\ensuremath{s}}
+
+% Numbers
+\newcommand{\geomeanSpeedup}{1.7\xspace}

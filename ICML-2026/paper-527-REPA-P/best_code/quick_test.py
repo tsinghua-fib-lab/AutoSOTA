@@ -1,0 +1,58 @@
+"""Quick test: run main.py for a few iterations to validate pipeline."""
+import os, sys, subprocess
+os.chdir('/repo')
+sys.path.insert(0, '/repo')
+
+# Quick config
+config = """c_data: 1
+c_residual: 0.01
+c_ineq: 0.0
+lambda_opt: 0.0
+diff_steps: 100
+x0_estimation: "mean"
+ddim_steps: 0
+residual_grad_guidance: False
+correction_mode: xt
+M_correction: 0
+N_correction: 0
+gov_eqs: darcy
+fd_acc: 2
+use_projection_heads: True
+projection_positions:
+  - bottleneck
+projection_hidden_dim: 128
+c_projection: 0.1
+run_name: darcy.repap.quicktest
+train_iterations: 100
+train_batch_size: 32
+wandb_track: False
+load_model_flag: False
+resume_step: 0
+checkpoint_save_freq: 0
+sample_freq: 50
+test_eval_freq: 50
+log_freq: 10
+no_samples: 5
+ema_start: 1000
+use_ema_for_eval: False
+collect_physics_per_step: False
+pixels_per_dim: 64
+turbulent_data_path: ./data/ch_2Dxysec.pickle
+turbulent_train_fraction: 0.9
+lambda_wall: 0.1
+lambda_smooth: 0.01
+lambda_gradient: 0.0
+lambda_near_wall: 0.0
+near_wall_rows: 3
+"""
+with open('/repo/configs/quicktest.yaml', 'w') as f:
+    f.write(config)
+
+# Run main.py
+result = subprocess.run(
+    [sys.executable, '/repo/main.py', '--config', '/repo/configs/quicktest.yaml', '--gpu', '0'],
+    capture_output=True, text=True, timeout=300
+)
+print("STDOUT:", result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout)
+print("STDERR:", result.stderr[-1000:] if len(result.stderr) > 1000 else result.stderr)
+print("Return code:", result.returncode)

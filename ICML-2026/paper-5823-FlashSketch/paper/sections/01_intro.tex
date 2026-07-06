@@ -1,0 +1,81 @@
+\section{Introduction}
+\label{sec:intro}
+
+Randomized sketching is a standard mechanism to reduce the dimension of a large collection of vectors while approximately preserving their geometry.
+This dimensionality reduction enables running downstream computational algorithms faster, using less memory, and with lower communication costs~\cite{woodruff2014sketching,clarkson2017low,martinsson2020randomized}.
+The canonical sketch is the Johnson--Lindenstrauss (JL) transform, which projects $n$ points in $d$ dimensions down to $k=O(\varepsilon^{-2}\log n)$ dimensions while preserving pairwise distances up to a $(1\pm\varepsilon)$ factor~\cite{johnson1984extensions,freksen2021introduction}.
+It can be implemented by multiplying the input matrix $A \in \R^{d \times n}$ of $n$ vectors in $\R^d$ by a random matrix $S\in\R^{k\times d}$, where $S_{ij}\sim\mathcal{N}(0,1/k)$.
+$S$ is the sketching matrix.
+This operation is at the core of classical randomized numerical linear algebra (RandNLA) algorithms for least squares, low-rank approximation, regression, etc. More recently, it has found use in end-to-end ML pipelines such as data attribution~\cite{hu2025grass}.
+Sparse JL transforms (SJLT) and related constructions such as OSNAP~\cite{dasgupta2010sparse,nelson2013osnap,kane2014sparser} reduce the arithmetic cost of applying $S$ by imposing sparsity on $S$, while retaining the geometric guarantees that make JL useful.
+Fundamentally, the power of sketches originates from their randomness, which leads to strong concentration phenomena, enabling \emph{subspace-oblivious} embedding guarantees.
+
+Modern computing hardware is increasingly heterogeneous, with GPUs playing a central role in large-scale numerical linear algebra and machine learning workloads.
+Performing sketching efficiently on GPUs is therefore essential to practically realizing the end-to-end speedups promised by RandNLA algorithms.
+Optimizing workloads on GPUs requires careful attention to the memory hierarchy and parallel execution model~\cite{nvidia2011nvidia}, and does not always align with CPU-centric cost models that usually focus on reducing arithmetic complexity.
+In particular, sparse matrix multiplication (SpMM) is a well-studied primitive on CPUs, but achieving high performance for SpMM on GPUs is challenging due to irregular memory access patterns and atomic contention \cite{yang2018design}.
+A fundamental tension therefore arises:
+\begin{center}
+  \emph{The very randomness that underpins the theoretical strength of sparse sketches also disrupts the structure required for their efficient implementations on modern hardware.}
+\end{center}
+This motivates our \textbf{co-design thesis}:
+\begin{center}
+  \emph{Balancing this tension requires co-designing sparse sketches and their corresponding GPU kernels.}
+\end{center}
+
+In this work, we pursue this co-design thesis by designing a sparse sketch with \emph{hardware-informed structured randomness}, allowing us to implement a specialized CUDA kernel, \method, that can better balance the tension between sketch quality and realized speed, pushing the Pareto frontier for sketching on GPUs (see \Cref{fig:pareto_money} for a preview).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_e2e_camera_ready_gpt2_medium_gpt2_medium_weights_concat_16k_1k_gram_fro_rel_nvidia_geforce_rtx_4090.pdf}
+  \caption{\textbf{Quality--speed Pareto frontier (preview).}
+    We compare sketching methods by runtime on an NVIDIA RTX 4090 GPU (x-axis) and quality measured using error in Gram matrix approximation (y-axis).
+    \textbf{Lower is better for both axes.}
+    \method pushes the Pareto frontier.}
+  \label{fig:pareto_money}
+  \vspace{-1.0em}
+\end{figure}
+
+\paragraph{Key idea: Structured Sparsity for Block Locality and Mixing.}
+Our key idea is to restrict the sparsity pattern of SJLT to simultaneously enable block locality and sufficient mixing.
+We achieve this by designing a block-structured SJLT in which the block-level sparsity pattern is a union of edge-disjoint permutations.
+We call the resulting sketch family \sketchfamily.
+Within each selected block, we maintain the standard SJLT sparsity to provide fine-grained mixing.
+
+We implement this sketch with \method, a CUDA kernel that streams tiles of the input $A$ through shared memory, accumulates an output tile privately in shared memory (using shared-memory atomics), and writes each output tile to global memory once.
+This kernel avoids global atomic operations during the accumulation phase, which are a major bottleneck in prior GPU SJLT implementations~\cite{hu2025grass,higgins2025high}.
+This is enabled by the bi-regular structure of the union-of-permutations block-sparsity graph, which implies that each output block can be assigned to a \emph{single CUDA thread-block} without overlap.
+This key kernel optimization enabled by the sketch structure emphasizes our co-design thesis.
+
+% \paragraph{A speed ceiling and why robustness matters.}
+% For context we also study \blockrowsketch, a gather-only block-row sampling sketch.
+% It is often extremely fast because it is a pure gather with excellent locality, but it does not control column degrees and can fail on high-coherence inputs.
+% We use \blockrowsketch as a reference point: it illustrates what a ``GPU-optimal'' access pattern looks like, and it clarifies the role of the additional structure in \sketchfamily, which aims to approach that speed while preserving robustness.
+
+% \paragraph{Problem setting.}
+% We focus on regimes where (a) $A$ is dense and resides on a single GPU, (b) the cost of forming $SA$ is dominated by memory movement, and (c) sketch quality is measured by standard RandNLA diagnostics (Gram approximation, JL distortion, and OSE error) and by end-to-end impact in a representative ML pipeline.
+
+\paragraph{Contributions.}
+%
+\begin{itemize}
+  \item \textbf{A hardware-informed sparse sketch family.}
+        In \Cref{sec:sketch}, we introduce a new sparse sketch, \sketchfamily, a restricted SJLT family that preserves block locality while improving mixing via a union-of-permutations block wiring.
+  \item \textbf{A specialized CUDA kernel.}
+        In \Cref{sec:kernel} we present \method, a thread-block-tiled kernel that applies \sketchfamily with thread-block-local accumulation using shared-memory atomics and a single global write per output tile, as well as techniques for on-the-fly randomness generation.
+  \item \textbf{Theory via permutation-coupled localization.}
+        In \Cref{sec:theory}, building on localized sketching~\cite{srinivasa2020localized}, we prove an oblivious subspace embedding style guarantee controlled by a \emph{neighborhood-coherence} quantity induced by the permutation wiring.
+        Further, under a simplified model of independent random permutations, we show that the number of permutations $\kappa$ controls the neighborhood-coherence, providing a tunable tradeoff between sketch quality and speed.
+  \item \textbf{Benchmarks and an ML pipeline.}
+        In \Cref{sec:experiments}, we benchmark \method on standard RandNLA tasks and an end-to-end ML pipeline for data attribution called GraSS~\cite{hu2025grass}.
+        We compare against strong dense and sparse baselines, and our experiments demonstrate that \method pushes the quality--speed Pareto frontier by achieving a global geomean speedup of roughly $\geomeanSpeedup\times$ while preserving quality over a range of regimes and tasks.
+\end{itemize}
+
+We release all our code in the following GitHub repository: \url{https://github.com/rajatvd/flash-sketch-arxiv}.
+
+% \paragraph{Outline.}
+% \Cref{sec:related} situates sketching-kernel co-design in prior work.
+% \Cref{sec:background} reviews sketching objectives and the GPU bottlenecks that motivate our restrictions.
+% \Cref{sec:sketch} defines \sketchfamily and \blockrowsketch.
+% \Cref{sec:kernel} describes \method and its mapping to GPU hardware.
+% \Cref{sec:theory} states our guarantees.
+% \Cref{sec:experiments} presents microbenchmarks and an end-to-end GraSS-style evaluation.
