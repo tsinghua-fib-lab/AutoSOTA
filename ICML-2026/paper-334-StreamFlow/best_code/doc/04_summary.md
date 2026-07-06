@@ -1,0 +1,5 @@
+## Summary
+
+In this paper, we present the first comprehensive acceleration framework specifically designed for accelerating the Rectified Flow model. We have thoroughly analyzed the difficulties (Velocity Field Batching, Heterogeneous Timesteps, Dynamic Compilation) in designing a new acceleration framework for flow models from a theoretical, strategic, and practical perspective. We have also understood the reasons for the failure of traditional methods and proposed corresponding solutions. Our acceleration framework is plug-and-play and can significantly increase the generation speed of 512-dimensional images of the Rectified Flow model by 611\% with almost no loss in quality. Even on larger dimensions, we can still achieve an almost 4-5 times improvement, and in this case, the native Hugging Face pipeline is almost unable to accelerate. Compared with the inconvenient-to-reuse methods such as distillation, Reflow, and few-step, we directly make the deployment of large-scale flow models possible.
+
+**Note:** More information can be found in the code's [README](https://github.com/World-Snapshot/StreamFlow).

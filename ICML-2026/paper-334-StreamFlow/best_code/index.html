@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StreamFlow: Accelerating Rectified Flow.">
+    <title>StreamFlow: Theory, Strategy, and Implementation for High-Speed Rectified Flow Generation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 添加网站图标 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23eef0f2'/%3E%3Ctext x='16' y='26' font-family='-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif' font-size='26' font-weight='500' text-anchor='middle' fill='%23202122'%3EW%3C/text%3E%3C/svg%3E">
+    <!-- 为 Safari 浏览器添加图标 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23eef0f2'/%3E%3Ctext x='16' y='26' font-family='-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif' font-size='26' font-weight='500' text-anchor='middle' fill='%23202122'%3EW%3C/text%3E%3C/svg%3E">
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="./static/styles.css">
+    <!-- 引入 Cite 按钮样式 -->
+    <link rel="stylesheet" href="./static/cite-button.css">
+</head>
+<body>
+    <header class="header">
+        <h1 class="header-title">StreamFlow
+            <!-- 
+            <select class="version-select" onchange="if(this.value) window.location.href=this.value" style="padding: 2px 0; border: none; border-radius: 4px; background: white; cursor: pointer; font-size: 12px; height: 20px; vertical-align: middle; -webkit-appearance: none; -moz-appearance: none; appearance: none;">
+                <option value="" selected>v1-init</option>
+            </select>--> 
+      </h1>
+        <div class="header-links">
+            <a href="https://github.com/World-Snapshot" class="header-link">[Organization]</a>
+            <a href="https://x.com/SenFang01/status/1993857770035052877" class="header-link">[X Thread]</a>
+        </div>
+    </header>
+
+    <div class="sidebar-trigger"></div>
+    <nav class="sidebar">
+        <button class="lock-button">
+            <i class="fas fa-lock-open"></i>
+        </button>
+
+        <div class="nav-section">
+            <div class="nav-items">
+                <a href="#title" class="nav-link">Title</a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <span class="nav-toggle"></span>
+                Overview
+            </div>
+            <div class="nav-items">
+                <a href="#teaser" class="nav-link">Teaser</a>
+                <a href="#abstract" class="nav-link">Abstract</a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <span class="nav-toggle"></span>
+                Results
+            </div>
+            <div class="nav-items">
+                <a href="#method" class="nav-link">Methodology</a>
+            </div>
+            <div class="nav-items">
+                <a href="#experiment" class="nav-link">Experiment</a>
+            </div>
+            <div class="nav-items">
+                <a href="#summary" class="nav-link">Summary</a>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <span class="nav-toggle"></span>
+                Others
+            </div>
+            <div class="nav-items">
+                <a href="#bibtex" class="nav-link">BibTeX</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="title">
+
+            <span class="highlight-notice">StreamFlow: Accelerating Rectified Flow</span>
+        
+            <h1 class="title">StreamFlow: Theory, Algorithm, and Implementation<br>for High-Efficiency Rectified Flow Generation</h1>
+            
+            <div class="authors">
+                <a href="https://x.com/SenFang01" class="author-link">Sen Fang</a><sup>1</sup>,
+                <a href="https://rjzhb.github.io/" class="author-link">Hongbin Zhong</a><sup>2*</sup>,
+                <a href="https://github.com/YalinFeng01" class="author-link">Yalin Feng</a><sup>3</sup>,
+                <a href="https://yanxinzhangcs.github.io" class="author-link">Yanxin Zhang</a><sup>4</sup>,
+                <br>
+                <a href="https://scholar.google.com/citations?user=a7VNhCIAAAAJ" class="author-link">Dimitris N. Metaxas</a><sup>1</sup>
+            </div>
+
+            <div class="affiliations">
+                <sup>1</sup>Rutgers University, &nbsp <sup>2</sup>Georgia Institute of Technology, &nbsp <sup>3</sup>Nanyang Technological University, 
+                 <br>
+                <sup>4</sup>University of Wisconsin-Madison
+                <br>
+                    <div style="text-align: center; color: black !important;">
+                        <sup>*</sup>Equal Contribution
+                    </div>
+            </div>
+
+
+            
+            <div style="text-align: center; margin: 1em 0;">
+                <span style="font-size: 1.5em; color: #28a745; font-weight: 800; font-family: Verdana, Geneva, sans-serif;">
+                    ICML 2026
+                </span>
+            </div>
+
+            <div class="links">
+                <a href="https://arxiv.org/abs/2511.22009" class="button">
+                    <i class="fas fa-file-pdf"></i> Paper
+                </a>
+                <a href="https://github.com/World-Snapshot/StreamFlow" class="button">
+                    <i class="fab fa-github-square"></i> Code
+                </a>
+            </div>
+
+
+        <div class="mixed-content">
+
+            <section id="teaser" class="html-section">
+
+
+
+
+                <video src="./static/videos/StreamFlow_teaser.mp4" autoplay muted loop playsinline style="max-width: 100%; height: auto; display: block;"></video>
+
+                <center>
+                    <b>Overview:</b>
+                    This video clearly demonstrates the acceleration capability of our Rectified Flow model. It loads a 4-step <a href="https://github.com/magic-research/piecewise-rectified-flow">PeRFlow model</a> and boosts its speed to approximately 600%. Since the remote rendering speed is slower than the generation process, this video is composed of generated frames to match the actual speed. 
+                    </center>
+            </section>
+
+            <!-- Teaser Section (Markdown) -->
+            <section id="teaser" class="markdown-section"></section>
+
+            <!-- Abstract Section (Markdown) -->
+            <section id="abstract" class="markdown-section"></section>
+
+            <!-- Demos Section (Markdown) -->
+            <section id="method" class="markdown-section"></section>
+            
+            <!-- Original HTML Demos Section (Commented Out) -->
+            <!--
+            <section id="demos" class="html-section">
+                <h2>Demos</h2>
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <img src="/api/placeholder/400/200" alt="Demo 1" class="demo-image">
+                        <div class="demo-content">
+                            <h3 class="demo-title">Demo 1 Title</h3>
+                            <p class="demo-description">Description of demo 1 and its features.</p>
+                        </div>
+                    </div>
+                    <div class="demo-item">
+                        <img src="/api/placeholder/400/200" alt="Demo 2" class="demo-image">
+                        <div class="demo-content">
+                            <h3 class="demo-title">Demo 2 Title</h3>
+                            <p class="demo-description">Description of demo 2 and its features.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            -->
+
+            <!-- Experiment Section (Markdown) -->
+            <section id="experiment" class="markdown-section"></section>
+
+            <!-- Summary Section (Markdown) -->
+            <section id="summary" class="markdown-section"></section>
+
+            <!-- BibTeX Section (Markdown) -->
+            <section id="bibtex" class="markdown-section"></section>
+        </div>
+    </div>
+
+    <footer>
+        <p>This website is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.</p>
+        <p>
+            This means you are free to borrow the <a href="https://github.com/World-Snapshot/world-snapshot.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+        </p>
+    </footer>
+
+    <script>
+        // Initialize markdown-it
+        const md = window.markdownit({
+            html: true,
+            linkify: true,
+            typographer: true,
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(str, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return '';
+            }
+        });
+
+        // Content sections configuration
+        const contentSections = [
+            {
+                id: 'abstract',
+                type: 'markdown',
+                file: 'doc/01_abstract.md'
+            },
+            {
+                id: 'method',
+                type: 'markdown',
+                file: 'doc/02_method.md'
+            },
+            {
+                id: 'experiment',
+                type: 'markdown',
+                file: 'doc/03_experiment.md'
+            },
+            {
+                id: 'summary',
+                type: 'markdown',
+                file: 'doc/04_summary.md'
+            },
+            {
+                id: 'bibtex',
+                type: 'markdown',
+                file: 'doc/07_bibtex.md'
+            }
+        ];
+
+        // Load and render content
+        async function loadAndRenderContent() {
+            for (const section of contentSections) {
+                if (section.type === 'markdown') {
+                    try {
+                        const response = await fetch(section.file);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const markdown = await response.text();
+                        const element = document.getElementById(section.id);
+                        if (element) {
+                            element.innerHTML = md.render(markdown);
+                        }
+                    } catch (error) {
+                        console.error(`Error loading ${section.file}:`, error);
+                        const element = document.getElementById(section.id);
+                        if (element) {
+                            element.innerHTML = `<p>Error loading content for ${section.id}</p>`;
+                        }
+                    }
+                }
+            }
+            
+            // 为标题添加锚点链接
+            addHeaderLinks();
+            
+            // Execute all scripts in rendered markdown
+            executeMarkdownScripts();
+
+            // Smooth scrolling for sidebar navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // 临时更新URL但不触发跳转
+                        history.replaceState(null, null, `#${targetId}`);
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // 延迟移除锚点，让跳转完成
+                        setTimeout(() => {
+                            history.replaceState(null, null, window.location.pathname);
+                        }, 200);
+
+                        // If sidebar is not locked, hide it after navigation
+                        if (!sidebar.classList.contains('locked')) {
+                            sidebar.classList.remove('active');
+                        }
+                    }
+                });
+            });
+
+            // 检查URL中的锚点并跳转
+            setTimeout(() => {
+                if (window.location.hash) {
+                    const element = document.getElementById(window.location.hash.substring(1));
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }, 100);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // 强制跳转到title位置
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }, 100);
+            // Load and render markdown content
+            loadAndRenderContent();
+            
+            // Sidebar animation
+            setTimeout(() => {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.add('active');
+                setTimeout(() => {
+                    if (!sidebar.classList.contains('locked')) {
+                        sidebar.classList.remove('active');
+                    }
+                }, 1000);
+            }, 100);
+        });
+
+        // Lock button functionality
+        const lockButton = document.querySelector('.lock-button');
+        const sidebar = document.querySelector('.sidebar');
+        
+        lockButton.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('fa-lock-open')) {
+                icon.classList.remove('fa-lock-open');
+                icon.classList.add('fa-lock');
+                sidebar.classList.add('locked');
+            } else {
+                icon.classList.remove('fa-lock');
+                icon.classList.add('fa-lock-open');
+                sidebar.classList.remove('locked');
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Sidebar section toggle
+        document.querySelectorAll('.nav-section-title').forEach(title => {
+            title.addEventListener('click', (e) => {
+                const section = title.closest('.nav-section');
+                section.classList.toggle('collapsed');
+            });
+        });
+
+
+        // Execute all scripts found in rendered markdown sections
+        function executeMarkdownScripts() {
+            // Find all markdown sections
+            const markdownSections = document.querySelectorAll('.markdown-section');
+            
+            markdownSections.forEach(section => {
+                // Find all script tags in this section
+                const scripts = section.querySelectorAll('script');
+                
+                scripts.forEach(script => {
+                    // Create a new script element and execute it
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    
+                    // Copy any attributes from the original script
+                    Array.from(script.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
+                    });
+                    
+                    // Replace the old script with the new one to execute it
+                    script.parentNode.replaceChild(newScript, script);
+                });
+            });
+        }
+
+        // 为标题添加锚点链接的函数
+        function addHeaderLinks() {
+            // 生成slug的函数
+            function generateSlug(text) {
+                return text
+                    .toLowerCase()
+                    .replace(/[^\w\s-]/g, '') // 移除特殊字符
+                    .replace(/\s+/g, '-')     // 空格替换为连字符
+                    .replace(/-+/g, '-')      // 多个连字符合并为一个
+                    .trim('-');               // 移除首尾连字符
+            }
+
+            // 为所有标题添加ID和链接
+            const headers = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4, .markdown-section h5, .markdown-section h6, .html-section h1, .html-section h2, .html-section h3, .html-section h4, .html-section h5, .html-section h6');
+            
+            headers.forEach(header => {
+                const text = header.textContent;
+                const slug = generateSlug(text);
+                
+                // 设置ID
+                header.id = slug;
+                
+                // 创建链接元素
+                const link = document.createElement('a');
+                link.href = `#${slug}`;
+                link.className = 'header-link';
+                link.innerHTML = '#';
+                
+                // 添加点击事件处理
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    history.pushState(null, null, `#${slug}`);
+                    header.scrollIntoView({ behavior: 'smooth' });
+                });
+                
+                // 将链接插入到标题中
+                header.appendChild(link);
+            });
+
+            // 使用 CiteButton 模块添加 Cite 按钮
+            if (typeof CiteButton !== 'undefined') {
+                CiteButton.init({
+                    author: 'World Snapshot Team',
+                    title: 'Related Documents or Contents of Top Level Project (under World Snapshot Template)',
+                    yearMode: 'current',
+                    headerSelector: '.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4, .markdown-section h5, .markdown-section h6, .html-section h1, .html-section h2, .html-section h3, .html-section h4, .html-section h5, .html-section h6'
+                });
+            }
+        }
+
+    </script>
+
+    <!-- 引入 Cite 按钮模块 -->
+    <script src="./static/cite-button.js"></script>
+</body>
+</html>

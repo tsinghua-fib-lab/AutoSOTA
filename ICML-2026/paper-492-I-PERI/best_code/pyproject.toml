@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyciphod"
+version = "0.1.0"
+description = "A Python package for causal discovery, causal inference, and root cause analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Charles Assaad", email = "charles.assaad@inserm.fr"},
+    {name = "Federico Baldo"},
+    {name = "Simon Ferreira"},
+    {name = "Timothée Loranchet"},
+    {name = "Willow Scott"},
+    {name = "Sarah Semlali"},
+    {name = "Anouk Ruer"}
+]
+dependencies = [
+    "networkx>0",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn"
+]
+
+[tool.setuptools]
+# Keep package_dir pointing at the repository root so setuptools can map discovered
+# packages under both src/ and the top-level folders like reproducibility.
+package-dir = {"" = "src", "reproducibility" = "reproducibility"}
+
+[tool.setuptools.packages.find]
+# Search for Python packages both inside src and at repository root (for reproducibility/baselines)
+where = ["src", "."]
+include = ["pyciphod*", "reproducibility*"]
+
+[project.optional-dependencies]
+# Extra dependencies needed only to run reproducibility scripts and baselines.
+# Keep this minimal: only packages not already listed under [project].dependencies
+reproducibility = [
+  "scipy",
+  "statsmodels",
+  "causal-learn",
+  "igraph", 
+  "torch",
+  "tensorflow",
+  "mlxtend",
+  "causaldag"
+]
+
+dev = [
+  "pytest"
+]

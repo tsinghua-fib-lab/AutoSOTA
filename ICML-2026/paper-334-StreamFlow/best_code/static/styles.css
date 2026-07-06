@@ -1,0 +1,507 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #202122;
+    background: #fff;
+}
+
+.sidebar {
+    position: fixed;
+    top: 50px;
+    left: -260px;
+    width: 260px;
+    height: calc(100vh - 50px);
+    background: #f8f9fa;
+    border-right: 1px solid #a2a9b1;
+    padding: 20px;
+    transition: left 0.6s ease;
+    overflow-y: auto;
+    z-index: 99;
+}
+
+.sidebar-trigger {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 30px;
+    height: calc(100vh - 50px);
+    z-index: 98;
+}
+
+.sidebar-trigger:hover + .sidebar,
+.sidebar:hover,
+.sidebar.active,
+.sidebar.locked {
+    left: 0;
+}
+
+.sidebar.locked ~ .container {
+    margin-left: 260px;
+}
+
+.nav-section {
+    margin: 8px 0;
+}
+
+.nav-section-title {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #202122;
+    padding: 6px 0;
+    font-weight: 500;
+}
+
+.nav-toggle {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    position: relative;
+}
+
+.nav-toggle::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid #72777d;
+    border-bottom: 2px solid #72777d;
+    transform: translate(-75%, -50%) rotate(45deg);
+    transition: transform 0.2s;
+}
+
+.nav-section.collapsed .nav-toggle::before {
+    transform: translate(-75%, -75%) rotate(-45deg);
+}
+
+.nav-section.collapsed .nav-items {
+    display: none;
+}
+
+.nav-items {
+    margin-left: 24px;
+}
+
+.nav-link {
+    color: #3366cc;
+    text-decoration: none;
+    display: block;
+    padding: 4px 0;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: #fff;
+    border-bottom: 1px solid #a2a9b1;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    z-index: 100;
+    justify-content: space-between;
+}
+
+.header-title {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin-left: 20px;
+}
+
+.header-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.header-link {
+    color: #3366cc;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.header-link:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 50px auto 0;
+    padding: 40px 20px;
+    transition: margin-left 0.6s ease;
+}
+
+.title {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.authors {
+    text-align: center;
+    margin: 20px 0 10px;
+    line-height: 1.8;
+}
+
+.author-link {
+    color: #3366cc;
+    text-decoration: none;
+}
+
+.author-link:hover {
+    text-decoration: underline;
+}
+
+.affiliations {
+    text-align: center;
+    margin: 10px 0;
+    color: #666;
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #a2a9b1;
+    border-radius: 4px;
+    color: #202122;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.button:hover {
+    background: #f0f0f0;
+}
+
+.button i {
+    margin-right: 8px;
+}
+
+.video-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 20px 0;
+    /* 移除了固定的 padding-bottom 和 height: 0 */
+}
+
+.video-container video {
+    width: 100%;
+    height: auto; /* 高度会根据视频比例自动调整 */
+    display: block; /* 防止底部可能出现的小空隙 */
+}
+
+/* Markdown and HTML section styles */
+.markdown-section, .html-section {
+    margin: 40px 0;
+    scroll-margin-top: 70px;
+}
+
+.markdown-section h1, .html-section h1 {
+    font-size: 1.8em;
+    margin-bottom: 0.8em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #a2a9b1;
+    color: #000;
+    font-family: 'Linux Libertine','Georgia','Times',serif;
+    position: relative;
+}
+
+.markdown-section h2, .html-section h2 {
+    font-size: 1.5em;
+    margin: 1em 0;
+    padding-bottom: 0.2em;
+    border-bottom: 1px solid #c8ccd1;
+    color: #162441;
+    position: relative;
+}
+
+.markdown-section h3, .html-section h3 {
+    font-size: 1.2em;
+    margin: 0.8em 0;
+    color: #162441;
+    position: relative;
+}
+
+/* 标题锚点链接样式 */
+.markdown-section .header-link,
+.html-section .header-link {
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    color: #666;
+    font-weight: normal;
+}
+
+.markdown-section h1:hover .header-link,
+.markdown-section h2:hover .header-link,
+.markdown-section h3:hover .header-link,
+.markdown-section h4:hover .header-link,
+.markdown-section h5:hover .header-link,
+.markdown-section h6:hover .header-link,
+.html-section h1:hover .header-link,
+.html-section h2:hover .header-link,
+.html-section h3:hover .header-link,
+.html-section h4:hover .header-link,
+.html-section h5:hover .header-link,
+.html-section h6:hover .header-link {
+    opacity: 1;
+}
+
+.markdown-section .header-link:hover,
+.html-section .header-link:hover {
+    color: #3366cc;
+    text-decoration: none;
+}
+
+/* Cite 按钮样式适配 */
+.markdown-section h1,
+.markdown-section h2,
+.markdown-section h3,
+.markdown-section h4,
+.markdown-section h5,
+.markdown-section h6,
+.html-section h1,
+.html-section h2,
+.html-section h3,
+.html-section h4,
+.html-section h5,
+.html-section h6 {
+    position: relative;
+    scroll-margin-top: 70px;
+}
+
+.markdown-section .cite-button,
+.html-section .cite-button {
+    position: absolute;
+    right: -55px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    color: #666;
+    font-weight: normal;
+    font-size: 11px;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.markdown-section h1:hover .cite-button,
+.markdown-section h2:hover .cite-button,
+.markdown-section h3:hover .cite-button,
+.markdown-section h4:hover .cite-button,
+.markdown-section h5:hover .cite-button,
+.markdown-section h6:hover .cite-button,
+.html-section h1:hover .cite-button,
+.html-section h2:hover .cite-button,
+.html-section h3:hover .cite-button,
+.html-section h4:hover .cite-button,
+.html-section h5:hover .cite-button,
+.html-section h6:hover .cite-button {
+    opacity: 1;
+}
+
+.markdown-section .cite-button:hover,
+.html-section .cite-button:hover {
+    color: #3366cc;
+    border-color: #3366cc;
+    text-decoration: none;
+}
+
+.markdown-section p, .html-section p {
+    margin: 1em 0;
+    line-height: 1.6;
+}
+
+.markdown-section pre, .html-section pre {
+    margin: 1em 0;
+    padding: 16px;
+    background: #f6f8fa;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+.markdown-section code, .html-section code {
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 0.9em;
+    padding: 0.2em 0.4em;
+    background: #f6f8fa;
+    border-radius: 3px;
+}
+
+.markdown-section img, .html-section img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em auto;
+}
+
+/* Demo section specific styles */
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0px;
+    margin: 0px 0;
+}
+
+.demo-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.demo-item:hover {
+    transform: translateY(-5px);
+}
+
+.demo-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.demo-content {
+    padding: 15px;
+}
+
+.demo-title {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #162441;
+}
+
+.demo-description {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.lock-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    padding: 5px;
+    z-index: 100;
+}
+
+footer {
+    text-align: center;
+    padding: 0px;
+    margin-top: 0px;
+    border-top: 1px solid #a2a9b1;
+    font-size: 14px;
+    color: #666;
+}
+
+footer a {
+    color: #3366cc;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Unordered lists style */
+.markdown-section ul, .html-section ul {
+    padding-left: 40px; /* Consistent with main content padding */
+    margin: 1em 0;      /* Same margin as paragraphs */
+}
+
+/* Ordered lists style */
+.markdown-section ol, .html-section ol {
+    padding-left: 40px; /* Consistent with main content padding */
+    margin: 1em 0;      /* Same margin as paragraphs */
+}
+
+.footnote {
+    color: #3366cc;
+    position: relative;
+    cursor: help;
+}
+.footnote:hover::after {
+    content: attr(data-note);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 4px;
+    white-space: normal;
+    max-width: 300px;
+    min-width: 200px;
+    font-size: 0.9em;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    word-wrap: break-word;
+}
+
+/* 当脚注靠近右边缘时，让提示框向左显示 */
+.footnote:hover::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 添加小三角形指向脚注 */
+.footnote:hover::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #333;
+    z-index: 1001;
+}
+
+/* 醒目说明样式 */
+.highlight-notice {
+    color: blue;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+}

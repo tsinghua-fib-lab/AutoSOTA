@@ -1,0 +1,5 @@
+- Improve guidance
+  - "The critique must explicitly point mistakes"
+- Run checks
+- Set up the LLM-as-a-judge
+- Get the results asap

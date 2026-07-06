@@ -1,0 +1,17 @@
+hydra:
+  run:
+    dir: .
+  job:
+    chdir: false
+  output_subdir: null
+
+game: kuhn_poker
+traverse_type: Enumerate
+iter: 100000
+print_freq: 1000
+
+defaults:
+  - algorithm: AsymPDGDA
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled

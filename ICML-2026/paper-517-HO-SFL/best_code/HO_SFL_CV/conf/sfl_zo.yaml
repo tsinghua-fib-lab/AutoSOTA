@@ -1,0 +1,42 @@
+seed: 42
+
+system:
+  device: "cuda:0"
+
+data:
+  dataset: "CIFAR10"  
+  root: "./data"
+  shuffle: True
+  train_batch_size: 32
+  test_batch_size: 100
+  
+  partition:
+    algo: "iid"  
+    min_samples: 32   
+
+
+model:
+  model_name: "ResNet18"
+  freeze_bn: True
+  use_pretrained: True
+
+
+algo:
+  algo_name: "SFLZO"  
+  split_point: 6       
+  optimizer: "adamw"
+  lr: 0.001
+  zo_p: 1
+  zo_mu: 1e-3
+
+runner:
+  communication_rounds: 50
+  local_epochs: 1
+  evaluation_interval: 1     
+  num_clients: 100          
+  sampled_clients: 10       
+  total_samples: 120000  
+logging:
+  use_wandb: True
+  project_name: "ICML_Code_Test"
+  log_dir: "./logs"

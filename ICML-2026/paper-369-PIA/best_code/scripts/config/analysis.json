@@ -1,0 +1,287 @@
+{
+  "analysis_name": "Agent Cognitive Attack - Analysis Configuration",
+  "description": "Configuration for cognitive analysis, parameter fitting, and visualization",
+  "version": "1.0",
+
+  "metrics_calculation": {
+    "enabled": true,
+    "output_format": "csv",
+    "calculate_additional_metrics": true,
+    "metrics": [
+      "ASR",
+      "NTF",
+      "Switch_Rate",
+      "Recovery_Rate",
+      "JRS"
+    ],
+    "baseline_group": "Baseline",
+    "thresholds": {
+      "asr_warning": 0.3,
+      "ntf_warning": 0.5,
+      "switch_rate_warning": 0.4
+    }
+  },
+
+  "drift_plot": {
+    "enabled": true,
+    "output_format": "png",
+    "dpi": 300,
+    "figsize": [12, 8],
+    "output_dir": "logs/images",
+    "metrics_to_plot": [
+      "ASR",
+      "NTF",
+      "Switch_Rate"
+    ],
+    "smoothing_window": 5,
+    "show_confidence": true,
+    "palette": {
+      "Baseline": "#95a5a6",
+      "Optimism": "#e74c3c",
+      "Optimism-Neg": "#c0392b",
+      "Punishment": "#c0392b",
+      "Threat": "#2c3e50",
+      "Authority": "#8e44ad",
+      "Sycophancy": "#e67e22",
+      "Regret": "#16a085",
+      "Stimulus": "#f1c40f",
+      "Magnitude": "#d35400"
+    }
+  },
+
+  "radar_plot": {
+    "enabled": true,
+    "output_format": "png",
+    "dpi": 300,
+    "output_dir": "logs/images",
+    "exclude_models": [],
+    "layered_mode": true,
+    "layers": {
+      "perception": {
+        "enabled": true,
+        "parameters": ["Baseline (θ)", "Authority (θ)", "Threat (θ)", "Regret (θ)"],
+        "title": "Perception Layer: θ Parameters",
+        "filename": "layer1_perception.png"
+      },
+      "learning": {
+        "enabled": true,
+        "parameters": ["Optimism (α+)", "Optimism (α-)", "Punishment (α+)", "Punishment (α-)", "Regret (α+)", "Regret (α-)"],
+        "title": "Learning Layer: α Parameters",
+        "filename": "layer2_learning.png"
+      },
+      "risk": {
+        "enabled": true,
+        "parameters": ["Risk_Pref (ρ)", "R_perc"],
+        "title": "Risk Layer: ρ and R_perc Parameters",
+        "filename": "layer3_risk.png"
+      }
+    },
+    "comparison": {
+      "theta_comparison": {
+        "enabled": true,
+        "filename": "theta_comparison.png"
+      }
+    },
+    "additional_plots": {
+      "perception_diverging": {
+        "enabled": true,
+        "filename": "1_perception_bias.png"
+      },
+      "alpha_subplots": {
+        "enabled": true,
+        "filename": "2_alpha_asymmetry_subplots.png"
+      },
+      "risk_preference": {
+        "enabled": true,
+        "filename": "3_risk_preference_subplots.png"
+      }
+    },
+    "normalization": "minmax",
+    "colors": {
+      "baseline": "#7f8c8d",
+      "authority": "#9b59b6",
+      "threat": "#2c3e50",
+      "regret": "#16a085",
+      "alpha_pos": "#e74c3c",
+      "alpha_neg": "#3498db",
+      "punishment": "#c0392b"
+    }
+  },
+
+  "parameter_fitting": {
+    "enabled": true,
+    "extended_mode": false,
+    "output_dir": "logs/analysis",
+    "optimization": {
+      "method": "NLL",
+      "max_iterations": 1000,
+      "multi_start": 32,
+      "tolerance": 1e-6
+    },
+    "parameter_bounds": {
+      "alpha_pos": [0.0, 1.0],
+      "alpha_neg": [0.0, 1.0],
+      "rho": [0.1, 5.0],
+      "theta": [-10.0, 10.0],
+      "lambda": [-5.0, 5.0],
+      "phi": [0.0, 1.0],
+      "beta": [0.0, 20.0],
+      "R_perc": [0.1, 100.0],
+      "lambda_LA": [0.1, 10.0]
+    },
+    "strategy_map": {
+      "BASELINE": ["lambda", "beta", "phi", "theta"],
+      "OPTIMISM": ["alpha_pos", "alpha_neg"],
+      "PUNISHMENT": ["alpha_neg"],
+      "STIMULUS": ["rho"],
+      "MAGNITUDE": ["rho"],
+      "THREAT": ["theta", "alpha_neg"],
+      "AUTHORITY": ["theta"],
+      "SYCOPHANCY": ["theta"],
+      "REGRET": ["alpha_pos", "alpha_neg"],
+      "FIT_BASELINE": ["lambda", "beta", "theta", "lambda_LA", "alpha_pos", "alpha_neg"],
+      "FIT_PERCEPTION": ["R_perc", "rho", "theta"],
+      "FIT_FEAR": ["alpha_neg", "lambda_LA", "theta"],
+      "FIT_GREED": ["alpha_pos", "alpha_neg", "theta"]
+    },
+    "data_filters": {
+      "min_trials_per_group": 5,
+      "exclude_actions": ["ParseFail"],
+      "convert_to_binary": true
+    }
+  },
+
+  "workflow": {
+    "auto_chain": true,
+    "steps": [
+      "metrics",
+      "fitting",
+      "drift",
+      "radar"
+    ],
+    "save_intermediate": true,
+    "overwrite_existing": false
+  },
+
+  "input_output": {
+    "input_type": "run_directory",
+    "input_formats": [
+      "new_format",
+      "legacy_format"
+    ],
+    "output_base_dir": "logs/analysis",
+    "subdirectories": {
+      "metrics": "metrics",
+      "drift": "images",
+      "radar": "images",
+      "fitting": "fitting"
+    },
+    "file_naming": {
+      "metrics_details": "metrics_details_{model}.csv",
+      "metrics_summary": "metrics_summary_{model}.csv",
+      "cognitive_report": "cognitive_report.csv",
+      "drift_plot": "drift_{model}.png",
+      "radar_plot": "radar_{model}.png",
+      "theta_plot": "theta_diverging.png",
+      "alpha_plot": "alpha_comparison.png",
+      "risk_plot": "risk_preference.png"
+    }
+  },
+
+  "visualization": {
+    "general": {
+      "figsize": [10, 8],
+      "dpi": 300,
+      "font_size": 12,
+      "title_font_size": 14,
+      "legend_loc": "best"
+    },
+    "theta_diverging": {
+      "normalize_range": [-10, 10],
+      "output_filename": "theta_diverging.png",
+      "colors": {
+        "Baseline (θ)": "#7f8c8d",
+        "Authority (θ)": "#9b59b6",
+        "Threat (θ)": "#2c3e50"
+      }
+    },
+    "alpha_comparison": {
+      "output_filename": "alpha_comparison.png",
+      "colors": {
+        "(α+)": "#e74c3c",
+        "(α-)": "#3498db"
+      },
+      "ylim": [0, 1.05],
+      "threshold_line": 0.1
+    },
+    "risk_preference": {
+      "output_filename": "risk_preference.png",
+      "xlim": [0.01, 5.0],
+      "risk_zones": {
+        "averse": [0.01, 1.0],
+        "seeking": [1.0, 5.0]
+      }
+    }
+  },
+
+  "scenarios": {
+    "all_groups": [
+      "Baseline",
+      "Optimism",
+      "Magnitude",
+      "Punishment",
+      "Threat",
+      "Authority",
+      "Regret",
+      "Stimulus",
+      "Sycophancy"
+    ],
+    "enabled_groups": [
+      "Baseline",
+      "Optimism",
+      "Magnitude",
+      "Punishment",
+      "Threat",
+      "Authority",
+      "Regret",
+      "Stimulus"
+    ],
+    "num_scenarios_per_group": 9
+  },
+
+  "notes": [
+    "=== Analysis Configuration ===",
+    "This file controls all analysis behavior including metrics, fitting, and visualization",
+    "",
+    "=== Usage ===",
+    "# Run with config file:",
+    "python scripts/analysis/analyze.py --folder logs/cigt/Model/RunID/ --type all",
+    "python scripts/analysis/fit_params.py --folder logs/cigt/Model/RunID/ --output_dir logs/analysis/",
+    "",
+    "=== Key Parameters ===",
+    "- extended_mode: Set true to include R_perc and lambda_LA parameters",
+    "- min_trials_per_group: Groups with fewer trials are skipped during fitting",
+    "- auto_chain: Automatically run all analysis steps in sequence",
+    "",
+    "=== File Structure ===",
+    "Input: logs/cigt/{model}/{run_id}/",
+    "  ├── Baseline/{hash}.csv",
+    "  ├── Optimism/{hash}.csv",
+    "  └── ...",
+    "",
+    "Output: logs/analysis/{model}/",
+    "  ├── cognitive_report.csv (fitted parameters)",
+    "  ├── metrics_details_{model}.csv",
+    "  ├── metrics_summary_{model}.csv",
+    "  └── images/",
+    "      ├── drift_{model}.png",
+    "      ├── theta_diverging.png",
+    "      ├── alpha_comparison.png",
+    "      └── risk_preference.png",
+    "",
+    "=== Troubleshooting ===",
+    "- If fitting fails: Check min_trials_per_group and data quality",
+    "- If plots are empty: Verify input folder contains valid CSV files",
+    "- If parameters are unrealistic: Adjust bounds in parameter_bounds section"
+  ]
+}

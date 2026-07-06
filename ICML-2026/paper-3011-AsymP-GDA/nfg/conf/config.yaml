@@ -1,0 +1,32 @@
+hydra:
+  run:
+    dir: .
+  job:
+    chdir: false
+  output_subdir: null
+seed: 0
+n_trials: 1
+num_iters: 10000
+stop_early: false
+asymmetric_players: true
+output_dir: logs
+log_interval: 100
+print_interval: 100000
+player0:
+  random_init: false
+  learning_rate: 0.1
+  perturbation_strength: 0.1
+player1:
+  random_init: false
+  learning_rate: 0.1
+  perturbation_strength: #None
+defaults:
+  - _self_
+  - algorithm@player0:
+    - PGD
+  - algorithm@player1:
+    - GD
+  - game:
+    - biased_rps
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled

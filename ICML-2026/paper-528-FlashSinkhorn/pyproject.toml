@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flash-sinkhorn"
+dynamic = ["version"]
+description = "Sinkhorn optimal transport kernels in PyTorch + Triton (squared Euclidean, no cost matrix materialization)."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+keywords = ["optimal-transport", "sinkhorn", "triton", "pytorch", "gpu"]
+authors = [
+  {name = "OT Triton Contributors"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Environment :: GPU :: NVIDIA CUDA",
+]
+dependencies = [
+  "numpy",
+  "torch>=2.5",
+  "triton>=3.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/ot-triton-lab/flash-sinkhorn"
+Repository = "https://github.com/ot-triton-lab/flash-sinkhorn"
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "geomloss",
+  "pykeops",
+  "jax",
+  "ott-jax",
+  "matplotlib",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "flash_sinkhorn.__version__"}
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["src/flash_sinkhorn/testing"]

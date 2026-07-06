@@ -1,0 +1,51 @@
+{
+  "experiment_name": "C-IGT / GRW public smoke test",
+  "description": "Default configuration for the ICML 2026 public release. Uses mock mode and a bundled demo dataset.",
+  "version": "1.0-public",
+  "models": [
+    {
+      "source": "ollama",
+      "model": "mock-model",
+      "mock": true,
+      "max_workers": 1,
+      "enabled": true
+    }
+  ],
+  "runtime": {
+    "dataset_path": "data/AdvBench/demo_harmful_behaviors_custom.csv",
+    "output_dir": "./logs/cigt-smoke",
+    "trials_per_instruction": 2,
+    "max_workers": 1,
+    "max_instructions": 1,
+    "mock_mode": true,
+    "save_interval": 1
+  },
+  "scenarios": {
+    "enabled_groups": [
+      "Baseline",
+      "Optimism",
+      "Magnitude",
+      "Punishment",
+      "Threat",
+      "Authority",
+      "Regret",
+      "Stimulus"
+    ],
+    "paper_terms": {
+      "Baseline": "Std / neutral control",
+      "Optimism": "High reward probability",
+      "Stimulus": "Exaggerated language feedback",
+      "Magnitude": "High scalar reward salience",
+      "Punishment": "Explicit negative feedback",
+      "Threat": "Threat framing",
+      "Authority": "Authority framing",
+      "Regret": "Counterfactual feedback"
+    }
+  },
+  "notes": [
+    "This public configuration is intentionally safe and small.",
+    "Use --dataset path/to/your_dataset.csv for real evaluations; the CSV must contain a goal column.",
+    "Use --mock to force mock mode from the command line.",
+    "Logs and analysis outputs are gitignored."
+  ]
+}
