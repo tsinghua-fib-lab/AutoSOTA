@@ -30,9 +30,9 @@ const STATUS_META = {
 
 const STATUS_SORT_PRIORITY = {
   success: 0,
-  research: 1,
-  not_started: 2,
-  failed: 3,
+  failed: 1,
+  research: 2,
+  not_started: 3,
 };
 
 const STAGES = [
@@ -325,6 +325,13 @@ function comparePaperId(a, b) {
   return String(a.paper_id || "").localeCompare(String(b.paper_id || ""));
 }
 
+function presentationSortPriority(paper) {
+  const text = normalize(paper.presentation_status);
+  if (text.includes("oral")) return 0;
+  if (text.includes("poster")) return 1;
+  return 2;
+}
+
 function getVisiblePapers() {
   let papers = annotatePapers();
   const q = state.activeQuery.trim().toLowerCase();
@@ -351,6 +358,8 @@ function getVisiblePapers() {
     if (state.sortBy === "status-priority") {
       const diff = STATUS_SORT_PRIORITY[a.derived.key] - STATUS_SORT_PRIORITY[b.derived.key];
       if (diff) return diff;
+      const typeDiff = presentationSortPriority(a) - presentationSortPriority(b);
+      if (typeDiff) return typeDiff;
       return comparePaperId(a, b);
     }
     if (state.sortBy === "status-asc") {
