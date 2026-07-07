@@ -5,7 +5,7 @@ const state = {
   papers: [],
   activeQuery: "",
   activeStatusFilter: "all",
-  sortBy: "id-asc",
+  sortBy: "status-priority",
   page: 1,
   pageSize: 30,
 };
@@ -26,6 +26,13 @@ const STATUS_META = {
   research: { label: "Researching", className: "status-research", rank: 1 },
   success: { label: "Success", className: "status-success", rank: 2 },
   failed: { label: "Failed", className: "status-failed", rank: 3 },
+};
+
+const STATUS_SORT_PRIORITY = {
+  success: 0,
+  research: 1,
+  not_started: 2,
+  failed: 3,
 };
 
 const STAGES = [
@@ -311,6 +318,13 @@ function stageBlock(derived) {
   return stageBadges(derived.stages);
 }
 
+function comparePaperId(a, b) {
+  const aId = parseInt(a.paper_id, 10);
+  const bId = parseInt(b.paper_id, 10);
+  if (!Number.isNaN(aId) && !Number.isNaN(bId) && aId !== bId) return aId - bId;
+  return String(a.paper_id || "").localeCompare(String(b.paper_id || ""));
+}
+
 function getVisiblePapers() {
   let papers = annotatePapers();
   const q = state.activeQuery.trim().toLowerCase();
@@ -334,14 +348,16 @@ function getVisiblePapers() {
     if (state.sortBy === "title-asc") {
       return String(a.title || "").localeCompare(String(b.title || ""));
     }
+    if (state.sortBy === "status-priority") {
+      const diff = STATUS_SORT_PRIORITY[a.derived.key] - STATUS_SORT_PRIORITY[b.derived.key];
+      if (diff) return diff;
+      return comparePaperId(a, b);
+    }
     if (state.sortBy === "status-asc") {
       const diff = STATUS_META[a.derived.key].rank - STATUS_META[b.derived.key].rank;
       if (diff) return diff;
     }
-    const aId = parseInt(a.paper_id, 10);
-    const bId = parseInt(b.paper_id, 10);
-    if (!Number.isNaN(aId) && !Number.isNaN(bId) && aId !== bId) return aId - bId;
-    return String(a.paper_id || "").localeCompare(String(b.paper_id || ""));
+    return comparePaperId(a, b);
   });
 
   return papers;
