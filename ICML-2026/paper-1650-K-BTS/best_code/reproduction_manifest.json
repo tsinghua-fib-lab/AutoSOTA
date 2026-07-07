@@ -1,0 +1,86 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 1650,
+    "repo_url": "https://github.com/hxnhxn/K-BTS",
+    "repo_commit": "963a8a37b06e1d0740146808f070102f5e0b2459",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_1650",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-1650:reproduced",
+    "eval_command": "PYTHONPATH=/repo python3 eval_metrics.py results/rand 100",
+    "baseline_metrics": {
+      "Top1_Dock_Avg": -9.60,
+      "Top1_Dock_Med": -9.60,
+      "Top5_Dock_Avg": -9.34,
+      "Top5_Dock_Med": -9.29,
+      "Top10_Dock_Avg": -9.18,
+      "Top10_Dock_Med": -9.13,
+      "Top20_Dock_Avg": -9.00,
+      "Top20_Dock_Med": -8.95,
+      "QED_Avg": 0.53,
+      "QED_Med": 0.53,
+      "SA_Avg": 0.75,
+      "SA_Med": 0.75,
+      "Diversity_Avg": 0.55,
+      "Diversity_Med": 0.55
+    },
+    "primary_metric": "Top1_Dock_Avg",
+    "metric_direction": "lower",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/yql/sota-icml-9/autosota-v2.5/logs/reproduction/paper-1650.log",
+    "status": "success",
+    "created_at": "2026-07-07T04:10:00Z",
+    "notes": "Perfect reproduction of all 14 metrics from Table 1 (K-BTS-rand on CrossDocked2020, 100 targets). Docking scores (Top1/5/10/20 Avg & Med), QED Avg & Med, SA Avg & Med, and Diversity Avg & Med all match paper values to 2 decimal places. Evaluated from pre-computed results in results/rand/ without requiring LLM API calls or re-running the full optimization pipeline.",
+    "eval_timeout_minutes": 5,
+    "eval_output_format": "stdout text with labeled metric lines (e.g., 'Top1 Dock Avg: -9.60') and JSON at results/<dir>/reproduction_metrics.json",
+    "known_levers": "1) LLM backend and temperature (utils/llm_tools.py, default DeepSeek V3.2 at 0.7) 2) Thompson Sampling parameters: tau in selector.select_seed() (default 2.0), sim_threshold in kb_manager.select_action() (default 0.3), min_delta in warm_start (default 0.5) 3) Boltzmann temperature (default 2.0) 4) Docking exhaustiveness (default 32) and seed (default 1234) 5) Conformer generation method (ETKDGv3, seed 1) 6) Number of initial ligands (default 100) 7) Target molecule count (TARGET_COUNT=100 in k_bts_rand.py) 8) Knowledge manager warm-start and action repository structure 9) Seed selection strategy in core/selector.py",
+    "setup_notes": "Installed pandas 2.3.3, rdkit 2024.9.6, openai 2.14.0 via pip (Tsinghua mirror). Downloaded smina 2020.12.10 binary from SourceForge to /usr/local/bin/smina. Fixed SMINA_BIN path in utils/docking.py. CrossDocked2020 test set structure files (100 protein-ligand pairs) present in datasets/crossdocked/structure-files-test/. No additional data downloads needed for evaluation. Container committed as autosota/paper-1650:reproduced. Pre-computed K-BTS-rand results for all 100 targets already present in results/rand/. Running full k_bts_rand.py pipeline requires DeepSeek API key configured in k_bts_rand.py line 107.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Minimize docking (binding affinity) scores while maintaining drug-likeness (QED) and synthetic accessibility (SA). Diversity is a secondary concern - the paper acknowledges lower diversity is a consequence of focused exploitation. The primary goal is to achieve lower (more negative) Top1/5/10/20 docking scores than the K-BTS-rand baseline without degrading QED below ~0.50 or SA below ~0.70.",
+      "metrics": [
+        {
+          "name": "Top1_Dock_Avg",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": -9.60,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Primary paper metric: mean Top-1 docking score per target averaged across 100 targets. Direct measure of binding affinity optimization quality. Reported in Table 1 as -9.60 for K-BTS-rand."
+        },
+        {
+          "name": "QED_Avg",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "preserve",
+          "baseline": 0.53,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Drug-likeness score. Antagonistic with docking optimization - improving binding often reduces drug-likeness. Paper baseline 0.53. Must not drop below ~0.50."
+        },
+        {
+          "name": "SA_Avg",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "preserve",
+          "baseline": 0.75,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Synthetic accessibility score. K-BTS achieves 0.75 vs ELILLM-rand 0.63. Must not drop below ~0.70. Important for practical viability of generated molecules."
+        },
+        {
+          "name": "Diversity_Avg",
+          "direction": "higher",
+          "role": "secondary",
+          "goal": "monitor",
+          "baseline": 0.55,
+          "regression_tolerance_pct": 20.0,
+          "rationale": "Average pairwise Tanimoto distance diversity. The paper acknowledges lower diversity (0.55 vs 0.80 for LMLF-rand) is a trade-off of focused exploitation. Acceptable range given primary docking objective."
+        }
+      ],
+      "success_policy": "An improvement is valid if Top1_Dock_Avg decreases (improves) with no more than 5% regression in QED_Avg and SA_Avg from baseline. Diversity_Avg regression up to 20% is acceptable. Docking score improvements of 0.1+ are meaningful. The SOTA agent should prioritize docking improvement while monitoring QED/SA guardrails. If docking improves but QED drops below 0.50 or SA below 0.70, the result is invalid."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": null
+  }
+}

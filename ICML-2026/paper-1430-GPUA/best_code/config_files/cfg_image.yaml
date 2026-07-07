@@ -1,0 +1,38 @@
+RNG_SEED: 1
+EVAL_INTERVAL: 5
+LOG_INTERVAL: 5
+TRAIN_PRECISION: fp16
+SAVE_PATH: ""
+RESUME_CHECKPOINT: ""
+LOG_TO_WANDB: False
+MODEL:
+  VIZ_BACKBONE: ViT-B/16
+  PER_CLS_PROMPTS: False
+  PROMPT_POSITION: end
+  IMG_CONDITIONING: False
+  NUM_PROMPTS: 16
+DATA:
+  TYPE: image
+  DATASET_NAME: ImageNet
+  DATA_PATH: /home/nfs/adrian.bulat/Datasets/coop_datasets
+  TRAIN_AUGS: ["resize", "center_crop", "random_flip", "normalize"]
+  TEST_AUGS: ["resize", "center_crop", "normalize"]
+  TRAIN_RESIZE: 224
+  TRAIN_CROP_SIZE: 224
+  TEST_RESIZE: 224
+  TEST_CROP_SIZE: 224
+  N_SHOT: 16
+  USE_BASE_AND_NEW: False
+DATALOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+  TRAIN_BATCHSIZE: 32
+  TEST_BATCHSIZE: 32
+OPT:
+  LR: 2e-3
+  MAX_EPOCHS: 100
+  TYPE: sgd
+  LR_POLICY: cosine
+  COSINE_END_LR: 1e-6
+  WEIGHT_DECAY: 5e-4
+  WARMUP_EPOCHS: 1.0

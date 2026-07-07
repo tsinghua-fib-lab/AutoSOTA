@@ -1,0 +1,40 @@
+[project]
+name = "ms-pca"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel>=7.0.1",
+    "jupyterlab>=4.4.9",
+    "matplotlib>=3.10.7",
+    "notebook>=7.4.7",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+    "scipy>=1.15.3",
+    "tqdm>=4.67.1",
+    "torch>=2.7.0",
+    "jupyter>=1.1.1",
+    "ipywidgets>=8.1.8",
+    "rpca>=0.1.6",
+    "seaborn>=0.13.2",
+    "datasets[audio]>=4.4.2",
+    "torchaudio>=2.8.0",
+]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu" },
+]
+torchvision = [
+    { index = "pytorch-cpu" },
+]
+torchaudio = [
+    { index = "pytorch-cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

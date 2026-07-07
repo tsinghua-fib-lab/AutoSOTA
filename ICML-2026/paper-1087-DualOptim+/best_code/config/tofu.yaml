@@ -1,0 +1,85 @@
+# model Config
+model_family: llama2-7b
+model_path: locuslab/tofu_ft_llama2-7b
+
+use_LoRA: false
+LoRA:
+  r: 8
+  alpha: 32
+  dropout: 0.05
+
+# dataset config
+forget_data: tofu
+data_path: data/tofu
+split: forget05
+task_id: 1
+
+# alternating update
+alternate: false
+forget_lr: 1e-5
+optim_cfg: "dual_adam"
+
+
+# unlearning config
+forget_loss: ME+GD
+lr: 1e-5
+num_epochs: 5
+max_steps:
+batch_size: 5
+gradient_accumulation_steps: 4
+forget_coeff: 0.1 # 0.1 for ME+GD, 1.0 for baselines
+regularization_coeff: 1.0
+
+
+beta: 0.1
+weight_decay: 0.01
+
+fix_ref_model: false
+mask: true # false for ME+GD, true for baselines
+
+seed: 1001
+
+# save config
+save_checkpoint: false
+overwrite_dir: false
+save_steps: last # steps_per_epoch
+save_root: results
+
+save_dir: ${save_root}/${model_family}/${split}_task_${task_id}/${forget_loss}/epoch${num_epochs}_lr_${forget_lr}_${lr}_freq_${forget_freq}_${retain_freq}_FixRef${fix_ref_model}_mask${mask}_${forget_coeff}_${regularization_coeff}
+
+# evak config
+ds_size: 300
+eval_unlearn_step: last
+
+eval:
+  model_family: ${..model_family}
+  forget_loss: ${..forget_loss}
+  do_sample: false
+  
+  data_path: [ data/tofu, data/tofu, data/tofu, data/tofu ]
+
+  split: ${..split}_perturbed
+  split_list:
+    - retain_perturbed
+    - real_authors_perturbed
+    - world_facts_perturbed
+    - ${split}_perturbed
+
+  eval_task: [ eval_log, eval_real_author_wo_options, eval_real_world_wo_options, eval_log_forget ]
+  question_key: [ question, question, question, question ]
+  answer_key: [ answer, answer, answer, answer ]
+  base_answer_key: [ paraphrased_answer, answer, answer, paraphrased_answer ]
+  perturbed_answer_key: [ perturbed_answer, perturbed_answer, perturbed_answer, perturbed_answer ]
+
+  generation:
+    max_length: 200
+    max_new_tokens: null
+
+  save_generated_text: true
+  
+  ds_size: ${..ds_size}
+
+  overwrite: true
+  use_pretrained: false
+
+  batch_size: 100

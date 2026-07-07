@@ -1,0 +1,115 @@
+defaults:
+  - _self_
+  - hydra/job_logging: none # disable Hydra's default logging
+  - hydra/hydra_logging: none
+
+
+##### hyperparams for target distribution
+dist: ising
+vocab_size: 2
+L: 4
+seq_len: ${eval:"${L}**2"}
+beta: 0.28 # high: 0.28, critical: 0.4407, low: 0.6 
+J: 1
+h: 0.00
+# Potts: vocab_size=4, beta=0.9 (high) 1.0986 (critical) 1.3 (low)
+gt_sample_path: null # path to ground truth samples (.npy file) for evaluation, optional
+
+
+##### hyperparams for noise schedule
+noise:
+  type: log_linear # const, log_linear
+  gamma: 1.0 # for const, log_linear
+  alpha: 0.5 # for log_linear
+
+
+##### hyperparams for initial distribution
+beta_init: 0 # initial inverse temperature, 0 - uniform, inf - delta at mode (assume h = 0)
+init_sample_path: null # path to initial samples (.npy file) if beta_init != 0, inf
+
+
+##### hyperparams for model
+model:
+  name: ropevit # ropevit, sit, ropesit
+  hidden_size: 32
+  n_blocks: 4
+  n_heads: 4
+  dtype: bfloat16
+ema:
+  decay: 0.9999 # set to 0.0 to disable EMA
+  reset: false # whether to reset EMA at each stage
+ckpt:
+  path: null # path to checkpoint to resume training
+  load_optim: true # whether to load optimizer state
+  load_ema: true # whether to load EMA state
+  start_from_zero: false # whether to continue from existing stage or start from stage 1 (e.g., warmup from high temp)
+  # if so, it's recommended to copy the ckpt to a new folder and rename it to ckpt0.pth to avoid collision
+
+
+##### hyperparams for training
+seed: 0
+batch_size: 512 # per-GPU batch size
+num_stages: 5 # if resuming from ckpt, num_stages includes previous stages judging from the ckpt stage number
+num_steps:
+  controller: 200
+  corrector: 200
+loss: # dm, tm
+  controller: tm
+  corrector: tm
+  use_log_rnd: false # whether to use log dp*/dp_u for importance weighting
+  log_rnd_apply_softmax: true # whether to apply softmax to normalize the log_rnd
+dm_eps: 0.01 # sampling time uniformly from [0, 1 - dm_eps] when computing denoising matching losses
+# dm_eps = 1 means always use t = 0
+num_repl: 16 # no replicate for corrector tm loss
+resample_freq: 20
+buffer_size: 512 # min buffer size = batch_size
+init_buffer_size: ${batch_size} # initial buffer size before training starts, min = batch_size
+breg_func: # tlogt, -logt, t2
+  controller: tlogt
+  corrector: tlogt
+t_weight_func: # unif, ada, gamma
+  controller: unif
+  corrector: unif
+sampling_steps: 25
+save_stage_freq: 5
+controller_reparam: false # whether to use reparameterized controller given by the discrete score and corrector
+memoryless: false # if true, no need to train the corrector. UDNS = memoryless + controller dm loss + log_rnd (softmax)
+controller_first: true # if false, will skip the controller training at the first stage
+zero_init_corrector: true # whether to initialize corrector to zero at each stage
+# when memoryless, will always use zero corrector;
+# otherwise, when warmup from high temp, it's recommended to not use zero corrector at the beginning
+anneal: false # whether to anneal the target log discrete score in the controller tm loss
+anneal_func: '${eval:"lambda t:t**0.3"}' # increasing function: [0,1] -> [0,1]
+
+
+##### hyperparams for optimization
+optim:
+  lr: 1e-3
+  wd: 0.00
+  reset: false # whether to reset optimizer at each stage
+  clip_grad_norm: 0 # <=0 means no gradient clipping
+  log_grad_norm_freq: 0 # <=0 means no logging
+
+
+##### hyperparams for logging
+logging:
+  on_slurm: false
+  # if true, run_name will be overwritten by the RUN_NAME generated in loop.sh;
+  # otherwise, will create a new run_name based on current time
+  displaying: true # if true, print to the console
+  saving: false # if true, save log to the local file (not necessary on slurm)
+  debug: false # if true, will use logging.DEBUG level; otherwise, logging.INFO level
+  use_wandb: true # if false, will only log to the local file
+  wandb_api_key: null # if not set, will use the default key in ~/.netrc
+  wandb_entity: pce-mdm
+  wandb_project: dasbs
+  root_dir: outputs
+  run_name: # will be overwritten
+  dir: ${logging.root_dir}/${logging.run_name}
+
+hydra:
+  output_subdir: null  # Disable Hydra's .hydra subfolder
+  job:
+    chdir: false  # Don't change working directory
+  run:
+    dir: .  # Use current directory instead of Hydra-managed one

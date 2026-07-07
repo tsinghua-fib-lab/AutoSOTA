@@ -1,0 +1,41 @@
+out_dir: results/prellp
+dataset:
+  format: PyG
+  name: Cora
+  task: node
+  task_type: classification
+  node_encoder: False
+  node_encoder_name: Atom
+  edge_encoder: False
+  edge_encoder_name: Bond
+train:
+  batch_size: 4096
+  eval_period: 10
+  ckpt_period: 100
+  sampler: neighbor
+model:
+  type: gnn
+  loss_fun: cross_entropy
+  edge_decoding: dot
+  graph_pooling: add
+gnn:
+  layers_pre_mp: 2
+  neigh: edge_index
+  norm_mode: degree_sys
+  agg: add
+  act: prelu
+  dropout: 0.3
+  self_msg: add
+  layers_mp: 4
+  stage_type: skipsum
+  layers_post_mp: 2
+  dim_inner: 256
+  layer_type: generalconv
+  batchnorm: True
+optim:
+  base_lr: 0.005
+  optimizer: adam
+  weight_decay: 0.0005
+  max_epoch: 500
+val:
+  sampler: neighbor

@@ -1,0 +1,19 @@
+As a graph learning scientist, your task is to measure how similar a target graph dataset (unseen) is to several prior graph datasets (benchmark). This similarity should reflect the effectiveness of transferring prior architecture design knowledge from the benchmark dataset to guide the architecture design of a tailored MPNN (Message Passing Neural Network) model for the unseen dataset. 
+
+# Task Summary
+1. **Understand Background**: Understand the MPNN Design Space and the graph properties contained in each dataset description. 
+2. **Analyze Key Graph Properties**: Based on your expertise and the given best MPNN model configuration from each benchmark dataset, please capture the key connection between graph properties and tailored MPNN architecture design. 
+3. **Measure Similarity**: Compare the unseen dataset's key properties with those of benchmark datasets to determine the similarity (between 0 and 1.0) that reflects the potential effectiveness of transferring MPNN architecture design.
+
+# Dataset Properties
+- Each graph dataset (both benchmark and unseen target) has been characterized with various graph properties, including degree distribution, density, hubs, diameter, homophily, spectral properties, community structure, node feature, assortativity, random walk properties, node centrality, and others.
+
+# MPNN Design Space
+The architecture for the tailored MPNN on a target graph dataset will be configured based on key properties of the graph, using the following comprehensive design space:
+- **Intra-layer Neighbor Mechanism**: `['edge_index (ordinary)', 'edge_index_2hop (higher-order)', 'edge_index_knn (with diffusion-based re-wiring)', 'edge_index_knn (with Laplacian eigenvector positional encoding-based re-wiring)', 'edge_index_knn (with random-walk structural encoding-based re-wiring)']`
+- **Intra-layer Edge Weight**: `['systematic normalization', 'random-walk normalization', 'self-attention', 'relative random-walk structural encoding', 'relative Laplacian eigenvector positional encoding']`
+- **Intra-layer Aggregation**: `['add', 'mean', 'max', 'min']`
+- **Intra-layer Combination**: `['add', 'concat']`
+- **Number of Layers**: `[4, 6]`
+- **Inter-layer Aggregation**: `['concat (with skip connections)', 'sum (with skip connections)', 'mean', 'personalized PageRank 0.1 decay', 'gpr (layer-wise adaptive)', 'bidirectional LSTM', 'gating mechanism']`
+The target MPNN will be constructed by choosing the appropriate designs from this grid based on suitable knowledge from similar benchmark datasets.

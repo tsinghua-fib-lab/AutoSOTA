@@ -1,0 +1,56 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 1281,
+    "repo_url": "https://github.com/TanXZfra/Judge-Aware-Ranking-Framework-for-LLMs",
+    "repo_commit": "150ec37c0249bf9bf177da2786e0dcd802f76c86",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_1281",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-1281:reproduced",
+    "eval_command": "python3 main/run_vectorized.py",
+    "baseline_metrics": {
+      "Pearson Correlation": 0.9947,
+      "Spearman Correlation": 0.9920
+    },
+    "primary_metric": "Pearson Correlation",
+    "metric_direction": "higher",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/chenxinyu/autosota-v2.5-sota-icml-13/logs/reproduction/paper-1281.log",
+    "status": "success",
+    "created_at": "2026-07-06T16:34:57Z",
+    "notes": "Successfully reproduced the mixed-quality judge experiment (Section 5.4) using the in-house dataset with 45 candidate models and 8 judges (6 low-quality + 2 high-quality). The judge-aware weighted model achieves Pearson=0.9947 and Spearman=0.9920 correlation against full-data reference scores, well above the rubric lower bounds (Pearson=0.8992, Spearman=0.8316). Reproduced values are higher than the paper's reported values (Pearson=0.9394, Spearman=0.9212), likely due to MLE convergence differences and the specific judge subset being highly representative. The vectorized MLE implementation runs in ~10 seconds on CPU (no GPU required).",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "Parse stdout for 'Weighted (judge-aware):' lines under 'Pearson Correlation:' and 'Spearman Correlation:' sections. Values are printed as 4-decimal floats. Also saved to /repo/results/section54/results.json.",
+    "known_levers": "MLE hyperparameters (learning rates lr_s, lr_a, max_iter, tolerance), judge selection (which 8 judges from the 18-judge panel), Adam beta parameters, initialization strategy, convergence tolerance, tie handling (ties encoded as y=0.5 vs excluded). The method is a statistical estimation procedure, not a trainable ML model, so optimization levers are about algorithmic configuration rather than training.",
+    "setup_notes": "Container based on pytorch:2.1.0-cuda12.1-cudnn8-runtime. Additional pip packages installed: numpy, scipy, pandas, matplotlib, tqdm, openpyxl. No GPU required — computation is pure CPU (numpy MLE optimization). In-house dataset (in_house_data.json, 36K comparisons, 45 models, 18 judges) is included in the repo at data/. The key reproduction script is main/run_vectorized.py (vectorized Adam optimizer). Original main.py uses Python for-loops (slow) but same algorithm. The 8 judges for mixed-quality experiment are hardcoded in run_vectorized.py per Table 2 of the paper.",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Maximize Pearson and Spearman correlation between judge-aware weighted scores (on 8-judge mixed-quality subset) and full-data weighted reference scores (on all 18 judges). The model jointly estimates latent LLM quality scores and judge-specific discrimination parameters from pairwise comparison data. Higher correlation indicates better alignment with the ground-truth reference ranking.",
+      "metrics": [
+        {
+          "name": "Pearson Correlation",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.9947,
+          "regression_tolerance_pct": 0.5,
+          "rationale": "Primary metric from the paper (Section 5.4, Table 2). Measures linear correlation between estimated model scores and reference scores. The judge-aware weighted model should outperform the unweighted baseline."
+        },
+        {
+          "name": "Spearman Correlation",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "improve",
+          "baseline": 0.9920,
+          "regression_tolerance_pct": 1.0,
+          "rationale": "Coupled metric measuring rank correlation. The paper reports larger improvements in Spearman than Pearson when accounting for judge heterogeneity, making it an important guardrail. Should not regress significantly."
+        }
+      ],
+      "success_policy": "Both Pearson and Spearman correlations should be maintained or improved. Pearson is the primary metric and should not regress by more than 0.5%. Spearman is a guardrail and should not regress by more than 1.0%. The weighted (judge-aware) scores must outperform the unweighted baseline on both metrics. Since baseline values are already very high (>0.99), marginal improvements are acceptable; the main validation is that the judge-aware framework continues to outperform unweighted aggregation."
+    },
+    "metric_upper_bound": 0.94342,
+    "metric_lower_bound": 0.8992
+  }
+}

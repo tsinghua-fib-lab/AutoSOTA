@@ -1,0 +1,24 @@
+# Format for each row: name in config.py; alias; range to search
+# No spaces, except between these 3 fields
+# Line breaks are used to union different grid search spaces
+# Feel free to add '#' to add comments
+
+
+# dataset: Single, task: node
+dataset.format format ['PyG']
+dataset.name dataset ['Actor']
+dataset.task task ['node']
+train.batch_size batch [4096]
+gnn.layers_pre_mp l_pre [2]
+gnn.neigh neigh ['edge_index','edge_index_knn','edge_index_2hop','edge_index_knn_rwpe','edge_index_knn_lepe']
+gnn.norm_mode norm ['degree_sys','degree_row','fagcn_like','rel_rwpe','rel_lepe']
+gnn.agg agg ['add','mean','max','min']
+gnn.act act ['prelu']
+gnn.dropout drop [0.0]
+gnn.self_msg comb ['add','concat']
+gnn.layers_mp l_mp [4,6]
+gnn.stage_type stage ['skipconcat','skipsum','mean','ppr_0.1','gpr','lstm','node_adaptive']
+gnn.layers_post_mp l_post [2]
+optim.base_lr lr [0.01]
+optim.optimizer optim ['adam']
+optim.max_epoch epoch [300]

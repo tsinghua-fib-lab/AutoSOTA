@@ -1,0 +1,89 @@
+model_family: phi1.5
+model_path: /models/tofu_ft_phi-1.5
+use_LoRA: false
+LoRA:
+  r: 8
+  alpha: 32
+  dropout: 0.05
+forget_data: tofu
+data_path: data/tofu
+split: forget05
+task_id: 1
+alternate: true
+forget_lr: 1.0e-05
+optim_cfg: dual_adam_plus
+forget_freq: 1
+retain_freq: 5
+forget_loss: IDK+GD
+lr: 1.0e-05
+num_epochs: 5
+max_steps: 300
+batch_size: 4
+gradient_accumulation_steps: 5
+forget_coeff: 1.0
+regularization_coeff: 1.0
+alpha: 1.0
+beta1: 0.9
+beta2: 0.95
+base_beta1: 0.99
+base_beta2: 0.999
+beta: 0.1
+weight_decay: 0.01
+fix_ref_model: false
+mask: true
+seed: 1001
+save_checkpoint: true
+overwrite_dir: false
+save_steps: last
+save_root: ./llm_unlearn_results_iter1
+save_dir: ./llm_unlearn_results_iter1/phi1.5/forget05_task_1/IDK+GD/epoch5_lr_1e-05_1e-05_freq_1_5_FixRefFalse_maskTrue_1.0_1.0/1
+ds_size: 300
+eval_unlearn_step: last
+eval:
+  model_family: ${..model_family}
+  forget_loss: ${..forget_loss}
+  do_sample: false
+  data_path:
+  - data/tofu
+  - data/tofu
+  - data/tofu
+  - data/tofu
+  split: ${..split}_perturbed
+  split_list:
+  - retain_perturbed
+  - real_authors_perturbed
+  - world_facts_perturbed
+  - ${split}_perturbed
+  eval_task:
+  - eval_log
+  - eval_real_author_wo_options
+  - eval_real_world_wo_options
+  - eval_log_forget
+  question_key:
+  - question
+  - question
+  - question
+  - question
+  answer_key:
+  - answer
+  - answer
+  - answer
+  - answer
+  base_answer_key:
+  - paraphrased_answer
+  - answer
+  - answer
+  - paraphrased_answer
+  perturbed_answer_key:
+  - perturbed_answer
+  - perturbed_answer
+  - perturbed_answer
+  - perturbed_answer
+  generation:
+    max_length: 256
+    max_new_tokens: null
+  save_generated_text: true
+  ds_size: ${..ds_size}
+  overwrite: true
+  use_pretrained: false
+  batch_size: 100

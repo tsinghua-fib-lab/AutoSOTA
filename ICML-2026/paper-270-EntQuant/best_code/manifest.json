@@ -1,0 +1,50 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 270,
+    "repo_url": "https://github.com/merantix-momentum/entquant",
+    "repo_commit": "a957fec2f68ec5cd51fe3401bf3c6d6e2693ce98",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_270",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-270:reproduced",
+    "eval_command": "python3 eval_reproduce.py",
+    "baseline_metrics": {"c4_perplexity": 7.5491},
+    "primary_metric": "c4_perplexity",
+    "metric_direction": "lower",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/zengguanyang/autosota-v2.5/logs/reproduction/paper-270.log",
+    "status": "success",
+    "created_at": "2026-07-05T10:57:00Z",
+    "notes": "Successfully reproduced C4 Perplexity for LLaMA-2 7B with EntQuant Float8 3-bit compression. Paper reports 7.55; our reproduction achieved 7.5491, an exact match within 0.001. Used Float8 (qfloat8_e4m3fn) quantization with reg_param=14.5, lr=1.0, and no super weight handling (spike_threshold=inf). C4 validation data was downloaded manually due to datasets library 4.4.1 incompatibility with HF mirror HEAD redirects.",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "Parse stdout for 'C4 Perplexity: <float>' line after script completes",
+    "known_levers": [
+      "reg_param: controls entropy compression rate (14.5 for 3-bit, 58.0 for 2-bit, 3.9 for 4-bit)",
+      "lr: optimizer learning rate (1.0 for 3/4-bit, 0.25 for 2-bit)",
+      "weight_qtype: qfloat8 (default, Float8) or qint8 (Int8) base format",
+      "spike_threshold: super weight handling (inf = off, 50.0 = on for Float8)",
+      "ctx_length: context length for perplexity evaluation (2048 for LLaMA-2)"
+    ],
+    "setup_notes": "Container built from fallback image docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Upgraded Python to 3.11 via conda (env py311). Installed gcc-10, build-essential, wget, cuda-nvcc, cuda-cudart-dev, libcusparse-dev, libcusolver-dev, libcublas-dev via apt/conda. Dependencies installed with uv sync using the repo's pyproject.toml (torch 2.9.1, transformers 4.57.3, optimum-quanto 0.2.7). Patched torch/include/ATen/core/List_inl.h to fix GCC 10 brace-initialization issue. Set CUDA_HOME=/opt/conda/envs/py311 and CPLUS_INCLUDE_PATH to targets/x86_64-linux/include for CUDA header resolution. LLaMA-2 7B model cached at /models/Llama-2-7b-hf. C4 validation data downloaded to /autosota_cache/hf/datasets_local/ due to datasets library HF mirror 308 redirect issue. ANS compression (nvCOMP) not required for perplexity evaluation since compression is lossless; evaluation uses compress=False.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize C4 Perplexity for LLaMA-2 7B under EntQuant compression at a target bit rate (3-bit: reg_param=14.5). Lower perplexity indicates better compression-quality trade-off.",
+      "metrics": [
+        {
+          "name": "c4_perplexity",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 7.5491,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "C4 perplexity is the primary compression-quality benchmark for data-free LLM quantization, as reported in Table 3 of the paper. Lower values indicate better language modeling quality after compression."
+        }
+      ],
+      "success_policy": "Lower C4 perplexity indicates a better compression-quality trade-off. Any improvement over the baseline 7.5491 is a win. The metric direction is lower_better, so target values below 7.5491."
+    },
+    "metric_upper_bound": 9.11,
+    "metric_lower_bound": 7.394
+  }
+}

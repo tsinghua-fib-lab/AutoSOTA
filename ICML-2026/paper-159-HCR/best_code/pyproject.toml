@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-judge-reporting"
+version = "0.1.0"
+readme = "README.md"
+dependencies = [
+  "numpy",
+  "scipy>=1.8",
+  "matplotlib>=3.5",
+  "pandas>=1.5",
+]
+authors = [
+  {name = "Chungpa Lee"},
+  {name = "Thomas Zeng"},
+  {name = "Jongwon Jeong"},
+  {name = "Jy-yong Sohn"},
+  {name = "Kangwook Lee"},
+]
+
+[project.urls]
+Repository = "https://github.com/UW-Madison-Lee-Lab/LLM-judge-reporting"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llm_judge_reporting*"]

@@ -1,0 +1,66 @@
+defaults:
+  - override hydra/launcher: joblib
+
+# ----------------------------------------------------------------------
+# Config for the max_dim = 3 InfoAtlas model (compact, ~82M params).
+# Per-side whitening is ON for this model (whiten: eig).
+# Override any field from the command line, e.g.
+#   python train.py --config-name default_3d gpu_card=1 log_dir=logs/my_run
+# ----------------------------------------------------------------------
+
+# --- optimization ---
+learning_rate: 1e-4
+lr_decay_step: 100000
+warmup_steps: 2000
+
+# --- model architecture (compact encoder + hypernetwork) ---
+latent_dim: 512
+latent_num: 384
+cross_attn_heads: 8
+self_attn_heads: 8
+num_self_attn_per_block: 6
+num_self_attn_blocks: 1
+decoder_query_dim: 384
+targetnet_hiddim: 128
+# hypernetwork critic
+weight_dim: 256
+enc_dec_dim: 256
+opt_block_dim: 384
+weight_split_dim: 384
+num_layers: 3
+num_opt_mlp_layer: 2
+num_enc_dec_layer: 2
+nhead: 4
+
+input_dim_x: 3
+input_dim_y: 3
+
+# --- preprocessing ---
+softrank_reg: 1e-3
+gauss_copula: True
+whiten: eig            # per-side whitening ON for the max_dim=3 model
+whiten_eps: 1e-3
+
+# --- data / batching ---
+batchsize: 88
+seq_len: 5000
+num_per_epoch: 2000
+
+# --- hardware ---
+gpu_card: 1
+num_nodes: 1
+
+# --- logging / paths (edit to your environment) ---
+name: infoatlas-d3
+version: d${input_dim_x}-whiten
+log_dir: logs
+bmi_data_root: path/to/bmi_task_data   # only used by training-time validation
+
+hydra:
+  run:
+    dir: ./
+  sweep:
+    dir: ./
+    subdir: ""
+  launcher:
+    n_jobs: 1
