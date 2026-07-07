@@ -1,0 +1,87 @@
+{
+  "data_root": "data",
+  "train_datasets": [
+    {
+      "name": "magicbrush_multiedit_train",
+      "path": "magicbrush_multiedit_train",
+      "enabled": true,
+      "allow_multiple_targets": false,
+      "authentic_ratio": 0.0,
+      "is_training": true,
+      "sample_ratio": 1.0,
+      "force_resize": true,
+      "img_size": null,
+      "contrastive_blur": null,
+      "perturbation_type": null,
+      "perturbation_intensity": null,
+      "authentic_source_dir": null,
+      "mask_binarize_threshold": null
+    },
+    {
+      "name": "sid_train",
+      "path": "sid_train",
+      "enabled": true,
+      "allow_multiple_targets": false,
+      "authentic_ratio": 0.0,
+      "is_training": true,
+      "sample_ratio": 1.0,
+      "force_resize": true,
+      "img_size": null,
+      "contrastive_blur": null,
+      "perturbation_type": null,
+      "perturbation_intensity": null,
+      "authentic_source_dir": null,
+      "mask_binarize_threshold": null
+    }
+  ],
+  "val_datasets": [
+    {
+      "name": "magicbrush_multiedit_val",
+      "path": "magicbrush_multiedit_val",
+      "enabled": true,
+      "allow_multiple_targets": false,
+      "authentic_ratio": 0.0,
+      "is_training": false,
+      "sample_ratio": 1.0,
+      "force_resize": true,
+      "img_size": null,
+      "contrastive_blur": null,
+      "perturbation_type": null,
+      "perturbation_intensity": null,
+      "authentic_source_dir": null,
+      "mask_binarize_threshold": null
+    },
+    {
+      "name": "sid_validation",
+      "path": "sid_validation",
+      "enabled": true,
+      "allow_multiple_targets": false,
+      "authentic_ratio": 0.0,
+      "is_training": false,
+      "sample_ratio": 1.0,
+      "force_resize": true,
+      "img_size": null,
+      "contrastive_blur": null,
+      "perturbation_type": null,
+      "perturbation_intensity": null,
+      "authentic_source_dir": null,
+      "mask_binarize_threshold": null
+    }
+  ],
+  "train_loader": {
+    "batch_size": 8,
+    "shuffle": true,
+    "num_workers": 4,
+    "pin_memory": true,
+    "drop_last": true,
+    "persistent_workers": false
+  },
+  "val_loader": {
+    "batch_size": 8,
+    "shuffle": false,
+    "num_workers": 4,
+    "pin_memory": true,
+    "drop_last": false,
+    "persistent_workers": false
+  }
+}

@@ -1,0 +1,53 @@
+defaults:
+  - override hydra/launcher: joblib
+
+# ----------------------------------------------------------------------
+# Config for the max_dim = 10 InfoAtlas model.
+# Per-side whitening is ON for this model (whiten: eig).
+# Override any field from the command line, e.g.
+#   python train.py --config-name default_10d gpu_card=8 log_dir=logs/my_run
+# ----------------------------------------------------------------------
+
+# --- optimization ---
+learning_rate: 1e-5
+lr_decay_step: 20000
+warmup_steps: 500
+
+# --- model architecture ---
+latent_dim: 1024
+latent_num: 1024
+decoder_query_dim: 768
+targetnet_hiddim: 256
+
+input_dim_x: 10
+input_dim_y: 10
+
+# --- preprocessing ---
+softrank_reg: 1e-3
+gauss_copula: True
+whiten: eig            # per-side whitening ON for the max_dim=10 model
+whiten_eps: 1e-3
+
+# --- data / batching ---
+batchsize: 18
+seq_len: 5000
+num_per_epoch: 2000
+
+# --- hardware ---
+gpu_card: 8
+num_nodes: 1
+
+# --- logging / paths (edit to your environment) ---
+name: infoatlas-d10
+version: d${input_dim_x}-whiten
+log_dir: logs
+bmi_data_root: path/to/bmi_task_data   # only used by training-time validation
+
+hydra:
+  run:
+    dir: ./
+  sweep:
+    dir: ./
+    subdir: ""
+  launcher:
+    n_jobs: 1

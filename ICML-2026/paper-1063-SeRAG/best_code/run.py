@@ -1,0 +1,97 @@
+import argparse
+import json
+import random 
+import numpy as np 
+import torch 
+from transformers import AutoTokenizer, AutoModel
+from sentence_transformers import SentenceTransformer
+from src.config import SeRAGConfig
+from src.SeRAG import SeRAG
+import os
+import warnings
+from src.evaluate import Evaluator
+from src.utils import LLM_Model
+from src.utils import setup_logging
+from datetime import datetime
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+warnings.filterwarnings('ignore')
+
+def seed_everything(seed=42):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spacy_model", type=str, default="en_core_web_trf", help="The spacy model to use")
+    parser.add_argument("--embedding_model", type=str, default="/models/all-MiniLM-L6-v2", help="The path of embedding model to use")
+    parser.add_argument("--dataset_name", type=str, default="musique", help="The dataset to use")
+    parser.add_argument("--llm_model", type=str, default="gpt-4o-mini", help="The LLM model to use")
+    parser.add_argument("--max_workers", type=int, default=16, help="The max number of workers to use")
+    parser.add_argument("--retrieval_top_k", type=int, default=None, help="Override retrieval_top_k")
+    parser.add_argument("--gamma_coarse", type=float, default=None, help="Override gamma_coarse")
+    parser.add_argument("--gamma_fine", type=float, default=None, help="Override gamma_fine")
+    parser.add_argument("--k_dim", type=int, default=None, help="Override k_dim (entropy dimension)")
+    parser.add_argument("--coarse_adaptive_factor", type=float, default=None, help="Override coarse_adaptive_factor (0=disabled)")
+    return parser.parse_args()
+
+
+def load_dataset(dataset_name): 
+    questions_path = f"dataset/{dataset_name}/questions.json"
+    with open(questions_path, "r", encoding="utf-8") as f:
+        questions = json.load(f)
+    chunks_path = f"dataset/{dataset_name}/chunks.json"
+    with open(chunks_path, "r", encoding="utf-8") as f:
+        chunks = json.load(f)
+    passages = [f'{idx}:{chunk}' for idx, chunk in enumerate(chunks)]
+    return questions, passages
+
+def load_embedding_model(embedding_model):
+    embedding_model = SentenceTransformer(embedding_model, device="cuda")
+    return embedding_model
+
+def main():
+    seed_everything(42)
+
+    time = datetime.now()
+    time_str = time.strftime("%Y-%m-%d_%H-%M-%S")
+    args = parse_arguments()
+    embedding_model = load_embedding_model(args.embedding_model)
+    print("load embedding model done")
+    questions,passages = load_dataset(args.dataset_name)
+    print("load dataset done")
+    setup_logging(f"results/{args.dataset_name}/{time_str}/log.txt")
+    llm_model = LLM_Model(args.llm_model)
+    print(f"load llm model {args.llm_model} done")
+    config = SeRAGConfig(
+        dataset_name=args.dataset_name,
+        embedding_model=embedding_model,
+        spacy_model=args.spacy_model,
+        max_workers=args.max_workers,
+        llm_model=llm_model,
+        llm_name=args.llm_model,
+    )
+    # Apply CLI overrides for hyperparameter tuning
+    for attr in ["retrieval_top_k", "gamma_coarse", "gamma_fine", "k_dim", "coarse_adaptive_factor"]:
+        val = getattr(args, attr, None)
+        if val is not None:
+            setattr(config, attr, val)
+            print(f"Override {attr}={val}")
+    
+    rag_model = SeRAG(global_config=config)
+    rag_model.index(passages)
+    questions = rag_model.qa(questions)
+    os.makedirs(f"results/{args.dataset_name}/{time_str}", exist_ok=True)
+    with open(f"results/{args.dataset_name}/{time_str}/predictions.json", "w", encoding="utf-8") as f:
+        json.dump(questions, f, ensure_ascii=False, indent=4)
+    evaluator = Evaluator(llm_model=llm_model, predictions_path=f"results/{args.dataset_name}/{time_str}/predictions.json")
+    evaluator.evaluate(max_workers=args.max_workers)
+if __name__ == "__main__":
+    main()

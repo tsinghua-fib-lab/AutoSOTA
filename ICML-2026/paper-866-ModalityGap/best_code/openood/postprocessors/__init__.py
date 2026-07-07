@@ -1,0 +1,1 @@
+from openood.postprocessors.streaming_prototype_adapter import StreamingPrototypeAdapter

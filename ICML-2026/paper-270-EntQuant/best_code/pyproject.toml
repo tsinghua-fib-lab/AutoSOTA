@@ -1,0 +1,94 @@
+[project]
+name = "entquant"
+version = "0.1.0"
+description = "EntQuant - Entropy-Coding Meets Quantization"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Merantix Momentum GmbH" }]
+requires-python = ">=3.11"
+keywords = [
+    "model-compression",
+    "quantization",
+    "entropy-coding",
+    "llm",
+    "deep-learning",
+]
+dependencies = [
+    "bitsandbytes>=0.49.0",
+    "datasets>=4.4.1",
+    "hqq>=0.2.8.post1",
+    "hydra-zen>=0.16.0",
+    "immutabledict>=4.3.1",
+    "langdetect>=1.0.9",
+    "lm-eval[math]>=0.4.9.2",
+    "numpy>=2.3.5",
+    "optimum-quanto>=0.2.7",
+    "rootutils>=1.0.7",
+    "sentencepiece>=0.2.1",
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/merantix-momentum/entquant"
+Repository = "https://github.com/merantix-momentum/entquant"
+Paper = "https://arxiv.org/abs/2601.22787"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.0",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.5.0",
+    "pytest-timeout>=2.3.1",
+]
+
+[tool.uv]
+# hydra-core stable (<=1.3.2) pins antlr4-python3-runtime==4.9.* which
+# conflicts with lm-eval's pin of ==4.11. Allow pre-release to resolve.
+constraint-dependencies = ["hydra-core>=1.4.0.dev1", "omegaconf>=2.4.0.dev2"]
+prerelease = "if-necessary-or-explicit"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["entquant"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = [
+    "E402", # Module level import not at top of file
+]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+order-by-type = false
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+explicit_package_bases = true
+ignore_missing_imports = true
+implicit_optional = true
+allow_redefinition = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:warnings -v"
+norecursedirs = [".*", "build", "dist", "CVS", "_darcs", "{arch}", "*.egg"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "^\\s*raise NotImplementedError",
+    "^\\s*raise AssertionError",
+    "^\\s*raise ValueError",
+    "^\\s*pass\\s*$",
+]

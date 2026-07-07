@@ -1,0 +1,38 @@
+algo: rat
+
+algo_config:
+  ent_coef: 0.001
+  norm_obj: adv # options: adv, obj
+  optimizer: sgd
+  lr: 0.05
+  use_kl_adaptive_lr: True
+  is_karzmarz: True
+  epochs: 4
+  minibatches: 8
+  vf_coef: 1.0
+  with_popart: True
+  adv_type: gae
+  clamp_ratio: True
+  max_ratio: 10.0
+  min_ratio: 0.1
+  sigma_type: 'vector' # mu_shared, separate, linear
+  cg_damping: 0.1
+  max_grad_norm: 0.5
+
+env_config: 
+  env_name: hopper
+  num_envs: 32
+  nsteps: 256
+  timesteps_per_proc: 10_000_000
+  norm_ret: False
+
+nets_config:
+  norm_obs: True
+  type: mlp
+  dropout: 0.0
+  hidden_size: 256
+  num_layers: 2
+
+log_config: 
+  log_interval: 10
+  n_eval_trials: 20

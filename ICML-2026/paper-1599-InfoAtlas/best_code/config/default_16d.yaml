@@ -1,0 +1,36 @@
+defaults:
+  - override hydra/launcher: joblib
+
+learning_rate: 1e-6
+lr_decay_step: 10000
+
+latent_dim: 1280
+latent_num: 1280
+decoder_query_dim: 1024
+
+input_dim_x: 16
+input_dim_y: 16
+targetnet_hiddim: 512
+softrank_reg: 1e-3
+
+batchsize: 12
+seq_len: 5000
+num_per_epoch: 2000
+
+gpu_card: 8
+num_nodes: 1
+
+name: infoatlas-d16
+version: d${input_dim_x}-softrank1e-3
+log_dir: logs
+
+bmi_data_root: path/to/bmi_task_data   # only used by training-time validation
+
+hydra:
+  run:
+    dir: ./
+  sweep:
+    dir: ./
+    subdir: ""
+  launcher:
+    n_jobs: 1

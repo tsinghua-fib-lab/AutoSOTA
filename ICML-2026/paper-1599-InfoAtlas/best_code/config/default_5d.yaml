@@ -1,0 +1,52 @@
+defaults:
+  - override hydra/launcher: joblib
+
+# ----------------------------------------------------------------------
+# Canonical config for the released max_dim = 5 InfoAtlas model.
+# Override any field from the command line, e.g.
+#   python train.py gpu_card=8 batchsize=16 log_dir=logs/my_run
+# ----------------------------------------------------------------------
+
+# --- optimization ---
+learning_rate: 1e-6
+lr_decay_step: 9000
+
+# --- model architecture ---
+latent_dim: 1024
+latent_num: 1024
+decoder_query_dim: 768
+input_dim_x: 5
+input_dim_y: 5
+targetnet_hiddim: 256
+encoder2_expand_dim: 512
+encoder2_hiddim: 512
+encoder2_block: 4
+
+# --- preprocessing ---
+softrank_reg: 1e-3
+gauss_copula: True
+whiten: none           # per-side whitening OFF for the max_dim=5 model
+
+# --- data / batching ---
+batchsize: 19
+seq_len: 5000
+num_per_epoch: 2000
+
+# --- hardware ---
+gpu_card: 1
+num_nodes: 1
+
+# --- logging / paths (edit to your environment) ---
+name: infoatlas-d5
+version: d${input_dim_x}-softrank1e-3
+log_dir: logs
+bmi_data_root: path/to/bmi_task_data   # only used by training-time validation
+
+hydra:
+  run:
+    dir: './'
+  sweep:
+    dir: './'
+    subdir: ''
+  launcher:
+    n_jobs: 1

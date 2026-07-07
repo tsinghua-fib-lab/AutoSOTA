@@ -1,0 +1,38 @@
+out_dir: results/prellp
+dataset:
+  format: PyG
+  name: TU_DD
+  task: graph
+  task_type: classification
+  transductive: False
+  node_encoder: False
+  node_encoder_name: Atom
+  edge_encoder: False
+  edge_encoder_name: Bond
+train:
+  batch_size: 128
+  eval_period: 5
+  ckpt_period: 100
+  sampler: full_batch
+model:
+  type: gnn
+  loss_fun: cross_entropy
+  graph_pooling: add
+gnn:
+  layers_pre_mp: 2
+  neigh: edge_index
+  norm_mode: degree_sys
+  agg: add
+  act: prelu
+  dropout: 0.0
+  self_msg: add
+  layers_mp: 4
+  stage_type: skipsum
+  layers_post_mp: 2
+  dim_inner: 256
+  layer_type: generalconv
+  batchnorm: True
+optim:
+  base_lr: 0.01
+  optimizer: adam
+  max_epoch: 300

@@ -1,0 +1,45 @@
+# Streaming Prototype OOD Detection -- OpenOOD CIFAR-100 benchmark
+
+backbone: 'ViT-B/16'
+
+data_root: '/yourpath/data'
+
+id_dataset_name: 'cifar100'
+id_imglist: 'benchmark_imglist/cifar100/test_cifar100.txt'
+
+ood_datasets:
+  CIFAR10:   'benchmark_imglist/cifar100/test_cifar10.txt'
+  TinyImageNet: 'benchmark_imglist/cifar100/test_tin.txt'
+  MNIST:     'benchmark_imglist/cifar100/test_mnist.txt'
+  SVHN:      'benchmark_imglist/cifar100/test_svhn.txt'
+  Texture:   'benchmark_imglist/cifar100/test_texture.txt'
+  Places365: 'benchmark_imglist/cifar100/test_places365.txt'
+
+batch_size:  256
+num_workers: 8
+allow_mock_data: false
+output_dir: 'results'
+result_name: 'openood_cifar100_results'
+
+seed: 74
+
+text_prompt: 'nice'
+num_negative_labels: 10000
+use_ood_labels: false
+
+dataset_num_classes: 100
+total_samples: 50000
+
+prototype_lr: 0.1
+bias_lr: 0.0
+bias_target: 0.0
+blend_factor: 1.0
+
+text_temperature: 0.01
+visual_temperature: 0.05
+
+thresh_id:  0.95
+thresh_ood: 0.05
+
+negative_temperature: 0.01
+score_groups: 20

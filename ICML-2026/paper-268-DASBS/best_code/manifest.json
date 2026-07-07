@@ -1,0 +1,66 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 268,
+    "repo_url": "https://github.com/AlexandreGUO2001/DASBS",
+    "repo_commit": "df22917126d0ec462d0944d209db3e7e12b7a1c2",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_268",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-268:reproduced",
+    "eval_command": "python3 eval.py --ckpt outputs/ising_L24_beta0.28/ckpt5.pth --gt_samples gt_samples_ising_L24_beta0.28.npy --n_samples 5000 --batch_size 512 --steps 200",
+    "baseline_metrics": {
+      "ΔMag": 0.000321,
+      "ΔCorr": 0.002425,
+      "EW2": 15.23
+    },
+    "primary_metric": "ΔCorr",
+    "metric_direction": "lower",
+    "gpu_devices": "6,7",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/zengguanyang/autosota-v2.5/logs/reproduction/paper-268.log",
+    "status": "success",
+    "created_at": "2026-07-05T07:40:00Z",
+    "notes": "DASBS reproduction for Ising L=24, β=0.28 with 3000 training steps. ΔCorr=0.002425 within CI [0.00029, 0.002501] (paper: 0.0023). ΔMag=0.000321 below CI lower bound [0.00089] — better than paper's 0.015. EW2=15.23 above CI upper bound [5.93] — worse than paper's 5.4, possibly due to single-seed vs 3-seed average. Metrics computed against 51,200 MCMC Wolff reference samples. Model: ropeSiT (hidden=32, 6 blocks). Training: controller-TM + corrector-TM (adjoint matching), log-linear noise (α=0.5, γ=1.0), 5 stages × (400 ctrl + 200 corr) steps, batch=64, lr=1e-3, EMA decay=0.9999.",
+    "eval_timeout_minutes": 30,
+    "eval_output_format": "stdout lines: 'ΔMag  = <float>', 'ΔCorr = <float>', 'EW2   = <float>'",
+    "known_levers": "Model capacity (hidden_size, n_blocks); training steps (num_stages, num_steps.controller, num_steps.corrector); learning rate and schedule; noise schedule (alpha, gamma); EMA decay; sampling steps at inference; batch size and buffer size; Bregman divergence function choice (tlogt, -logt, t2); loss type (tm=adjoint, dm=denoising); time weight function (unif, ada, gamma); number of replicates (num_repl); resample frequency",
+    "setup_notes": "Base image: docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Python 3.10.13, PyTorch 2.1.0, CUDA 12.1. Dependencies installed via pip (hydra-core, omegaconf, wandb, tqdm, timm, matplotlib, pot). Ground truth MCMC samples (51,200) generated using Wolff cluster algorithm with burn_in=2000, collect_every=50, batch_size=256. Training with 2x A100 80GB GPUs. Disable wandb logging with logging.use_wandb=false for offline runs. Register OmegaConf eval resolver before evaluation.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Minimize all three quality metrics (ΔMag, ΔCorr, EW2) for the DASBS sampler on Ising L=24 β=0.28. These metrics capture magnetization accuracy, correlation structure fidelity, and energy distribution matching, respectively. They are strongly coupled — improvements in model quality typically improve all three simultaneously.",
+      "metrics": [
+        {
+          "name": "ΔMag",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.000321,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Absolute magnetization error. Primary quality metric per paper Table 2. Lower values indicate the sampler captures the correct order parameter."
+        },
+        {
+          "name": "ΔCorr",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.002425,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Average 2-point correlation error across distances r=1..12. Captures spatial structure fidelity. Paper reports 0.0023 (within CI of our baseline)."
+        },
+        {
+          "name": "EW2",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 15.23,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Energy Wasserstein-2 distance (sqrt of 1D W2 between energy distributions). Measures overall distribution matching quality. Our baseline is above CI upper bound (5.93); paper reports 5.4. Large room for improvement."
+        }
+      ],
+      "success_policy": "Improvement is measured as reduction across all three core metrics. All three should decrease together since better distribution matching simultaneously improves magnetization, correlations, and energy statistics. If only one metric improves at the expense of others, the result is ambiguous. Prioritize EW2 reduction as it has the largest gap to paper-reported values. ΔMag is already below paper's reported value (0.0003 vs 0.015) — further improvement here is low priority."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": null
+  }
+}

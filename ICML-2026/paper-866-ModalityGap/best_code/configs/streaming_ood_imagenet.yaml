@@ -1,0 +1,90 @@
+# Streaming Prototype OOD Detection -- ImageNet benchmark
+# Replace /yourpath/data with your local data root before running.
+#
+# Relative paths in id_imglist and ood_datasets are joined with
+# data_root automatically by the Config loader.
+
+# ---------------------------------------------------------------------------
+# Network
+# ---------------------------------------------------------------------------
+backbone: 'ViT-B/16'
+
+# ---------------------------------------------------------------------------
+# Data
+# ---------------------------------------------------------------------------
+data_root: '/yourpath/data'
+
+id_dataset_name: 'imagenet'
+id_imglist: 'benchmark_imglist/imagenet/val_imagenet.txt'
+
+ood_datasets:
+  iNaturalist: 'benchmark_imglist/imagenet/test_inaturalist.txt'
+  SUN:         'benchmark_imglist/imagenet/test_sun.txt'
+  Places:      'benchmark_imglist/imagenet/test_places.txt'
+  Textures:    'benchmark_imglist/imagenet/test_dtd.txt'
+
+batch_size:  256
+num_workers: 8
+allow_mock_data: false
+output_dir: 'results'
+result_name: 'imagenet_ood_results'
+
+# ---------------------------------------------------------------------------
+# Reproducibility
+# ---------------------------------------------------------------------------
+seed: 74
+
+# ---------------------------------------------------------------------------
+# OOD text feature generation
+# ---------------------------------------------------------------------------
+# text_prompt selects the template family used to embed class names via CLIP.
+# 'nice' uses "The nice {classname}." templates defined in
+# openood/networks/clip_fixed_ood_prompt.py.
+text_prompt: 'nice'
+
+# Number of OOD negative label prototypes generated from WordNet.
+num_negative_labels: 10000
+
+# When false, OOD negative labels are pure WordNet adjectives/nouns.
+# When true, real OOD dataset class names (SUN, Places, DTD) are force-
+# included before the WordNet selection fills the remaining budget.
+use_ood_labels: false
+
+# ---------------------------------------------------------------------------
+# Streaming adapter hyperparameters
+# ---------------------------------------------------------------------------
+# Number of ImageNet in-distribution classes.
+dataset_num_classes: 1000
+
+# Used to normalise the sqrt(progress) blend schedule. Set to the expected
+# total number of samples in the combined ID+OOD stream.
+total_samples: 50000
+
+# Visual prototype learning rate (decays as prototype_lr / sqrt(count)).
+prototype_lr: 0.1
+
+# Class-bias learning rate. Set to 0.0 to disable bias updates entirely.
+bias_lr: 0.0
+
+# Class-bias target coefficient.
+bias_target: 0.0
+
+# Blend ceiling. blend_factor * sqrt(progress) controls the interpolation
+# between frozen text prototypes and stream-adapted visual prototypes.
+blend_factor: 1.0
+
+# Softmax temperature for the frozen text prototype distribution.
+text_temperature: 0.01
+
+# Softmax temperature for the stream-adapted visual prototype distribution.
+visual_temperature: 0.05
+
+thresh_id:  0.95
+thresh_ood: 0.05
+
+# Temperature for the OOD logit slice inside compute_scores.
+negative_temperature: 0.01
+
+# Number of equal-sized chunks the OOD logit vector is split into.
+# The final OOD score is the mean softmax-ID-probability over all chunks.
+score_groups: 20
