@@ -79,24 +79,37 @@ function isFailureValue(value) {
     /no[_\s-]?improvement|not[_\s-]?reproduc|insufficient|missing[_\s-]?(repo|data|resource)/i.test(text);
 }
 
+function isNotRunValue(value) {
+  return /^(skipped|skip|not[_\s-]?run)$/i.test(String(value || "").trim());
+}
+
 function stageState(paper, stage) {
   const statusValue = paper[stage.statusField];
   const successValue = stage.successField ? paper[stage.successField] : "";
 
   if (isExplicitFalse(successValue) || isFailureValue(statusValue)) return "failed";
   if (isSuccessValue(successValue) || isSuccessValue(statusValue)) return "success";
+  if (isNotRunValue(statusValue)) return "not-run";
   if (hasValue(successValue) || hasValue(statusValue)) return "research";
   return "pending";
 }
 
 function getStages(paper) {
+  let stopped = false;
   return STAGES.map((stage, index) => {
-    const stateName = stageState(paper, stage);
+    const statusValue = paper[stage.statusField];
+    const successValue = stage.successField ? paper[stage.successField] : "";
+    let stateName = stopped && !hasValue(statusValue) && (!hasValue(successValue) || isExplicitFalse(successValue))
+      ? "not-run"
+      : stageState(paper, stage);
+    if (stopped && stateName === "pending") stateName = "not-run";
+    if (stateName === "failed") stopped = true;
+
     return {
       ...stage,
       index: index + 1,
       state: stateName,
-      display: stateName === "pending" ? "Pending" : stateName === "research" ? "In progress" : stateName,
+      display: stateName === "pending" ? "Pending" : stateName === "research" ? "In progress" : stateName === "not-run" ? "Not run" : stateName,
     };
   });
 }
