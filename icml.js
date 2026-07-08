@@ -35,6 +35,13 @@ const STATUS_SORT_PRIORITY = {
   not_started: 3,
 };
 
+const REVISION_STATUS_PRIORITY = {
+  success: 3,
+  failed: 2,
+  research: 1,
+  not_started: 0,
+};
+
 const STAGES = [
   { key: "reproduction", label: "Reproduction", statusField: "reproduction_status", successField: "reproduction_success" },
   { key: "ideas", label: "Ideas", statusField: "ideas_status" },
@@ -83,7 +90,9 @@ function isNotRunValue(value) {
   return /^(skipped|skip|not[_\s-]?run)$/i.test(String(value || "").trim());
 }
 
-function stageState(paper, stage) {
+function stageState(paper, stage, pipelineSuccess = false) {
+  if (pipelineSuccess) return "success";
+
   const statusValue = paper[stage.statusField];
   const successValue = stage.successField ? paper[stage.successField] : "";
 
@@ -95,13 +104,14 @@ function stageState(paper, stage) {
 }
 
 function getStages(paper) {
+  const pipelineSuccess = isSuccessValue(paper.pipeline_status);
   let stopped = false;
   return STAGES.map((stage, index) => {
     const statusValue = paper[stage.statusField];
     const successValue = stage.successField ? paper[stage.successField] : "";
     let stateName = stopped && !hasValue(statusValue) && (!hasValue(successValue) || isExplicitFalse(successValue))
       ? "not-run"
-      : stageState(paper, stage);
+      : stageState(paper, stage, pipelineSuccess);
     if (stopped && stateName === "pending") stateName = "not-run";
     if (stateName === "failed") stopped = true;
 
@@ -136,6 +146,7 @@ function getFailureCategory(paper, stages) {
 
 function derivePaperStatus(paper) {
   const stages = getStages(paper);
+  const pipelineSuccess = isSuccessValue(paper.pipeline_status);
   const hasFailure = hasValue(paper.failed_stage) ||
     hasValue(paper.failure_reason) ||
     hasValue(paper.failure_reason_source) ||
@@ -143,8 +154,17 @@ function derivePaperStatus(paper) {
     stages.some((stage) => stage.state === "failed");
 
   const sotaSuccess = stages.some((stage) => stage.key === "sota" && stage.state === "success");
-  const pipelineSuccess = isSuccessValue(paper.pipeline_status);
   const repoSuccess = hasValue(paper.autosota_repo_url) && !hasFailure;
+
+  if (pipelineSuccess) {
+    return {
+      key: "success",
+      label: STATUS_META.success.label,
+      className: STATUS_META.success.className,
+      failureCategory: "",
+      stages,
+    };
+  }
 
   if (hasFailure) {
     return {
@@ -186,6 +206,42 @@ function annotatePapers() {
     ...paper,
     derived: derivePaperStatus(paper),
   }));
+}
+
+function revisionTime(paper) {
+  const text = paper.finished_at_beijing || paper.started_at_beijing || "";
+  const time = Date.parse(text);
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function shouldUseRevision(current, next) {
+  const timeDiff = revisionTime(next) - revisionTime(current);
+  if (timeDiff) return timeDiff > 0;
+
+  const currentStatus = derivePaperStatus(current).key;
+  const nextStatus = derivePaperStatus(next).key;
+  const priorityDiff = (REVISION_STATUS_PRIORITY[nextStatus] || 0) - (REVISION_STATUS_PRIORITY[currentStatus] || 0);
+  if (priorityDiff) return priorityDiff > 0;
+
+  return true;
+}
+
+function normalizeLoadedPapers(papers) {
+  const byId = new Map();
+  const anonymous = [];
+
+  papers.forEach((paper) => {
+    const id = String(paper.paper_id || "").trim();
+    if (!id) {
+      anonymous.push(paper);
+      return;
+    }
+
+    const current = byId.get(id);
+    if (!current || shouldUseRevision(current, paper)) byId.set(id, paper);
+  });
+
+  return [...byId.values(), ...anonymous];
 }
 
 function getCounts(papers) {
@@ -427,10 +483,6 @@ function renderRuns() {
 
     return `<article class="cvpr-row icml-row status-row-${paper.derived.key}" data-id="${esc(paper.paper_id)}">
       <div class="cvpr-row-main">
-        <div class="icml-paper-meta">
-          <span class="paper-id-chip">Paper ID ${esc(paper.paper_id)}</span>
-          <span>${esc(typeLabel)}</span>
-        </div>
         <span class="cvpr-row-title">${esc(paper.title)}</span>
         <div class="cvpr-row-links">${links.join(" · ") || '<span style="color:var(--muted)">No links</span>'}</div>
       </div>
@@ -466,7 +518,7 @@ function getStaticPapers() {
 async function loadPapers() {
   const staticData = getStaticPapers();
   if (staticData) {
-    state.papers = staticData;
+    state.papers = normalizeLoadedPapers(staticData);
     return;
   }
 
@@ -474,7 +526,7 @@ async function loadPapers() {
     const resp = await fetch("site-data/icml_papers.json");
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-    state.papers = Array.isArray(data) ? data : data.papers || [];
+    state.papers = normalizeLoadedPapers(Array.isArray(data) ? data : data.papers || []);
   } catch (err) {
     console.error("Failed to load ICML papers:", err);
     state.papers = [];
