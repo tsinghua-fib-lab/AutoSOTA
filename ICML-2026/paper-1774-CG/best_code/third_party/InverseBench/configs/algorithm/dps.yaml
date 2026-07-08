@@ -1,0 +1,10 @@
+name: DPS
+method:
+  _target_: algo.dps_original.DPS
+  diffusion_scheduler_config:
+    num_steps: 1000
+    schedule: 'vp'
+    timestep: 'vp'
+    scaling: 'vp'
+  guidance_scale: 1.0e-3   # blackhole: sweep range [1e-4, 3e-3]; natural image: 10.0
+  sde: True

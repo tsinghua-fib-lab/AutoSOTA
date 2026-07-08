@@ -1,0 +1,33 @@
+program: main.py
+project: SipBench
+name: fwi-lgd
+method: bayes
+metric:
+  goal: minimize
+  name: data_fitting_loss
+parameters:
+  algorithm.method.guidance_scale:
+    distribution: log_uniform_values
+    min: 1e-3
+    max: 100.0
+  algorithm.method.diffusion_scheduler_config.num_steps:
+    values: [100, 200, 400, 800, 100]
+
+early_terminate:
+  type: hyperband
+  max_iter: 1000
+  eta: 3
+  s: 3
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - problem=fwi                             # Set the problem config
+  - algorithm=lgd                                # Set the algorithm config
+  - pretrain=fwi                          # Set the pre-trained model config
+  - wandb=True
+  - problem.data.root="../../data/fwi-val"   # Path to the validation dataset
+  - problem.data.id_list="0"                    # String that indicates the indices of data to use. "0-2" includes 0, 1, and 2. "0,3-4" includes 0, 3, and 4.
+  - algorithm.method.batch_grad=False
+  - ${args_no_hyphens}

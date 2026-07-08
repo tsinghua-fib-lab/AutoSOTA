@@ -1,0 +1,12 @@
+tf32: True
+inference: True    # If False, skip inference and only evaluate the results
+num_samples: 1     # Number of samples to generate for each observation
+compile: False     # If True, enable torch.compile. Recommended for ensemble methods
+seed: 0            # Random seed
+wandb: False       # If True, log to wandb
+exp_name: default  # Name of the experiment
+defaults:
+  - _self_
+  - pretrain: navier-stokes
+  - problem: navier-stokes
+  - algorithm: enkg

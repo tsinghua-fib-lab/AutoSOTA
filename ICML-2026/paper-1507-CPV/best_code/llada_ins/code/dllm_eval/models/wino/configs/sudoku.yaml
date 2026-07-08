@@ -1,0 +1,24 @@
+dataset_name: 'sudoku'
+model_path: "/PATH/TO/llada_8b_instruct"
+data_root: "/PATH/TO/DATA/ROOT/"
+
+dataset_config:
+  data_loader: 'custom_loader'
+  loader_fn: 'sudoku_read_data'
+  load_dataset_args: { path: "sudoku/4x4_test_sudoku.csv" }
+  split: null
+  doc_to_text_fn: "sudoku_doc_to_text"
+  eval_fn: "sudoku_evaluate_and_extract"
+  eval_mode: "partial_credit"
+  prompt_suffix: "<reasoning>"
+
+generation_args:
+  gen_length: 256
+  block_length: 128
+  temperature: 0.0
+
+method: 'wino'
+method_args:
+  wino:
+    threshold: 0.7
+    threshold_back: 0.9

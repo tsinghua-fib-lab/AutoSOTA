@@ -1,0 +1,77 @@
+ckpt: ZINC250k
+data:
+  batch_size: 512
+  data: ZINC250k
+  dir: ./data
+  feat: atom
+  max_feat_num: 9
+  max_node_num: 38
+  perm_mix: true
+mix:
+  adj:
+    drift_coeff: 1
+    num_scales: 1000
+    sigma_0: 1.0
+    sigma_1: 0.1
+    type: OU
+  x:
+    drift_coeff: 1
+    num_scales: 1000
+    sigma_0: 1.0
+    sigma_1: 0.1
+    type: OU
+model:
+  adj_scale: 3
+  hidden_dims:
+    de: 64
+    dim_ffE: 128
+    dim_ffX: 256
+    dim_ffy: 128
+    dx: 256
+    dy: 64
+    n_head: 8
+  hidden_mlp_dims:
+    E: 128
+    X: 256
+    y: 128
+  input_dims:
+    E: 2
+    y: 0
+  num_layers: 9
+  type: transformer_mol
+sample:
+  batch_size: 2500
+  eps: 0.002
+  noise_removal: true
+  seed: 42
+  test_size: 10000
+  use_ema: true
+  ref: 1 #5
+  gamma: 0.02
+  tc: 0
+sampler:
+  data: ZINC250k
+  corrector: None
+  n_steps: 1
+  predictor: Euler #Heun
+  prior: None
+  scale_eps: 0.0
+  snr: 0.0
+train:
+  ema: 0.999
+  eps: 0.002
+  grad_norm: 1.0
+  lambda_train: 5
+  loss_type:
+    adj: default
+    x: default
+  lr: 0.0002
+  lr_decay: 0.999
+  lr_schedule: false
+  name: test
+  num_epochs: 500
+  optimizer: adamw
+  reduce_mean: false
+  save_interval: 100
+  use_tensorboard: true
+  weight_decay: 1.0e-12

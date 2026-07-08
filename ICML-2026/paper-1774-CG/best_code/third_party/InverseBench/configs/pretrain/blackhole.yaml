@@ -1,0 +1,41 @@
+data:
+  _target_: training.dataset.BlackHole
+  root: data/blackhole/bh_50k
+  resolution: 64
+
+model:
+  _target_: models.precond.VPPrecond
+  model_type: SongUNet
+  img_resolution: 64
+  img_channels: 1
+  label_dim: 0
+  model_channels: 128
+  channel_mult: [1,2,2]
+  attn_resolutions: [16]
+  num_blocks: 1
+  dropout: 0.0
+
+loss:
+  _target_: training.loss.VPLoss
+
+train:
+  lr: 0.0001
+  batch_size: 256
+  num_steps: 100_000
+  warmup_steps: 500
+  ema_decay: 0.9999
+  grad_clip: 0.0
+  ema_halflife_nimg: 209600
+  ema_rampup_ratio: 0.05
+  tf32: True
+  resume: None
+  num_workers: 4
+
+log:
+  exp_dir: 'exps/pretrain'
+  exp_name: test
+  wandb: True
+  project: 'blackhole-prior'
+  group: 'training'
+  log_every: 50
+  save_every: 5000

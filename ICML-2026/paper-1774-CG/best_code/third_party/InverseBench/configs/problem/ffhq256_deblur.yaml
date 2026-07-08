@@ -1,0 +1,19 @@
+name: ffhq256-deblur
+prior: checkpoints/ffhq256.pt
+model:
+  _target_: inverse_problems.image_restore.GaussialBlur
+  sigma_noise: 0.05
+  intensity: 3
+  kernel_size: 61
+
+data:
+  _target_: training.dataset.ImageFolder
+  root: ../data/ffhq256
+  resolution: 256
+  num_channels: 3
+  id_list: 0-9
+
+evaluator:
+  _target_: eval.Image
+
+exp_dir: exps/inference/ffhq256-deblur

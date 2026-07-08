@@ -1,0 +1,41 @@
+data:
+  # _target_: training.dataset.MultiCoilMRIData
+  # root: /scratch/imaging/projects/active_acquisition/MotionMRI/datasets/knee/knee_multicoil_train_sens_maps_espirit
+  _target_: training.dataset.MultiCoilMRILMDBData
+  root: /tmp/zwu2/datasets/fastmri_multicoil_knee_train_lmdb
+  image_size: [320, 320]
+
+model:
+  _target_: models.e2e.unet.ResidualUNet
+  chans: 64
+  num_pool_layers: 4
+
+loss:
+  _target_: training.loss.MRILoss
+  forward_op:
+    _target_: inverse_problems.multi_coil_mri.MultiCoilMRI
+    sigma_noise: 0.0
+    total_lines: 320
+    acceleration_ratio: 4
+    mask_seed: 0
+  loss_type: psnr_loss
+  target_type: mvue_abs
+
+train:
+  lr: 0.001
+  batch_size: 64
+  num_steps: 100_000
+  warmup_steps: 1
+  grad_clip: 0.0
+  tf32: True
+  resume: None
+  num_workers: 1 # Number of workers for dataloader
+
+log:
+  exp_dir: exps/pretrain
+  log_every: 10
+  save_every: 5_000
+  exp_name: E2EUNET-MRI-KNEE-8x
+  wandb: False
+  project: E2EUNET-MRI-KNEE-8x
+  group: training

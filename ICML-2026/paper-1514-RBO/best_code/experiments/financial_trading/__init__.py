@@ -1,0 +1,1 @@
+"""Financial trading experiment for testing RCGP robustness on April 17, 2013 Twitter flash crash data."""

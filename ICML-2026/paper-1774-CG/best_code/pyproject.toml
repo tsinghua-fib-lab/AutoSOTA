@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calibrated-guidance"
+version = "0.1.0"
+description = "Calibrated Test-Time Guidance for Bayesian Inference — unified code for all experiments in the paper."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = [
+    "torch",
+    "numpy",
+    "tqdm>=4.67.1",
+]
+
+[project.optional-dependencies]
+# Bayesian-inference (SBI) benchmark + analytic toy tasks.
+sbi = [
+    "scikit-learn",
+    "pyro-ppl>=1.9",
+    "scipy",
+    "matplotlib",
+]
+# Black-hole imaging (InverseBench engine + mean-flow renoise estimator).
+blackhole = [
+    "hydra-core>=1.3",
+    "omegaconf>=2.3",
+    "ehtim>=1.2.10",
+    "scipy",
+    "h5py",
+    "lmdb",
+    "Pillow",
+    "piq>=0.8",
+    "wandb",
+]
+# 4x super-resolution with the public pixel mean-flow (pMF) model.
+superres = [
+    "fire",
+    "piq>=0.8",
+    "Pillow",
+    "opencv-python",
+    "wandb",
+]
+# Local + CI test suite.
+dev = [
+    "pytest>=8.0",
+    "hypothesis>=6.0",
+    "pytest-cov",
+]
+
+[tool.setuptools]
+packages = [
+    "calibrated_guidance",
+    "calibrated_guidance.diffusion_posterior",
+    "calibrated_guidance.diffusion_posterior.analytic",
+    "calibrated_guidance.tasks",
+    "calibrated_guidance.tasks.toy",
+    "experiments",
+    "experiments.common",
+    "experiments.black_hole",
+    "experiments.sbi",
+    "experiments.super_resolution",
+    "experiments.super_resolution.pixel_space_inverse_problems",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]

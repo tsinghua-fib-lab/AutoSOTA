@@ -1,0 +1,46 @@
+data:
+  # _target_: training.dataset.MultiCoilMRIData
+  # root: /scratch/imaging/projects/active_acquisition/MotionMRI/datasets/knee/knee_multicoil_train_sens_maps_espirit
+  _target_: training.dataset.MultiCoilMRILMDBData
+  root: /tmp/zwu2/datasets/fastmri_multicoil_knee_train_lmdb
+  image_size: [320, 320]
+  mvue_only: true
+
+model:
+  _target_: models.precond.EDMPrecond
+  model_type: DhariwalUNet
+  img_resolution: 320
+  img_channels: 2
+  label_dim: 0
+  model_channels: 128
+  # channel_mult: [1, 2, 2, 4, 4]
+  channel_mult: [1, 1, 1, 2, 2]
+  attn_resolutions: [16]
+  num_blocks: 1
+  dropout: 0.0
+
+loss:
+  _target_: training.loss.EDMLoss
+
+train:
+  lr: 0.0001
+  batch_size: 64
+  num_steps: 100_000
+  warmup_steps: 500
+  ema_decay: 0.9999
+  grad_clip: 0.0
+  ema_halflife_nimg: 204800
+  ema_rampup_ratio: 0.05
+  tf32: True
+  resume: None
+  num_workers: 1 # Number of workers for dataloader
+
+log:
+  exp_dir: exps/pretrain
+  log_every: 10
+  save_every: 5_000
+  # exp_name: EDM-MRI-KNEE-MVUE-large
+  exp_name: EDM-MRI-KNEE-MVUE
+  wandb: False
+  project: EDM-MRI-KNEE-MVUE
+  group: training

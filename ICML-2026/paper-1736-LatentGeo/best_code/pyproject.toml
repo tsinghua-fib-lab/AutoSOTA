@@ -1,0 +1,34 @@
+[project]
+name = "latentgeodesics"
+version = "0.1.0"
+description = "This project provides code to compute geodesic paths and exponential maps on latent manifolds."
+readme = "README.md"
+authors = [
+    { name = "Florine Hartwig", email = "florine.hartwig@uni-bonn.de" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.9.4",
+    "numpy",
+    "scikit-learn>=1.7.2",
+    "scipy>=1.13.1",
+    "torch>=2.9.1",
+]
+
+[project.scripts]
+latentgeodesics = "latentgeodesics:main"
+
+[project.optional-dependencies]
+training = [
+    "tensorboard>=2.20.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.31.0",
+]
+

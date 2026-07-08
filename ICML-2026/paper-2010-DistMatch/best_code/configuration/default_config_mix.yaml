@@ -1,0 +1,90 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 6
+#    prefer: processes
+#    pre_dispatch: 1
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 1    # Only relevant for parallel execution
+  seeds:
+    - 10
+    - 20
+    - 30
+    - 40
+#  skip_cfg: # fp_cfg / seed
+#    - [0, 10]
+#    - [2, 20]
+  init_models: null
+
+sweep:
+  type: grid
+  axes:
+    - parameter: evaluation.pred_vega
+      vals:
+        - False
+### RUN CONFIG END
+
+###################################
+defaults:
+  - config: default
+  - override config/model_fc: darts_forest
+  - override config/model_uc: eps_pred_hopfield_1year_mixed
+  - override config/dataset: nsdb2019_60m
+  - override config/task: default_1year_gn #default
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null  # set wandb project name
+    project_entity: null #null, null
+    base_proj_dir: null    # USE ABSOLUTE PATH!
+    data_dir: ${config.experiment_data.base_proj_dir}data
+    model_dir: ${config.experiment_data.base_proj_dir}models_save
+    evaluate: true
+    offline: true
+    experiment_tag: local
+    experiment_name: test_lstm_pred
+    experiment_notes:
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 10
+    gpu_id: -1
+
+  trainer:
+    _target_: trainer.internal_trainer.ModelInternalTrainer
+    trainer_config:
+      n_epochs: 2
+      val_every: 5
+      save_every: 10000
+      early_stopping_patience: 10000
+      optim:
+        _target_: torch.optim.AdamW
+        _partial_: true
+        lr: 0.001
+        weight_decay: 0.001
+      lr_scheduler:
+        _target_: trainer.WarmupCosineSchedule
+        _partial_: true
+        warmup_steps: 20
+        t_total: 1000
+      grad_clip_param: null
+      #  max_norm: 1
+      model_selection: threshold-pi
+      init_model: null
+  ###

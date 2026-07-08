@@ -1,0 +1,30 @@
+name: fwi-acoustic
+prior: checkpoints/fwi-5m.pt
+model:
+  _target_: inverse_problems.acoustic.AcousticWave
+  shape: [128, 128]
+  spacing: [20.0, 10.0]
+  tn: 1000.0
+  f0: 0.005
+  dt: 1.0
+  nbl: 80
+  nshots: 16
+  nreceivers: 129
+  unnorm_scale: 1.0
+  unnorm_shift: 3.0
+  src_depth: 1270.0
+
+data:
+  _target_: training.dataset.LMDBData
+  root: ../data/fwi-test
+  resolution: 128
+  raw_resolution: 70
+  std: 500.0
+  mean: 3000.0
+  id_list: 1-10
+# after normalization, the data is in the range [-1.5, 1.5]
+
+evaluator:
+  _target_: eval.AcousticWave
+
+exp_dir: exps/inference/fwi-acoustic

@@ -1,0 +1,26 @@
+dataset_name: 'gsm8k'
+model_path: "/PATH/TO/llada_8b_instruct"
+data_root: "/PATH/TO/DATA/ROOT/"
+
+
+dataset_config:
+  data_loader: 'huggingface' # can be chosen from [huggingface, custom_loader]
+  loader_fn: null
+  load_dataset_args: { path: "gsm8k", name: "main" }
+  split: "test"
+  doc_to_text_fn: "gsm8k_doc_to_text"
+  extract_answer_fn: "gsm8k_extract_answer"
+  is_correct_fn: "gsm8k_is_correct"
+  eval_mode: "binary"
+  prompt_suffix: "<reasoning>"
+
+generation_args:
+  gen_length: 256
+  block_length: 128
+  temperature: 0.0
+
+method: 'wino' #default
+method_args:
+  wino:
+    threshold: 0.6
+    threshold_back: 0.9

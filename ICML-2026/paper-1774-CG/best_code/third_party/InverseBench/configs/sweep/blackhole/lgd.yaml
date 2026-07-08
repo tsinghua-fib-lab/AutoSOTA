@@ -1,0 +1,26 @@
+program: main.py
+project: SIPBench
+name: blackhole-lgd
+method: bayes
+metric:
+  goal: maximize
+  name: psnr
+parameters:
+  algorithm.method.guidance_scale:
+    distribution: log_uniform_values
+    min: 1e-4
+    max: 1e-2
+  algorithm.method.num_samples:
+    min: 1
+    max: 10
+command:
+  - ${env}
+  - python
+  - ${program}
+  - problem=blackhole                             # Set the problem config
+  - algorithm=lgd                                # Set the algorithm config
+  - pretrain=blackhole                          # Set the pre-trained model config
+  - wandb=True
+  - problem.data.root="data//blackhole_val/bh_50_synthetic"   # Path to the validation dataset
+  - problem.data.id_list="0-4"                    # String that indicates the indices of data to use. "0-2" includes 0, 1, and 2. "0,3-4" includes 0, 3, and 4.
+  - ${args_no_hyphens}

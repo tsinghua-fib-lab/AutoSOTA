@@ -1,0 +1,29 @@
+{
+	"train": {
+        	"epochs": 6000,
+        	"batch_size": 32,
+        	"sampling": {
+            		"std": 0.0025
+        	},
+        	"lr": 0.001,
+        	"weight_decay": 1e-05,
+			"scheduler_step": 1000,
+        	"seed": 42
+	},
+	"architecture": {
+	        "intermediate_dim": 64,
+	        "latent_dim": 3,
+	        "depth": 4,
+	        "activation": "elu",
+			"normalization": false
+	},
+	"data": {
+        	"load_path": "/path/to/data.npy",
+        	"reach": 1
+	},
+	"test": {
+		"data": null,
+		"dataset_size":null
+}
+
+}

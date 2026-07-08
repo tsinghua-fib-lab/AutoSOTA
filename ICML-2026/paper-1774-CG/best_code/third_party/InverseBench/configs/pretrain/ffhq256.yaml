@@ -1,0 +1,16 @@
+name: ffhq256
+model:
+  _target_: models.precond.VPPrecond
+  model_type: ADM
+  img_resolution: 256
+  img_channels: 3
+  model_channels: 128
+  num_res_blocks: 1
+  channel_mult: [1, 1, 2, 2, 4, 4]
+  attention_resolutions: [16]
+  dropout: 0.0
+  num_heads: 4
+  num_head_channels: 64
+  use_scale_shift_norm: True
+  resblock_updown: True
+  

@@ -1,0 +1,1 @@
+"""Synthetic benchmark functions for Bayesian Optimization experiments."""

@@ -1,0 +1,9 @@
+_target_: models.forcast.precomputed_nh_pub.PrecomputedNeuralHydrologyForcastPUB
+model: precomputed-nh
+model_params:
+  nh_results_calib_path: ${config.experiment_data.base_proj_dir}output_tmp/run_dir_test_pub_hop/validation/model_epoch12/validation_results.p
+  nh_states_calib_path: ${config.experiment_data.base_proj_dir}output_tmp/run_dir_test_pub_hop/validation/model_epoch12
+  nh_results_pub_path: ${config.experiment_data.base_proj_dir}output_tmp/run_dir_test_pub_hop/test/model_epoch12/test_results.p
+  nh_states_pub_path: ${config.experiment_data.base_proj_dir}output_tmp/run_dir_test_pub_hop/test/model_epoch12
+  nh_states_used: [h_n, c_n] # h_n, c_n, lstm_output
+  target_variable: 'QObs(mm/d)_sim'

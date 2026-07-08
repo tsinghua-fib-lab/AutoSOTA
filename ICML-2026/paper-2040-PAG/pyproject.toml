@@ -1,0 +1,28 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.10",
+  "pybind11>=2.12",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pag-ann"
+version = "0.1.0"
+description = "Python bindings for Projection-Augmented Graph approximate nearest neighbor search"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [
+  { name = "PAG contributors" },
+]
+dependencies = [
+  "numpy>=1.23,<2",
+]
+
+[tool.scikit-build]
+wheel.packages = ["python/pag"]
+cmake.args = [
+  "-DPAG_BUILD_CLI=OFF",
+  "-DPAG_BUILD_EXAMPLES=OFF",
+  "-DPAG_BUILD_PYTHON=ON",
+]

@@ -1,0 +1,47 @@
+[project]
+name = "rcgp-ucb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Abdelhamid Ezzerg", email = "ezzergabdelhamid@gmail.com" }
+]
+requires-python = ">=3.12, <3.13"
+dependencies = [
+    "torch>=2.0.0",
+    "botorch>=0.9.0",
+    "gpytorch>=1.11",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "torchvision>=0.23.0",
+    "pandas>=2.3.2",
+    "gymnasium[box2d]>=1.2.0",
+    "gymnasium[mujoco]>=1.2.0",
+    "numba>=0.61.2",
+    "gpy>=1.13.2",
+    "ipykernel>=6.30.1",
+    "seaborn>=0.13.2",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rcgp*", "bo_framework*", "experiments*", "utilities*"]
+
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+rcgp-ucb = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.9",
+    "pytest>=8.0.0",
+    "rcgp-ucb",
+]

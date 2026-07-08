@@ -1,0 +1,202 @@
+# NeuralHydrology configuration to train an LSTM on the hydrology dataset.
+
+# experiment name, used as folder name
+experiment_name: regression_camels_9y_seed10_1601_092104
+
+# place to store run directory (if empty runs are stored in code_dir/runs/)
+run_dir: ./models_save/hydro/
+
+# files to specify training, validation and test basins (relative to code root or absolute path)
+train_basin_file: ./data/hydrology/531_basin_list.txt
+validation_basin_file: ./data/hydrology/531_basin_list.txt
+test_basin_file: ./data/hydrology/531_basin_list.txt
+
+# training, validation and test time periods (format = 'dd/mm/yyyy')
+train_start_date: '01/10/1980'
+train_end_date: '30/09/1990'
+validation_start_date: '01/10/1990'
+validation_end_date: '30/09/1995'
+test_start_date: '01/10/1995'
+test_end_date: '30/09/2005'
+
+# fixed seed, leave empty to use a random seed
+seed: 0
+
+# which GPU (id) to use [in format of cuda:0, cuda:1 etc, or cpu or None]
+device: cuda:0
+
+# --- Validation configuration ---------------------------------------------------------------------
+
+# specify after how many epochs to perform validation
+validate_every: 3
+
+# specify how many random basins to use for validation
+validate_n_random_basins: 99999999
+
+# By default, validation is cached (even is this argument is empty). Set to False, if you do not want to use it.
+cache_validation_data: True
+
+# specify which metrics to calculate during validation (see neuralhydrology.evaluation.metrics)
+# this can either be a list or a dictionary. If a dictionary is used, the inner keys must match the name of the
+# target_variable specified below. Using dicts allows for different metrics per target variable.
+metrics:
+- NSE
+- KGE
+- MSE
+
+# --- Model configuration --------------------------------------------------------------------------
+
+# base model type [cudalstm, customlstm, ealstm, embcudalstm, mtslstm, gru, transformer]
+# (has to match the if statement in modelzoo/__init__.py)
+model: cudalstm
+
+# prediction head [regression]. Define the head specific parameters below
+head: regression
+
+# # CMAL settings
+# n_distributions: 3
+# n_samples: 500
+# negative_sample_handling: none
+# mc_dropout: False
+
+# ----> Regression settings <----
+output_activation: linear
+
+# ----> General settings <----
+
+# Number of cell states of the LSTM
+hidden_size: 256
+
+# Initial bias value of the forget gate
+initial_forget_bias: 3
+
+# Dropout applied to the output of the LSTM
+output_dropout: 0.4
+
+# --- Training configuration -----------------------------------------------------------------------
+
+# specify optimizer [Adam]
+optimizer: Adam
+
+# specify loss [MSE, NSE, RMSE]
+loss: nse
+
+# specify learning rates to use starting at specific epochs (0 is the initial learning rate)
+learning_rate:
+  0: 0.001
+  10: 0.0005
+  25: 0.0001
+
+# Mini-batch size
+batch_size: 256
+
+# Number of training epochs
+epochs: 30
+
+# adds noise with given std to the labels during training. Leave empty or set to 0 if not used.
+target_noise_std: 0
+
+# If a value, clips the gradients during training to that norm.
+clip_gradient_norm: 1
+
+# Length of the input sequence
+seq_length: 365
+
+predict_last_n: 1
+
+# Number of parallel workers used in the data pipeline
+num_workers: 16
+
+# Log the training loss every n steps
+log_interval: 5
+
+# If true, writes logging results into tensorboard file
+log_tensorboard: True
+
+# If a value and greater than 0, logs n random basins as figures during validation
+log_n_figures: 4
+
+# Save model weights every n epochs
+save_weights_every: 3
+
+# Store the results of the validation to disk
+save_validation_results: False
+
+
+# --- Data configurations --------------------------------------------------------------------------
+
+# which data set to use [camels_us, camels_gb, global, hourly_camels_us, camels_cl, generic]
+dataset: camels_us
+
+# Path to data set root
+data_dir: ./data/hydrology/CAMELS_US
+
+# Set to True, if train data file should be save to disk. If empty or False, train data is not saved.
+save_train_data: False
+
+# Forcing product [daymet, maurer, maurer_extended, nldas, nldas_extended, nldas_hourly]
+# can be either a list of forcings or a single forcing product
+forcings: 
+- maurer_extended
+- daymet
+- nldas_extended
+
+# variables to use as time series input (names match the data file column headers)
+# Note: In case of multiple input forcing products, you have to append the forcing product behind
+# each variable. E.g., 'prcp(mm/day)' of the daymet product is 'prcp(mm/day)_daymet'
+dynamic_inputs:
+- PRCP(mm/day)_nldas_extended
+- SRAD(W/m2)_nldas_extended
+- Tmax(C)_nldas_extended
+- Tmin(C)_nldas_extended
+- Vp(Pa)_nldas_extended
+- prcp(mm/day)_maurer_extended
+- srad(W/m2)_maurer_extended
+- tmax(C)_maurer_extended
+- tmin(C)_maurer_extended
+- vp(Pa)_maurer_extended
+- prcp(mm/day)_daymet
+- srad(W/m2)_daymet
+- tmax(C)_daymet
+- tmin(C)_daymet
+- vp(Pa)_daymet
+
+# which columns to use as target
+target_variables:
+- QObs(mm/d)
+
+# clip negative predictions to zero for all variables listed below. Should be a list, even for single variables.
+clip_targets_to_zero:
+- QObs(mm/d)
+
+# Which CAMELS attributes to use. Leave empty if none should be used
+static_attributes:
+- elev_mean
+- slope_mean
+- area_gages2
+- frac_forest
+- lai_max
+- lai_diff
+- gvf_max
+- gvf_diff
+- soil_depth_pelletier
+- soil_depth_statsgo
+- soil_porosity
+- soil_conductivity
+- max_water_content
+- sand_frac
+- silt_frac
+- clay_frac
+- carbonate_rocks_frac
+- geol_permeability
+- p_mean
+- pet_mean
+- aridity
+- frac_snow
+- high_prec_freq
+- high_prec_dur
+- low_prec_freq
+- low_prec_dur
+
+# whether to use basin id one hot encoding as (additional) static input
+use_basin_id_encoding: False

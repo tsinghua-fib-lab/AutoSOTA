@@ -1,0 +1,15 @@
+_target_: models.forcast.globallstm.GlobalLSTM
+model: global-lstm
+model_params:
+  seq_len: 50
+  batch_size: 512
+  dropout: 0.25
+  use_mc_dropout: true
+  train_with_calib: true
+  lstm_conf:
+    hidden_size: 64
+    num_layers: 1
+    dropout: 0 # Never use it!
+  pre_trained_model_path: null
+  pre_trained_predictions_paths: null
+  plot_eval_after_train: false

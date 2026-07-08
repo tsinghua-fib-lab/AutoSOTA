@@ -1,0 +1,32 @@
+program: main.py
+project: SIPBench
+name: blackhole-pnpdm
+method: bayes
+metric:
+  goal: maximize
+  name: psnr
+parameters:
+  algorithm.method.annealing_scheduler_config.rho:
+    min: 0.9
+    max: 0.95
+  algorithm.method.annealing_scheduler_config.sigma_min:
+    min: 0.1
+    max: 0.3
+  algorithm.method.lgvd_config.num_steps:
+    min: 200
+    max: 20
+  algorithm.method.lgvd_config.lr:
+    distribution: log_uniform_values
+    min: 1e-4
+    max: 1e-6
+command:
+  - ${env}
+  - python
+  - ${program}
+  - problem=blackhole                             # Set the problem config
+  - algorithm=pnpdm                                # Set the algorithm config
+  - pretrain=blackhole                          # Set the pre-trained model config
+  - wandb=True
+  - problem.data.root="data//blackhole_val/bh_50_synthetic"   # Path to the validation dataset
+  - problem.data.id_list="0-4"                    # String that indicates the indices of data to use. "0-2" includes 0, 1, and 2. "0,3-4" includes 0, 3, and 4.
+  - ${args_no_hyphens}

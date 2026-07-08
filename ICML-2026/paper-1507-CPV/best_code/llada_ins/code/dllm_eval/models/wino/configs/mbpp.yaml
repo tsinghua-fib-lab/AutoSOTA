@@ -1,0 +1,21 @@
+dataset_name: 'mbpp'
+model_path: "/PATH/TO/llada_8b_instruct"
+data_root: "/PATH/TO/DATA/ROOT/"
+
+dataset_config:
+  data_loader: 'custom_loader'
+  loader_fn: 'mbpp_read_data'
+  load_dataset_args: { path: "mbpp/mbpp.jsonl" }
+  split: null
+  doc_to_text_fn: "mbpp_doc_to_text"
+  extract_answer_fn: "mbpp_extract_answer"
+  is_correct_fn: null
+  eval_mode: "save_only" 
+  prompt_suffix: ""
+  output_formatter: 'humaneval'
+  problem_file: "./data/mbpp/mbpp_test.jsonl"
+
+generation_args: { gen_length: 256, block_length: 128, temperature: 0.0 }
+method: 'wino'
+method_args:
+  wino: { threshold: 0.8, threshold_back: 0.9 }

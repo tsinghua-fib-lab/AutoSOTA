@@ -1,0 +1,21 @@
+name: multi-coil-mri
+prior: /srv/tmp/zwu2/sipbench/exps/pretrain/EDM-MRI-KNEE-MVUE/ckpts/ckpt_50000.pt
+model:
+  _target_: inverse_problems.multi_coil_mri.MultiCoilMRI
+  sigma_noise: 0.0
+  total_lines: 320
+  acceleration_ratio: 4
+  pattern: random
+  mask_seed: 0
+
+data:
+  _target_: training.dataset.MultiCoilMRILMDBData
+  root: /tmp/zwu2/datasets/fastmri_multicoil_knee_train_lmdb
+  image_size: [320, 320]
+  id_list: null
+  simulated_kspace: false
+
+evaluator:
+  _target_: eval.MRI
+
+exp_dir: exps/inference/multi-coil-mri-knee

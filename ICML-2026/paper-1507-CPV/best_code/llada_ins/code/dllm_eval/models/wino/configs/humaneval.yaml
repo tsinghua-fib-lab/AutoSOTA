@@ -1,0 +1,20 @@
+dataset_name: 'humaneval'
+model_path: "/PATH/TO/llada_8b_instruct"
+data_root: "/PATH/TO/DATA/ROOT/"
+
+dataset_config:
+  data_loader: 'huggingface'
+  loader_fn: null
+  load_dataset_args: { path: "humaneval" }
+  split: "test"
+  doc_to_text_fn: "humaneval_doc_to_text"
+  extract_answer_fn: "humaneval_extract_answer"
+  is_correct_fn: null
+  eval_mode: "save_only"       
+  prompt_suffix: ""
+  output_formatter: 'humaneval'
+
+generation_args: { gen_length: 256, block_length: 128, temperature: 0.0 }
+method: 'wino'
+method_args:
+  wino: { threshold: 0.7, threshold_back: 0.9 }

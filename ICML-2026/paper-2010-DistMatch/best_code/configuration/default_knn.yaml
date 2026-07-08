@@ -1,0 +1,96 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 8
+#    prefer: processes
+#    pre_dispatch: 8  
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 4 # Only relevant for parallel execution
+  seeds:
+     - 10
+#     - 20
+#     - 30
+#     - 40
+
+
+sweep:
+  type: grid
+  axes:
+    - parameter: model_uc.retrieve_mode
+      vals:
+        - topk
+    - parameter: model_uc.topk_used_share
+      vals:
+        - 0.025
+        - 0.05
+        - 0.1
+        - 0.15
+        - 0.2
+        - 0.25
+        - 0.3
+        - 0.35
+    - parameter: evaluation.pred_vega
+      vals:
+       - false
+    - parameter: experiment_data.evaluate
+      vals:
+       - False
+### RUN CONFIG END
+
+###################################
+defaults:
+  - config: default
+#  - override hydra/launcher: joblib
+  - override config/model_fc: reg_ridge
+  - override config/model_uc: eps_sel_stat_knn
+  - override config/dataset: toy_3
+  - override config/task: default_3year_gn
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null  # set wandb project name
+    project_entity: null #null, null
+    base_proj_dir: null    # USE ABSOLUTE PATH!
+    data_dir: ${config.experiment_data.base_proj_dir}data
+    model_dir: ${config.experiment_data.base_proj_dir}models_save
+    evaluate: true
+    experiment_tag: Toy
+    experiment_name: toy_knn
+    experiment_notes: # str, used to make notes to wandblogger
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 50
+    gpu_id: 4
+
+  trainer:
+    _target_: trainer.internal_trainer.ModelInternalTrainer
+    trainer_config:
+      n_epochs: 700
+      val_every: 5
+      save_every: 10000
+      early_stopping_patience: 10000
+      optim:
+        _target_: torch.optim.AdamW
+        _partial_: true
+        lr: 0.01
+        weight_decay: 0.01
+      lr_scheduler:
+      init_model: null # NOT USED
+  ###

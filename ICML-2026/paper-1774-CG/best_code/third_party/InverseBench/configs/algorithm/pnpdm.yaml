@@ -1,0 +1,41 @@
+name: PnPDM
+method:
+  _target_: algo.pnpdm.PnPDM
+
+# Natural Image
+#  annealing_scheduler_config:
+#    num_steps: 200
+#    sigma_max: 10
+#    sigma_min: 0.1
+#    rho: 0.9
+#
+#  diffusion_scheduler_config:
+#    num_steps: 100
+#    sigma_min: 1e-2
+#    sigma_final: 0
+#    schedule: 'linear'
+#    timestep: 'poly-7'
+#
+#  lgvd_config:
+#    num_steps: 100
+#    lr: 1e-4
+#    tau: 0.01
+
+# Blackhole
+  annealing_scheduler_config:
+    num_steps: 100
+    sigma_max: 10
+    sigma_min: 0.02
+    rho: 0.93
+
+  diffusion_scheduler_config:
+    num_steps: 100
+    sigma_min: 1e-2
+    sigma_final: 0
+    schedule: 'linear'
+    timestep: 'poly-7'
+
+  lgvd_config:
+    num_steps: 40
+    lr: 5e-5
+    tau: 1

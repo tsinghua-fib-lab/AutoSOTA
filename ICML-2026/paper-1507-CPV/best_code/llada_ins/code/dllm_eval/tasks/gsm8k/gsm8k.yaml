@@ -1,0 +1,15 @@
+task: gsm8k
+dataset_path: openai/gsm8k
+dataset_name: main
+output_type: generate_until
+training_split: train
+fewshot_split: train
+test_split: test
+doc_to_text: !function utils.gsm_prompt
+doc_to_target: "{{answer.split('####')[-1].strip()}}"
+generation_kwargs:
+  until:
+    - "[NO_UNTIL_PLACEHOLDER]"
+  do_sample: false
+repeats: 1
+num_fewshot: 0

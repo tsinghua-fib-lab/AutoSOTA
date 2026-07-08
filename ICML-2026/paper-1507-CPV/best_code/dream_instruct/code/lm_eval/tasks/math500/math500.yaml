@@ -1,0 +1,12 @@
+task: math500
+dataset_path: HuggingFaceH4/MATH-500
+output_type: generate_until
+test_split: test
+doc_to_text: !function utils.math500_prompt
+doc_to_target: "{{answer}}"
+generation_kwargs:
+  until:
+    - "[NO_UNTIL_PLACEHOLDER]"
+  do_sample: false
+repeats: 1
+num_fewshot: 0

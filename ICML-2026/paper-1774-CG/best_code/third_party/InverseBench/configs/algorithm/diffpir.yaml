@@ -1,0 +1,15 @@
+name: DiffPIR
+method:
+  _target_: algo.diffpir.DiffPIR
+  diffusion_scheduler_config:
+    num_steps: 1000
+    schedule: 'vp'
+    timestep: 'vp'
+    scaling: 'vp'
+    # schedule: 'linear'
+    # timestep: 'poly-7'
+  sigma_n: 0.05
+  lamb: 1.0e6   # blackhole: sweep range [7.5e5, 1.25e6]; natural image: 8.0
+  xi: 1 # stochasticity
+  linear: False # True for Inverse Scattering
+

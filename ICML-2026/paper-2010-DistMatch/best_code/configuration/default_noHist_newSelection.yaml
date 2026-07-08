@@ -1,0 +1,118 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 8
+#    prefer: processes
+#    pre_dispatch: 8  
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 1    # Only relevant for parallel execution
+  seeds:
+#    - 1
+#    - 55
+#    - 66
+#    - 1738
+#    - 1174
+#    - 279
+#    - 165
+#    - 269
+#    - 94
+#    - 1447
+#    - 68
+#    - 170
+     - 10
+     - 20
+     - 30
+     - 40
+
+
+sweep:
+  type: grid
+  axes:
+    - parameter: model_uc.ctx_encode_dropout
+      vals:
+       - null
+       - 0.25
+       - 0.50
+    - parameter: trainer.trainer_config.optim.lr
+      vals:
+       - 0.01
+       - 0.001
+    - parameter: model_uc.pos_encode.mode
+      vals:
+       - rel-simple
+#       - rel-linear
+#        - abs-transformer
+       - null
+    - parameter: model_uc.history_compress.mode
+      vals:
+#        - max-pool
+#       - max-reset
+#       - mean-reset
+#       - decay-pool
+       - null
+    - parameter: experiment_data.evaluate
+      vals:
+       - False
+    - parameter: evaluation.pred_vega
+      vals:
+       - False       
+### RUN CONFIG END
+
+###################################
+defaults:
+  - config: default
+#  - override hydra/launcher: joblib
+  - override config/model_fc: darts_forest
+  - override config/model_uc: eps_pred_hopfield_1year
+  - override config/dataset: nsdb2019_60m
+  - override config/task: default_1year
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null  # set wandb project name
+    project_entity: null #null, null
+    base_proj_dir: null    # USE ABSOLUTE PATH!
+    data_dir: ${config.experiment_data.base_proj_dir}data
+    model_dir: ${config.experiment_data.base_proj_dir}models_save
+    evaluate: true
+    experiment_tag: Hyp_Sweep_GN_newSel
+    experiment_name: hopfield_1year
+    experiment_notes: # str, used to make notes to wandblogger
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 50
+    gpu_id: 4
+
+  trainer:
+    _target_: trainer.internal_trainer.ModelInternalTrainer
+    trainer_config:
+      n_epochs: 700
+      val_every: 5
+      save_every: 10000
+      early_stopping_patience: 10000
+      optim:
+        _target_: torch.optim.AdamW
+        _partial_: true
+        lr: 0.01
+        weight_decay: 0.01
+      lr_scheduler:
+      model_selection: threshold-pi
+      init_model: null # NOT USED
+  ###
