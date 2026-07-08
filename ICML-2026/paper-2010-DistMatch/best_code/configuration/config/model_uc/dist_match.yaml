@@ -1,0 +1,24 @@
+_target_: models.uncertainty.dist_match.dist_match.DistMatch
+past_window_len: 100
+match_method: ks_stat
+match_threshold: 0.005
+beta_calc_bins: 10
+data_mode: error
+input_mode: normal
+qrf_param:
+  n_trees: 10
+  bagging_ratio: 0.9
+  verbose: false
+  split_on_predict: false
+  keep_relevant: false
+  n_recent_kept: null
+  quantile_regressor: qrf
+matcher_param:
+  retrain: false
+qrf_upd_steps: null
+# Auto-calibration: when true, match_threshold is estimated from calibration data
+auto_calibrate_threshold: false
+auto_calibrate_percentile: 15
+# Adaptive window: when true, past_window_len is selected via Winkler CV
+adaptive_window: true
+window_candidates: [50, 75, 100, 125, 150, 200]

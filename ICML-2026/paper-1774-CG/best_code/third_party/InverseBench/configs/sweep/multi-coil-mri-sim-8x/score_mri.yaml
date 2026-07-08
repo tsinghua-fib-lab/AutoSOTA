@@ -1,0 +1,24 @@
+program: main.py
+name: multi-coil-mri-score_mri-sim-8x
+method: bayes
+metric:
+  goal: maximize
+  name: psnr
+parameters:
+  algorithm.method.lamb:
+    distribution: log_uniform_values
+    min: 1.0e-2
+    max: 1.0e+2
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - problem=multi-coil-mri-knee                           # Set the problem config
+  - problem.model.acceleration_ratio=8
+  - problem.data.simulated_kspace=True
+  - algorithm=score_mri                                 # Set the algorithm config
+  - pretrain=mri-knee-mvue                          # Set the pre-trained model config
+  - wandb=True
+  - problem.data.id_list="16,40,68,114,166,199"             # String that indicates the indices of data to use. "0-2" includes 0, 1, and 2. "0,3-4" includes 0, 3, and 4.
+  - ${args_no_hyphens}

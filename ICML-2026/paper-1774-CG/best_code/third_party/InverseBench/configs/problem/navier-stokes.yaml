@@ -1,0 +1,24 @@
+name: navier-stokes-ds2
+prior: checkpoints/ns-5m.pt
+model:
+  _target_: inverse_problems.navier_stokes.ForwardNavierStokes2d
+  forward_time: 1.0
+  Re: 200.0
+  resolution: 128
+  downsample_factor: 2
+  sigma_noise: 0.0
+  unnorm_scale: 10.0
+  adaptive: True  # adaptive time-stepping
+  delta_t: 0.002   # If not adaptive, use a small time step for numerical stability
+
+data:
+  _target_: training.dataset.LMDBData
+  root: ../data/navier-stokes-test/Re200.0-t5.0
+  resolution: 128
+  std: 5.0
+  id_list: 0-9
+
+evaluator:
+  _target_: eval.NavierStokes2d
+
+exp_dir: exps/inference/navier-stokes-ds2

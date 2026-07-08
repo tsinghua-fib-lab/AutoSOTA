@@ -1,0 +1,8 @@
+_target_: models.forcast.precomputed_nh.PrecomputedNeuralHydrologyForcast
+model: precomputed-nh
+model_params:
+  nh_results_path: ${config.experiment_data.base_proj_dir}models_save/hydro/neuralhydrology_9y_1601_092104_test_results/test_results.p
+  nh_train_results_path: null #  ${config.experiment_data.base_proj_dir}models_save/hydro/neuralhydrology_9y_1601_092104_test_results/train_results.p
+  nh_states_path: null #${config.experiment_data.base_proj_dir}models_save/hydro/neuralhydrology_9y_1601_092104_test_results
+  nh_states_used: [h_n, c_n] # h_n, c_n, lstm_output
+  target_variable: 'QObs(mm/d)_sim'

@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: core test suite (CPU)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install CPU torch + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements/dev.txt
+          pip install -e .
+
+      - name: Run core test suite
+        env:
+          CBG_WANDB: "off"
+        run: |
+          # The cloud runner has no GPU and none of the heavy experiment deps
+          # (ehtim / pMF / checkpoints), so we skip tests marked accordingly.
+          # `slow` skips the few minutes-long C2ST-on-guided-samples checks.
+          pytest -m "not gpu and not blackhole and not superres and not slow" --durations=20

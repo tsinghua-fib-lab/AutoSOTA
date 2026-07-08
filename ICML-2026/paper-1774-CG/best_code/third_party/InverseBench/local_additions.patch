@@ -1,0 +1,1333 @@
+diff --git a/algo/dps.py b/algo/dps.py
+index e7efcf5..ea7c5a5 100755
+--- a/algo/dps.py
++++ b/algo/dps.py
+@@ -3,6 +3,15 @@ from tqdm import tqdm
+ from .base import Algo
+ from utils.scheduler import Scheduler
+ import numpy as np
++import time
++import pickle
++import os
++# -----------------------------------------------------------------------------------------------
++# Paper: Diffusion Posterior Sampling for General Noisy Inverse Problems
++# Official implementation: https://github.com/DPS2022/diffusion-posterior-sampling
++# -----------------------------------------------------------------------------------------------
++
++import matplotlib.pyplot as plt
+ 
+ 
+ class DPS(Algo):
+@@ -22,35 +31,240 @@ class DPS(Algo):
+         self.diffusion_scheduler_config = diffusion_scheduler_config
+         self.scheduler = Scheduler(**diffusion_scheduler_config)
+         self.sde = sde
++        self.REINF_K = 128
+         
+     def inference(self, observation, num_samples=1, **kwargs):
++        self.gen_idx=-1
++        if 'gen_idx' in kwargs:
++            self.gen_idx = kwargs['gen_idx']
+         device = self.forward_op.device
+         if num_samples > 1:
+             observation = observation.repeat(num_samples, 1, 1, 1)
+         x_initial = torch.randn(num_samples, self.net.img_channels, self.net.img_resolution, self.net.img_resolution, device=device) * self.scheduler.sigma_max
+         x_next = x_initial
+-        x_next.requires_grad = True
+ 
+-        pbar = tqdm(range(self.scheduler.num_steps))
++        pbar = range(self.scheduler.num_steps)
++        s1=time.time()
+         
++        all_min_phi = []
++        all_mean_return_phi = []
++        all_max_phi = []
++
+         for i in pbar:
+-            x_cur = x_next.detach().requires_grad_(True)
++            s2=time.time()
++            num_reinf_samples = 64  # round(self.REINF_K*self.scheduler.num_steps/(self.scheduler.num_steps-i))
++            x_cur = x_next.detach()
+ 
+             sigma, factor, scaling_factor = self.scheduler.sigma_steps[i], self.scheduler.factor_steps[i], self.scheduler.scaling_factor[i]
+             
+             denoised = self.net(x_cur / self.scheduler.scaling_steps[i], torch.as_tensor(sigma).to(x_cur.device))
+-            gradient, loss_scale = self.forward_op.gradient(denoised, observation, return_loss=True)
+ 
+-            ll_grad = torch.autograd.grad(denoised, x_cur, gradient)[0]
+-            ll_grad = ll_grad * 0.5 / torch.sqrt(loss_scale)
++            grad, min_phi, mean_return_phi, max_phi = self.batch_reinforce_grad(
++                num_reinf_samples,
++                64,
++                i,
++                x_cur,
++                observation
++            )
++            print(f"Min Phi: {min_phi}, Mean Return Phi: {mean_return_phi}, Max Phi: {max_phi}")
++            all_min_phi.append(min_phi)
++            all_mean_return_phi.append(mean_return_phi)
++            all_max_phi.append(max_phi)
++
++            # alpha_bar = 1 / (1 + sigma^2)
++            sigma_t = torch.as_tensor(sigma, device=x_cur.device, dtype=x_cur.dtype)
++            alpha_bar = 1.0 / (1.0 + sigma_t**2)
++            a_t = torch.sqrt(alpha_bar)
++        
++            b2_over_a = (1.0 - alpha_bar) / a_t
++            
++            denoised = denoised + (self.scale * b2_over_a) * grad
++            
++
++            score = (denoised - x_cur / self.scheduler.scaling_steps[i]) / sigma ** 2 / self.scheduler.scaling_steps[i]
++            #pbar.set_description(f'Iteration {i + 1}/{self.scheduler.num_steps}. Data fitting loss: {best_loss**0.5}')
++            
++            if self.sde:
++                epsilon = torch.randn_like(x_cur)
++                x_next = x_cur * scaling_factor + factor * score + np.sqrt(factor) * epsilon
++            else:
++                x_next = x_cur * scaling_factor + factor * score * 0.5 
++
++        import matplotlib.pyplot as plt
++        plt.figure(figsize=(10,5))
++        plt.plot(all_min_phi, label='Min Phi')
++        plt.plot(all_mean_return_phi, label='Mean Phi')
++        plt.plot(all_max_phi, label='Max Phi')
++        plt.xlabel('Step')
++        plt.ylabel('Phi Values')
++        plt.yscale('symlog')
++        plt.title(f'Phi Values Across Steps')
++        plt.legend()
++        plt.savefig(f'./step_samples/z_{self.REINF_K}_{self.scheduler.num_steps}_{self.gen_idx}-reinf_phi_values_across_steps.png')
++        plt.close()
++
++        return x_next
++    
++    
++    
++    
++    #-----------------helpers
++    def posterior_score(self, x_t: torch.Tensor, x0: torch.Tensor, alpha_bar_t: torch.Tensor):
++        return (alpha_bar_t.sqrt() * x0 - x_t) / (1.0 - alpha_bar_t)
++    
++    
++    def marginal_score_from_eps(self, x_t: torch.Tensor, eps_pred: torch.Tensor, alpha_bar_t: torch.Tensor):
++        return -eps_pred / (1.0 - alpha_bar_t).sqrt()
++
++
++    def conditional_score_from_samples(self, x_t: torch.Tensor, x0_samples: torch.Tensor, eps_pred: torch.Tensor, alpha_bar_t: torch.Tensor):
++        K, B = x0_samples.shape[:2]
++        x_t_exp   = x_t.unsqueeze(0).expand(K, -1, -1, -1, -1)
++        alpha_exp = alpha_bar_t.unsqueeze(0).expand(K, -1, -1, -1, -1)
++    
++        g_fwd   = self.posterior_score(x_t_exp, x0_samples, alpha_exp)
++        s_xt    = self.marginal_score_from_eps(x_t, eps_pred, alpha_bar_t)
++        s_xt_exp = s_xt.unsqueeze(0).expand_as(g_fwd)
++        return g_fwd - s_xt_exp
++    
++    
++    
++    #-----------------sampling
++    @torch.no_grad()
++    def unguided_posterior_sample(self, x_initial: torch.Tensor, step_idx: int):
++        device = self.forward_op.device
++        x_next = x_initial
++
++        pbar = range(step_idx, self.scheduler.num_steps)
++        
++        for i in pbar:
++            x_cur = x_next.detach()
+ 
++            sigma, factor, scaling_factor = self.scheduler.sigma_steps[i], self.scheduler.factor_steps[i], self.scheduler.scaling_factor[i]
++            denoised = self.net(x_cur / self.scheduler.scaling_steps[i], torch.as_tensor(sigma).to(x_cur.device))
+             score = (denoised - x_cur / self.scheduler.scaling_steps[i]) / sigma ** 2 / self.scheduler.scaling_steps[i]
+-            pbar.set_description(f'Iteration {i + 1}/{self.scheduler.num_steps}. Data fitting loss: {torch.sqrt(loss_scale)}')
+             
+             if self.sde:
+                 epsilon = torch.randn_like(x_cur)
+                 x_next = x_cur * scaling_factor + factor * score + np.sqrt(factor) * epsilon
+             else:
+                 x_next = x_cur * scaling_factor + factor * score * 0.5 
+-            x_next -= ll_grad * self.scale
+-        return x_next
+\ No newline at end of file
++        return x_next
++    
++    @torch.no_grad()
++    def posterior_samples(self, x_initial: torch.Tensor, step_idx: int, K: int):
++        return [self.unguided_posterior_sample(x_initial, step_idx).detach() for _ in range(K)]
++    
++    
++    
++    def batch_reinforce_grad(
++        self,
++        num_samples,
++        batch_size,
++        step_idx,
++        xt: torch.Tensor,
++        observation: torch.Tensor,
++        scale: float = 1.0,
++        baseline: str = "mean",
++        normalize: bool = True,
++    ):
++        device = xt.device
++        B = xt.size(0)
++        
++        sigma, factor, scaling_factor = self.scheduler.sigma_steps[step_idx], self.scheduler.factor_steps[step_idx], self.scheduler.scaling_factor[step_idx]
++
++        with torch.no_grad():
++            x0_pred = self.net(xt / self.scheduler.scaling_steps[step_idx], torch.as_tensor(sigma).to(xt.device))
++            eps_pred = xt - x0_pred
++
++        alpha_bar_t = torch.as_tensor(1.0 / (1.0 + self.scheduler.sigma_steps[step_idx]**2))[None,None,None,...].cuda().repeat(B, 1, 1, 1)
++
++        sum_phi = torch.zeros(B, device=device)
++        sum_score = torch.zeros_like(xt)
++        sum_phi_score = torch.zeros_like(xt)
++        total_K = 0
++
++        batch_idx = 0
++        count = 0
++        
++        all_phi_vals = []
++
++        while count < num_samples:
++            cur_batch = min(batch_size, num_samples - count)
++
++            cache_path = f'./step_samples/{self.REINF_K}_{self.scheduler.num_steps}_{self.gen_idx}-reinf_{step_idx}_{batch_idx}'
++            if os.path.exists(cache_path):
++                with open(cache_path, 'rb') as f:
++                    cur_samples = pickle.load(f)
++            else:
++                cur_samples = self.posterior_samples(xt.detach(), step_idx, cur_batch)
++                os.makedirs('./step_samples/', exist_ok=True)
++                with open(cache_path, 'wb') as f:
++                    pickle.dump([s.cpu() for s in cur_samples], f) # move to cpu for ram
++
++                # cur_samples has shape torch.Size([1, 1, 64, 64])
++                # Plot it as an image grid
++
++                for i, my_image in enumerate(cur_samples):
++                    plt.imshow(my_image.reshape(64, 64).cpu(), cmap='gray')
++                    os.makedirs(f'./step_samples/figs_step_{step_idx}/', exist_ok=True)
++                    plt.savefig(f'./step_samples/figs_step_{step_idx}/{self.REINF_K}_{self.scheduler.num_steps}_{self.gen_idx}-reinf_{step_idx}_{batch_idx}_{i}.png')
++                    plt.close()
++
++
++            x0_batch = torch.stack(cur_samples, dim=0).to(device)
++            Kb = x0_batch.size(0)
++
++#             Hx = self.H.H(x0_batch.view(-1, *x0_batch.shape[2:]))
++#             Hx = Hx.view(Kb, B, -1).contiguous()
++#             y0_flat = y_0.view(B, -1).to(Hx.device)
++#             residual = (y0_flat.unsqueeze(0) - Hx)
++#             var = sigma_likelihood ** 2
++#             phi_vals = (-0.5 / var) * (residual ** 2).sum(dim=2)
++            phi_vals = -self.forward_op.loss(x0_batch, observation)
++
++            phi_vals_list = phi_vals.cpu().numpy().tolist()
++
++            all_phi_vals.extend(phi_vals_list)
++            cond_scores = self.conditional_score_from_samples(
++                xt, x0_batch, eps_pred, alpha_bar_t
++            ).contiguous()
++
++            sum_phi += phi_vals.sum(dim=0)
++            sum_score += cond_scores.sum(dim=0)
++            #print(phi_vals.shape,cond_scores.shape)
++            sum_phi_score += (phi_vals[:, None, None, None, None] * cond_scores).sum(dim=0)
++            total_K += Kb
++
++            # free ram
++            del cur_samples, x0_batch, phi_vals, cond_scores
++
++            count += cur_batch
++            batch_idx += 1
++            print(f"-----{step_idx} -- Finished batch {batch_idx}: {count} / {num_samples} samples")
++
++            mean_phi = (sum_phi / total_K).view(B, 1, 1, 1)
++            grad_ckpt = (sum_phi_score / total_K) - mean_phi * (sum_score / total_K)
++
++        all_phi_vals.sort()
++        plt.figure(figsize=(10,5))
++        plt.plot(all_phi_vals)
++        plt.xlabel('Rank')
++        plt.ylabel('Phi Value')
++        plt.title(f'Phi Values for Step {step_idx}')
++        plt.savefig(f'./step_samples/{self.REINF_K}_{self.scheduler.num_steps}_{self.gen_idx}-reinf_{step_idx}_phi_values.png')
++        plt.close()
++        
++        min_phi, mean_return_phi, max_phi = all_phi_vals[0], np.mean(all_phi_vals), all_phi_vals[-1]
++
++        if baseline == "mean":
++            mean_phi = (sum_phi / total_K).view(B, 1, 1, 1)
++            grad = (sum_phi_score / total_K) - mean_phi * (sum_score / total_K)
++        else:
++            grad = (sum_phi_score / total_K)
++
++        plt.imshow(grad[0,0].cpu(), cmap='gray')
++        plt.savefig(f'./step_samples/{self.REINF_K}_{self.scheduler.num_steps}_{self.gen_idx}-reinf_{step_idx}_grad.png')
++        plt.close()
++
++        return grad.contiguous(), min_phi, mean_return_phi, max_phi
+diff --git a/algo/dps_original.py b/algo/dps_original.py
+new file mode 100644
+index 0000000..3cc32cc
+--- /dev/null
++++ b/algo/dps_original.py
+@@ -0,0 +1,61 @@
++import torch
++from tqdm import tqdm
++from .base import Algo
++from utils.scheduler import Scheduler
++import numpy as np
++
++# -----------------------------------------------------------------------------------------------
++# Paper: Diffusion Posterior Sampling for General Noisy Inverse Problems
++# Official implementation: https://github.com/DPS2022/diffusion-posterior-sampling
++# -----------------------------------------------------------------------------------------------
++
++
++class DPS(Algo):
++    
++    '''
++    DPS algorithm implemented in EDM framework.
++    '''
++    
++    def __init__(self, 
++                 net,
++                 forward_op,
++                 diffusion_scheduler_config,
++                 guidance_scale,
++                 sde=True):
++        super(DPS, self).__init__(net, forward_op)
++        self.scale = guidance_scale
++        self.diffusion_scheduler_config = diffusion_scheduler_config
++        self.scheduler = Scheduler(**diffusion_scheduler_config)
++        self.sde = sde
++        
++    def inference(self, observation, num_samples=1, **kwargs):
++        device = self.forward_op.device
++        if num_samples > 1:
++            observation = observation.repeat(num_samples, 1, 1, 1)
++        x_initial = torch.randn(num_samples, self.net.img_channels, self.net.img_resolution, self.net.img_resolution, device=device) * self.scheduler.sigma_max
++        x_next = x_initial
++        x_next.requires_grad = True
++
++        pbar = tqdm(range(self.scheduler.num_steps))
++        
++        for i in pbar:
++            x_cur = x_next.detach().requires_grad_(True)
++
++            sigma, factor, scaling_factor = self.scheduler.sigma_steps[i], self.scheduler.factor_steps[i], self.scheduler.scaling_factor[i]
++            
++            denoised = self.net(x_cur / self.scheduler.scaling_steps[i], torch.as_tensor(sigma).to(x_cur.device))
++            gradient, loss_scale = self.forward_op.gradient(denoised, observation, return_loss=True)
++
++            ll_grad = torch.autograd.grad(denoised, x_cur, gradient)[0]
++            ll_grad = ll_grad * 0.5 / torch.sqrt(loss_scale)
++
++            score = (denoised - x_cur / self.scheduler.scaling_steps[i]) / sigma ** 2 / self.scheduler.scaling_steps[i]
++            pbar.set_description(f'Iteration {i + 1}/{self.scheduler.num_steps}. Data fitting loss: {torch.sqrt(loss_scale)}')
++            
++            if self.sde:
++                epsilon = torch.randn_like(x_cur)
++                x_next = x_cur * scaling_factor + factor * score + np.sqrt(factor) * epsilon
++            else:
++                x_next = x_cur * scaling_factor + factor * score * 0.5 
++            x_next -= ll_grad * self.scale
++        return x_next
+\ No newline at end of file
+diff --git a/algo/meanflow_posterior.py b/algo/meanflow_posterior.py
+new file mode 100644
+index 0000000..2645d4f
+--- /dev/null
++++ b/algo/meanflow_posterior.py
+@@ -0,0 +1,123 @@
++import os
++import pickle
++import sys
++
++import torch
++
++from calibrated_guidance.diffusion_posterior.base import DiffusionPosterior, SampleOutput
++
++
++def load_meanflow_net(ckpt_path, device, easy_meanflow_root=None):
++    """
++    Load a MeanFlow network. Accepts either:
++      - .pkl network snapshot (recommended; uses 'ema').
++      - .pt training state (uses 'net' — live, non-EMA weights).
++    The persistence-pickled module class is reconstructed from source bytes
++    in the pickle, so `training.networks_mf` does not need to be importable.
++    `dnnlib` and `torch_utils` (already present at the repo root) must be.
++    """
++    if easy_meanflow_root is not None and easy_meanflow_root not in sys.path:
++        sys.path.insert(0, easy_meanflow_root)
++
++    if ckpt_path.endswith('.pkl'):
++        with open(ckpt_path, 'rb') as f:
++            obj = pickle.load(f)
++        net = obj.get('ema', obj.get('net'))
++    else:
++        obj = torch.load(ckpt_path, map_location='cpu', weights_only=False)
++        net = obj.get('ema', obj.get('net'))
++
++    return net.to(device).eval()
++
++
++class MeanFlowDiffusionPosterior(DiffusionPosterior):
++    """
++    Single-step MeanFlow replacement for the 25-step inner EDM-SDE loop in
++    `algo.reinforce.InverseBenchModel`. Same `sample(xt, t, K)` contract:
++    returns `[1, K, C, H, W]` candidate x0 estimates.
++
++    Coordinate conversion (VP-EDM outer -> rectified-flow MF):
++        sigma   = scheduler.sigma_steps[start_step]
++        scaling = scheduler.scaling_steps[start_step]
++        tau     = sigma / (1 + sigma)
++        z_tau   = xt / (scaling * (1 + sigma))   # ~= (1-tau) y + tau n
++
++    Sibling re-noising for diverse K candidates (mirrors approxposterior's
++    PMFOneShotSiblingReinforceDiffusionPosterior):
++        1. anchor x_hat0 = z_tau - (tau - sigma_min) * mf_net(z_tau, tau, h=tau-sigma_min)
++        2. broadcast anchor to K replicas, draw K i.i.d. fresh noises n_i,
++           rebuild z_i = (1 - renoise_tau) * anchor + renoise_tau * n_i
++        3. K-batched MF jump: x0_i = z_i - (renoise_tau - sigma_min) * mf_net(z_i, renoise_tau, h=...)
++    Default `sibling_renoise_t = None` -> renoise to the same `tau` as the outer step.
++    """
++
++    def __init__(self, scheduler, mf_net, output_path,
++                 sigma_min=0.002, sibling_renoise_t=None, enable_grad=False):
++        self.scheduler = scheduler
++        self.mf_net = mf_net
++        self.output_path = output_path
++        self.sigma_min = sigma_min
++        self.sibling_renoise_t = sibling_renoise_t
++        self.enable_grad = enable_grad
++
++    MAX_INNER_BATCH = 256
++
++    def _mf_one_step(self, z, tau_scalar):
++        B = z.shape[0]
++        h = max(tau_scalar - self.sigma_min, 0.0)
++        outs = []
++        grad_ctx = torch.enable_grad() if self.enable_grad else torch.no_grad()
++        for start in range(0, B, self.MAX_INNER_BATCH):
++            end = min(start + self.MAX_INNER_BATCH, B)
++            chunk = z[start:end]
++            cb = end - start
++            tau_t = torch.full((cb, 1, 1, 1), tau_scalar, device=z.device, dtype=z.dtype)
++            h_t = torch.full((cb, 1, 1, 1), h, device=z.device, dtype=z.dtype)
++            augment_labels = torch.zeros(cb, 9, device=z.device, dtype=z.dtype)
++            with grad_ctx:
++                v = self.mf_net(chunk, tau_t, class_labels=None,
++                                h=h_t, augment_labels=augment_labels)
++            outs.append(chunk - h * v)
++        return torch.cat(outs, dim=0) if len(outs) > 1 else outs[0]
++
++    def mean(self, xt, t):
++        start_step = int((1.0 - float(t)) * self.scheduler.num_steps)
++        start_step = min(max(start_step, 0), self.scheduler.num_steps - 1)
++        sigma = float(self.scheduler.sigma_steps[start_step])
++        scaling = float(self.scheduler.scaling_steps[start_step])
++        tau = sigma / (1.0 + sigma)
++        with torch.no_grad():
++            z_tau = xt.detach() / (scaling * (1.0 + sigma))
++            tau_t = torch.full((z_tau.shape[0], 1, 1, 1), tau, device=z_tau.device, dtype=z_tau.dtype)
++            h = max(tau - self.sigma_min, 0.0)
++            h_t = torch.full_like(tau_t, h)
++            augment_labels = torch.zeros(z_tau.shape[0], 9, device=z_tau.device, dtype=z_tau.dtype)
++            v = self.mf_net(z_tau, tau_t, class_labels=None, h=h_t, augment_labels=augment_labels)
++            return z_tau - h * v
++
++    def sample(self, xt, t, num_samples_per_step):
++        B, C, H, W = xt.shape
++        assert B == 1, "Only batch size 1 is supported in MeanFlowDiffusionPosterior"
++
++        start_step = int((1.0 - t) * self.scheduler.num_steps)
++        start_step = min(max(start_step, 0), self.scheduler.num_steps - 1)
++        sigma = float(self.scheduler.sigma_steps[start_step])
++        scaling = float(self.scheduler.scaling_steps[start_step])
++
++        tau = sigma / (1.0 + sigma)
++        z_tau = xt / (scaling * (1.0 + sigma))
++
++        anchor_x0 = self._mf_one_step(z_tau, tau)
++
++        renoise_tau = self.sibling_renoise_t if self.sibling_renoise_t is not None else tau
++        renoise_tau = float(max(min(renoise_tau, 1.0), 1e-3))
++
++        K = num_samples_per_step
++        expanded_anchor = anchor_x0.expand(K, C, H, W).contiguous()
++        fresh_noise = torch.randn_like(expanded_anchor)
++        renoised = (1.0 - renoise_tau) * expanded_anchor + renoise_tau * fresh_noise
++
++        siblings_x0 = self._mf_one_step(renoised, renoise_tau)
++
++        result = siblings_x0.reshape(1, K, C, H, W)
++        return SampleOutput(result)
+diff --git a/algo/reinforce.py b/algo/reinforce.py
+new file mode 100644
+index 0000000..9c66148
+--- /dev/null
++++ b/algo/reinforce.py
+@@ -0,0 +1,574 @@
++import copy
++import torch
++from calibrated_guidance.guidance import build_reinforce_mean_fn, build_reparam_mean_fn
++from calibrated_guidance.inference import edm_sde, flow_matching
++from calibrated_guidance.diffusion_posterior.base import DiffusionPosterior, SampleOutput
++from utils.diffusion import DiffusionSampler
++from algo.base import Algo
++from utils.scheduler import Scheduler
++import os
++import matplotlib.pyplot as plt
++import wandb
++
++
++class InverseBenchModel(DiffusionPosterior):
++    def __init__(self, scheduler, model, inner_loop_steps, output_path):
++        self.scheduler = scheduler
++        self.model = model
++        self.output_path = output_path
++        self.desired_number_of_steps_inner_loop = inner_loop_steps
++
++    def sample(self, xt, t, num_samples_per_step):
++        B, C, H, W = xt.shape
++        assert B == 1, "Only batch size 1 is supported in InverseBenchModel"
++
++        os.makedirs(self.output_path, exist_ok=True)
++        if os.path.exists(os.path.join(self.output_path, f'time_{t:.4f}.pt')):
++            result = torch.load(os.path.join(self.output_path, f'time_{t:.4f}.pt'))
++        else:
++            xt = xt.repeat(num_samples_per_step, 1, 1, 1)
++            
++            this_scheduler = self.scheduler
++            use_normal_scheduler = True
++            if self.desired_number_of_steps_inner_loop is not None:
++                start_step = int((1 - t) * self.scheduler.num_steps)
++                if start_step + self.desired_number_of_steps_inner_loop <= self.scheduler.num_steps:
++                    this_scheduler = Scheduler.get_evenly_spaced_subset_scheduler(self.scheduler, self.desired_number_of_steps_inner_loop, start_step)
++                    use_normal_scheduler = False
++
++            diffusion_sampler = DiffusionSampler(this_scheduler)
++            result = diffusion_sampler._euler(self.model, xt, SDE=True, t_begin=(1 - t), skip_filtering=(not use_normal_scheduler))
++            result = result.reshape(1, num_samples_per_step, C, H, W)
++            torch.save(result, os.path.join(self.output_path, f'time_{t:.4f}.pt'))
++
++        output = SampleOutput(result)
++        return output
++
++
++def plot_torch_image(tensor, filename):
++    plt.imshow(tensor.reshape(64, 64).cpu().numpy(), cmap='gray')
++    plt.savefig(filename)
++    plt.close()
++
++
++class CalibratedGuidanceReinforce(Algo):
++    def __init__(self,
++                 net,
++                 forward_op,
++                 diffusion_scheduler_config,
++                 sde=True,
++                 reinf_k=128,
++                 desired_number_of_steps_inner_loop=50,
++                 mf_net=None,
++                 mf_sibling_renoise_t=None,
++                 mf_sigma_min=0.002,
++                 reparam=False,
++                 use_clamp=True,
++                 save_intermediates=False,
++                 stop_at_sigma=None,
++                 last_hop=False,
++                 particle_pool_size=None,
++                 pool_no_noise=False,
++                 pool_analytic=False):
++        super().__init__(net, forward_op)
++        self.diffusion_scheduler_config = dict(diffusion_scheduler_config)
++        self.scheduler = Scheduler(**self.diffusion_scheduler_config)
++        self.last_hop = last_hop
++        self.stop_at_sigma = stop_at_sigma
++        self.particle_pool_size = int(particle_pool_size) if particle_pool_size else None
++        self.pool_no_noise = bool(pool_no_noise)
++        self.pool_analytic = bool(pool_analytic)
++        self.sde = sde
++        self.REINF_K = reinf_k
++        self.desired_number_of_steps_inner_loop = desired_number_of_steps_inner_loop
++        self.mf_net = mf_net
++        self.mf_sibling_renoise_t = mf_sibling_renoise_t
++        self.mf_sigma_min = mf_sigma_min
++        self.reparam = reparam
++        self.use_clamp = use_clamp
++        self.save_intermediates = save_intermediates
++        self.min_log_likelihoods = []
++        self.mean_log_likelihoods = []
++        self.max_log_likelihoods = []
++
++    def create_summary_plots(self, output_path):
++        os.makedirs(output_path, exist_ok=True)
++        plt.plot(self.min_log_likelihoods, label='min')
++        plt.plot(self.mean_log_likelihoods, label='mean')
++        plt.plot(self.max_log_likelihoods, label='max')
++        plt.xlabel('Diffusion Step')
++        plt.ylabel('Log Likelihood')
++        plt.yscale('symlog')
++        plt.legend()
++        plt.savefig(os.path.join(output_path, 'summary_log_likelihoods.png'))
++        plt.close()
++
++        print(f"At the end of generation at {output_path}, log likelihoods - min: {self.min_log_likelihoods[-1]}, mean: {self.mean_log_likelihoods[-1]}, max: {self.max_log_likelihoods[-1]}")
++
++    def create_plot_samples(self, output_path):
++        def plot_samples(xt, x0_samples, log_likelihoods, t):
++            B, K, C, H, W = x0_samples.samples.shape
++            assert B == 1, "Only batch size 1 is supported in plotting samples"
++            self.min_log_likelihoods.append(log_likelihoods.min().item())
++            self.mean_log_likelihoods.append(log_likelihoods.mean().item())
++            self.max_log_likelihoods.append(log_likelihoods.max().item())
++
++            log_weights = x0_samples.log_weights if x0_samples.log_weights is not None else torch.zeros_like(log_likelihoods)
++            weights = torch.softmax(log_likelihoods + log_weights, dim=1)
++            x0_hat = (weights[..., None, None, None] * x0_samples.samples).sum(dim=1).detach().cpu()
++            self.x0_traj.append(x0_hat)
++            self.t_traj.append(float(t))
++
++            if self.save_intermediates:
++                self.xt_traj.append(xt.detach().cpu())
++                self.x0_samples_traj.append(x0_samples.samples.detach().cpu())
++                self.log_lik_traj.append(log_likelihoods.detach().cpu())
++
++            # Log to wandb
++            wandb.log({
++                'min_log_likelihood': log_likelihoods.min().item(),
++                'mean_log_likelihood': log_likelihoods.mean().item(),
++                'max_log_likelihood': log_likelihoods.max().item(),
++                'diffusion_step': len(self.min_log_likelihoods),
++                't': t
++            })
++
++        return plot_samples
++
++    def get_log_likelihood_fn(self):
++        chunk = int(os.environ.get("LOSS_CHUNK_SIZE", "0") or "0")
++
++        def _ll(x0_samples):
++            x = x0_samples.reshape(-1, 1, 64, 64)
++            if chunk <= 0 or x.shape[0] <= chunk:
++                return -self.forward_op.loss(x, self.observation).reshape(1, -1)
++            parts = []
++            for i in range(0, x.shape[0], chunk):
++                parts.append(-self.forward_op.loss(x[i:i + chunk], self.observation).reshape(-1))
++            return torch.cat(parts, dim=0).reshape(1, -1)
++
++        return _ll
++
++    def _inference_particle_pool(self, observation, num_samples=1, gen_idx=None,
++                                  guidance_scale=1.0, sample_idx=0):
++        """
++        Population-SMC variant: maintain P=particle_pool_size independent SDE
++        trajectories. Each outer step, pick K=REINF_K random particles, run
++        the MeanFlow on those K, REINFORCE-weight them into a single guided
++        x0 mean, and apply the deterministic EDM-SDE update with that shared
++        mean to *all* P particles. Trajectories start very different and
++        converge as guidance pulls them toward the same x0.
++        """
++        if self.mf_net is None:
++            raise NotImplementedError("particle_pool requires mf_net")
++
++        output_path = f'step_samples/gen_idx_{gen_idx}_{sample_idx}'
++        os.makedirs(output_path, exist_ok=True)
++        self.observation = observation
++        self.x0_traj = []
++        self.t_traj = []
++
++        self.wandb_run = wandb.init(
++            project='reinforce_log_likelihoods',
++            name=f'gen_{gen_idx}_sample_{sample_idx}_pool',
++            reinit=True,
++            settings=wandb.Settings(start_method="fork"),
++        )
++
++        from algo.meanflow_posterior import MeanFlowDiffusionPosterior
++        posterior = MeanFlowDiffusionPosterior(
++            self.scheduler, self.mf_net, output_path,
++            sigma_min=self.mf_sigma_min,
++            sibling_renoise_t=self.mf_sibling_renoise_t,
++            enable_grad=False,
++        )
++
++        device = "cuda"
++        P = self.particle_pool_size
++        K = self.REINF_K
++
++        x_t = DiffusionSampler(self.scheduler).get_start(
++            torch.ones((P, 1, 64, 64), device=device)
++        )
++
++        sigma_steps = torch.as_tensor(self.scheduler.sigma_steps, device=device).float()
++        factor_steps = torch.as_tensor(self.scheduler.factor_steps, device=device).float()
++        scaling_factor = torch.as_tensor(self.scheduler.scaling_factor, device=device).float()
++        scaling_steps = torch.as_tensor(self.scheduler.scaling_steps, device=device).float()
++
++        stop_steps = self.scheduler.num_steps
++        if self.stop_at_sigma is not None:
++            below = (sigma_steps <= float(self.stop_at_sigma)).nonzero(as_tuple=False)
++            if below.numel() > 0:
++                stop_steps = max(int(below[0].item()), 1)
++            print(f"[pool] running {stop_steps}/{self.scheduler.num_steps} SDE steps "
++                  f"on P={P} particles (subset K={K})")
++        else:
++            print(f"[pool] running {stop_steps} SDE steps on P={P} particles (subset K={K})")
++
++        log_lik_fn = self.get_log_likelihood_fn()
++
++        def reinforce_step(x_t_full, sigma, scaling):
++            """Pick K particles, MF→x0, REINFORCE-weighted mean."""
++            idx = torch.randperm(P, device=device)[:K]
++            x_t_sel = x_t_full[idx]
++            tau = sigma / (1.0 + sigma)
++            z_tau = x_t_sel / (scaling * (1.0 + sigma))
++            with torch.no_grad():
++                x0_cand = posterior._mf_one_step(z_tau, tau)            # [K,1,H,W]
++            log_lik = log_lik_fn(x0_cand).flatten()                      # [K]
++            w = torch.softmax(guidance_scale * log_lik, dim=0)
++            mean = (w[:, None, None, None] * x0_cand).sum(dim=0, keepdim=True)
++            if self.use_clamp:
++                mean = mean.clamp(-1.0, 1.0)
++            return mean, log_lik
++
++        for i in range(stop_steps):
++            sigma = float(sigma_steps[i])
++            scaling = float(scaling_steps[i])
++            s_factor = float(scaling_factor[i])
++            factor = float(factor_steps[i])
++
++            mean, log_lik = reinforce_step(x_t, sigma, scaling)
++
++            self.x0_traj.append(mean.detach().cpu())
++            self.t_traj.append(1.0 - i / self.scheduler.num_steps)
++            wandb.log({
++                'mean_log_likelihood': log_lik.mean().item(),
++                'min_log_likelihood': log_lik.min().item(),
++                'max_log_likelihood': log_lik.max().item(),
++                'pool_x_t_std': x_t.std(dim=0).mean().item(),
++                'diffusion_step': i,
++                't': 1.0 - i / self.scheduler.num_steps,
++            })
++
++            score = (mean - x_t / scaling) / (sigma ** 2) / scaling
++            eps = torch.randn_like(x_t)
++            noise_term = (factor ** 0.5) * eps if i < stop_steps - 1 else 0
++            if self.pool_no_noise:
++                noise_term = 0
++            x_t = x_t * s_factor + factor * score + noise_term
++
++        if self.last_hop:
++            sigma = float(sigma_steps[stop_steps]) if stop_steps < len(sigma_steps) else float(sigma_steps[-1])
++            scaling = float(scaling_steps[stop_steps]) if stop_steps < len(scaling_steps) else float(scaling_steps[-1])
++            result, _ = reinforce_step(x_t, sigma, scaling)
++        else:
++            result = x_t.mean(dim=0, keepdim=True)
++
++        if len(self.x0_traj) > 0:
++            torch.save(
++                {'x0_traj': torch.cat(self.x0_traj, dim=0),
++                 't_traj': torch.tensor(self.t_traj)},
++                os.path.join(output_path, 'x0_traj.pt'),
++            )
++
++        self.wandb_run.finish()
++        return result
++
++    def _inference_particle_pool_analytic(self, observation, num_samples=1, gen_idx=None,
++                                          guidance_scale=1.0, sample_idx=0):
++        """
++        Analytic-marginal pool: equivalent in distribution to the explicit
++        particle-pool method (up to redrawing the K-subset each step), but
++        without storing P particles. The per-step SDE update is linear in x_t
++        with shared coefficients, so the marginal of any single particle stays
++        Gaussian: x_t[p,i] = mu[i] + xi[p,i] with xi ~ N(0, Sigma[i] * I).
++        Sample K fresh particles from N(mu, Sigma * I) each step instead.
++        """
++        if self.mf_net is None:
++            raise NotImplementedError("particle_pool_analytic requires mf_net")
++
++        output_path = f'step_samples/gen_idx_{gen_idx}_{sample_idx}'
++        os.makedirs(output_path, exist_ok=True)
++        self.observation = observation
++        self.x0_traj = []
++        self.t_traj = []
++
++        self.wandb_run = wandb.init(
++            project='reinforce_log_likelihoods',
++            name=f'gen_{gen_idx}_sample_{sample_idx}_pool_analytic',
++            reinit=True,
++            settings=wandb.Settings(start_method="fork"),
++        )
++
++        from algo.meanflow_posterior import MeanFlowDiffusionPosterior
++        posterior = MeanFlowDiffusionPosterior(
++            self.scheduler, self.mf_net, output_path,
++            sigma_min=self.mf_sigma_min,
++            sibling_renoise_t=self.mf_sibling_renoise_t,
++            enable_grad=self.reparam,
++        )
++
++        device = "cuda"
++        K = self.REINF_K
++
++        sigma_steps = torch.as_tensor(self.scheduler.sigma_steps, device=device).float()
++        factor_steps = torch.as_tensor(self.scheduler.factor_steps, device=device).float()
++        scaling_factor = torch.as_tensor(self.scheduler.scaling_factor, device=device).float()
++        scaling_steps = torch.as_tensor(self.scheduler.scaling_steps, device=device).float()
++
++        stop_steps = self.scheduler.num_steps
++        if self.stop_at_sigma is not None:
++            below = (sigma_steps <= float(self.stop_at_sigma)).nonzero(as_tuple=False)
++            if below.numel() > 0:
++                stop_steps = max(int(below[0].item()), 1)
++            print(f"[pool-analytic] running {stop_steps}/{self.scheduler.num_steps} SDE steps (K={K})")
++        else:
++            print(f"[pool-analytic] running {stop_steps} SDE steps (K={K})")
++
++        log_lik_fn = self.get_log_likelihood_fn()
++
++        # Initial marginal: x_T = sigma_max * randn  =>  mu_0 = 0, Sigma_0 = sigma_max^2
++        mu = torch.zeros((1, 1, 64, 64), device=device)
++        Sigma = float(self.scheduler.sigma_max) ** 2
++
++        def reinforce_step(mu_cur, Sigma_cur, sigma, scaling):
++            """Sample K particles from N(mu, Sigma*I), MF→x0, REINFORCE-weighted mean."""
++            std = max(Sigma_cur, 0.0) ** 0.5
++            x_t_sel = mu_cur + std * torch.randn((K, 1, 64, 64), device=device)
++            tau = sigma / (1.0 + sigma)
++            z_tau = x_t_sel / (scaling * (1.0 + sigma))
++            with torch.no_grad():
++                x0_cand = posterior._mf_one_step(z_tau, tau)
++            log_lik = log_lik_fn(x0_cand).flatten()
++            w = torch.softmax(guidance_scale * log_lik, dim=0)
++            mean = (w[:, None, None, None] * x0_cand).sum(dim=0, keepdim=True)
++            if self.use_clamp:
++                mean = mean.clamp(-1.0, 1.0)
++            return mean, log_lik
++
++        reparam_chunk = int(os.environ.get("REPARAM_CHUNK", "32"))
++
++        def reparam_step(mu_cur, Sigma_cur, sigma, scaling):
++            """K particles from N(mu, Sigma*I); reparam-grad of logsumexp w.r.t. mu.
++            Computed in chunks to bound activation memory: with detached softmax
++            weights w_k, grad(logsumexp_k g_k) = sum_k w_k * grad(g_k), so we can
++            backprop chunk-by-chunk and accumulate the gradient.
++            """
++            std = max(Sigma_cur, 0.0) ** 0.5
++            tau = sigma / (1.0 + sigma)
++            eps_k = torch.randn((K, 1, 64, 64), device=device)
++
++            # Pass 1 (no grad): compute softmax weights and unguided mean over full K.
++            with torch.no_grad():
++                x_t_full = mu_cur + std * eps_k
++                z_tau_full = x_t_full / (scaling * (1.0 + sigma))
++                x0_full = posterior._mf_one_step(z_tau_full, tau)
++                log_lik_full = log_lik_fn(x0_full).flatten()
++                w_full = torch.softmax(guidance_scale * log_lik_full, dim=0)  # [K]
++                unguided = x0_full.mean(dim=0, keepdim=True)
++
++            # Pass 2 (chunked, grad): accumulate grad of sum_k w_k * (guidance * log_lik_k) w.r.t. mu.
++            mu_grad = mu_cur.detach().clone().requires_grad_(True)
++            grad = torch.zeros_like(mu_grad)
++            M = max(1, reparam_chunk)
++            for c in range(0, K, M):
++                eps_chunk = eps_k[c:c + M]
++                w_chunk = w_full[c:c + M].detach()
++                x_t_chunk = mu_grad + std * eps_chunk
++                z_tau_chunk = x_t_chunk / (scaling * (1.0 + sigma))
++                with torch.enable_grad():
++                    x0_chunk = posterior._mf_one_step(z_tau_chunk, tau)
++                log_lik_chunk = log_lik_fn(x0_chunk).flatten()
++                chunk_loss = (w_chunk * guidance_scale * log_lik_chunk).sum()
++                chunk_grad = torch.autograd.grad(chunk_loss, mu_grad, retain_graph=False)[0]
++                grad = grad + chunk_grad.detach()
++
++            a_t = 1.0 - tau
++            b_t = tau
++            mean = unguided + (b_t ** 2 / a_t) * grad
++            if self.use_clamp:
++                mean = mean.clamp(-1.0, 1.0)
++            return mean.detach(), log_lik_full.detach()
++
++        step_fn = reparam_step if self.reparam else reinforce_step
++
++        for i in range(stop_steps):
++            sigma = float(sigma_steps[i])
++            scaling = float(scaling_steps[i])
++            s_factor = float(scaling_factor[i])
++            factor = float(factor_steps[i])
++
++            mean, log_lik = step_fn(mu, Sigma, sigma, scaling)
++
++            self.x0_traj.append(mean.detach().cpu())
++            self.t_traj.append(1.0 - i / self.scheduler.num_steps)
++            wandb.log({
++                'mean_log_likelihood': log_lik.mean().item(),
++                'min_log_likelihood': log_lik.min().item(),
++                'max_log_likelihood': log_lik.max().item(),
++                'pool_x_t_std': max(Sigma, 0.0) ** 0.5,
++                'diffusion_step': i,
++                't': 1.0 - i / self.scheduler.num_steps,
++            })
++
++            # Linear-recurrence coefficients (per-particle update, shared across particles):
++            #   x_t[p, i+1] = a * x_t[p, i] + b + c * eps[p, i]
++            # so the marginal moments evolve as:
++            #   mu    <- a * mu + b
++            #   Sigma <- a^2 * Sigma + c^2
++            a = s_factor - factor / (sigma ** 2 * scaling ** 2)
++            b = factor * mean / (sigma ** 2 * scaling)
++            c2 = factor if i < stop_steps - 1 else 0.0
++            if self.pool_no_noise:
++                c2 = 0.0
++
++            mu = a * mu + b
++            Sigma = a * a * Sigma + c2
++
++        if self.last_hop:
++            sigma = float(sigma_steps[stop_steps]) if stop_steps < len(sigma_steps) else float(sigma_steps[-1])
++            scaling = float(scaling_steps[stop_steps]) if stop_steps < len(scaling_steps) else float(scaling_steps[-1])
++            result, _ = step_fn(mu, Sigma, sigma, scaling)
++        else:
++            result = mu
++
++        if len(self.x0_traj) > 0:
++            torch.save(
++                {'x0_traj': torch.cat(self.x0_traj, dim=0),
++                 't_traj': torch.tensor(self.t_traj)},
++                os.path.join(output_path, 'x0_traj.pt'),
++            )
++
++        self.wandb_run.finish()
++        return result
++
++    def inference(self, observation, num_samples=1, gen_idx=None, guidance_scale=1.0, sample_idx=0):
++        if self.pool_analytic:
++            return self._inference_particle_pool_analytic(
++                observation, num_samples=num_samples, gen_idx=gen_idx,
++                guidance_scale=guidance_scale, sample_idx=sample_idx,
++            )
++        if self.particle_pool_size is not None:
++            return self._inference_particle_pool(
++                observation, num_samples=num_samples, gen_idx=gen_idx,
++                guidance_scale=guidance_scale, sample_idx=sample_idx,
++            )
++
++        output_path = f'step_samples/gen_idx_{gen_idx}_{sample_idx}'
++        self.x0_traj = []
++        self.t_traj = []
++        self.xt_traj = []
++        self.x0_samples_traj = []
++        self.log_lik_traj = []
++
++        # Initialize independent wandb session for this inference run
++        self.wandb_run = wandb.init(
++            project='reinforce_log_likelihoods',
++            name=f'gen_{gen_idx}_sample_{sample_idx}',
++            reinit=True,
++            settings=wandb.Settings(start_method="fork")
++        )
++
++        if self.mf_net is None:
++            if self.reparam:
++                raise NotImplementedError("Reparam estimator currently requires mf_net (gradient-enabled MF posterior).")
++            diffusion_posterior = InverseBenchModel(self.scheduler, self.net, self.desired_number_of_steps_inner_loop, output_path)
++        else:
++            from algo.meanflow_posterior import MeanFlowDiffusionPosterior
++            diffusion_posterior = MeanFlowDiffusionPosterior(
++                self.scheduler, self.mf_net, output_path,
++                sigma_min=self.mf_sigma_min,
++                sibling_renoise_t=self.mf_sibling_renoise_t,
++                enable_grad=self.reparam,
++            )
++        self.observation = observation
++        build_mean_fn = build_reparam_mean_fn if self.reparam else build_reinforce_mean_fn
++        reinforce_mean_fn = build_mean_fn(diffusion_posterior, self.get_log_likelihood_fn(), self.REINF_K, plot_samples=self.create_plot_samples(output_path), guidance_scale=guidance_scale)
++
++        clamp_stats = {'pixels_clamped': 0, 'pixels_total': 0,
++                       'steps_with_clamp': 0, 'n_steps': 0,
++                       'max_abs_pre_clamp': 0.0}
++
++        def clamp_wrap(fn):
++            def wrapped(xt, t):
++                m = fn(xt, t)
++                oob = (m < -1.0) | (m > 1.0)
++                n_oob = int(oob.sum().item())
++                clamp_stats['pixels_clamped'] += n_oob
++                clamp_stats['pixels_total'] += m.numel()
++                clamp_stats['steps_with_clamp'] += int(n_oob > 0)
++                clamp_stats['n_steps'] += 1
++                clamp_stats['max_abs_pre_clamp'] = max(clamp_stats['max_abs_pre_clamp'], float(m.abs().max().item()))
++                return m.clamp(-1.0, 1.0)
++            return wrapped
++
++        if self.use_clamp:
++            reinforce_mean_fn = clamp_wrap(reinforce_mean_fn)
++
++        sigma_steps = torch.as_tensor(self.scheduler.sigma_steps).float().to("cuda")
++        factor_steps = torch.as_tensor(self.scheduler.factor_steps).float().to("cuda")
++        scaling_factor = torch.as_tensor(self.scheduler.scaling_factor).float().to("cuda")
++        scaling_steps = torch.as_tensor(self.scheduler.scaling_steps).float().to("cuda")
++
++        # Truncate the SDE: stop at the first step where sigma <= stop_at_sigma.
++        # `stop_steps` = number of SDE iterations actually run.
++        stop_steps = self.scheduler.num_steps
++        if self.stop_at_sigma is not None:
++            below = (sigma_steps <= float(self.stop_at_sigma)).nonzero(as_tuple=False)
++            if below.numel() > 0:
++                stop_steps = max(int(below[0].item()), 1)
++            sigma_steps = sigma_steps[: stop_steps + 1]
++            factor_steps = factor_steps[: stop_steps]
++            scaling_factor = scaling_factor[: stop_steps]
++            scaling_steps = scaling_steps[: stop_steps + 1]
++            print(f"[truncate] running {stop_steps}/{self.scheduler.num_steps} SDE steps "
++                  f"(stop sigma={float(sigma_steps[-1]):.4f}, threshold={self.stop_at_sigma})")
++
++        result = edm_sde(
++            reinforce_mean_fn,
++            sigma_steps,
++            factor_steps,
++            scaling_factor,
++            scaling_steps,
++            shape=(1, 64, 64),
++            n_samples=num_samples,
++            x_t_start=DiffusionSampler(self.scheduler).get_start(torch.ones((1, 1, 64, 64)).to("cuda"))
++        )
++
++        if self.last_hop:
++            # Use the t corresponding to the last sigma_steps element so the MF
++            # posterior reads the matching sigma from the unmodified scheduler.
++            last_t = 1.0 - stop_steps / self.scheduler.num_steps
++            # Both reinforce_mean_fn and reparam_mean_fn manage their own grad
++            # context; an outer torch.no_grad() would prevent reparam from
++            # attaching gradients to its xt clone.
++            result = reinforce_mean_fn(result, last_t)
++
++        if len(self.x0_traj) > 0:
++            os.makedirs(output_path, exist_ok=True)
++            torch.save(
++                {'x0_traj': torch.cat(self.x0_traj, dim=0),
++                 't_traj': torch.tensor(self.t_traj)},
++                os.path.join(output_path, 'x0_traj.pt'),
++            )
++
++        if self.save_intermediates and len(self.xt_traj) > 0:
++            os.makedirs(output_path, exist_ok=True)
++            torch.save(
++                {'xt_traj': torch.cat(self.xt_traj, dim=0),
++                 'x0_samples_traj': torch.cat(self.x0_samples_traj, dim=0),
++                 'log_lik_traj': torch.cat(self.log_lik_traj, dim=0),
++                 't_traj': torch.tensor(self.t_traj),
++                 'observation': observation.detach().cpu()},
++                os.path.join(output_path, 'intermediates.pt'),
++            )
++
++        if clamp_stats['n_steps'] > 0:
++            steps_frac = clamp_stats['steps_with_clamp'] / clamp_stats['n_steps']
++            pixel_frac = clamp_stats['pixels_clamped'] / max(clamp_stats['pixels_total'], 1)
++            print(f"[clamp] gen={gen_idx} sample={sample_idx}  "
++                  f"steps clamped: {clamp_stats['steps_with_clamp']}/{clamp_stats['n_steps']} ({steps_frac:.1%}); "
++                  f"pixels clamped: {clamp_stats['pixels_clamped']}/{clamp_stats['pixels_total']} ({pixel_frac:.2%}); "
++                  f"max|guided_mean| pre-clamp: {clamp_stats['max_abs_pre_clamp']:.3f}")
++            self.last_clamp_stats = dict(clamp_stats)
++
++        self.min_log_likelihoods = []
++        self.mean_log_likelihoods = []
++        self.max_log_likelihoods = []
++
++        # Finish the independent wandb session
++        self.wandb_run.finish()
++
++        return result
+diff --git a/configs/algorithm/daps.yaml b/configs/algorithm/daps.yaml
+index 3b1aae1..ea037f3 100755
+--- a/configs/algorithm/daps.yaml
++++ b/configs/algorithm/daps.yaml
+@@ -4,7 +4,7 @@ method:
+   annealing_scheduler_config:
+     num_steps: 200
+     sigma_max: 100
+-    sigma_min: 0.1
++    sigma_min: 3.0e-3    # blackhole: sweep range [1e-3, 1e-2]; natural image: 0.1
+     sigma_final: 0
+     schedule: 'linear'
+     timestep: 'poly-7'
+@@ -17,7 +17,7 @@ method:
+     timestep: 'poly-7'
+ 
+   lgvd_config:
+-    num_steps: 100
+-    lr: 1e-4
++    num_steps: 15          # blackhole: sweep range [10, 25]; natural image: 100
++    lr: 3.0e-8             # blackhole: sweep range [1e-8, 1e-7]; natural image: 1e-4
+     tau: 0.01
+     lr_min_ratio: 0.01
+diff --git a/configs/algorithm/diffpir.yaml b/configs/algorithm/diffpir.yaml
+index f1b4b80..ef2b51f 100755
+--- a/configs/algorithm/diffpir.yaml
++++ b/configs/algorithm/diffpir.yaml
+@@ -9,7 +9,7 @@ method:
+     # schedule: 'linear'
+     # timestep: 'poly-7'
+   sigma_n: 0.05
+-  lamb: 8.0 # regularization parameter
++  lamb: 1.0e6   # blackhole: sweep range [7.5e5, 1.25e6]; natural image: 8.0
+   xi: 1 # stochasticity
+   linear: False # True for Inverse Scattering
+ 
+diff --git a/configs/algorithm/dps.yaml b/configs/algorithm/dps.yaml
+index 5599117..7bd9e5c 100755
+--- a/configs/algorithm/dps.yaml
++++ b/configs/algorithm/dps.yaml
+@@ -1,10 +1,10 @@
+ name: DPS
+ method:
+-  _target_: algo.dps.DPS
++  _target_: algo.dps_original.DPS
+   diffusion_scheduler_config:
+     num_steps: 1000
+     schedule: 'vp'
+     timestep: 'vp'
+     scaling: 'vp'
+-  guidance_scale: 10.0
++  guidance_scale: 1.0e-3   # blackhole: sweep range [1e-4, 3e-3]; natural image: 10.0
+   sde: True
+diff --git a/configs/algorithm/reddiff.yaml b/configs/algorithm/reddiff.yaml
+index cb0ab4e..f40023f 100755
+--- a/configs/algorithm/reddiff.yaml
++++ b/configs/algorithm/reddiff.yaml
+@@ -2,14 +2,14 @@ name: REDDiff
+ method:
+   _target_: algo.reddiff.REDDiff
+   num_steps: 1000
+-  # images
+-  observation_weight: 1.0
+-  base_lr: 2e-2
++  # blackhole
++  observation_weight: 1.0e-4   # sweep range [1e-5, 1e-3]
++  base_lr: 1.0e-2              # sweep range [1e-3, 1e-1]
+   base_lambda: 0.25
+   lambda_scheduling_type: 'constant'
+ 
+-  # blackhole
+-#  observation_weight: 1e-4
+-#  base_lr: 1e-2
++  # images
++#  observation_weight: 1.0
++#  base_lr: 2e-2
+ #  base_lambda: 0.25
+ #  lambda_scheduling_type: 'constant'
+diff --git a/training/dataset.py b/training/dataset.py
+index ec55177..13cd011 100644
+--- a/training/dataset.py
++++ b/training/dataset.py
+@@ -186,7 +186,7 @@ class BlackHole(Dataset):
+         self.txn = self.env.begin(write=False)
+ 
+     def __getitem__(self, idx):
+-        key = f'{idx}'.encode('utf-8')
++        key = f'{self.idx_map(idx)}'.encode('utf-8')
+         img_bytes = self.txn.get(key)
+         img = np.frombuffer(img_bytes, dtype=np.float64).reshape(1, self.original_resolution, self.original_resolution)
+         img = torch.from_numpy(np.array(img, copy=True))
+diff --git a/utils/diffusion.py b/utils/diffusion.py
+index fc24524..12658ce 100755
+--- a/utils/diffusion.py
++++ b/utils/diffusion.py
+@@ -55,19 +55,22 @@ class DiffusionSampler:
+         d = model(x, sigma)
+         return (d - x) / sigma**2
+     
+-    def _euler(self, model, x_start, SDE=False, verbose=False):
++    def _euler(self, model, x_start, SDE=False, verbose=False, t_begin=None, skip_filtering=False):
+         """
+             Euler's method for sampling from the diffusion process.
+         """
+         pbar = tqdm.trange(self.scheduler.num_steps) if verbose else range(self.scheduler.num_steps)
+ 
++        if t_begin is not None and not skip_filtering:
++            pbar = [step for step in pbar if step >= t_begin * self.scheduler.num_steps - 0.0001]
++
+         x = x_start
+         for step in pbar:
+             sigma, factor, scaling_factor = self.scheduler.sigma_steps[step], self.scheduler.factor_steps[step], self.scheduler.scaling_factor[step]
+             score = self.score(model, x / self.scheduler.scaling_steps[step], sigma) / self.scheduler.scaling_steps[step]
+             if SDE:
+                 epsilon = torch.randn_like(x)
+-                x = x * scaling_factor + factor * score + np.sqrt(factor) * epsilon
++                x = x * scaling_factor + factor * score + (np.sqrt(factor) * epsilon if step < self.scheduler.num_steps - 1 else 0)
+             else:
+                 x = x * scaling_factor + factor * score * 0.5 
+         return x
+diff --git a/utils/scheduler.py b/utils/scheduler.py
+index dbe0be2..f918c7a 100755
+--- a/utils/scheduler.py
++++ b/utils/scheduler.py
+@@ -1,7 +1,7 @@
+ import numpy as np
+ import copy
+ 
+-'''
++r'''
+     Scheduler for diffusion sampling following EDM framework.
+     schedule (\sigma(t)): linear, sqrt, vp
+     timestep (discretization of t): log, poly-n, vp
+@@ -13,6 +13,16 @@ import copy
+     EDM: Scheduler(num_steps=200, schedule='linear', timestep='poly-7', scaling='none')
+     
+     Example Usage: See DiffusionSampler in utils/diffusion.py for unconditional diffusion sampling.
++    
++    Subset Scheduler:
++    To create a scheduler with only specific steps (e.g., for faster inference or
++    coarse-to-fine sampling), use Scheduler.get_subset_scheduler():
++    
++        original = Scheduler(num_steps=1000, schedule='linear', timestep='poly-7')
++        subset = Scheduler.get_subset_scheduler(original, [0, 100, 200, 300, 500, 700, 999])
++    
++    The factors (factor_steps, scaling_factor) are recalculated to account for the 
++    larger \Delta t between non-consecutive steps.
+ '''
+ class Scheduler:
+     """
+@@ -42,6 +52,7 @@ class Scheduler:
+             self.sigma_final = self.sigma_min
+         self.schedule = schedule
+         self.timestep = timestep
++        self.scaling = scaling
+ 
+         steps = np.linspace(0, 1, num_steps)
+         sigma_fn, sigma_derivative_fn, sigma_inv_fn = self.get_sigma_fn(self.schedule)
+@@ -131,4 +142,124 @@ class Scheduler:
+         new_scheduler.factor_steps = scheduler.factor_steps[-num_steps:]
+         new_scheduler.scaling_factor = scheduler.scaling_factor[-num_steps:]
+         new_scheduler.scaling_steps = scheduler.scaling_steps[-num_steps:]
+-        return new_scheduler
+\ No newline at end of file
++        return new_scheduler
++
++    @classmethod
++    def get_subset_scheduler(cls, scheduler, step_indices):
++        """
++            Creates a new scheduler that uses only a subset of steps from the original scheduler.
++            The factors are recalculated to account for the larger jumps between non-consecutive steps.
++            
++            Parameters:
++                scheduler (Scheduler): The original scheduler with all steps.
++                step_indices (list[int]): List of step indices to include (0-indexed). 
++                    For example, [0, 100, 200, 300, 400, 500, 550] for a 1000-step scheduler.
++                    Must be sorted in ascending order and within range [0, scheduler.num_steps).
++            
++            Returns:
++                Scheduler: A new scheduler with only the specified steps and recalculated factors.
++            
++            Example:
++                original_scheduler = Scheduler(num_steps=1000, schedule='linear', timestep='poly-7')
++                subset_scheduler = Scheduler.get_subset_scheduler(original_scheduler, [0, 100, 200, 300, 400, 500, 550])
++        """
++        step_indices = list(step_indices)
++        
++        # Validate inputs
++        if not step_indices:
++            raise ValueError("step_indices cannot be empty")
++        if step_indices != sorted(step_indices):
++            raise ValueError("step_indices must be sorted in ascending order")
++        if step_indices[0] < 0 or step_indices[-1] >= scheduler.num_steps:
++            raise ValueError(f"step_indices must be in range [0, {scheduler.num_steps})")
++        
++        new_scheduler = copy.deepcopy(scheduler)
++        new_num_steps = len(step_indices)
++        
++        # Get the sigma and scaling functions for recalculating factors
++        sigma_fn, sigma_derivative_fn, _ = scheduler.get_sigma_fn(scheduler.schedule)
++        scaling_fn, scaling_derivative_fn = scheduler.get_scaling_fn(scheduler.scaling if hasattr(scheduler, 'scaling') else 'none')
++        
++        # Extract time_steps at the selected indices
++        # Note: time_steps has num_steps+1 elements (includes the final step)
++        # We need the time values at each selected index, plus the final time value
++        selected_time_steps = [scheduler.time_steps[i] for i in step_indices]
++        # Add the final time step - always use the original scheduler's final time step
++        # This ensures we end at the same sigma_final as the original scheduler
++        selected_time_steps.append(scheduler.time_steps[-1])
++        
++        selected_time_steps = np.array(selected_time_steps)
++        
++        # Recalculate sigma_steps and scaling_steps at selected time points
++        selected_sigma_steps = np.array([sigma_fn(t) for t in selected_time_steps])
++        selected_scaling_steps = np.array([scaling_fn(t) for t in selected_time_steps])
++        
++        # Recalculate scaling_factor and factor_steps with new delta t values
++        # scaling_factor = 1 - \dot s(t)/s(t) * \Delta t
++        new_scaling_factor = np.array([
++            1 - scaling_derivative_fn(selected_time_steps[i]) / scaling_fn(selected_time_steps[i]) * 
++            (selected_time_steps[i] - selected_time_steps[i + 1])
++            for i in range(new_num_steps)
++        ])
++        
++        # factor = 2 s(t)^2 \dot\sigma(t)\sigma(t)\Delta t
++        new_factor_steps = np.array([
++            2 * scaling_fn(selected_time_steps[i])**2 * 
++            sigma_fn(selected_time_steps[i]) * sigma_derivative_fn(selected_time_steps[i]) * 
++            (selected_time_steps[i] - selected_time_steps[i + 1])
++            for i in range(new_num_steps)
++        ])
++        
++        # Update the new scheduler
++        new_scheduler.num_steps = new_num_steps
++        new_scheduler.sigma_steps = selected_sigma_steps
++        new_scheduler.time_steps = selected_time_steps
++        new_scheduler.scaling_steps = selected_scaling_steps
++        new_scheduler.scaling_factor = new_scaling_factor
++        new_scheduler.factor_steps = [max(f, 0) for f in new_factor_steps]
++        new_scheduler.sigma_max = selected_sigma_steps[0]
++        
++        # Store the original step indices for reference
++        new_scheduler.original_step_indices = step_indices
++        
++        return new_scheduler
++
++    @classmethod
++    def get_evenly_spaced_subset_scheduler(cls, scheduler, num_subset_steps, start_step=0):
++        """
++            Creates a subset scheduler with evenly spaced steps from a starting position to the end.
++            
++            Parameters:
++                scheduler (Scheduler): The original scheduler with all steps.
++                num_subset_steps (int): Number of steps to include in the subset.
++                start_step (int): The step index to start from (0-indexed). Default is 0.
++                    For example, if you're at step 333 out of 1000 and want 20 steps to the end,
++                    use start_step=333 and num_subset_steps=20.
++            
++            Returns:
++                Scheduler: A new scheduler with evenly spaced steps from start_step to the end.
++            
++            Example:
++                original_scheduler = Scheduler(num_steps=1000, schedule='linear', timestep='poly-7')
++                
++                # Full range: 10 steps from 0 to 999
++                subset = Scheduler.get_evenly_spaced_subset_scheduler(original_scheduler, 10)
++                # Creates steps at indices [0, 111, 222, 333, 444, 555, 666, 777, 888, 999]
++                
++                # Partial range: 20 steps from 333 to 999
++                subset = Scheduler.get_evenly_spaced_subset_scheduler(original_scheduler, 20, start_step=333)
++                # Creates steps at indices [333, 368, 403, 438, ..., 964, 999]
++        """
++        if start_step < 0 or start_step >= scheduler.num_steps:
++            raise ValueError(f"start_step ({start_step}) must be in range [0, {scheduler.num_steps})")
++        
++        remaining_steps = scheduler.num_steps - start_step
++        if num_subset_steps > remaining_steps:
++            raise ValueError(f"num_subset_steps ({num_subset_steps}) cannot exceed remaining steps ({remaining_steps})")
++        if num_subset_steps < 1:
++            raise ValueError("num_subset_steps must be at least 1")
++        
++        # Generate evenly spaced indices from start_step to the last step
++        step_indices = np.linspace(start_step, scheduler.num_steps - 1, num_subset_steps, dtype=int).tolist()
++        
++        return cls.get_subset_scheduler(scheduler, step_indices)

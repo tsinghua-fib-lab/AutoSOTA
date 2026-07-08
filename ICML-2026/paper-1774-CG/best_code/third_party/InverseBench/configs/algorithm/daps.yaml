@@ -1,0 +1,23 @@
+name: DAPS
+method:
+  _target_: algo.daps.DAPS
+  annealing_scheduler_config:
+    num_steps: 200
+    sigma_max: 100
+    sigma_min: 3.0e-3    # blackhole: sweep range [1e-3, 1e-2]; natural image: 0.1
+    sigma_final: 0
+    schedule: 'linear'
+    timestep: 'poly-7'
+
+  diffusion_scheduler_config:
+    num_steps: 5
+    sigma_min: 0.01
+    sigma_final: 0
+    schedule: 'linear'
+    timestep: 'poly-7'
+
+  lgvd_config:
+    num_steps: 15          # blackhole: sweep range [10, 25]; natural image: 100
+    lr: 3.0e-8             # blackhole: sweep range [1e-8, 1e-7]; natural image: 1e-4
+    tau: 0.01
+    lr_min_ratio: 0.01

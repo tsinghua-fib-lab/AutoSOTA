@@ -1,0 +1,84 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 6
+#    prefer: processes
+#    pre_dispatch: 1
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 1    # Only relevant for parallel execution
+  seeds:
+    - 10
+    - 20
+    - 30
+    - 40
+    - 50
+    - 60
+    - 70
+    - 80
+    - 90
+    - 100
+sweep:
+  type: grid
+  axes:
+    - parameter: evaluation.pred_vega
+      vals:
+        - False
+### RUN CONFIG END
+
+###################################
+defaults:
+  - config: default
+  - override config/model_fc: reg_ridge
+  - override config/model_uc: spic
+  - override config/dataset: toy_3
+  - override config/task: default_3year_gn #default
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null  # set wandb project name
+    project_entity: null #null, null
+    base_proj_dir: null    # USE ABSOLUTE PATH!
+    data_dir: ${config.experiment_data.base_proj_dir}data
+    model_dir: ${config.experiment_data.base_proj_dir}models_save
+    evaluate: false
+    offline: disabled
+    experiment_tag: DEBUG
+    experiment_name: test_offline
+    experiment_notes:
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 55
+    gpu_id: -1
+
+  trainer:
+    _target_: trainer.internal_trainer.ModelInternalTrainer
+    trainer_config:
+      n_epochs: 500
+      val_every: 5
+      save_every: 10000
+      early_stopping_patience: 10000
+      optim:
+        _target_: torch.optim.AdamW
+        _partial_: true
+        lr: 0.01
+        weight_decay: 0.01
+      lr_scheduler:
+      init_model: null # NOT USED
+  ###

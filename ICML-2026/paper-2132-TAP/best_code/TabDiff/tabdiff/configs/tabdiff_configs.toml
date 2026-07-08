@@ -1,0 +1,59 @@
+[data]
+dequant_dist = "none"
+int_dequant_factor = 0
+
+[unimodmlp_params]
+num_layers = 2
+d_token = 4
+n_head = 1
+factor = 32
+bias = true
+dim_t = 1024
+use_mlp = true
+
+[diffusion_params]
+num_timesteps = 50
+scheduler='power_mean'      # 'power_mean', 'power_mean_unified', 'power_mean_per_column'
+cat_scheduler='log_linear'        # 'log_linear', 'log_linear_unified', 'log_linear_per_column'
+noise_dist='uniform_t'       #'uniform_t' or 'log_norm'
+
+[diffusion_params.sampler_params]
+stochastic_sampler = true
+second_order_correction = true
+
+[diffusion_params.edm_params]
+precond = true
+sigma_data = 1.0
+net_conditioning = "sigma"
+
+[diffusion_params.noise_dist_params]
+P_mean = -1.2
+P_std = 1.2
+
+[diffusion_params.noise_schedule_params]
+sigma_min = 0.002
+sigma_max = 80
+rho = 7
+eps_max = 1e-3
+eps_min = 1e-5
+rho_init = 7.0
+rho_offset = 5.0
+k_init=-6.0
+k_offset=1.0
+
+[train.main]
+steps = 8000
+lr = 0.001
+weight_decay = 0
+ema_decay = 0.997
+batch_size = 4096
+check_val_every = 2000
+lr_scheduler = "reduce_lr_on_plateau"
+factor = 0.90           # hyperparam for reduce_lr_on_plateau
+reduce_lr_patience = 50        # hyperparam for reduce_lr_on_plateau
+closs_weight_schedule = "anneal"
+c_lambda = 1.0
+d_lambda = 1.0
+
+[sample]
+batch_size = 10000

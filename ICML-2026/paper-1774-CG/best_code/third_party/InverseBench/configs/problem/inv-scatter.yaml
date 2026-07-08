@@ -1,0 +1,28 @@
+name: inverse-scatter-linear
+prior: checkpoints/inv-scatter-5m.pt
+model:
+  _target_: inverse_problems.inverse_scatter.InverseScatter
+  Lx: 0.18
+  Ly: 0.18
+  Nx: 128
+  Ny: 128
+  wave: 6
+  numRec: 360
+  numTrans: 20
+  sensorRadius: 1.6
+  sigma_noise: 0.0001
+  unnorm_shift: 1.0
+  unnorm_scale: 0.5
+
+data:
+  _target_: training.dataset.LMDBData
+  root: ../data/inv-scatter-test
+  resolution: 128
+  mean: 0.5
+  std: 0.25
+  id_list: 0-99
+
+evaluator:
+  _target_: eval.InverseScatter
+
+exp_dir: exps/inference/inv-scatter-linear

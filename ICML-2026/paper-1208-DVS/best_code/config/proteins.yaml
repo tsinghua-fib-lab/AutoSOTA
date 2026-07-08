@@ -1,0 +1,81 @@
+data: 
+  data: proteins
+  batch_size: 8
+  max_node_num: 500
+  feat:
+    type: 
+      - eig1
+      - eig2
+    scale: 8 #10
+    norm: True
+  perm_mix: True
+
+mix:
+  x: 
+    type: OU
+    drift_coeff: 1
+    sigma_0: 1.0
+    sigma_1: 0.2
+    num_scales: 1000
+  adj: 
+    type: OU
+    drift_coeff: 1
+    sigma_0: 1.0
+    sigma_1: 0.2
+    num_scales: 1000
+
+model:
+  type: transformer
+  num_layers: 8
+  input_dims:
+    E: 2
+    y: 0
+  hidden_mlp_dims:
+    X: 64
+    E: 32
+    y: 64
+  hidden_dims:
+    dx: 128
+    de: 32
+    dy: 32
+    n_head: 8
+    dim_ffX: 128
+    dim_ffE: 32
+    dim_ffy: 128
+  
+train:
+  name: test
+  use_tensorboard: True
+  lambda_train: 5 
+  num_epochs: 30000
+  save_interval: 100 
+  reduce_mean: False 
+  lr: 2.0e-4 #4.0e-4
+  lr_schedule: False 
+  ema: 0.999
+  weight_decay: 1.0e-12 
+  grad_norm: 1.0
+  lr_decay: 0.999
+  eps: 2.0e-3 
+  optimizer: adamw
+  loss_type:
+    x: const 
+    adj: default
+
+sampler:
+  data: proteins
+  predictor: Euler
+  corrector: None
+  snr: 0.0
+  scale_eps: 0.0
+  n_steps: 1
+
+sample:
+  batch_size: 62
+  use_ema: True 
+  eps: 2.0e-3 
+  kernel: tv
+  noise_removal: True
+  seed: 42
+
+ckpt: proteins

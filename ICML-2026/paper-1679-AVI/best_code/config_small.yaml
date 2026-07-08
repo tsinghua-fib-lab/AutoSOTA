@@ -1,0 +1,61 @@
+models:
+  - name: "Qwen/Qwen2.5-1.5B-Instruct"
+    provider: "hf"
+    max_new_tokens: 128
+    temperature: 0.7
+    top_p: 0.9
+    use_chat_template: true
+
+  - name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    provider: "hf"
+    max_new_tokens: 128
+    temperature: 0.7
+    top_p: 0.9
+    use_chat_template: true
+
+  - name: "openai-community/gpt2"
+    provider: "hf"
+    max_new_tokens: 128
+    temperature: 0.7
+    top_p: 0.9
+    use_chat_template: false
+
+questions: "/datasets/triviaqa_validation_questions.txt"
+question_shuffle: true
+
+alpha: 0.1
+max_t: 2000
+sampling_method: "tournament"
+top_k: null
+max_tournament_samples: 200
+
+judge:
+  type: "openai"
+  model: "deepseek-chat"
+  temperature: 0.0
+  max_tokens: 5
+  base_url: "https://api.deepseek.com"
+  api_key: ""  # Set DEEPSEEK_API_KEY or OPENAI_API_KEY env var instead
+  system_prompt: |
+    You are an expert evaluator for open-domain question answering. Compare two
+    responses to the same question and output only "A" or "B".
+
+huggingface:
+  device_map: "auto"
+  dtype: "float16"
+  quantization: null
+  trust_remote_code: true
+  cache_dir: "/models/hf_cache"
+  low_cpu_mem_usage: true
+
+output:
+  dir: "/repo/reproduction_results"
+  save_interactions: true
+  save_csv: true
+  save_serpant_trace: true
+  save_config_snapshot: true
+  log_level: "INFO"
+
+performance:
+  batch_size: 1
+  num_workers: 0

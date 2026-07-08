@@ -1,0 +1,78 @@
+ckpt: planar
+data:
+  batch_size: 128
+  data: planar
+  feat:
+    norm: true
+    scale: 10
+    type:
+    - eig1
+    - eig2
+  max_node_num: 64
+  perm_mix: true
+mix:
+  adj:
+    drift_coeff: 1
+    num_scales: 1000
+    sigma_0: 0.4
+    sigma_1: 0.2
+    type: OU
+  x:
+    drift_coeff: 1
+    num_scales: 1000
+    sigma_0: 0.2
+    sigma_1: 0.1
+    type: OU
+model:
+  hidden_dims:
+    de: 64
+    dim_ffE: 64
+    dim_ffX: 256
+    dim_ffy: 256
+    dx: 256
+    dy: 64
+    n_head: 8
+  hidden_mlp_dims:
+    E: 64
+    X: 128
+    y: 128
+  input_dims:
+    E: 2
+    y: 0
+  num_layers: 8
+  type: transformer
+sample:
+  batch_size: 40
+  eps: 0.002
+  gamma: 0.31 #0.30
+  kernel: tv
+  noise_removal: true
+  ref: 10
+  seed: 42
+  tc: 0.5
+  use_ema: true
+sampler:
+  data: planar
+  corrector: Langevin
+  n_steps: 1
+  predictor: Euler #Heun
+  scale_eps: 0.7
+  snr: 0.01
+train:
+  ema: 0.999
+  eps: 0.002
+  grad_norm: 1.0
+  lambda_train: 5
+  loss_type:
+    adj: default
+    x: const
+  lr: 0.0004
+  lr_decay: 0.999
+  lr_schedule: false
+  name: test
+  num_epochs: 30000
+  optimizer: adamw
+  reduce_mean: false
+  save_interval: 2000
+  use_tensorboard: true
+  weight_decay: 1.0e-12

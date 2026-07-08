@@ -1,0 +1,28 @@
+{
+    "train": {
+        "epochs": 4000,
+        "batch_size": 64,
+        "sampling": {
+            "std": 0.04
+        },
+        "lr": 0.001,
+        "weight_decay": 1e-05,
+        "seed": 42,
+        "device": "cuda:0"
+    },
+    "architecture": {
+        "intermediate_dim": 64,
+        "latent_dim": 2,
+        "depth": 4,
+        "activation": "elu",
+        "normalization": false
+    },
+    "data": {
+        "load_path": "/path/to/samples.npy",
+        "reach": 1
+    },
+    "test": {
+        "data": "/path/to/samples.npy",
+        "num_samples": 6000
+    }
+}

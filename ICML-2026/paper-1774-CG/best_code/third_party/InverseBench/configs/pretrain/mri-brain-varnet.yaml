@@ -1,0 +1,31 @@
+data:
+  _target_: training.dataset.MultiCoilMRIData
+  root: /srv/tmp/zwu2/datasets/brain/train_sens_maps_espirit
+  image_size: [320, 320]
+
+model:
+  _target_: models.e2e.varnet.VarNet
+
+loss:
+  _target_: training.loss.MRILoss
+  loss_type: psnr_loss
+  target_type: mvue_abs
+
+train:
+  lr: 0.001
+  batch_size: 16
+  num_steps: 100_000
+  warmup_steps: 1
+  grad_clip: 0.0
+  tf32: True
+  resume: None
+  num_workers: 1 # Number of workers for dataloader
+
+log:
+  exp_dir: exps/pretrain
+  log_every: 100
+  save_every: 5_000
+  exp_name: E2EVARNET-MRI-BRAIN
+  wandb: False
+  project: E2EVARNET-MRI-BRAIN
+  group: training

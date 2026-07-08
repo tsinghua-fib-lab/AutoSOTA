@@ -1,0 +1,81 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 6
+#    prefer: processes
+#    pre_dispatch: 1
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 1    # Only relevant for parallel execution
+  seeds:
+    - 10
+    - 20
+#  skip_cfg: # fp_cfg / seed
+#    - [0, 10]
+#    - [2, 20]
+#  init_models: null
+
+sweep:
+  type: grid
+  axes:
+    - parameter: evaluation.pred_vega
+      vals:
+        - False
+### RUN CONFIG END
+
+###################################
+defaults:
+  - config: default
+  - override config/model_fc: global_lstmmdn
+  - override config/model_uc: dummyquantile
+  - override config/dataset: nsdb2018-20_60m
+  - override config/task: default_3year_gn #default
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null
+    project_entity: null
+    base_proj_dir: null
+    data_dir: ${config.experiment_data.base_proj_dir}data
+    model_dir: ${config.experiment_data.base_proj_dir}models_save
+    evaluate: true
+    offline: offline
+    experiment_tag: debug_lstm
+    experiment_name: test_lstm_enbpi
+    experiment_notes:
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 10
+    gpu_id: -1
+
+  trainer:
+    _target_: trainer.internal_trainer.ModelInternalTrainer
+    trainer_config:
+      n_epochs: 5
+      val_every: 1
+      save_every: 10000
+      early_stopping_patience: 10000
+      optim:
+        _target_: torch.optim.AdamW
+        _partial_: true
+        lr: 0.001
+        weight_decay: 0.001
+      lr_scheduler: null
+      init_model: null
+  ###

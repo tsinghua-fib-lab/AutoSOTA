@@ -1,0 +1,55 @@
+### HYDRA START
+hydra:
+  run:
+    dir: ./outputs/${hydra.job.name}
+  sweep:
+    dir: ./outputs/${hydra.job.name}
+    subdir: ${hydra.job.num}
+  job:
+    chdir: True # change working directory of run
+    name: ${config.experiment_data.experiment_name}_${now:%d%m%y_%H%M%S}
+#  launcher:
+#    n_jobs: 6
+#    prefer: processes
+#    pre_dispatch: 1
+### HYDRA END
+
+### RUN CONFIG START
+run_config:
+  exec_type: parallel # sequential
+  gpu_ids: [0]
+  runs_per_gpu: 1    # Only relevant for parallel execution
+  seeds:
+    - 1
+    - 45
+    - 546
+
+sweep:
+  type: grid
+  axes:
+### RUN CONFIG END
+
+
+###################################
+defaults:
+  - config: enbPI
+  - override config/model_uc: spic_legacy
+  - override config/dataset: enbPI_solar_all
+
+
+config:
+
+  ### EXPERIMENT CONFIG
+  experiment_data:
+    project_name: null  # set wandb project name
+    experiment_tag: EnbPI-New
+    experiment_name: spic-legacy
+    experiment_notes: # str, used to make notes to wandblogger
+    experiment_dir: null
+    experiment_sweep_fp: null      # This is used by sweep to allow grouping of multiple seeds
+    experiment_sweep_tag: NoSweep  # This is used by sweep to allow filter for the sweep
+    seed: 0
+    gpu_id: 0
+
+  ###
+

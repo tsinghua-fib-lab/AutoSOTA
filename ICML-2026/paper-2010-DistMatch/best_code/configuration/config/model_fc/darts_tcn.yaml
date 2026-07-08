@@ -1,0 +1,10 @@
+_target_: models.forcast.darts.SimpleDartsModel
+model: darts-tcn
+model_params:
+  input_chunk_length: 96
+  output_chunk_length: 1
+  pl_trainer_kwargs:
+    accelerator: gpu
+    devices:
+      - 0
+  n_epochs: 50

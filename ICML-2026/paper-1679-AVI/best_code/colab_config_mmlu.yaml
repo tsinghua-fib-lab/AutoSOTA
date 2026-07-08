@@ -1,0 +1,58 @@
+# Public example configuration for MMLU-style evaluations.
+# Replace model names, cache paths, and output directories before running.
+
+models:
+  - name: "your-org/your-instruct-model-a"
+    provider: "hf"
+    max_new_tokens: 64
+    temperature: 0.7
+    top_p: 0.9
+    use_chat_template: true
+
+  - name: "your-org/your-instruct-model-b"
+    provider: "hf"
+    max_new_tokens: 64
+    temperature: 0.7
+    top_p: 0.9
+    use_chat_template: true
+
+questions: "hf-mmlu:cais/mmlu:example_subset:test"
+question_shuffle: true
+max_questions: 100
+
+alpha: 0.1
+max_t: 500
+sampling_method: "random_pair"
+top_k: null
+max_tournament_samples: 200
+
+judge:
+  type: "openai"
+  model: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 5
+  system_prompt: |
+    You are a strict multiple-choice question evaluator. Compare two responses
+    to the same question and output only "A" or "B".
+
+huggingface:
+  device_map: "auto"
+  dtype: "float16"
+  quantization: null
+  trust_remote_code: false
+  cache_dir: null
+  low_cpu_mem_usage: true
+
+output:
+  dir: "example_results"
+  save_interactions: true
+  save_csv: true
+  save_serpant_trace: true
+  save_config_snapshot: true
+  log_level: "INFO"
+
+performance:
+  batch_size: 1
+  num_workers: 0
+  prefetch_factor: null
+  pin_memory: false

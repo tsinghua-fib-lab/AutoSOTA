@@ -1,0 +1,46 @@
+OCMB/
+├── README.md                     (9.1K) - Complete documentation
+├── EXTRACTION_SUMMARY.md         (6.5K) - Extraction details
+├── requirements.txt              (426B) - Dependencies
+├── example.py                    (9.2K) - Comprehensive examples
+├── test_installation.py          (3.1K) - Installation test
+├── __init__.py                   (1.3K) - Package exports
+├── ocmb.py                       (56K)  - Main OCMB implementation
+│
+├── caps/                                - CaPS Backbone
+│   ├── __init__.py              (296B)
+│   ├── caps_backend.py          (5.7K) - Stein gradient algorithm
+│   └── utils.py                 (2.5K) - DAG utilities
+│
+├── scino/                               - SciNO Backbone
+│   └── sciNO/
+│       ├── __init__.py          (231B)
+│       ├── config.py            (688B)
+│       ├── scino.py             (23K)  - Main algorithm
+│       │
+│       ├── models/
+│       │   ├── __init__.py      (93B)
+│       │   ├── fno_operator.py  (9.4K) - Fourier Neural Operator
+│       │   └── score_unet.py    (2.6K) - Score network
+│       │
+│       ├── trainers/
+│       │   ├── __init__.py      (112B)
+│       │   ├── train_operator.py (11K)  - FNO training
+│       │   └── train_score.py   (5.7K) - Score training
+│       │
+│       ├── data/
+│       │   ├── __init__.py      (75B)
+│       │   └── dataset.py       (1.6K) - Data loaders
+│       │
+│       └── utils/
+│           ├── __init__.py      (37B)
+│           └── math_utils.py    (2.1K) - Math utilities
+│
+└── utils/                               - CMI Testing
+    ├── __init__.py              (682B) - Auto loader
+    ├── KnnCMI_loader.py         (4.1K) - Unified loader
+    ├── KnnCMI.py                (5.2K) - CPU version
+    ├── KnnCMI_cuda.py           (9.1K) - CUDA version
+    └── KnnCMI_cuda_cached.py    (9.6K) - Cached CUDA
+
+Total: 25 Python files, ~500KB

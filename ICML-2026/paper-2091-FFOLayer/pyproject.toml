@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ffolayer"
+dynamic = ['version']
+description = "A fully first-order (FFO) layer for differentiable convex optimization"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Zihao Zhao"},
+           {name = "Kai-Chia Mo"},
+           {name = "Shing-Hei Ho"},
+           {name = "Brandon Amos"},
+           {name = "Kai Wang"},
+]
+dependencies = [
+  "numpy",
+  "scipy",
+  "torch",
+  "cvxpy",
+  "diffcp",
+  "threadpoolctl",
+]
+keywords = ["first-order", "convex optimization", "differentiable optimization"]
+
+[project.optional-dependencies]
+
+
+[project.urls]
+Homepage = "https://github.com/GT-KOALA/FFOLayer"
+Repository = "https://github.com/GT-KOALA/FFOLayer.git"
+Documentation = "https://github.com/GT-KOALA/FFOLayer"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ffolayer"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/README.md", "/LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.version]
+path = "src/ffolayer/__init__.py"

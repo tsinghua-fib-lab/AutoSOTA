@@ -1,0 +1,45 @@
+data:
+  _target_: training.dataset.LMDBData
+  root: ../data/navier-stokes/Re200.0-t5.0
+  resolution: 128
+  std: 5.0
+
+model:
+  _target_: models.precond.EDMPrecond
+  model_type: DhariwalUNet
+  img_resolution: 128
+  img_channels: 1
+  label_dim: 0
+  model_channels: 128
+  channel_mult: [1, 1, 1, 2, 2]
+  attn_resolutions: [16]
+  num_blocks: 1
+  dropout: 0.0
+
+loss:
+  _target_: training.loss.EDMLoss
+
+train:
+  lr: 0.0001
+  batch_size: 256
+  num_steps: 100_000
+  warmup_steps: 500
+  ema_decay: 0.9999
+  grad_clip: 0.0
+  ema_halflife_nimg: 204800
+  ema_rampup_ratio: 0.05
+  tf32: True
+  resume: None
+  num_workers: 4 # Number of workers for dataloader
+
+
+
+log:
+  exp_dir: exps/pretrain
+  log_every: 100
+  save_every: 5_000
+  exp_name: EDM-NS2d
+  wandb: False
+  project: EKS-DM-NS2d
+  group: training
+

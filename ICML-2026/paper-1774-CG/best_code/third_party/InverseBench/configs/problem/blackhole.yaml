@@ -1,0 +1,32 @@
+name: blackhole
+prior: checkpoints/blackhole-50k.pt
+model:
+  _target_: inverse_problems.blackhole.BlackHoleImaging
+  root: ../data/blackhole/measure
+  imsize: 64
+  observation_time_ratio: 1.0
+  noise_type: 'eht'
+  w1: 0
+  w2: 1
+  w3: 1
+  w4: 0.5
+  sigma_noise: 0.0
+  unnorm_scale: 0.5
+  unnorm_shift: 1.0
+ 
+
+data:
+  _target_: training.dataset.BlackHole
+  root: ../data/blackhole/test
+  resolution: 64
+  original_resolution: 64
+  random_flip: False
+  zoom_in_out: False
+  id_list: 0-99
+
+
+evaluator:
+  _target_: eval.BlackHoleEvaluator
+
+
+exp_dir: exps/inference/blackhole
