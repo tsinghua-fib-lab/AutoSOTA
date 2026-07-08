@@ -1,0 +1,60 @@
+policy:
+  desc: Namespace for configuring the agent-policy for data-generation.
+  method:
+    desc: Agent name/ specification for the factory.
+    value: smc
+  params:
+    desc: Hyperparameters namespace for the `smc` RL-policy implementation
+    option:
+      desc: >
+        Choice between `dirac`, `value`, or `sumprod` to change construction
+        of the behaviour policy + learning targets.
+      value: dirac
+    value_mixing:
+      desc: >
+        Linear mixing parameter for prior and posterior estimated value, to be used
+        for bootstrapping values in credit-assignment (0 = prior, 1 = posterior).
+      value: 0.0
+    stochastic_eval:
+      desc: > 
+        If true, use sampling from PMF for selecting actions at offline testing. 
+        Otherwise, select the max-logit (or mean if Gaussian; i.e., deterministic).
+      value: false
+    credit_assignment: { discount: 0.997, td_lambda: 0.95 }
+    smc:
+      desc: Hyperparameter configuration for our (iterated) particle filter planning method
+      kwargs:
+        desc: Base SMC hyperparameters
+        value: {
+          depth: 4,
+          num_particles: 4,
+          resampling_period: 4,
+          prevent_particle_death: false
+        }
+      resampling_method:
+        desc: Choose how to resample.
+        value: multinomial # deterministic, multinomial
+      sh_smcts:
+        desc: Choose what to do at the root.
+        value: {
+          root_planner: smc,     # sh_smcts, smc
+          num_actions_to_search: 16,
+          use_completed_q_values: false,
+          use_q_transform: false,
+          variance_ablations: false,
+        }
+      proposal_kwargs:
+        desc: Hyperparameters for the (twisted) proposal distribution
+        value: {
+          bootstrap: 5,
+          constraint_param: 0,
+          constraint_type: hard,
+          method: Prior,
+          root_method: null
+        }
+      transition_kwargs:
+        desc: Unused field for interface parity
+        value: { }
+      target_kwargs:
+        desc: Target policy improvement operator keyword arguments
+        value: { normalizer: softmax, temperature: .1, root_temperature: .1 }

@@ -1,0 +1,27 @@
+
+policy:
+  desc: Namespace for configuring the agent-policy for data-generation.
+  method:
+    desc: Agent name/ specification for the factory.
+    value: mctx
+  params:
+    desc: Hyperparameters namespace for `mctx` implementation of gumbel-muzero's MCTS search
+    bootstrap:
+      desc: Number of action-samples to take from the prior (action-space bootstrapping)
+      value: 30
+    budget:
+      desc: Number of simulations MCTS performs.
+      value: 32
+    max_depth:
+      desc: >
+        Max depth in the tree to search, lower values give faster runtime performance
+        due to jax buffer preallocation
+      value: 32
+    max_breadth_root:
+      desc: Maximum branching factor for search to consider.
+      value: 16
+    stochastic_eval:
+      desc: >
+        If true, use sampling from PMF for selecting actions at offline testing. 
+        Otherwise, select the max-logit (or mean if Gaussian; i.e., deterministic).
+      value: false

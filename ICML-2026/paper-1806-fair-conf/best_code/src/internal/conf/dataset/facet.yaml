@@ -1,0 +1,25 @@
+dataset: "facet"
+n_calib: 4000
+n_calib_val: -1  # use half of remaining examples for HPO
+n_test: -1        # use other half of remaining examples for test
+m: 20
+data_root: "data/facet/"
+model_size: "ViT-L/14"
+
+h_params_raps:
+  T: 1.0
+  kreg: 3
+  lamda: 0.5
+
+llm_model: 'gemma-3-4b-it-qat'
+
+llm_system_instruct: "You are given an image of a person and a list of possible classes: [{all_options}].\n
+  Select exactly one class name from this list. Respond with only the class name. Do not provide explanations or additional text."
+
+llm_user_prompt: "image attached\n
+  The following shorter list contains classes that are more likely to be correct:\n
+  [{options}]\n
+  Based on the image, which class is the person most likely to belong to?"
+
+llm_user_prompt_control: "image attached\n
+  Based on the image, which class is the person most likely to belong to?"

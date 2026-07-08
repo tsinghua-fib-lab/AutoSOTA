@@ -1,0 +1,39 @@
+method: grid
+parameters:
+
+  policy.params.smc.kwargs.value:
+    values: [
+      { depth: 4, num_particles: 4, resampling_period: 3, prevent_particle_death: true },
+      { depth: 4, num_particles: 16, resampling_period: 3, prevent_particle_death: true },
+      { depth: 16, num_particles: 4, resampling_period: 3, prevent_particle_death: true },
+      { depth: 16, num_particles: 16, resampling_period: 3, prevent_particle_death: true },
+
+      { depth: 4, num_particles: 4, resampling_period: 1, prevent_particle_death: true },
+      { depth: 4, num_particles: 16, resampling_period: 1, prevent_particle_death: true },
+      { depth: 16, num_particles: 4, resampling_period: 1, prevent_particle_death: true },
+      { depth: 16, num_particles: 16, resampling_period: 1, prevent_particle_death: true },
+  ]
+
+  policy.params.smc.proposal_kwargs.value:
+    values: [
+      {
+        bootstrap: 5,
+        constraint_param: 0,
+        constraint_type: sandwich,
+        method: Prior,
+        root_method: null
+      },
+      {
+        bootstrap: 30,
+        constraint_param: .1,
+        constraint_type: sandwich,
+        method: VariationalKullbackLeibler,
+        root_method: null
+      },
+    ]
+
+  policy.params.option.value:
+    values: [ dirac, sumprod ]
+
+  policy.params.smc.target_kwargs.value.temperature:
+    values: [0.1, 1.0]

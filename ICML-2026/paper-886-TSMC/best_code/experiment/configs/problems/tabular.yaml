@@ -1,0 +1,31 @@
+
+environment:
+  desc: Namespace for configuring the problem to tackle.
+  name:
+    desc: Specify which problem-domain to run the experiment on
+    value: SquareGrid
+  kwargs:
+    desc: Problem specific keyword arguments to initialize the environment
+    value: {
+      n: 5,
+      episode_steps: 100000,
+      terminate_on_timeout: False,
+      one_hot_encoding: False,
+      start_bounds: [ 0, 0 ],
+      goal_bounds: [ 4, 4 ]
+    }
+  truncation_length:
+    desc: ...
+    value: 1000
+
+evaluation:
+  desc: Namespace for configuring evaluation of output variables
+  fixed_seed:
+    desc: Specify PRNG-seed value to independently seed the test-environment setup and keep fixed across all agent parameters
+    value: 0
+  timeout:
+    desc: How many interactions to wait until the first termination.
+    value: 4000
+  batch_size:
+    desc: How many samples to estimate expected performance
+    value: 128

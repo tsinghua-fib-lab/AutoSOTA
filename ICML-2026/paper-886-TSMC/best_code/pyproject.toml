@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smz"
+version = "0.0.0"
+description = "Research code for Twice-Sequential Monte Carlo for Tree Search (TSMCTS)."
+readme = "README.md"
+authors = [
+    { name="Joery A. de Vries", email="J.A.deVries@tudelft.nl" }
+]
+keywords = [
+    "reinforcement-learning",
+    "python",
+    "machine learning",
+    "jax"
+]
+classifiers = [
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "setuptools>=69.5.1",
+    "jaxtyping>=0.2.30",
+    "optax>=0.2.3"
+]
+requires-python = ">=3.12"
+license = { text = "MIT" }
+urls = { "Homepage" = "https://github.com/joeryjoery/tsmcts" }
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.2",
+    "flake8-pyproject>=1.2.3",
+    "flake8>=7.1.0",
+    "flashbax==0.1.2",
+    "rlax==0.1.6",
+    "mctx==0.0.5",
+    "flax>=0.8.4",
+    "wandb>=0.17.2",
+    "tqdm>=4.66.4",
+    "pyyaml>=6.0.1",
+    "jit-env>=0.1.5",
+    "brax==0.10.5",
+    "jumanji==1.0.1",
+    "pgx==2.0.1",
+]
+
+[tool.setuptools.packages.find]
+exclude = []
+
+[tool.setuptools.package-data]
+"smz" = ["py.typed"]
+
+[project.scripts]
+smz-run = "experiment.src.main:main"
+
+[tool.flake8]
+extend-ignore = [
+    "F401",
+    "F722"
+]
+exclude = [
+    ".git",
+    ".tox",
+    "__pycache__",
+    "build",
+    "dist",
+    "local",
+    "notes"
+]
+max-line-length = 79
+max-complexity = 10

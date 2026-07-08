@@ -1,0 +1,57 @@
+dataset: "acs-income"
+calib_batch_size: 256
+calib_val_batch_size: 256
+train_batch_size: 80000
+test_batch_size: 256
+n_calib: 20000
+n_train: 80000
+n_val: 8000
+n_calib_val: 10000
+n_test: 10000
+data_root: "data/acs/"
+m: 10
+
+optimizer: "adam"
+score_fn: "raps"
+lr: 0.005
+epochs: 15
+
+h_params_raps:
+  T: 0.2
+  kreg: 5
+  lamda: 0.5
+
+llm_model: 'qwen2.5-7b'
+
+llm_system_instruct: "You are a labor economics expert. Given a structured demographic and employment profile from a census survey, select the correct income bracket from the provided list: [{all_options}].\n
+  Respond with only the income bracket label. Do not explain your reasoning."
+
+llm_user_prompt: "Profile: The following is a structured demographic and employment profile derived from a census survey.\n
+  Age: {AGEP}\n
+  Class of worker: {COW}\n
+  Educational attainment: {SCHL}\n
+  Marital status: {MAR}\n
+  Occupation code: {OCCP}\n
+  Place of birth: {POBP}\n
+  Employment status of parent: {ESP}\n
+  Relationship to household reference person: {RELSHIPP}\n
+  Usual hours worked per week (past 12 months): {WKHP}\n
+  Sex: {SEX}\n
+  Race: {RAC1P}\n
+  The following income brackets are more likely to be correct:\n
+  [{options}]\n
+  Based on the profile above, which income bracket is the best match?"
+
+llm_user_prompt_control: "Profile: The following is a structured demographic and employment profile derived from a census survey.\n
+  Age: {AGEP}\n
+  Class of worker: {COW}\n
+  Educational attainment: {SCHL}\n
+  Marital status: {MAR}\n
+  Occupation code: {OCCP}\n
+  Place of birth: {POBP}\n
+  Employment status of parent: {ESP}\n
+  Relationship to household reference person: {RELSHIPP}\n
+  Usual hours worked per week (past 12 months): {WKHP}\n
+  Sex: {SEX}\n
+  Race: {RAC1P}\n
+  Based on the profile above, which income bracket is the best match?"

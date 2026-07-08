@@ -1,0 +1,26 @@
+
+environment:
+  desc: Namespace for configuring the problem to tackle.
+  name:
+    desc: Specify which problem-domain to run the experiment on
+    value: jumanji Snake-v1
+  kwargs:
+    desc: Problem specific keyword arguments to initialize the environment
+    value: { num_rows: 12, num_cols: 12 }
+  truncation_length:
+    desc: ...
+    value: 4000
+
+evaluation:
+  desc: Namespace for configuring evaluation of output variables
+  fixed_seed:
+    desc: Specify PRNG-seed value to independently seed the test-environment setup and keep fixed across all agent parameters
+    value: 0
+  timeout:
+    desc: How many interactions to wait until the first termination.
+    value: 4000
+  batch_size:
+    desc: How many samples to estimate expected performance
+    value: 128
+
+

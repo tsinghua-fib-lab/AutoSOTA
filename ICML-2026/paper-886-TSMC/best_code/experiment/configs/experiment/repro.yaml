@@ -1,0 +1,34 @@
+rng:
+  desc: Namespace for configuring pseudo-randomness initialization
+  seed:
+    desc: Initialization values to pseudo-random number generators
+    value: 42
+
+experiment:
+  desc: Namespace for configuring experiment settings
+  name:
+    desc: Name of this experiment configuration
+    value: Repro-Snake-TSMCTS
+  max_iterations:
+    desc: Number of learning iterations to perform
+    value: 100
+  eval_period:
+    desc: Evaluate each intermediate agent with this period
+    value: 20
+  eager_eval:
+    desc: >
+      Whether to immediately evaluate iterates or defer this.
+    value: true
+  snapshot_period:
+    desc: Save model weights with this period.
+    value: 50
+
+data_generator:
+  desc: >
+    Namespace for configuring agent-environment interaction.
+  batch_size:
+    desc: Number of environments/ agents to run in parallel
+    value: 16
+  length:
+    desc: Sequence length for generating environment data
+    value: 32

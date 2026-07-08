@@ -1,0 +1,51 @@
+optimizer:
+  desc: Namespace for configuring optimization of `model` parameters
+  name:
+    desc: What optimizer to use from the `optax` namespace
+    value: adamw
+  learning_rate:
+    desc: Initial learning rate for the optimizer
+    value: 3.0e-4
+  l2_weight_decay:
+    desc: l2 prior variance on the neural network weights
+    value: 1.0e-6
+  max_grad_norm:
+    desc: Maximum gradient norm for clipping
+    value: 10.0
+  max_grad:
+    desc: Maximum absolute value for any gradient element
+    value: 10.0
+  subset_of_weights:
+    desc: Whether to optimize a (flagged by the architecture) subset of model parameters
+    value: false
+
+
+learner:
+  desc: Namespace for configuring optimization of `model` parameters
+  replay_buffer:
+    desc: >
+      Hyperparameters for the replay buffer implementation.
+      Note, the max age of old parameter-data extends the buffer size by
+      multiplying `data_generator.batch_size * data_generator.length * value`.
+    value: {
+      max_age_buffer: 64,
+      min_length_buffer: 1,
+      prioritized: false,
+      priority_exponent: 0.0
+    }
+  credit_assignment:
+    desc: Hyperparameters for the credit assignment algorithm for *learning*
+    value: { td_lambda: 0.95, discount: 0.997, sarsa: false }
+  loss:
+    desc: Hyperparameters for the loss-function
+    value: {
+      sample_entropy_coeff: 0.0,
+      exact_entropy_coeff: 0.01,
+      policy_coeff: 1.0,
+      value_coeff: 0.5
+    }
+  gradient_descent:
+    desc: Hyperparameters for the stochastic gradient descent implementation
+    value: { batch_size: 256, num_steps: 100 }
+
+

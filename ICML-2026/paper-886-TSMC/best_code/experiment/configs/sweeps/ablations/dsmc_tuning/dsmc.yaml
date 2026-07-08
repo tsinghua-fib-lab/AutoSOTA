@@ -1,0 +1,34 @@
+method: grid
+parameters:
+  policy.params.smc.kwargs.value.depth:
+    values: [ 6 ]
+  policy.params.smc.kwargs.value.num_particles:
+    values: [ 4 ]
+  policy.params.smc.kwargs.value.resampling_period:
+    values: [ 4 ]
+  policy.params.smc.target_kwargs.value.root_temperature:
+    values: [ 0.01 ]
+  policy.params.smc.sh_smcts.value.root_planner:
+    values: [ sh_smcts ]
+  policy.params.smc.sh_smcts.value.use_completed_q_values:
+    values: [ false ]
+  policy.params.smc.sh_smcts.value.use_q_transform:
+    values: [ false ]
+  policy.params.smc.sh_smcts.value.variance_ablations:
+    values: [ false ]
+  policy.params.smc.sh_smcts.value.num_actions_to_search:
+    values: [ 4 ]
+  policy.params.credit_assignment.discount:
+    values: [ 0.99 ]
+  policy.params.credit_assignment.td_lambda:
+    values: [ 0.9 ]
+  policy.params.smc.kwargs.value.prevent_particle_death:
+    values: [ true ]
+  policy.params.smc.proposal_kwargs.value.constraint_param:
+    values: [ .1 ]
+  policy.params.smc.proposal_kwargs.value.constraint_type:
+    values: [ sandwich ]
+  policy.params.smc.proposal_kwargs.value.method:
+    values: [ VariationalKullbackLeibler ]
+  policy.params.smc.target_kwargs.value.advantage_softmax:
+    values: [ true ]

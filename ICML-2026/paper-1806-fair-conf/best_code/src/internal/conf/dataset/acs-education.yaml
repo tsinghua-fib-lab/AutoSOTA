@@ -1,0 +1,22 @@
+dataset: "acs-education"
+calib_batch_size: 256
+calib_val_batch_size: 256
+train_batch_size: 80000
+test_batch_size: 256
+n_calib: 20000
+n_train: 80000
+n_val: 8000
+n_calib_val: 10000
+n_test: 10000
+data_root: "data/acs/"
+m: 6
+
+optimizer: "adam"
+score_fn: "raps"
+lr: 0.005
+epochs: 15
+
+h_params_raps:
+  T: 0.2
+  kreg: 2
+  lamda: 0.5

@@ -1,0 +1,37 @@
+seed: 0  # random seed for reproducibility
+alpha: 0.1  # conformal error tolerance rate
+test_batch_size: 256
+calib_batch_size: 256
+m: 10
+data_root: "data/"
+logdir_root: "logs/"
+k: 3
+score_fn: "raps"  # hinge, raps, saps
+hpo_iterations: 50
+verbose: false
+model_checkpoint: null
+save_model_ckpt: false
+
+chart_heatmap_label_ordered: True
+
+h_params_saps:
+  T: 1.0
+  lamda: 0.5
+
+h_params_hinge:
+  T: 1.0
+
+back_cp_params:
+  epsilon: 1e-4
+  max_set_size_offset: 0
+  tolerance: 1e-7
+
+clustered_cp:
+  gamma_label: 0.3              # fraction of calibration points used for clustering
+  M_label: 3                    # number of clusters (excluding the null cluster)
+  gamma_group: 0.3              
+  M_group: 2 
+  embedding_mode: 'upper_percentiles'    # options: upper_percentiles or cdf_grid
+  summary_bins: 50        # number of points to summarize empirical CDF per key
+  random_state: 42         # random seed for splitting calibration set and K-means initialization
+  min_points_per_key: 10   # keys with < this in clustering split are clustered to the null cluster

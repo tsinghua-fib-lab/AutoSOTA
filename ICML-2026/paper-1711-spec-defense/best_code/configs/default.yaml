@@ -1,0 +1,55 @@
+# CSR Default Configuration
+# Override these values via command-line arguments or by editing this file.
+
+paths:
+  data_root: "./data"                            # Dataset root directory
+  openclip_pretrained: ""                          # Path to OpenCLIP pretrained weights (or set CSR_OPENCLIP_PRETRAINED env var)
+  fare_weights: ""                                 # Path to FARE model weights (or set CSR_FARE_WEIGHTS env var)
+  tecoa_weights: ""                                # Path to TeCoA model weights (or set CSR_TECOA_WEIGHTS env var)
+  adv_save_root: "./outputs/adv_samples"
+  results_root: "./results"
+
+csr_defense:
+  filter_type: "gaussian"      # gaussian | butterworth | ideal
+  lpf_radius: 40
+  butterworth_order: 2
+  detect_thresh: 0.85
+  purify_steps: 3
+  purify_eps: 0.01568          # 4/255
+  purify_alpha: 0.00784        # 2/255
+
+attack:
+  epsilons: [0.00392, 0.00784, 0.01568]  # [1/255, 2/255, 4/255]
+  pgd_steps: 10
+  pgd_alpha_scale: 2.5
+  cw_steps: 30
+  cw_kappa: 0.0
+  apgd_steps: 30
+  batch_size: 16
+  sample_n: 1000
+
+eval:
+  batch_size: 32
+  num_workers: 4
+  sample_n: 1000
+  datasets:
+    - "General/ImageNet"
+    - "General/CIFAR10"
+    - "General/CIFAR100"
+    - "General/STL10"
+    - "General/Caltech101"
+    - "General/Caltech256"
+    - "FineGrained/OxfordPets"
+    - "FineGrained/Flowers102"
+    - "FineGrained/Food101"
+    - "FineGrained/StanfordCars"
+    - "Scene/SUN397"
+    - "Scene/Country211"
+    - "Domain/FGVCAircraft"
+    - "Domain/EuroSAT"
+    - "Domain/DTD"
+    - "Domain/PCAM"
+  adv_subfolders:
+    - "1_255"
+    - "2_255"
+    - "4_255"

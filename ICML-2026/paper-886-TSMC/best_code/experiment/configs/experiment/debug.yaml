@@ -1,0 +1,40 @@
+rng:
+  desc: Namespace for configuring pseudo-randomness initialization
+  seed:
+    desc: Initialization values to pseudo-random number generators
+    value: 0
+
+experiment:
+  desc: Namespace for configuring experiment settings
+  name:
+    desc: Name of this experiment configuration
+    value: TEST
+  max_iterations:
+    desc: Number of learning iterations to perform
+    value: 125
+  eval_period:
+    desc: Evaluate each intermediate agent with this period
+    value: 25
+  eager_eval:
+    desc: >
+      Whether to immediately evaluate iterates or defer this. Setting this to
+      `false` means to keep all `max_iterations // eval_period` model snapshots
+      in memory to evaluate after the training loop.
+    value: false
+  snapshot_period:
+    desc: Save model weights (and eval-metrics if compatible) with this period.
+    value: null
+
+data_generator:
+  desc: >
+    Namespace for configuring agent-environment interaction. This generates
+    data for training in chunks of size (batch_size x length). The total number
+    of samples is then calculated by `batch_size * length * experiment.max_iterations`
+
+  batch_size:
+    desc: Number of environments/ agents to run in parallel
+    value: 1
+
+  length:
+    desc: Sequence length for generating environment data
+    value: 8

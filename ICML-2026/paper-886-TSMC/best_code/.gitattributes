@@ -1,0 +1,19 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.py text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+
+# Mark all Jupyter Notebook files as generated to ignore them for linguist language stats
+*.ipynb linguist-generated
+
+# Prevent development on windows OS/ WSL to change line-endings. Force linux standard.
+*.sln text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
