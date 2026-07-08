@@ -1,0 +1,35 @@
+dataset: "bios"
+train_batch_size: 512
+test_batch_size: 512
+calib_batch_size: 512
+n_calib: 10000
+n_test: 2000
+n_calib_val: 5000
+n_train: 50000
+n_val: 5000
+data_root: "data/BiosBias/"
+optimizer: "adam"
+score_fn: "saps"
+lr: 0.005
+epochs: 15
+
+h_params_raps:
+  T: 0.2
+  kreg: 3
+  lamda: 0.5
+
+llm_model: 'llama-3.2-3b-instruct'
+#llm_model: 'gpt-4o-mini'
+
+llm_system_instruct: "You are an HR expert. Given a short biography, select the correct occupation from the provided list: [{all_options}].\n
+  Respond with only the occupation name from this list. Do not explain your reasoning."
+
+llm_user_prompt: "Biography:\n
+  {prompt}\n
+  The following shorter list contains occupations that are more likely to be correct:\n
+  [{options}]\n
+  Based on the biography above, which occupation is the best match?"
+
+llm_user_prompt_control: "Biography:\n
+  {prompt}\n
+  Based on the biography above, which occupation is the best match?"

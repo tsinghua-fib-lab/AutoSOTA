@@ -1,0 +1,380 @@
+#!/usr/bin/env python3
+"""
+Decentralized learning: CIFAR-10 + LeNet-5 + DSGD + exponential graph +
+BTSP-MSR node assignment + Ebone NW communication delays.
+
+GPU-optimized: all data pre-loaded on GPU, random sampling without DataLoader.
+"""
+
+import os, sys, json, time, math, argparse
+import numpy as np
+from collections import OrderedDict
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
+
+
+# ---------------------------------------------------------------------------
+# LeNet-5
+# ---------------------------------------------------------------------------
+class LeNet5(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+
+# ---------------------------------------------------------------------------
+# Exponential graph mixing matrix
+# ---------------------------------------------------------------------------
+def build_exponential_mixing_matrix(n_nodes):
+    K = int(math.ceil(math.log2(n_nodes)))
+    S = [2**k for k in range(K) if 2**k < n_nodes]
+    W = np.zeros((n_nodes, n_nodes), dtype=np.float32)
+    weight = 1.0 / (len(S) + 1)
+    for j in range(n_nodes):
+        W[j, j] = weight
+        for s in S:
+            k = (j + s) % n_nodes
+            W[j, k] = weight
+    return W, S
+
+
+# ---------------------------------------------------------------------------
+# Parameter vectorization
+# ---------------------------------------------------------------------------
+def models_to_matrix(models):
+    vecs, pshapes = [], []
+    for m in models:
+        vlist, slist = [], []
+        for p in m.parameters():
+            slist.append(p.data.shape)
+            vlist.append(p.data.view(-1))
+        pshapes.append(slist)
+        vecs.append(torch.cat(vlist))
+    return torch.stack(vecs), pshapes
+
+
+def matrix_to_models(pm, models, pshapes):
+    for i, m in enumerate(models):
+        off = 0
+        for j, p in enumerate(m.parameters()):
+            shp = pshapes[i][j]
+            sz = shp.numel()
+            p.data.copy_(pm[i, off:off + sz].view(shp))
+            off += sz
+
+
+# ---------------------------------------------------------------------------
+# GPU-based data augmentation
+# ---------------------------------------------------------------------------
+def gpu_augment(images):
+    """
+    Fast GPU augmentation: RandomCrop(32, pad=4) + RandomHorizontalFlip + Normalize.
+    images: (B, C, H, W) uint8 tensor on GPU, H=W=32
+    """
+    B, C, H, W = images.shape
+    device = images.device
+    images_f = images.float().div_(255.0)
+
+    # Pad reflect: (B, C, 40, 40), then vectorized random crop
+    padded = F.pad(images_f, (4, 4, 4, 4), mode='reflect')
+    ox = torch.randint(0, 8, (B,), device=device)
+    oy = torch.randint(0, 8, (B,), device=device)
+
+    # Compute flat indices for gather (treat channels as part of spatial dim)
+    # padded is (B, C, 40, 40); we want (B, C, H, W) starting at offsets
+    # For each batch b: padded[b, :, oy[b]:oy[b]+H, ox[b]:ox[b]+W]
+    # Use as_strided or direct loop for speed
+    # Direct loop over batch is acceptable for small B (~128)
+    cropped = torch.empty(B, C, H, W, device=device, dtype=torch.float32)
+    for b in range(B):
+        cropped[b] = padded[b, :, oy[b]:oy[b] + H, ox[b]:ox[b] + W]
+
+    # Random horizontal flip
+    flip_mask = torch.rand(B, device=device) < 0.5
+    if flip_mask.any():
+        idx = flip_mask.nonzero(as_tuple=True)[0]
+        cropped[idx] = torch.flip(cropped[idx], dims=[-1])
+
+    # Normalize
+    mean = torch.tensor([0.4914, 0.4822, 0.4465], device=device).view(1, 3, 1, 1)
+    std = torch.tensor([0.2023, 0.1994, 0.2010], device=device).view(1, 3, 1, 1)
+    cropped.sub_(mean).div_(std)
+
+    return cropped
+
+
+def gpu_test_transform(images):
+    """Test-time transform: just normalize, no augmentation."""
+    images_f = images.float() / 255.0
+    mean = torch.tensor([0.4914, 0.4822, 0.4465], device=images.device).view(1, 3, 1, 1)
+    std = torch.tensor([0.2023, 0.1994, 0.2010], device=images.device).view(1, 3, 1, 1)
+    return (images_f - mean) / std
+
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+@torch.no_grad()
+def evaluate_gpu(models, test_img_gpu, test_lbl_gpu):
+    """Evaluate global model using GPU-resident test data."""
+    avg_sd = OrderedDict()
+    n = len(models)
+    for k in models[0].state_dict().keys():
+        avg_sd[k] = sum(m.state_dict()[k].float() for m in models) / n
+    em = LeNet5().to(test_img_gpu.device)
+    em.load_state_dict(avg_sd)
+    em.eval()
+
+    bs = 1000
+    correct = total = 0
+    for start in range(0, len(test_img_gpu), bs):
+        end = min(start + bs, len(test_img_gpu))
+        imgs = test_img_gpu[start:end]
+        imgs = gpu_test_transform(imgs)
+        lbls = test_lbl_gpu[start:end]
+        out = em(imgs)
+        correct += out.argmax(1).eq(lbls).sum().item()
+        total += len(lbls)
+    return correct / total
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--n_nodes', type=int, default=87)
+    parser.add_argument('--n_rounds', type=int, default=16000)
+    parser.add_argument('--local_updates', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--weight_decay', type=float, default=0.005)
+    parser.add_argument('--alpha', type=float, default=0.1)
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--eval_every', type=int, default=500)
+    parser.add_argument('--output_dir', type=str, default='/repo/results')
+    parser.add_argument('--assignment_file', type=str, default='/repo/output_exp_ebone.json')
+    parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--data_dir', type=str, default='/datasets/cifar10_preprocessed')
+    parser.add_argument('--resume_from', type=str, default=None)
+    parser.add_argument('--save_every', type=int, default=2000)
+    args = parser.parse_args()
+
+    device = torch.device(f'cuda:{args.gpu}')
+    print(f"Device: {device}")
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+
+    # --- BTSP-MSR BCD ---
+    with open(args.assignment_file) as f:
+        adata = json.load(f)
+    bcd_ms = adata['metrics']['BCD']
+    bcd_sec = bcd_ms / 1000.0
+    print(f"BTSP-MSR BCD: {bcd_ms:.4f} ms/round")
+
+    # --- Mixing matrix ---
+    W_np, S = build_exponential_mixing_matrix(args.n_nodes)
+    W_t = torch.tensor(W_np.T, dtype=torch.float32, device=device)
+    deg = int(round(1.0 / W_np[0, 0]))
+    print(f"Exponential: S={S}, degree={deg}")
+
+    # --- Load data onto GPU ---
+    print("Loading data...")
+    t0 = time.time()
+    train_img = torch.from_numpy(np.load(os.path.join(args.data_dir, 'train_images.npy'))).to(device)
+    train_lbl = torch.from_numpy(np.load(os.path.join(args.data_dir, 'train_labels.npy'))).to(device)
+    test_img = torch.from_numpy(np.load(os.path.join(args.data_dir, 'test_images.npy'))).to(device)
+    test_lbl = torch.from_numpy(np.load(os.path.join(args.data_dir, 'test_labels.npy'))).to(device)
+    print(f"  GPU data loaded in {time.time()-t0:.1f}s")
+    print(f"  Train: {train_img.shape}, Test: {test_img.shape}")
+    print(f"  GPU memory: {torch.cuda.memory_allocated()/1024**3:.2f} GB")
+
+    # --- Dirichlet split (generate per-node index lists) ---
+    print(f"Dirichlet(alpha={args.alpha}) split...")
+    rng_np = np.random.RandomState(args.seed)
+    n_train = len(train_img)
+    all_labels = train_lbl.cpu().numpy()
+    node_indices = [[] for _ in range(args.n_nodes)]
+    for c in range(10):
+        c_idx = np.where(all_labels == c)[0]
+        rng_np.shuffle(c_idx)
+        proportions = rng_np.dirichlet([args.alpha] * args.n_nodes)
+        proportions = (proportions * len(c_idx)).astype(int)
+        diff = len(c_idx) - proportions.sum()
+        if diff > 0:
+            for i in range(diff):
+                proportions[i % args.n_nodes] += 1
+        elif diff < 0:
+            for i in range(-diff):
+                idx = i % args.n_nodes
+                if proportions[idx] > 0:
+                    proportions[idx] -= 1
+        start = 0
+        for node in range(args.n_nodes):
+            cnt = max(0, int(proportions[node]))
+            if cnt > 0:
+                node_indices[node].extend(c_idx[start:start + cnt].tolist())
+            start += cnt
+
+    # Convert to GPU tensors (list of tensors)
+    node_idx_tensors = [torch.tensor(idxs, dtype=torch.long, device=device)
+                        for idxs in node_indices]
+    counts = [len(idxs) for idxs in node_indices]
+    print(f"Data/node: min={min(counts)} max={max(counts)} mean={np.mean(counts):.1f} total={sum(counts)}")
+
+    # --- Models ---
+    models = [LeNet5().to(device) for _ in range(args.n_nodes)]
+    init_sd = models[0].state_dict()
+    for m in models[1:]:
+        m.load_state_dict(init_sd)
+    optimizers = [optim.SGD(m.parameters(), lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
+                  for m in models]
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    scaler = torch.cuda.amp.GradScaler()
+
+    # --- Resume ---
+    start_round = 0
+    best_acc = 0.0
+    sim_time = 0.0
+    eval_hist = []
+    if args.resume_from and os.path.exists(args.resume_from):
+        ckpt = torch.load(args.resume_from, map_location=device)
+        start_round = ckpt['round'] + 1
+        best_acc = ckpt.get('best_acc', 0.0)
+        sim_time = ckpt.get('elapsed_time', 0.0)
+        eval_hist = ckpt.get('eval_history', [])
+        for i, m in enumerate(models):
+            m.load_state_dict(ckpt['model_states'][i])
+        for i, opt in enumerate(optimizers):
+            opt.load_state_dict(ckpt['optimizer_states'][i])
+        print(f"Resumed at round {start_round}, best_acc={best_acc:.4f}")
+
+    # --- Training ---
+    print(f"\nTraining: rounds {start_round+1}..{args.n_rounds}, "
+          f"{args.local_updates} local steps/round")
+    t_start = time.time()
+
+    for rnd in range(start_round, args.n_rounds):
+        # Local updates
+        for node_i in range(args.n_nodes):
+            m = models[node_i]
+            opt = optimizers[node_i]
+            idx_t = node_idx_tensors[node_i]
+            n_local = len(idx_t)
+            m.train()
+
+            for _ in range(args.local_updates):
+                # Random batch from this node's data
+                if n_local >= args.batch_size:
+                    bidx = idx_t[torch.randint(0, n_local, (args.batch_size,), device=device)]
+                else:
+                    # Repeat with replacement for small nodes
+                    bidx = idx_t[torch.randint(0, n_local, (args.batch_size,), device=device)]
+
+                imgs = train_img[bidx]  # (B, 3, 32, 32) uint8
+                lbls = train_lbl[bidx]
+
+                # GPU augmentation
+                imgs = gpu_augment(imgs)
+
+                opt.zero_grad()
+                with torch.cuda.amp.autocast():
+                    loss = criterion(m(imgs), lbls)
+                scaler.scale(loss).backward()
+                # CODE-03: gradient clipping
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(m.parameters(), max_norm=5.0)
+                scaler.step(opt)
+                scaler.update()
+
+        # Mixing
+        pm, pshapes = models_to_matrix(models)
+        pm = W_t @ pm
+        matrix_to_models(pm, models, pshapes)
+        sim_time += bcd_sec
+
+        # Eval & save
+        do_eval = (rnd + 1) % args.eval_every == 0 or rnd == 0
+        do_save = (rnd + 1) % args.save_every == 0
+
+        if do_eval or do_save:
+            acc = evaluate_gpu(models, test_img, test_lbl) if do_eval else None
+            wall = time.time() - t_start
+            if do_eval:
+                is_best = acc > best_acc
+                if is_best:
+                    best_acc = acc
+                eval_hist.append({'round': rnd + 1, 'test_acc': acc,
+                                  'sim_time': sim_time, 'wall_time': wall})
+                marker = '*' if is_best else ''
+                msg = (f"R {rnd+1:5d} | Acc: {acc:.4f} (best {best_acc:.4f}) | "
+                       f"SimT: {sim_time:.0f}s | Wall: {wall:.0f}s {marker}")
+                print(msg, flush=True)
+            ckpt = {
+                'round': rnd, 'best_acc': best_acc, 'elapsed_time': sim_time,
+                'model_states': [m.state_dict() for m in models],
+                'optimizer_states': [opt.state_dict() for opt in optimizers],
+                'eval_history': eval_hist, 'bcd_ms': bcd_ms,
+            }
+            torch.save(ckpt, os.path.join(args.output_dir, 'checkpoint_latest.pt'))
+            if do_eval and is_best:
+                torch.save(ckpt, os.path.join(args.output_dir, 'checkpoint_best.pt'))
+
+        if (rnd + 1) % 500 == 0:
+            wall = time.time() - t_start
+            rate = (rnd + 1 - start_round) / max(wall, 1)
+            eta = (args.n_rounds - rnd - 1) / max(rate, 1e-10)
+            msg = (f"  --- Progress: {rnd+1}/{args.n_rounds} | "
+                   f"{rate:.2f} rnd/s | ETA: {eta/3600:.1f}h | "
+                   f"SimT: {sim_time:.0f}s | Best: {best_acc:.4f}")
+            print(msg, flush=True)
+
+    # --- Final ---
+    wall_total = time.time() - t_start
+    final_acc = evaluate_gpu(models, test_img, test_lbl)
+    print(f"\n{'='*60}")
+    print(f"Final acc: {final_acc:.4f}  Best acc: {best_acc:.4f}")
+    print(f"Wall: {wall_total:.0f}s ({wall_total/3600:.2f}h)")
+    print(f"Simulated: {sim_time:.0f}s")
+
+    results = {
+        'best_test_accuracy': float(best_acc),
+        'final_test_accuracy': float(final_acc),
+        'n_rounds': args.n_rounds, 'n_nodes': args.n_nodes,
+        'local_updates': args.local_updates, 'batch_size': args.batch_size,
+        'lr': args.lr, 'weight_decay': args.weight_decay,
+        'bcd_ms': float(bcd_ms), 'total_sim_time_s': float(sim_time),
+        'total_wall_time_s': float(wall_total), 'eval_history': eval_hist,
+        'node_data_counts': counts,
+    }
+    with open(os.path.join(args.output_dir, 'final_results.json'), 'w') as f:
+        json.dump(results, f, indent=2)
+    print(f"Results: {args.output_dir}/final_results.json")
+    return results
+
+
+if __name__ == '__main__':
+    main()

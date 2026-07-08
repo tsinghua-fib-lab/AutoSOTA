@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python run_exp.py +model=llama +peft=all ++peft.lora_r1=2 ++peft.lora_r2=2 ++peft.lora_r=8 ++peft.lora_alpha=64 +dataset_name=meta_math +init=default +seed=333

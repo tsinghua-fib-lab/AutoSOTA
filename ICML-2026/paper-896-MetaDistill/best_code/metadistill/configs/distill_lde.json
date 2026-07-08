@@ -1,0 +1,67 @@
+{
+  "logdir": "runs",
+  "n_epochs": 128,
+  "n_generations": 100,
+  "batchsize": 1,
+  "popsize": 200,
+  "problemdim": 10,
+  "training_set": {
+    "cec": {
+      "pre": "cecf",
+      "start": 2,
+      "end": 6
+    }
+  },
+  "lr": 0.0005,
+  "warming_up": 10,
+  "distill_interval": 10,
+  "seed": 42,
+  "alignment": {
+    "mode": "next",
+    "warmup_epochs": 0
+  },
+  "loss_config": {
+    "KL": {
+      "coef": 1.0,
+      "clip_val": 10.0,
+      "eps": 1e-6,
+      "clip_mode": "soft",
+      "cov_mode": "full",
+      "normalize": "maxabs",
+      "dim_normalize": "div_d",
+      "dim_norm": "none",
+      "log_metrics": true,
+      "cov_reg": 0.0,
+      "epoch_ramp": {
+        "enabled": false
+      }
+    },
+    "Fitness": {
+      "coef": 0.0,
+      "mode": "relative"
+    },
+    "Diversity": {
+      "coef": 0.0,
+      "mode": "entropy"
+    }
+  },
+  "curriculum": {
+    "enabled": false,
+    "schedule": "linear"
+  },
+  "teacher_trajectories": "data/teacher/teacher_cec2-6_sel_itvl10_d10_pop200_gen100_7t_e16.pkl",
+  "teacher_sampling": {
+    "mode": "sequential",
+    "per_fid": true,
+    "seed": 42
+  },
+  "teacher_smoothing": {
+    "enabled": false
+  },
+  "expname": "metadistill_lde",
+  "student": {
+    "name": "LDE",
+    "config": "configs/lde_d10_pop200.json",
+    "ckpt": null
+  }
+}

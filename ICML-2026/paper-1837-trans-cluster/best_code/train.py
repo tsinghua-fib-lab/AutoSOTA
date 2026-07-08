@@ -1,0 +1,444 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import time
+import sys
+import random
+
+import numpy as np
+from pandas import Index
+np.set_printoptions(precision=4)
+import pandas as pd
+pd.set_option('display.precision', 4)
+import matplotlib.pyplot as plt
+
+import torch
+torch.set_printoptions(precision=4)
+from torch import nn
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR, LambdaLR
+
+print(f"Cuda available: {torch.cuda.is_available()}")
+
+from losses import ADICT, kmeans_obj_batched, SoftKMObj
+from ctasks import DMAP, ClusteringTasks
+from kmt import ATTDICT, KMeansTransformer, KModel
+from utils import lloyds_iters_batched
+torch.set_printoptions(precision=2)
+
+
+def get_task_config(parser: argparse.ArgumentParser):
+  parser.add_argument(
+    '-n', '--nlb', help="Lower bound on number of samples to cluster",
+    type=int, default=128,
+  )
+  parser.add_argument(
+    '-N', '--nub', help="Upper bound on number of samples to cluster",
+    type=int, default=512,
+  )
+  parser.add_argument(
+    '-k', '--nclusters', help="Number of clusters",
+    type=int, default=8,
+  )
+  parser.add_argument(
+    '-d', '--ndims', help="Data dimensionality",
+    type=int, default=2,
+  )
+  parser.add_argument(
+    '-D', '--train_dists',
+    help=(
+      f"+-separated list of distributions to train on --- "
+      f"choose one or more of {list(DMAP.keys())}"
+    ),
+    type=str, default=list(DMAP.keys())[0],
+  )
+  parser.add_argument(
+    '-s', '--scale', help="Per-dimensionality scale for distributions",
+    type=float, default=0.1,
+  )
+  parser.add_argument(
+    "--em", help="Equal mixture of distributions", action="store_true"
+  )
+  parser.add_argument(
+    "--es", help="Equal scale for each dimension", action="store_true"
+  )
+  parser.add_argument(
+    "--sdb", help="Sample tasks from same distribution in a batch",
+    action="store_true"
+  )
+  return parser
+
+
+def validate_task_config(args: argparse.Namespace):
+  assert 10 <= args.nlb <= args.nub
+  assert args.nclusters >= 2
+  assert args.ndims >= 2
+  assert all([d in DMAP.keys() for d in args.train_dists.split('+')])
+  assert args.scale > 0
+
+
+def get_arch_config(parser: argparse.ArgumentParser):
+  enc_choices = ['onehot', 'none']
+  parser.add_argument(
+    '-e', '--scratch', help="Form of scratch space",
+    choices=enc_choices, default=enc_choices[0]
+  )
+  parser.add_argument(
+    '-q', '--dqkv',
+    help="dot product projection dimensionality multiplier",
+    type=int, default=1,
+  )
+  parser.add_argument(
+    '-A', '--attn_act', help="Attention activation",
+    choices=ATTDICT.keys(), default=list(ATTDICT.keys())[0]
+  )
+  parser.add_argument(
+    '-a', '--attn_itemp', help="Inverse temperature for attention",
+    type=float, default=1.0,
+  )
+  parser.add_argument(
+    '-p', '--dropout', help="Dropout probability",
+    type=float, default=0.01,
+  )
+  return parser
+
+
+def validate_arch_config(args: argparse.Namespace):
+  assert args.dqkv >= 1
+  assert args.attn_itemp > 0.
+
+
+def get_opt_config(parser: argparse.ArgumentParser):
+  parser.add_argument(
+    '-L', '--loss_act', help="Loss activation",
+    choices=ADICT.keys(), default=list(ADICT.keys())[0]
+  )
+  parser.add_argument(
+    '-g', "--logloss", help="Minimize log of the loss", action="store_true"
+  )
+  parser.add_argument(
+    '-l', '--loss_itemp', help="Inverse temperature for loss upper bound",
+    type=float, default=1.0,
+  )
+  parser.add_argument(
+    '-E', '--seed', help="Experiment seed", type=int, default=548977,
+  )
+  parser.add_argument(
+    '-b', '--bsz', help="Number of tasks per batch", type=int, default=32,
+  )
+  parser.add_argument(
+    '-r', '--init_lr', help="Initial learning rate",
+    type=float, default=1.0,
+  )
+  parser.add_argument(
+    '-C', '--lr_decay', help="Learning rate decay at plateau",
+    type=float, default=0.5,
+  )
+  parser.add_argument(
+    '-P', '--patience', help="Patience for plateau detection",
+    type=float, default=5,
+  )
+  parser.add_argument(
+    '-T', '--nsteps', help="Number of optimization steps", type=int, default=1000,
+  )
+  parser.add_argument(
+    '-t', '--nsteps_per_eval',
+    help="Number of optimization steps per validation eval",
+    type=int, default=10,
+  )
+  parser.add_argument(
+    '-B', '--val_nbatches', help="Number of batches in the validation set",
+    type=int, default=10,
+  )
+  return parser
+
+
+def validate_opt_config(args: argparse.Namespace):
+  assert args.loss_itemp > 0.
+  assert args.seed > 0
+  assert args.bsz > 0
+  assert args.init_lr > 0.
+  assert args.nsteps > 10
+  assert 1 <= args.nsteps_per_eval < args.nsteps
+  assert 1 <= args.val_nbatches
+
+
+def plot_current_stats(
+    sdf: pd.DataFrame, gnames: list[str], fname: str, hist_len: int = 10
+):
+  mult = 5
+  fig, axs = plt.subplots(
+    1, 3, figsize=(3 * mult, 1 * mult),
+    sharex=True, sharey=False
+  )
+  titles = [
+    'Train batch loss (running avg)',
+    'Validation loss',
+    "Validation loss (rel. to Lloyd's)",
+  ]
+  assert len(axs) == len(gnames)
+  for idx, (ax, gn) in enumerate(zip(axs, gnames)):
+    gdf: pd.DataFrame = sdf[sdf['set'] == gn]  # type: ignore[assignment]
+    xx: np.ndarray = gdf['step'].to_numpy()
+    yy: np.ndarray | None = None
+    if idx == 0:
+      fyy: np.ndarray = gdf['loss'].to_numpy()
+      assert len(xx) == len(fyy)
+      yy = np.array([
+        np.mean(fyy[max(i-hist_len, 0):i+1]) for i in range(len(xx))
+      ])
+    else:
+      yy = gdf['loss'].to_numpy()  # type: ignore[attr-defined]
+    ax.plot(xx, yy)
+    ax.set_title(titles[idx])
+    ax.set_ylabel(gn)
+    ax.set_xlabel('# steps')
+    if idx == 2:
+      ax.plot([0, xx[-1]], [1, 1], '--')
+  fig.tight_layout()
+  fig.savefig(fname)
+  plt.close()
+
+
+if __name__ == '__main__':
+
+  # Parse arguments
+  parser = argparse.ArgumentParser()
+  parser = get_task_config(parser)
+  parser = get_arch_config(parser)
+  parser = get_opt_config(parser)
+  parser.add_argument(
+    '-o', '--odir', help='Output directory', type=str, default="",
+  )
+  args = parser.parse_args()
+
+  # validate args
+  validate_task_config(args)
+  validate_arch_config(args)
+  validate_opt_config(args)
+  if args.odir != "":
+    assert os.path.isdir(args.odir), (
+      f"Directory '{args.odir}' does not exist"
+    )
+  skip_args = ["odir", "use_cosine", "warmup_pct", "use_qk_norm"]
+  # nstr = (':').join([
+  #   f"{k[:2]}={v}" for k, v in args.__dict__.items() if k not in skip_args
+  # ])
+  nstr = ('_').join([
+    f"{parser._get_option_tuples(f'--{k}')[0][0].option_strings[0].replace('-','')}={v}"
+    for k, v in args.__dict__.items() if k not in skip_args
+  ])
+  print(nstr)
+
+  chkpt_dict = {}
+  fnames = None
+  if args.odir != "":
+    fnames = {
+      "stats": os.path.join(args.odir, f"{nstr}.csv"),
+      "plot": os.path.join(args.odir, f"{nstr}.pdf"),
+      "chkpt_last": os.path.join(args.odir, f"{nstr}_last.pt"),
+      "chkpt_best": os.path.join(args.odir, f"{nstr}_best.pt"),
+    }
+    assert all([not os.path.exists(v) for k, v in fnames.items()])
+    print(f"Saving following:\n{fnames}")
+    chkpt_dict['fnames'] = fnames
+    chkpt_dict['cli_args'] = args.__dict__
+
+  # picking GPU device adaptively
+  GPUE = torch.cuda.is_available()
+  DEVICE = None
+  if GPUE:
+    DEVICE = torch.cuda.current_device()
+    print(f"[train] Found device: {DEVICE}")
+
+  # Set seeds for experiment
+  SEED = args.seed
+  RNG = np.random.RandomState(SEED)
+  torch.manual_seed(SEED)
+  np.random.seed(SEED)
+  random.seed(SEED)
+
+  # Instantiate task generator and obtain validation set
+  task_gen = ClusteringTasks(
+    args.nclusters, args.nclusters, args.ndims,
+    args.nlb, args.nub, [d for d in args.train_dists.split('+')],
+    scale=args.scale, equal_mix=args.em, equal_scales=args.es,
+  )
+  val_tasks = [
+    task_gen.sample_batch(args.bsz, same_dist_batch=args.sdb)
+    for _ in range(args.val_nbatches)
+  ]
+  # if GPUE:
+  #   val_tasks = [ (X.to(DEVICE), C.to(DEVICE)) for (X, C) in val_tasks ]
+  val_kmeans_obj = [
+    lloyds_iters_batched(XX, CC, niters=1)
+    for (XX, CC) in val_tasks
+  ]
+  for idx, (vt, kmobj) in enumerate(zip(val_tasks, val_kmeans_obj)):
+    print(f"Validation batch {idx+1}: {vt[0].shape}, {vt[1].shape}")
+    print(kmobj)
+
+  # saving validation tasks with checkpoint
+  # for multi-step inference evaluations
+  if fnames is not None:
+    chkpt_dict['val_tasks'] = val_tasks
+    chkpt_dict['val_kmeans_obj'] = val_kmeans_obj
+
+  # set up transformer models
+  ssize = {
+    'onehot': args.nclusters,
+    'none': 0,
+  }
+  demb = args.ndims + ssize[args.scratch]
+  print(
+    f"Encoding sizes: {ssize}, final embedding size: {demb} ({args.ndims})"
+  )
+  # function to generate the initial encoding
+  # for the cluster centers
+  def get_cluster_id_enc():
+    if args.scratch == 'onehot':
+      # one-hot encoding equivalent to an identity matrix
+      return torch.eye(ssize[args.scratch])
+    assert False
+    return None
+
+  # initializing the kmeans transformer model
+  model = KModel(
+    demb, args.dqkv*demb, inv_temp=args.attn_itemp,
+    dropout_p=args.dropout, act=args.attn_act,
+    use_qk_norm=args.use_qk_norm,
+  )
+  print(model)
+
+  # set up loss function
+  criterion = SoftKMObj(
+    gamma=args.loss_itemp, act=args.loss_act, logloss=args.logloss
+  )
+
+  # set up forward pass
+  def fpass(samples, centers, tmodel):
+    b, n, d = samples.shape
+    _, k, _ = centers.shape
+    assert centers.shape[0] == b
+    assert centers.shape[2] == d
+    # First append scratch space to initial token emb
+    if args.scratch == 'none':
+      XX = samples.clone().detach()
+      CC = centers.clone().detach()
+    else:
+      YY = torch.zeros(b, n, ssize[args.scratch])
+      MM = get_cluster_id_enc().repeat(b, 1, 1)
+      if GPUE:
+        YY = YY.to(DEVICE)
+        MM = MM.to(DEVICE)
+      XX = torch.cat((samples.clone().detach(), YY), dim=2)
+      CC = torch.cat((centers.clone().detach(), MM), dim=2)
+    # forward pass through the model
+    XXX, CCC = tmodel(XX, CC)
+    # return just the updated centers
+    return CCC[:, :, :d]
+
+  # set up for training loop
+  lr = args.init_lr
+  optimizer = Adam(model.parameters(), lr=lr)
+  if args.use_cosine:
+    warmup_steps = int(args.warmup_pct * args.nsteps)
+    def warmup_fn(step):
+      if step < warmup_steps:
+        return float(step) / float(max(1, warmup_steps))
+      return 1.0
+    warmup_scheduler = LambdaLR(optimizer, lr_lambda=warmup_fn)
+    cosine_scheduler = CosineAnnealingLR(optimizer, T_max=args.nsteps - warmup_steps)
+    print(f'Using cosine annealing: {warmup_steps} warmup steps, {args.nsteps - warmup_steps} cosine steps')
+  else:
+    scheduler = ReduceLROnPlateau(optimizer, factor=args.lr_decay, patience=args.patience)
+    print(f'Using ReduceLROnPlateau: factor={args.lr_decay}, patience={args.patience}') 
+  stats = []
+  stats_cols = Index(['step', 'set', 'loss'])
+  set_names = ['train-batch-loss', 'val-kmeans-obj', 'val-kmeans-rel-obj']
+  curr_best_val = np.inf
+  if GPUE:
+    print("Moving model to GPU")
+    model = model.to(DEVICE)
+  # Training loop
+  model.train()
+  for step in range(args.nsteps+1):
+    if step % args.nsteps_per_eval == 0 or step == args.nsteps:
+      # validation comp
+      model.eval()
+      save_best_chkpt = False
+      with torch.no_grad():
+        # forward passes + kmeans obj over set
+        model_kmeans_objs = [
+          kmeans_obj_batched(XX, fpass(XX, CC, model)).to('cpu') for XX, CC in val_tasks
+        ]
+        val_obj = torch.mean(torch.stack(model_kmeans_objs)).item()
+        rel_val_obj = torch.mean(torch.stack([
+          torch.div(mm, vv[-1])  for mm, vv in zip(model_kmeans_objs, val_kmeans_obj)
+        ])).item()
+        if rel_val_obj < curr_best_val:
+          curr_best_val = rel_val_obj
+          save_best_chkpt = True
+        stats += [(step, set_names[1], val_obj)]
+        stats += [(step, set_names[2], rel_val_obj)]
+        print(
+          f"Step {step}/{args.nsteps}: Validation obj: {val_obj:.4f}, "
+          f"relative to Lloyd's: {rel_val_obj:.4f}"
+        )
+      # save stats, plots, chkpoints if needed
+      if fnames is not None and step > 0:
+        # save current chkpt of model + opt + lr scheduler
+        torch.save({
+          **chkpt_dict,
+          'model_state_dict': model.state_dict(),
+          'optimizer_state_dict': optimizer.state_dict(),
+          'scheduler_state_dict': scheduler.state_dict() if not args.use_cosine else {},
+          'best_val_rel_obj': curr_best_val,
+          'step': step,
+        }, fnames['chkpt_last'])
+        # save stats
+        stats_df = pd.DataFrame(stats, columns=stats_cols)
+        stats_df.to_csv(
+          fnames['stats'], header=True, index=False
+        )
+        # plot training and validation stats periodically
+        plot_current_stats(stats_df, set_names, fnames['plot'])
+        # save current chkpt of model if best
+        if save_best_chkpt:
+          print(f"Saving current best checkpoint")
+          torch.save({
+            **chkpt_dict,
+            'model_state_dict': model.state_dict(),
+            'best_val_rel_obj': curr_best_val,
+            'val_obj': val_obj,
+            'step': step,
+          }, fnames['chkpt_best'])
+      if step == args.nsteps:
+        print(f"Done with {args.nsteps} of training")
+        break
+      model.train()
+      if step > 0:
+        if args.use_cosine:
+          if step < warmup_steps:
+            warmup_scheduler.step()
+          else:
+            cosine_scheduler.step()
+        else:
+          scheduler.step(rel_val_obj)
+        print(f" ... current lr: {optimizer.param_groups[0]['lr']}")
+    # forward pass
+    XX, CC = task_gen.sample_batch(args.bsz, same_dist_batch=args.sdb)
+    # if GPUE:
+    #   XX, CC = XX.to(DEVICE), CC.to(DEVICE)
+    CCC = fpass(XX, CC, model)
+    # compute loss
+    loss = torch.mean(criterion(XX, CCC))
+    # backward
+    optimizer.zero_grad()
+    loss.backward()
+    # Gradient clipping for training stability (IDEA-001)
+    nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+    optimizer.step()
+    stats += [(step, set_names[0], loss.item())]
+

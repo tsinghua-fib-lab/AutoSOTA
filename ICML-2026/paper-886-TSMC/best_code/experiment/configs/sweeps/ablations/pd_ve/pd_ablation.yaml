@@ -1,0 +1,22 @@
+method: grid
+parameters:
+
+  policy.params.smc.kwargs.value:
+    values: [
+      { depth: 4, num_particles: 4, resampling_period: 1, prevent_particle_death: true },
+      { depth: 8, num_particles: 8, resampling_period: 1, prevent_particle_death: true },
+      { depth: 4, num_particles: 4, resampling_period: 1, prevent_particle_death: false },
+      { depth: 8, num_particles: 8, resampling_period: 1, prevent_particle_death: false },
+    ]
+
+  policy.params.smc.proposal_kwargs.value.method:
+    values: [ Prior ]
+
+  policy.params.smc.target_kwargs.value.temperature:
+    values: [ 0.1 ]
+
+  policy.params.option.value:
+    values: [ sumprod, dirac]
+
+  policy.params.value_mixing.value:
+    values: [ 1.0, 0.5, 0.0 ]

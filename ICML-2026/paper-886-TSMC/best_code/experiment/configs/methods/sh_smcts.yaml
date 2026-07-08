@@ -1,0 +1,62 @@
+policy:
+  desc: Namespace for configuring the agent-policy for data-generation.
+  method:
+    desc: Agent name/ specification for the factory.
+    value: smc
+  params:
+    desc: Hyperparameters namespace for the `smc` RL-policy implementation
+    option:
+      desc: >
+        Choice between `dirac`, `value`, or `sumprod` to change construction
+        of the behaviour policy + learning targets.
+      value: dsmc
+    value_mixing:
+      desc: >
+        Linear mixing parameter for prior and posterior estimated value, to be used
+        for bootstrapping values in credit-assignment (0 = prior, 1 = posterior).
+      value: 1.0  # When DSMC / SHSMCTS are active, this is only used by the baseline SMC for variance testing.
+    stochastic_eval:
+      desc: >
+        If true, use sampling from PMF for selecting actions at offline testing. 
+        Otherwise, select the max-logit (or mean if Gaussian; i.e., deterministic).
+      value: false
+    credit_assignment: { discount: 0.997, td_lambda: 0.9 }
+    smc:
+      desc: Hyperparameter configuration for our (iterated) particle filter planning method
+      kwargs:
+        desc: Base SMC hyperparameters
+        value: {
+          depth: 16,  # Should be dividable by log_2 min(num_actions_to_search, num_particles)
+          num_particles: 4,
+          resampling_period: 4,
+          prevent_particle_death: false
+        }
+      resampling_method:
+        desc: Choose how to resample.
+        value: multinomial # deterministic, multinomial
+      sh_smcts:
+        desc: Choose what to do at the root.
+        value: {
+          root_planner: sh_smcts,     # for the baseline algorithm, we always use smc
+          num_actions_to_search: 16,
+          use_completed_q_values: false,
+          use_q_transform: false,
+          variance_ablations: false,
+        }
+      proposal_kwargs:
+        desc: Hyperparameters for the (twisted) proposal distribution
+        value: {
+          bootstrap: 30,
+          constraint_param: 0.01,
+          constraint_type: hard,
+          method: Prior,  # Decides the prior (whether to twist and how)
+          root_method: null,
+          mode: '',  # Options: '', 'argtopk' (det. sampling), 'sampled-argtopk' (sampling without replacement)
+          k: 4  # This needs to be number of particles
+        }
+      transition_kwargs:
+        desc: Unused field for interface parity
+        value: { }
+      target_kwargs:
+        desc: Target policy improvement operator keyword arguments
+        value: { normalizer: softmax, temperature: .1, root_temperature: .01, advantage_softmax: false } # Options: true = advantage_softmax, false = q_softmax

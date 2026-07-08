@@ -1,0 +1,69 @@
+policy:
+  desc: Namespace for configuring the agent-policy for data-generation.
+  method:
+    desc: Agent name/ specification for the factory.
+    value: smc
+  params:
+    credit_assignment:
+      discount: 0.997
+      td_lambda: 0.9
+    desc: Hyperparameters namespace for the `smc` RL-policy implementation
+    option:
+      desc: 'Choice between `dirac`, `value`, or `sumprod` to change construction
+        of the behaviour policy + learning targets.
+
+        '
+      value: dsmc
+    smc:
+      desc: Hyperparameter configuration for our (iterated) particle filter planning
+        method
+      kwargs:
+        desc: Base SMC hyperparameters
+        value:
+          depth: 12
+          num_particles: 8
+          prevent_particle_death: false
+          resampling_period: 4
+      proposal_kwargs:
+        desc: Hyperparameters for the (twisted) proposal distribution
+        value:
+          bootstrap: 30
+          constraint_param: 0.1
+          constraint_type: soft
+          k: 4
+          method: VariationalKullbackLeibler
+          mode: ''
+          root_method: null
+      resampling_method:
+        desc: Choose how to resample.
+        value: multinomial
+      sh_smcts:
+        desc: Choose what to do at the root.
+        value:
+          num_actions_to_search: 4
+          root_planner: sh_smcts
+          use_completed_q_values: false
+          use_q_transform: true
+          variance_ablations: false
+      target_kwargs:
+        desc: Target policy improvement operator keyword arguments
+        value:
+          advantage_softmax: false
+          normalizer: softmax
+          root_temperature: 0.01
+          temperature: 0.1
+      transition_kwargs:
+        desc: Unused field for interface parity
+        value: {}
+    stochastic_eval:
+      desc: 'If true, use sampling from PMF for selecting actions at offline testing.  Otherwise,
+        select the max-logit (or mean if Gaussian; i.e., deterministic).
+
+        '
+      value: false
+    value_mixing:
+      desc: 'Linear mixing parameter for prior and posterior estimated value, to be
+        used for bootstrapping values in credit-assignment (0 = prior, 1 = posterior).
+
+        '
+      value: 1.0

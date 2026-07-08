@@ -1,0 +1,31 @@
+dataset: "fashion-mnist"
+train_batch_size: 256
+valid_batch_size: 256
+n_calib: 2000
+n_test: 8000
+optimizer: "adam"
+lr: 0.001
+epochs: 2
+
+h_params_raps:
+  T: 1.0
+  kreg: 3
+  lamda: 0.5
+
+llm_model: 'gemma-3-4b-it-qat'
+
+llm_system_instruct: "You are a fashion expert. Given an image of clothing, your task is to select the correct clothing category.\n
+  The list of all possible categories are [{all_options}].\n
+  Respond with only the category string or label. Do not explain your reasoning."
+
+llm_user_prompt: "image attached\n
+  Prediction set generated from a high-coverage classifier with {coverage_info} coverage to contain the true answer:\n
+  [{options}]\n
+  Which clothing type best matches the image?"
+
+llm_user_prompt_cvg: "approximately {coverage}%"
+
+llm_user_prompt_no_cvg: "high"
+
+llm_user_prompt_control: "image attached\n
+  Which clothing type best matches the image?"

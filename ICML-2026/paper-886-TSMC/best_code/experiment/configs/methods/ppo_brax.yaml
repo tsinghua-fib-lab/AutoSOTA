@@ -1,0 +1,54 @@
+optimizer:
+  desc: Namespace for configuring optimization of `model` parameters
+  name:
+    desc: What optimizer to use from the `optax` namespace
+    value: adamw
+  learning_rate:
+    desc: Initial learning rate for the optimizer
+    value: 3.0e-4
+  l2_weight_decay:
+    desc: l2 prior variance on the neural network weights
+    value: 1.0e-6
+  max_grad_norm:
+    desc: Maximum gradient norm for clipping
+    value: 10.0
+  max_grad:
+    desc: Maximum absolute value for any gradient element
+    value: 10.0
+  subset_of_weights:
+    desc: Whether to optimize a (flagged by the architecture) subset of model parameters
+    value: false
+
+
+learner:
+  desc: Namespace for configuring optimization of `model` parameters
+  credit_assignment:
+    desc: Hyperparameters for the credit assignment algorithm for *learning*
+    value: { td_lambda: 0.9, discount: 0.99 }
+  loss:
+    desc: Hyperparameters for the loss-function
+    value: {
+      policy_coeff: 1.0,
+      value_coeff: 0.5,
+      entropy_coeff: 0.0003,
+      clip_epsilon: 0.3
+    }
+  gradient_descent:
+    desc: Hyperparameters for the stochastic gradient descent implementation
+    value: { batch_size: 256, num_steps: 64 }
+
+
+policy:
+  desc: Namespace for configuring the agent-policy for data-generation.
+  method:
+    desc: Agent name/ specification for the factory.
+    value: ppo
+  params:
+    desc: Empty field for constructor parity. PPO has no special values for data-generation.
+    value: null
+    stochastic_eval:
+      desc: >
+        If true, use sampling from PMF for selecting actions at offline testing. 
+        Otherwise, select the max-logit (or mean if Gaussian; i.e., deterministic).
+      value: false
+

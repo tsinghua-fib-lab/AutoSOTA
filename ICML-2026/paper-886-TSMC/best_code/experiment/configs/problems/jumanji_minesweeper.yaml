@@ -1,0 +1,25 @@
+
+environment:
+  desc: Namespace for configuring the problem to tackle.
+  name:
+    desc: Specify which problem-domain to run the experiment on
+    value: jumanji Minesweeper-v0
+  kwargs:
+    desc: Problem specific keyword arguments to initialize the environment
+    value: { }
+  truncation_length:
+    desc: ...
+    value: 101
+
+evaluation:
+  desc: Namespace for configuring evaluation of output variables
+  fixed_seed:
+    desc: Specify PRNG-seed value to independently seed the test-environment setup and keep fixed across all agent parameters
+    value: 0
+  timeout:
+    desc: How many interactions to wait until the first termination.
+    value: 101
+  batch_size:
+    desc: How many samples to estimate expected performance
+    value: 128
+

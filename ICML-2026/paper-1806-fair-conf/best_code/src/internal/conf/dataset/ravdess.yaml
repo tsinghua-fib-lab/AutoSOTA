@@ -1,0 +1,57 @@
+dataset: "ravdess"
+n_calib: 0.5833333
+n_calib_val: 0.16666666
+n_test: 0.25
+test_batch_size: 64
+calib_val_batch_size: 64
+calib_batch_size: 64
+m: 8
+data_root: "data/RAVDESS/"
+
+h_params_raps:
+  T: 0.5
+  kreg: 2
+  lamda: 2.0
+
+#llm_model: 'mini-Ichigo-llama3.2-3B-s-instruct'
+audio_lm_base64: true
+llm_model: 'gpt-4o-audio-preview' 
+
+
+llm_system_instruct: |
+  You are an expert in emotion classification from audio. Analyze the acoustic and prosodic features of the speaker's voice.
+
+  Instructions:
+  - Focus on HOW they speak, not WHAT they say
+  - Listen for vocal tone, pitch patterns, and energy
+  - Classify which emotion does the audio convey
+
+  Choose one emotion from this list: [{all_options}]
+  Answer with ONE word from the list only.
+
+llm_user_prompt: |
+  Prediction set from a high-coverage classifier with {coverage_info} confidence to contain the true answer (that is, options in this set are more likely to be correct): 
+  [{options}]
+
+  Listen carefully to the speaker's voice. Analyze:
+  1. Vocal tone
+  2. Pitch patterns (high/low, rising/falling)
+  3. Speaking energy and tempo
+  4. Emotional expression in delivery
+  
+  Based on these prosodic cues in the audio and the prediction set, which emotion best matches the speaker's vocal expression?
+
+llm_user_prompt_cvg: "approximately {coverage}%"
+
+llm_user_prompt_no_cvg: "strong"
+
+llm_user_prompt_control: |
+  Listen carefully to the speaker's voice. Analyze:
+  1. Vocal tone
+  2. Pitch patterns (high/low, rising/falling)
+  3. Speaking energy and tempo
+  4. Emotional expression in delivery
+  
+  Based on these prosodic cues in the audio, which emotion best matches the speaker's vocal expression?
+  
+  Choose from: [{all_options}]
