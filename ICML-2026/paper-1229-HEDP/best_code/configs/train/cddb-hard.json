@@ -1,0 +1,65 @@
+{
+    "prefix": "train",
+    "dataset": "cddb",
+    "data_path": "/repo/data/CDDB/",
+    "task_name": [
+        "gaugan",
+        "biggan",
+        "wild",
+        "whichfaceisreal",
+        "san"
+    ],
+    "total_sessions": 5,
+    "multiclass": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "knn_K": [
+        5,
+        5,
+        5,
+        5,
+        5
+    ],
+    "energy_border": -31,
+    "energy_midline": -40,
+    "energy_tau": 3,
+    "distance_tau": 0.5,
+    "energy_T": 1,
+    "reg_loss_lamda": 0.05,
+    "init_cls": 2,
+    "increment": 2,
+    "model_name": "hybrid_energy_distance_prompt_trainer",
+    "query_type": "l1",
+    "shuffle": false,
+    "class_token_position": "end",
+    "CSC": false,
+    "embd_dim": 768,
+    "textual_prompt_length": 16,
+    "visual_prompt_length": 10,
+    "visual_prompt_layers": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ],
+    "device": [
+        "0"
+    ],
+    "seed": [
+        1993
+    ],
+    "init_epoch": 50,
+    "init_lr": 0.01,
+    "init_weight_decay": 0.0005,
+    "epochs": 50,
+    "lrate": 0.01,
+    "weight_decay": 0.0005,
+    "batch_size": 128,
+    "num_workers": 8
+}

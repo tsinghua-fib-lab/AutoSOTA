@@ -1,0 +1,103 @@
+# **********************************************************************
+#
+#	$Id: RELEASE_NOTES,v 1.6 2023/04/03 16:21:40 warme Exp $
+#
+#	File:	RELEASE_NOTES
+#	Rev:	e-5
+#	Date:	04/03/2023
+#
+#	Copyright (c) 2015, 2023 by David M. Warme, Pawel Winter, and
+#	Martin Zachariasen.  This work is licensed under a Creative
+#	Commons Attribution-NonCommercial 4.0 International License.
+#
+# **********************************************************************
+#
+#	Modification Log:
+#
+#	e-1:	12/12/2015	warme
+#		: For version 5.0.1.
+#	e-2:	09/05/2016	warme
+#		: For version 5.1.
+#		: Change notices for 5.1 release.
+#	e-3:	09/24/2016	warme
+#		: Additional tweaks for 5.1 release.
+#	e-4:	11/18/2022	warme
+#		: For version 5.2.
+#	e-5:	04/03/2023	warme
+#		: For version 5.3.
+#
+# **********************************************************************
+
+
+1.	What has changed?
+
+GeoSteiner 5.3 contains significant enhancements that provide
+additional functionality over the previous release (5.2):
+
+ * Added support for ARM64 architecture (only tested on MacOS).  This
+   consists of code to enable traps (i.e., signals) for floating-point
+   overflow, divide by zero and invalid operation exceptions.  (We
+   consider the default floating-point environment that quietly
+   propagates NaNs to be "dangerous" in that such NaNs do not always
+   propagate to the output.  Trapping on exceptions guarantees that all
+   such numeric issues are noticed.)
+
+ * The following new algorithmic parameters have been added:
+
+	- Local_Cuts_Trace_Style: The "normal" (default) value of this
+          parameter causes the local cuts separation routines to produce
+          a new, much more concise trace output.  This style displays
+          only a single character for every 10 local cut iterations.
+          This character is either '.' or 'x', depending upon whether
+          any of the iterations invoked the "Exact algorithm" for
+          finding a maximum weight forest.  Up to 50 such characters are
+          displayed per line.  The "verbose" setting produces the
+          previous style of trace output, which displays multiple lines
+          per local cut iteration.  The new concise style drastically
+          reduces the size of the trace output on instances that produce
+          a lot of local cut activity.
+
+ * Fixed a serious bug in the local cut algorithm that permitted
+   invalid inequalities to be generated.  This happened because the
+   "exact" maximum-weight forest code did not always produce optimal
+   solutions.  This algorithm reduces max-weight forest to an instance
+   of MST in hypergraph where the edge costs are generally negative, and
+   solves this instance by recursively calling gst_hg_solve().  When
+   this hypergraph was sufficiently small, it would automatically use
+   the "backtrack search" algorithm -- which does not correctly handle
+   instances having negative edge costs.  The solution is for local cuts
+   to force the use of the branch-and-cut algorithm on these recursive
+   calls.
+
+ * The backtrack search algorithm now immediately returns a new error
+   code if any of the edge costs are negative.
+
+ * Fixed a crash in _gst_branch_and_cut() caused because the bbip->lp
+   pointer changes whenever we need to recover from a CPLEX "unscaled
+   infeasibility" status.  The local "lp" variable became invalid when
+   this happened.
+
+ * Fixed a bug wherein find_almost_integer_cycles() produced
+   inequalities that were not actually violated.  This was causing
+   crashes in compute_good_lower_bound() when do_separations() returned
+   (cp NE NULL), but none of these generated constraints were
+   successfully added to the LP (because none of them were violated).
+   (Generating constraints that do not cause the LP to change results in
+   an infinite loop unless we crash.)
+
+ * Made the FST pruning code FATAL_ERROR when the output FSTs produced
+   would be invalid (due to the "un-pruned" FSTs not spanning all
+   terminals).  This happens on some uniform direction FSTs for some
+   instances because the UFST generator lacks all of the numeric
+   stability enhancements that were added to the Euclidean FST
+   generator.  Numeric errors lead to geometric inconcistencies that
+   can then trick the pruning code into pruning FSTs that it shouldn't.
+
+ * Added a gen_array() interface to the random point generator API.
+   (This API is not presently part of the GeoSteiner library, but is
+   used by the rand_points.c program.)
+
+ * Fixed a bug wherein "rand_points -g 1 -s seed_file" proclaimed
+   valid seed_file to be invalid.
+
+ * Fixed several -Wall -Werror build issues.

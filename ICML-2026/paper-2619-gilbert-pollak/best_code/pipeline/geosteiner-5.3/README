@@ -1,0 +1,99 @@
+!========================================================================
+                            GeoSteiner 5.3
+
+	Copyright (c) 1999, 2023 by David M. Warme, Pawel Winter, and
+	Martin Zachariasen.  This work is licensed under a Creative
+	Commons Attribution-NonCommercial 4.0 International License.
+
+========================================================================
+
+This directory contains GeoSteiner version 5.3, which solves the
+following NP-hard problems:
+
+	- Euclidean Steiner minimal tree
+	- Rectilinear Steiner minimal tree
+	- Uniformly-oriented Steiner minimal trees (including hexagonal
+	  and octilinear Steiner minimal trees)
+	- Minimum spanning tree in hypergraphs
+
+The code is written in ANSI C and requires no supplementary software
+or libraries. 
+
+Geosteiner is the joint work of:
+
+	- David Warme		Group W
+	- Pawel Winter		University of Copenhagen
+	- Martin Zachariasen	University of the Faroe Islands
+
+Additional programming assistance was provided by:
+
+	- Benny K. Nielsen	University of Copenhagen
+	- Daniel Juhl		University of Copenhagen
+
+The latest news regarding the GeoSteiner package can be found at:
+
+	http://www.geosteiner.com/
+
+Bug reports, suggested improvements and constructive comments are
+greatly appreciated.
+
+
+Author's information
+====================
+
+David Warme
+Principal Computer Scientist
+Group W, Inc.
+2650 Park Tower Drive, Suite 500
+Vienna, Virginia  22180  USA
+E-mail:	david@warme.net
+
+Pawel Winter
+Department of Computer Science (DIKU), University of Copenhagen
+Universitetsparken 1, DK-2100 Copenhagen East, Denmark
+E-mail:	pawel@di.ku.dk
+
+Martin Zachariasen
+Rector, University of the Faroe Islands
+100 Tórshavn, Faroe Islands
+E-mail:	m.zachariasen@gmail.com
+
+
+Building and Installing GeoSteiner
+==================================
+
+GeoSteiner comes with a "GNU style" configure script.  For those of
+you who are especially impatient, type the following:
+
+	./configure
+	make
+
+For complete instructions on building and installing Geosteiner, see
+the INSTALL file.
+
+User's Guide and Reference Manual
+=================================
+
+The manual describes the GeoSteiner callable library in full
+detail. It also documents each of the stand-alone programs
+accompanying the callable library. The manual (named manual.pdf or
+manual.ps) is avaiable on the GeoSteiner homepage; it can also be
+built by   
+
+	make manual.pdf
+or
+	make manual.ps
+
+Below are a few examples of program invocation.
+
+The following command will generate a set of 70 random points and
+compute a rectilinear Steiner minimal tree for it:
+
+	rand_points 70 | rfst | bb
+
+The following (Bourne shell) examples can be used to generate complete
+printable postscript plots for the same problem:
+
+	(cat prelude.ps; rand_points 70 | rfst | bb) >rsmt70.ps
+
+For more examples, please consult the manual.

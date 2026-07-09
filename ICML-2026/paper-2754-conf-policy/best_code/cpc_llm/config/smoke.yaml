@@ -1,0 +1,42 @@
+# Smoke test config: tiny model, 2 DPO rounds, minimal data (~5 min on A100).
+# Mirrors cpc_llm.yaml structure (DPO rounds) but with reduced sizes.
+defaults:
+  - cpc_llm
+  - _self_
+
+last_seed: 0
+num_dpo_rounds: 2  # runs num_dpo_rounds - 1 policy improvement iterations (round 0 is initial SFT)
+num_marge_rounds: 0
+sanity_check: False
+
+evol_dataset_gen:
+  args:
+    num_opt_steps: 5
+    optimizer:
+      num_particles: 200
+
+iterative_generation:
+  num_jobs: 1
+  init_args:
+    sample_size: 20
+    max_iterations: 10
+  args:
+    sample_size: 10
+    max_iterations: 10
+
+# Relax filtering so small datasets produce enough preference pairs
+propen_dataset_formatting_preference:
+  args:
+    dist_x_threshold: 0.5
+    filter_by_likelihood: False
+
+initial_sft:
+  args:
+    training_args:
+      num_train_epochs: 1
+
+dpo:
+  args:
+    dpo_config:
+      num_train_epochs: 1
+      per_device_train_batch_size: 4

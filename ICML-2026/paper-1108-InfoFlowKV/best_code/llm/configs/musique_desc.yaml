@@ -1,0 +1,25 @@
+models:
+  - /path/to/Qwen3-14B
+
+dataset: musique
+device: "cuda:0"
+
+top_p: 0.15
+lego_k: 5
+batch_size: 4
+default_split: true
+chunk_size: 1024
+layer_indices: null
+
+use_varlen: true
+num_recompute_chunks: 1
+recompute_attention_mode: flashinfer
+
+max_new_tokens: 32
+num_samples: null
+warmup_samples: 1
+sort_descending: true
+
+strategies:
+  - name: guided_recompute
+    method: norm

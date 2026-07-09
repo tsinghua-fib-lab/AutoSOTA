@@ -1,0 +1,35 @@
+
+#include "geosteiner.h"
+#include "stdlib.h"
+
+int main (int argc, char** argv)
+{
+        double terms [8] = { 0, 0,
+                             0, 1,
+                             1, 0,
+                             1, 1 };
+
+        int i, nsps;
+        double length, sps [4];
+
+        /* Open GeoSteiner environment */
+        if (gst_open_geosteiner () != 0) {
+                printf ("Could not open GeoSteiner.\n");
+                exit (1);
+        }
+
+        /* Compute Euclidean Steiner tree */
+        gst_esmt (4, terms, &length, &nsps, sps, NULL, NULL, NULL, NULL);
+
+        /* Display information about solution */
+        printf ("Steiner tree has length %f\n", length);
+
+        for (i = 0; i < nsps; i++) {
+                printf ("Steiner point: (%f, %f)\n", sps[2*i], sps[2*i+1]);
+        }
+
+        /* Close GeoSteiner environment */
+        gst_close_geosteiner ();
+
+        exit (0);
+}

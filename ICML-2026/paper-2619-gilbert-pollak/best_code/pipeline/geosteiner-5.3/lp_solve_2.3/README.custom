@@ -1,0 +1,169 @@
+
+		Custom Modification to lp_solve_2.3
+
+
+This file documents the modifications that I have made to the stock
+distributions of lp_solve_2.3.
+
+
+		================ BUG FIXES ================
+
+I have fixed a number of actual bugs in lp_solve_2.3:
+
+- The comparison of theta against the upper bound in dual case of
+  "solvelp()" did not match the similar condition at the top of
+  "iteration()".  (One used Epsb, the other did not.)  This resulted in
+  a small window of values where the two routines took incompatible
+  execution paths.  This usually resulted in solutions that weren't even
+  feasible!
+
+- The "get_reduced_costs" routine did not properly handle problems that
+  were scaled.
+
+- Fixed "delete_row_set" routine (see below -- this is a new interface I
+  added) to modify the basis more carefully when deleting rows.
+
+
+		================ Stylistic Changes ================
+
+The equates EQ, LE, GE that lp_solve uses to represent constraint types
+clashes with equates that are used in my own code to represent the C
+operators ==, <=, and >=.  It was much easier to change the names of
+these equates in lp_solve than to adjust my own code.
+
+
+		================ NEW INTERFACES ================
+
+A number of new interfaces have been added that make it much more
+efficient or convenient to construct and modify large problems.
+
+
+	add_rows ()
+
+Previously, a problem could be initially set up only by calling
+"add_constraint" once per row, or "add_column" once per variable.
+Setting up the initial LP matrix for a 200 point Steiner tree problem
+this way used to require SEVERAL HUNDRED CPU SECONDS!
+
+The sparse array is column oriented, so each call to add_constraint
+forced a global reorganization of the entire sparse array.  Calling
+add_column once per variable is not much better, since the sparse array
+is always grown by exactly the amount of space that will be needed for
+the new column.  Thus the entire matrix is copied each time REALLOC runs
+into something else.
+
+The new "add_rows ()" routine permits an arbitrary number of rows to be
+added in one call.  The new rows are also specified in a sparse manner
+so that this is also a reasonable way to set up a problem initially.
+
+
+	set_bounds ()
+
+Stock lp_solve_2.3 provides two separate routines for setting the bounds
+on a variable:  "set_upbo ()" and "set_lowbo ()".  Unfortunately, there
+is no routine provided that will SIMULTANEOUSLY SET BOTH BOUNDS.  To see
+why this is important, consider what happens when solving a 0-1 integer
+programming problem via branch-and-bound:  suppose integer variable x2
+has bounds [0..1], and currently has a fractional value.  To branch on
+variable x2=0 we force the bounds to be [0..0] by calling:
+
+		set_lowbo (lp, x2, 0.0);
+		set_upbo  (lp, x2, 0.0);
+
+and the re-optimizing the modified LP.  At some later point we want to
+branch on x2=1.  We now force the bounds to be [1..1] by calling:
+
+		set_lowbo (lp, x2, 1.0);
+		set_upbo  (lp, x2, 1.0);
+
+Unfortunately, this call to set_lowbo FAILS because the requested lower
+bound exceeds the CURRENTLY SET upper bound!  As defined, the set_lowbo
+and set_upbo routines require their caller to be intimately aware of the
+CURRENT STATE of the bounds and to invoke these routines in an order
+that does not create an invalid intermediate state!  This is an almost
+unusable interface.
+
+Solution -- the new "set_bounds ()" routine replaces both the upper and
+lower bounds with new values that must be consistent.  The current
+bounds are irrelevant.
+
+	delete_row_set ()
+
+Provides a way of deleting a specified subset of the rows in one fell
+swoop.  This is MUCH more efficient than doing it one row at a time with
+del_constraint.
+
+
+	lpbinio.c --	dump_lp() and load_lp()
+
+This new file contains routines to write LP problem instances out to a
+file in a binary format that can be loaded back in without causing any
+change in the numeric values of the problem.
+
+Although such files contain binary data, they are written in
+"big-endian" byte order so that they are somewhat portable from one
+machine to another.  For example, I have successfully ported these files
+from a Sparc to an IBM RS/6000 -- both of which use IEEE floating
+point.
+
+I wrote these as a tool to analyze lp_solve's numeric difficulties.  I
+figured that if I could carry a difficult problem instance EXACTLY over
+to CPLEX then I could use CPLEX to give me some clue as to why the
+problem was difficult.  Only one problem -- CPLEX solved every one of
+these problems without comment!  So far not a single problem that
+lp_solve croaks on causes CPLEX any concern whatsoever!
+
+
+	=======	Attempts to Make lp_solve More Robust =======
+
+I have added a substantial amount of debugging code (most of it #if 0'd
+out), in an attempt to understand the causes of lp_solve' instability.
+One of my early theories was degeneracy (this theory appears to be
+incorrect).
+
+The TRUE cause of lp_solve's numeric instability seems to be an almost
+total lack of concern over the values it uses as pivot elements!
+Essentially, it will pivot blindly on ANY ELEMENT whose magnitude is
+1e-8 or larger!  The use of "my_round" to squish small values into zero
+is its only real method of avoiding bad pivots.  Note also that its
+epsilon rounding tolerances are all ABSOLUTE magnitudes, not magnitudes
+that are relative to the problem data.  (In GeoSteiner, only the
+objective row can be badly scaled, so this is less of a problem than it
+might seem.)
+
+With such little concern over the magnitude of its pivot choices, there
+should be no surprise that it behaves so erratically.
+
+Consider that the primal simplex algorithm permits ANY column having
+negative reduced cost to be chosen.  Once you pick the column, however,
+you have NO CHOICE about which row to pivot in (modulo ties, that is).
+lp_solve ALWAYS picks the column having the MOST-NEGATIVE reduced cost
+-- NO MATTER HOW BAD A PIVOT ELEMENT RESULTS!  Stability should improve
+dramatically if such pivots are rejected by CHOOSING A DIFFERENT COLUMN
+to pivot in -- until you get a decent pivot element!
+
+Similarly in the dual simplex algorithm, you can choose any infeasible
+row.  Once you pick the row, however, you have little choice over the
+column.  Once again, lp_solve ALWAYS picks the MOST-INFEASIBLE row -- NO
+MATTER HOW BAD A PIVOT ELEMENT RESULTS!  Stability should improve
+dramatically if such pivots are rejected by choosing a different row to
+pivot in -- until you get a decent pivot element.
+
+Two other issues involve loss of primal (and perhaps dual?)
+feasibility, and failure of matrix inversion.  I have modified the code
+to address both of these issues.  After every primal reinversion, the
+code now verifies that the basis is still primal feasible.  If not, it
+switches back to the dual.  The algorithm fails if this happens 5
+times.
+
+Similarly, attempts to reinvert a singular basis (column all zeros in
+each of the remaining pivot rows) are handled by simply leaving the
+offending column out of the basis (substituting one of the slack columns
+instead).  The resulting basis may not even be feasible, so the code
+checks feasibility and reenters either the primal or dual as
+appropriate.  In all probability you have also lost much progress on the
+objective function -- but at least it represents SOMETHING to continue
+with!  The algorithm fails when this happens 5 times.
+
+Of course, picking better pivots in the first place would do much to
+steer you away from such singular bases.

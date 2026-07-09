@@ -1,0 +1,38 @@
+input_data_path_list: ['s3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r0/seeds_gens_likelihood_20sample_200iter_temp1.0_10seqs.jsonl',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r1/seeds_gens_likelihood_10sample_100iter_temp1.0_10seqs.jsonl',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r2/seeds_gens_likelihood_10sample_100iter_temp1.0_10seqs.jsonl',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r3/seeds_gens_likelihood_10sample_100iter_temp1.0_10seqs.jsonl']
+
+target_data_path: 's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r3/cal_r0_gens_likelihood_10sample_100iter.jsonl'
+
+prev_target_data_path_list: null #[]
+
+model_name_or_path_list: ['s3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r0',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r1',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r2',
+  's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r3']
+
+model_indices: [0, 1, 2, 3] ## If model_name_or_path_list just had paths for say r2 and r3, would run with this set to [2, 3]
+overwrite_cmp_lik_all: True 
+
+# model_timestep: null ## Model's time index
+#s3://prescient-data-dev/sandbox/chena78/pipelines/sft_EleutherAI/pythia-2.8b_ehrlich_s8_d128_m8_l8_r10_s2000_ga_steps30_p1000_pm0.005_xthres0.25/sft_EleutherAI/pythia-2.8b_ehrlich_s8_d128_m8_l8_r10_s2000_ga_steps30_p1000_pm0.005_xthres0.25_sft_r0/
+batch_size: 256
+test_fn_dim: 32
+output_dir: 's3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r3'
+# null #s3://prescient-pcluster-data/prinstea/llome/parent_output_20250908_moreSFT/smaller_pythia/smaller_pythia_sft_r1/
+#s3://prescient-data-dev/sandbox/chena78/pipelines/sft_EleutherAI/pythia-2.8b_ehrlich_s8_d128_m8_l8_r10_s2000_ga_steps30_p1000_pm0.005_xthres0.25/sft_EleutherAI/pythia-2.8b_ehrlich_s8_d128_m8_l8_r10_s2000_ga_steps30_p1000_pm0.005_xthres0.25_sft_r0/
+output_filename: scores_of_cal_data.jsonl
+log_level: info
+# input_field: "higher_score_particle"
+# target_field: "lower_score_particle"
+sanity_check: False
+
+generation_config:  # greedy decoding
+  # _target_: transformers.GenerationConfig
+  max_new_tokens: 500
+  # do_sample: True
+  # num_beams: 1
+  # num_return_sequences: 1
+  # max_length: null
+  temperature: 1.0

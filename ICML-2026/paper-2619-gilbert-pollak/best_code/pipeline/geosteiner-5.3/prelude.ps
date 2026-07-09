@@ -1,0 +1,326 @@
+%!PS-Adobe-3.0
+%%Creator: Steiner Tree Version 5.0
+%%Copyright: Copyright (c) 1998, 2022 by David M. Warme. This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.
+%%LanguageLevel: 1
+%%DocumentNeededResources: font Times-Roman
+%%DocumentSuppliedResources: procset SteinerTreeProcs 2.0 0
+%%+ procset TreeArray 1.0 0
+%%EndComments
+%%BeginProlog
+%%BeginProcSet: SteinerTreeProcs 2.0 0
+/LabelTerminals	0		def	% set non-zero to label terminals
+/inch { 72 mul } def
+/PaperWidth	8.5 inch	def
+/PaperHeight	11 inch		def
+/BigBoxSize	7 inch		def
+/SmallBoxSize	2 inch		def
+/SmallBoxHeight	SmallBoxSize	def
+/SmallBoxWidth	SmallBoxSize	def
+/BoxHeight	BigBoxSize	def
+/BoxWidth	BigBoxSize	def
+/MinX		0		def
+/MaxX		1		def
+/MinY		0		def
+/MaxY		1		def
+/BoxMode	0		def	% (0 ==> big plot, 1 ==> small plots)
+/SmallBoxCount	0		def
+/TermRadius	1 32 div inch	def
+/LineWidth	currentlinewidth	def
+
+% Define the clipping region to be the inside edge of the box.
+
+/ClipHeight	BigBoxSize LineWidth sub def
+/ClipWidth	ClipHeight def
+
+% Define the plotting region so that points plotted at the extremes will
+% exactly meet the edge of the clipping region.  (Reduce by the terminal
+% radius on each side.)
+
+/PlotHeight	ClipHeight TermRadius 2 mul sub def
+/PlotWidth	ClipWidth  TermRadius 2 mul sub	def
+/XlateX { MinX sub MaxX MinX sub div PlotWidth mul } def
+/XlateY { MinY sub MaxY MinY sub div PlotHeight mul } def
+/XlateXY { exch XlateX exch XlateY } def
+/Dup2 { dup 3 -1 roll dup 4 1 roll exch } def
+/Swap2 { 4 2 roll } def
+% define the two fonts we will use:
+%	- one for numbering the terminals
+%	- one for printing the plot's title
+/TermNumPointsize	8	def
+/TitlePointsize		15	def
+/TermNumFont
+	/Times-Roman findfont TermNumPointsize scalefont
+def
+/UseTermNumFont { TermNumFont setfont } def
+/TitleFont
+	/Times-Roman findfont TitlePointsize scalefont
+def
+/UseTitleFont { TitleFont setfont } def
+/DefineTerminals {
+	/NumTerms exch def
+	/TermX NumTerms TreeArray def
+	/TermY NumTerms TreeArray def
+	/TermIndex 0 def
+} def
+/DT {
+	TermY TermIndex 3 -1 roll TreeArrayPut
+	TermX TermIndex 3 -1 roll TreeArrayPut
+	/TermIndex TermIndex 1 add def
+} def
+/SetAxes {	% minx maxx miny maxy
+	/MaxY exch def
+	/MinY exch def
+	/MaxX exch def
+	/MinX exch def
+} def
+/PTString	12 string	def
+/Plot_Terminals {
+	LabelTerminals 0 eq {
+		% Display terminals, no labels
+		0 1 NumTerms 1 sub {			% i
+			dup				% i i
+			TermX exch TreeArrayGet exch	% x i
+			TermY exch TreeArrayGet
+			newpath
+			XlateXY
+			TermRadius 0 360 arc fill
+		} for
+	}
+	{	% Display terminals, with labels
+		0 1 NumTerms 1 sub {			% i
+			dup				% i i
+			PTString cvs exch dup		% str i i
+			TermX exch TreeArrayGet exch	% str x i
+			TermY exch TreeArrayGet		% str x y
+			newpath
+			XlateXY
+			Dup2
+			TermRadius 0 360 arc fill
+			moveto TermRadius 3 mul dup neg rmoveto
+			UseTermNumFont
+			show
+		} for
+	} ifelse
+} def
+% n T ==> Xn Yn, get coordinates of terminal n.
+/T {
+	dup
+	TermX exch TreeArrayGet exch
+	TermY exch TreeArrayGet
+} def
+% Draw a line segment.
+/S {
+	gsave
+	LineWidth setlinewidth
+	newpath
+	XlateXY
+	moveto
+	XlateXY
+	lineto
+	stroke
+	grestore
+} def
+% Draw a corner.  First point is incident to vertical segment.
+% Second point is incident to horizontal segment.
+/C {	% x1 y1 x2 y2
+	newpath
+	% x1 y1 x2 y2 -> x1 y1 x1 y2 x2 y2
+	4 -1 roll dup 5 1 roll exch dup 4 -1 roll exch
+	XlateXY
+	moveto
+	XlateXY
+	lineto
+	XlateXY
+	lineto
+	stroke
+} def
+/BeginPlot {
+	FlushSmallPlot
+	gsave
+	PaperWidth BoxWidth sub 2 div
+	 PaperHeight BoxHeight sub 2 div
+	  translate
+	newpath
+	0 0 moveto
+	BoxWidth 0 lineto
+	BoxWidth BoxHeight lineto
+	0 BoxHeight lineto
+	closepath
+	stroke
+	gsave
+	% establish a clipping region at the inside edge of the box
+	LineWidth 2 div dup moveto
+	ClipWidth 0 rlineto
+	0 ClipHeight rlineto
+	ClipWidth neg 0 rlineto
+	closepath
+	clip
+	% establish the origin for the plotting region
+	LineWidth 2 div TermRadius add
+	 dup
+	  translate
+} def
+/EndPlot {
+	grestore
+	newpath
+	UseTitleFont
+	0 0 moveto
+		dup stringwidth pop BigBoxSize exch sub 2 div
+		TitlePointsize -2 mul
+	rmoveto
+	show
+	grestore
+	showpage
+} def
+/BeginSmallPlot {
+	gsave
+	.75 inch SmallBoxCount 3 mod SmallBoxWidth .5 inch add mul add
+	  .75 inch 3 SmallBoxCount 3 idiv sub SmallBoxHeight .5 inch add mul add
+	    translate
+	SmallBoxWidth BoxWidth div
+	 SmallBoxHeight BoxHeight div
+	  scale
+	newpath
+	0 0 moveto
+	BoxWidth 0 lineto
+	BoxWidth BoxHeight lineto
+	0 BoxHeight lineto
+	closepath
+	stroke
+	gsave
+	% establish a clipping region at the inside edge of the box
+	LineWidth 2 div dup moveto
+	ClipWidth 0 rlineto
+	0 ClipHeight rlineto
+	ClipWidth neg 0 rlineto
+	closepath
+	clip
+	% establish the origin for the plotting region
+	LineWidth 2 div TermRadius add
+	 dup
+	  translate
+} def
+/EndSmallPlot2 {
+	grestore
+	newpath
+	UseTitleFont
+	0 0 moveto
+		dup stringwidth pop BigBoxSize exch sub 2 div
+		TitlePointsize -2 mul
+	rmoveto
+	show
+	grestore
+	/SmallBoxCount SmallBoxCount 1 add def
+	SmallBoxCount 12 ge {
+		FlushSmallPlot
+	} if
+} def
+/FlushSmallPlot {
+	SmallBoxCount 0 gt {
+		showpage
+		/SmallBoxCount	0 def
+	} if
+} def
+/PT {
+	dup				% i i
+	TermX exch TreeArrayGet exch	% x i
+	TermY exch TreeArrayGet
+	newpath
+	XlateXY
+	TermRadius 0 360 arc fill
+} def
+%%EndProcSet
+%%BeginProcSet: TreeArray 1.0 0
+/TreeArrayNodeSize	32768 def
+% Test whether the given object is the 'null' object.
+/isNull { type /nulltype eq } def
+% Throw an error of the given type.
+/TreeArrayError { errordict exch get exec } def
+% Create a TreeArray of the specified size.
+% This is a 5-element array: [ /TreeArray size rsize n arrayNode ].
+/TreeArray {
+	% Verify operand type and value.
+	dup type /integertype ne
+		{ /TreeArray /typecheck TreeArrayError } if
+	dup 1 lt
+		{ /TreeArray /rangecheck TreeArrayError } if
+	10 dict begin
+	/size exch def
+	/n TreeArrayNodeSize def
+	/ta 5 array def
+	/rsize size 1 sub def
+	% Divide rsize iteratively by n until it becomes <= n.
+	% This is the size of the root node.  All others have size n.
+	{ rsize n le { exit } if /rsize rsize n idiv def } loop
+	/rsize rsize 1 add def
+	/node rsize array def
+	ta 0 /TreeArray put
+	ta 1 size put
+	ta 2 rsize put
+	ta 3 n put
+	ta 4 node put
+	ta
+	end
+} def
+% Validate the given TreeArray.
+/TreeArrayValidate {
+	dup type /arraytype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 0 get /TreeArray ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 1 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 2 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 3 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 4 get type /arraytype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	pop
+} def
+/TreeArrayIndex {	% TreeArray index ==> nodeArray index
+	10 dict begin
+	/i exch def
+	/ta exch def
+	ta TreeArrayValidate
+	i type /integertype ne
+		{ ta i /TreeArrayIndex /typecheck TreeArrayError } if
+	/size	ta 1 get def
+	/rsize	ta 2 get def
+	/n	ta 3 get def
+	/root	ta 4 get def
+	i 0 lt { ta i /TreeArrayIndex /rangecheck TreeArrayError } if
+	i size ge { ta i /TreeArrayIndex /rangecheck TreeArrayError } if
+	% Generate array of successive indices.
+	mark
+	{
+		size n le { exit } if
+		i n mod		% push next index
+		/i i n idiv def
+		/size size n idiv def
+	} loop
+	i			% Push last index
+	/node root def
+	{
+		/i exch def	% Pop next index
+		dup type /marktype eq { pop exit } if
+		node i get isNull { node i n array put } if
+		/node node i get def
+	} loop
+	node i
+	end
+} def
+% Get specified entry of given TreeArray.
+/TreeArrayGet {		% treearray index TreeArrayGet ==> value
+	TreeArrayIndex get
+} def
+% Put given value into specified entry of given TreeArray.
+/TreeArrayPut {		% treearray index value TreeArrayPet ==>
+	3 1 roll	% ta index value ==> value ta index
+	TreeArrayIndex
+	3 -1 roll	% value node index ==> node index value
+	put
+} def
+%%EndProcSet
+%%EndProlog
+

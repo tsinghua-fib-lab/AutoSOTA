@@ -1,0 +1,34 @@
+# data
+data_path: s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/dense_neighborhood_pairs_scoreabove-0.5_xthres0.125_30nn.jsonl
+sample_size: 100
+sampling_method: "best_scoring" # "uniform", "combination"
+
+# script args
+sanity_check: False
+model_name_or_path: s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.5_xthres0.125/checkpoint-1500/
+batch_size: 4
+output_dir: s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.5_xthres0.125/checkpoint-1500/
+output_filename: extrapolative_generations_100sample_10iter.jsonl
+max_iterations: 20
+log_level: info
+seed: 0
+test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+test_fn_fp: "s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/ehrlich.jsonl"
+higher_score_particle_field: "higher_score_particle" # "prompt"
+lower_score_particle_field: "lower_score_particle" # "chosen"
+lower_score_field: "lower_score" # "chosen_score"
+higher_score_field: "higher_score" # "prompt_score"
+subsample_seeds: True ## Whether to subsample input seeds (with replacement), or to iterate through all of them
+first_iter: False ## Whether is first iteration, in which case will use sampling_method="uniform"
+
+permissive_parsing: True
+min_rel_len_feasible_particle: 1.0
+
+
+generation_config:  # greedy decoding
+  _target_: transformers.GenerationConfig
+  max_new_tokens: 500
+  do_sample: False
+  num_beams: 1
+  num_return_sequences: 1
+  max_length: null

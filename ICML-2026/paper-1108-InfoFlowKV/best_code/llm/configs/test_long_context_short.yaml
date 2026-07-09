@@ -1,0 +1,34 @@
+# Test config for LongBench v2 — short samples only
+models:
+  - /path/to/Qwen3-14B
+
+dataset: longbenchv2
+device: "cuda:0"
+
+top_p: 0.15
+lego_k: 5
+batch_size: 4
+default_split: true
+chunk_size: 2048
+layer_indices: null
+
+use_varlen: true
+num_recompute_chunks: 1
+recompute_attention_mode: flashinfer
+
+query_template: "Read the above context and answer the multiple-choice question. Only output the letter of the correct answer (A, B, C, or D).\n{query}\nAnswer:"
+
+max_new_tokens: 32
+num_samples: null
+warmup_samples: 0
+
+length_filter: ["short"]
+max_context_tokens: 131072
+
+strategies:
+  - name: baseline
+  - name: no_recompute
+  - name: guided_recompute
+    method: norm
+  - name: cacheblend
+  - name: lego

@@ -1,0 +1,27 @@
+# Model
+model: /path/to/Qwen3-VL-8B-Instruct
+cache_dir: /path/to/models/
+
+# Paths
+dataset_dir: /path/to/dataset_cache
+output_dir: /path/to/output
+
+# Dataset
+dataset: blink_counting
+
+# KV cache recomputation
+strategy: no_recompute  # no_recompute, lego, cacheblend, guided_recompute
+recompute_ratio: 0.15
+method: mass # norm, mass, entropy
+
+# Generation
+max_new_tokens: 128
+run_baseline: false
+run_recompute: true
+
+# Optional: limit samples for testing
+#num_samples: 200
+
+# Compare chunk_k=0 (native baseline) vs chunk_k=1 (chunked extraction)
+# chunk_k=0 with recompute_ratio=0 uses native model.generate()
+chunk_k: [0, 2, 4, 6, 8, 16]

@@ -1,0 +1,43 @@
+namespace __f4_detail {
+bool steiner_cond(double b, double c, double d, double s, double e) {
+    // Sufficient, axis-parallel closed condition ensuring existence of an (AD)-(QR) Steiner tree
+    // as verified with Mathematica in the derivation above.
+    return (b >= 0.0) && (c >= 1.0) && (d >= 0.0) && (s >= 0.0) && (e >= 1.0);
+}
+
+double steiner_length(double b, double c, double d, double s, double e) {
+    // Length = |UV| with U = R60*D and V = Q + R60*(R-Q).
+    // Closed form: let S = 1 + s + c + e + 2*d, then |UV| = sqrt(S^2 - S + 1).
+    (void)b; // length is independent of b
+    const double S = 1.0 + s + c + e + 2.0*d;
+    return std::sqrt(S*S - S + 1.0);
+}
+
+}
+template<> struct F<162> {
+constexpr static int split_id = 34;
+constexpr static int lemma_id = 4;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b + b + 1);
+ld L_s_plus;
+if(!__f4_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f4_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<163> {
+constexpr static int split_id = 35;
+constexpr static int lemma_id = 4;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b - b*d + b*s + d*d + d*s + s*s);
+ld L_s_plus;
+if(!__f4_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f4_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+const int M4 = 164;

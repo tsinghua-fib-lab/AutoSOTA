@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "mantis-tsfm"
+version = "1.0.0"
+description = "Mantis: Lightweight Calibrated Foundation Model for User-Friendly Time Series Classification"
+authors = [
+    "Vasilii Feofanov <vasilii.feofanov@huawei.com>",
+    "Songkang Wen",
+    "Marius Alonso",
+    "Romain Ilbert",
+    "Hongbo Guo",
+    "Malik Tiomoko",
+    "Lujia Pan",
+    "Jianfeng Zhang",
+    "Ievgen Redko",
+]
+maintainers = [
+  "Vasilii Feofanov <vasilii.feofanov@huawei.com>",
+]
+license = "MIT"
+readme = "README.md"
+keywords = ["Time Series Foundation Model", "Classification", "Transformer"]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+  
+]
+packages = [
+    { include = "mantis", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+einops = "^0.8"
+huggingface-hub = ">=0.23"
+datasets = ">=4.0"
+numpy = ">=1.23,<3.0"
+pandas = ">=1.5,<3.0"
+scikit-learn = "^1.2"
+torch = ">=1.12,<3.0"
+tqdm = "^4.64"
+safetensors = "^0.4"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.1,<9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

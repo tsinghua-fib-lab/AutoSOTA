@@ -1,0 +1,22 @@
+# Reproduction config for InfoFlow KV paper-1108
+# Target: Llama-3.1-8B-Instruct, 2WikiMQA, Fixed chunk 2048, 15% recompute ratio
+
+models:
+  - /models/Llama-3.1-8B-Instruct
+
+dataset: 2wikimqa
+device: "cuda:0"
+top_p: 0.15
+lego_k: 4
+batch_size: [1]
+default_split: false
+chunk_size: 2048
+layer_indices: null
+max_new_tokens: 32
+num_samples: 200
+
+strategies:
+  - name: baseline
+  - name: no_recompute
+  - name: guided_recompute
+    method: norm

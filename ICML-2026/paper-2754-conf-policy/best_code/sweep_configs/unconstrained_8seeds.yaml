@@ -1,0 +1,14 @@
+# Unconstrained baseline: 8 seeds x alpha=1.0 = 8 parallel jobs.
+# Full DPO pipeline (10 rounds) on pythia-14m, each on its own A100.
+#
+# Usage:
+#   modal deploy modal_runner.py
+#   modal run modal_runner.py --sweep sweep_configs/unconstrained_8seeds.yaml
+
+base_config: cpc_llm
+cache: false
+overrides: []
+
+parameters:
+  initial_seed: [0, 1, 2, 3, 4, 5, 6, 7]
+  conformal_policy_control.alpha: [1.0]

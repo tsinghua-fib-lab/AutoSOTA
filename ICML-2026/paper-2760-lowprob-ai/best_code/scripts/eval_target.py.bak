@@ -1,0 +1,145 @@
+# -*- coding: utf-8 -*-
+"""Minimal evaluation: XSum + GPT-2 XL, black-box, Uncertainty method."""
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+
+import json
+import numpy as np
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from sklearn.metrics import roc_auc_score
+
+# =========================================================
+# Hyperparameters (matching paper Table 11 for Uncertainty)
+# =========================================================
+DATA_FILE = "../dataset/xsum_gpt2_xl.raw_data.json"
+MODEL_ID = "../Proxy_LLMs/gpt-j-6b"
+MODEL_DTYPE = torch.bfloat16
+MAX_LENGTH = 512
+BOS = True
+CHUNK_SIZE = 32
+EPS = 1e-12
+GLOBAL_SEED = 42
+X_TAIL = 7        # low_probability_percentile = 7
+RENYI_Q = 2.0     # renyi_entropy_order = 2.0
+WZ = 0.8          # weighting_coefficient = 0.8
+
+def encode_raw_text_bos_noeos(tokenizer, text, max_length, bos):
+    ids = tokenizer.encode(text, add_special_tokens=False)
+    if bos and tokenizer.bos_token_id is not None:
+        ids = [tokenizer.bos_token_id] + ids
+    if len(ids) > max_length:
+        ids = ids[:max_length]
+    return torch.tensor([ids], dtype=torch.long)
+
+@torch.no_grad()
+def extract_features(text, tokenizer, model):
+    if not text or not isinstance(text, str):
+        return float("nan")
+    input_ids = encode_raw_text_bos_noeos(tokenizer, text, MAX_LENGTH, BOS)
+    device = model.get_input_embeddings().weight.device
+    input_ids = input_ids.to(device)
+    if int(input_ids.shape[1]) < 2:
+        return float("nan")
+    out_model = model(input_ids=input_ids, use_cache=False)
+    logits = out_model.logits[0, :-1, :]
+    targets = input_ids[0, 1:]
+    T_val = int(logits.shape[0])
+    V_val = int(logits.shape[1])
+    lnV = float(np.log(max(2, V_val)))
+    logp_obs = np.empty((T_val,), dtype=np.float32)
+    H_renyi = np.empty((T_val,), dtype=np.float32)
+    for start in range(0, T_val, CHUNK_SIZE):
+        end = min(T_val, start + CHUNK_SIZE)
+        chunk_logits = logits[start:end].to(torch.float32)
+        c = int(chunk_logits.shape[0])
+        logp = torch.log_softmax(chunk_logits, dim=-1)
+        tgt = targets[start:end]
+        ar = torch.arange(c, device=device)
+        logp_tok = logp[ar, tgt]
+        logp_obs[start:end] = logp_tok.detach().cpu().numpy().astype(np.float32)
+        log_sum = torch.logsumexp(RENYI_Q * logp, dim=-1)
+        Hq = log_sum / (1.0 - RENYI_Q)
+        H_renyi[start:end] = Hq.detach().cpu().numpy().astype(np.float32)
+        del chunk_logits, logp, tgt, ar, logp_tok, log_sum, Hq
+    obs = logp_obs.astype(np.float64)
+    k = int(np.ceil((X_TAIL / 100.0) * T_val))
+    k = max(1, min(k, T_val))
+    tail_idx_k = np.argpartition(obs, k - 1)[:k]
+    d = int(min(4, k - 1))
+    if d > 0:
+        rm_local = np.argpartition(obs[tail_idx_k], d - 1)[:d]
+        keep_mask = np.ones(k, dtype=bool)
+        keep_mask[rm_local] = False
+        tail_idx = tail_idx_k[keep_mask]
+    else:
+        tail_idx = tail_idx_k
+    mean_logp_tail = float(np.mean(obs[tail_idx]))
+    p_norm = float(np.clip((mean_logp_tail + lnV) / (lnV + EPS), 0.0, 1.0))
+    mean_renyi_tail = float(np.mean(H_renyi[tail_idx].astype(np.float64)))
+    h_norm = float(np.clip(mean_renyi_tail / (lnV + EPS), 0.0, 1.0))
+    fused = float(WZ * p_norm + (1.0 - WZ) * (1.0 - h_norm))
+    return fused
+
+def auc_best_from_scores(scores, labels):
+    x = np.asarray(scores, dtype=float)
+    y = np.asarray(labels, dtype=int)
+    mask = ~np.isnan(x)
+    x = x[mask]
+    y = y[mask]
+    if len(x) == 0 or len(np.unique(y)) < 2:
+        return float("nan")
+    if np.nanstd(x) < 1e-12:
+        return float("nan")
+    auc_raw = float(roc_auc_score(y, x))
+    return max(auc_raw, 1.0 - auc_raw)
+
+def main():
+    torch.manual_seed(GLOBAL_SEED)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(GLOBAL_SEED)
+    np.random.seed(GLOBAL_SEED)
+
+    print("Loading tokenizer and model from:", MODEL_ID)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True)
+    try:
+        model = AutoModelForCausalLM.from_pretrained(MODEL_ID, dtype=MODEL_DTYPE, device_map="auto")
+    except TypeError:
+        model = AutoModelForCausalLM.from_pretrained(MODEL_ID, torch_dtype=MODEL_DTYPE, device_map="auto")
+    model.eval()
+    gpu_mem = torch.cuda.memory_allocated(0) / 1024**3 if torch.cuda.is_available() else 0
+    print("Model loaded. GPU memory allocated: {:.1f} GB".format(gpu_mem))
+
+    print("Loading data from:", DATA_FILE)
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        records = json.load(f)
+    print("Loaded {} records".format(len(records)))
+
+    scores, labels = [], []
+    for i, item in enumerate(records):
+        human_text = item.get("original_text", "")
+        ai_text = item.get("ai_generated_text", "")
+        if not human_text.strip() or not ai_text.strip():
+            continue
+        hs = extract_features(human_text, tokenizer, model)
+        ai_s = extract_features(ai_text, tokenizer, model)
+        scores.append(float(hs))
+        labels.append(0)
+        scores.append(float(ai_s))
+        labels.append(1)
+        if (i + 1) % 10 == 0:
+            print("  Processed {}/{} samples...".format(i+1, len(records)))
+
+    auc = auc_best_from_scores(scores, labels)
+    n_pairs = len(labels) // 2
+    sep = "=" * 60
+    print("\n" + sep)
+    print("RESULTS: XSum + GPT-2 (1.5B) black-box | Proxy: GPT-J-6B")
+    print("  Method: Uncertainty")
+    print("  Hyperparameters: X_TAIL={}%, RENYI_Q={}, WZ={}".format(X_TAIL, RENYI_Q, WZ))
+    print("  Samples evaluated: {}".format(n_pairs))
+    print("  AUROC: {:.2f}%".format(auc * 100))
+    print(sep)
+
+if __name__ == "__main__":
+    main()

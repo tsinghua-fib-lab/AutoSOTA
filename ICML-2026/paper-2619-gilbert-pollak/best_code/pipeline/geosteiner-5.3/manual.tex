@@ -1,0 +1,2442 @@
+%***********************************************************************
+%
+%	$Id: manual.tex,v 1.62 2023/04/04 03:49:54 warme Exp $
+%
+%	File:	manual.tex
+%	Rev:	e-6
+%	Date:	04/03/2023
+%
+%	Copyright (c) 2002, 2023 by David M. Warme, Pawel Winter and
+%	Martin Zachariasen.  This work is licensed under a Creative
+%	Commons Attribution-NonCommercial 4.0 International License.
+%
+%***********************************************************************
+%
+%	LaTex source code for the GeoSteiner manual.
+%
+%***********************************************************************
+%
+%	Modification Log:
+%
+%	c-1:	05/04/2007	warme
+%		: Added proper banner and mod log.
+%		: Updated copyright notices to 2007.
+%		: Replaced "publicly available" clause with one that
+%		:  says "version 3.1 still available from ..., but is
+%		:  unsupported by GeoSteiner, Inc."
+%		: Commented out the paragraph claiming that (i) the
+%		:  commercial version is any better than the academic
+%		:  version, and (ii) that empirical data can be
+%		:  obtained from the DIKU web site.
+%		: Computational state of the art as of 5/2007.
+%		: Removed all references and discussion of the
+%		:  source code.
+%	c-2:	02/02/2014	warme
+%		: Replace obsolete image-inclusion with newer
+%		:  technology.
+%	e-1:	04/14/2015	warme
+%		: Changes for 5.0 release.
+%	e-2:	09/05/2016	warme
+%		: Changes for 5.1 release.
+%		: Changes to rand_points program.
+%		: Document changes to fst2graph arguments and
+%		:  SAVE_FORMAT parameter.
+%		: Change notices for 5.1 release.
+%	e-3:	01/01/2017	warme
+%		: Update dates for 5.1 release.
+%	e-4:	01/01/2017	warme
+%		: Fix two syntax errors.
+%	e-5:	11/18/2022	warme
+%		: Corrected documented default value of
+%		:  max-cutset-enumerate-comps.
+%		: Added new parameters: sparse-subtours,
+%		:  zero-weight-cutsets-method, strengthen-reduce,
+%		:  generate-unstrengthened, initial-primal-heuristic,
+%		:  ib-node-limit, bb-lp-limit,
+%		:  initial-primal-heur-stop.
+%	e-6:	04/03/2023	warme
+%		: Version 5.3.
+%		: Document new callback interfaces.
+%		: Document our enabling of floating-point exceptions.
+%		: Added local cuts trace style.
+%
+%***********************************************************************
+
+\documentclass[12pt,twoside,letterpaper]{article}
+\usepackage{times}
+%\usepackage{amsfonts}
+%\usepackage{mathptm}
+% \usepackage{psfig}
+\usepackage{epsfig}
+\usepackage{makeidx}
+\usepackage{verbatim}
+
+\def\func#1{\bigskip\noindent{\bf\large #1}\\}
+\def\comment#1{\bigskip\centerline{\parbox{11cm}{\small #1}}\bigskip}
+\def\code#1{{\ttfamily #1}}
+%\def\geosteiner{{\sc Geo\-Steiner}}
+\def\_{\leavevmode\kern.04em\vbox{\hrule width 0.4em height 0.3pt}}
+\def\geosteiner{Geo\-Steiner}
+\makeindex
+
+\newcommand{\GeoSteinerCurrentVersion}{5.3}
+
+\begin{document}
+\thispagestyle{empty}
+\vspace*{4cm}
+
+\centerline{\Huge\bf \geosteiner{} \GeoSteinerCurrentVersion{}}
+
+\vspace*{3cm}
+
+\centerline{\Large User's Guide and Reference Manual}
+
+\vspace*{10cm}
+\centerline{Copyright \copyright{} 2004, 2022 by
+ David~M.~Warme, Pawel~Winter and Martin~Zachariasen.}
+\centerline{This work is licenced under a Creative Commons}
+\centerline{Attribution-NonCommercial 4.0 International License.}
+
+\clearpage
+\thispagestyle{empty}
+~
+
+\clearpage
+\pagenumbering{roman}
+\tableofcontents
+
+\clearpage
+\setlength{\parskip}{1.5ex plus0.1ex minus0.1ex}
+\setlength{\parindent}{0ex}
+
+\pagestyle{headings}
+\section*{Preface}
+
+This manual documents \geosteiner{} version
+\GeoSteinerCurrentVersion{}
+--- an optimization software package for solving Steiner tree
+problems.
+\geosteiner{} version 4.0 was a proprietary commercial product,
+that was released in substantially identical form under an open source
+form beginning with version 5.0.
+\geosteiner{} version 3.1 is still available from
+\code{www.geosteiner.com} under an academic license, but is no
+longer supported.
+
+Version \GeoSteinerCurrentVersion{} contains significant improvements
+over the previous
+version (\geosteiner~3.1); these improvements are both functional and
+structural.
+By far the largest structural change is that the core
+optimization algorithms have now been encapsulated into a library of
+callable subroutines.  This greatly facilitates the incorporation of
+\geosteiner{} into other applications.  Indeed, the old familiar
+stand-alone programs from version 3.1 have now been completely
+re-implemented to use only the documented library interfaces.  The
+ability to use function calls instead of program calls from
+applications provides for more efficient solution of (large) series of
+problem instances; such applications occur frequently in, e.g., VLSI
+layout.  In addition, the library interfaces provide greater control
+of the solution process when needed.
+
+% There is a commercial version of \geosteiner{} that offers additional
+% functionality, and significantly improved running times for many
+% problem instances.  Refer to \code{www.diku.dk/geosteiner} for
+% empirical data comparing the relative performance of the public and
+% commercial versions of \geosteiner.  Any commercial use of the
+% software requires a license; please consult the LICENSE file for
+% additional information.
+
+The authors would like to thank Benny K.\ Nielsen, who has been the
+programmer on the callable library project. In addition, Benny has
+written a major part of the new FST generator for uniformly-oriented
+Steiner trees.
+
+\bigskip\bigskip\bigskip
+
+\begin{flushright}
+Copenhagen/Washington, April 2023
+
+\bigskip\bigskip
+David M.\ Warme\\
+Pawel Winter\\
+Martin Zachariasen
+
+\end{flushright}
+
+\clearpage
+\thispagestyle{empty}
+~
+
+\clearpage
+\pagenumbering{arabic}
+\section{Introduction}
+\label{intro}
+
+\geosteiner{} is a software package for solving Steiner tree
+problems. The package currently solves the following NP-hard problems
+in the plane\footnote{Problem definitions are given in Section~\ref{intro_stp}.}:  
+\begin{itemize}
+\item Euclidean Steiner tree problem.
+\item Rectilinear Steiner tree problem.
+\item Uniformly-oriented Steiner tree problem (including hexagonal
+  and octilinear Steiner tree problems).
+\end{itemize}
+In addition, the package gives the user access to a powerful solver
+for 
+\begin{itemize}
+\item Minimum spanning tree in hypergraph (MSTHG) problem.
+\end{itemize}
+The solver for this NP-hard problem is used as a subroutine in the
+solution of the above geometric problems. 
+
+\geosteiner{} is written in ANSI C. The code makes heavy use of
+linear programming 
+(LP); the public domain LP-solver \code{lp\_solve} is included (in a
+significantly modified form). However, the package also supports
+\code{CPLEX}, a proprietary product of IBM Inc., which is perhaps
+the fastest and most robust LP-solver available. 
+The authors of \geosteiner\ strongly recommend that you use CPLEX if at
+all possible --- especially for production applications or published
+computational studies. The core callable library requires no
+supplementary software or libraries (except the CPLEX library if
+\geosteiner{} is configured to use CPLEX as its LP solver). 
+
+% \comment{DMW: The phrase ``requires no supplementary software or
+%   libraries,'' is problematic.  Consider TeX, X11, QT, and now even
+%   eps2eps, which is very hard to get on my Linux here at home. MZ: I
+%   have change the paragraph above so that we only refer to the core
+%   callable library. Okay?} 
+
+In this introductory section we first define the problems that are
+solved by \geosteiner, and give some fundamental definitions and
+acronyms used throughout this manual (Section~\ref{intro_stp}). Then an
+introduction to the callable library and associated stand-alone
+problems is given (Sections~\ref{intro_callable}
+and~\ref{intro_standalone}). Finally, we give some historic background
+on \geosteiner{} in Section~\ref{intro_literature}.
+
+
+\subsection{Steiner tree problems}
+\label{intro_stp}
+
+Given a metric and a (finite) set of points in the plane, also denoted
+terminals, a {\em Steiner minimum tree} (SMT) is a shortest possible
+interconnection of the terminals. This interconnection must be a tree,
+and may contain junctions 
+that are not among the terminals, so-called {\em Steiner points}. In
+Figure~\ref{fig:SMTs} we show four different SMTs for the same set of
+terminals. These are SMTs under the Euclidean, rectilinear, hexagonal
+and octilinear metric, respectively. 
+
+\begin{figure}[tbp]
+
+\begin{tabular}{cc}
+\includegraphics[width=6.5cm,clip=]{fig_ESMT.eps} &
+\includegraphics[width=6.5cm,clip=]{fig_RSMT.eps} \\
+\includegraphics[width=6.5cm,clip=]{fig_HSMT.eps} &
+\includegraphics[width=6.5cm,clip=]{fig_OSMT.eps} \\
+\end{tabular}
+
+\caption{SMTs for the same set of terminals under different metrics
+(output from \geosteiner).}
+\label{fig:SMTs}
+\end{figure}
+
+All metrics currently handled by \geosteiner{} are {\em uniformly
+oriented metrics}: Given a set of $\lambda \geq 2$ uniformly oriented
+directions in the plane, the distance between two points is defined to
+be the length of a shortest path in which all line segments have one
+of the given directions. As special cases we have the rectilinear
+($\lambda=2$), hexagonal ($\lambda=3$), octilinear ($\lambda=4$) and
+Euclidean ($\lambda=\infty$) metric.
+
+If we break an SMT at all terminals having two or more incident
+edges, each component will be a so-called {\em full Steiner tree}
+(FST). These are trees in which all terminals are leaves. The fact
+that the number of terminals in each FST in an SMT usually is small
+is what makes it possible to solve large problem instances to
+optimality. More specifically, the algorithms employed by
+\geosteiner{} first generate a set of FSTs known to contain an SMT as
+a subset, and then the shortest possible union of FSTs interconnecting
+all terminals is selected; 
+we say that the FSTs are concatenated. The concatenation problem is
+equivalent to finding a {\em minimum spanning tree in a hypergraph}
+(problem MSTHG).
+An efficient solver for this subproblem forms a cornerstone of
+\geosteiner.
+
+
+\subsection{Callable library}
+\label{intro_callable}
+
+The kernel of \geosteiner\ is the callable library. Both high-level
+and low-level interfaces are provided.  Also included are powerful
+routines for manipulating various algorithmic parameters, handling
+messages, and accessing problem instance data in various formats.
+
+The high-level interfaces give the user easy access to the basic
+algorithms in the library. Problem instances are given as simple
+arrays, and the functions return optimal solutions to the problem 
+instances. 
+
+Low-level interfaces are provided for users who need more control
+over the solution process. Also, the low-level
+interfaces are used by the stand-alone programs that accompany the
+callable library. For more details on the design and structure of the
+callable library, please consult the user's guide in
+Section~\ref{usersguide} and the callable library reference manual in
+Section~\ref{libraryfunctions}.
+
+
+\subsection{Stand-alone programs}
+\label{intro_standalone}
+
+The stand-alone programs are provided for users who would like to
+solve Steiner tree problems without writing their own application
+programs. For example, if the coordinates of the given problem
+instance are given in a file, the stand-alone programs give the user
+the opportunity to solve the instance and make a postscript plot of
+the solution. A complete list of all stand-alone programs, including
+docu\-mentation of their invocation options, and examples of their use
+are given in Section~\ref{standalone}.
+
+
+\subsection{Historic note and literature}
+\label{intro_literature}
+
+To the best knowledge of the authors, as of April 2023, GeoSteiner
+represents the computational state of the art for geometric Steiner
+tree problems in the plane under each of the following metrics:
+\begin{itemize}
+ \item Euclidean
+ \item Rectilinear
+ \item Uniformly oriented metrics
+\end{itemize}
+Furthermore, GeoSteiner has held this dominant position continuously
+since at least 1998.
+During the $11^{\mathrm{th}}$ DIMACS Implementation Challenge
+(December, 2015) no other algorithms world-wide were entered into any
+of these problem categories.
+(Because GeoSteiner was only entrant in each of these categories, no
+competition was performed --- which is why GeoSteiner does not appear
+in any of the official DIMACS 11 competition results.)
+
+The ``GeoSteiner'' name was coined (and is therefore ``owned'') by Pawel
+Winter, whose seminal program GEOSTEINER started it all back in
+1985~\cite{Winter85}. In 1996 Winter and Zachariasen published an
+improved algorithm called ``GeoSteiner96''~\cite{WinterZachariasen97}.
+
+On the other hand, Warme's first Steiner tree code was the Salowe-Warme
+algorithm in 1993, which used backtrack search to concatenate
+rectilinear FSTs~\cite{SaloweWarme95}.  In 1998, Warme's Ph.D.
+dissertation~\cite{Warme98} described a new branch-and-cut code for
+finding minimum spanning trees in arbitrary hypergraphs --- which was
+applied to the FST concatenation problem for both rectilinear and
+Euclidean FSTs. 
+
+The first distribution of the combined code therefore represented the
+``third version'' of each group's code, and it was thus named
+\geosteiner\ version 3.0. This and subsequent versions continue
+that naming convention.
+
+The algorithms in \geosteiner~3.0 are based on those described
+in~\cite{WarmeWinterZachariasen00, WinterZachariasen97,
+  Zachariasen99a}.
+
+\geosteiner~4.0 was a proprietary commercial product which introduced
+the callable library interfaces, and support for solving
+uniformly-oriented Steiner
+trees~\cite{NielsenWinterZachariasen02c}.
+In addition, a number of minor improvements were made throughout the
+code.
+
+Upon termination of commercial operations in 2015, the GeoSteiner code
+was released once again in open source form as \geosteiner{} version
+5.0, and its various successors.
+
+
+\clearpage
+\section{Callable Library User's Guide}
+\label{usersguide}
+
+In this section we give a number of examples of using the callable
+library. We start with a few simple uses of the high-level functions,
+then move to the low-level interfaces, and finally, we discuss the use
+of callback functions. 
+
+\subsection{High-level interfaces}
+\label{high_level_interfaces}
+
+Any application program that uses the \geosteiner{} library must include
+the \geosteiner{} header file \code{geosteiner.h}. Furthermore, 
+the \geosteiner{} environment must be opened using the function {\bf
+gst\_open\_geosteiner()} as described in
+Section~\ref{environment_functions} on
+page~\pageref{environment_functions}.
+
+Our first example, shown in Figure~\ref{fig:demo1}, computes an Euclidean SMT
+for the points $(0,0)$, $(0,1)$, $(1,0)$ and $(1,1)$.  
+After having successfully opened the \geosteiner{} environment, we
+use the high-level function {\bf gst\_esmt()} to compute the SMT (see
+page~\pageref{gst_esmt}). As arguments we first pass the number of
+terminals, here~4, and then a double array {\bf terms} that holds the
+terminal point coordinates. Then follow the variables {\bf length},
+{\bf nsps} and {\bf sps}, in which the length of the computed SMT,
+the number of Steiner points and the coordinates of the Steiner
+points will be returned.  The remaining arguments to {\bf gst\_esmt()}
+are all given as NULL, causing corresponding inputs to assume default
+values, and corresponding outputs to be ignored; in particular the
+edges of the optimal solution and the solution status are all ignored,
+and default values are assumed for all GeoSteiner parameters.
+
+In the program we assume that {\bf gst\_esmt()} returns successfully
+--- the return code is not checked --- and then we print the length of
+the SMT and the (two) Steiner points. Finally, we close the
+\geosteiner{} environment and the program ends. We encourage you to
+run the \code{demo1} program that comes with the \geosteiner{}
+distribution.
+
+\begin{figure}[p]
+{\scriptsize
+\verbatiminput{demo1.notabs}
+}
+\caption{Demo program that computes an Euclidean SMT for four
+terminals (demo1.c)}
+\label{fig:demo1}
+\end{figure}
+
+Our next example, \code{demo2}, computes a series of SMTs for randomly
+generated points sets (Figure~\ref{fig:demo2}). This program has
+two command line parameters: Firstly, the $\lambda$-value for the uniformly
+oriented metric that is to be used --- where $\lambda=0$ is defined to
+be the Euclidean metric; secondly, the required maximum excess from
+optimum in percent. As an example, ``\code{demo2 4 1}'' computes Steiner trees
+using the octilinear metric whose length are at most $1\%$ from optimum. 
+
+In the program we first read the command line parameters and then
+create a metric object (see Section~\ref{metric_functions}) that
+corresponds to the given command line para\-meter. Then we create a
+default parameter set (see Section~\ref{parameter_functions}) and
+change the \code{GST\_PARAM\_GAP\_TARGET} parameter (see
+Appendix~\ref{parameters}). Finally, we compute the SMTs using the
+high-level function {\bf gst\_smt()} which takes the metric object and
+parameter set as arguments. Only the SMT length is returned from {\bf
+  gst\_smt()}, and based on this the total length of all SMTs is
+computed and displayed. 
+
+\begin{figure}[p]
+{\scriptsize 
+\verbatiminput{demo2.notabs}
+}
+\caption{Demo program that computes SMTs for a series of randomly
+generated problem instances (demo2.c).}
+\label{fig:demo2}
+\end{figure}
+
+Our third example, shown in Figure~\ref{fig:demo3}, is similar
+to the previous example, but instead of generating the terminal
+coordinates using a random number generator, we read the terminal
+coordinates from input. The input is assumed to 
+be in the OR-library format\footnote{OR-library:
+  http://www.ms.ic.ac.uk/info.html}. The program reads every instance 
+in the file and computes an SMT for each. The metric is given
+as the first command line parameter to the program. Furthermore, the
+maximum FST size (number of terminals) can be specified as the second
+command line parameter. By giving (small) bound on the FST size, the
+running time of FST generation may decrease significantly --- at the
+cost of not necessarily returning the optimal solution.
+
+\begin{figure}[p]
+{\scriptsize 
+\verbatiminput{demo3.notabs}
+}
+\caption{Demo program that computes SMTs for a series of instances
+read from an OR-library file (demo3.c).}
+\label{fig:demo3}
+\end{figure}
+
+
+\subsection{Low-level interfaces}
+\label{low_level_interfaces}
+
+The low-level interfaces completely separate FST generation and FST
+concatenation, the two components of the exact algorithm used by
+\geosteiner{}. Thus it is possible to use alternative FST generation
+or concatenation algorithms --- or to store away generated FSTs and
+concatenate them at a later time.
+
+Another advantage of using the low-level interfaces is the greater
+control they provide over the solution process, in particular with
+respect to solving the FST concatenation problem. For most large
+instances the FST concatenation problem --- which is equivalent to
+solving a MSTHG problem --- is by far the most time-consuming part of
+the solution process.
+
+As for the high-level interfaces, programs that use the low-level
+interfaces must include the \geosteiner{} header file and open
+the \geosteiner{} environment. In the example given in
+Figure~\ref{fig:demo4} we construct a large random terminal set,
+generate the rectilinear FSTs, and set up a solution state object for
+the MSTHG problem (see Section~\ref{solver_functions}). One of
+the parameters passed to the solution state object is
+\code{GST\_PARAM\_CPU\_TIME\_LIMIT}, which limits the amount of time
+spent in the solver before returning to the application program. 
+
+\begin{figure}[p]
+{\scriptsize
+\verbatiminput{demo4.notabs}
+}
+\caption{Demo program that computes a rectilinear Steiner tree (not
+necessarily minimal) for a large random terminal set. The upper
+bound/lower bound gap is displayed at fixed running time intervals
+(demo4.c).} 
+\label{fig:demo4}
+\end{figure}
+
+In the main loop of the program we run the MSTHG solver by calling {\bf
+gst\_hg\_solve()}, passing the solution state object as an
+argument. When this function returns, we query the solution state
+object for the current solution status; this is done by calling {\bf
+gst\_get\_solver\_status()} which returns a code that represents the
+four possibilities (optimal solution, feasible solution, infeasible
+problem, no feasible solution yet).
+
+If a feasible solution has been found, the current upper and lower
+bound is obtained by querying the solution state property list. In our
+example we repeat the main loop until we have found a feasible
+solution that is within the maximum specified excess from optimum.
+
+
+\subsection{Algorithmic callback functions}
+\label{callback_interfaces}
+
+Algorithmic callback functions provide the lowest-level --- and
+perhaps most powerful --- of all the interfaces in the \geosteiner{}
+callable library.
+Callbacks are user-written functions.
+Such functions become callbacks by passing their address to suitable
+\geosteiner{} routines.
+Once a function is established as a callback in this manner,
+\geosteiner{} automatically invokes the function at the corresponding
+critical points in the branch-and-cut algorithm.
+For example, the user can provide callback routines that are invoked
+every time
+\begin{itemize}
+  \item an LP is solved during the optimize / separate loop,
+  \item processing of a branch-and-bound node completes,
+%  \item a new lower bound is obtained,
+  \item a new upper bound is obtained.
+%  \item a branch variable is selected.
+\end{itemize}
+Callback functions permit the user to extend the \geosteiner{}
+optimization algorithms by incorporating application specific
+knowledge into some of \geosteiner{}'s most critical decisions.
+As an example, the \code{bb} program (see Section~\ref{standalone})
+uses callbacks to implement the 
+\code{bb -r} switch: a callback function is defined that is invoked
+upon completion of every node.  When invoked for the root node, the LP
+solution is fractional, and the \code{-r} switch was specified, this
+callback generates a postscript plot of the node's LP relaxation.
+% Consult the \geosteiner\ source code (file \code{bbmain.c}) for an
+% example of how this callback function is used.
+
+
+\clearpage
+\section{Callable Library Functions}
+\label{libraryfunctions}
+\def\adescr#1{\begin{minipage}{9cm}{\vspace{2pt}#1\vspace{2pt}}\end{minipage}}
+
+\subsection{Application programming interface}
+\label{sec:api}
+
+All declarations needed to use the \geosteiner\ library in an
+application are defined in a single include file called
+\code{geosteiner.h}. All identifiers \code{\#define}'d in the
+header file begin with the prefix ``\code{GST\_}''.  All structure or
+union tags and typedefs begin with the prefix ``\code{gst\_}''.  All
+functions provided by the library begin with the prefix
+``\code{gst\_}''.
+
+All \geosteiner\ library functions reside in a single library.
+On most systems the name will be \code{libgeosteiner.a} and linking is 
+done with \code{-lgeosteiner}. A shared library is also possible on 
+some systems. If \geosteiner{} has been configured to use CPLEX as its
+LP-solver, then the CPLEX callable library must also be linked with
+the application program.
+
+
+\subsection{Design of library}
+\label{sec:lib_design}
+
+The \geosteiner{} library is designed to be completely re-entrant so
+that multiple problems can be solved serially or in a round-robin
+fashion.  The current implementation might not yet completely satisfy
+this goal --- especially concerning the various LP-solver interfaces
+and the way \geosteiner{} interacts with them.  We hope to eventually
+make the library fully thread-safe so that multiple problems can be
+solved in parallel within a single process address space on a
+multi-processor system.  However, this ideal is not yet supported in
+the current version.
+% Note that this is an ideal that may not be achievable due to
+% limitations within CPLEX or within the particular C runtime
+% library being used.  Whenever possible and reasonable, such
+% limitations should arise from external sources --- not our own code.
+%
+% \comment{DMW: lp\_solve fails here!  CPLEX probably does also! MZ:
+%  Yes. Could you please suggest an appropriate text?} 
+
+All output generated by the library (i.e., text that was written to
+stdout or stderr by previous versions of \geosteiner) is now
+user-controllable.  Various types of output have parameters that
+enable/disable their generation.  This is achieved using so-called
+``channels'' described in Section~\ref{message_functions}. By default,
+library routines are completely ``quiet''.
+
+The library does not use any signals nor does it establish any signal
+handlers.  These would be potential points of contention with
+applications that use the library.  Instead, all asynchronous requests
+to alter or abort a GeoSteiner computation (e.g., to abort the
+solution process, force branching in lieu of constraint generation,
+etc.) are delivered by a single routine that is designed to be safe
+when called from a user-defined signal handler (see the description of 
+the function {\bf gst\_deliver\_signals()} on
+page~\pageref{gst_deliver_signals} for more information).  
+
+During execution of its library functions, \geosteiner{} enables the
+delivery of floating-point exceptions to the calling process/thread as
+SIGFPE (or other) signals.
+This is done for floating-point overflow, divide-by-zero and invalid
+operation exceptions.
+(By default on most systems, these floating-point exceptions generate
+and propagate not-a-number (NaN) values.
+Not all NaN values generated within an algorithm reach the outputs of
+that algorithm, nor are NaN results always ``noticed'' by their callers.
+To improve reliability, robustness, debug ability and trustworthiness
+of its numeric results, \geosteiner{} forces these exceptions to
+immediately signal their occurrence.
+This is currently supported on the \code{x86\_64} and \code{arm64}
+platforms.)
+
+\subsection{Library objects}
+\label{sec:lib_objects}
+
+\subsubsection{\geosteiner\ environment}
+
+The \geosteiner\ environment encapsulates licensing information and 
+platform-specific data. If CPLEX is used as LP solver, the CPLEX
+environment is stored here. 
+
+The environment is a single {\em global} variable. No explicit user
+references to the environment are possible, but the environment {\em
+  must} be initialized by calling the {\bf gst\_open\_geosteiner()}
+function (see Section~\ref{environment_functions}).
+
+
+\subsubsection{Parameter set}
+
+A parameter set holds values for all parameters used by the
+library. In order to change one or more parameters, the user creates a
+new parameter set and modifies the parameter(s) in this set. A pointer
+to the parameter set (type \code{gst\_param\_ptr}) is then
+passed to all functions for which these parameter settings should have
+effect. Whenever a \geosteiner{} function accepts an argument of type
+\code{gst\_param\_ptr}, the user may pass a NULL pointer in which case
+the \geosteiner{} library assumes default settings for all parameter
+values.
+
+Parameter setting and querying functions are described in
+Section~\ref{parameter_functions}, while the individual parameters are  
+described in Appendix~\ref{parameters}.
+
+
+\subsubsection{Problem instance}
+
+The problem instance object is a {\em hypergraph} that can be
+decorated with a variety of additional (and optional) data (see
+Section~\ref{hypergraph_functions}). 
+By attaching information globally to the hypergraph, and to its
+vertices and edges, the problem to be solved becomes well-defined. In
+general we would like to construct a {\em tree} in the hypergraph.
+% note that the tree need not be a spanning tree. 
+Problem instance objects have type \code{gst\_hg\_ptr}.
+
+% For each vertex we have the following optional information:
+% \begin{itemize}
+% \item Vertex weight (default: zero)
+% \item Is vertex a terminal? (default: yes)
+% \item Which group(s) does the vertex belong to? (default: each
+%   terminal vertex forms a singleton group)
+% \end{itemize}
+% A group is a specified subset of vertices; groups are allowed to
+% overlap such that a given vertex can belong to more than one group. 
+% Feasible (tree) solutions are constrained to include {\em at least}
+% or {\em exactly} one vertex from each group, depending on the
+% parameters given. If no group information is given, each terminal
+% vertex for a singleton group.
+
+% For each hyperedge we have the following optional information:
+% \begin{itemize}
+% \item Edge weight (default: 1)
+% \end{itemize}
+
+% A hypergraph may be embedded into $k$-dimensional space,
+% $k \geq 2$ (default: no embedding). When the hypergraph is embedded,
+% the following additional information is needed:
+
+% \begin{itemize}
+% \item Coordinates of vertices in $k$-dimensional space
+% \item Geometric embedding of hyperedge; simply a list of line segments
+%   giving the exact drawing of the hyperedge in $k$-dimensional
+%   space 
+% \item Metric (not needed)
+% \end{itemize}
+
+% \comment{MZ: As you can see I followed your suggestion of isolating
+%   the embedding information completely. However, I have also chosen to
+%   use a very general scheme to embed the hypergraph. This means, for
+%   example, that a rectilinear edge that consists of two line segments
+%   must be given as two lines segments in this specification. I think
+%   this is much easier and equally powerful to what we already
+%   have (and it simplifies the drawing routines tremendously). Also,
+%   embedding of uniform Steiner tree problems --- or for that sake
+%   any geometric tree problem --- is automatically handled 
+%   this way.} 
+
+% \comment{DW: Although this solves the FST drawing problem, I worry
+%   that it may introduce subtle difficulties.  Consider the case of a
+%   rectilinear MST edge.  By representing it as a pair of line
+%   segments, we have arbitrarily decided whether to make it a
+%   ``left-most'' corner or a ``right-most'' corner.  This could impact
+%   our ability to prune the edge.  I would rather leave the embedding
+%   representation unspecified and force the user to instead provide a
+%   structure containing function pointers that we invoke to perform
+%   necessary operations such as drawing, various metric-dependent
+%   pruning operations, etc.  (Perhaps some of these operations would
+%   permit the extraction of a set of line segments that would comprise
+%   an embedding.)  It should be valid for the user to use NULL pointers
+%   for operations that he does not use.  Specifying a {\em rectilinear}
+%   or {\em Euclidean} metric (with $k=2$ dimensions) should be
+%   sufficient to obtain default versions of these routines.}
+
+% \comment{MZ: The problem you mention above can easily be solved by the
+%   pruning procedure if the metric is known (as I have assumed) by
+%   ``melting'' the two lines segments into one ``edge''. In general, I
+%   would like to avoid users providing structures and function pointers;
+%   it is simply a programming style I don't like. But I am willing to
+%   accept that the hypergraph only contains information about embedded
+%   ``edges'', i.e., their endpoints and their length. Actually, drawing
+%   an edge is not something I consider to be part of the library. Do
+%   you agree??}
+
+\subsubsection{Problem solution state}
+
+The problem solution state object represents the ``state'' of some
+solution process for a given problem instance (see
+Section~\ref{solver_functions}). The object can contain zero or more
+feasible (though not necessarily optimal) solutions to the problem.
+For a given problem instance, several problem solution state objects
+may be created. 
+% A problem instance that has one of more problem solution state
+% objects, should {\em not} be changed. 
+A problem solution state object refers to both a problem
+instance being solved and a parameter object (from which all
+necessary parameter values are obtained), as illustrated in
+Figure~\ref{fig:solutionstate}. 
+The problem solution state object has type \code{gst\_solver\_ptr}.
+
+\begin{figure}
+\begin{center}
+\setlength{\unitlength}{1mm}
+\begin{picture}(120,60)(0,0)
+%\thicklines
+\put(35,40){\framebox(50,20)[l]
+{\begin{minipage}{5cm}\begin{center}
+Problem Solution State\\ \code{gst\_solver\_ptr}
+\end{center}\end{minipage}}}
+\put(0,0){\framebox(50,20)[l]
+{\begin{minipage}{5cm}\begin{center}
+Problem Instance\\ \code{gst\_hg\_ptr}
+\end{center}\end{minipage}}}
+\put(70,0){\framebox(55,20)[l]
+{\begin{minipage}{5cm}\begin{center}
+Parameter Set\\ \code{gst\_param\_ptr}
+\end{center}\end{minipage}}}
+\put(45,40){\vector(-1,-1){19.4}}
+\put(75,40){\vector(1,-1){19.4}}
+\end{picture}
+\end{center}
+\caption{Problem solution state references a problem instance and a
+parameter set.}
+\label{fig:solutionstate}
+\end{figure}
+
+\subsubsection{Auxiliary objects}
+
+In addition to the four object classes described above, \geosteiner{}
+uses objects for handling metrics, property lists, messages,
+and scaling information. A short introduction to these auxiliary 
+objects is given in this section.
+
+
+\paragraph{Metric}
+A metric object identifies the method for computing distances between
+pairs of points. A metric object has type \code{gst\_metric\_ptr}, and
+can be passed as an argument to some of the functions in the callable
+library. For more information, see the examples given in
+Section~\ref{low_level_interfaces}, and the descriptions of the metric
+functions in Section~\ref{metric_functions}.
+
+
+\paragraph{Property List}
+A property list contains auxiliary information about problem
+instances and solution state objects, e.g.\ the CPU time for FST
+generation (problem instance property) and the current lower bound in
+the MSTHG solver (solution state property). 
+Property lists have type \code{gst\_proplist\_ptr}, and a property is 
+known by its property identification number (see
+Section~\ref{proplist_functions}).
+
+
+\paragraph{Channel}
+All output messages from \geosteiner{} are passed through
+user-controllable channels. A given channel may write its output to
+more than one output (screen/files). Channels have type
+\code{gst\_channel\_ptr} and are described in
+Section~\ref{message_functions}. 
+
+
+\paragraph{Scaling Information}
+A set of points may have associated scaling information, that is,
+information about how the internal representation (double floating
+point values) should be scaled back to the original point
+coordinates. This is done in order to improve the numerical precision
+of \geosteiner{}. Scaling information objects have type
+\code{gst\_scale\_info\_ptr} and are described in
+Section~\ref{io_functions}. 
+
+%--------------------
+\input{functions.tex}
+%--------------------
+
+\clearpage
+\section{Stand-Alone Programs}
+\label{standalone}
+
+%\def\mdescr#1{\begin{minipage}{11cm}{\vspace{2pt}#1\vspace{2pt}}\end{minipage}}
+\def\mdescr#1{#1}
+
+Below we first give some examples of program invocations.
+This is followed by a complete description of each stand-alone
+program.  Note that a short description of each program also can
+be obtained by running the program with the {\bf -h} option.
+
+The following command will generate a set of 70 random points and
+compute a rectilinear Steiner minimal tree for it:
+{\small\begin{verbatim}
+ rand_points 70 | rfst | bb
+\end{verbatim}
+}
+\noindent The following computes an Euclidean Steiner minimal tree 
+{\small\begin{verbatim}
+ rand_points 70 | efst | bb
+\end{verbatim}
+}
+\noindent and the following computes an octilinear Steiner minimal
+   tree for the same set of points 
+{\small\begin{verbatim}
+ rand_points 70 | ufst | bb
+\end{verbatim}
+}
+
+Note that rand\_points always generates the same sequence of points
+unless given the {\bf -r} or {\bf -s} option.
+
+The following (Bourne shell) examples can be used to generate complete
+printable postscript plots for these problem instances:
+{\small\begin{verbatim}
+ (cat prelude.ps; rand_points 70 | rfst | bb) >rsmt70.ps
+ (cat prelude.ps; rand_points 70 | efst | bb) >esmt70.ps
+ (cat prelude.ps; rand_points 70 | ufst | bb) >usmt70.ps
+\end{verbatim}
+}
+\noindent The complete set of FSTs can also be plotted as follows:
+{\small\begin{verbatim}
+ (cat prelude.ps; rand_points 70 | rfst | plotfst -fgo) >rfsts.ps
+ (cat prelude.ps; rand_points 70 | efst | plotfst -fgo) >efsts.ps
+ (cat prelude.ps; rand_points 70 | ufst | plotfst -fgo) >ufsts.ps
+\end{verbatim}
+}
+
+A reduced Hanan grid in the OR-library format (for the rectilinear
+problem) can be generated as follows:
+\begin{verbatim}
+ rand_points 70 | rfst | fst2graph
+\end{verbatim}
+\noindent By pruning the set of FSTs, an even more reduced grid graph
+can be generated:
+\begin{verbatim}
+ rand_points 70 | rfst | prunefst | fst2graph
+\end{verbatim}
+
+An Euclidean Steiner minimal tree for the \code{berlin52.tsp} instance from
+TSPLIB can be constructed and displayed as follows (assuming that the
+file \code{berlin52.tsp} is present in your \geosteiner\ directory):
+{\small\begin{verbatim}
+ (cat prelude.ps; lib_points <berlin52.tsp | efst | bb) | gv -
+\end{verbatim}
+}
+
+\newpage
+\subsection*{rand\_points}
+
+Generates random point sets.
+There is considerable flexibility in choosing the size, precision and
+scaling factor for the generated point coordinates.
+By default, the coordinates are almost always real numbers, uniformly
+distributed in the interval $[0,1)$ (see below for exceptions to this
+rule).
+Several pseudo-random generator algorithms are supported.
+The number of digits per coordinate (both default and maximum) vary by
+generator, as described below.
+The following options are permitted:
+
+\begin{tabular}{lp{11cm}}
+\bf -b  & \mdescr{ Binary mode.  Generates coordinates that are
+  uniformly distributed doubles in $\lbrack 0,1)$, outputting them
+  with full precision. } \\
+\bf -d N  & \mdescr{ Generate decimal numbers having N digits.
+	(See below for default and maximum values, which vary by
+	generator.)} \\
+\bf -g G & \mdescr{ Use pseudo-random number generator G.
+	(See below.) } \\
+\bf -k KEY & \mdescr{ Modify default generator seed with KEY, which can
+	be arbitrary text. } \\
+\bf -p N & \mdescr{ Make N of the coordinate digits be fractional
+  (i.e., to the right of the decimal point).
+  Default is for all digits to be fractional.} \\
+\bf -r  & \mdescr{Randomize. Use an initial seed chosen from the current date
+  and time.} \\
+\bf -s FILE & \mdescr{ If FILE exists, read the generator and its
+	initial seed from this file.
+	When finished, write the generator and final seed to this
+        file. }
+\end{tabular}
+
+The {\bf -g G} argument allows choosing between the following
+pseudo-random number generators:
+
+\begin{tabular}{lcp{10cm}}
+	& {\bf Default : Max} & \\
+{\bf G}	& {\bf Digits} & {\bf Description} \\ \hline
+\bf 0 & 4 : 5 & \mdescr{The ``legacy'' random generator.
+	It is based on the original PDP-11 Unix rand(3) function (with
+        all of its ugly warts intact).
+	Its randomness is quite poor. } \\
+\bf 1 & 7 : 9 & \mdescr{The ``new'' random generator.
+	It uses a 64-bit shift register with XOR feedback, and
+        produces a reasonable level of randomness. } \\
+\bf 2 & 7 : 19 & \mdescr{The ``AES-256'' random generator.
+	It uses the AES-256 block cipher as its fundamental entropy
+        source, producing truly excellent randomness.
+	GeoSteiner must be built with GMP in order for this generator
+        to be available.} \\ \hline
+\end{tabular}
+\vskip 0.25in
+
+If no generator is specified, rand\_points will use
+generator 2 (AES-256), if available.
+Otherwise, generator 1 is used.
+The default generator can be overridden using the
+RAND\_POINTS\_DEFAULT\_GENERATOR
+environment variable.
+
+Note that using -s to load an intial seed from an existing seed file
+has the effect of specifying the generator, since there is a data
+field within the seed file that specifies the generator.
+(This data field is necessary because the format of the seed file
+state information is different for each generator.)
+If both -g and -s are specified, then either (1) the seed file must
+{\bf not} yet exist, or (2) the generator specified with -g must match
+that specified within the seed file.
+
+Previous versions of rand\_points only supported generators 0 and 1,
+with the default being to use generator 0 to generate 4-digit integer
+coordinates.
+As a special case, when using generator 0 (legacy) with neither the
+-d nor -p arguments, the current version of rand\_points also generates
+4-digit integers, thereby replicating the behavior of previous
+versions of rand\_points.
+Users who prefer the point sets produced by previous versions of
+rand\_points can obtain these same, familiar point sets without any
+additional command line arguments simply by setting the environment
+variable
+\begin{displaymath}
+\hbox{RAND\_POINTS\_DEFAULT\_GENERATOR=0}
+\end{displaymath}
+
+\newpage
+\subsection*{lib\_points}
+
+Reads a point set in either TSPLIB or OR-library format from stdin and
+converts the input to point coordinates as required by {\bf efst},
+{\bf rfst} or {\bf ufst}.  The program automatically
+determines the input file type.  The program has one optional
+parameter (which has value 1 by default) that specifies which instance
+number should be extracted from an OR-library file.
+
+\newpage
+\subsection*{efst}
+
+Reads a point set from stdin, and generates a set of Euclidean FSTs
+that contains at least one Euclidean Steiner minimal tree. The
+following options are permitted:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -d txt      & \mdescr{Description of problem instance.} \\
+\bf -g  & \mdescr{Use greedy heuristic instead of Smith-Lee-Liebman (more time
+  consuming but generates fewer eq-points).} \\
+\bf -k K        & \mdescr{Generate only FSTs having at most K terminals. This can
+  save considerable time but can also eliminate FSTs that must be in
+  the optimal Steiner tree (i.e., solutions can become suboptimal).} \\
+\bf -m M        & \mdescr{Use multiple precision.  Larger M use it more. Default is
+  M=0 which disables multiple precision. The use of this option
+  requires that \geosteiner\ be configured to use the GNU
+  Multi-Precision arithmetic library (GMP).  (See the INSTALL file for
+  more details).} \\
+\bf -t  & \mdescr{Print detailed timings to stderr.} \\
+\bf -v N        & \mdescr{Generate the output in version N of the FST data
+  format. Supported versions are 0, 1, 2 and 3. Version 3 is the
+  default. } \\
+\bf -Z P V & \mdescr{Set parameter P to value V, e.g.\
+\mbox{\code{-ZEPS\_MULT\_FACTOR 64}} sets the epsilon
+multiplication factor to 64 (\code{GST\_PARAM\_EPS\_MULT\_FACTOR~=~64}).}
+\end{tabular}\bigskip
+
+\newpage
+\subsection*{rfst}
+
+Reads a point set from stdin, and generates a set of rectilinear FSTs
+that contains at least one rectilinear Steiner minimal tree. The
+following options are permitted: 
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -d txt      & \mdescr{Description of problem instance.} \\
+\bf -k K        & \mdescr{Generate only FSTs having at most K terminals. This can
+  save time but can also eliminate FSTs that must be in the optimal
+  Steiner tree (i.e., solutions can become suboptimal). } \\
+\bf -t  & \mdescr{Print detailed timings to stderr.} \\
+\bf -v N        & \mdescr{Generate the output in version N of the FST data
+  format. Supported versions are 0, 1, 2 and 3. Version 3 is the
+  default. } \\
+\bf -Z P V & \mdescr{Set parameter P to value V, e.g.\
+\mbox{\code{-ZINCLUDE\_CORNERS 0}} disables the generation of corner points
+(\code{GST\_PARAM\_INCLUDE\_CORNERS~=~0})}
+\end{tabular}\bigskip
+
+\newpage
+\subsection*{ufst}
+
+Reads a point set from stdin, and generates a set of uniformly-oriented
+FSTs that contains at least one uniformly-oriented Steiner minimal
+tree. The following options are permitted: 
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -d txt      & \mdescr{Description of problem instance.} \\
+\bf -k K        & \mdescr{Generate only FSTs having at most K terminals. This can
+  save time but can also eliminate FSTs that must be in the optimal
+  Steiner tree (i.e., solutions can become suboptimal).} \\
+\bf -l L        & \mdescr{Number of orientations (default: 4).} \\
+\bf -t  & \mdescr{Print detailed timings to stderr.} \\
+\bf -v N        & \mdescr{Generate the output in version N of the FST data
+  format. Supported versions are 0, 1, 2 and 3. Version 3 is the
+  default. } \\
+\bf -Z P V & \mdescr{Set parameter P to value V, e.g.\
+\mbox{\code{-ZINCLUDE\_CORNERS 0}} disables the generation of corner points
+(\code{GST\_PARAM\_INCLUDE\_CORNERS~=~0})}
+\end{tabular}\bigskip
+
+\newpage
+\subsection*{bb}
+
+The FST concatenation algorithm using branch-and-cut to solve an IP formulation
+of the problem.  The FST data is read from stdin and a plot of the solution is
+produced on stdout in an ``incomplete'' postscript form.  A printable
+postscript file can be obtained by {\em prepending} the file "prelude.ps" to
+the program output. If you want this file to be included in some other document
+then it needs a bounding box. This can be obtained by running it through
+{\bf eps2eps} (GhostScript 6.01 or later).
+
+Various trace messages appear in the output as postscript
+comments.  (The name {\bf bb} is for branch-and-bound -- note that the name
+{\bf bc} is already taken on Unix.)  The following options are permitted:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -2 & \mdescr{Omit all 2-terminal Subtour Elimination Constraints
+  (SEC's) from the initial constraint pool.} \\ 
+\bf -b & \mdescr{Disable "strong branching", which chooses branching variables
+        very carefully.} \\
+\bf -B N & \mdescr{Set branch variable selection policy.
+         N=0: naive max of mins,
+         N=1: smarter lexicographic max of mins (default),
+         N=2: product of improvements.} \\
+\bf -c P & \mdescr{Pathname of checkpoint file to restore (if present)
+         and/or update.  The files are actually named P.chk and P.ub, with
+         temporary files named P.tmp, P.new and P.nub.}\\
+\bf -f & \mdescr{The only information dumped is the FSTs in the best solution found. This
+      can then be given to dumpfst/plotfst. E.g.
+ \code{rand\_points | efst | bb -f | dumpfst -sl}}\\
+\bf -H & \mdescr{Force the use of the backtrack search. This will result in an
+      error if there are more than 32 edges. Note that there is still a limit
+      on the number of backtracks (\code{GST\_PARAM\_MAX\_BACKTRACKS}). If
+      using this option one might also want to set backtrack limit to infinity
+      (otherwise an optimal solution might not be found).}\\
+\bf -l T & \mdescr{Sets a CPU time limit (in seconds) of T. Example CPU times are:
+  \code{-l 3days2hours30minutes15seconds}, \code{-l 1000seconds},
+  \code{-l 1000} and \code{-l 2h30m}.}\\
+\bf -m P & \mdescr{Merge constraints from checkpoint file P with those
+      of the formulation.}
+\end{tabular}
+
+
+\begin{tabular}{lp{11cm}}
+\bf -n N & \mdescr{Output N best solutions (default: 1).}\\
+\bf -r   & \mdescr{Plot the optimal LP relaxation solution for the root node,
+        but only if it is fractional.} \\
+\bf -R   & \mdescr{When optimal root LP relaxation is obtained, determine for
+        each LP iteration the number of final constraints whose first violation
+        occurred during that iteration.} \\
+\bf -t   & \mdescr{Do {\em not} include the title string in the postscript output
+                   (name, length and time).} \\
+\bf -T N & \mdescr{Search N times more thoroughly for strong branching
+        variables.} \\
+\bf -u B & \mdescr{Specify B to be the initial upper bound assumed by the
+        branch-and-bound.} \\
+\bf -z N & \mdescr{Set the target number of pool non-zeros to N.} \\
+\bf -Z P V & \mdescr{Set parameter P to value V, e.g.\
+\mbox{\code{-ZGAP\_TARGET 0.5}} sets \code{GST\_PARAM\_GAP\_TARGET~=~0.5}.}
+\end{tabular}\bigskip
+
+When configured to use CPLEX, the following additional
+option is permitted:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -a M N & \mdescr{Force CPLEX allocation to be at least M rows and N
+        non-zeros.}
+\end{tabular}\bigskip
+
+When configured to use {\code lp\_solve}, the following additional
+options are permitted:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -p & \mdescr{Turn on the use of perturbations.  This is the method
+        that {\code lp\_solve\_2.3} uses to deal with degenerate problems.} \\
+\bf -s & \mdescr{Turn on the use of problem scaling.  Once again a rather
+        crude attempt to address problems that are badly behaved numerically.}
+\end{tabular}\bigskip
+
+The following ``grep-able'' items appear in the output within
+postscript comments, and may be potentially useful:
+
+\bigskip
+\begin{itemize}
+
+\item[\code{@0}] The instance description from the FST data file.\\
+
+\item[\code{@1}] Summary statistics:
+ \begin{itemize}
+  \item Number of terminals
+  \item Number of FSTs/hyperedges
+  \item Number of branch-and-bound nodes
+  \item Number of LPs solved
+  \item Phase 1 CPU time (FST generation)
+  \item Phase 2 CPU time (branch-and-cut)
+  \item Total CPU time
+\end{itemize}
+
+\item[\code{@2}] LP/IP statistics:
+ \begin{itemize}
+  \item Length of optimal Steiner tree
+  \item Length of LP relaxation at root node
+  \item Percent of LP/IP "gap"
+  \item \# of LPs solved for root node
+  \item CPU time for root node
+  \item Percent reduction of SMT over MST
+\end{itemize}
+
+\item[\code{@3}]        Initial constraint pool statistics:
+ \begin{itemize}
+  \item Number of rows in pool
+  \item Number of non-zeros in pool
+  \item Number of rows in LP tableau
+  \item Number of non-zeros in LP tableau
+\end{itemize}
+
+\item[\code{@4}]        Constraint pool statistics for root node:
+ \begin{itemize}
+  \item Number of rows in pool
+  \item Number of non-zeros in pool
+  \item Number of rows in LP tableau
+  \item Number of non-zeros in LP tableau
+\end{itemize}
+
+\item[\code{@5}]        Final constraint pool statistics:
+ \begin{itemize}
+  \item Number of rows in pool
+  \item Number of non-zeros in pool
+  \item Number of rows in LP tableau
+  \item Number of non-zeros in LP tableau
+\end{itemize}
+
+\item[\code{@6}]        Statistics on FSTs occurring in the SMT:
+ \begin{itemize}
+  \item Number of FSTs in SMT
+  \item Average FST size in SMT
+  \item Maximum FST size in SMT
+  \item Number of FSTs of size 2 in SMT
+  \item Number of FSTs of size 3 in SMT
+  \item Number of FSTs of size 4 in SMT
+  \item Number of FSTs of size 5 in SMT
+  \item Number of FSTs of size 6 in SMT
+  \item Number of FSTs of size 7 in SMT
+  \item Number of FSTs of size 8 in SMT
+  \item Number of FSTs of size 9 in SMT
+  \item Number of FSTs of size 10 in SMT
+  \item Number of FSTs of size $>$ 10 in SMT
+\end{itemize}
+
+\item[\code{@C}]           Coordinates of a Steiner point in the optimal
+        solution.  The Steiner points form a
+        "certificate" of the optimal solution since the
+        optimal solution can be reconstructed by
+        computing a minimum spanning tree of the
+        original terminals and these Steiner points.
+\item[\code{@D}]    Deletion of slack rows from LP tableau.
+\item[\code{@LO} / \code{@LN}]   This pair of messages is emitted every time the
+        lower bound gets tighter.  They contain the CPU
+        time and the old/new bound, as well as the
+        old/new gap percentages.  These can be plotted
+        (i.e., using gnuplot) to graphically show the
+        convergence rate of the algorithm.
+\item[\code{@NC}]   Creation of a new branch-and-bound node:
+
+\begin{itemize}
+  \item Node number
+  \item Parent node number
+  \item Branch variable
+  \item Branch direction
+  \item Objective value (the real LP objective is at least this value)
+\end{itemize}
+
+\item[\code{@PAP}]  Adding "pending" pool constraints to the LP
+        tableau.
+\item[\code{@PL}]   State of LP tableau constraints.
+\item[\code{@PMEM}] Constraint pool memory status.  Printed before
+                   and after each garbage collection, and after
+                   adding new/initial constraints to the pool.
+\item[\code{@r}]           Experimental output from -R switch.
+\item[\code{@RC}]   Experimental output from -R switch.
+\item[\code{@UO} / \code{@UN}]  This pair of messages is emitted every time the
+        upper bound gets tighter.  They contain the CPU
+        time and the old/new bound, as well as the
+        old/new gap percentages.  These can be plotted
+        (i.e., using gnuplot) to graphically show the
+        convergence rate of the algorithm.
+\end{itemize}
+
+\newpage
+\subsection*{prunefst}
+
+Reduce the set of FSTs generated by {\bf efst}, {\bf rfst} or {\bf
+ufst} while still retaining at least one optimal solution among the
+remaining set of FSTs.  This program can reduce the time to solve the
+FST concatenation problem considerably, but is only worthwhile for
+large instances.  The following options are permitted:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -b          & \mdescr{Use linear space and logarithmic time lookup for BSDs.} \\
+\bf -d txt      & \mdescr{Description of problem instance.} \\
+\bf -t  & \mdescr{Print detailed timings to stderr.} \\
+\bf -v N        & \mdescr{Generate the output in version N of the FST data
+  format. Supported versions are 0, 1, 2 and 3. Version 3 is the
+  default.}\\
+\bf -Z P V & \mdescr{Set parameter P to value V, e.g.\
+\mbox{\code{-ZEPS\_MULT\_FACTOR 64}} sets the epsilon
+multiplication factor to 64 (\code{GST\_PARAM\_EPS\_MULT\_FACTOR~=~64}).}
+\end{tabular}\bigskip
+
+\newpage
+\subsection*{dumpfst}
+Dumps readable information about generated FSTs.  There are two forms
+of this command, each producing a different type of output.  The first
+form of the command is obtained whenever the {\bf -d} or {\bf -h}
+switches are used.  These switches provide summary information {\em only}
+--- FST statistics, and/or a histogram of FST sizes:.
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -d  & \mdescr{Display statistics about FSTs.} \\
+\bf -h  & \mdescr{Display histogram of FST sizes.} \\
+\bf -a  & \mdescr{Include all FSTs in histogram, even those that were ``pruned''
+  by the FST generator or a pruning algorithm.}
+\end{tabular}\bigskip
+
+The second form of the command is obtained when neither {\bf -d} nor
+{\bf -h} are specified.  This form dumps all of the FSTs in a readable
+form.  Each line of output represents a single FST, listing its
+terminal numbers (0 through N-1).  The terminals are listed in the
+same order that they occur in the actual data structures, although
+they can optionally be sorted in numeric order.  The length of each
+FST can optionally be appended to each line:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -l  & \mdescr{Append the FST length to each output line.} \\
+\bf -s  & \mdescr{Terminals of each FST are listed in numeric (sorted) order
+  instead of internal order.} \\
+\bf -a  & \mdescr{Include all FSTs, even those that were ``pruned'' by the FST
+  generator or a pruning algorithm.}
+\end{tabular}\bigskip
+
+\newpage
+\subsection*{plotfst}
+Program to generate various plots of FSTs in an FST data file.  Reads
+the FST data file on stdin and produces postscript on stdout for the
+plots indicated by the command line switches:
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+
+\bf -f  & \mdescr{Prints all FSTs, 12 FSTs per page.} \\
+\bf -g  & \mdescr{Prints FSTs in ``grouped'' fashion, 12 groups per page.} \\
+\bf -o  & \mdescr{Prints all FSTs overlaid together.} \\
+\bf -p  & \mdescr{Prints only the points, no FSTs.}
+\end{tabular}\bigskip
+
+Note that the file \code{prelude.ps} must be {\em prepended} to the output of
+this program in order to have a complete postscript document.
+
+\newpage
+\subsection*{fst2graph}
+
+Reads FSTs from stdin and produces an (ordinary) graph on stdout
+representing the FSTs.  For the rectilinear problem, the FSTs are
+overlaid on the Hanan grid and the remaining Hanan grid is output.
+For the Euclidean problem the set of all terminals and Steiner points
+in all FSTs forms the set of vertices and the line segments form the
+edges. Output data is printed in the OR-library format by default, but the
+SteinLib format is also supported: 
+
+\bigskip
+\begin{tabular}{lp{11cm}}
+\bf -b N	& \mdescr{For version 4 output (STEINLIB\_INT),
+ generate integer edge weights as unsigned N-bit integers
+ (default is N=64).} \\
+\bf -d txt      & \mdescr{Description of problem instance.} \\
+\bf -e  & \mdescr{Generate the edge graph for the rectilinear problem.} \\
+\bf -u  & \mdescr{Output unscaled (fractional) data for the rectilinear
+  problem.} \\
+\bf -v N	& \mdescr{Generate version N format output.}
+\end{tabular}\bigskip
+
+\newpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+% \bibliography{/net/verdande/home/disk00/martinz/project/text/mz_references}
+
+\begin{thebibliography}{10}
+
+\bibitem{KahngRobins92a}
+A.~B. Kahng and G.~Robins.
+\newblock {A New Class of Iterative Steiner Tree Heuristics with Good
+  Performance}.
+\newblock {\em IEEE Transactions on Computer-Aided Design of Integrated
+  Circuits and Systems}, 11(7):893--902, 1992.
+
+\bibitem{NielsenWinterZachariasen02c}
+B.~K. Nielsen, P.~Winter, and M.~Zachariasen.
+\newblock {An Exact Algorithm for the Uniformly-Oriented Steiner Tree Problem}.
+\newblock In {\em Proceedings of the 10th European Symposium on Algorithms,
+  Lecture Notes in Computer Science}, volume 2461, pages 760--772. Springer,
+  2002.
+
+\bibitem{SaloweWarme95}
+J.~S. Salowe and D.~M. Warme.
+\newblock {Thirty-Five-Point Rectilinear Steiner Minimal Trees in a Day}.
+\newblock {\em Networks}, 25(2):69--87, 1995.
+
+\bibitem{SmithLeeLiebman81}
+J.~M. Smith, D.~T. Lee, and J.~S. Liebman.
+\newblock {An $O(n \log n)$ Heuristic for Steiner Minimal Tree Problems on the
+  Euclidean Metric}.
+\newblock {\em Networks}, 11:23--29, 1981.
+
+\bibitem{Warme98}
+D.~M. Warme.
+\newblock {\em {Spanning Trees in Hypergraphs with Applications to Steiner
+  Trees}}.
+\newblock Ph.D. thesis, Computer Science Dept., The University of Virginia, 1998.
+
+\bibitem{WarmeWinterZachariasen00}
+D.~M. Warme, P.~Winter, and M.~Zachariasen.
+\newblock {Exact Algorithms for Plane Steiner Tree Problems: A Computational
+  Study}.
+\newblock In D.-Z. Du, J.~M. Smith, and J.~H. Rubinstein, editors, {\em
+  {Advances in Steiner Trees}}, pages 81--116. Kluwer Academic Publishers,
+  Boston, 2000.
+
+\bibitem{Winter85}
+P.~Winter.
+\newblock {An Algorithm for the Steiner Problem in the Euclidean Plane}.
+\newblock {\em Networks}, 15:323--345, 1985.
+
+\bibitem{WinterZachariasen97}
+P.~Winter and M.~Zachariasen.
+\newblock {Euclidean Steiner Minimum Trees: An Improved Exact Algorithm}.
+\newblock {\em Networks}, 30:149--166, 1997.
+
+\bibitem{Zachariasen99a}
+M.~Zachariasen.
+\newblock {Rectilinear Full Steiner Tree Generation}.
+\newblock {\em Networks}, 33:125--143, 1999.
+
+\bibitem{ZachariasenWinter98}
+M.~Zachariasen and P.~Winter.
+\newblock {Concatenation-Based Greedy Heuristics for the Euclidean Steiner Tree
+  Problem}.
+\newblock {\em Algorithmica}, 25:418--437, 1999.
+
+\end{thebibliography}
+
+\clearpage
+\appendix
+
+\def\param#1{\noindent{\bf\ttfamily GST\_PARAM\_#1}}
+\def\pname#1{\noindent\hrulefill\\ \noindent{\bf\ttfamily GST\_PARAM\_#1}}
+\def\ptype#1{\vspace*{-0.9cm}\begin{flushright}\code{#1}\end{flushright}}
+\def\pdescr#1{\noindent #1 \bigskip}
+\def\pvalhead{\noindent{\bf Values}\\}
+\def\pval#1#2#3{\noindent\makebox[10.5cm][l]{\code{GST\_PVAL\_#1}}\makebox[1cm][r]{#2}\makebox[2cm][r]{#3}}
+
+\section{Library Parameters}
+\label{parameters}
+
+The parameters in \geosteiner\ are divided into five groups: FST
+generation parameters (Section~\ref{parameters_fst}), LP solver
+parameters (Section~\ref{parameters_lp}), hypergraph solver
+algorithmic options (Section~\ref{parameters_solver_alg}), 
+hypergraph solver stopping conditions (Section~\ref{parameters_stop}),
+and  hypergraph solver input/output options
+(Section~\ref{parameters_io}). 
+
+Parameters are modified as described in
+Section~\ref{parameter_functions}.  
+Each parameter is uniquely identified by its macro name beginning with
+(\code{GST\_PARAM}). Below the effect of each parameter is
+described. Also, the type of each parameter (\code{double}, \code{int},
+\code{char*} or \code{gst\_channel\_ptr}) and range of possible
+values are given.
+
+% ----------------------------------------------------------------------
+% \subsection{Hypergraph parameters} 
+% \label{parameters_hg}
+
+% \pname{GROUP\_DEFINITION}
+% \ptype{int}
+
+% \pdescr{Definition of vertex groups: Either at least one or exactly one vertex
+% should be chosen for each group.}
+
+% \pvalhead
+% \pval{GROUP\_DEFINITION\_ATLEAST}{0}{(default)}\\
+% \pval{GROUP\_DEFINITION\_EXACTLY}{1}{}
+
+% ----------------------------------------------------------------------
+\newpage
+\subsection{FST generation parameters}
+\label{parameters_fst}
+
+
+% ----------------------------------------------------------------------
+\pname{MAX\_FST\_SIZE}
+\ptype{int} 
+
+\pdescr{Maximum size (number of terminals spanned) of generated FSTs.}
+
+\pvalhead
+Any number greater than or equal to 2 (default: \code{INT\_MAX}).
+
+% ----------------------------------------------------------------------
+\pname{INCLUDE\_CORNERS}
+\ptype{int}
+
+\pdescr{Include corners of bent edges in FSTs in hypergraph
+  embedding. Applies to rectilinear and uniform-orientation metric FST 
+  generators. Including corners makes the embedding easier to
+  draw.}
+
+\pvalhead
+\pval{INCLUDE\_CORNERS\_DISABLE}{0}{(default)}\\
+\pval{INCLUDE\_CORNERS\_ENABLE}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{EFST\_HEURISTIC}
+\ptype{int}
+
+\pdescr{Heuristic used in the Euclidean FST generator:
+  Smith-Lee-Liebman or Zachariasen-Winter. The latter is slower but
+  prunes more eq-points; it is therefore recommended for large and/or
+  difficult instances.} 
+
+\pvalhead
+\pval{EFST\_HEURISTIC\_SLL}{0}{(default)}\\
+\pval{EFST\_HEURISTIC\_ZW}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{EPS\_MULT\_FACTOR}
+\ptype{int}
+
+\pdescr{Epsilon multiplication factor F used in floating point
+  comparisons. The maximum relative error is expected to be at most 
+  F $\times$ \code{DBL\_ESPILON}.}
+
+\pvalhead
+Any number greater than or equal to 1 (default: 32).
+
+% ----------------------------------------------------------------------
+\pname{MULTIPLE\_PRECISION}
+\ptype{int}
+
+\pdescr{Use GNU Multi-Precision arithmetic library (GMP) in the
+  Euclidean FST generator in order to improve numerical
+  precision of computed eq-points: 0:~off; 1:~use GMP
+  with 1 Newton iteration; 2:~use GMP with 1 or more Newton
+  iterations, stopping when a convergence test indicates that 1/2 ULP
+  of precision has been obtained.}
+
+\pvalhead
+\pval{MULTIPLE\_PRECISION\_OFF}{0}{(default)}\\
+\pval{MULTIPLE\_PRECISION\_ONE\_ITER}{1}{}\\
+\pval{MULTIPLE\_PRECISION\_MORE\_ITER}{2}{}
+
+% ----------------------------------------------------------------------
+\pname{INITIAL\_EQPOINTS\_TERMINAL}
+\ptype{int}
+
+\pdescr{Number of eq-points initially allocated per terminal in
+  the Euclidean FST generator.  Although eq-point storage is added
+  dynamically when needed, some large or difficult instances run out
+  of memory if the initial allocation is insufficient.}
+
+\pvalhead
+Any number greater than or equal to 1 (default: 100).
+
+% ----------------------------------------------------------------------
+\pname{BSD\_METHOD}
+\ptype{int}
+
+\pdescr{Data structure for holding bottleneck Steiner distances
+(BSD). Either quadratic space and \emph{constant} time lookup or linear
+space and \emph{logarithmic} time lookup. The latter is recommended for
+very large instances.}
+
+\pvalhead
+\pval{BSD\_METHOD\_CONSTANT}{0}{(default)}\\
+\pval{BSD\_METHOD\_LOGARITHMIC}{1}{}
+
+% ----------------------------------------------------------------------
+\newpage
+\subsection{LP solver parameters} 
+\label{parameters_lp}
+
+% ----------------------------------------------------------------------
+\pname{LP\_SOLVE\_PERTURB}
+\ptype{int}
+
+\pdescr{Use perturbations when solving LPs (only applicable
+  when using lp\_solve as LP-solver).} 
+
+\pvalhead
+\pval{LP\_SOLVE\_PERTURB\_DISABLE}{0}{(default)}\\
+\pval{LP\_SOLVE\_PERTURB\_ENABLE}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{LP\_SOLVE\_SCALE}
+\ptype{int}
+
+\pdescr{Use scaling when solving LPs (only applicable when using
+  lp\_solve as LP-solver).}
+
+\pvalhead
+\pval{LP\_SOLVE\_SCALE\_DISABLE}{0}{(default)}\\
+\pval{LP\_SOLVE\_SCALE\_ENABLE}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{CPLEX\_MIN\_ROWS}
+\ptype{int}
+
+\pdescr{Force the LP solver allocation to be at least N rows (only
+  applicable when using CPLEX as LP-solver).}
+
+\pvalhead
+Any non-negative number (default: 0).
+
+% ----------------------------------------------------------------------
+\pname{CPLEX\_MIN\_NZS}
+\ptype{int}
+
+\pdescr{Force the LP solver allocation to be at least N non-zeros (only
+  applicable when using CPLEX as LP-solver).} 
+
+\pvalhead
+Any non-negative number (default: 0).
+
+% ----------------------------------------------------------------------
+\newpage
+\subsection{Hypergraph solver algorithmic options}
+\label{parameters_solver_alg}
+
+% ----------------------------------------------------------------------
+\pname{SOLVER\_ALGORITHM}
+\ptype{int}
+
+\pdescr{Hypergraph solver algorithm: Branch-and-cut, backtrack search,
+  or chosen automatically. Backtrack search is only applicable if the
+  instance has 32 or fewer hyperedges. Also note that some stopping
+  conditions --- such as UB/LB gap --- are {\em not} feasible for
+  backtrack search. 
+  The automatic algorithm uses backtrack search when the instance is
+  small (see parameters
+  \code{GST\_PARAM\_BACKTRACK\_MAX\_VERTS} and
+  \code{GST\_PARAM\_BACKTRACK\_MAX\_EDGES}); furthermore, it switches 
+  to branch-and-cut when the the backtrack limit
+  \code{GST\_PARAM\_MAX\_BACKTRACKS} is hit. }
+
+\pvalhead
+\pval{SOLVER\_ALGORITHM\_AUTO}{0}{(default)}\\
+\pval{SOLVER\_ALGORITHM\_BRANCH\_AND\_CUT}{1}{}\\
+\pval{SOLVER\_ALGORITHM\_BACKTRACK\_SEARCH}{2}{}
+
+% ----------------------------------------------------------------------
+\pname{NUM\_FEASIBLE\_SOLUTIONS}
+\ptype{int}
+
+\pdescr{Number N of stored feasible solutions (top N solutions).  A
+  value of N for this parameter instructs the solver to retain the N
+  best feasible solutions discovered.}
+
+\pvalhead
+Any number greater than or equal to 1 (default: 1).
+
+% ----------------------------------------------------------------------
+\pname{BRANCH\_VAR\_POLICY}
+\ptype{int}
+
+\pdescr{Branch variable policy. 0:~naive max of mins, 1:~smarter
+  lexicographic max of mins, 2:~product of improvements; 3:~weak
+  branching. All policies except the last one use strong branching.}
+
+\pvalhead
+\pval{BRANCH\_VAR\_POLICY\_NAIVE}{0}{}\\
+\pval{BRANCH\_VAR\_POLICY\_SMART}{1}{(default)}\\
+\pval{BRANCH\_VAR\_POLICY\_PROD}{2}{}\\
+\pval{BRANCH\_VAR\_POLICY\_WEAK}{3}{}
+
+% ----------------------------------------------------------------------
+\pname{CHECK\_BRANCH\_VARS\_THOROUGHLY}
+\ptype{int} 
+
+\pdescr{Search N times more thoroughly for strong branching
+  variables.}
+
+\pvalhead
+Any number from 1 to 1000 (default: 1).
+
+% ----------------------------------------------------------------------
+\pname{TARGET\_POOL\_NON\_ZEROS}
+\ptype{int} 
+
+\pdescr{Target number of pool non-zeros; target is computed
+  automatically when value is zero.}
+
+\pvalhead
+Any non-negative number (default: 0).
+
+% ----------------------------------------------------------------------
+\pname{SEED\_POOL\_WITH\_2SECS}
+\ptype{int}
+
+\pdescr{This parameter controls whether or not to seed the initial
+constraint pool with all 2-terminal Subtour Elimination Constraints
+(SECs). Most problems have relatively few of these, but some problems
+(such as those with many edges containing a large number of vertices)
+can blow up unless this 
+is disabled.}
+
+\pvalhead
+\pval{SEED\_POOL\_WITH\_2SECS\_DISABLE}{0}{}\\
+\pval{SEED\_POOL\_WITH\_2SECS\_ENSABLE}{1}{(default)}
+
+% ----------------------------------------------------------------------
+\pname{INITIAL\_UPPER\_BOUND}
+\ptype{double}
+
+\pdescr{Value of initial upper bound for problem being solved.}
+
+\pvalhead
+Any number (default: \code{DBL\_MAX}).
+
+% ----------------------------------------------------------------------
+\pname{CHECK\_ROOT\_CONSTRAINTS}
+\ptype{int}
+
+\pdescr{When the optimal root LP relaxation is obtained, determine for
+  each LP iteration the number of final constraints whose first
+  violation occurred during that iteration.
+  This option creates a temporary file to hold the LP solution vector
+  from each iteration.  This file can grow very large.}
+
+\pvalhead
+\pval{CHECK\_ROOT\_CONSTRAINTS\_DISABLE}{0}{(default)}\\
+\pval{CHECK\_ROOT\_CONSTRAINTS\_ENABLE}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_MODE}
+\ptype{int} 
+
+\pdescr{Local cuts mode: 
+0:~disable local cuts; 
+1:~apply local cuts only when no subtour violation exists; 
+2:~apply local cuts to congested components that contain no subtour
+violations; 
+3:~apply local cuts in both cases.} 
+
+\pvalhead
+\pval{LOCAL\_CUTS\_MODE\_DISABLE}{0}{(default)}\\
+\pval{LOCAL\_CUTS\_MODE\_SUBTOUR\_RELAXATION}{1}{}\\
+\pval{LOCAL\_CUTS\_MODE\_SUBTOUR\_COMPONENTS}{2}{}\\
+\pval{LOCAL\_CUTS\_MODE\_BOTH}{3}{}
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_MAX\_VERTICES}
+\ptype{int} 
+
+\pdescr{Local cuts will not be attempted for any subproblem having
+  more than this number of vertices.}
+
+\pvalhead
+Any number from 0 to 80 (default: 80).
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_MAX\_EDGES} 
+\ptype{int}
+
+\pdescr{Local cuts will not be attempted for any subproblem having
+  more than this number of edges.}
+
+\pvalhead
+Any number from 0 to 256 (default: 256).
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_VERTEX\_THRESHOLD}
+\ptype{double} 
+
+\pdescr{A threshold value $\alpha$ that prohibits local cuts on any
+  fractional component $C = (V',E')$ of a parent problem $H = (V,E)$
+  unless $|V'| < \alpha * |V|$.}
+
+\pvalhead
+Any number from 0 to 1 (default: 0.75).
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_MAX\_DEPTH} 
+\ptype{int}
+
+\pdescr{Maximum recursive depth of local cuts. 
+0: disable local cuts;
+1: enable local cuts with no recursion;
+2: enable local cuts with two recursive levels.
+-1: enable local cuts with recursion to any depth.}
+
+\pvalhead
+\pval{LOCAL\_CUTS\_MAX\_DEPTH\_DISABLE}{0}{}\\
+\pval{LOCAL\_CUTS\_MAX\_DEPTH\_ONELEVEL}{1}{(default)}\\
+\pval{LOCAL\_CUTS\_MAX\_DEPTH\_TWOLEVELS}{2}{}\\
+\pval{LOCAL\_CUTS\_MAX\_DEPTH\_ANYLEVEL}{-1}{}
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_TRACE\_DEPTH}
+\ptype{int}
+
+\pdescr{Tracing of local cuts. 
+0:~do not trace local cuts or their recursive invocations;
+1:~trace first level of local cuts;
+2:~trace first two levels of local cuts;
+-1:~trace any level of local cuts.}
+
+\pvalhead
+\pval{LOCAL\_CUTS\_TRACE\_DEPTH\_DISABLE}{0}{(default)}\\
+\pval{LOCAL\_CUTS\_TRACE\_DEPTH\_ONELEVEL}{1}{}\\
+\pval{LOCAL\_CUTS\_TRACE\_DEPTH\_TWOLEVELS}{2}{}\\
+\pval{LOCAL\_CUTS\_TRACE\_DEPTH\_ANYLEVEL}{-1}{}
+
+% ----------------------------------------------------------------------
+\pname{LOCAL\_CUTS\_TRACE\_STYLE}
+\ptype{int}
+
+\pdescr{Selects the style of local cuts trace messages.}
+
+\pvalhead
+\pval{LOCAL\_CUTS\_TRACE\_STYLE\_NORMAL}{0}{(default)}\\
+\pval{LOCAL\_CUTS\_TRACE\_STYLE\_VERBOSE}{1}{}
+
+% ----------------------------------------------------------------------
+\pname{MAX\_CUTSET\_ENUMERATE\_COMPS}
+\ptype{int}
+
+\pdescr{Controls the behavior of the zero-weight cutset separation
+algorithm, which looks for multiple connected components.  If the
+number $N$ of connected components does not exceed this threshold, then
+the separator generates one cutset constraint for each of the $2^N-2$
+possible combinations of connected components (excluding the two
+combinations that take all or none of the components).  This parameter
+controls an exponential process, so setting it too high can easily
+swamp the solver with constraints.}
+
+\pvalhead
+Any number from 0 to 11 (default: 5)
+
+% ----------------------------------------------------------------------
+\pname{SEC\_ENUM\_LIMIT}
+\ptype{int}
+
+\pdescr{Congested components having at most this number of vertices
+are exhaustively searched to find all violated subtour elimination
+constraints.  A component with $N$ vertices has $2^N - N - 1$
+possible subtour elimination constraints.  This parameter therefore
+controls an exponential process --- setting it too high can easily
+swamp the solver with constraints or increase runtime.}
+
+\pvalhead
+Any number from 0 to 16 (default: 10)
+
+% ----------------------------------------------------------------------
+\pname{BACKTRACK\_MAX\_VERTS}
+\ptype{int}
+
+\pdescr{Backtrack search should only be attempted for solving MST in 
+hypergraph problem when the number of vertices is smaller than this
+value.} 
+
+\pvalhead
+Any number from 0 to 32 (default: 8).
+
+% ----------------------------------------------------------------------
+\pname{BACKTRACK\_MAX\_EDGES}
+\ptype{int}
+
+\pdescr{Backtrack search should only be attempted for solving MST in 
+hypergraph problem when the number of edges is smaller than this
+value.} 
+
+\pvalhead
+Any number from 0 to 32 (default: 12).
+
+
+% ----------------------------------------------------------------------
+\pname{MAX\_BACKTRACKS}
+\ptype{int}
+
+\pdescr{Maximum number of distinct partial solution nodes to enumerate
+during a single run of the backtrack search algorithm. Note that if
+this limit is hit, the solver might exit without having found an
+optimal solution.} 
+
+\pvalhead
+Any non-negative number (default: 10000).
+
+
+% ----------------------------------------------------------------------
+\pname{SPARSE\_SUBTOURS}
+\ptype{int}
+
+\pdescr{There are two forms for hypergraph subtour constraints: the
+``classic'' subtour, and the form obtained by subtracting the
+``classic'' inequality from the single equation of the formulation.
+If enabled, then generate the form that has the least number of
+non-zeros (i.e., more sparse).  If disabled, always generate the
+``classic'' subtour inequality.}
+
+\pvalhead
+\pval{SPARSE\_SUBTOURS\_DISABLE}{0}{}\\
+\pval{SPARSE\_SUBTOURS\_ENABLE}{1}{(default)}
+
+
+% ----------------------------------------------------------------------
+\pname{ZERO\_WEIGHT\_CUTSETS\_METHOD}
+\ptype{int}
+
+\pdescr{Controls the behavior of the zero-weight cutset separation
+algorithm, which is invoked when the support hypergraph of the current
+LP solution consists of two or more connected components.
+For each such connected component, this algorithm generates either:
+(1) a pair of complementary subtour inequalities; or
+(2) an actual cutset inequality ({\em not} recommended).}
+
+\pvalhead
+\pval{ZERO\_WEIGHT\_CUTSETS\_METHOD\_SUBTOURS}{0}{(default)}\\
+\pval{ZERO\_WEIGHT\_CUTSETS\_METHOD\_CUTSET}{1}{}
+
+
+% ----------------------------------------------------------------------
+\pname{STRENGTHEN\_REDUCE}
+\ptype{int}
+
+\pdescr{If enabled, attempt to strengthen generated subtour inequalities
+by performing the various reductions (greedy vertex deletion,
+connected components and biconnected components) on the subhypergraph
+induced by the vertices of the subtour.}
+
+\pvalhead
+\pval{STRENGTHEN\_REDUCE\_DISABLE}{0}{}\\
+\pval{STRENGTHEN\_REDUCE\_ENABLE}{1}{(default)}
+
+
+% ----------------------------------------------------------------------
+\pname{GENERATE\_UNSTRENGTHENED}
+\ptype{int}
+
+\pdescr{If enabled, generate violated subtours in their original form
+--- before any strengthening is performed.
+(This is implcitly enabled if \code{GST\_PARAM\_STRENGTHEN\_REDUCE} is
+disabled to prevent all violated subtours from being discarded.)}
+
+\pvalhead
+\pval{GENERATE\_UNSTRENGTHENED\_DISABLE}{0}{}\\
+\pval{GENERATE\_UNSTRENGTHENED\_ENABLE}{1}{(default)}
+
+
+% ----------------------------------------------------------------------
+\pname{INITIAL\_PRIMAL\_HEURISTIC}
+\ptype{int}
+
+\pdescr{If enabled, run the primal heuristic at the very start, (before
+any LPs have been solved).  Normally the primal heuristic is given the
+current LP solution as a ``hint'' for constructing good solutions, but
+it can also run no such solution.  This option is normally disabled
+because any such upper bound is usually replaced quickly on the next
+invocation of the primal heuristic, after the first LP has been solved.
+Turning this option on permits a very quick solution.}
+
+\pvalhead
+\pval{INITIAL\_PRIMAL\_HEURISTIC\_DISABLE}{0}{(default)}\\
+\pval{INITIAL\_PRIMAL\_HEURISTIC\_ENABLE}{1}{}
+
+% ----------------------------------------------------------------------
+\newpage
+\subsection{Hypergraph solver stopping conditions} 
+\label{parameters_stop}
+
+% ----------------------------------------------------------------------
+\pname{CPU\_TIME\_LIMIT}
+\ptype{double}
+
+\pdescr{CPU time limit for solver (in seconds); when the limit is
+  zero, {\em no} CPU time limit is imposed.} 
+
+\pvalhead
+Any non-negative number (default: 0).
+
+% ----------------------------------------------------------------------
+\pname{GAP\_TARGET}
+\ptype{double}
+
+\pdescr{Exit solver when ratio UB/LB between the upper bound (UB) and
+  the lower bound (LB) is less than or equal to this threshold; e.g., if
+  target is 1.01, the solver stops when a solution within 1\% from the
+  optimum has been found.}
+
+\pvalhead
+Any number greater than or equal to 1 (default: 1).
+
+% ----------------------------------------------------------------------
+\pname{UPPER\_BOUND\_TARGET}
+\ptype{double}
+
+\pdescr{Exit solver when a feasible solution whose length is at most
+  this value is found.}
+
+\pvalhead
+Any number (default: \code{-DBL\_MAX}).
+
+% ----------------------------------------------------------------------
+\pname{LOWER\_BOUND\_TARGET} 
+\ptype{double} 
+
+\pdescr{Exit solver when the lower bound becomes greater than or equal
+  to this value.}
+
+\pvalhead
+Any number (default: \code{DBL\_MAX}).
+
+% ----------------------------------------------------------------------
+\pname{MAX\_FEASIBLE\_UPDATES}
+\ptype{int} 
+
+\pdescr{Exit solver when N feasible solution updates have been made
+  (zero means no limit). A feasible update is either an insertion of a
+  solution of any quality into the (non-full) set of solutions, or a
+  replacement of an inferior solution with an improved solution in the
+  (full) set of solutions. The size of the solution set is specified
+  using parameter \code{GST\_PARAM\_NUM\_FEASIBLE\_SOLUTIONS}.}
+
+\pvalhead
+Any non-negative number (default: 0).
+
+
+% ----------------------------------------------------------------------
+\pname{BB\_NODE\_LIMIT}
+\ptype{int}
+
+\pdescr{Stop the optimization after processing this many branch-and-bound
+nodes.
+If this parameter is zero, there is no limit on the number of
+branch-and-bound nodes processed.}
+
+\pvalhead
+Any non-negative number (default: 0).
+
+
+% ----------------------------------------------------------------------
+\pname{BB\_LP\_LIMIT}
+\ptype{int}
+
+\pdescr{Stop the optimization after processing this many LPs (optimize
+/ separate iterations).
+The number of LPs processed is a global number that completely
+disregards branch-and-bound node boundaries.
+If this parameter is zero, there is no limit on the number of LPs
+processed.}
+
+\pvalhead
+Any non-negative number (default: 0).
+
+
+% ----------------------------------------------------------------------
+\pname{INITIAL\_PRIMAL\_HEUR\_STOP}
+\ptype{int}
+
+\pdescr{If this parameter and \code{INITIAL\_PRIMAL\_HEURISTIC} are both
+enabled, optimization stops immediately after this initial invocation
+of the primal heuristic, with a status of
+\code{GST\_SOLVE\_BB\_STOP\_REQUESTED}.
+No LPs are solved, nor is any branch-and-bound performed.  This permits
+a very quick solution, but no lower bound will be available, and
+therefore no indication of solution quality.}
+
+\pvalhead
+\pval{INITIAL\_PRIMAL\_HEUR\_STOP\_DISABLE}{0}{(default)}\\
+\pval{INITIAL\_PRIMAL\_HEUR\_STOP\_ENABLE}{1}{}
+
+
+% ----------------------------------------------------------------------
+\newpage
+\subsection{Hypergraph solver input/output options}
+\label{parameters_io}
+
+% ----------------------------------------------------------------------
+\pname{SAVE\_FORMAT} 
+\ptype{int}
+
+\pdescr{Format used by {\bf gst\_hg\_save()} when saving a hypergraph to a
+ file:
+0: OR-library format;
+1: SteinLib format;
+2: GeoSteiner FST format version 2;
+3: GeoSteiner FST format version 3;
+4: SteinLib format with integer edge weights.}
+
+\pvalhead
+\pval{SAVE\_FORMAT\_ORLIBRARY}{0}{}\\
+\pval{SAVE\_FORMAT\_STEINLIB}{1}{}\\
+\pval{SAVE\_FORMAT\_VERSION2}{2}{}\\
+\pval{SAVE\_FORMAT\_VERSION3}{3}{(default)}\\
+\pval{SAVE\_FORMAT\_STEINLIB\_INT}{4}{}
+
+% ----------------------------------------------------------------------
+\pname{SAVE\_INT\_NUMBITS} 
+\ptype{int}
+
+\pdescr{Number of bits of precision to use in final integer edge
+weights when using {\bf gst\_hg\_save()} to save hypergraphs having
+Euclidean metric problems in ``integer'' SteinLib format
+({\bf GST\_PARAM\_SAVE\_FORMAT} set to \\
+\noindent
+ {\bf GST\_PVAL\_SAVE\_FORMAT\_STEINLIB\_INT}).}
+
+\pvalhead
+Value must be at least 32.  Default value is 64.
+
+% ----------------------------------------------------------------------
+\pname{GRID\_OVERLAY} 
+\ptype{int}
+
+\pdescr{Used by function {\bf gst\_hg\_to\_graph()} to specify that
+  the edges of the reduced grid graph rather than individual edges of
+  the embedding should be returned (only applicable for the
+  rectilinear metric).}
+
+\pvalhead
+\pval{GRID\_OVERLAY\_DISABLE}{0}{}\\
+\pval{GRID\_OVERLAY\_ENABLE}{1}{(default)}
+
+% ----------------------------------------------------------------------
+\pname{DETAILED\_TIMINGS\_CHANNEL} 
+\ptype{gst\_channel\_ptr} 
+
+\pdescr{Detailed timing is written to this channel.} 
+
+\pvalhead
+Any valid channel pointer (default: \code{NULL}).
+
+% ----------------------------------------------------------------------
+\pname{PRINT\_SOLVE\_TRACE} 
+\ptype{gst\_channel\_ptr} 
+
+\pdescr{Solver output trace is written to this channel.}
+
+\pvalhead
+Any valid channel pointer (default: \code{NULL}).
+
+% ----------------------------------------------------------------------
+\pname{CHECKPOINT\_FILENAME}
+\ptype{char*} 
+\pdescr{Pathname P of checkpoint file to restore (if present) and/or
+  update. The files are actually named P.chk and P.ub, with temporary
+  files named P.tmp, P.new and P.nub.} 
+
+\pvalhead
+Any valid pathname (default: \code{NULL}).
+
+% ----------------------------------------------------------------------
+\pname{CHECKPOINT\_INTERVAL}
+\ptype{double}
+
+\pdescr{Perform checkpointing of solver process at a time interval (in 
+  seconds) given by this parameter.} 
+
+\pvalhead
+Any number between 0 and 1000000 (default: 3600). A value of 0 means
+that no checkpointing should be performed.
+
+% ----------------------------------------------------------------------
+\pname{MERGE\_CONSTRAINT\_FILES}
+\ptype{char*}
+
+\pdescr{A colon-separated list of pathnames of checkpoint files.  All
+constraints from the constraint pool of each listed checkpoint file
+are merged into the solver's constraint pool before solving the
+current hypergraph problem.}
+
+\pvalhead
+A colon-separated list of pathnames of checkpoint files (default: \code{NULL}).
+
+\clearpage
+\section{Hypergraph Properties}
+\label{hypergraph_properties}
+
+The following table shows the properties currently accessible in a hypergraph
+instance. Read more about properties in Section~\ref{proplist_functions}.
+
+\begin{center}
+\input{hgprops.tex}
+\end{center}
+
+\clearpage
+\section{Solver Properties}
+\label{solver_properties}
+
+The following table shows the properties currently accessible in a solver
+object. Read more about properties in Section~\ref{proplist_functions}.
+
+\begin{center}
+\input{solverprops.tex}
+\end{center}
+
+\clearpage
+\section{Error Codes}
+
+\input{errors.tex}
+
+
+\section{FST Data File Formats}
+\label{sec:fst_formats}
+
+The FST generators produce output called FST data files.  (They are
+sometimes called ``phase 1 data files'', since FST generation is the first
+phase of the two-phase process for computing Steiner trees.
+
+FST data files come in three different formats, distinguished by version
+numbers.  Currently there are three such formats corresponding to
+versions 0, 2 and 3 of the FST data format.  (Version 1 is very
+obsolete, and no longer supported.)
+
+Note that version 0 and 3 data formats can be used to describe Steiner
+tree in graph (or hypergraph) instances.  However,
+\geosteiner~\GeoSteinerCurrentVersion{}
+{\em cannot} solve such problems. It blindly assumes all vertices are
+terminals.  If given such an instance, \geosteiner\ will produce the MST
+(i.e., the minimum tree spanning {\em all} vertices, be they terminals,
+Steiner vertices, or any mixture thereof.)
+
+\subsection*{Version 0}
+
+Version 0 is used to represent an abstract MST or Steiner tree in graph
+or hypergraph problem instance.  It is essentially the same format as
+used in Beasley's ``OR-library'' -- but extended slightly to handle
+hypergraph instances as well as graph instances.  The OR-library format
+is as follows:
+
+{\footnotesize
+\begin{verbatim}
+<Number of vertices N> <Number of edges M>
+For each edge:
+    <Vertex 1> <Vertex 2> <Edge cost>
+<Number of terminal vertices K>
+    <Terminal 1> <Terminal 2> ... <Terminal K>
+\end{verbatim}
+}
+
+Vertices are numbered 1 through N.  Each \code{<Terminal i>} is the vertex
+number of a vertex that is a terminal (i.e., must be connected).
+The \code{<Edge cost>}'s are real numbers.
+
+We extend this format slightly by permitting each edge to have two
+{\em or more} vertices.  In exchange for this flexibility, we require the entire
+description of each edge to reside on a single line of the data file.
+Therefore, the final number on each line represents the hyperedge cost,
+and all preceding numbers on the line represent the vertices of the
+hyperedge.
+
+
+\newpage
+\subsection*{Version 2}
+
+Version 2 is used primarily to represent geometric FSTs (Euclidean or
+rectilinear), although it can also handle non-geometric (graph)
+instances.  It is unable, however, to represent Steiner trees in
+hypergraph problems, because it assumes every vertex is a terminal.
+
+In the following description, fields enclosed in \code{<<...>>} are
+omitted when the Metric is Graph.  The format is as follows:
+
+{\footnotesize
+\begin{verbatim}
+<Version Number: literally "V2">
+<Instance description (free text)>
+<Metric: 1 = Rectilinear, 2 = Euclidean, 3 = Graph>
+<Number of terminals (N)>
+<<Decimal length of MST>> <<Hex length of MST>>
+<<Number of duplicate terminal groups (ndg)>>
+<Coordinate/length scaling factor>
+<Machine description (free text)>
+<Front-end CPU-time (1/100s of a second (integer number)>
+<Number of hyperedges/FSTs (M)>
+For each terminal:
+    <<Dec X-coord>> <<Dec Y-coord>> <<Hex X-coord>> <<Hex Y-coord>>
+For each duplicate terminal group:
+    <<Number of duplicate terminals>>
+    <<Terminal indices (1..N), on one line separated by spaces>>
+For each hyperedge/FST:
+    <Number of terminals (Ni)>
+    <Terminal indices (1..N), on one line separated by spaces>
+    <Decimal length of hyperedge/FST> <Hex length of hyperedge/FST>
+    <<Number of Steiner points (Mi)>>
+    For each Steiner point:
+       <<Dec X-coord>> <<Dec Y-coord>> <<Hex X-coord>> <<Hex Y-coord>>
+    <<Number of FST edges (Ki)>>
+    For each FST edge:
+       <<endpoint-1>> <<endpoint-2>>
+    <FST status: 0 = never needed, 1 = maybe needed, 2 = always needed>
+    <Number of incompatible FSTs>
+    <Incompatible FST indices (1..M), on one line separated by spaces>
+    <Number of concatenation terminals>
+    <Conc. terminals indices (1..N), on one line separated by spaces>
+\end{verbatim}
+}
+
+\newpage
+\subsection*{Version 3}
+
+Version 3 is the default format, and represents geometric FSTs
+(Euclidean or rectilinear) as well as graph instances.  Since it
+separately specifies each vertex to be either a terminal or Steiner
+vertex, it can also represent Steiner problems in graphs/hypergraphs.
+A number of obsolete fields from version 2 is omitted, however.
+
+In the following description, fields enclosed in \code{<<...>>} are
+omitted when the Metric is Graph.  The format is as follows:
+
+{\footnotesize
+\begin{verbatim}
+<Version Number: literally "V3">
+<Instance description (free text)>
+<Metric: 1 = Rectilinear, 2 = Euclidean, 3 = Graph>
+<Number of terminals (N)>
+<<Decimal length of MST>> <<Hex length of MST>>
+<Coordinate/length scaling factor>
+<Decimal Integrality delta> <Hex Integrality delta>
+<Machine description (free text)>
+<Front-end CPU-time (1/100s of a second (integer number)>
+<Number of hyperedges/FSTs (M)>
+For each terminal:
+    <<Dec X-coord>> <<Dec Y-coord>> <<Hex X-coord>> <<Hex Y-coord>>
+For each terminal:
+    <Terminal/Steiner flag: 0=Steiner, 1=Terminal>
+For each hyperedge/FST:
+    <Number of terminals (Ni)>
+    <Terminal indices (1..N), on one line separated by spaces>
+    <Decimal length of hyperedge/FST> <Hex length of hyperedge/FST>
+    <<Number of Steiner points (Mi)>>
+    For each Steiner point:
+       <<Dec X-coord>> <<Dec Y-coord>> <<Hex X-coord>> <<Hex Y-coord>>
+    <<Number of FST edges (Ki)>>
+    For each FST edge:
+       <<endpoint-1>> <<endpoint-2>>
+    <FST status: 0 = never needed, 1 = maybe needed, 2 = always needed>
+    <Number of incompatible FSTs>
+    <Incompatible FST indices (1..M), on one line separated by spaces>
+\end{verbatim}
+}
+
+\newpage
+\def\code#1{{\footnotesize\ttfamily #1}}
+The following conventions are observed in versions 2 and 3 of the FST
+data file format:
+\begin{itemize}
+\item 
+  Data input routines require only that the individual data fields are
+  separated by one or more white-space characters (space, tab, newline,
+  vertical tab, and form-feed are the white-space characters of ANSI C).
+\item
+  Data output routines shall align items according to the schema
+  above:
+  \begin{itemize}
+  \item Schema fields that appear on separate lines shall be written on
+    separate lines.
+  \item Schema fields that are all on one line shall be written all on one
+    line.
+  \item The data shall be indented as shown by the schema.
+  \item Each indentation level shall be one ``tab stop''.
+  \item The implementor may freely choose the width of this ``tab stop''.
+  \end{itemize}
+
+\item
+  The \code{<Instance description (free text)>} and
+  \code{<Machine description (free text)>} fields shall each be a sequence of
+  0 to 79 characters.  Each character in the sequence may be any
+  printable ASCII character except newline.
+
+\item 
+  The \code{<on one line separated by spaces>} fields are permitted to span
+  several lines, so long as the additional lines are each indented an
+  additional ``tab stop''.  The intent of this splitting is to fully pack
+  lines without exceeding some column limit (e.g., 80 columns).
+  If no data is to appear then the line is removed completely.
+
+\item 
+  All decimal fields shall be {\em unscaled} -- just as in the original
+  terminal coordinate input data.
+
+\item 
+  The hexadecimal fields shall be {\em scaled}.  For example suppose that
+  the \code{<Coordinate scaling factor>} is K.  Then the following
+  relationship is implied:
+  
+  \centerline{\small\code{<Dec X-coord> = <Hex X-coord> / 10**K}}
+
+  where the equal sign is meant to imply ``is within epsilon of''.
+  Scaling of data shall be at the discretion of the FST generator.  For
+  example the FST generator is permitted to always specify a scaling
+  factor of zero -- thereby disabling the scaling feature.  Programs
+  that read FST data files should not assume that the hex-values (scaled
+  or otherwise) are all integral without first verifying the actual data
+  values.
+
+\item
+  The \code{<Decimal Integrality delta>} (\code{<Hex Integrality
+    delta>}) fields represent an {\em unscaled} ({\em scaled}) lower bound on the
+  amount by which two solutions of different lengths must differ.  For
+  Euclidean FSTs, this must always be 0.  For rectilinear FSTs scaled
+  to integer lengths this would be 1 (scaled value).  For graphs with
+  integer weights, this can also be 1.  The branch-and-cut can use
+  this to provide earlier cutoff of nodes that cannot reduce the upper
+  bound.
+
+\item 
+  Let fields \code{<endpoint-1>} and \code{<endpoint-2>}, occur within an FST
+  containing $N$ terminals and $M$ Steiner points.  Let the field
+  value be~$J$.  Then the interpretation of the endpoint field is as
+  follows: 
+
+        $1 \le J \le N \Longrightarrow$ endpoint is the $J$th terminal
+                            in the FST's list of terminals.
+
+        $-M \le J \le -1 \Longrightarrow$ endpoint is the $-J$th
+                            Steiner point in the FST's list of Steiner
+                            points.
+
+\item (only applicable for version~2 of the FST data file format)\\
+  Duplicate terminal groups (DTGs) identify subsets of the vertices
+  having identical coordinates:
+  \begin{itemize}
+  \item The size of each DTG shall be at least 2.
+  \item Each terminal may be listed in at most one DTG.
+  \item The terminal indices listed in a single DTG must be distinct.
+  \item The first terminal in each duplicate terminal group shall be
+    referenced by at least one FST (having FST status $\ne$ 0).
+  \item The remaining terminals in each duplicate terminal group shall NOT
+      be referenced by any FST (having FST status $\ne$ 0).
+    \end{itemize}
+    
+\item
+  If an FST has ``never needed'' status then the FST generator may output
+  {\em any} incompatibility and concatenation terminal information, including
+  no information at all (such information is redundant).
+
+\item
+  The incompatible information shall NOT include the FST itself.
+
+\item
+  The incompatible information need not include FSTs which are ``never
+  needed''.
+
+\item 
+  The incompatible information need not include FSTs which share two or
+  more terminals.  It is assumed that programs that read FST data files
+  are smart enough to know about such basic incompatibilities already.
+  Omitting such incompatibilities can significantly reduce the size of
+  the data file.
+
+\item
+  The FST-graph for rectilinear FSTs must always be a ``left-most'' and
+  ``top-most'' Hwang topology.  If not, such FSTs will not appear to be
+  Hwang topologies when plotted.
+
+\item
+  A simple top-down traversal of each Euclidean FST-graph starting from
+  the first terminal must yield the recursive equilateral-point
+  structure of the FST.  In this way, programs that read Euclidean FST
+  data files are able to correctly compute the exact length of each FST
+  in terms of algebraic numbers, if desired.
+\end{itemize}
+
+\printindex
+\end{document}

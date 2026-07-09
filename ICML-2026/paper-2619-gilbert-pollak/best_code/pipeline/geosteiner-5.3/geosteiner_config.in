@@ -1,0 +1,61 @@
+#!/bin/sh
+#***********************************************************************
+#
+#	$Id: geosteiner_config.in,v 1.5 2022/11/19 13:45:52 warme Exp $
+#
+#	File:	geosteiner_config.in
+#	Rev:	e-2
+#	Date:	09/05/2016
+#
+#	Copyright (c) 2003, 2022 by David M. Warme.  This work is
+#	licensed under a Creative Commons Attribution-NonCommercial
+#	4.0 International License.
+#
+#***********************************************************************
+#
+#	Script to configure client programs that use GeoSteiner.
+#
+#***********************************************************************
+#
+#	Modification Log:
+#
+#	a-1:	08/25/2003	warme
+#		Created.
+#	e-1:	04/14/2015	warme
+#		: Changes for 5.0 release.
+#	e-2:	09/05/2016	warme
+#		: Change notices for 5.1 release.
+#
+#***********************************************************************
+
+me="$0"
+
+usage () {
+	echo "Usage: $me [OPTIONS]"	2>&1
+	echo "Options:"			2>&1
+	echo "	[--version]"		2>&1
+	echo "	[--libs]"		2>&1
+	echo "	[--cflags]"		2>&1
+
+	exit 1
+}
+
+case $# in
+  0)	usage	;;
+  *)	;;
+esac
+
+while [ "$#" -gt 0 ]
+do
+	case ".$1" in
+	.--version)	echo "%GEOLIB_VERSION_STRING%"
+			;;
+	.--libs)	echo "%GEOSTEINER_CLIENT_LIBRARY_ARGS%"
+			;;
+	.--cflags)	echo "%GEOSTEINER_CLIENT_CFLAGS%"
+			;;
+	*)		usage
+			;;
+	esac
+	shift
+done

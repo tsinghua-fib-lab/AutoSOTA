@@ -1,0 +1,510 @@
+log_level: info
+run_name: smaller_pythia #smaller_pythia_0.25dist_0.1maxinf_50gen
+parent_output_dir: /cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/parent_output_20260625_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/parent_output_20260624_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/parent_output_20260623_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/parent_output_20260530_bestScoreSafe
+
+local_output_dir: /cv/scratch/u/prinstea/conformal-policy-control/cpc_llm/local_output_20260625_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/local_output_20260624_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/local_output_20260623_bestScoreSafe
+#/cv/data/ai4dd/data/prinstea/conformal-policy-control/cpc_llm/local_output_20260530_bestScoreSafe
+
+overwrite_ga: False ## If False, will only run genetic algorithm when output file does not already exist.
+overwrite_initial_sft: False ## If False, will only run SFT when output file does not already exist.
+overwrite_init_sft_formatter: False
+
+overwrite_initg: False #False ## If False, will only run initial generation when output file does not already exist.
+
+
+overwrite_seeds_flag: False
+overwrite_split_init: False
+overwrite_sft: False ## If False, will only run SFT when output file does not already exist.
+overwrite_ig: False ## If False, will only run iterative generation when output file does not already exist.
+overwrite_split: False
+overwrite_cg: False ## If False, will only run contrastive generation when output file does not already exist.
+overwrite_cmp_lik_all: False #False #True ## If False, will only run compute_likelihoods_all_models when output file doesn't exist.
+overwrite_sft_formatter: False
+overwrite_marge: False # If False, will only run remaining jobs (that don't have their own overwrite flag) when output file does not exist.
+overwrite: False #True # If False, will only run remaining jobs (that don't have their own overwrite flag) when output file does not exist.
+overwrite_dpo_formatter: False #True
+overwrite_dpo: False #True # If False, will only run remaining jobs (that don't have their own overwrite flag) when output file does not exist.
+
+retrain_initial_sft_each_trial: True ## If True, will retrain the initial SFT for each trial (seed)
+
+## Modify this string for different settings
+setting_str: 20260629_200PostCPC_0.333calFrac_0.2oldSeed_1.5e-7lr_fft0.001_minBetaMix1e-80_CPCfix
+#20260627_10KGA_reInit_200PostCPC_0.333calFrac_0.3oldSeed_1.5e-7lr_fft0.001_subsampMix
+#20260626_10KGA_reInit_25MaxIter_2KPreCPC_200PostCPC_0.333calFrac_0.3oldSeed_1.5e-7lr_fft0.002
+
+#20260625_10KGA_reInit_1KPreCPC_200PostCPC_0.25calFrac_0.2oldSeed_1.5e-7lr
+
+initial_seed: 0
+last_seed: 1
+
+
+run_conformal_policy_control: True
+
+run_evol_dataset_gen: True
+run_propen_sft_dataset_formatting: True
+run_initial_sft: True
+run_sft: True
+run_init_gen: True ## Whether to run initial generation
+run_iter_gen: True
+run_compute_liks_all_models_and_cal_data: True ## Whether to run likelihood computation for all models (for policy control)
+run_contrast_gen: True #False ## Whether to run contrastive generation
+
+run_propen_dpo_dataset_formatting: True
+init_generation_sampling_num_return_sequences: 10 #10 ## Number of sequences to sample at each intialization generation stage
+generation_sampling_num_return_sequences: 10 #20 #10 ## Number of sequences to sample at each iterative generation (policy improvement) stage
+unconditional_sampling_num_return_sequences: 10 ## Number of sequences to sample from density model, for initial CP cal
+
+num_labels_after_first_round: 2000 # num. of labels to use in all rounds after the first
+proportion_of_old_data: 0.2 #0.3333 #1.0 #0.0  # proportion of old training data to include in the running "combined" dataset (used for selecting seeds)
+min_num_data_old: 50 #100 ## If proportion_of_old_data > 0.0, min number of old data samples to include in training
+proportion_of_old_seeds: 0.2 #0.2 #0.5 ## proportion of seeds from previous training data to use in current optimized policy (rest are from most recent round)
+select_old_seeds_from: "init" #"last" ## "last" or "init"
+
+seed: 0
+greedy_decoding: False ## For initial and iterative
+temperature_scaling: False #True
+job_submission_system: direct #slurm
+greedy_gen_batch_size: 64
+sampling_gen_batch_size: 32
+initial_model: "EleutherAI/pythia-14m" # "EleutherAI/pythia-2.8b"
+sanity_check: False  # will be propagated to all training + generation jobs
+path_to_repo: null # /scratch/ac5968/llome
+
+## Conformal policy control params
+random_seed: 0 ## For train/cal set splits
+
+
+## For how to split cal vs train sets
+split:
+  cal_frac: 0.333 #0.333 #3333 #0.25 #0.2 #0.1 #0.3333 #0.05 ## Fraction of generated outputs to place in calibration data (rather than training) at each time
+  train_frac_from_non_cal: 1.0 ## Fraction of *non-cal, deduplicated* generated outputs to place in training data (rather than calibration) at each time
+  train_sampling_method: "best_scoring" # "best_scoring", "uniform"
+  num_cal_per_step: 10
+  num_train_per_step: 40
+
+## If using ranked FFT for selecting seeds, top fraction of particles to construct library from
+ranked_fft_top_fraction: 0.001 #0.01
+# ranked_fft_top_n: 100 ## top number of particles to construct library from
+
+temperature_init: 1.0 #1.0 #0.8 #1.0
+temperature: 1.0 #1.0
+
+# Note: each num_*_rounds runs N-1 policy improvement iterations (round 0 is initial SFT)
+num_dpo_rounds: 25
+num_init_sft_rounds: 1 #5 #10
+num_sft_rounds: 0 #10
+num_marge_rounds: 0 #10
+
+evol_dataset_gen:
+  args:
+    wandb_mode: offline
+    optimizer:
+      num_particles: 10000 #10000 #1000
+      mutation_prob: 0.05 #0.01 #0.05 #0.005
+    test_function:
+      num_states: 32
+      dim: 32
+      num_motifs: 4
+      motif_length: 4
+      quantization: 4
+    random_seed: 0
+    log_interval: 1
+    log_level: info
+    num_opt_steps: 10 #50 # 256 ##### NOTE THIS
+    project_name: sherpa
+    exp_name: sherpa_smaller_pythia
+    job_name: sherpa_smaller_pythia
+    # Dataset generation parameters
+    num_test_fns: 1
+    # Hyperparameters to run iterations of the GA for
+    hyperparameter_ranges:
+      survival_quantile: [0.5] # [0.1]
+  slurm_args:
+  # run on single gpu
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB"
+    mail_type: "BEGIN,END,FAIL"
+    mail_user: # "ac5968@nyu.edu"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+    
+    #account: "cds"
+
+propen_dataset_formatting_sft:
+  args:
+    dist_x_threshold: 0.3 #0.32 #0.25
+    max_proportion_infeasible: 0.0 #0.05 #0.1  # the maximum proportion of the dataset that infeasible examples
+                                    # or pairs containing infeasible examples can be
+    distance_metric: "hamming"
+    seed: 0
+    n_neighbors: 30  # how many approx. nearest neighbors to compute -- higher is more accurate but more expensive
+    filter_by_likelihood: True
+    likelihood_quantile_threshold: 0.6
+    filter_by_likelihood_range: False
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    open_mode: "append"
+    export: "ALL"
+    time: "6:00:00"
+    mem: "100GB"
+    mail_type: "BEGIN,END,FAIL"
+    mail_user: # "ac5968@nyu.edu"
+    partition: "preempt-priority"
+    #gpus_per_node: 0
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+
+propen_dataset_formatting_initial_sft:
+  args:
+    dist_x_threshold: 0.3 #0.32 #0.25
+    max_proportion_infeasible: 0.0 #5 #0.1  # the maximum proportion of the dataset that infeasible examples
+                                    # or pairs containing infeasible examples can be
+    distance_metric: "hamming"
+    seed: 0
+    n_neighbors: 30  # how many approx. nearest neighbors to compute -- higher is more accurate but more expensive
+    filter_by_likelihood: True
+    likelihood_quantile_threshold: 0.6
+    filter_by_likelihood_range: False
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    open_mode: "append"
+    export: "ALL"
+    time: "6:00:00"
+    mem: "100GB"
+    mail_type: "BEGIN,END,FAIL"
+    mail_user: ## "ac5968@nyu.edu"
+    partition: "preempt-priority"
+    #gpus_per_node: 0
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+propen_dataset_formatting_preference:
+  args:
+    dist_x_threshold: 0.35 #0.25
+    max_proportion_infeasible: 0.0 # 0.05 #0.1  # the maximum proportion of the dataset that infeasible examples
+                                    # or pairs containing infeasible examples can be
+    distance_metric: "hamming"
+    seed: 0
+    n_neighbors: 30  # how many approx. nearest neighbors to compute -- higher is more accurate but more expensive
+    filter_by_likelihood: True
+    likelihood_quantile_threshold: 0.6
+    filter_by_likelihood_range: False
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    open_mode: "append"
+    export: "ALL"
+    time: "6:00:00"
+    mem: "100GB"
+    mail_type: "BEGIN,END,FAIL"
+    mail_user: # "ac5968@nyu.edu"
+    partition: "preempt-priority"
+    #gpus_per_node: 0
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+initial_sft:
+  args:
+    training_args:
+      num_train_epochs: 10 #10 #2 #10
+      seed: 0
+      eval_strategy: steps
+      eval_steps: 0.1
+      save_strategy: steps
+      save_steps: 0.2
+      learning_rate: 1e-6
+      per_device_train_batch_size: 32 #16 #2
+      per_device_eval_batch_size: 256
+      eval_accumulation_steps: 2
+      gradient_accumulation_steps: 1 #16 #32
+      max_length: 256 #256
+      log_level: "info"
+      save_total_limit: 2
+      torch_compile: false
+      #warmup_ratio: 0.0
+
+    generation_config:  # use greedy decoding during evaluation
+      max_new_tokens: 256 #256
+      num_beams: 1
+      do_sample: False
+      num_return_sequences: 1
+
+    model_config:
+      model_name_or_path: "EleutherAI/pythia-14m" # "EleutherAI/pythia-2.8b"
+      attn_implementation: "eager" #"sdpa"
+
+    train_size: 0.95
+    max_eval_size: 100 # evaluation takes a long time, so we set a max. size on the eval dataset
+    seq_length: 256 #256
+    format_type: "edit_pairs"
+    # test function
+    test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+
+    # instrumentation
+    log_level: "info"
+    wandb_mode: "offline"
+    project_name: "finetune_ehrlich"
+    exp_name: "sft_smaller_pythia"
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+sft:
+  args:
+    training_args:
+      num_train_epochs: 2  #5
+      seed: 0
+      eval_strategy: steps
+      eval_steps: 0.1
+      save_strategy: steps
+      save_steps: 0.2
+      learning_rate: 1e-4 #1e-6
+      per_device_train_batch_size: 16 #2
+      per_device_eval_batch_size: 256
+      eval_accumulation_steps: 2
+      gradient_accumulation_steps: 2 #16 #32
+      max_seq_length: 256 #256
+      log_level: "info"
+      save_total_limit: 2
+      #warmup_ratio: 0.0
+
+    generation_config:  # use greedy decoding during evaluation
+      max_new_tokens: 256 #256
+      num_beams: 1
+      do_sample: False
+      num_return_sequences: 1
+
+    model_config:
+      model_name_or_path: "EleutherAI/pythia-14m" # "EleutherAI/pythia-2.8b"
+      attn_implementation: "eager" #"sdpa"
+
+    train_size: 0.95
+    max_eval_size: 100 # evaluation takes a long time, so we set a max. size on the eval dataset
+    seq_length: 256 #256
+    format_type: "edit_pairs"
+    # test function
+    test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+
+    # instrumentation
+    log_level: "info"
+    wandb_mode: "offline"
+    project_name: "finetune_ehrlich"
+    exp_name: "sft_smaller_pythia"
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+
+
+iterative_generation:
+  num_jobs: 6  # number of generation jobs to parallelize this over
+  permissive_parsing: True #False #True #False
+  min_rel_len_feasible_particle: 1.0 ## Minimum length of feasible particle as a fraction of test_fn dim
+  init_args:
+    ## init args just for first iteration:
+    sample_size: 20 #20 #100 #20
+    max_iterations: 25 #100 #120 #200 #50 #100 #200
+    sampling_method: "ranked_fft" #"best_scoring" #"best_scoring" #"uniform"
+    seed: 0
+  args:
+    sanity_check: False
+    log_level: info
+    seed: 0
+    test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+    subsample_seeds: True ## Whether to subsample input seeds (with replacement), or to iterate through all of them
+    sample_size: 10 #10 #100 #200  # initial number of seeds to use for iterative generation
+    max_iterations: 25 #60 #120 #120 #50 #100 #10
+    sampling_method: "best_scoring" ## Method for selecting seeds # "uniform", "combination", "best_scoring"
+    generation_config:
+      max_new_tokens: 256
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB" #"300GB" #"100GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+    # nodelist: "b200-st-b200-[2-10,13-15,23,40-41],b200-st-b200-2-[2-3,9,65,69-83]" #"b200-st-b200-41"
+
+
+
+conformal_policy_control:
+  alpha: 0.8 #0.5 #1.0 #0.25 #0.5 #0.3 #1.0 #0.5
+  num_starts_beta_search: 1
+  mixture_proposal: True #True #True ## Whether to do mixture proposal in place of optimized proposal (else use safe and then optimized proposal)
+  mixture_proposal_factor: 0.25 # 0.25 #0.05 ## Do mixture proposal if mixture_proposal_factor * overlap_coef_{safe} < overlap_coef_{unconstrained}. So, 0 or -1 does nothing
+  mixture_proposal_subsample_cpc: False #False #True
+  optimized_proposal_factor: 1 #1 ## Do optimized proposal if optimized_proposal_factor *overlap_coef_{safe} < overlap_coef_{unconstrained}. So, 0 or -1 does nothing
+  min_safe_mix_weight: "adaptive" #0.1 ## When set to "adaptive", will use (1 - alpha) ** 4 as the minimum weight on safe proposals
+  min_beta_mix_prop: 1e-80
+  ind_metropolis_hastings: False #False
+  num_AR_before_MH: 10 #10 ## Number of AR generation iterations to try before switching to IMH sampling (only runs IMH if less than max_total_AR_calls)
+  constrain_against: "init" ## "init" or "last": whether to constrain against the initial safe policy, or the last/most recent safe policy
+  use_overlap_mix_weight: True  #True ## Whether to use overlap coefficient mixture weight; else, use 1 / (1 + beta)
+  randomized_cpc: False #True
+  test_pt_scale_factor: 1.0 #25
+  args:
+    n_grid: 200 ## Approx size of grid to search over for lik-ratio bound    
+  accept_reject:
+    max_total_AR_calls: 20 #15 #30 #40
+    n_target_pre_cpc: 2000 #1000
+    n_target_post_cpc: 200 #200 #150 # 1000
+    iwmci_intersect_thresh: 0.5
+    n_opt_prop_calls_pre_cpc_quarter_check: 5
+    env_const_scale_emp_max: 1.0 #1.0 #1.05 ## Factor by which to scale the empirical maximum likelihood ratio for estimating envelope constant
+
+
+
+compute_likelihooods_all_models:
+  num_jobs: 6  # number of generation jobs to parallelize this over
+  score_field: "score"
+  args:
+    batch_size: 256
+    test_fn_dim: 32
+    sanity_check: False
+    generation_config:
+      max_new_tokens: 256
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1
+    ntasks_per_node: 1
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00" #"48:00:00"
+    mem: "100GB" #"100GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+dpo:
+  args:
+    dpo_config:
+      learning_rate: 1.5e-7
+      beta: 0.1 #0.4 ## Switched to using default regularization level from DPO paper
+      gradient_accumulation_steps: 1
+      num_train_epochs: 1 #1 #2 #2 #1
+      # eval_strategy: steps
+      eval_steps: 0.1
+      # save_strategy: steps
+      save_steps: 0.2
+      torch_compile: false
+      max_length: 256
+      log_level: "info"
+      seed: 0
+      per_device_train_batch_size: 32
+      per_device_eval_batch_size: 256
+    test_fn_type: "ehrlich"
+    train_size: 0.95
+    max_eval_size: 100
+    generation_config:
+      max_new_tokens: 256
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 1 #2
+    ntasks_per_node: 1 #2
+    #gpus_per_node: 1 #2
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB" #"200GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+
+
+marge:
+  args:
+    marge_config:
+      learning_rate: 1e-6
+      alpha: 1.0
+      beta: 10.0
+      gradient_accumulation_steps: 1
+      num_train_epochs: 1
+      eval_strategy: steps
+      eval_steps: 0.1
+      save_strategy: steps
+      save_steps: 0.2
+      torch_compile: false
+      self_normalize_weights: True
+      reinforce_style: False
+      max_length: 256
+      max_prompt_length: 256
+      log_level: "info"
+      seed: 0
+      per_device_train_batch_size: 32
+      per_device_eval_batch_size: 256
+    test_fn_type: "ehrlich"
+    train_size: 0.95
+    max_eval_size: 100
+    generation_config:
+      max_new_tokens: 256
+  slurm_args:
+    nodes: 1
+    cpus_per_task: 2
+    ntasks_per_node: 2
+    #gpus_per_node: 1
+    partition: "preempt-priority"
+    open_mode: "append"
+    export: "ALL"
+    time: "24:00:00"
+    mem: "100GB"
+    account: "ai4dd"
+    qos: "preempt"
+    gres: "gpu:b200:1"
+ 

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffclf"
+version = "0.1.0"
+description = "Reference implementation of A Diffusive Classification Loss for Learning Energy-based Generative Models (ICML 2026)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "RuiKang OuYang" },
+    { name = "Louis Grenioux" },
+    { name = "José Miguel Hernández-Lobato" },
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "tqdm>=4.65",
+    "POT>=0.9",
+    "normflows>=1.7",
+]
+
+[project.optional-dependencies]
+aldp = [
+    "boltzgen",
+    "mdtraj",
+    "openmmtools",
+]
+dev = [
+    "jupyter",
+]
+
+[project.urls]
+Repository = "https://github.com/h2o64/diffclf"
+Paper = "https://openreview.net/forum?id=RVPqygyGRu"
+
+[tool.setuptools.packages.find]
+include = ["diffclf*"]
+exclude = ["experiments*", "assets*", "venv*"]

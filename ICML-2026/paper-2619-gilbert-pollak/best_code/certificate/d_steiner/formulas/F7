@@ -1,0 +1,77 @@
+namespace __f7_detail {
+bool steiner_cond(double b, double c, double d, double s, double e) {
+    // Nonnegativity
+    if (b < 0 || c < 0 || d < 0 || s < 0 || e < 0) return false;
+
+    // Convexity nontrivial edge: d(c + e - 1) + e(s + c) ≥ 0
+    if (d * (c + e - 1.0) + e * (s + c) < 0.0) return false;
+
+    // Angle at R threshold: e ≥ f(c + s, d) with f(t, d) = ( -(t + 2d) + sqrt( (t + 2d)^2 + 4d ) ) / 2
+    const double t = c + s;
+    const double w = t + 2.0 * d;
+    const double rad = w * w + 4.0 * d;
+    const double thr = ( -w + std::sqrt(rad) ) / 2.0;
+    if (e + 1e-12 < thr) return false;
+
+    // Third relaxed constraint: dot(AQ, DR) ≥ 0
+    // AQ = Q - A, DR = R - D. Using the simplified expression:
+    // dot = -(1 + s/2 - c/2 + d/2)·(c/2 + e + d) + (3/4)·c·(s + c + d)
+    const double alpha = 1.0 + 0.5 * s - 0.5 * c + 0.5 * d;
+    const double dot_third = -alpha * (0.5 * c + e + d) + 0.75 * c * (s + c + d);
+    if (dot_third < -1e-12) return false;
+
+    // Axis-parallel monotonicity helpers for dot(AQ,DR):
+    // s + e ≥ 1 and c ≤ 1 + d + (s + e)/2
+    if (s + e + 1e-12 < 1.0) return false;
+    if (c > 1.0 + d + 0.5 * (s + e) + 1e-12) return false;
+
+    return true;
+}
+
+double steiner_length(double b, double c, double d, double s, double e) {
+    // Length |UV| = sqrt( T^2 + T + 1 ), where T = 2d + s + c + e
+    const double T = 2.0 * d + s + c + e;
+    return std::sqrt(T * T + T + 1.0);
+}
+
+}
+template<> struct F<1531> {
+constexpr static int split_id = 63;
+constexpr static int lemma_id = 7;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b + b + 1);
+ld L_s_plus;
+if(!__f7_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f7_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<1532> {
+constexpr static int split_id = 64;
+constexpr static int lemma_id = 7;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b - b*d + b*s - 2*b*u + d*d + d*s + d*u + s*s - s*u + u*u);
+ld L_s_plus;
+if(!__f7_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f7_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<1533> {
+constexpr static int split_id = 65;
+constexpr static int lemma_id = 7;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b - b*d + b*s + b*v + d*d + d*s + d*v + s*s + 2*s*v + v*v);
+ld L_s_plus;
+if(!__f7_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f7_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+const int M7 = 1534;

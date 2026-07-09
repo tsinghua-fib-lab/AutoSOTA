@@ -1,0 +1,71 @@
+dpo_script_args:  # trl.DpoScriptArguments
+  sanity_check: False  # If true, will train on only 1K examples
+
+dpo_config:  # trl.DPOConfig
+  beta: 0.1
+  loss_type: ["sigmoid"]
+  generate_during_eval: True
+  max_length: 512
+  output_dir: ???
+  run_name: ???
+  do_train: True
+  do_eval: True
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 8
+  logging_steps: 1
+  logging_first_step: True
+  warmup_steps: 150
+  bf16: True
+  gradient_accumulation_steps: 16
+  learning_rate: 1e-6
+  num_train_epochs: 2
+  load_best_model_at_end: True
+  eval_strategy: "steps"
+  eval_steps: 0.05
+  save_strategy: "steps"
+  save_steps: 0.1
+  optim: "rmsprop"
+  seed: 0
+  remove_unused_columns: False
+  save_total_limit: 1
+  torch_compile: false
+  log_level: "info"
+  # self_normalize_weights: True ## Drew added
+  # reinforce_style: False
+
+
+model_config:
+  attn_implementation: "eager"
+  model_name_or_path: s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.5_xthres0.125_maxinfs0.1/
+
+# generation
+generation_config:
+  max_new_tokens: 256
+  do_sample: False
+  num_return_sequences: 1
+  num_beams: 1
+
+# data
+data_fp: s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/dense_preference_pairs_scoreabove-0.5_xthres0.125_maxinfs0.1_30nn.jsonl
+pretokenized_train_fp: null  # optional
+pretokenized_eval_fp: null  # optional
+pretokenized: False
+train_size: 0.95
+max_eval_size: 100 # evaluation takes a long time, so we set a max. size on the eval dataset
+# format_type: "edit_pairs"
+
+# instrumentation
+log_level: "info"
+wandb_host: null
+wandb_mode: "offline" #"online"
+project_name: "pref_tuning"
+exp_name: "dpo_pythia-2.8b"
+job_name: null
+__version__: null
+
+# other
+num_generate_batches: null
+threshold_percent_valid: 0.9
+s3_output_dir: "s3://prescient-data-dev/sandbox/chena78/dpo_ehrlich_pythia-2.8b/sanity_check"
+test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+test_fn_fp: "s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/ehrlich.jsonl"

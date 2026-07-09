@@ -1,0 +1,69 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the accompanying paper."
+title: "Selective KV Cache Recomputation for Long-Context Transformer Inference (LLM + VLM)"
+abstract: >-
+  This repository accompanies a research paper on selective key/value cache
+  recomputation for Transformer inference on long contexts. It contains two
+  side-by-side codebases: a text-only LLM pipeline implementing selective KV
+  cache recomputation and Ring-Attention sequence parallelism for Qwen3,
+  Llama, and ChatGLM (under `llm/`), and a vision-language counterpart for
+  Qwen3-VL-8B-Instruct with image chunking (under `vlm/`). Reproduces the
+  paper's `sp_guided_recompute`, `sp_cacheblend`, `sp_lego`, and
+  `ring_attention` baselines on LongBench v1/v2, and the BLINK / VLMEvalKit
+  results.
+authors:
+  - family-names: Author
+    given-names: Anonymous
+    affiliation: Anonymous
+type: software
+license: MIT
+keywords:
+  - large language models
+  - kv cache
+  - ring attention
+  - sequence parallelism
+  - long context inference
+  - vision language models
+  - longbench
+  - blink
+references:
+  # External models (used, not redistributed)
+  - title: "Qwen3 Technical Report"
+    type: report
+    authors:
+      - family-names: Qwen Team
+  - title: "Qwen3-VL"
+    type: software
+    authors:
+      - family-names: Qwen Team
+  - title: "Llama"
+    type: software
+    authors:
+      - family-names: Meta AI
+  - title: "ChatGLM"
+    type: software
+    authors:
+      - family-names: ZhipuAI
+  # Benchmarks (used, not redistributed)
+  - title: "LongBench"
+    type: software
+    authors:
+      - family-names: THUDM
+  - title: "LongBench v2"
+    type: software
+    authors:
+      - family-names: zai-org
+    repository-code: "https://huggingface.co/datasets/zai-org/LongBench-v2"
+  - title: "BLINK"
+    type: software
+  - title: "VLMEvalKit"
+    type: software
+  # Bundled / submoduled code (attribution)
+  - title: "ring-flash-attention"
+    type: software
+    authors:
+      - family-names: Zhu
+        given-names: Zilin
+    repository-code: "https://github.com/zhuzilin/ring-flash-attention"
+    version: "0.1.8"
+    notes: "Bundled as a git submodule under llm/ring-flash-attention; pinned to commit 786677930bce4f6022166899c88ce2c00c814ee2."

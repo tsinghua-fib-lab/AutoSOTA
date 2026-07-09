@@ -1,0 +1,37 @@
+# data
+data_path_list: ["s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_sft_init_r0/dpo_seed0_20251129_v2_seeds_from_sft_init_r0_dense_neighborhood_pairs_xthres0.3_maxinfs0.0_30nn.jsonl", "s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_alpha0.8_dpo_seed0_20251129_v2_r1/dpo_seed0_20251129_v2_seeds_from_alpha0.8_dpo_seed0_20251129_v2_r1xthres0.3_maxinfs0.0_30nn.jsonl", "s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_alpha0.8_dpo_seed0_20251129_v2_r2/dpo_seed0_20251129_v2_seeds_from_alpha0.8_dpo_seed0_20251129_v2_r2xthres0.3_maxinfs0.0_30nn.jsonl"]
+#None #s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/dense_neighborhood_pairs_scoreabove-0.5_xthres0.125_30nn.jsonl
+sample_size: 100
+# sampling_method: "best_scoring" # "uniform", "combination"
+
+# script args
+sanity_check: False
+model_name_or_path_list: ["s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_sft_init_r0", "s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_alpha0.8_dpo_seed0_20251129_v2_r1", "s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_alpha0.8_dpo_seed0_20251129_v2_r2"]
+#None # s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.5_xthres0.125/checkpoint-1500/
+batch_size: 4
+output_dir: "s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/smaller_pythia_sft_init_r0" #s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.5_xthres0.125/checkpoint-1500/
+output_filename: contrastive_generations_100sample.jsonl #extrapolative_generations_100sample_10iter.jsonl
+max_iterations: 20
+log_level: info
+seed: 0
+test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+test_fn_fp: s3://prescient-pcluster-data/prinstea/llome/parent_output_20251123/smaller_pythia/c4_k4_l32_n5000_pm0.05_steps10/ehrlich.jsonl
+#"s3://prescient-pcluster-data/prinstea/llome/parent_output_20250902_1itr/smaller_pythia/c4_k4_l32_n1000_pm0.005_steps10/ehrlich.jsonl"
+ #"s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/ehrlich.jsonl"
+particle_field: "higher_score_particle" # "prompt"
+# lower_score_particle_field: "lower_score_particle" # "chosen"
+score_field: "cg_lik_ratio_opt_over_mix" #"score" # "chosen_score"
+# higher_score_field: "higher_score" # "prompt_score"
+subsample_seeds: True ## Whether to subsample input seeds (with replacement), or to iterate through all of them
+higher_score_particle_field: "prompt" #"higher_score_particle" #
+lower_score_particle_field: "chosen" #"lower_score_particle" # 
+lower_score_field: "chosen_score" #"lower_score" # 
+higher_score_field: "prompt_score" #"higher_score" # 
+
+generation_config:  # greedy decoding
+  _target_: transformers.GenerationConfig
+  max_new_tokens: 500
+  do_sample: False
+  num_beams: 10
+  num_return_sequences: 10
+  max_length: null
