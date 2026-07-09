@@ -1,0 +1,32 @@
+real: False
+quantiles_given: False
+multiple_series: False 
+T_burnin: 300 
+alpha: 0.05
+seasonal_period: 0
+score_function_name: "absolute-residual"
+seed: 42
+n_seeds: 50
+sequences:
+  0:
+    dataset: "changevariance"
+    fit_every: 1 
+    log: False
+    model_names: 
+      - "linear_regression"
+    overwrite: False
+methods:
+  SFOGD:
+    lrs:
+      - 0.25
+      - 1
+      - 4
+  KT:
+    lrs:
+      - None
+  UP:
+    lrs:
+      - None
+  DtACI:
+    lrs:
+      - None

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Arena - Multi-AI Battle</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif;color:#fff}
+.game-container{position:relative}
+canvas{border:2px solid #0ff;box-shadow:0 0 30px rgba(0,255,255,.3);border-radius:4px}
+.hud{position:absolute;top:-45px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-size:12px}
+.health-bar{width:120px;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.health-fill{height:100%;background:linear-gradient(90deg,#0f0,#0ff);transition:width .3s}
+.score{font-size:24px;color:#ff0;text-shadow:0 0 10px #ff0}
+.bottom-hud{position:absolute;bottom:-35px;left:0;right:0;display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.6);padding:0 10px}
+.ai-panel{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;max-height:90%;overflow-y:auto}
+.ai-box{background:rgba(0,0,0,.8);border:1px solid;padding:6px;border-radius:5px;font-size:10px;min-width:130px}
+.ai-box h4{margin-bottom:3px;font-size:11px}
+.ai-box .hp-bar{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:3px}
+.ai-box .hp-fill{height:100%;border-radius:2px;transition:width .3s}
+.ai-avatars{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;max-height:90%;overflow-y:auto}
+.ai-avatar{width:60px;height:60px;border:2px solid;border-radius:6px;overflow:hidden;background:#111;position:relative;transition:all .3s;display:flex;align-items:center;justify-content:center}
+.ai-avatar img{width:100%;height:100%;object-fit:cover}
+.ai-avatar .label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.8);font-size:8px;text-align:center;padding:1px}
+.ai-avatar.hit{animation:shake .3s;border-color:#f00!important;box-shadow:0 0 12px #f00}
+.ai-avatar.attack{border-color:#ff0!important;box-shadow:0 0 12px #ff0}
+.ai-avatar.dead{opacity:.3;filter:grayscale(1)}
+.ai-avatar .default-icon{font-size:28px}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;z-index:10}
+.overlay.hidden{display:none}
+.overlay h1{font-size:42px;background:linear-gradient(90deg,#0ff,#f0f);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.overlay p{margin:5px 0;opacity:.7;font-size:13px}
+.server-input{margin:15px 0;display:flex;gap:8px;align-items:center}
+.server-input input{padding:8px 12px;background:rgba(255,255,255,.1);border:1px solid #0ff;color:#fff;border-radius:4px;width:280px;font-size:12px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#666}
+.status-dot.ok{background:#0f0;box-shadow:0 0 8px #0f0}
+.status-dot.err{background:#f00}
+.config-row{margin:10px 0;display:flex;align-items:center;gap:10px;font-size:13px}
+.config-row input[type=number]{background:#222;border:1px solid #0ff;color:#fff;padding:5px 8px;border-radius:4px;width:60px}
+.config-row select{background:#222;border:1px solid #0ff;color:#fff;padding:5px 8px;border-radius:4px}
+.overflow-hint{font-size:11px;color:#f0f;margin-top:5px;display:none}
+.btn{margin-top:20px;padding:12px 40px;font-size:16px;font-weight:bold;background:transparent;border:2px solid #0ff;color:#0ff;cursor:pointer;border-radius:4px;transition:all .3s}
+.btn:hover{background:#0ff;color:#000}
+.game-stats{margin-top:15px;padding:15px;background:rgba(255,255,255,.05);border-radius:8px;text-align:left;font-size:13px}
+.game-stats p{margin:5px 0}
+.highlight{color:#0ff;font-weight:bold}
+.winner{font-size:32px;margin:15px 0}
+.winner.player{color:#0f0}
+.winner.ai{color:#f0f}
+.debug{position:fixed;right:10px;top:10px;width:300px;max-height:380px;background:rgba(0,0,0,.9);border:1px solid #0ff;border-radius:8px;padding:6px;font-family:monospace;font-size:9px;color:#0f0;overflow:hidden;display:flex;flex-direction:column}
+.debug-header{display:flex;justify-content:space-between;border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:4px}
+.debug-log{flex:1;overflow-y:auto;max-height:320px}
+.log-entry{margin:2px 0;padding:3px;background:rgba(255,255,255,.03);border-left:2px solid #0ff;font-size:9px}
+.log-entry.error{border-color:#f00;color:#f88}
+.audio-ctrl{position:fixed;bottom:10px;left:10px;display:flex;gap:8px;background:rgba(0,0,0,.8);padding:6px 10px;border-radius:15px;border:1px solid #0ff;font-size:10px}
+.audio-ctrl label{display:flex;align-items:center;gap:4px;color:#0ff}
+.audio-ctrl input[type=range]{width:50px}
+</style>
+</head>
+<body>
+<div class="game-container">
+  <div class="hud">
+    <div><span style="color:#0f0;font-weight:bold;">◆ PLAYER</span>
+      <div class="health-bar"><div class="health-fill" id="player-hp"></div></div>
+    </div>
+    <div class="score" id="time">0:00</div>
+    <div style="color:#f0f;">AI: <span id="ai-count">0</span></div>
+  </div>
+  <canvas id="game" width="900" height="600"></canvas>
+  <div class="ai-panel" id="ai-panel"></div>
+  <div class="ai-avatars" id="ai-avatars"></div>
+  <div class="bottom-hud">
+    <div>Latency: <span id="latency">--</span>ms</div>
+    <div>Decisions: <span id="decisions">0</span></div>
+    <div>WASD:Move | IJKL:Fire | SPACE:Shield</div>
+  </div>
+  <div class="overlay" id="start-screen">
+    <h1>NEON ARENA</h1>
+    <p>Multi-AI Battle with SimpleTool Function Calling</p>
+    <div class="server-input">
+      <input id="fc-url" value="http://localhost:8899" placeholder="SimpleTool Server URL">
+      <div class="status-dot" id="status-dot"></div>
+    </div>
+    <div id="conn-status" style="font-size:11px;">Click to check...</div>
+    <div class="config-row">
+      <label>AI Count: <input type="number" id="ai-num" min="1" max="20" value="2"></label>
+      <span id="max-ai-info" style="font-size:11px;color:#888;"></span>
+    </div>
+    <div class="config-row" id="overflow-row" style="display:none;">
+      <label>Overflow Mode:
+        <select id="overflow-mode">
+          <option value="clone">Clone profiles (复制人设)</option>
+          <option value="default">Default style (默认图标)</option>
+        </select>
+      </label>
+    </div>
+    <div class="overflow-hint" id="overflow-hint"></div>
+    <button class="btn" id="start-btn">START</button>
+  </div>
+  <div class="overlay hidden" id="end-screen">
+    <h2>GAME OVER</h2>
+    <div class="winner" id="winner">--</div>
+    <div class="game-stats">
+      <p>Time: <span class="highlight" id="final-time">0:00</span></p>
+      <p>Your Hits: <span class="highlight" id="final-hits">0</span></p>
+      <p>AI Decisions: <span class="highlight" id="final-decisions">0</span></p>
+      <p>Avg Latency: <span class="highlight" id="final-latency">--</span>ms</p>
+    </div>
+    <button class="btn" id="restart-btn">RESTART</button>
+  </div>
+</div>
+<div class="audio-ctrl">
+  <label>🎵<input type="range" id="bgm-vol" min="0" max="100" value="30"></label>
+  <label>🔊<input type="range" id="sfx-vol" min="0" max="100" value="70"></label>
+</div>
+<div class="debug">
+  <div class="debug-header"><span>📊 AI Log</span><button onclick="debugLog.length=0;$('debug-log').innerHTML=''">Clear</button></div>
+  <div class="debug-log" id="debug-log"></div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// 🎮 配置区域 - 在这里添加/修改 AI 角色
+// ═══════════════════════════════════════════════════════════════════
+const AI_PROFILES = [
+  {
+    id: "nahida", name: "纳西妲", color: "#7CFC00",
+    expressionDir: "./expressions_nahida",
+    expressions: {
+      idle: "01_smile.png", happy: "02_laugh.png", angry: "03_angry.png",
+      sad: "04_sad.png", shocked: "05_shocked.png", confused: "06_confused.png",
+      love: "07_love.png", smug: "08_smug.png", dizzy: "09_dizzy.png"
+    },
+    soundDir: "./wavs/Nahida",
+    sounds: { hit: "t_别打了别打了.wav", taunt: "t_杂鱼杂鱼.wav" }
+  },
+  {
+    id: "aiyafala", name: "艾雅法拉", color: "#FF6B6B",
+    expressionDir: "./expressions_aiyafala",
+    expressions: {
+      idle: "01_calm_平静.png", happy: "02_happy_开心.png", confused: "03_confused_困惑.png",
+      angry: "04_angry_生气.png", sad: "05_sad_难过.png", curious: "06_curious_好奇.png",
+      furious: "07_furious_愤怒.png", crying: "08_crying_哭泣.png", idea: "09_idea_灵感.png",
+      shocked: "06_curious_好奇.png", smug: "02_happy_开心.png", dizzy: "08_crying_哭泣.png", love: "02_happy_开心.png"
+    },
+    soundDir: "./wavs/Eyjafjalla",
+    sounds: { hit: "t_别打了前辈别打了.wav", taunt: "t_杂鱼前辈杂鱼前辈.wav" }
+  }
+];
+
+// 默认 AI 配置 (无资源时使用)
+const DEFAULT_COLORS = ['#00CED1','#FF69B4','#FFD700','#9370DB','#20B2AA','#FF7F50','#87CEEB','#98FB98','#DDA0DD','#F0E68C'];
+function createDefaultProfile(idx) {
+  return {
+    id: `ai_${idx}`, name: `AI-${idx+1}`, color: DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
+    expressionDir: null, expressions: {}, soundDir: null, sounds: {}
+  };
+}
+
+// 生成实际使用的 AI 配置列表
+function generateAIList(count, mode) {
+  const list = [];
+  for (let i = 0; i < count; i++) {
+    if (i < AI_PROFILES.length) {
+      list.push({...AI_PROFILES[i], sourceIdx: i});
+    } else if (mode === 'clone') {
+      const src = AI_PROFILES[i % AI_PROFILES.length];
+      list.push({...src, id: `${src.id}_${Math.floor(i/AI_PROFILES.length)+1}`, name: `${src.name} #${Math.floor(i/AI_PROFILES.length)+1}`, sourceIdx: i % AI_PROFILES.length});
+    } else {
+      list.push({...createDefaultProfile(i), sourceIdx: -1});
+    }
+  }
+  return list;
+}
+
+const BALANCE = {playerHp:10,aiHp:5,playerSpeed:4,aiMoveDistance:28,bulletSpeed:8,playerFireCooldown:15,aiFireCooldown:35,shieldDuration:500,shieldCooldown:180};
+const EXPR_RULES = {
+  gotHit_high:{expressions:["sad","shocked"],duration:600,sound:"hit",cooldown:2500,css:"hit"},
+  gotHit_low:{expressions:["crying","furious","dizzy"],duration:800,sound:"hit",cooldown:2000,css:"hit"},
+  hitPlayer:{expressions:["smug","happy","love"],duration:700,sound:"taunt",cooldown:3000},
+  attack:{expressions:["angry","furious"],duration:400,css:"attack"},
+  thinking:{expressions:["confused","curious"],duration:0},
+  moving:{expressions:["idle","curious"],duration:300},
+  win:{expressions:["happy","smug","love"],duration:0,sound:"taunt"},
+  lose:{expressions:["crying","dizzy","sad"],duration:0}
+};
+const TOOLS = [
+  {type:"function",function:{name:"move",description:"Move spaceship",parameters:{type:"object",properties:{direction:{type:"string",enum:["up","down","left","right"]}},required:["direction"]}}},
+  {type:"function",function:{name:"fire",description:"Fire bullet",parameters:{type:"object",properties:{direction:{type:"string",enum:["up","down","left","right"]}},required:["direction"]}}}
+];
+
+const $ = id => document.getElementById(id);
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const debugLog = [];
+function safeStr(v) { return v == null ? '' : String(v).trim().toLowerCase(); }
+function log(entry) {
+  entry.time = Date.now(); debugLog.push(entry);
+  const div = document.createElement('div');
+  div.className = 'log-entry' + (entry.error ? ' error' : '');
+  div.innerHTML = entry.ai ? `<span style="color:${entry.color}">[${entry.ai}]</span> ${entry.fn}(${entry.dir}) <span style="color:#f0f">${entry.ms|0}ms</span>` : entry.msg;
+  $('debug-log').insertBefore(div, $('debug-log').firstChild);
+  while ($('debug-log').children.length > 50) $('debug-log').lastChild.remove();
+}
+
+const Audio_ = {
+  sfxCache:{}, sfxVol:0.7, lastPlay:{},
+  play(path, cooldown=0) {
+    if (!path) return;
+    const now = Date.now();
+    if (cooldown && now - (this.lastPlay[path]||0) < cooldown) return;
+    if (!this.sfxCache[path]) this.sfxCache[path] = new Audio(path);
+    const snd = this.sfxCache[path];
+    snd.volume = this.sfxVol; snd.currentTime = 0;
+    snd.play().catch(()=>{});
+    this.lastPlay[path] = now;
+  }
+};
+$('sfx-vol').oninput = e => Audio_.sfxVol = e.target.value/100;
+
+class FCClient {
+  constructor(url) { this.url = url.replace(/\/$/, ''); }
+  async health() {
+    try { const r = await fetch(`${this.url}/health`, {signal: AbortSignal.timeout(3000)}); const d = await r.json(); return {ok: d.loaded === true || d.status === 'ok'}; }
+    catch(e) { return {ok: false}; }
+  }
+  async call(query, env, hist) {
+    const t0 = performance.now();
+    try {
+      const r = await fetch(`${this.url}/v1/function_call`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:query}],tools:TOOLS,environment:env,history:hist})});
+      const d = await r.json(), ms = performance.now() - t0;
+      let fn = safeStr(d.function) || safeStr(d.heads?.function);
+      let direction = safeStr(d.args?.direction) || safeStr(d.heads?.arg1);
+      if (!['move','fire'].includes(fn)) fn = 'move';
+      if (!['up','down','left','right'].includes(direction)) direction = 'left';
+      return {fn, direction, ms, success: d.success};
+    } catch(e) { return {fn:'move', direction:'left', ms:performance.now()-t0, success:false}; }
+  }
+}
+
+class ExprMgr {
+  constructor(idx, profile) {
+    this.idx = idx; this.profile = profile; this.timeout = null;
+    this.hasExpr = !!(profile.expressionDir && Object.keys(profile.expressions).length);
+    this.create();
+  }
+  create() {
+    const p = this.profile, c = p.color;
+    this.el = document.createElement('div');
+    this.el.className = 'ai-avatar';
+    this.el.style.borderColor = c;
+    if (this.hasExpr) {
+      this.img = document.createElement('img');
+      this.img.src = this.getPath('idle');
+      this.img.onerror = () => { this.hasExpr = false; this.showDefaultIcon(); };
+      this.el.appendChild(this.img);
+    } else { this.showDefaultIcon(); }
+    const lbl = document.createElement('div');
+    lbl.className = 'label'; lbl.style.color = c; lbl.textContent = p.name;
+    this.el.appendChild(lbl);
+    $('ai-avatars').appendChild(this.el);
+    const box = document.createElement('div');
+    box.className = 'ai-box'; box.id = `ai-box-${this.idx}`; box.style.borderColor = c;
+    box.innerHTML = `<h4 style="color:${c}">🤖 ${p.name}</h4><div>Status: <span class="st">Ready</span></div><div>Action: <span class="act">--</span></div><div class="hp-bar"><div class="hp-fill" style="width:100%;background:${c}"></div></div>`;
+    $('ai-panel').appendChild(box);
+  }
+  showDefaultIcon() {
+    const icon = document.createElement('span');
+    icon.className = 'default-icon'; icon.style.color = this.profile.color; icon.textContent = '🤖';
+    this.el.innerHTML = ''; this.el.appendChild(icon);
+  }
+  getPath(emotion) {
+    const expr = this.profile.expressions || {};
+    const f = expr[emotion] || expr.idle || Object.values(expr)[0];
+    return f && this.profile.expressionDir ? `${this.profile.expressionDir}/${f}` : '';
+  }
+  getSoundPath(name) {
+    const f = this.profile.sounds?.[name];
+    return f && this.profile.soundDir ? `${this.profile.soundDir}/${f}` : null;
+  }
+  set(emotion, duration=0, cssClass='') {
+    if (this.timeout) clearTimeout(this.timeout);
+    this.el.classList.remove('hit','attack','dead');
+    if (this.img && this.hasExpr) { const path = this.getPath(emotion); if (path) this.img.src = path; }
+    if (cssClass) this.el.classList.add(cssClass);
+    if (duration > 0) this.timeout = setTimeout(() => { this.el.classList.remove('hit','attack'); this.set('idle'); }, duration);
+  }
+  trigger(eventName) {
+    const rule = EXPR_RULES[eventName]; if (!rule) return;
+    this.set(rand(rule.expressions), rule.duration||0, rule.css||'');
+    if (rule.sound) Audio_.play(this.getSoundPath(rule.sound), rule.cooldown||0);
+  }
+  updateBox(status, action, hpPct) {
+    const box = $(`ai-box-${this.idx}`); if (!box) return;
+    box.querySelector('.st').textContent = status;
+    box.querySelector('.act').textContent = action;
+    box.querySelector('.hp-fill').style.width = hpPct + '%';
+  }
+  markDead() { this.el.classList.add('dead'); }
+  destroy() { this.el?.remove(); $(`ai-box-${this.idx}`)?.remove(); }
+}
+
+let fcClient = null, game = null;
+
+class Game {
+  constructor(aiCount, overflowMode) {
+    this.canvas = $('game'); this.ctx = this.canvas.getContext('2d');
+    this.W = this.canvas.width; this.H = this.canvas.height;
+    this.running = false; this.startTime = 0;
+    this.player = {x:80,y:this.H/2,vx:0,vy:0,hp:BALANCE.playerHp,maxHp:BALANCE.playerHp,cd:0,shield:false,shieldCd:0,trail:[]};
+    this.ais = []; this.exprMgrs = [];
+    this.aiCount = aiCount; this.overflowMode = overflowMode;
+    this.bullets = []; this.particles = [];
+    this.stars = Array.from({length:80},()=>({x:Math.random()*this.W,y:Math.random()*this.H,s:Math.random()*1.5+.5}));
+    this.keys = {}; this.stats = {hits:0,decisions:0,latencies:[]};
+    this.initAIs(); this.bindKeys();
+  }
+  initAIs() {
+    const profiles = generateAIList(this.aiCount, this.overflowMode);
+    for (let i = 0; i < profiles.length; i++) {
+      const p = profiles[i];
+      const angle = (i / profiles.length) * Math.PI - Math.PI/2;
+      const cx = this.W - 100, cy = this.H / 2, r = Math.min(this.H/2 - 50, 200);
+      const sx = cx + Math.cos(angle) * r * 0.3;
+      const sy = cy + Math.sin(angle) * r;
+      this.ais.push({idx:i, profile:p, x:sx+(Math.random()-.5)*30, y:sy+(Math.random()-.5)*30, vx:0,vy:0, hp:BALANCE.aiHp,maxHp:BALANCE.aiHp, cd:0,trail:[], thinking:false,lastThink:0,pending:false,alive:true,history:[]});
+      this.exprMgrs.push(new ExprMgr(i, p));
+    }
+    $('ai-count').textContent = this.aiCount;
+  }
+  bindKeys() {
+    window.onkeydown = e => { this.keys[e.key.toLowerCase()] = true; if (e.key === ' ') { e.preventDefault(); this.activateShield(); } };
+    window.onkeyup = e => this.keys[e.key.toLowerCase()] = false;
+  }
+  activateShield() { if (this.player.shieldCd <= 0 && !this.player.shield) { this.player.shield = true; this.player.shieldCd = BALANCE.shieldCooldown; setTimeout(() => this.player.shield = false, BALANCE.shieldDuration); } }
+  start() { this.running = true; this.startTime = performance.now(); this.loop(); }
+  stop(winner) { this.running = false; this.showEnd(winner); }
+  loop() { if (!this.running) return; this.update(); this.render(); requestAnimationFrame(() => this.loop()); }
+  update() {
+    const now = performance.now();
+    if (this.player.cd > 0) this.player.cd--;
+    if (this.player.shieldCd > 0) this.player.shieldCd--;
+    for (const ai of this.ais) { if (!ai.alive) continue; if (ai.cd > 0) ai.cd--; if (now - ai.lastThink > 20 && !ai.pending) { this.aiThink(ai); ai.lastThink = now; } }
+    this.handleInput(); this.updateEntity(this.player);
+    this.ais.filter(a=>a.alive).forEach(a => this.updateEntity(a));
+    this.player.trail.unshift({x:this.player.x,y:this.player.y}); if (this.player.trail.length > 8) this.player.trail.pop();
+    this.ais.filter(a=>a.alive).forEach(a=>{a.trail.unshift({x:a.x,y:a.y});if(a.trail.length>8)a.trail.pop();});
+    this.updateBullets();
+    this.particles = this.particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.95;p.vy*=.95;return --p.life>0;});
+    this.updateUI();
+    const alive = this.ais.filter(a=>a.alive).length; $('ai-count').textContent = alive;
+    if (this.player.hp <= 0) this.stop('ai'); else if (alive === 0) this.stop('player');
+  }
+  handleInput() {
+    let vx=0, vy=0;
+    if (this.keys['w']) vy -= BALANCE.playerSpeed; if (this.keys['s']) vy += BALANCE.playerSpeed;
+    if (this.keys['a']) vx -= BALANCE.playerSpeed; if (this.keys['d']) vx += BALANCE.playerSpeed;
+    if (vx && vy) { vx *= .707; vy *= .707; } this.player.vx = vx; this.player.vy = vy;
+    if (this.player.cd <= 0) {
+      let dir = null;
+      if (this.keys['i']) dir = {dx:0,dy:-1}; if (this.keys['k']) dir = {dx:0,dy:1};
+      if (this.keys['j']) dir = {dx:-1,dy:0}; if (this.keys['l']) dir = {dx:1,dy:0};
+      if (dir) { this.fire(this.player, dir.dx, dir.dy, 'player'); this.player.cd = BALANCE.playerFireCooldown; }
+    }
+  }
+  async aiThink(ai) {
+    if (ai.pending || !ai.alive) return;
+    ai.pending = true; ai.thinking = true;
+    this.exprMgrs[ai.idx].trigger('thinking');
+    this.exprMgrs[ai.idx].updateBox('Thinking...', '--', (ai.hp/ai.maxHp)*100);
+    const p = this.player, dx = p.x - ai.x, dy = p.y - ai.y, dist = Math.round(Math.hypot(dx, dy));
+    const hDir = dx > 0 ? 'right' : 'left', vDir = dy > 0 ? 'down' : 'up';
+    const primaryDir = Math.abs(dx) > Math.abs(dy) ? hDir : vDir;
+    const alignH = Math.abs(dy) < 35, alignV = Math.abs(dx) < 35;
+    const nearWall = ai.x < 60 ? 'left' : ai.x > this.W-60 ? 'right' : ai.y < 60 ? 'top' : ai.y > this.H-60 ? 'bottom' : 'no';
+    const env = [`pos=${Math.round(ai.x)},${Math.round(ai.y)}`,`player=${Math.round(p.x)},${Math.round(p.y)}`,`dist=${dist}`,`align_h=${alignH}`,`align_v=${alignV}`,`cd=${ai.cd}`,`wall=${nearWall}`];
+    let instruction = '';
+    if (ai.cd <= 0 && dist < 400) { if (alignH) instruction = `FIRE ${hDir}! Aligned horizontally.`; else if (alignV) instruction = `FIRE ${vDir}! Aligned vertically.`; else instruction = `MOVE ${primaryDir} to align.`; }
+    else if (ai.cd > 0) instruction = `Cooling. MOVE ${primaryDir}.`;
+    else instruction = `MOVE ${primaryDir} to approach (dist=${dist}).`;
+    const query = `Arena ${this.W}x${this.H}. ${instruction} Call move(dir) or fire(dir). dir:up/down/left/right`;
+    try {
+      const res = await fcClient.call(query, env, ai.history.slice(-6));
+      this.stats.decisions++; this.stats.latencies.push(res.ms);
+      $('decisions').textContent = this.stats.decisions;
+      $('latency').textContent = Math.round(this.stats.latencies.slice(-20).reduce((a,b)=>a+b,0)/Math.min(20,this.stats.latencies.length));
+      log({ai:ai.profile.name, color:ai.profile.color, fn:res.fn, dir:res.direction, ms:res.ms});
+      if (ai.alive) {
+        this.execAction(ai, res.fn, res.direction);
+        ai.history.push(`${res.fn}(${res.direction})`); if (ai.history.length > 12) ai.history.shift();
+        this.exprMgrs[ai.idx].updateBox('Active', `${res.fn}(${res.direction})`, (ai.hp/ai.maxHp)*100);
+        this.exprMgrs[ai.idx].trigger(res.fn === 'fire' ? 'attack' : 'moving');
+      }
+    } catch(e) { log({msg:`[${ai.profile.name}] Error: ${e.message}`, error:true}); }
+    ai.pending = false; ai.thinking = false;
+  }
+  execAction(ai, action, direction) {
+    const dirs = {up:{dx:0,dy:-1},down:{dx:0,dy:1},left:{dx:-1,dy:0},right:{dx:1,dy:0}};
+    const d = dirs[direction]; if (!d) return;
+    if (action === 'move') { ai.x = Math.max(20, Math.min(this.W-20, ai.x + d.dx * BALANCE.aiMoveDistance)); ai.y = Math.max(20, Math.min(this.H-20, ai.y + d.dy * BALANCE.aiMoveDistance)); ai.vx = d.dx * 3; ai.vy = d.dy * 3; }
+    else if (action === 'fire' && ai.cd <= 0) { this.fire(ai, d.dx, d.dy, 'ai', ai.idx); ai.cd = BALANCE.aiFireCooldown; }
+  }
+  fire(ent, dx, dy, owner, aiIdx=-1) {
+    const color = owner==='player' ? '#0ff' : (aiIdx>=0 ? this.ais[aiIdx].profile.color : '#f0f');
+    this.bullets.push({x:ent.x+dx*20, y:ent.y+dy*20, vx:dx*BALANCE.bulletSpeed, vy:dy*BALANCE.bulletSpeed, owner, aiIdx, color, life:100});
+    for (let i=0;i<5;i++) this.particles.push({x:ent.x+dx*15,y:ent.y+dy*15,vx:(Math.random()-.5)*3-dx,vy:(Math.random()-.5)*3-dy,life:12,color});
+    if (owner==='player') this.stats.hits++;
+  }
+  updateEntity(e) { e.x += e.vx; e.y += e.vy; e.vx *= .88; e.vy *= .88; e.x = Math.max(20, Math.min(this.W-20, e.x)); e.y = Math.max(20, Math.min(this.H-20, e.y)); }
+  updateBullets() {
+    for (let i=this.bullets.length-1; i>=0; i--) {
+      const b = this.bullets[i]; b.x += b.vx; b.y += b.vy; b.life--;
+      if (b.life<=0 || b.x<0 || b.x>this.W || b.y<0 || b.y>this.H) { this.bullets.splice(i,1); continue; }
+      if (b.owner==='ai' && Math.hypot(b.x-this.player.x,b.y-this.player.y)<16) {
+        if (this.player.shield) { this.bullets.splice(i,1); continue; }
+        this.player.hp--; this.bullets.splice(i,1); this.spawnHitFX(this.player.x, this.player.y, '#0f0');
+        if (b.aiIdx >= 0) this.exprMgrs[b.aiIdx].trigger('hitPlayer'); continue;
+      }
+      if (b.owner==='player') {
+        for (const ai of this.ais) {
+          if (!ai.alive) continue;
+          if (Math.hypot(b.x-ai.x,b.y-ai.y)<16) {
+            ai.hp--; this.bullets.splice(i,1); this.spawnHitFX(ai.x, ai.y, ai.profile.color);
+            const hpRatio = ai.hp/ai.maxHp;
+            this.exprMgrs[ai.idx].updateBox(ai.hp>0?'Hit!':'DEAD', '--', hpRatio*100);
+            if (ai.hp<=0) { ai.alive = false; this.exprMgrs[ai.idx].markDead(); this.exprMgrs[ai.idx].trigger('lose'); }
+            else this.exprMgrs[ai.idx].trigger(hpRatio > 0.5 ? 'gotHit_high' : 'gotHit_low');
+            break;
+          }
+        }
+      }
+    }
+  }
+  spawnHitFX(x,y,color) { for(let i=0;i<12;i++) this.particles.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:20,color}); }
+  updateUI() { $('player-hp').style.width = (this.player.hp/this.player.maxHp*100)+'%'; const s = Math.floor((performance.now()-this.startTime)/1000); $('time').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+  render() {
+    const ctx = this.ctx; ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0,0,this.W,this.H);
+    ctx.fillStyle = '#fff'; this.stars.forEach(s=>{ctx.globalAlpha=.3+Math.random()*.3;ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,Math.PI*2);ctx.fill();}); ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(0,255,255,.03)'; for(let x=0;x<this.W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,this.H);ctx.stroke();} for(let y=0;y<this.H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.W,y);ctx.stroke();}
+    this.particles.forEach(p=>{ctx.globalAlpha=p.life/20;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();}); ctx.globalAlpha = 1;
+    const drawTrail = (trail,color) => {ctx.strokeStyle=color;ctx.lineWidth=2;for(let i=1;i<trail.length;i++){ctx.globalAlpha=(1-i/trail.length)*.2;ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();}ctx.globalAlpha=1;};
+    drawTrail(this.player.trail,'#0f0'); this.ais.filter(a=>a.alive).forEach(a=>drawTrail(a.trail,a.profile.color));
+    this.bullets.forEach(b=>{ctx.shadowBlur=10;ctx.shadowColor=b.color;ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();}); ctx.shadowBlur=0;
+    const drawShip = (x,y,color,shield,think) => {
+      ctx.shadowBlur=15;ctx.shadowColor=color;ctx.fillStyle=color;
+      ctx.beginPath();ctx.moveTo(x+14,y);ctx.lineTo(x-8,y-10);ctx.lineTo(x-4,y);ctx.lineTo(x-8,y+10);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+      if(shield){ctx.strokeStyle='#0ff';ctx.lineWidth=2;ctx.globalAlpha=.5+Math.sin(Date.now()/50)*.3;ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
+      if(think){ctx.fillStyle='#ff0';ctx.font='12px sans-serif';ctx.fillText('💭',x-6,y-18);}
+    };
+    drawShip(this.player.x,this.player.y,'#0f0',this.player.shield,false);
+    this.ais.filter(a=>a.alive).forEach(a=>drawShip(a.x,a.y,a.profile.color,false,a.thinking));
+  }
+  showEnd(winner) {
+    $('winner').textContent = winner==='player' ? 'YOU WIN!' : 'AI WINS';
+    $('winner').className = 'winner '+(winner==='player'?'player':'ai');
+    const s = Math.floor((performance.now()-this.startTime)/1000);
+    $('final-time').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+    $('final-hits').textContent = this.stats.hits; $('final-decisions').textContent = this.stats.decisions;
+    $('final-latency').textContent = this.stats.latencies.length ? Math.round(this.stats.latencies.reduce((a,b)=>a+b,0)/this.stats.latencies.length) : '--';
+    $('end-screen').classList.remove('hidden');
+  }
+  reset() {
+    this.exprMgrs.forEach(m => m.destroy()); $('ai-panel').innerHTML = ''; $('ai-avatars').innerHTML = '';
+    this.player = {x:80,y:this.H/2,vx:0,vy:0,hp:BALANCE.playerHp,maxHp:BALANCE.playerHp,cd:0,shield:false,shieldCd:0,trail:[]};
+    this.ais = []; this.exprMgrs = []; this.bullets = []; this.particles = [];
+    this.stats = {hits:0,decisions:0,latencies:[]};
+    this.aiCount = parseInt($('ai-num').value)||2; this.overflowMode = $('overflow-mode').value;
+    this.initAIs(); $('end-screen').classList.add('hidden'); this.start();
+  }
+}
+
+function updateOverflowUI() {
+  const num = parseInt($('ai-num').value) || 2;
+  const profileCount = AI_PROFILES.length;
+  const overflow = num > profileCount;
+  $('overflow-row').style.display = overflow ? 'flex' : 'none';
+  $('overflow-hint').style.display = overflow ? 'block' : 'none';
+  if (overflow) {
+    const extra = num - profileCount;
+    $('overflow-hint').innerHTML = `⚠️ ${extra} AI(s) exceed profiles. <br>Clone: reuse expressions/sounds. Default: 🤖 icon only.`;
+  }
+}
+
+async function init() {
+  $('ai-num').value = Math.min(2, AI_PROFILES.length || 2);
+  $('max-ai-info').textContent = `(${AI_PROFILES.length} profiles available)`;
+  $('ai-num').oninput = updateOverflowUI;
+  updateOverflowUI();
+  fcClient = new FCClient($('fc-url').value);
+  const r = await fcClient.health();
+  $('status-dot').className = 'status-dot '+(r.ok?'ok':'err');
+  $('conn-status').textContent = r.ok ? '✔ Connected' : '✗ Failed';
+  $('fc-url').oninput = async () => {
+    fcClient = new FCClient($('fc-url').value);
+    const r = await fcClient.health();
+    $('status-dot').className = 'status-dot '+(r.ok?'ok':'err');
+    $('conn-status').textContent = r.ok ? '✔ Connected' : '✗ Failed';
+  };
+  $('start-btn').onclick = async () => {
+    const r = await fcClient.health();
+    if (!r.ok) { alert('Cannot connect to SimpleTool Server'); return; }
+    $('start-screen').classList.add('hidden');
+    game = new Game(parseInt($('ai-num').value) || 2, $('overflow-mode').value);
+    game.start();
+  };
+  $('restart-btn').onclick = () => game?.reset();
+  console.log(`[Neon Arena] Loaded ${AI_PROFILES.length} AI profiles`);
+}
+init();
+</script>
+</body>
+</html>

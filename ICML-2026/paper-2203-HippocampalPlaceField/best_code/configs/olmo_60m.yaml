@@ -1,0 +1,45 @@
+# Simplified configuration for the 60M model, based on the FoPE paper.
+# This file uses the minimal structure of olmo_mini.yaml for clarity.
+
+run_name: "olmo-60m-fope-exp"
+
+model:
+  # --- Model architecture for OLMo-60M ---
+  d_model: 512
+  n_layers: 8
+  n_heads: 8
+  max_sequence_length: 512  # Pre-training sequence length from the FoPE paper
+  vocab_size: 50304         # From the full OLMo-60M config
+  init_device: "cuda"
+
+  # flashattention
+  flash_attention: true
+  # --- Positional Embedding Settings ---
+  # To run the RoPE baseline, use these settings:
+  rope: true
+  fope: false
+
+  # To run the FoPE experiment, comment out the RoPE line
+  # and uncomment the following lines:
+  # fope: true
+  # rope: false
+  # fope_freq_d: 64              # Corresponds to Num Freq D in the paper's ablation table
+  # fope_freq_var_sigma: 0.3     # Corresponds to Var Freq σ for the 60M model
+
+optimizer:
+  name: adamw
+  learning_rate: 6.0e-4
+  weight_decay: 0.1 # A common value from the full config
+
+scheduler:
+  name: cosine_with_warmup
+  t_warmup: 5000 # Warmup steps from the full config
+
+# --- Batching ---
+global_train_batch_size: 8
+device_train_microbatch_size: 8
+
+# --- Other Settings ---
+# Keep these minimal for a simple setup
+distributed_strategy: null
+precision: amp_bf16 # Use bfloat16 for better performance, as in the full config

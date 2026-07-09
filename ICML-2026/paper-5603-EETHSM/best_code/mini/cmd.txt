@@ -1,0 +1,15 @@
+python3 main.py --model "T_rope" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 30 --max_train_len 50 --min_eval_len 30 --max_eval_len 50
+
+python3 test.py --model "T_rope" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 30 --max_train_len 50 --min_eval_len 30 --max_eval_len 50
+
+python3 main.py --model "mamba" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 30 --max_train_len 50 --min_eval_len 30 --max_eval_len 50 --sequence_length 100
+
+python3 main.py --model "T_rope" --train_task "decode-recall-last" --eval_task  "decode-recall-last" --min_train_len 30 --max_train_len 50 --min_eval_len 30 --max_eval_len 50 --sequence_length 100
+
+python3 test.py --model "T_rope" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 20 --max_train_len 25 --min_eval_len 98 --max_eval_len 99 --sequence-len 100
+
+python3 main.py --model "T_rope" --train_task "var-copy-rep" --eval_task "var-copy-rep" --min_train_len 20 --max_train_len 25 --min_eval_len 98 --max_eval_len 99 --sequence_length 100 --lr 1e-3
+
+python3 main.py --model "pretrained" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 30 --max_train_len 50 --min_eval_len 30 --max_eval_len 50 --pretrained_model "openai-community/gpt2"
+
+python3 main.py --model "hybrid" --train_task "var-copy" --eval_task  "var-copy" --min_train_len 50 --max_train_len 100 --min_eval_len 50 --max_eval_len 100 --hidden_size 12 --heads 1 --state_dim 1 --num_masked_heads 0 --layers 2

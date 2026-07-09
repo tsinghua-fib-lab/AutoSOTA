@@ -1,0 +1,37 @@
+method_name: ThompsonHedgeHybridOCOAcc
+algorithm: ts
+num_runs: 10
+cuda_device: 0
+
+problems:
+  BiObjectiveTSP:
+    medium: {n_cities: 50}
+    # small:  {n_cities: 20}
+    # large:  {n_cities: 100}
+  # MultiObjectiveKnapsack:
+  #   large: {n_items: 200, n_objectives: 2, capacity: 25.0}
+  # TriObjectiveTSP:
+  #   large: {n_cities: 100}
+  # BiObjectiveCVRP:
+  #   medium: {n_customers: 50, n_vehicles: 15}
+
+params:
+  learning_rate: 0.1
+  initial_temperature: 1.0
+  temp_decay: 0.995
+  hybrid_ratio: 0.5
+  adaptive_hybrid: true
+  decomposition_size: 35
+  overlap: 18
+  use_adaptive_weights: true
+  max_iterations: 180
+  nb_rounds: 15
+  patience: 60
+  use_lagrangian: true
+  use_ftrl: false
+  dual_step_size: 1.0
+  use_accelerated_dual: true
+  use_diminishing_overlap: true
+  overlap_decay_rate: 0.1
+  use_learned_operators: true
+  n_weight_vectors: 25

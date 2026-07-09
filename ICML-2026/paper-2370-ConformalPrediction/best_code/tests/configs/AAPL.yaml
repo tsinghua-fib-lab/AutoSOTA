@@ -1,0 +1,37 @@
+real: True
+quantiles_given: False
+multiple_series: False 
+T_burnin: 100 
+alpha: 0.05
+seasonal_period: 5 
+score_function_name: "absolute-residual"
+sequences:
+  0:
+    dataset: "AAPL-stock"
+    fit_every: 1 
+    log: True
+    model_names: 
+      # - "theta"
+      # - "ar"
+      # - "transformer"
+      - "prophet"
+    overwrite: False 
+methods:
+  SFOGD:
+    lrs:
+      - 0.01
+      - 0.25
+      - 0.1
+      - 1
+      - 10
+      - 25
+      - 100
+  KT:
+    lrs: 
+      - None
+  UP:
+    lrs: 
+      - None
+  DtACI:
+    lrs: 
+      - None

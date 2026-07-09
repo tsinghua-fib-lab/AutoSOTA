@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Game — Tower Defense",
+    "tools_file": "tools_game.jsonl",
+    "system": "You are the voice command interpreter for a real-time tower defense game. The player issues orders by voice. You convert ASR-transcribed commands into function calls.\n\nRules:\n- One function call per command\n- Fuzzy match operator names\n- Positions: north, south, east, west, center\n- If all tasks in history are done, call pass",
+    "query": "Wave 5, BOSS appeared, 8 enemies remaining\nOperators: Blaze(north,HP50%,skill ready) Amiya(center,HP90%,skill ready)\nEnemy direction: concentrated north\n\nAmiya use skill now",
+    "history": "[]",
+    "expected": "use_skill",
+    "desc": "use_skill(Amiya)"
+  },
+  {
+    "name": "Robotic Arm — Assembly",
+    "tools_file": "tools_arm.jsonl",
+    "system": "You are the voice controller for an industrial 6-axis robotic arm. You convert spoken commands into function calls.\n\nRules:\n- One function call per command\n- Coordinates in mm, angles in degrees\n- Gripper force: light=10N, medium=50N, heavy=100N\n- Speed: slow/normal/fast",
+    "query": "Arm at home (0,0,500), gripper open\nWorkpiece: red gear at (300,150,50), target tray at (600,0,80)\n\nMove to the red gear position slowly",
+    "history": "[]",
+    "expected": "move_to",
+    "desc": "move_to(300,150,50,slow)"
+  },
+  {
+    "name": "Digital Human — Streamer",
+    "tools_file": "tools_avatar.jsonl",
+    "system": "You are the expression controller for a virtual digital human streamer. You convert director instructions into animation function calls.\n\nRules:\n- One function call per instruction\n- Emotion intensity: 0.0-1.0\n- Speech text should be natural\n- Tone: cheerful/calm/serious/excited",
+    "query": "Stream just started, viewers flooding in\nChat: \"Hello streamer!\" \"Good evening!\"\nDirector: greet the audience warmly, say welcome and look at camera",
+    "history": "[]",
+    "expected": "speak",
+    "desc": "speak(welcome,cheerful)"
+  }
+]
