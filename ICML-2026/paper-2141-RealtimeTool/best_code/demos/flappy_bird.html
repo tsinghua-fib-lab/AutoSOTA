@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flappy Bird AI - SimpleTool Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(180deg,#1a1a2e 0%,#16213e 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif;color:#fff}
+.container{display:flex;gap:20px;align-items:flex-start}
+.game-wrapper{display:flex;flex-direction:column;align-items:center}
+.title{font-size:28px;font-weight:bold;margin-bottom:15px;background:linear-gradient(90deg,#ffd700,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stats-bar{display:flex;gap:20px;margin-bottom:10px;font-size:14px}
+.stat{padding:8px 16px;background:rgba(255,215,0,.1);border:1px solid #ffd700;border-radius:20px}
+.stat span{color:#ffd700;font-weight:bold}
+.game-area{position:relative}
+canvas{border:2px solid #ffd700;box-shadow:0 0 30px rgba(255,215,0,.3);border-radius:8px}
+.controls{margin-top:15px;display:flex;gap:10px}
+.btn{padding:10px 25px;font-size:14px;font-weight:bold;background:transparent;border:2px solid #ffd700;color:#ffd700;cursor:pointer;border-radius:6px;transition:all .2s}
+.btn:hover{background:#ffd700;color:#000}
+.btn.stop{border-color:#f44;color:#f44}
+.btn.stop:hover{background:#f44;color:#fff}
+.panel{width:320px;background:rgba(0,0,0,.8);border:1px solid #ffd700;border-radius:10px;padding:15px;font-size:12px}
+.panel h3{color:#ffd700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #333}
+.config-row{display:flex;align-items:center;justify-content:space-between;margin:8px 0}
+.config-row label{color:#aaa}
+.config-row input{width:200px;padding:6px 10px;background:#111;border:1px solid #ffd700;color:#fff;border-radius:4px;font-size:12px}
+.config-row select{background:#111;border:1px solid #ffd700;color:#fff;padding:6px;border-radius:4px}
+.status-row{display:flex;align-items:center;gap:8px;margin:10px 0}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#666}
+.status-dot.ok{background:#0f0;box-shadow:0 0 8px #0f0}
+.status-dot.err{background:#f44}
+.log-section{max-height:180px;overflow-y:auto;background:#050505;border-radius:6px;padding:10px;margin-top:10px}
+.log-entry{padding:4px 8px;margin:2px 0;background:rgba(255,215,0,.05);border-left:3px solid #ffd700;font-family:monospace;font-size:11px}
+.log-entry.flap{border-color:#0f0;background:rgba(0,255,0,.1)}
+.log-entry.wait{border-color:#888}
+.log-entry .action{font-weight:bold}
+.log-entry .ms{color:#f0f}
+.env-display{background:#111;padding:10px;border-radius:6px;font-family:monospace;font-size:10px;color:#888;margin-top:10px;white-space:pre-wrap;max-height:120px;overflow-y:auto}
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px}
+.overlay.hidden{display:none}
+.overlay h2{font-size:36px;color:#ffd700;margin-bottom:10px}
+.overlay .score-display{font-size:24px;color:#0ff;margin:10px 0}
+.high-score{color:#f0f;font-size:14px;margin-top:5px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="game-wrapper">
+    <div class="title">🐦 FLAPPY BIRD AI</div>
+    <div class="stats-bar">
+      <div class="stat">Score: <span id="score">0</span></div>
+      <div class="stat">Best: <span id="best">0</span></div>
+      <div class="stat">Flaps: <span id="flaps">0</span></div>
+      <div class="stat">Avg: <span id="avg-latency">--</span>ms</div>
+    </div>
+    <div class="game-area">
+      <canvas id="game" width="400" height="600"></canvas>
+      <div class="overlay" id="overlay">
+        <h2 id="overlay-title">FLAPPY BIRD AI</h2>
+        <div class="score-display" id="overlay-score"></div>
+        <div class="high-score" id="overlay-best"></div>
+        <button class="btn" id="start-btn">START</button>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="restart-btn">RESTART</button>
+      <button class="btn stop" id="stop-btn">STOP</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>⚙️ Configuration</h3>
+    <div class="config-row">
+      <label>Server URL</label>
+    </div>
+    <div class="config-row">
+      <input type="text" id="server-url" value="http://localhost:8899">
+    </div>
+    <div class="status-row">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Click Start to connect</span>
+    </div>
+    <div class="config-row">
+      <label>Difficulty</label>
+      <select id="difficulty">
+        <option value="easy">Easy (wide gaps)</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Hard (narrow gaps)</option>
+      </select>
+    </div>
+    <div class="config-row">
+      <label>AI Decision Rate</label>
+      <select id="decision-rate">
+        <option value="1">Every frame</option>
+        <option value="3" selected>Every 3 frames</option>
+        <option value="5">Every 5 frames</option>
+      </select>
+    </div>
+    <h3>📊 AI Decision Log</h3>
+    <div class="log-section" id="log-section"></div>
+    <div class="env-display" id="env-display">Environment will show here...</div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+
+// Tool Definition - 二元决策
+const TOOLS = [{
+  type: "function",
+  function: {
+    name: "act",
+    description: "Flappy bird action. Flap to gain height, wait to fall by gravity.",
+    parameters: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["flap", "wait"],
+          description: "flap=jump up ~50px, wait=fall by gravity ~3px/frame"
+        }
+      },
+      required: ["action"]
+    }
+  }
+}];
+
+class FCClient {
+  constructor(url) { this.url = url.replace(/\/$/, ''); }
+  async health() {
+    try {
+      const r = await fetch(`${this.url}/health`, { signal: AbortSignal.timeout(3000) });
+      const d = await r.json();
+      return { ok: d.loaded === true || d.status === 'ok' };
+    } catch(e) { return { ok: false }; }
+  }
+  async call(messages, env) {
+    const t0 = performance.now();
+    try {
+      const r = await fetch(`${this.url}/v1/function_call`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, tools: TOOLS, environment: env })
+      });
+      const d = await r.json();
+      const ms = performance.now() - t0;
+      let action = String(d.args?.action || d.heads?.arg1 || '').toLowerCase().trim();
+      if (!['flap','wait'].includes(action)) action = 'wait';
+      return { action, ms, raw: d };
+    } catch(e) {
+      return { action: 'wait', ms: performance.now() - t0, error: e.message };
+    }
+  }
+}
+
+class FlappyGame {
+  constructor() {
+    this.canvas = $('game');
+    this.ctx = this.canvas.getContext('2d');
+    this.W = this.canvas.width;
+    this.H = this.canvas.height;
+    this.client = null;
+    this.running = false;
+    this.bestScore = 0;
+    this.latencies = [];
+    this.reset();
+  }
+
+  getDifficultyParams() {
+    const d = $('difficulty').value;
+    return {
+      easy: { gapSize: 180, pipeSpeed: 2.5 },
+      normal: { gapSize: 150, pipeSpeed: 3 },
+      hard: { gapSize: 120, pipeSpeed: 4 }
+    }[d];
+  }
+
+  reset() {
+    const params = this.getDifficultyParams();
+    this.bird = { x: 80, y: this.H / 2, vy: 0, radius: 15 };
+    this.gravity = 0.4;
+    this.flapStrength = -7;
+    this.pipes = [];
+    this.pipeWidth = 60;
+    this.gapSize = params.gapSize;
+    this.pipeSpeed = params.pipeSpeed;
+    this.pipeInterval = 100;
+    this.frameCount = 0;
+    this.score = 0;
+    this.flapCount = 0;
+    this.latencies = [];
+    this.pendingDecision = null;
+    this.decisionRate = parseInt($('decision-rate').value);
+    this.spawnPipe();
+    this.updateStats();
+    this.render();
+  }
+
+  spawnPipe() {
+    const minY = 80;
+    const maxY = this.H - this.gapSize - 80;
+    const gapY = minY + Math.random() * (maxY - minY);
+    this.pipes.push({
+      x: this.W + 50,
+      gapY: gapY,
+      passed: false
+    });
+  }
+
+  async start() {
+    this.client = new FCClient($('server-url').value);
+    const health = await this.client.health();
+    $('status-dot').className = 'status-dot ' + (health.ok ? 'ok' : 'err');
+    $('status-text').textContent = health.ok ? 'Connected' : 'Connection failed';
+    if (!health.ok) return;
+
+    this.reset();
+    this.running = true;
+    $('overlay').classList.add('hidden');
+    this.loop();
+  }
+
+  stop() {
+    this.running = false;
+  }
+
+  async loop() {
+    if (!this.running) return;
+
+    this.frameCount++;
+
+    // AI 决策（按频率）
+    if (this.frameCount % this.decisionRate === 0) {
+      await this.aiDecision();
+    }
+
+    // 物理更新
+    this.bird.vy += this.gravity;
+    this.bird.y += this.bird.vy;
+
+    // 管道移动
+    for (const pipe of this.pipes) {
+      pipe.x -= this.pipeSpeed;
+      if (!pipe.passed && pipe.x + this.pipeWidth < this.bird.x) {
+        pipe.passed = true;
+        this.score++;
+      }
+    }
+
+    // 移除离开屏幕的管道
+    this.pipes = this.pipes.filter(p => p.x > -this.pipeWidth);
+
+    // 生成新管道
+    if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.W - this.pipeInterval) {
+      this.spawnPipe();
+    }
+
+    // 碰撞检测
+    if (this.checkCollision()) {
+      this.gameOver();
+      return;
+    }
+
+    this.updateStats();
+    this.render();
+    requestAnimationFrame(() => this.loop());
+  }
+
+  async aiDecision() {
+    const bird = this.bird;
+    const nextPipe = this.pipes.find(p => p.x + this.pipeWidth > bird.x);
+    
+    if (!nextPipe) return;
+
+    const pipeCenter = nextPipe.gapY + this.gapSize / 2;
+    const birdToCenter = pipeCenter - bird.y;
+    const distToPipe = nextPipe.x - bird.x;
+    
+    // 预测未来位置
+    const futureY = bird.y + bird.vy * 5 + 0.5 * this.gravity * 25;
+    const willBeAboveGap = futureY < nextPipe.gapY + 20;
+    const willBeBelowGap = futureY > nextPipe.gapY + this.gapSize - 20;
+
+    // Environment
+    const env = [
+      `bird_y=${Math.round(bird.y)}`,
+      `bird_vy=${bird.vy.toFixed(1)}`,
+      `pipe_x=${Math.round(distToPipe)}`,
+      `gap_top=${Math.round(nextPipe.gapY)}`,
+      `gap_bottom=${Math.round(nextPipe.gapY + this.gapSize)}`,
+      `gap_center=${Math.round(pipeCenter)}`,
+      `bird_to_center=${Math.round(birdToCenter)}`,
+      `predicted_y=${Math.round(futureY)}`,
+      `ceiling=${0}`,
+      `floor=${this.H}`
+    ];
+
+    // Query - 明确的决策指令
+    let instruction;
+    if (bird.y < 30) {
+      instruction = `DANGER: Too high! WAIT to fall.`;
+    } else if (bird.y > this.H - 50) {
+      instruction = `DANGER: Too low! FLAP now!`;
+    } else if (distToPipe < 100) {
+      // 即将穿越管道
+      if (bird.y > pipeCenter + 20) {
+        instruction = `Approaching pipe, below center. FLAP to rise!`;
+      } else if (bird.y < pipeCenter - 30) {
+        instruction = `Approaching pipe, above center. WAIT to fall.`;
+      } else {
+        instruction = `Aligned with gap. ${bird.vy > 2 ? 'FLAP to slow descent.' : 'WAIT to maintain.'}`;
+      }
+    } else {
+      // 远离管道，调整高度
+      if (birdToCenter > 40) {
+        instruction = `Far from pipe. Below gap center by ${Math.round(birdToCenter)}px. FLAP!`;
+      } else if (birdToCenter < -40) {
+        instruction = `Far from pipe. Above gap center. WAIT.`;
+      } else {
+        instruction = `Good position. ${bird.vy > 3 ? 'FLAP to control speed.' : 'WAIT.'}`;
+      }
+    }
+
+    const query = `Flappy bird. Screen ${this.W}x${this.H}. ${instruction} Call act(flap) or act(wait).`;
+    $('env-display').textContent = `Query: ${query}\n\nEnv:\n${env.join('\n')}`;
+
+    const result = await this.client.call([{ role: 'user', content: query }], env);
+    this.latencies.push(result.ms);
+    this.logDecision(result);
+
+    if (result.action === 'flap') {
+      this.bird.vy = this.flapStrength;
+      this.flapCount++;
+    }
+  }
+
+  checkCollision() {
+    const b = this.bird;
+    // 天花板和地板
+    if (b.y - b.radius < 0 || b.y + b.radius > this.H) return true;
+    
+    // 管道碰撞
+    for (const pipe of this.pipes) {
+      if (b.x + b.radius > pipe.x && b.x - b.radius < pipe.x + this.pipeWidth) {
+        if (b.y - b.radius < pipe.gapY || b.y + b.radius > pipe.gapY + this.gapSize) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  gameOver() {
+    this.running = false;
+    if (this.score > this.bestScore) this.bestScore = this.score;
+    $('overlay').classList.remove('hidden');
+    $('overlay-title').textContent = 'GAME OVER';
+    $('overlay-score').textContent = `Score: ${this.score}`;
+    $('overlay-best').textContent = `Best: ${this.bestScore}`;
+    $('best').textContent = this.bestScore;
+  }
+
+  updateStats() {
+    $('score').textContent = this.score;
+    $('flaps').textContent = this.flapCount;
+    const avg = this.latencies.length ? Math.round(this.latencies.reduce((a,b)=>a+b,0)/this.latencies.length) : '--';
+    $('avg-latency').textContent = avg;
+  }
+
+  logDecision(result) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry ' + result.action;
+    entry.innerHTML = `<span class="action">${result.action.toUpperCase()}</span> <span class="ms">${Math.round(result.ms)}ms</span>`;
+    $('log-section').insertBefore(entry, $('log-section').firstChild);
+    while ($('log-section').children.length > 30) $('log-section').lastChild.remove();
+  }
+
+  render() {
+    const ctx = this.ctx;
+
+    // 背景渐变
+    const grad = ctx.createLinearGradient(0, 0, 0, this.H);
+    grad.addColorStop(0, '#1a1a2e');
+    grad.addColorStop(1, '#16213e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, this.W, this.H);
+
+    // 星星背景
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    for (let i = 0; i < 30; i++) {
+      const x = (i * 37 + this.frameCount * 0.2) % this.W;
+      const y = (i * 23) % this.H;
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 管道
+    for (const pipe of this.pipes) {
+      // 上管道
+      const topGrad = ctx.createLinearGradient(pipe.x, 0, pipe.x + this.pipeWidth, 0);
+      topGrad.addColorStop(0, '#0a5');
+      topGrad.addColorStop(0.5, '#0d8');
+      topGrad.addColorStop(1, '#0a5');
+      ctx.fillStyle = topGrad;
+      ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.gapY);
+      ctx.fillRect(pipe.x - 5, pipe.gapY - 20, this.pipeWidth + 10, 20);
+
+      // 下管道
+      ctx.fillRect(pipe.x, pipe.gapY + this.gapSize, this.pipeWidth, this.H - pipe.gapY - this.gapSize);
+      ctx.fillRect(pipe.x - 5, pipe.gapY + this.gapSize, this.pipeWidth + 10, 20);
+
+      // 发光边缘
+      ctx.strokeStyle = '#0f0';
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#0f0';
+      ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.gapY);
+      ctx.strokeRect(pipe.x, pipe.gapY + this.gapSize, this.pipeWidth, this.H - pipe.gapY - this.gapSize);
+    }
+
+    // 小鸟
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#ffd700';
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(this.bird.x, this.bird.y, this.bird.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 小鸟眼睛
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(this.bird.x + 5, this.bird.y - 3, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(this.bird.x + 7, this.bird.y - 3, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 小鸟嘴
+    ctx.fillStyle = '#f44';
+    ctx.beginPath();
+    ctx.moveTo(this.bird.x + this.bird.radius, this.bird.y);
+    ctx.lineTo(this.bird.x + this.bird.radius + 10, this.bird.y + 3);
+    ctx.lineTo(this.bird.x + this.bird.radius, this.bird.y + 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // 翅膀（根据速度调整角度）
+    ctx.fillStyle = '#e5c100';
+    ctx.save();
+    ctx.translate(this.bird.x - 5, this.bird.y);
+    ctx.rotate(this.bird.vy * 0.05);
+    ctx.fillRect(-10, -3, 10, 8);
+    ctx.restore();
+
+    ctx.shadowBlur = 0;
+  }
+}
+
+const game = new FlappyGame();
+
+$('start-btn').onclick = () => game.start();
+$('restart-btn').onclick = () => { game.stop(); game.start(); };
+$('stop-btn').onclick = () => { game.stop(); $('overlay').classList.remove('hidden'); $('overlay-title').textContent = 'PAUSED'; };
+
+game.render();
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Scales
+BiObjectiveTSP:
+  small:
+    problem:       {n_cities: 20}
+    decomposition: {decomposition_size: 10, overlap: 4}
+  medium:
+    problem:       {n_cities: 50}
+    decomposition: {decomposition_size: 25, overlap: 11}
+  large:
+    problem:       {n_cities: 100}
+    decomposition: {decomposition_size: 35, overlap: 15}
+
+MultiObjectiveKnapsack:
+  large:
+    problem:       {n_items: 200, n_objectives: 2, capacity: 25.0}
+    decomposition: {decomposition_size: 35, overlap: 15} # 18
+
+TriObjectiveTSP:
+  large:
+    problem:       {n_cities: 100}
+    decomposition: {decomposition_size: 35, overlap: 15} # 18 boosts performance as well within same time
+
+BiObjectiveCVRP:
+  medium:
+    problem:       {n_customers: 50, n_vehicles: 15} 
+    decomposition: {decomposition_size: 25, overlap: 11}

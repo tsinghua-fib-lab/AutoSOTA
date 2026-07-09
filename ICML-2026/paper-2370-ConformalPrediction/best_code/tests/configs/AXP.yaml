@@ -1,0 +1,38 @@
+real: True
+quantiles_given: False
+multiple_series: False
+T_burnin: 100
+alpha: 0.05
+seasonal_period: 5
+score_function_name: "absolute-residual"
+sequences:
+  0:
+    dataset: "AXP-stock"
+    fit_every: 1
+    log: True
+    model_names:
+      - "prophet"
+    overwrite: False
+methods:
+  SFOGD:
+    lrs:
+      - 0.01
+      - 0.25
+      - 0.1
+      - 1
+      - 10
+      - 25
+      - 100
+  KT:
+    lrs:
+      - None
+  UP:
+    lrs:
+      - None
+    finite_sample_correction: 0.01
+    gamma_aci: 0.0
+    decay: 1.0
+    warmup_init: True
+  DtACI:
+    lrs:
+      - None

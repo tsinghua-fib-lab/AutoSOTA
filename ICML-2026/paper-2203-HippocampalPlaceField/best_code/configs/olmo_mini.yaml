@@ -1,0 +1,24 @@
+
+run_name: "olmo_mini" # This will be part of your filename
+
+model:
+  d_model: 128
+  n_layers: 4
+  n_heads: 4
+  max_sequence_length: 256
+  vocab_size: 50257
+  init_device: "cpu"
+  rope: true
+
+optimizer:
+  name: adamw
+  learning_rate: 1.0e-4
+
+scheduler:
+  name: cosine_with_warmup
+  t_warmup: 100
+
+global_train_batch_size: 8
+device_train_microbatch_size: 4
+distributed_strategy: null
+precision: null

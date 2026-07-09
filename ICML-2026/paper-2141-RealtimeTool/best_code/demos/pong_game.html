@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimpleTool Pong - Real-time AI Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,#0a0a0a,#1a1a2e);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;padding:20px}
+h1{font-size:2rem;margin-bottom:5px;background:linear-gradient(90deg,#00d4ff,#7b2cbf);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#666;font-size:.85rem;margin-bottom:20px}
+.game-wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+#canvas{background:#000;border-radius:8px;box-shadow:0 0 60px rgba(0,212,255,.3);border:2px solid #333}
+.panel{background:rgba(255,255,255,.03);border-radius:12px;padding:16px;width:320px;border:1px solid #222}
+.panel h3{font-size:.85rem;color:#00d4ff;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.score-board{display:flex;justify-content:space-around;margin-bottom:20px;background:#000;border-radius:8px;padding:15px}
+.score-item{text-align:center}
+.score-label{font-size:.7rem;color:#666;margin-bottom:5px}
+.score-value{font-size:2.5rem;font-weight:bold}
+.ai-score{color:#00d4ff}
+.human-score{color:#ff6b6b}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:15px}
+.stat{background:#000;padding:12px;border-radius:6px;text-align:center}
+.stat-val{font-size:1.3rem;font-weight:bold;color:#0f0}
+.stat-label{font-size:.65rem;color:#555;margin-top:2px}
+.info-box{font-family:Consolas,monospace;font-size:.7rem;background:#000;padding:10px;border-radius:6px;max-height:100px;overflow-y:auto;margin-bottom:12px;border:1px solid #222;color:#0f0;word-break:break-all}
+.controls{margin-top:15px;display:flex;gap:10px}
+.btn{flex:1;padding:12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-start{background:linear-gradient(90deg,#00d4ff,#7b2cbf);color:#fff}
+.btn-reset{background:#222;color:#888;border:1px solid #444}
+.btn:hover{transform:translateY(-2px)}
+.status{text-align:center;padding:8px;border-radius:4px;font-size:.8rem;margin-bottom:10px}
+.status.ok{background:rgba(0,255,0,.1);color:#0f0}
+.status.err{background:rgba(255,0,0,.1);color:#f44}
+.status.wait{background:rgba(255,255,0,.1);color:#ff0}
+.server-input{display:flex;gap:8px;margin-bottom:15px}
+.server-input input{flex:1;padding:8px;background:#111;border:1px solid #333;color:#fff;border-radius:4px;font-size:.75rem}
+.legend{font-size:.7rem;color:#444;text-align:center;margin-top:10px}
+.decision{background:#111;padding:8px;border-radius:4px;margin-bottom:10px;font-size:.8rem;border-left:3px solid #00d4ff}
+</style>
+</head>
+<body>
+<h1>🏓 SimpleTool Pong</h1>
+<p class="subtitle">Real-time AI vs Human • Multi-Head Parallel Decoding</p>
+<div class="game-wrap">
+  <div>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <p class="legend">⬆⬇ Arrow Keys or W/S to move your paddle (right side)</p>
+  </div>
+  <div class="panel">
+    <div class="score-board">
+      <div class="score-item"><div class="score-label">🤖 SimpleTool AI</div><div class="score-value ai-score" id="ai-score">0</div></div>
+      <div class="score-item"><div class="score-label">👤 Human</div><div class="score-value human-score" id="human-score">0</div></div>
+    </div>
+    <div class="server-input">
+      <input id="server-url" value="http://localhost:8899" placeholder="SimpleTool Server URL">
+      <button class="btn btn-reset" onclick="checkServer()" style="flex:0;padding:8px 12px">Test</button>
+    </div>
+    <div class="status wait" id="status">⏳ Click START to begin</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="latency">--</div><div class="stat-label">Latency (ms)</div></div>
+      <div class="stat"><div class="stat-val" id="fps">60</div><div class="stat-label">Game FPS</div></div>
+      <div class="stat"><div class="stat-val" id="calls">0</div><div class="stat-label">API Calls</div></div>
+      <div class="stat"><div class="stat-val" id="avg-lat">--</div><div class="stat-label">Avg Latency</div></div>
+    </div>
+    <h3>🎯 AI Decision</h3>
+    <div class="decision" id="decision-box">Waiting...</div>
+    <h3>📡 Environment</h3>
+    <div class="info-box" id="env-box">Waiting...</div>
+    <h3>📜 History (last 6)</h3>
+    <div class="info-box" id="hist-box">[]</div>
+    <h3>📤 Raw Response</h3>
+    <div class="info-box" id="heads-box" style="max-height:120px">Waiting...</div>
+    <div class="controls">
+      <button class="btn btn-start" id="start-btn">▶ START</button>
+      <button class="btn btn-reset" id="reset-btn">↺ RESET</button>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $('canvas'), ctx = canvas.getContext('2d');
+const W = 600, H = 400;
+const log = (msg, type='info') => console.log(`[Pong][${type}] ${msg}`);
+
+let running = false, aiScore = 0, humanScore = 0;
+let ball = {x: W/2, y: H/2, vx: 5, vy: 3, r: 8};
+let aiPaddle = {x: 20, y: H/2, w: 10, h: 70, speed: 6};
+let humanPaddle = {x: W-30, y: H/2, w: 10, h: 70, speed: 8};
+let keys = {up: false, down: false};
+let history = [], apiCalls = 0, totalLatency = 0, latencies = [];
+let lastAiMove = 'stay', aiPending = false, aiInterval = null;
+
+const TOOLS = [{
+  type: "function",
+  function: {
+    name: "move",
+    description: "Move paddle vertically to intercept ball",
+    parameters: {
+      type: "object",
+      properties: {
+        direction: {type: "string", enum: ["up", "down", "stay"], description: "up=decrease Y, down=increase Y, stay=hold position"}
+      },
+      required: ["direction"]
+    }
+  }
+}];
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = false;
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
+});
+
+function buildEnv() {
+  const ballY = Math.round(ball.y), paddleY = Math.round(aiPaddle.y);
+  const diff = ballY - paddleY;
+  return [
+    `ball_y=${ballY}`,
+    `paddle_y=${paddleY}`,
+    `diff=${diff}`,
+    `ball_moving_${ball.vx < 0 ? 'towards' : 'away'}`,
+    `ball_vy=${ball.vy > 0 ? 'down' : 'up'}`
+  ];
+}
+
+function buildQuery() {
+  const ballY = Math.round(ball.y), paddleY = Math.round(aiPaddle.y);
+  const diff = ballY - paddleY;
+  const approaching = ball.vx < 0;
+  let instruction;
+  if (!approaching) {
+    instruction = 'Ball moving away. Stay or prepare.';
+  } else if (diff > 20) {
+    instruction = `Ball is ${diff}px BELOW paddle. Move DOWN.`;
+  } else if (diff < -20) {
+    instruction = `Ball is ${-diff}px ABOVE paddle. Move UP.`;
+  } else {
+    instruction = 'Ball aligned. STAY.';
+  }
+  return `Pong AI. ${instruction} Choose: up/down/stay`;
+}
+
+function updateUI() {
+  $('env-box').textContent = buildEnv().join(' | ');
+  $('hist-box').textContent = `[${history.slice(-6).join(', ')}]`;
+}
+
+async function checkServer() {
+  const url = $('server-url').value.replace(/\/$/, '');
+  try {
+    const r = await fetch(`${url}/health`, {signal: AbortSignal.timeout(3000)});
+    const d = await r.json();
+    if (d.loaded || d.status === 'ok') {
+      $('status').className = 'status ok';
+      $('status').textContent = '🟢 Connected';
+      log('Server connected', 'success');
+      return true;
+    }
+  } catch(e) { log(`Connection failed: ${e.message}`, 'error'); }
+  $('status').className = 'status err';
+  $('status').textContent = '🔴 Connection failed';
+  return false;
+}
+
+async function callAI() {
+  if (aiPending || !running) return;
+  aiPending = true;
+  const url = $('server-url').value.replace(/\/$/, '');
+  const env = buildEnv(), query = buildQuery();
+  log(`Query: ${query}`);
+  try {
+    const t0 = performance.now();
+    const r = await fetch(`${url}/v1/function_call`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        messages: [{role: 'user', content: query}],
+        tools: TOOLS,
+        environment: env,
+        history: history.slice(-6)
+      })
+    });
+    const d = await r.json();
+    const lat = performance.now() - t0;
+    apiCalls++; totalLatency += lat; latencies.push(lat);
+    if (latencies.length > 50) latencies.shift();
+    $('latency').textContent = lat.toFixed(0);
+    $('calls').textContent = apiCalls;
+    $('avg-lat').textContent = (totalLatency/apiCalls).toFixed(0);
+    $('status').className = 'status ok';
+    $('status').textContent = '🟢 Active';
+    
+    // Display raw response
+    $('heads-box').innerHTML = `function: ${d.function || '-'}<br>args: ${JSON.stringify(d.args)}<br>heads: ${JSON.stringify(d.heads)}`;
+    
+    // Safe extraction with type coercion
+    let direction = 'stay';
+    if (d.success && d.args && d.args.direction !== undefined) {
+      direction = String(d.args.direction).toLowerCase().trim();
+    } else if (d.heads && d.heads.arg1) {
+      direction = String(d.heads.arg1).toLowerCase().trim();
+    }
+    if (!['up', 'down', 'stay'].includes(direction)) {
+      log(`Invalid direction "${direction}", fallback to stay`, 'warn');
+      direction = 'stay';
+    }
+    lastAiMove = direction;
+    history.push(direction);
+    if (history.length > 20) history.shift();
+    const emoji = direction === 'up' ? '⬆️' : direction === 'down' ? '⬇️' : '⏸️';
+    $('decision-box').innerHTML = `${emoji} <strong>${direction.toUpperCase()}</strong> (${lat.toFixed(0)}ms)`;
+    log(`Decision: ${direction} in ${lat.toFixed(0)}ms`, 'success');
+  } catch(e) {
+    log(`API Error: ${e.message}`, 'error');
+    $('status').className = 'status err';
+    $('status').textContent = '🔴 Error - Fallback';
+    // Fallback
+    if (ball.vx < 0) {
+      const diff = ball.y - aiPaddle.y;
+      lastAiMove = diff > 15 ? 'down' : diff < -15 ? 'up' : 'stay';
+    } else lastAiMove = 'stay';
+    history.push(`fb:${lastAiMove}`);
+  }
+  aiPending = false;
+}
+
+function applyAI() {
+  if (lastAiMove === 'up') aiPaddle.y -= aiPaddle.speed;
+  else if (lastAiMove === 'down') aiPaddle.y += aiPaddle.speed;
+  aiPaddle.y = Math.max(aiPaddle.h/2, Math.min(H - aiPaddle.h/2, aiPaddle.y));
+}
+
+function update() {
+  if (keys.up) humanPaddle.y -= humanPaddle.speed;
+  if (keys.down) humanPaddle.y += humanPaddle.speed;
+  humanPaddle.y = Math.max(humanPaddle.h/2, Math.min(H - humanPaddle.h/2, humanPaddle.y));
+  applyAI();
+  ball.x += ball.vx; ball.y += ball.vy;
+  if (ball.y - ball.r < 0 || ball.y + ball.r > H) {
+    ball.vy *= -1;
+    ball.y = ball.y < ball.r ? ball.r : H - ball.r;
+  }
+  if (ball.x - ball.r < aiPaddle.x + aiPaddle.w && ball.y > aiPaddle.y - aiPaddle.h/2 && ball.y < aiPaddle.y + aiPaddle.h/2 && ball.vx < 0) {
+    ball.vx = Math.abs(ball.vx) * 1.05;
+    ball.vy += (ball.y - aiPaddle.y) * 0.1;
+    ball.x = aiPaddle.x + aiPaddle.w + ball.r;
+  }
+  if (ball.x + ball.r > humanPaddle.x && ball.y > humanPaddle.y - humanPaddle.h/2 && ball.y < humanPaddle.y + humanPaddle.h/2 && ball.vx > 0) {
+    ball.vx = -Math.abs(ball.vx) * 1.05;
+    ball.vy += (ball.y - humanPaddle.y) * 0.1;
+    ball.x = humanPaddle.x - ball.r;
+  }
+  ball.vx = Math.max(-12, Math.min(12, ball.vx));
+  ball.vy = Math.max(-8, Math.min(8, ball.vy));
+  if (ball.x < 0) { humanScore++; $('human-score').textContent = humanScore; resetBall(1); }
+  if (ball.x > W) { aiScore++; $('ai-score').textContent = aiScore; resetBall(-1); }
+  updateUI();
+}
+
+function resetBall(dir) {
+  ball.x = W/2; ball.y = H/2;
+  ball.vx = 5 * dir;
+  ball.vy = (Math.random() - 0.5) * 6;
+}
+
+function draw() {
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  ctx.setLineDash([10, 10]); ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#00d4ff'; ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 20;
+  ctx.fillRect(aiPaddle.x, aiPaddle.y - aiPaddle.h/2, aiPaddle.w, aiPaddle.h);
+  ctx.fillStyle = '#ff6b6b'; ctx.shadowColor = '#ff6b6b';
+  ctx.fillRect(humanPaddle.x, humanPaddle.y - humanPaddle.h/2, humanPaddle.w, humanPaddle.h);
+  ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 15;
+  ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.font = '14px monospace'; ctx.fillStyle = '#00d4ff'; ctx.fillText('AI', 50, 30);
+  ctx.fillStyle = '#ff6b6b'; ctx.fillText('YOU', W - 70, 30);
+  const arrow = lastAiMove === 'up' ? '↑' : lastAiMove === 'down' ? '↓' : '•';
+  ctx.fillStyle = '#00d4ff'; ctx.font = '12px monospace'; ctx.fillText(arrow, aiPaddle.x + 25, aiPaddle.y + 4);
+}
+
+function gameLoop() {
+  if (!running) return;
+  update(); draw();
+  requestAnimationFrame(gameLoop);
+}
+
+$('start-btn').onclick = async () => {
+  if (!running) {
+    await checkServer();
+    running = true;
+    $('start-btn').textContent = '⏸ PAUSE';
+    log('Game started');
+    gameLoop();
+    aiInterval = setInterval(callAI, 100);
+  } else {
+    running = false;
+    $('start-btn').textContent = '▶ START';
+    clearInterval(aiInterval);
+    log('Game paused');
+  }
+};
+
+$('reset-btn').onclick = () => {
+  running = false; clearInterval(aiInterval);
+  aiScore = humanScore = apiCalls = totalLatency = 0;
+  history = []; latencies = []; lastAiMove = 'stay';
+  $('ai-score').textContent = '0'; $('human-score').textContent = '0';
+  $('latency').textContent = '--'; $('calls').textContent = '0'; $('avg-lat').textContent = '--';
+  $('decision-box').textContent = 'Waiting...'; $('start-btn').textContent = '▶ START';
+  resetBall(Math.random() > 0.5 ? 1 : -1);
+  aiPaddle.y = humanPaddle.y = H/2;
+  draw(); log('Game reset');
+};
+
+draw(); checkServer();
+</script>
+</body>
+</html>

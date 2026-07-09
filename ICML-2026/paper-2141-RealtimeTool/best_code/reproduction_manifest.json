@@ -1,0 +1,56 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 2141,
+    "repo_url": "https://github.com/HaxxorCialtion/SimpleTool",
+    "repo_commit": "0e9f8c1886a3515f01d00473b5401ef89af459a1",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_2141",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-2141:reproduced",
+    "eval_command": "python3 reproduce.py --model /models/RT-Qwen2.5-0.5B",
+    "baseline_metrics": {
+      "Overall Accuracy": 87.2,
+      "Function Accuracy": 100.0
+    },
+    "primary_metric": "Overall Accuracy",
+    "metric_direction": "higher",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-2/logs/reproduction/paper-2141.log",
+    "status": "success",
+    "created_at": "2026-07-08T04:25:25Z",
+    "notes": "Reproduction successful on BFCL v4 Non-Live (600 samples: 200 Multiple + 400 Simple Python). Function Accuracy 100.0% (paper 99.8%), Overall Accuracy 87.2% (paper 79.8%). Both metrics exceed lower bounds. The higher Overall Accuracy is attributed to BFCL v4 data (closest available; paper used v3) and possibly different evaluation checker leniency. Model: RT-Qwen2.5-0.5B FP16 (LoRA-merged Qwen2.5-0.5B with special tokens for multi-head parallel decoding). AWQ model also tested: 99.2% Function Accuracy, 77.2% Overall Accuracy (slightly below lower bound due to quantization). V1 prompt format required for 0.5B model (explicit multi-head instructions).",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "stdout: Overall Accuracy (%), Function Accuracy (%); also saved to --output JSON file with per-sample results",
+    "known_levers": "LoRA rank (higher = more capacity), training data composition (xLAM + synthetic augmentation), number of parallel argument heads (6 covers 95.2% of cases), prompt format (v1 vs v2), temperature (default 0.0), system prompt engineering, parameter ordering in tool definitions",
+    "setup_notes": "Container: autosota_repro_paper_2141 from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Python 3.10, pip-installed vLLM 0.12.0 (downgraded from 0.24.0 due to CUDA/flashinfer compatibility), flashinfer-cubin downgraded to 0.5.3 to match flashinfer-python. CUDA_HOME set to /opt/conda/lib/python3.10/site-packages/nvidia/cu13 (pip-installed CUDA toolkit). gcc/g++ installed (build-essential). Model downloaded from Cialtion/SimpleTool on HuggingFace to /models/RT-Qwen2.5-0.5B. BFCL v4 evaluation data cloned from https://github.com/ShishirPatil/gorilla to /repo/gorilla. AWQ model (RT-Qwen2.5-0.5B-AWQ) also downloaded but config required patching (removed scale_dtype/zp_dtype from quantization_config) for vLLM 0.12.0 compatibility. All downloads used https://hf-mirror.com for HuggingFace and https://pypi.tuna.tsinghua.edu.cn for pip.",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Improve Overall Accuracy on BFCL function-calling benchmark while maintaining high Function Accuracy. The paper focuses on both accuracy and speed; for SOTA optimization, accuracy is the primary target given that speed depends on quantization and inference infrastructure.",
+      "metrics": [
+        {
+          "name": "Overall Accuracy",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 87.2,
+          "regression_tolerance_pct": 2.0,
+          "rationale": "Primary metric: complete correctness of function name AND all arguments. Paper reports 79.8% on BFCL-v3; our baseline is 87.2% on BFCL-v4 with FP16 model."
+        },
+        {
+          "name": "Function Accuracy",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "maintain",
+          "baseline": 100.0,
+          "regression_tolerance_pct": 1.0,
+          "rationale": "Function name selection accuracy. Paper reports 99.8%. Must not regress below 98.3% (lower bound) as getting the wrong function invalidates all arguments."
+        }
+      ],
+      "success_policy": "Prioritize Overall Accuracy improvement. Function Accuracy must remain above 98.3%. If both improve, consider the iteration successful. If Overall Accuracy improves but Function Accuracy drops below 98.3%, the iteration is rejected."
+    },
+    "metric_upper_bound": 79.95,
+    "metric_lower_bound": 78.3
+  }
+}

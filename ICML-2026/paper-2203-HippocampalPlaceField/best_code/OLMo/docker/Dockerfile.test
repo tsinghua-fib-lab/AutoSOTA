@@ -1,0 +1,16 @@
+# Defines a CUDA-enabled Docker image suitable for running GPU tests on Beaker
+# via the GitHub Action 'beaker-run-action'.
+# The image needs to exist on Beaker for the tests to work.
+#
+# To build and push the image to Beaker, run 'make test-image'.
+
+FROM olmo-torch2-base
+
+COPY scripts/test_entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && \
+    pip install packaging ninja && \
+    export FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE && \
+    pip install flash-attn==2.5.9.post1 --no-build-isolation
+WORKDIR /testing
+
+ENTRYPOINT ["/entrypoint.sh"]
