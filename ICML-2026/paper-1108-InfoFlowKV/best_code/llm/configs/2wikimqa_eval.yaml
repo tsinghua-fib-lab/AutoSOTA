@@ -1,0 +1,59 @@
+# Models - list of models to evaluate (will run each model on this dataset)
+models:
+  - /path/to/glm-4-9b-chat
+  # - /path/to/Qwen3-14B"
+  # - /path/to/Meta-Llama-3.1-8B-Instruct"
+# Dataset
+dataset: 2wikimqa
+
+# Device (GPU selection)
+device: "cuda:0"  # Options: "cuda:0", "cuda:1", "cpu", "auto"
+
+# Global parameters
+top_p: 0.15          # Recompute ratio for guided strategies
+lego_k: 4            # K value for lego strategy
+batch_size: [1,4,8]  # Batch sizes to test (single value or list for comparison)
+default_split: true  # Split by passage markers (true) or fixed-length chunks (false)
+chunk_size: 1024     # Token length per chunk when default_split=false (512/1024/2048)
+layer_indices: null  # Layer indices for scoring
+                     # null = use default (layer_indices: [22, 23, 24, 25])
+                     # Examples:
+                     #   [22, 23, 24, 25]  - use layers 22-25
+                     #   [-4, -3, -2, -1]  - use last 4 layers
+                     #   [0, 1, 2]         - use first 3 layers
+
+# Generation
+max_new_tokens: 32
+
+# Optional: limit samples for testing
+num_samples: 200
+
+# Strategy configurations
+strategies:
+  - name: baseline
+
+  - name: no_recompute
+
+  - name: guided_recompute
+    method: norm
+
+  - name: guided_recompute
+    method: vatp
+
+  - name: guided_recompute
+    method: entropy
+
+  - name: double_guided
+    method: norm
+
+  - name: double_guided
+    method: vatp
+
+  - name: double_guided
+    method: entropy
+
+  - name: cacheblend
+
+  - name: lego
+
+  - name: lego2

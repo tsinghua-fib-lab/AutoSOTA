@@ -1,0 +1,44 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 2301,
+    "repo_url": "https://github.com/cyoonjun/srr",
+    "repo_commit": "46b245d2176f6f68df031aaed2069220e39540ba",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_2301",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-2301:reproduced",
+    "eval_command": "python -u ptq_pipeline.py experiments/configs/srr_3bit_rank32_repro.yaml --model-name \"/models/TinyLlama-1.1B\" --perplexity-eval-batch-size 1 --max-position-embeddings 2048 --perplexity-max-seq-length 2048 --lr-scaling-mode \"cholesky\" --num-calibration-samples 256 --srr-seed 42 --disable-lm-eval -ow",
+    "baseline_metrics": {"perplexity": 19.643},
+    "primary_metric": "perplexity",
+    "metric_direction": "lower",
+    "gpu_devices": "0,1",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-2301.log",
+    "status": "success",
+    "created_at": "2026-07-08T18:40:51Z",
+    "notes": "Reproduced SRR (Preserve-Then-Quantize) with QERA-exact (cholesky) scaling on TinyLlama-1.1B, 3-bit MXINT quantization, rank=32, block_size=32. Mean perplexity 19.64 over 3 seeds (42, 1234, 4321), close to paper 19.62. Reproduce CI bounds [19.60, 19.62]; mean 19.64 is slightly above due to PyTorch 2.1.0 vs 2.3.0 numerical differences. Calibration: 256 samples from SlimPajama-6B (local parquet). Evaluation: lm_eval v0.4.7 WikiText2 word_perplexity. All 3 seeds produced valid results well below QERA-exact baseline (20.10).",
+    "eval_timeout_minutes": 45,
+    "eval_output_format": "Parse stdout line matching 'Perplexity after approximation: <float>' or read perplexity_results.yaml. Mean over 3 seeds (42, 1234, 4321) in checkpoints/ptq/srr/cholesky/_models_TinyLlama-1.1B/slim_pajama_6b_256/mxint_3/32_1/seed_*/perplexity_results.yaml.",
+    "known_levers": "1) Rank budget (rank in config): higher rank improves quality. 2) SRR seed (srr-seed): affects quantization error initialization. 3) Bit width (width in quant_config): 2/3/4 bit MXINT. 4) Block size (block_size): smaller blocks give finer quantization. 5) LR scaling mode (lr-scaling-mode): cholesky (QERA-exact), diag (QERA-approx), identity (ZeroQuant-v2), lqer, rxx. 6) Calibration samples (num-calibration-samples): more samples improve Hessian. 7) SRR iterations (iter): more iterations refine rank split. 8) Randomized SVD (apply-rand-svd): faster SVD. 9) Calibration set (calibration_set): different data distributions. 10) Model scale: TinyLlama-1.1B to larger models.",
+    "setup_notes": "Base image docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Installed transformers==4.44.2 accelerate==0.32.0 lm_eval==0.4.7 datasets==5.0.0 bitsandbytes==0.43.2 peft==0.19.1 sentencepiece evaluate wandb matplotlib nvitop pandas pyarrow. Model: TinyLlama-1.1B at /models/TinyLlama-1.1B/. Calibration: SlimPajama-6B parquet files in /datasets/slimpajama-6b/data/. Code patched: src/qera/datasets/slim_pajama.py for local parquet loading. Config: experiments/configs/srr_3bit_rank32_repro.yaml with global_dir=/autosota_cache/srr_global. Hessian cache (1.95GB) at /autosota_cache/srr_global/. Two A100-80GB GPUs.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize WikiText2 perplexity of TinyLlama-1.1B under 3-bit MXINT quantization with SRR rank-32 reconstruction.",
+      "metrics": [
+        {
+          "name": "perplexity",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 19.643,
+          "regression_tolerance_pct": 3.0,
+          "rationale": "Primary paper metric: perplexity on WikiText2 after SRR quantization. Paper achieved 19.62; reproduction achieved 19.64. QERA-exact baseline without SRR is 20.10."
+        }
+      ],
+      "success_policy": "Improve (lower) perplexity within the SOTA iteration budget. Accept up to 3% regression (0.59 ppl) for seed variance. Beyond 3% regression is detrimental."
+    },
+    "metric_upper_bound": 20.10,
+    "metric_lower_bound": null
+  }
+}

@@ -1,0 +1,110 @@
+# PROMPT START
+
+**Role:** You are an expert Computational Geometer and Mathematician.
+**Objective:** Derive a **simplified, robust condition $P(b, c, d, s, e)$** that guarantees the existence of a specific Steiner Tree.
+**Constraint:** The condition you find must be "Axis-Parallel Segment Closed" (APSC).
+**Tools:** You have access to a **Mathematica** execution environment and a **Python** execution environment.
+
+---
+
+### PHASE 1: Geometric Definitions
+Construct the following points in the 2D plane based on these vector instructions.
+*   **A**: $(0,0)$
+*   **X**: From A, move length $1$ at angle $0^\circ$.
+*   **Y**: From X, move length $s$ at angle $-60^\circ$.
+*   **B**: From X, move length $b$ at angle $60^\circ$.
+*   **D**: From Y, move length $d$ at angle $0^\circ$.
+*   **P**: From Y, move length $c$ at angle $-120^\circ$.
+*   **Q**: From P, move length $d$ at angle $-60^\circ$.
+*   **R**: From P, move length $e$ at angle $180^\circ$.
+
+The domain of the variables is b>=0 && c>=0 && d>=0 && s>=0 && e>=0.
+
+*Note: Although Points X, Y, P are used for construction, your final task focuses on the Steiner Tree for points **{A}, {B}, {C}, {D}**.*
+
+---
+
+### PHASE 2: The Existence Logic (Type {A}{B}-{C}{D})
+You are investigating the existence of an **({A}{B})-({C}{D})** type Steiner Tree.
+For this specific type, define the auxiliary points $U$ and $V$ as follows:
+1.  **Point U**: Rotate point **{B}** 60° counter-clockwise around **{A}**.
+2.  **Point V**: Rotate point **{D}** 60° counter-clockwise around **{C}**.
+
+**The Exact Existence Conditions ($E_{exact}$) are:**
+1.  **Convexity:** The quadrilateral formed by **{A}, {B}, {C}, {D}** must be convex.
+2.  **Internal Angles:** The angles $\angle U{C}{D}$, $\angle U{D}{C}$, $\angle V{A}{B}$, and $\angle V{B}{A}$ must all be $\le 120^\circ$.
+3.  **Crossing Angle:** Let $\theta$ be the angle between diagonal vectors $\vec{{A}{C}}$ and $\vec{{B}{D}}$. The condition is $\theta \le 120^\circ$.
+    *   *Relaxation Hint:* You may relax this third condition to $\theta \le 90^\circ$ (which is $\vec{{A}{C}} \cdot \vec{{B}{D}} \ge 0$) if it helps simplify the math.
+
+The condition for "convex quadrilateral" can be formulated as follows: For any three adjacent points x, y, z (in clockwise order), the cross product of vectors xy and yz is less than or equal to zero.
+
+The condition that the angle between vectors u and v is less than or equal to 120 degrees can be expressed using the cosine rule or the dot product of vectors, namely: vectors u and v form an angle less than or equal to 120 degrees if and only if 2 * dot(u, v) + (|u|*|v|) >= 0. You may relax it to dot(u, v) >= 0 if possible.
+
+---
+
+### PHASE 3: Deriving the Relaxed Condition P
+The exact conditions above are too complex. You must find a **sufficient condition** $P(b,c,d,s,e)$ such that $P \implies E_{exact}$.
+
+**Requirements for Condition P (APSC Property):**
+
+**Definition:** A condition $P$ satisfies APSC if, for any line parallel to one of the coordinate axes, the set of points **within the domain (variables $\ge 0$)** that satisfy the condition forms a **single connected interval**.
+*   *Note:* You only care about $b,c,d,s,e \ge 0$. Ignore behavior for negative numbers.
+
+To satisfy "Axis-Parallel Segment Closure," your condition $P$ must be the conjunction of inequalities from the following **allowed categories only**:
+1.  **Linear or Multilinear:** Inequalities that are linear in each variable separately (e.g., $b \cdot (c + d + s) > 10$).
+2.  **Quadratic:** Inequalities in the form $Ax^2 + Bx + C \ge 0$ (or $\le 0$).
+    *   If the coefficient of the squared term makes the inequality concave (e.g., $-x^2 \ge -10$), it is automatically valid.
+    *   If the coefficient makes it convex (e.g., $x^2 \ge 10$), you **must verify the monotonicity** of the expression with respect to that variable in the relevant domain.
+    *   **Tip:** You can add **auxiliary inequalities** to force the condition into a monotonic region to satisfy APSC. For example, if you have $x^2 + Bx + C \ge 0$, you can add the derivative constraint $2x + B \ge 0$ to ensure you are on the increasing branch.
+3.  **Functional Boundaries:** Inequalities in the form $e > f(b,c,s,d)$ or $e < f(b,c,s,d)$.
+    *   You **must verify the monotonicity** of $f$ to ensure segment closure (i.e., ensure that if two endpoints of a segment satisfy the condition, all points in between do as well).
+
+**Coverage Requirement:**
+Your condition $P$ must be general (not hardcoded numbers), but it must strictly cover the following "Test Box":
+{Bottleneck}
+
+**Important:** You MUST verify the APSC Property in the **ENTIRE** domain, not in the Test Box.
+
+---
+
+### PHASE 4: Verification Protocol
+You must verify your work using Mathematica logic.
+
+**Step A:** Write Mathematica code to compute the exact expressions for the 6 existence inequalities (Convexity + Angles).
+**Step B:** Define your relaxed condition `condP`.
+**Step C:** Verify Implication. You must run a command equivalent to this logic:
+`Reduce[ !<ExactCondition_i> && condP && b>=0 && c>=0 && d>=0 && s>=0 && e>=0, {vars} ]`
+*   If this returns `False`, your condition is valid.
+*   If this returns `True` or an expression, your condition is invalid.
+
+**Tips:** You should reformulate `2 * dot(u, v) + (|u|*|v|) >= 0` into `dot(u, v) >= 0 || 4 * dot(u, v)^2 <= |u|^2 * |v|^2` for faster speed when verifying.
+
+*Constraint:* Do not put all checks in one `Reduce` call. It will time out. Check each inequality individually against $P$.
+
+**Important:** You MUST verify the implication in the **ENTIRE** domain, not in the Test Box.
+
+---
+
+### PHASE 5: Output Requirements
+1.  **Detailed Derivation:** Show how you calculated coordinates and how you derived the relaxed inequalities.
+2.  **APSC Proof:** Provide a logical argument explaining why your condition $P$ satisfies the APSC property, specifically addressing the Linearity/Monotonicity requirements for each part of your condition.
+3.  **Mathematica Output:** Paste the code and the output confirming the `False` result for the implication checks.
+4.  **C++ Implementation:**
+    *   Provide a C++ code block containing these exact functions:
+```
+// Returns true if your condition $P$ is met.
+bool steiner_cond(double b, double c, double d, double s, double e) {
+    // Your condition here
+}
+
+// Returns the total length of the ({A}{B}-{C}{D}) type Steiner tree, which is exactly |UV|, the distance between U and V.
+double steiner_length(double b, double c, double d, double s, double e) {
+    // Return the distance between U and V
+}
+```
+
+**Important:** Do NOT use the Test Box values inside the C++ code. The code must be a general algebraic formula.
+
+**If you fail to find a valid condition after rigorous attempts, return `false` and `0.0`.**
+
+--- END OF PROMPT ---

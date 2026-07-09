@@ -1,0 +1,67 @@
+namespace __f6_detail {
+bool steiner_cond(double b, double c, double d, double s, double e) {
+    // Nonnegativity
+    if (b < 0 || c < 0 || d < 0 || s < 0 || e < 0) return false;
+    // Simple linear constraints ensuring the U-angle constraints and helping the V-angles
+    if (d < b) return false;
+    if (d < e) return false;
+
+    // Relaxed intersection-angle constraint: dot(Q - B, R - D) >= 0
+    // Derived closed form:
+    // dot3 = (2*c^2 + b*(2*c + d + e) - (d + e)*(d + s) + c*(2*d + e + s)) / 2
+    double dot3 = (2.0*c*c + b*(2.0*c + d + e) - (d + e)*(d + s) + c*(2.0*d + e + s)) / 2.0;
+    if (dot3 < 0) return false;
+
+    return true;
+}
+
+double steiner_length(double b, double c, double d, double s, double e) {
+    // |UV|^2 = (3/4)(s + c + 2d + e)^2 + (b + s/2 + c/2 + d + e/2)^2
+    // Equivalently, |UV| = (1/2) * sqrt( (2b + c + 2d + e + s)^2 + 3*(c + 2d + e + s)^2 )
+    double t1 = (2.0*b + c + 2.0*d + e + s);
+    double t2 = (c + 2.0*d + e + s);
+    double val = 0.5 * std::sqrt(t1*t1 + 3.0*t2*t2);
+    return val;
+}
+
+}
+template<> struct F<1528> {
+constexpr static int split_id = 25;
+constexpr static int lemma_id = 6;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b + b + 1);
+ld L_s_plus;
+if(!__f6_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f6_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<1529> {
+constexpr static int split_id = 26;
+constexpr static int lemma_id = 6;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(d*d + d*s + d*u + 2*d + s*s - s*u + s + u*u + u + 1);
+ld L_s_plus;
+if(!__f6_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f6_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<1530> {
+constexpr static int split_id = 27;
+constexpr static int lemma_id = 6;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(d*d + d*s + d*v + 2*d + s*s + 2*s*v + s + v*v + v + 1);
+ld L_s_plus;
+if(!__f6_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f6_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+const int M6 = 1531;

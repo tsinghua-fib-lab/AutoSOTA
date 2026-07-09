@@ -1,0 +1,77 @@
+dpo_script_args:  # trl.DpoScriptArguments
+  sanity_check: False  # If true, will train on only 1K examples and not save the final model.
+
+marge_config:  # marge_trainer.MargeConfig (extends TrainingArguments)
+  # MARGE-specific
+  alpha: 1.0
+  beta: 0.1
+  max_length: 512
+  max_prompt_length: 256
+  generate_during_eval: True
+  input_field_name: "input"
+  target_field_name: "target"
+  input_score_field_name: "score_input"
+  target_score_field_name: "score_target"
+  self_normalize_weights: False
+  reinforce_style: False
+  # TrainingArguments
+  output_dir: ???
+  run_name: ???
+  do_train: True
+  do_eval: True
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 8
+  logging_first_step: True
+  logging_steps: 1
+  warmup_steps: 0
+  bf16: False
+  gradient_accumulation_steps: 16
+  learning_rate: 1e-6
+  num_train_epochs: 2
+  load_best_model_at_end: True
+  eval_strategy: "steps"
+  eval_steps: 0.1
+  save_strategy: "steps"
+  save_steps: 0.2
+  seed: 0
+  remove_unused_columns: False
+  resume_from_checkpoint: True
+  save_total_limit: 1
+  torch_compile: false
+  log_level: "info"
+
+model_config:
+  attn_implementation: "eager"
+  model_name_or_path: s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.7_xthres0.125_maxinfs0.1/
+
+# data
+data_fp: s3://prescient-data-dev/sandbox/chena78/finetune_ehrlich_pythia-2.8b/ft_dense_pairs_ehrlich_c4_k4_l32_n1000_pm0.005_scoreabove-0.7_xthres0.125_maxinfs0.1/dense_neighborhood_pairs_scoreabove-0.8_xthres0.125_maxinfs0.1.jsonl
+pretokenized_train_fp: null  # optional
+pretokenized_eval_fp: null  # optional
+pretokenized: False
+train_size: 0.95
+max_train_size: null
+max_eval_size: 100 # evaluation takes a long time, so we set a max. size on the eval dataset
+# format_type: "edit_pairs"
+
+# generation
+generation_config:
+  max_new_tokens: 256
+  do_sample: False
+  num_return_sequences: 1
+
+# instrumentation
+log_level: "info"
+wandb_host: null
+wandb_mode: "online"
+project_name: "marge"
+exp_name: "marge_pythia-2.8b"
+job_name: null
+__version__: null
+
+# other
+num_generate_batches: null
+threshold_percent_valid: 0.9
+s3_output_dir: "s3://prescient-data-dev/sandbox/chena78/marge_ehrlich_pythia-2.8b/sanity_check"
+test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+test_fn_fp: "s3://prescient-data-dev/sandbox/chena78/ehrlich_datasets_no_dupes/c4_k4_l32_n1000_pm0.005/ehrlich.jsonl"

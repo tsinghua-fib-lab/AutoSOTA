@@ -1,0 +1,65 @@
+# training arguments - SFTConfig or TrainingArguments
+training_args:
+  dataset_text_field: "text"
+  learning_rate: 1e-6
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 8
+  eval_accumulation_steps: 2
+  gradient_accumulation_steps: 32
+  output_dir: null  # provided by pipeline orchestration at runtime
+  logging_steps: 1
+  num_train_epochs: 2
+  max_steps: -1
+  report_to: "wandb"
+  seed: 0
+  do_eval: True
+  eval_strategy: "steps"
+  eval_steps: 0.05
+  load_best_model_at_end: True
+  batch_eval_metrics: True
+  predict_with_generate: True
+  torch_compile: true
+  max_length: 512
+  generation_num_beams: 1
+  save_total_limit: 1
+  save_strategy: "steps"
+  save_steps: 0.1
+  log_level: "info"
+  # remove_unused_columns: False
+
+generation_config:  # use greedy decoding during evaluation
+  max_new_tokens: 256
+  num_beams: 1
+  do_sample: False
+  num_return_sequences: 1
+  max_length: null
+
+model_config:  # trl.ModelConfig
+  model_name_or_path: "EleutherAI/pythia-2.8b"
+  attn_implementation: "eager"
+
+train_from_scratch: False
+
+# data
+data_fp: null  # provided by pipeline orchestration at runtime
+train_size: 0.95
+max_eval_size: 100 # evaluation takes a long time, so we set a max. size on the eval dataset
+seq_length: 512
+format_type: "edit_pairs"
+
+# test function
+test_fn_type: "ehrlich"  # [ehrlich, mt_fuji]
+test_fn_fp: null  # provided by pipeline orchestration at runtime
+
+# instrumentation
+sanity_check: False  # If true, will train on only 1K examples and not save the final model.
+log_level: "info"
+wandb_host: null
+wandb_mode: "online"
+project_name: "finetune_ehrlich"
+exp_name: "finetune_pythia-2.8b"
+job_name: null
+__version__: null
+
+# other
+s3_output_dir: null  # provided by pipeline orchestration at runtime

@@ -1,0 +1,26 @@
+# Model
+model: /path/to/Qwen3-VL-8B-Instruct
+cache_dir: /path/to/models/
+
+# Paths
+dataset_dir: /path/to/dataset_cache
+output_dir: /path/to/output
+
+# Dataset
+dataset: ocrbench
+
+# KV cache recomputation
+strategy: guided_recompute  # no_recompute, lego, cacheblend, guided_recompute
+recompute_ratio: 0.15
+method: entropy
+
+# Generation
+max_new_tokens: 256
+run_baseline: false
+run_recompute: true
+
+# Optional: limit samples for testing
+#num_samples: 200
+
+# Chunk size for parallel prefill
+chunk_k: [0, 2, 4, 6, 8, 16]

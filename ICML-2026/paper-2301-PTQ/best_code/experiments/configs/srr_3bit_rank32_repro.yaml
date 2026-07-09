@@ -1,0 +1,76 @@
+global_dir: "/autosota_cache/srr_global"
+model_name: TinyLlama/TinyLlama_v1.1
+# Note that the dtype for statistic profiling is hard-coded float32,
+# since the SVD of float16 is not supported by pytorch
+quant_dtype: float32 # the precision for computing A, and B. Note that scale is always computed in float64
+eval_dtype: bfloat16 # the precision for evaluation
+device_map: auto-balanced
+num_workers: 8
+output_dir: null
+disable_perplexity_eval: false
+disable_lm_eval: false
+overwrite_output_dir: null
+
+# calibration & perplexity
+LR_dict: null
+Wq_dict: null
+save_params: false
+calibration_set: "slim_pajama_6b"
+num_calibration_samples: 256
+perplexity_eval_batch_size: 4
+perplexity_eval_set: "wikitext2"
+perplexity_max_seq_length: 2048
+# lm-eval-harness
+lm_eval_tasks: ["qera_benchmark_classic", "qera_benchmark_hard"]
+lm_eval_batch_size: 4
+lm_eval_num_fewshot: 0
+max_position_embeddings: null
+
+#LR processor
+disable_lr: false
+lr_processor:
+  # scaling_mode: diag # 'diag', 'rxx', 'identity', 'lqer'
+  scaling_mode_map: null # Used when scaling_mode is 'mixed'
+  rxx_sqrtm_implementation: blocked # 'blocked', 'iterative' 
+  rxx_sqrtm_num_iters: 100 
+  
+quant_config:
+  # llama/mistral/phi3 (partially)
+  'model\.layers\.[0-9]+\.self_attn\.(k|q|v|o)_proj': default-1
+  'model\.layers\.[0-9]+\.mlp\.(gate|down|up)_proj': default-1
+  'model\.layers\.[0-9]+\.self_attn\.(matmul_0|matmul_1)': default-matmul #TODO:
+  # opt
+  'model\.decoder\.layers\.[0-9]+\.self_attn\.(k|q|v|out)_proj': default-1
+  'model\.decoder\.layers\.[0-9]+\.(fc1|fc2)': default-1
+  'model\.decoder\.layers\.[0-9]+\.self_attn\.(bmm_0|bmm_1)': default-matmul
+  # phi3
+  'model\.layers\.[0-9]+\.self_attn\.qkv_proj': default-1
+  'model\.layers\.[0-9]+\.mlp\.gate_up_proj': default-1
+
+  default-1:
+    rank: 96
+    name: qera
+    is_ptq: true
+    hess: false
+    iter: 2
+    x_quantizer:
+      name: bypass
+    w_quantizer:
+      name: mxint
+      width: 3
+      block_size: 4
+      block_axis: -1
+    lr_initializer:
+      name: srr
+      num_mc_samples: 5
+    b_quantizer:
+      name: bypass
+
+  default-matmul:
+    name: flexible
+    x_quantizer:
+      name: bypass
+    w_quantizer:
+      name: bypass
+    lr_initializer:
+      name: zero

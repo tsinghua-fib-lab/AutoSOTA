@@ -1,0 +1,225 @@
+
+	Copyright (c) 2001, 2022 by David M. Warme, Pawel Winter &
+	Martin Zachariasen.  This work is licensed under a Creative
+	Commons Attribution-NonCommercial 4.0 International License.
+
+Basic Installation
+==================
+
+   GeoSteiner comes with a "GNU style" configure script.  For those of
+you who are especially impatient, type the following:
+
+    ./configure
+    make
+
+   The `configure' shell script attempts to guess correct values for
+various system-dependent variables used during compilation.  It uses
+those values to create a `Makefile' in each directory of the package.
+It also creates a `config.h' file containing system-dependent
+definitions.  Finally, it creates a shell script `config.status' that
+you can run in the future to recreate the current configuration, a
+directory `autom4te.cache' that saves the results of its tests to speed
+up reconfiguring, and a file `config.log' containing compiler output
+(useful mainly for debugging `configure').
+
+   The file `configure.ac' is used to create `configure' by a program
+called `autoconf'.  You only need `configure.ac' if you want to change
+it or regenerate `configure' using a newer version of GNU `autoconf'.
+You do NOT need the GNU `autoconf' program unless you plan to change the
+`configure.ac' file!!!
+
+The simplest way to compile this package is:
+
+  1. `cd' to the directory containing the package's source code and type
+     `./configure' to configure the package for your system.  While
+     running, it prints some messages telling which features it is
+     checking for.
+
+  2. Type `make' to compile GeoSteiner.
+
+  3. GeoSteiner will execute properly right in the build directory.
+     However, if you want to install GeoSteiner in a more permanent
+     place (/usr/local, or whichever --prefix option you gave to
+     `configure'), then type `make install' to install the programs and
+     data files.  Of course, you need to have write permission on these
+     directories or this will not work.
+
+  4. You can remove the program binaries and object files from the
+     source code directory by typing `make clean'.  To also remove the
+     files that `configure' created (so you can compile the package for
+     a different kind of computer), type `make distclean'.
+
+
+Compilers and Options
+=====================
+
+   At a minimum, we assume the following build tools:
+
+	- The GNU C compiler (gcc), or a gcc-compatible C compiler.
+
+	- GNU make, or a GNU-compatible version of `make'.
+
+The code compiles cleanly with gcc on most modern Linux distributions.
+
+   Some systems require unusual options for compilation or linking that
+the `configure' script does not know about.  You can give `configure'
+initial values for variables by setting them in the environment.  Using
+bash (or some other Bourne-compatible shell), you can do that on the
+command line like this:
+
+     CC=c89 CFLAGS=-O2 LIBS=-lposix ./configure
+
+
+Linear Programs (LPs) and LP Solvers
+====================================
+
+   GeoSteiner makes heavy use of linear programming, and must include an
+LP solver as part of the build process.  GeoSteiner 5.2 supports two
+choices:
+
+	- CPLEX		version 12 (versions 3-11 may work too)
+	- lp_solve	version 2.3
+
+   CPLEX is a proprietary product of IBM, Inc., and has a very high
+pricetag.  It is arguably the fastest and most robust LP solver on the
+planet.  We recommend that you use CPLEX if at all possible.
+
+   We recommend CPLEX version 12 or later.  Earlier versions of CPLEX
+(version 3.0 and later) have been used in the past, but proper support
+for such old and obsolete versions has not been tested in a long time --
+most of these will not even run on modern platforms.
+
+   For those who do not have CPLEX, we include a version of lp_solve --
+a public-domain package created by Michel Berkelaar and Jeroen Dirks.
+The version included here is based on lp_solve version 2.3 (which is
+very ancient), but is SIGNIFICANTLY MODIFIED from the original!  The
+file lp_solve_2.3/README.custom describes the modifications we have
+made.  The original distribution of lp_solve is available on the net at:
+
+	ftp://ftp.es.ele.tue.nl/pub/lp_solve
+
+   Note that lp_solve 2.3 seems to have been designed to be simple -- at
+the expense of robustness.  We have found that it works fine on most
+problems up to 300 or 400 points.  Beyond that, all bets are off.
+Although we have attempted to remedy some of lp_solve's deficiencies, we
+make no warranties or representations as to its performance -- at doing
+anything -- especially solving LP's -- PERIOD!
+
+   Sometimes the `configure' script detects the presence of CPLEX
+automatically.  GeoSteiner actually needs two CPLEX files in order to
+build: a header file and a library.  These files are named as follows:
+
+	cplex.h			header file
+	libcplex.a		library file
+
+On many sites, these files actually reside in places that the
+`configure' script cannot possibly know about or find.  The safest
+method is to explicitly tell the `configure' script where to find the
+CPLEX header and library files.  This is done by setting the
+CPLEX_HEADER and CPLEX_LIB environment variables, for example:
+
+	CPLEX_HEADER=/pathname/to/your/copy/of/cplex.h
+	CPLEX_LIB=/pathname/to/your/copy/of/libcplex.a
+	export CPLEX_HEADER CPLEX_LIB
+
+	./configure ...
+
+where ... represents all of the other arguments you would normally give
+to `configure'.
+
+   Note that there could be other additional environment variables that
+CPLEX itself needs to be properly set, for example to find your site's
+license file.  Consult your sysadmin if you encounter CPLEX licensing
+problems.
+
+   If CPLEX is not found (or is unusable for some reason), lp_solve will
+be configured instead.  If one or more pieces of CPLEX were found, but
+not all of them, then a warning is issued and lp_solve is configured
+instead.
+
+   If you have CPLEX, but want to use lp_solve for some reason, just add
+the `--with-cplex=no' option (or `--without-cplex') to the `configure'
+command:
+     ./configure --with-cplex=no
+
+
+GNU Multi-Precision arithmetic library (GMP)
+============================================
+
+   In order to improve the numerical precision (and robustness) of the
+Euclidean FST generator, the GNU Multi-Precision arithmetic library
+(GMP) can OPTIONALLY be used.  GMP can be downloaded from
+
+	https://gmplib.org/
+
+   If you want to use GMP (and we recommend this), then GMP *must* be
+installed and working prior to configuring and building GeoSteiner.
+(On Red Hat, Fedora, CentOS and other RPM-based Linux, you need to have
+both the 'gmp' and 'gmp-devel' packages installed.  Having only 'gmp'
+is not enough!)
+
+   The configure script will automatically detect the presence of GMP if
+it is installed in such a way that '#include <gmp.h>' and linking with
+'-lgmp -lm' flags both work and provide working GMP functionality.
+
+   If GMP is installed in a non-standard place, you can use the
+following environment variables to tell the `configure' script where to
+find your GMP header and library files:
+
+	GMP_HEADER=/foo/gmp.h
+	GMP_LIB=/foo/libgmp.a
+	export GMP_HEADER GMP_LIB
+	./configure ...
+
+   Note that you still need to use the "-m M" option in order to make
+the 'efst' use GMP (see the README file for further instructions).
+
+
+Installation Names
+==================
+
+   By default, `make install' will install the package's files in
+`/usr/local/bin', `/usr/local/man', etc.  You can specify an
+installation prefix other than `/usr/local' by giving `configure' the
+option `--prefix=PATH'.
+
+   You can specify separate installation prefixes for
+architecture-specific files and architecture-independent files.  If you
+give `configure' the option `--exec-prefix=PATH', the package will use
+PATH as the prefix for installing programs and libraries.
+Documentation and other data files will still use the regular prefix.
+
+   In addition, if you use an unusual directory layout you can give
+options like `--bindir=PATH' to specify different values for particular
+kinds of files.  Run `configure --help' for a list of the directories
+you can set and what kinds of files go in them.
+
+
+Optional Features
+=================
+
+   GeoSteiner supports the following special options to `configure':
+
+	--with-cplex		use CPLEX if available, (the default)
+	--with-cplex=no		do NOT use CPLEX
+	--without-cplex		do NOT use CPLEX
+
+	--with-machine='CHARACTER STRING'
+
+   The --with-machine=STRING option specifies a string that is placed in
+FST data files, and is intended to describe the properties of the
+machine that computed the FSTs.  Normally, this information is obtained
+automatically from the uname(1) command.  However, if this facility is
+unavailable, the string "Unknown" will be used instead.  The
+`--with-machine=STRING' option overrides all of these methods, using the
+given STRING instead.  Examples of such strings you might consider using
+are:
+	'laptop'
+	'AMD 9590'
+	'Intel Xeon'
+	'64 Core Opteron'
+	'My blazing fast computer'
+	'My abacus'
+
+Do './configure --help' to find out about all of the options that the
+`configure' script accepts.

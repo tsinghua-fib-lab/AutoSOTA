@@ -1,0 +1,64 @@
+{
+    "prefix": "train",
+    "dataset": "domainnet",
+    "data_path": "./data/domainnet",
+    "task_name": [
+        "clipart",
+        "infograph",
+        "painting",
+        "quickdraw",
+        "real",
+        "sketch"
+    ],
+    "total_sessions": 6,
+    "knn_K": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+    ],
+    "energy_border": -36,
+    "energy_midline": -45,
+    "energy_tau": 2,
+    "distance_tau": 0.3,
+    "energy_T": 1,
+    "reg_loss_lamda": 0.05,
+    "init_cls": 345,
+    "increment": 345,
+    "model_name": "hybrid_energy_distance_prompt_trainer",
+    "query_type": "l1",
+    "shuffle": false,
+    "class_token_position": "end",
+    "CSC": false,
+    "embd_dim": 768,
+    "textual_prompt_length": 16,
+    "visual_prompt_length": 70,
+    "visual_prompt_layers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+    ],
+    "device": [
+        "0"
+    ],
+    "seed": [
+        1993
+    ],
+    "init_epoch": 30,
+    "init_lr": 0.01,
+    "init_weight_decay": 0.0005,
+    "epochs": 30,
+    "lrate": 0.01,
+    "weight_decay": 2e-4,
+    "batch_size": 128,
+    "num_workers": 16
+}

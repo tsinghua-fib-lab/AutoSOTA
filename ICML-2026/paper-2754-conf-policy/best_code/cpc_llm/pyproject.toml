@@ -1,0 +1,37 @@
+[project]
+name = "cpc-llm"
+version = "0.1.0"
+description = "Conformal Policy Control for LLMs"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate>=0.31",
+    "backoff>=2.2",
+    "boto3>=1.34",
+    "botorch>=0.11",
+    "datasets>=2.20",
+    "hydra-core>=1.3",
+    "numpy>=1.26",
+    "omegaconf>=2.3",
+    "optuna>=3.6",
+    "pandas>=2.2",
+    "peft>=0.11",
+    "pydantic>=2.0",
+    "pynndescent>=0.5",
+    "pytorch-holo>=0.0.1",
+    "s3fs>=2024.5",
+    "scikit-learn>=1.5",
+    "scipy>=1.13",
+    "torch>=2.2",
+    "tqdm>=4.66",
+    "transformers>=4.41",
+    "trl>=0.9",
+    "wandb>=0.17",
+]
+
+[project.scripts]
+cpc-llm = "cpc_llm.main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"

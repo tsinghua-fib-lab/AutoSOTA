@@ -1,0 +1,117 @@
+(Stolen from ftp://softlib.cs.rice.edu/pub/miplib/mps_format)
+
+MPS input format was originally introduced by IBM to express linear 
+and integer programs in a standard way.  The format is a fixed column 
+format, so care must be taken that all information is placed in the 
+correct columns as described below. 
+
+The following is not intended as a complete description of MPS format, 
+but only as a brief introduction.  For more information, the reader is 
+directed to:
+
+  "Advanced Linear Programming," by Bruce A. Murtagh
+  "Computer Solutions of Linear Programs," by J.L. Nazareth
+
+
+It may be useful to look at an example MPS file while reading this
+MPS information.
+
+
+The following template is a guide for the use of MPS format:
+
+---------------------------------------------------------------------
+Field:    1           2          3         4         5         6
+Columns:  2-3        5-12      15-22     25-36     40-47     50-61
+
+          NAME   problem name
+
+          ROWS
+
+           type     name
+
+          COLUMNS
+                   column       row       value     row      value
+                    name        name                name
+          RHS
+                    rhs         row       value     row      value
+                    name        name                name
+          RANGES
+                    range       row       value     row      value
+                    name        name                name
+          BOUNDS
+
+           type     bound       column     value
+                    name        name
+          ENDATA
+---------------------------------------------------------------------
+
+NOTES:
+
+A. In the ROWS section, each row of the constraint matrix must have a
+   row type and a row name specified.  The code for indicating row type
+   is as follows:
+
+                     type      meaning
+                     ---------------------------
+                      E    equality
+                      L    less than or equal
+                      G    greater than or equal
+                      N    objective
+                      N    no restriction
+
+B. In the COLUMNS section, the names of the variables are defined along
+   with the coefficients of the objective and all the nonzero constraint
+   matrix elements.  It is not necessary to specify columns for slack or
+   surplus variables as this is taken care of automatically.
+
+C. The RHS section contains information for the right-hand side of the problem.
+
+D. The RANGES section is for constraints of the form:  h <= constraint <= u .
+   The range of the constraint is  r = u - h .  The value of r is specified
+   in the RANGES section, and the value of u or h is specified in the RHS
+   section.  If b is the value entered in the RHS section, and r is the
+   value entered in the RANGES section, then u and h are thus defined:
+
+        row type       sign of r       h          u
+        ----------------------------------------------
+           G            + or -         b        b + |r|
+           L            + or -       b - |r|      b
+           E              +            b        b + |r|
+           E              -          b - |r|      b
+
+
+E. In the BOUNDS section, bounds on the variables are specified.  When
+   bounds are not indicated, the default bounds ( 0 <= x < infinity )
+   are assumed.  The code for indicating bound type is as follows:
+
+                    type            meaning
+                   -----------------------------------
+                     LO    lower bound        b <= x
+                     UP    upper bound        x <= b
+                     FX    fixed variable     x = b
+                     FR    free variable
+                     MI    lower bound -inf   -inf < x
+                     BV    binary variable    x = 0 or 1
+
+F. Sections RANGES and BOUNDS are optional as are the fields 5 and 6.
+   Everything else is required.  In regards to fields 5 and 6, consider
+   the following 2 constraints:
+
+                       const1:  2x + 3y < 6
+                       const2:  5x + 8y < 20
+
+   Two ways to enter the variable x in the COLUMNS section are:
+
+     (Field:  2    3           4            5         6  )
+   1.         x  const1       2.0         const2     5.0
+
+   2.         x  const1       2.0
+              x  const2       5.0
+
+G. A mixed integer program requires the specification of which variables
+   are required to be integer.  Markers are used to indicate the start
+   and end of a group of integer variables.  The start marker has its
+   name in field 2, 'MARKER' in field 3, and 'INTORG' in field 5.  The
+   end marker has its name in field 2, 'MARKER' in field 3, and 'INTEND'
+   in field 5.  These markers are placed in the COLUMNS section.
+

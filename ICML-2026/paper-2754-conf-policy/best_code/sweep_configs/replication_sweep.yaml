@@ -1,0 +1,14 @@
+# Replication sweep: 4 seeds x 4 alpha values = 16 parallel jobs.
+# Full DPO pipeline (10 rounds) on pythia-14m, each on its own A100.
+#
+# Usage:
+#   modal deploy modal_runner.py
+#   modal run modal_runner.py --sweep sweep_configs/replication_sweep.yaml
+
+base_config: cpc_llm
+cache: false
+overrides: []
+
+parameters:
+  initial_seed: [0, 1, 2, 3]
+  conformal_policy_control.alpha: [0.4, 0.6, 0.8, 1.0]

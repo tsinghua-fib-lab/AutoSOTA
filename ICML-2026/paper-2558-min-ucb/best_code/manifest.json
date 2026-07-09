@@ -1,0 +1,53 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 2558,
+    "repo_url": "https://github.com/8Wings/APUB-Optimization",
+    "repo_commit": "5350fd6963e1d2f5e77b9a9ebf59087ab908bfec",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_2558",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-2558:reproduced",
+    "eval_command": "python3 run_eval.py",
+    "baseline_metrics": {"Time(s)": 4.514, "Iteration": 9.167},
+    "primary_metric": "Iteration",
+    "metric_direction": "lower",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-1/logs/reproduction/paper-2558.log",
+    "status": "success",
+    "created_at": "2026-07-08T14:45:00+08:00",
+    "notes": "APUB-M Iteration metric (9.17) perfectly reproduced within CI bounds [7.8, 10.6], matching paper's 9.2+-1.4. Time metric (4.51s vs paper 7.2s) is lower due to faster hardware (Xeon Platinum 8358P vs i7-11700). SAA-M baseline Iteration (7.97 vs paper 8.0) also matches. Gurobi 12.0.0 with restricted pip license used instead of paper's Gurobi 11.0.3; API is backward-compatible. Pre-generated N=120 data from 120.7z used.",
+    "eval_timeout_minutes": 15,
+    "eval_output_format": "JSON file /repo/reproduction_results.json with keys apub_m.time_mean, apub_m.time_std, apub_m.iteration_mean, apub_m.iteration_std, and corresponding saa_m keys. Also printed to stdout with mean+-std format.",
+    "known_levers": "M (bootstrap samples, paper used 5000; lower values reduce runtime at cost of approximation quality); alpha/nominal_level (paper used 0.1 for 90% confidence; controls robustness-conservatism tradeoff); Gurobi solver parameters (Threads, Method, Presolve, Cuts); L-shaped algorithm tolerance (tol=1e-4 in SAA) and max_iter; problem dimensions (n_items, n_machines); second-stage solver warm-start strategies",
+    "setup_notes": "Container started from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Installed gurobipy==12.0.0 (paper used 11.0.3 but pip license expired; 12.0.0 has valid restricted license until 2026-11-23. API is backward-compatible). Installed copulas==0.12.3, scipy==1.10.1, numpy, pandas, matplotlib, cvxpy==1.5.2, ecos, scs, osqp, clarabel via pip. Extracted 120.7z to obtain 120.pkl (56MB pickle with 200 training samples of N=120 scenarios each + test samples). GPU not used (pure optimization, no deep learning).",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Minimize APUB-M iteration count (primary, hardware-independent convergence measure) and runtime (secondary, efficiency) on the Product-Mix two-stage stochastic programming benchmark with N=120, M=5000, alpha=0.1. Both metrics should decrease while maintaining solution quality.",
+      "metrics": [
+        {
+          "name": "Iteration",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 9.167,
+          "regression_tolerance_pct": 15.0,
+          "rationale": "Hardware-independent measure of L-shaped algorithm convergence. Paper reports 9.2+-1.4. Reproduced at 9.17. Reducing iteration count directly improves both efficiency and runtime. Primary metric for algorithmic improvement."
+        },
+        {
+          "name": "Time(s)",
+          "direction": "lower",
+          "role": "secondary",
+          "goal": "improve",
+          "baseline": 4.514,
+          "regression_tolerance_pct": 20.0,
+          "rationale": "Wall-clock runtime per optimization run. Hardware-dependent but reflects practical efficiency. Paper reports 7.2+-1.2s (i7-11700); reproduced at 4.5s (Xeon Platinum). Should decrease proportionally with iteration improvements."
+        }
+      ],
+      "success_policy": "Primary goal: reduce Iteration count below baseline 9.17. Secondary: reduce or maintain Time(s) below baseline 4.51. If Iteration improves but Time regresses significantly (>20%), investigate Gurobi solver overhead per iteration. Solution quality (optimal objective value) should not degrade beyond normal statistical variation across runs. Evaluate over 30 runs with same seed (1234) and random indices for fair comparison."
+    },
+    "metric_upper_bound": 10.6,
+    "metric_lower_bound": 7.8
+  }
+}

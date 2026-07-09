@@ -1,0 +1,4909 @@
+@BANNER
+#***********************************************************************
+#
+#	$Id: functions.in,v 1.92 2023/04/03 16:38:41 warme Exp $
+#
+#	File:	functions.in
+#	Rev:	e-5
+#	Date:	04/03/2023
+#
+#	Copyright (c) 2002, 2023 by David M. Warme, Martin Zachariasen
+#	& Pawel Winter.  This work is licensed under a Creative Commons
+#	Attribution-NonCommercial 4.0 International License.
+#
+#***********************************************************************
+#
+#	Library documentation for GeoSteiner.
+#
+#***********************************************************************
+#
+#	Modification Log:
+#
+#	e-1:	04/14/2015	warme
+#		: Changes for 5.0 release.
+#		: Added comment banner to top of this file.
+#	e-2:	09/05/2016	warme
+#		: Change notices for 5.1 release.
+#		: Added STEINLIB_INT save format.
+#		: Added compile-time checking of printf args.
+#	e-3:	09/24/2016	warme
+#		: Make features unconditional.
+#	e-4:	11/18/2022	warme
+#		: Re-order parameter values to match the
+#		:  order these are presented in the manual.
+#		: Added values for new parameters.
+#		: Added gst_node_ptr.
+#		: Added solver status values for node_limit,
+#		:  lp_limit and stop_requested.
+#		: Added new accessors to get a solver' hypergraph,
+#		:  params.
+#		: Added new Section documenting new callback API.
+#	e-5:	04/03/2023	warme
+#		: Added new exit reason for backtrack search
+#		:  attempted with negative edge costs.
+#		: Added values for local cuts trace style.
+#		: Change name and description of node completed
+#		:  callback value.
+#
+#***********************************************************************
+#
+@HEADERINFO
+
+/* Parameter values */
+
+#if 0
+/* For GST_PARAM_GROUP_DEFINITION */
+#define GST_PVAL_GROUP_DEFINITION_ATLEAST               0
+#define GST_PVAL_GROUP_DEFINITION_EXACTLY               1
+#endif
+
+/* For GST_PARAM_INCLUDE_CORNERS */
+#define GST_PVAL_INCLUDE_CORNERS_DISABLE                0
+#define GST_PVAL_INCLUDE_CORNERS_ENABLE                 1
+
+/* For GST_PARAM_EFST_HEURISTIC */
+#define GST_PVAL_EFST_HEURISTIC_SLL                     0
+#define GST_PVAL_EFST_HEURISTIC_ZW                      1
+
+/* For GST_PARAM_MULTIPLE_PRECISION */
+#define GST_PVAL_MULTIPLE_PRECISION_OFF                 0
+#define GST_PVAL_MULTIPLE_PRECISION_ONE_ITER            1
+#define GST_PVAL_MULTIPLE_PRECISION_MORE_ITER           2
+
+/* For GST_PARAM_BSD_METHOD */
+#define GST_PVAL_BSD_METHOD_DYNAMIC                     0
+#define GST_PVAL_BSD_METHOD_CONSTANT                    1
+#define GST_PVAL_BSD_METHOD_LOGARITHMIC                 2
+
+/* For GST_PARAM_LP_SOLVE_PERTURB */
+#define GST_PVAL_LP_SOLVE_PERTURB_DISABLE               0
+#define GST_PVAL_LP_SOLVE_PERTURB_ENABLE                1
+
+/* For GST_PARAM_LP_SOLVE_SCALE */
+#define GST_PVAL_LP_SOLVE_SCALE_DISABLE                 0
+#define GST_PVAL_LP_SOLVE_SCALE_ENABLE                  1
+
+/* For GST_PARAM_SOLVER_ALGORITHM */
+#define GST_PVAL_SOLVER_ALGORITHM_AUTO                  0
+#define GST_PVAL_SOLVER_ALGORITHM_BRANCH_AND_CUT        1
+#define GST_PVAL_SOLVER_ALGORITHM_BACKTRACK_SEARCH      2
+
+/* For GST_PARAM_BRANCH_VAR_POLICY */
+#define GST_PVAL_BRANCH_VAR_POLICY_NAIVE                0
+#define GST_PVAL_BRANCH_VAR_POLICY_SMART                1
+#define GST_PVAL_BRANCH_VAR_POLICY_PROD                 2
+#define GST_PVAL_BRANCH_VAR_POLICY_WEAK                 3
+
+/* For GST_PARAM_SEED_POOL_WITH_2SECS */
+#define GST_PVAL_SEED_POOL_WITH_2SECS_DISABLE           0
+#define GST_PVAL_SEED_POOL_WITH_2SECS_ENSABLE           1
+
+/* For GST_PARAM_CHECK_ROOT_CONSTRAINTS */
+#define GST_PVAL_CHECK_ROOT_CONSTRAINTS_DISABLE         0
+#define GST_PVAL_CHECK_ROOT_CONSTRAINTS_ENABLE          1
+
+/* For GST_PARAM_LOCAL_CUTS_MODE */
+#define GST_PVAL_LOCAL_CUTS_MODE_DISABLE                0
+#define GST_PVAL_LOCAL_CUTS_MODE_SUBTOUR_RELAXATION     1
+#define GST_PVAL_LOCAL_CUTS_MODE_SUBTOUR_COMPONENTS     2
+#define GST_PVAL_LOCAL_CUTS_MODE_BOTH                   3
+
+/* For GST_PARAM_LOCAL_CUTS_MAX_DEPTH */
+#define GST_PVAL_LOCAL_CUTS_MAX_DEPTH_DISABLE           0
+#define GST_PVAL_LOCAL_CUTS_MAX_DEPTH_ONELEVEL          1
+#define GST_PVAL_LOCAL_CUTS_MAX_DEPTH_TWOLEVELS         2
+#define GST_PVAL_LOCAL_CUTS_MAX_DEPTH_ANYLEVEL          -1
+
+/* For GST_PARAM_LOCAL_CUTS_TRACE_DEPTH */
+#define GST_PVAL_LOCAL_CUTS_TRACE_DEPTH_DISABLE         0
+#define GST_PVAL_LOCAL_CUTS_TRACE_DEPTH_ONELEVEL        1
+#define GST_PVAL_LOCAL_CUTS_TRACE_DEPTH_TWOLEVELS       2
+#define GST_PVAL_LOCAL_CUTS_TRACE_DEPTH_ANYLEVEL        -1
+
+/* For GST_PARAM_LOCAL_CUTS_TRACE_STYLE */
+#define GST_PVAL_LOCAL_CUTS_TRACE_STYLE_NORMAL          0
+#define GST_PVAL_LOCAL_CUTS_TRACE_STYLE_VERBOSE         1
+
+/* For GST_PARAM_SPARSE_SUBTOURS */
+#define GST_PVAL_SPARSE_SUBTOURS_DISABLE		0
+#define GST_PVAL_SPARSE_SUBTOURS_ENABLE			1
+
+/* For GST_PARAM_ZERO_WEIGHT_CUTSETS_METHOD */
+#define GST_PVAL_ZERO_WEIGHT_CUTSETS_METHOD_SUBTOURS	0
+#define GST_PVAL_ZERO_WEIGHT_CUTSETS_METHOD_CUTSET	1
+
+/* For GST_PARAM_STRENGTHEN_REDUCE */
+#define GST_PVAL_STRENGTHEN_REDUCE_DISABLE		0
+#define GST_PVAL_STRENGTHEN_REDUCE_ENABLE		1
+
+/* For GST_PARAM_GENERATE_UNSTRENGTHENED */
+#define GST_PVAL_GENERATE_UNSTRENGTHENED_DISABLE	0
+#define GST_PVAL_GENERATE_UNSTRENGTHENED_ENABLE		1
+
+/* For GST_PARAM_INITIAL_PRIMAL_HEURISTIC */
+#define GST_PVAL_INITIAL_PRIMAL_HEURISTIC_DISABLE	0
+#define GST_PVAL_INITIAL_PRIMAL_HEURISTIC_ENABLE	1
+
+/* For GST_PARAM_INITIAL_PRIMAL_HEUR_STOP */
+#define GST_PVAL_INITIAL_PRIMAL_HEUR_STOP_DISABLE	0
+#define GST_PVAL_INITIAL_PRIMAL_HEUR_STOP_ENABLE	1
+
+/* For GST_PARAM_SAVE_FORMAT */
+#define GST_PVAL_SAVE_FORMAT_ORLIBRARY                  0
+#define GST_PVAL_SAVE_FORMAT_STEINLIB                   1
+#define GST_PVAL_SAVE_FORMAT_VERSION2                   2
+#define GST_PVAL_SAVE_FORMAT_VERSION3                   3
+#define GST_PVAL_SAVE_FORMAT_STEINLIB_INT               4
+
+/* For GST_PARAM_GRID_OVERLAY */
+#define GST_PVAL_GRID_OVERLAY_DISABLE                   0
+#define GST_PVAL_GRID_OVERLAY_ENABLE                    1
+
+% -------------------------------------------------------------------------
+/* Solution status codes */
+
+#define GST_STATUS_OPTIMAL     0  /* Optimal solution is available */
+#define GST_STATUS_INFEASIBLE  1  /* Problem is infeasible */
+#define GST_STATUS_FEASIBLE    2  /* Search incomplete, feasible known */
+#define GST_STATUS_NO_FEASIBLE 3  /* Search incomplete, no feasible known */
+#define GST_STATUS_NO_SOLUTION 4  /* Solver never invoked, or problem changed */
+
+/* Black-box pointer types */
+
+typedef struct gst_channel *    gst_channel_ptr;
+typedef struct gst_hypergraph * gst_hg_ptr;
+typedef struct gst_metric *     gst_metric_ptr;
+typedef struct gst_node *	gst_node_ptr;
+typedef struct gst_param *      gst_param_ptr;
+typedef struct gst_proplist *   gst_proplist_ptr;
+typedef struct gst_scale_info * gst_scale_info_ptr;
+typedef struct gst_solver *     gst_solver_ptr;
+
+struct cpxenv;
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Opening and closing \geosteiner{} environment
+
+@DESCRIPTION
+\label{environment_functions}
+The \geosteiner{} environment encapsulates licensing information and 
+platform-specific data. If CPLEX is used as LP solver, the CPLEX
+environment is stored in the \geosteiner{} environment. 
+
+The environment is a single {\em global} variable. No explicit user
+references to the environment are possible, but the environment {\em
+  must} be initialized by calling the {\bf gst\_open\_geosteiner()}
+function before any other library functions can be invoked.
+
+In the reminder of this section, we present each of the functions in
+the library related to the \geosteiner{} environment.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_open_geosteiner
+
+@DESCRIPTION
+\geosteiner{} can be in two major states {\em open} or {\em closed}.  The
+initial state is always {\em closed}.  This routine transitions
+\geosteiner{} from the {\em closed} state to the {\em open} state by 
+initializing the \geosteiner{} environment.
+No other \geosteiner{} library function may be called when \geosteiner{} is 
+{\em closed}.  In a multi-threaded environment, it is the
+application's responsibility to ensure that no calls to other
+\geosteiner{} library functions are either pending or initiated until
+\geosteiner{} is in the {\em open} state --- which begins as soon as
+this routine returns with a status code of zero.
+
+Note that the function does {\em not} open the LP solver
+(e.g., CPLEX). This is done automatically the first time the LP solver
+environment is accessed; however, it can also be done explicitly
+using the {\bf gst\_open\_lpsolver()} function.
+An existing CPLEX environment can also be attached to the \geosteiner{} 
+environment.  See {\bf gst\_attach\_cplex()}; this is only relevant
+for CPLEX versions of the library.
+
+@FUNCTION
+int gst_open_geosteiner (void);
+
+@RETURNVALUE
+Returns status code (which is zero if \geosteiner{} was successfully opened).
+
+@EXAMPLE
+if (gst_open_geosteiner()) {
+   printf("GeoSteiner was not opened successfully.\n");
+   exit(1);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_close_geosteiner
+
+@DESCRIPTION
+Transition \geosteiner{} from the {\em open} to the {\em closed} state.
+Conceptually, \geosteiner{} enters the {\em closed} state the
+very instant this routine is called. 
+% At that time GeoSteiner is ``officially closed'' --- the next call
+% (if any) must be to the function {\bf gst\_open\_geosteiner()}. 
+In a multi-threaded environment, it is the application's
+responsibility to ensure that no calls to other \geosteiner{} library
+functions are pending at the time this routine is invoked. 
+
+@FUNCTION
+int gst_close_geosteiner (void);
+
+@RETURNVALUE
+Returns error code (which is zero if \geosteiner{} was successfully closed).
+
+@EXAMPLE
+if (gst_close_geosteiner()) {
+   printf("GeoSteiner was not closed successfully.\n");
+   exit(1);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_version_string
+
+@DESCRIPTION
+Return \geosteiner{} version number as a character string.
+
+@FUNCTION
+const char * gst_version_string (void);
+
+@RETURNVALUE
+Returns null-terminated string giving the \geosteiner{} version number.
+
+@EXAMPLE
+printf ("This is GeoSteiner version %s\n", gst_version_string());
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_version
+
+@DESCRIPTION
+Return \geosteiner{} version number as an integer with the following
+decimal interpretation: XXXYYYZZZ, where XXX is the major version, YYY
+is the minor version and ZZZ is the patch-level.
+
+@FUNCTION
+int gst_version (void);
+
+@RETURNVALUE
+Returns integer representing the version number.
+
+@EXAMPLE
+int version = gst_version();
+printf ("This is GeoSteiner version %d.%d.%d\n", 
+        (version / 1000000),
+        (version / 1000) % 1000,
+        (version % 1000));
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_open_lpsolver
+
+@DESCRIPTION
+Initialize LP solver (e.g., CPLEX) environment. It is not necessary to
+open the LP solver explicitly, since this is done automatically the
+first time the LP solver is needed. However, it might be advantageous to
+ensure that the LP solver has been successfully opened and is available
+for use before starting a long run.
+
+@FUNCTION
+int gst_open_lpsolver (void);
+
+@RETURNVALUE
+Returns value zero if the LP solver was opened successfully or already
+was open.
+
+@EXAMPLE
+if (gst_open_geosteiner()) {
+   printf("GeoSteiner was not opened successfully.\n");
+   exit(1);
+}
+if (gst_open_lpsolver()) {
+   printf("LP solver was not initialized successfully.\n");
+   exit(1);
+}
+/* At this point both GeoSteiner and the LP solver are opened... */
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_close_lpsolver
+
+@DESCRIPTION
+Close LP solver environment. In the case where the LP solver was
+{\em attached}, e.g., using {\bf gst\_attach\_cplex()}, then this
+routine detaches but does {\em not} close the LP solver.
+
+@FUNCTION
+int gst_close_lpsolver (void);
+
+@RETURNVALUE
+Returns value zero if the solver was closed successfully or already
+was closed. 
+
+@EXAMPLE
+if (gst_close_geosteiner()) {
+   printf("LP solver could not be closed successfully.\n");
+   exit(1);
+}
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_lpsolver_version_string
+
+@DESCRIPTION
+Return the name of the configured LP solver and its version number as a
+string.
+
+@FUNCTION
+const char* gst_lpsolver_version_string (void);
+
+@RETURNVALUE
+Returns zero-terminated string giving the LP solver name and version.
+
+@EXAMPLE
+printf ("GeoSteiner used LP solver %s\n",
+        gst_lpsolver_version_string());
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_attach_cplex
+
+@DESCRIPTION
+Provided only for CPLEX versions of the library.  Attach an existing
+CPLEX environment to \geosteiner.  Certain applications may wish to use
+CPLEX before, during and/or after they use \geosteiner.  This function
+permits such applications to use an existing CPLEX environment rather
+than letting \geosteiner{} attempt to open CPLEX itself (which would
+fail if CPLEX were already open). A non-\code{NULL} CPLEX environment
+that was attached using {\bf gst\_attach\_cplex()} will not be closed
+when {\bf gst\_close\_geosteiner()} is called. 
+
+@FUNCTION
+void gst_attach_cplex (struct cpxenv*  envp);
+
+@ARGUMENTS
+@A envp
+CPLEX environment to be attached.
+
+@RETURNVALUE
+No return value.
+
+@EXAMPLE
+/* Assume that envp is an existing CPLEX environment...*/
+
+/* Open GeoSteiner */
+if (gst_open_geosteiner()) {
+   printf("GeoSteiner was not opened successfully.\n");
+   exit(1);
+}
+
+/* Attach existing CPLEX environment */
+gst_attach_cplex(envp);
+
+/* Now envp is the CPLEX environment used by GeoSteiner... */
+
+/* Detach CPLEX environment and close GeoSteiner */
+gst_detach_cplex();
+gst_close_geosteiner();
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_detach_cplex
+
+@DESCRIPTION
+Provided only for CPLEX versions of the library. Detach and return a
+previously attached CPLEX environment. Does not close the CPLEX
+environment. 
+
+@FUNCTION
+struct cpxenv* gst_detach_cplex ();
+
+@RETURNVALUE
+Return value is \code{NULL} if no CPLEX environment is currently attached.
+
+An example is given with the documentation of {\bf
+gst\_attach\_cplex()} on page~\pageref{gst_attach_cplex}.
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+High-level optimization functions
+
+@DESCRIPTION
+\label{high_level_functions}
+The high-level functions give the user easy access to the basic
+algorithms in the library. There are two types of functions:
+Firstly, there are functions that solve Steiner tree problems in the
+plane by passing a set of point coordinates; secondly, the MSTHG
+problem can be solved by giving a description of the hypergraph
+instance. 
+
+All functions have a parameter set as argument. This parameter set can
+be created and modified using the functions described in
+Section~\ref{parameter_functions}. However, default parameters are
+used for all parameters if a \code{NULL} pointer is passed as
+parameter set.
+ 
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_smt
+
+@DESCRIPTION
+Given a set of points (or terminals) in the plane, construct an SMT for the
+points. The metric used for the SMT construction must be specified.
+(Dedicated functions for specific metrics are given on the following pages.)
+The length of the constructed SMT, the Steiner points and the list of
+line segments in the SMT are returned.
+
+Any of the output parameters may be set to \code{NULL} if the corresponding
+output is not needed. It is the responsibility of the user to allocate
+sufficient memory for the output arrays.
+\vspace*{-0.3cm}
+
+@FUNCTION
+int gst_smt (int             nterms,
+             double*         terms,
+             double*         length,
+             int*            nsps,
+             double*         sps,
+             int*            nedges,
+             int*            edges,
+             int*            status,
+             gst_metric_ptr  metric,
+             gst_param_ptr   param);
+
+@ARGUMENTS
+@A nterms
+Number of points (or terminals).
+@A terms
+Input point coordinates ($x_1, y_1, x_2, y_2, \ldots$).
+@A length
+Length of computed SMT.
+@A nsps
+Number of Steiner points.
+@A sps
+Steiner point coordinates. 
+@A edges
+Edges of SMT (terminals have index 0 to \code{nterms}-1 while Steiner
+points have index \code{nterms} and up).
+@A status
+Solution status code (see page~\pageref{gst_get_solver_status}).
+@A metric
+Metric object (see Section~\ref{metric_functions}).
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns value zero if an SMT was computed and non-zero otherwise.
+See Figure~\ref{fig:demo2} on page~\pageref{fig:demo2} or the example
+file \code{demo2.c} for an example of how to use {\bf gst\_smt()}.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_esmt
+
+@DESCRIPTION
+Given a set of points (or terminals) in the plane, construct an {\em
+Euclidean} SMT for the points. The length of the constructed SMT, the
+Steiner points and the list of line segments in the SMT are returned.
+
+Any of the output parameters may be set to \code{NULL} if the corresponding
+output is not needed. It is the responsibility of the user to allocate
+sufficient memory for the output arrays.
+
+@FUNCTION
+int gst_esmt (int            nterms, 
+              double*        terms, 
+              double*        length,
+              int*           nsps,  
+              double*        sps, 
+              int*           nedges,
+              int*           edges, 
+              int*           status,
+              gst_param_ptr  param);
+
+@ARGUMENTS
+@A nterms
+Number of points (or terminals).
+@A terms
+Input point coordinates ($x_1, y_1, x_2, y_2, \ldots$).
+@A length
+Length of computed SMT.
+@A nsps
+Number of Steiner points.
+@A sps
+Steiner point coordinates. 
+@A edges
+Edges of SMT (terminals have index 0 to \code{nterms}-1 while Steiner
+points have index \code{nterms} and up).
+@A status
+Solution status code (see page~\pageref{gst_get_solver_status}).
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns value zero if an SMT was computed and non-zero otherwise.
+
+An example is given in Section~\ref{high_level_interfaces}.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_rsmt
+
+@DESCRIPTION
+Given a set of points (or terminals) in the plane, construct a {\em
+rectilinear} SMT for the points. The length of the constructed SMT,
+the Steiner points and the list of line segments in the SMT are
+returned.
+
+Any of the output parameters may be set to \code{NULL} if the corresponding
+output is not needed. It is the responsibility of the user to allocate
+sufficient memory for the output arrays.
+
+@FUNCTION
+int gst_rsmt (int            nterms,
+              double*        terms,
+              double*        length,
+              int*           nsps,
+              double*        sps,
+              int*           nedges,
+              int*           edges,
+              int*           status,
+              gst_param_ptr  param);
+
+@ARGUMENTS
+@A nterms
+Number of points (or terminals).
+@A terms
+Input point coordinates ($x_1, y_1, x_2, y_2, \ldots$).
+@A length
+Length of computed SMT.
+@A nsps
+Number of Steiner points.
+@A sps
+Steiner point coordinates. 
+@A edges
+Edges of SMT (terminals have index 0 to \code{nterms}-1 while Steiner
+points have index \code{nterms} and up).
+@A status
+Solution status code (see page~\pageref{gst_get_solver_status}).
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns value zero if an SMT was computed and non-zero otherwise.
+
+An example is given in Section~\ref{high_level_interfaces}.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_osmt
+
+@DESCRIPTION
+Given a set of points (or terminals) in the plane, construct an {\em 
+octilinear} SMT for the points.  The length of the constructed SMT, the
+Steiner points and the list of line segments in the SMT are returned.
+
+Any of the output parameters may be set to \code{NULL} if the corresponding
+output is not needed. It is the responsibility of the user to allocate
+sufficient memory for the output arrays.
+
+@FUNCTION
+int gst_osmt (int            nterms,
+              double*        terms,
+              double*        length,
+              int*           nsps,
+              double*        sps,
+              int*           nedges,
+              int*           edges,
+              int*           status,
+              gst_param_ptr  param);
+
+@ARGUMENTS
+@A nterms
+Number of points (or terminals).
+@A terms
+Input point coordinates ($x_1, y_1, x_2, y_2, \ldots$).
+@A length
+Length of computed SMT.
+@A nsps
+Number of Steiner points.
+@A sps
+Steiner point coordinates. 
+@A edges
+Edges of SMT (terminals have indices 0 to \code{nterms}-1 while Steiner
+points have indices \code{nterms} and up).
+@A status
+Solution status code (see page~\pageref{gst_get_solver_status}).
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns value zero if an SMT was computed and non-zero otherwise.
+
+An example is given in Section~\ref{high_level_interfaces}.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_hgmst
+
+@DESCRIPTION
+Given an edge-weighted hypergraph, construct a minimum spanning tree
+(MST) in this hypergraph.
+
+Any of the output parameters may be set to \code{NULL} if the corresponding
+output is not needed. It is the responsibility of the user to allocate
+sufficient memory for the output arrays.
+
+@FUNCTION
+int gst_hgmst (int            nverts,
+               int            nedges,
+               int*           edge_sizes,
+               int*           edges,
+               double*        weights,
+               double*        length,
+               int*           nmstedges,
+               int*           mstedges,
+               int*           status,
+               gst_param_ptr  param);
+
+@ARGUMENTS
+@A nverts
+Number of vertices in the hypergraph.
+@A nedges
+Number of edges in the hypergraph.
+@A edge\_sizes
+Array giving number of vertices in each edge
+@A edges
+Array of vertices contained in each edge.
+@A weights
+Array of edge weights.
+@A nmstedges
+Number of edges in the minimum spanning tree.
+@A mstedges
+Array of edges contained in the minimum spanning tree.
+@A status
+Solution status code (see page~\pageref{gst_get_solver_status}).
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns value zero if an MST was computed and non-zero otherwise.
+
+\bigskip\bigskip\bigskip\bigskip % Just to move example to next page
+
+@EXAMPLE
+static int edge_sizes [] = {2, 2, 2, 3};
+static int edges [] = {0, 1,        /* edge 0 */
+                       0, 2,        /* edge 1 */
+                       1, 2,        /* edge 2 */
+                       0, 1, 2};    /* edge 3 */
+static double weights [] = {3.0, 2.0, 1.0, 4.0};
+double length;
+int code, i, nmstedges, mstedges [2];
+
+code = gst_hgmst (3,       /* nverts */
+                  4,       /* nedges */
+                  edge_sizes,
+                  edges,
+                  weights,
+                  &length,
+                  &nmstedges,
+                  mstedges,
+                  NULL,    /* ignore status */
+                  NULL);   /* use default parameters */
+if (code != 0) {
+        fprintf (stderr, "Return code = %d\n", code);
+        exit (1);
+}
+printf ("Optimal solution = %g: ", length);
+for (i = 0; i < nmstedges; i++) {
+        printf (" %d", mstedges [i]);
+}
+printf ("\n");
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Parameter setting and querying functions
+
+@DESCRIPTION
+\label{parameter_functions}
+A parameter set is an object that holds values for all parameters in the
+library.
+The library provides the following operations on parameter sets:
+\begin{itemize}
+  \item create a parameter set having ``default'' values,
+  \item change parameter settings in a parameter set,
+  \item query the current, default, minimum and maximum values
+        of any parameter,
+  \item query the type of a parameter,
+  \item copy an existing parameter set,
+  \item free a parameter set.
+\end{itemize}
+Parameter sets have type \code{gst\_param\_ptr}. Various library
+functions require a parameter set to be provided as 
+an argument. In all such cases it is valid for the caller to pass a
+\code{NULL} pointer, in which case default settings will be used for all
+parameters.
+
+
+
+Each supported parameter has a specific type.  When querying the type of
+a parameter, the library responds with an integer value that denotes the
+corresponding parameter type.  The parameter types supported, together
+with the integer values that denote them are as follows:
+
+\begin{center}
+ {\ttfamily
+  \label{tab:parmtypes}
+  \begin{tabular}{llr}
+   {\bf Type}		& {\bf Macro Name}		& {\bf Value} \\
+   \hline
+   int			& GST\_PARAMTYPE\_INTEGER	&	1 \\
+   double		& GST\_PARAMTYPE\_DOUBLE	&	2 \\
+   char*		& GST\_PARAMTYPE\_STRING	&	3 \\
+   gst\_channel\_ptr	& GST\_PARAMTYPE\_CHANNEL	&	4 \\
+  \end{tabular}
+ }
+\end{center}
+
+Externally each parameter has a unique number defined by a
+\code{GST\_PARAM} macro (see Appendix~\ref{parameters}). This macro is
+used as an argument to the parameter get/set functions. Note that
+there are distinct parameter get/set functions for each parameter
+type.
+
+@HEADERINFO
+#define GST_PARAMTYPE_INTEGER    1
+#define GST_PARAMTYPE_DOUBLE     2
+#define GST_PARAMTYPE_STRING     3
+#define GST_PARAMTYPE_CHANNEL    4
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_param
+
+@DESCRIPTION
+Create a new parameter set with default parameters.
+
+@FUNCTION
+gst_param_ptr gst_create_param (int*  status);
+
+@ARGUMENTS
+@A status
+Status code (zero if operation was successful and non-zero otherwise).
+
+@RETURNVALUE
+Returns new parameter set with default parameters.
+
+@EXAMPLE
+int status;
+
+/* Create a default parameter set */
+gst_param_ptr myparam = gst_create_param(&status);
+
+/* Change one parameter to a non-default value */
+gst_set_int_param(myparam, GST_MAX_FST_SIZE, 4);
+
+/* Use the new parameter set...*/
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_copy_param
+
+@DESCRIPTION
+Copy all parameter values from one parameter set into another.
+
+@FUNCTION
+int gst_copy_param (gst_param_ptr  dst,
+                    gst_param_ptr  src);
+
+@ARGUMENTS
+@A dst
+Parameter set that should be overwritten.
+	If \code{NULL}, this routine does nothing.
+@A src
+Parameter set that should be copied. A \code{NULL} pointer is handled as the default
+set of parameters.
+
+@RETURNVALUE
+Returns zero if the parameter set was copied successfully.
+
+@EXAMPLE
+/* Assume that param1 is an existing parameter set */
+
+gst_param_ptr param2 = gst_create_param(NULL);
+if (gst_copy_param (param2, param1)) {
+   printf("Could not copy parameter set.\n");
+   exit(1);
+}
+
+/* At this point param2 is a copy of param1 */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_param
+
+@DESCRIPTION
+Free parameter set.  Freeing a parameter set that is still referenced
+by any other \geosteiner{} object (e.g., by a problem solution state
+object) produces undefined behavior. 
+
+@FUNCTION
+int gst_free_param (gst_param_ptr  param);
+
+@ARGUMENTS
+@A param
+Parameter set that should be freed.  If \code{NULL}, this routine does
+nothing.
+
+@RETURNVALUE
+Returns zero if the parameter set was freed successfully.
+
+@EXAMPLE
+/* Free existing parameter set myparam */
+gst_free_param(myparam);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_dbl_param
+
+@DESCRIPTION
+Change value of a specified double parameter in a given parameter set.
+
+@FUNCTION
+int gst_set_dbl_param (gst_param_ptr  param,
+                       int            whichparam,
+                       double         newvalue);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of double parameter to modify
+(\code{GST\_PARAM} macro).
+@A newvalue
+New value for this parameter.
+
+@RETURNVALUE
+Returns zero if the parameter was set successfully.
+
+@EXAMPLE
+/* Set a CPU time limit of 0.5 seconds for parameter set myparam */
+gst_set_dbl_param(myparam, GST_PARAM_CPU_LIMIT, 0.5);
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_dbl_param
+
+@DESCRIPTION
+Get current value of a specified double parameter from a given parameter set.
+
+@FUNCTION
+int gst_get_dbl_param (gst_param_ptr  param,
+                       int            whichparam,
+                       double*        value);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of double parameter to access
+(\code{GST\_PARAM} macro).
+@A value
+Current value of parameter (pointer to double variable).
+
+@RETURNVALUE
+Returns zero if the parameter was accessed successfully.
+
+@EXAMPLE
+double cpulimit;
+gst_get_dbl_param(myparam, GST_PARAM_CPU_LIMIT, &cpulimit);
+printf ("The current CPU time limit is %.2f.\n", cpulimit);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_query_dbl_param
+
+@DESCRIPTION
+Query properties of a specified double parameter in a given parameter set.
+
+@FUNCTION
+int gst_query_dbl_param (gst_param_ptr  param,
+                         int            whichparam,
+                         double*        current_value,
+                         double*        default_value,
+                         double*        min_value,
+                         double*        max_value);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of double parameter to query
+(\code{GST\_PARAM} macro).
+@A current\_value
+Current value of parameter (pointer to double variable).
+@A default\_value
+Default value of parameter (pointer to double variable).
+@A min\_value
+Minimum value of parameter (pointer to double variable).
+@A max\_value
+Maximum value of parameter (pointer to double variable).
+
+@RETURNVALUE
+Each of the last four arguments may be \code{NULL} if the
+corresponding value is not needed.
+
+Returns zero if the parameter was queried successfully.
+\newpage
+
+@EXAMPLE
+/* myparam is an existing parameter set */
+double curval, defval, minval, maxval;
+if (gst_query_dbl_param (myparam,
+                         GST_PARAM_GAP_TARGET,
+                         &curval,
+                         &defval,
+                         &minval,
+                         &maxval) != 0) {
+        fprintf (stderr, "Parameter query failed.\n");
+        exit (1);
+}
+printf ("Gap target: current=%g, default=%g, min=%g, max=%g.\n",
+        curval, defval, minval, maxval);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_int_param
+
+@DESCRIPTION
+Change value of a specified integer parameter in a given parameter set.
+
+@FUNCTION
+int gst_set_int_param (gst_param_ptr  param,
+                       int            whichparam,
+                       int            newvalue);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of	integer parameter to modify
+(\code{GST\_PARAM} macro).
+@A newvalue
+New value for this parameter.
+
+@RETURNVALUE
+Returns zero if the parameter was set successfully.
+
+@EXAMPLE
+/* Collect the 10 best solutions. */
+gst_set_int_param (myparam, GST_PARAM_NUM_FEASIBLE_SOLUTIONS, 10);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_int_param
+
+@DESCRIPTION
+Get current value of a specified integer parameter from a given parameter
+set.
+
+@FUNCTION
+int gst_get_int_param (gst_param_ptr  param,
+                       int            whichparam,
+                       int*           value);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of integer parameter to access
+(\code{GST\_PARAM} macro).
+@A value
+Current value of parameter (pointer to integer variable).
+
+@RETURNVALUE
+Returns zero if the parameter was accessed successfully.
+
+@EXAMPLE
+int vlimit;
+gst_get_int_param(myparam, GST_PARAM_BACKTRACK_MAX_VERTS, &vlimit);
+printf ("The current backtrack search vertex limit is %d.\n", vlimit);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_query_int_param
+
+@DESCRIPTION
+Query properties of a specified integer parameter in a given parameter
+set.
+
+@FUNCTION
+int gst_query_int_param (gst_param_ptr  param,
+                         int            whichparam,
+                         int*           current_value,
+                         int*           default_value,
+                         int*           min_value,
+                         int*           max_value);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of integer parameter to query
+(\code{GST\_PARAM} macro). 
+@A current\_value
+Current value of parameter (pointer to integer variable).
+@A default\_value
+Default value of parameter (pointer to integer variable).
+@A min\_value
+Minimum value of parameter (pointer to integer variable).
+@A max\_value
+Maximum value of parameter (pointer to integer variable).
+
+@RETURNVALUE
+Each of the last four arguments may be \code{NULL} if the corresponding
+value is not needed.
+
+Returns zero if the parameter was queried successfully.
+\newpage
+
+@EXAMPLE
+/* param is an existing parameter set */
+int curval, defval, minval, maxval;
+if (gst_query_int_param (param,
+                         GST_PARAM_BRANCH_VAR_POLICY,
+                         &curval,
+                         &defval,
+                         &minval,
+                         &maxval) != 0) {
+        fprintf (stderr, "Parameter query failed.\n");
+        exit (1);
+}
+printf ("Branch variable policy: "
+        "current=%g, default=%g, min=%g, max=%g.\n",
+        curval, defval, minval, maxval);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_str_param
+
+@DESCRIPTION
+Change value of a specified string parameter in a given parameter set.
+
+@FUNCTION
+int gst_set_str_param (gst_param_ptr  param, 
+                       int            whichparam, 
+                       const char*    str);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of string parameter to access
+(\code{GST\_PARAM} macro).
+@A chan
+New value for this parameter.
+
+@RETURNVALUE
+Returns zero if the parameter was set successfully.
+
+@EXAMPLE
+/* Establish a name for my problem instance. */
+#define MY_INSTANCE_NAME_PARAM  -123
+int code;
+code = gst_set_str_param (myparam,
+                          MY_INSTANCE_NAME_PARAM,
+                          "Bowser");
+if (code != 0) {
+        fprintf (stderr, "gst_set_str_param failed.\n");
+        exit (1);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_str_param
+
+@DESCRIPTION
+Get current value of a specified string parameter in a given parameter
+set.
+
+@FUNCTION
+int gst_get_str_param (gst_param_ptr  param, 
+                       int            whichparam,
+                       int*           length,
+                       char*          str);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of string parameter to access
+(\code{GST\_PARAM} macro).
+@A length
+The length of the string is written to this integer (unless it is a \code{NULL}
+pointer). A length of \code{-1} indicates that the parameter has the
+value \code{NULL}, which is distinct from a string of length zero.
+@A str
+The current value for this parameter is copied to the string provided
+here (unless it is a \code{NULL} pointer).
+
+@RETURNVALUE
+Returns zero if the parameter was accessed successfully.
+\newpage
+
+@EXAMPLE
+#define MY_INSTANCE_NAME_PARAM  -123
+int code, length;
+char* value;
+
+/* First, get length of the string. */
+gst_set_str_param (myparam,
+                   MY_INSTANCE_NAME_PARAM,
+                   &length,
+                   NULL);
+value = NULL;
+if (length >= 0) {
+        /* Allocate buffer to receive string value. */
+        value = (char *) malloc (length + 1);
+        code = gst_set_str_param (myparam,
+                                  MY_INSTANCE_NAME_PARAM,
+                                  NULL,
+                                  value);
+}
+printf ("My problem instance name = %s\n",
+        (value == NULL) ? "<null>" : value);
+if (value != NULL) {
+        free (value);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_chn_param
+
+@DESCRIPTION
+Change value of a specified channel parameter in a given parameter set.
+
+@FUNCTION
+int gst_set_chn_param (gst_param_ptr    param,
+                       int              whichparam,
+                       gst_channel_ptr  chan);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of a channel parameter to modify
+(\code{GST\_PARAM} macro).
+@A chan
+New value for this parameter.
+
+@RETURNVALUE
+Returns zero if the parameter was set successfully.
+
+@EXAMPLE
+int code;
+gst_channel_ptr chan;
+
+/* Create a channel directed to stdout. */
+chan = gst_create_channel (NULL, NULL);
+gst_channel_add_file (chan, stdout, NULL);
+
+/* Direct solver trace info to stdout. */
+code = gst_set_chn_param (myparam, GST_PARAM_PRINT_SOLVE_TRACE, chan);
+if (code != 0) {
+        fprintf (stderr, "gst_set_chn_param failed.\n");
+        exit (1);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_chn_param
+
+@DESCRIPTION
+Get current value of a specified channel parameter from a given parameter
+set.
+
+@FUNCTION
+int gst_get_chn_param (gst_param_ptr     param,
+                       int               whichparam,
+                       gst_channel_ptr*  chan);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A whichparam
+Parameter ID of channel parameter to access
+(\code{GST\_PARAM} macro).
+@A chan
+Current value for this parameter (pointer to channel variable).
+
+@RETURNVALUE
+Returns zero if the parameter was accessed successfully.
+
+@EXAMPLE
+int code;
+gst_channel_ptr chan;
+
+/* Get current solver trace channel. */
+code = gst_get_chn_param (myparam, 
+                          GST_PARAM_PRINT_SOLVE_TRACE, 
+                          &chan);
+if (code != 0) {
+        fprintf (stderr, "gst_get_chn_param failed.\n");
+        exit (1);
+}
+if (chan != NULL) {
+        /* Turn off the trace and destroy the channel. */
+        gst_set_chn_param (myparam, 
+                           GST_PARAM_PRINT_SOLVE_TRACE, 
+                           NULL);
+        gst_free_channel (chan);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_param_id
+
+@DESCRIPTION
+Translate a parameter name into the corresponding parameter id.
+
+@FUNCTION
+int gst_get_param_id (const char*       param_name,
+                      int*              param_id);
+
+@ARGUMENTS
+@A param\_name
+The name of a parameter (e.g., "max\_fst\_size", or
+"GST\_PARAM\_MAX\_FST\_SIZE").
+@A param\_id
+Address of an integer to store the parameter ID corresponding to the
+given parameter name.  This will be -1 for unknown or unrecognizable
+parameter names.  The \code{param\_id} argument can be \code{NULL}, if
+the actual parameter ID value is not required.
+
+@RETURNVALUE
+Returns zero if the \code{param\_name} was recognized and the parameter
+ID was successfully found.
+
+@EXAMPLE
+        int parmid;
+        if (gst_get_param_id ("save_format", &parmid) != 0) {
+                fprintf (stderr, "gst_get_param_id failed.\n");
+                exit (1);
+        }
+        printf ("Parameter ID: %d\n", parmid);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_param_type
+
+@DESCRIPTION
+Get the type of a specified parameter id.
+
+@FUNCTION
+int gst_get_param_type (int   whichparam,
+                        int*  type);
+
+@ARGUMENTS
+@A whichparam
+Parameter ID to query (\code{GST\_PARAM} macro).
+@A type
+This integer is set to the type of the parameter. The parameter types
+and their encodings as integer values are given in the table on
+page~\pageref{tab:parmtypes}.
+
+@RETURNVALUE
+Returns zero if the type was found successfully.
+
+@EXAMPLE
+char* str;
+int parmtype;
+if (gst_get_param_type (GST_PARAM_SAVE_FORMAT, &parmtype) != 0) {
+        fprintf (stderr, "gst_get_param_type failed.\n");
+        exit (1);
+}
+switch (parmtype) {
+        case GST_PARAMTYPE_INTEGER:  str = "int";     break;
+        case GST_PARAMTYPE_DOUBLE:   str = "double";  break;
+        case GST_PARAMTYPE_STRING:   str = "string";  break;
+        case GST_PARAMTYPE_CHANNEL:  str = "channel"; break;
+        default:                     str = "unknown"; break;
+}
+printf ("Parameter is of type %s.\n", str);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_param
+
+@DESCRIPTION
+Set the value of a named parameter from the given string.  This
+routine permits the value of any integer, double or string parameter
+to be set to the value given in text string form.  This is a
+convenient way to set parameters from command line arguments.
+
+@FUNCTION
+int gst_set_param (gst_param_ptr  param,
+                   const char*    name,
+                   const char*    value);
+
+@ARGUMENTS
+@A param
+Parameter set.
+@A name
+Name of parameter to set (see Appendix~\ref{parameters}).
+@A value
+Text string containing data value to set.
+
+@RETURNVALUE
+
+@EXAMPLE
+int main (int argc, char **argv)
+{
+int             i, j;
+char *          ap;
+gst_channel_ptr myparm;
+
+        gst_open_geosteiner (NULL);
+        myparam = gst_create_param (NULL);
+ 
+        /* Parse arguments such as: -ZBRANCH_VAR_POLICY 3 */
+        for (i = 1; i < argc; i++) {
+                ap = argv [i];
+                if ((ap[0] != '-') || (ap[1] != 'Z')) usage ();
+                j = gst_set_param (myparam, &ap[2], argv [i+1]);
+                if (j != 0) usage ();
+                ++i;
+        }
+        /* Parameters are now set... */
+}
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Metric setting and querying functions
+
+@DESCRIPTION
+\label{metric_functions}
+
+The support of different metrics in the \geosteiner{} library is primarily
+handled by metric objects. Some functions in the library use these metric
+objects automatically, e.g., {\bf gst\_esmt()}, while others require one to
+specify a metric object, e.g., {\bf gst\_smt()}. The metric objects provide a
+simple way to make general applications support several different metrics. An
+example of this can be found in the demo program \code{demo2.c} which
+is the code for a small program supporting all metrics supported by \geosteiner.
+
+Two $L_p$-metrics, $L_1$ (rectilinear) and $L_2$ (Euclidean), are
+supported. Also, all uniform metrics --- so-called
+$\lambda$-metrics --- are supported. The latter are metrics where only
+a limited number $\lambda \geq 2$ of equally-spaced orientations are
+allowed for the edges in a solution. For $\lambda = 2$ this is
+identical to the rectilinear metric, $L_1$. 
+
+When a metric object has been created, the distance between two points
+in the metric can be obtained by calling {\bf gst\_distance()}. This 
+is especially useful for the $\lambda$-metrics for which efficient
+calculation is non-trivial.
+
+The following macros are used for identifying the supported metrics:
+\begin{center}
+ \begin{tabular}{llr}
+  \label{tab:metrictypes}
+  {\bf Metric Type} & {\bf Macro Name} & {\bf Value} \\
+  \hline
+  None	&	\code{GST\_METRIC\_NONE}    &	\code{0} \\
+  $L_p$	&	\code{GST\_METRIC\_L}	    &	\code{1} \\
+  Uniform &	\code{GST\_METRIC\_UNIFORM} &	\code{2} \\
+ \end{tabular}
+\end{center}
+
+@HEADERINFO
+#define GST_METRIC_NONE         0
+#define GST_METRIC_L            1
+#define GST_METRIC_UNIFORM      2
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_metric
+
+@DESCRIPTION
+A metric is defined by a type and a parameter. For the $L_p$-metric
+this parameter $p$ must be either 1 or 2, and for the $\lambda$-metric
+we must have $\lambda \geq 2$.
+
+Note that even though the $L_1$-metric and the $\lambda$-metric
+with parameter 2 are the same (rectilinear metric), you cannot expect
+them to give exactly the same results when used to solve Steiner
+problems. The first one will result in the use of a dedicated FST
+generator for the rectilinear problem and the latter will result in
+the use of a general FST generator for $\lambda$-metrics. If you are
+aiming for speed then use the $L_1$-metric. 
+
+@FUNCTION
+gst_metric_ptr gst_create_metric (int   type,
+                                  int   parameter,
+                                  int*  status);
+
+@ARGUMENTS
+@A type
+Metric type (see macro values in the table on
+page~\pageref{tab:metrictypes}). 
+@A parameter
+Metric parameter.
+@A status
+Status code (zero if operation was successful and non-zero otherwise).
+
+@RETURNVALUE
+Returns new metric object.
+
+@EXAMPLE
+/* Creating a Euclidean metric object */
+gst_metric_ptr	metric;
+metric = gst_create_metric (GST_METRIC_L, 2, NULL);
+
+/* And use it as a parameter to gst_smt */
+gst_smt (nterms, terms, &length, NULL, NULL, NULL, NULL, NULL,
+         metric, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_metric
+
+@DESCRIPTION
+Free an existing metric object. Freeing a metric object that is still
+referenced by any other \geosteiner{} object (e.g., a hypergraph
+object) produces undefined behavior.
+
+@FUNCTION
+int gst_free_metric (gst_metric_ptr  metric);
+
+@ARGUMENTS
+@A metric
+Metric object. Does nothing if \code{NULL}.
+
+@RETURNVALUE
+Returns zero if operation was successful.
+
+@EXAMPLE
+/* Free parameter object mymetric */
+gst_free_metric (mymetric);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_copy_metric
+
+@DESCRIPTION
+Copy attributes from one metric object to another.
+
+@FUNCTION
+int gst_copy_metric (gst_metric_ptr  dst, 
+                     gst_metric_ptr  src);
+
+@ARGUMENTS
+@A dst
+Metric object that should be overwritten.
+@A src
+Metric that should be copied. A \code{NULL} pointer is considered as
+a "None" metric type (see table on page~\pageref{tab:metrictypes}).  
+
+@RETURNVALUE
+Returns zero if metric object was copied.
+
+@EXAMPLE
+gst_metric_ptr newmetric;
+
+newmetric = gst_create_metric (GST_METRIC_NONE, 0);
+
+gst_copy_metric (newmetric, oldmetric);
+
+/* newmetric is now the same metric as oldmetric. */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_distance
+
+@DESCRIPTION
+Compute the distance between two points under a given metric.
+
+@FUNCTION
+double gst_distance (gst_metric_ptr  metric,
+                     double          x1,
+                     double          y1,
+                     double          x2,
+                     double          y2);
+
+@ARGUMENTS
+@A metric
+Metric object.
+@A x1
+X-coordinate for first point.
+@A y1
+Y-coordinate for first point.
+@A x2
+X-coordinate for second point.
+@A y2
+Y-coordinate for second point.
+
+@RETURNVALUE
+Returns the distance. Returned value is always zero if metric type is "None".
+
+@EXAMPLE
+/* Assume that mymetric is a metric object. */
+/* Compute distance between points (0,0) and (1,1). */
+double d;
+d = gst_distance (mymetric, 0.0, 0.0, 1.0, 1.0);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_metric_info
+
+@DESCRIPTION
+Get the information about a metric object.
+
+@FUNCTION
+int gst_get_metric_info (gst_metric_ptr  metric,
+                         int*            type,
+                         int*            parameter);
+
+@ARGUMENTS
+@A metric
+Metric object.
+@A type
+A pointer to an integer in which to place the metric type. See the
+possible types in the table on page~\pageref{tab:metrictypes}.
+@A parameter
+An optional pointer to an integer in which to place the metric parameter. See
+the possible parameters in the description of {\bf gst\_create\_metric()}.
+
+@RETURNVALUE
+Returns zero if operation was successful. Either of the last two
+arguments may be \code{NULL} if the corresponding value is not needed.
+
+@EXAMPLE
+/* Let mymetric be a metric object */
+int type, parameter;
+gst_get_metric_info (mymetric, &type, &parameter);
+switch (type) {
+        case GST_METRIC_NONE:
+                printf ("Metric is None.\n");
+                break;
+        case GST_METRIC_L:
+                printf ("Metric is L%d.\n", parameter);
+                break;
+        case GST_METRIC_UNIFORM:
+                printf ("Metric is Uniform %d.\n", parameter);
+                break;
+        default:
+                printf ("Metric is unknown!\n");
+}
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Property list setting and querying functions
+
+@DESCRIPTION
+\label{proplist_functions}
+Property lists can be used to hold values which are rarely updated (the
+data structure holding the information {\em cannot} be queried/updated in
+constant time). The following basic operations are provided by the library:
+\begin{itemize}
+  \item create an empty property list,
+  \item set/create a value in a property list,
+  \item delete a value from a property list,
+  \item get a value in a property list,
+  \item query the type of a property,
+  \item copy a property list,
+  \item free a property list (including its content).
+\end{itemize}
+A property list has type \code{gst\_proplist\_ptr} and a property is known by
+its property ID (a macro name which expands to a signed integer).
+
+The main purpose of property lists is to make extra information about the
+solution process available to the user through a simple interface. Any property
+ID with a value larger than or equal to zero is reserved by the library.
+Negative values can be freely used by the user. The property ID values (and
+their macro names) currently in use can be found in
+Appendices~\ref{hypergraph_properties} and ~\ref{solver_properties}.
+
+Note that there are distinct property get/set functions for different
+property types. The type of a given property --- which is an integer
+--- can be queried. The supported property types, together with the
+integer values that denote them are as follows:
+
+\begin{center}
+ {\ttfamily
+  \label{tab:proptypes}
+  \begin{tabular}{llr}
+   {\bf Type}		& {\bf Macro Name}		& {\bf Value} \\
+   \hline
+   int			& GST\_PROPTYPE\_INTEGER	&	1 \\
+   double		& GST\_PROPTYPE\_DOUBLE		&	2 \\
+   char*		& GST\_PROPTYPE\_STRING		&	3 \\
+  \end{tabular}
+ }
+\end{center}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_proplist
+
+@DESCRIPTION
+Create a new empty property list.
+
+@FUNCTION
+gst_proplist_ptr 
+    gst_create_proplist (int*  status);
+
+@ARGUMENTS
+@A status
+Status code (zero if operation was successful and non-zero otherwise).
+May be \code{NULL} if value is not needed.
+
+@RETURNVALUE
+Returns new property list.
+
+@EXAMPLE
+gst_proplist_ptr plist;
+int status;
+plist = gst_create_proplist (&status);
+if (status != 0) {
+        fprintf (stderr, "Unable to create property list.\n");
+        exit (1);
+}
+gst_set_int_property (plist, GST_PROP_SOLVER_ROOT_OPTIMAL, 1);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_proplist
+
+@DESCRIPTION
+Free an existing property list.  Freeing a property list that is still
+referenced by existing GeoSteiner objects (e.g., hypergraphs and
+solvers) results in undefined behavior. In most cases it is an error to
+free a property list that was not obtained via a call to
+{\bf gst\_create\_proplist()}.
+
+@FUNCTION
+int gst_free_proplist (gst_proplist_ptr  plist);
+
+@ARGUMENTS
+@A plist
+A property list to free. If \code{NULL}, this routine does nothing.
+
+@RETURNVALUE
+Returns a status code (zero if operation was successful and non-zero otherwise).
+
+@EXAMPLE
+gst_proplist_ptr plist;
+plist = gst_create_proplist (NULL);
+
+/* Various operations on plist... */
+
+gst_free_proplist (plist);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_copy_proplist
+
+@DESCRIPTION
+Empty the destination property list and copy all properties into it from
+the source property list.
+
+@FUNCTION
+int gst_copy_proplist (gst_proplist_ptr  dst,
+                       gst_proplist_ptr  src);
+
+@ARGUMENTS
+@A dst
+Property list that should be overwritten.
+@A src
+Property list that should be copied.
+A \code{NULL} pointer is handled as an empty property list.
+
+@RETURNVALUE
+Returns zero if the property list was copied successfully.
+
+@EXAMPLE
+/* We assume that H is a hypergraph... */
+gst_proplist_ptr copy;
+
+copy = gst_create_proplist (NULL);
+
+if (gst_copy_proplist (copy, gst_get_hg_properties(H)) == 0) {
+   /* We have now created a copy of the property list for H */
+}
+else {
+   /* Something went wrong */
+}
+
+/* Use new copy of property list... */
+
+/* Free copy */
+gst_free_proplist (copy);
+
+% -------------------------------------------------------------------------
+@HEADERINFO
+#define GST_PROPTYPE_INTEGER    1
+#define GST_PROPTYPE_DOUBLE     2
+#define GST_PROPTYPE_STRING     3
+
+@FUNCNAME
+gst_get_property_type
+
+@DESCRIPTION
+Query the type of a given property.
+
+@FUNCTION
+int gst_get_property_type (gst_proplist_ptr  plist,
+                           int               propid,
+                           int*              type);
+
+@ARGUMENTS
+@A plist
+An existing property list.
+@A propid
+A property ID value.
+@A type
+Pointer to an integer which will be overwritten with the type of the property.
+
+@RETURNVALUE
+Return a status code (zero if operation was successful and non-zero otherwise).
+
+@EXAMPLE
+/* We assume that H is a hypergraph... */
+int type;
+
+if (gst_get_property_type (gst_get_hg_properties(H),
+                           GST_PROP_HG_GENERATION_TIME,
+                           &type) != 0) {
+   /* Something went wrong */
+}
+else {
+   switch (type) {
+   case GST_PROPTYPE_INTEGER: /* Property is an integer value */
+      break;
+   case GST_PROPTYPE_DOUBLE:  /* Property is a floating point value */
+      break;
+   case GST_PROPTYPE_STRING:  /* Property is a string value */
+      break;
+   default: /* Something went wrong */
+   }
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_delete_property
+
+@DESCRIPTION
+Remove any value that might be defined for the given property ID,
+regardless of type.
+
+@FUNCTION
+int gst_delete_property (gst_proplist_ptr   plist,
+                         int                propid);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of property to delete.
+
+@RETURNVALUE
+Returns zero if the property was successfully deleted from the property
+list.\\
+Returns \code{GST\_ERR\_INVALID\_PROPERTY\_LIST} if the property list
+itself is invalid.\\
+Returns \code{GST\_ERR\_PROPERTY\_NOT\_FOUND} if no property having the
+given ID exists.
+
+@EXAMPLE
+/* We are given a property list plist */
+#define MY_PROPERTY_ID  -1000
+
+gst_delete_property (plist, MY_PROPERTY_ID);
+
+/* plist no longer has any value defined */
+/* for property ID -1000. */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_dbl_property 
+
+@DESCRIPTION
+Get the value of a specified double property from a given property
+list.  The specified property must be of type double or an error
+is returned.
+ID values greater than or equal to zero are reserved for \geosteiner's
+use.
+Negative ID values can be freely used by user applications.
+
+@FUNCTION
+int gst_get_dbl_property (gst_proplist_ptr  plist, 
+                          int               propid,
+                          double*           value);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of double property to retrieve.
+@A value
+Current value of property (pointer to double variable).  May be
+\code{NULL} if value is not needed.
+
+@RETURNVALUE
+Returns zero if the property was accessed successfully.\\
+Returns \code{GST\_ERR\_PROPERTY\_NOT\_FOUND} if no property having the
+given ID exists.\\
+Returns \code{GST\_ERR\_PROPERTY\_TYPE\_MISMATCH} if the property exists but
+does not have type double.
+
+@EXAMPLE
+/* We are given a property list plist and a double value has 
+   been set for the ID value GST_PROP_USER_MYVALUE */ 
+#define GST_PROP_USER_MY_DBL_VALUE   -1000
+
+double value;
+gst_get_dbl_property (plist,
+                      GST_PROP_USER_MY_DBL_VALUE,
+                      &value);
+printf ("My_dbl_value is currently set at %.2f.\n", value);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_int_property 
+
+@DESCRIPTION
+Get the value of a specified property from the given property list.
+The specified property must be of type integer or an error is
+returned.
+ID values greater than or equal to zero are reserved for \geosteiner's
+use.
+Negative ID values can be freely used by user applications.
+
+@FUNCTION
+int gst_get_int_property (gst_proplist_ptr  plist, 
+                          int               propid,
+                          int*              value);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of integer property to retrieve.
+@A value
+Current value of property (pointer to integer variable).  May be
+\code{NULL} if value is not needed.
+
+@RETURNVALUE
+Returns zero if the property was accessed successfully.\\
+Returns \code{GST\_ERR\_PROPERTY\_NOT\_FOUND} if no property having the
+given ID exists.\\
+Returns \code{GST\_ERR\_PROPERTY\_TYPE\_MISMATCH} if the property exists but
+does not have type integer.
+
+@EXAMPLE
+/* We are given a property list plist and an integer value has 
+   been set for the ID value GST_PROP_USER_MY_INT_VALUE */ 
+#define GST_PROP_USER_MY_INT_VALUE   -1001
+
+int value;
+gst_get_int_property (plist,
+                      GST_PROP_USER_MY_INT_VALUE,
+                      &value);
+printf ("My_int_value is currently set at %d.\n", value);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_str_property 
+
+@DESCRIPTION
+Get the value of a specified property from the given property list.
+The specified property must be of type string or an error is
+returned.
+ID values greater than or equal to zero are reserved for \geosteiner's
+use.
+Negative ID values can be freely used by user applications.
+
+@FUNCTION
+int gst_get_str_property (gst_proplist_ptr  plist,
+                          int               propid,
+                          int*              length,
+                          char*             str);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of string property to retrieve.
+@A length
+The length of the string is written to this integer (unless it is a \code{NULL}
+pointer).  The returned length does {\em not} include the terminating
+null character.
+The returned length is -1 if the property value is a \code{NULL}
+pointer (which is distinct from a zero length string).
+@A str
+The current value for this parameter is copied into the buffer provided
+here (unless it is a \code{NULL} pointer).
+
+@RETURNVALUE
+Returns zero if the property was accessed successfully.\\
+Returns \code{GST\_ERR\_PROPERTY\_NOT\_FOUND} if no property having the
+given ID exists.\\
+Returns \code{GST\_ERR\_PROPERTY\_TYPE\_MISMATCH} if the property exists but
+does not have type string.
+\newpage
+
+@EXAMPLE
+int code, length;
+char* buf;
+buf = NULL;
+code = gst_get_str_property (plist, GST_PROP_HG_NAME, 
+                             &length, NULL);
+if ((code == 0) && (length >= 0)) {
+        buf = (char *) malloc (length + 1);
+        gst_get_str_property (plist,
+                              GST_PROP_HG_NAME,
+                              NULL,
+                              buf);
+}
+printf ("Hypergraph name is %s\n",
+        (buf == NULL) ? "<NULL>" : buf);
+if (buf != NULL) free (buf);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_properties
+
+@DESCRIPTION
+Retrieve all property IDs and their types from the given property list.
+
+@FUNCTION
+int gst_get_properties (gst_proplist_ptr  plist,
+                        int*              count,
+                        int*              propids,
+                        int*              types);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A count
+Number of properties in the given \code{plist} (unless it is a
+\code{NULL} pointer).
+@A propids
+Buffer to receive the property IDs of each property in \code{plist}
+(unless it is a \code{NULL} pointer).
+@A types
+Buffer to receive the types of each property in \code{plist}
+(unless it is a \code{NULL} pointer).
+
+@RETURNVALUE
+Returns zero if the properties were successfully retrieved.
+
+@EXAMPLE
+int count;
+int* propids;
+int* types;
+code = gst_get_properties (plist, &count, NULL, NULL);
+if (code != 0) {
+       /* Something went wrong. */
+       exit (1);
+}
+propids = (int *) malloc (count * sizeof (int));
+types   = (int *) malloc (count * sizeof (int));
+gst_get_properties (plist, NULL, propids, types);
+for (i = 0; i < count; i++) {
+        printf ("Propid = %d, type = %d.\n", 
+                propids [i], types [i]);
+}
+free (types);
+free (propids);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_dbl_property
+
+@DESCRIPTION
+Change or create a specified property in the given property list.
+The property is added to the list if not already present. If the
+property already exists, its type is forced to be double.
+It is {\em legal} to do this with any property list.
+% --- including the ones from
+% \code{gst\_get\_hg\_properties} and \code{gst\_get\_solver\_properties}.
+
+@FUNCTION
+int gst_set_dbl_property (gst_proplist_ptr  plist, 
+                          int               propid, 
+                          double            value);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of double property to create or modify.
+@A newvalue
+New value for this property.
+
+@RETURNVALUE
+Returns zero if the property was set successfully.
+
+@EXAMPLE
+/* Assume we are given a property list plist */
+#define GST_PROP_USER_MY_DBL_VALUE   -1000
+
+gst_set_dbl_property (plist, GST_PROP_USER_MY_DBL_VALUE, 2.71828);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_int_property
+
+@DESCRIPTION
+Change or create a a specified property in the given property list.
+The property is added to the list if not already present. If the
+property already exists, its type is forced to be integer.
+It is {\em legal} to do this with any property list.
+%  --- including the ones from
+% \code{gst\_get\_hg\_properties} and \code{gst\_get\_solver\_properties}.
+
+@FUNCTION
+int gst_set_int_property (gst_proplist_ptr  plist, 
+                          int               propid, 
+                          int               value);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of integer property to create or modify.
+@A newvalue
+New value for this property.
+
+@RETURNVALUE
+Returns zero if the property was set successfully.
+
+@EXAMPLE
+/* Assume we are given a property list plist */
+#define GST_PROP_USER_MY_INT_VALUE   -1001
+
+gst_set_int_property (plist, GST_PROP_USER_MY_INT_VALUE, 42);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_str_property
+
+@DESCRIPTION
+Change or create a specified property in the given property list.
+The property is added to the list if not already present. If the
+property already exists, its type is forced to be string.
+It is {\em legal} to do this with any property list.
+%  --- including the ones from
+% \code{gst\_get\_hg\_properties} and \code{gst\_get\_solver\_properties}.
+
+@FUNCTION
+int gst_set_str_property (gst_proplist_ptr  plist, 
+                          int               propid, 
+                          const char*       value);
+
+@ARGUMENTS
+@A plist
+Property list.
+@A propid
+ID of string property to create or modify.
+@A newvalue
+New value for this property.
+
+@RETURNVALUE
+Returns zero if the property was set successfully.
+
+@EXAMPLE
+/* Assume we are given a property list plist */
+gst_set_str_property (plist, GST_PROP_HG_NAME, "Oobleck");
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Hypergraph functions
+
+@DESCRIPTION
+\label{hypergraph_functions}
+
+The hypergraph object represents an arbitrary hypergraph that can be
+decorated with a variety of additional (and optional) data.  For
+example, the edges can be given weights.  In general, the goal of
+\geosteiner{} is to find a spanning tree of minimum total weight using the
+edges of the hypergraph.
+
+In this section we document all of the operations provided for creating,
+destroying and manipulating hypergraph objects.
+
+Hypergraphs can be embedded in the plane: Vertices can be given
+coordinates and hyperedges can be associated with trees in the plane. 
+Also, every hypergraph has an associated metric object
+(Section~\ref{metric_functions}), a scaling object
+(Section~\ref{io_functions}) and a property list
+(Section~\ref{proplist_functions}). 
+
+The library interfaces have been designed to permit maximum flexibility
+in using the various operations provided.  For example, it is
+intended that the user be able to define a hypergraph, solve it, modify
+some attributes of the hypergraph (e.g., change some of the edge costs),
+and re-solve the modified problem.  The library should be 
+smart enough to know when the problem can be re-solved starting from the
+most recent solution state --- and when it is necessary to discard the
+previous solution state and re-solve the current problem from scratch.
+
+% The current implementation of this functionality strives to achieve
+% correctness before efficiency --- i.e., it errs on the side of
+% caution by discarding existing solution state whenever any attribute of
+% the subject hypergraph has been modified since the last solve.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_hg
+
+@DESCRIPTION
+Create an instance of an empty hypergraph.  The hypergraph initially has
+no vertices and no edges.  After creating an empty hypergraph, the next
+step is normally to give it the desired number of vertices
+using {\bf gst\_set\_hg\_number\_of\_vertices()}, and then add the
+edges using {\bf gst\_set\_hg\_edges()}. Doing the steps in this order
+avoids the failure that would result from attempting to add edges that
+refer to non-existent vertices.
+
+@FUNCTION
+gst_hg_ptr gst_create_hg (int*  status);
+
+@ARGUMENTS
+@A status
+Status code (zero if the operation was successful and non-zero otherwise).
+May be \code{NULL} if the value is not needed.
+
+@RETURNVALUE
+Returns new hypergraph object.
+
+@EXAMPLE
+gst_hg_ptr h;
+int status;
+h = gst_create_hg (&status);
+if (status != 0) {
+        /* Something went wrong */
+}
+/* Make it be a complete hypergraph on 3 vertices */
+status = gst_set_hg_number_of_vertices (h, 3);
+if (status != 0) {
+        /* Error */
+}
+else {
+        static int edge_sizes [] = {2, 2, 2, 3};
+        static int edges [] = {0, 1, 0, 2, 1, 2, 0, 1, 2};
+        status = gst_set_hg_edges (h, 4, edge_sizes, edges, NULL);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_copy_hg
+
+@DESCRIPTION
+Make a copy of a given hypergraph. Any data associated with the
+destination hypergraph is discarded, and the following attributes are
+copied from the source hypergraph (if present): vertices, edges, edge
+weights, metric object info, scale object info, property list, vertex
+embedding, and edge embedding.
+
+@FUNCTION
+int gst_copy_hg (gst_hg_ptr  dst,
+                 gst_hg_ptr  src);
+
+@ARGUMENTS
+@A dst
+Destination hypergraph object. All existing data in the destination is
+discarded.
+@A src
+Source hypergraph object to copy.
+
+@RETURNVALUE
+Returns zero if the hypergraph was copied successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph */
+gst_hg_ptr newhg;
+newhg = gst_create_hg (NULL);
+status = gst_copy_hg (newhg, h);
+if (status != 0) {
+        fprintf (stderr, "Error copying hypergraph\n");
+        exit (1);
+}
+gst_set_hg_edge_weights (newhg, NULL);
+/* newhg is now a copy of h, but with all edge weights = 1. */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_copy_hg_edges
+
+@DESCRIPTION
+Make a copy of a given hypergraph with a subset of the original edges.
+Any data associated with the destination hypergraph is
+discarded, and the following attributes are copied from the source
+hypergraph (if present): vertices, (subset of) edges, (subset of) edge
+weights, metric object info, scale object info, property list, vertex 
+embedding, and edge embedding. 
+
+@FUNCTION
+int gst_copy_hg_edges (gst_hg_ptr  dst, 
+                       gst_hg_ptr  src, 
+                       int         nedges, 
+                       int*        edges);
+
+@ARGUMENTS
+@A dst
+Destination hypergraph object. All existing data in the destination is
+discarded.
+@A src
+Source hypergraph object to copy.
+@A nedges
+Number of edges to copy from source hypergraph.
+@A edges
+Index values of edges to copy from source hypergraph.
+
+@RETURNVALUE
+Returns zero if (a subset of) the hypergraph was copied successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph with 10 edges */
+static int edges [] = {2, 4, 6, 8};
+gst_hg_ptr newhg;
+newhg = gst_create_hg (NULL);
+status = gst_copy_hg_edges (newhg, h, 4, edges);
+if (status != 0) {
+        fprintf (stderr, "Error copying hypergraph\n");
+        exit (1);
+}
+/* newhg is now a copy of h but having only 4 of the edges of h */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_hg
+
+@DESCRIPTION
+Remove a hypergraph and free all associated memory, including associated
+properties. 
+
+@FUNCTION
+int gst_free_hg (gst_hg_ptr  H);
+
+@ARGUMENTS
+@A H
+Hypergraph to free. If \code{NULL}, this function does nothing. 
+
+@RETURNVALUE
+Returns zero if the hypergraph was freed successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph */
+int status;
+status = gst_free_hg (h);
+if (status != 0) {
+        fprintf (stderr, "Error freeing hypergraph\n");
+        exit (1);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_number_of_vertices
+
+@DESCRIPTION
+Define the number of vertices of a hypergraph.
+
+@FUNCTION
+int gst_set_hg_number_of_vertices (gst_hg_ptr  H,
+                                   int         nverts);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A nverts
+Number of vertices \code{H} should have (non-negative number).
+
+@RETURNVALUE
+Returns zero if the number of vertices was set successfully.
+
+@EXAMPLE
+/* Construct a hypergraph with 20 vertices (no error checking) */
+gst_hg_ptr hg;
+
+hg = gst_create_hg (NULL);
+gst_set_hg_number_of_vertices (hg, 20);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_edges
+
+@DESCRIPTION
+Define the set of edges of a hypergraph (default associated
+information). 
+
+@FUNCTION
+int gst_set_hg_edges (gst_hg_ptr  H,
+                      int         nedges,
+                      int*        edge_sizes,
+                      int*        edges,
+                      double*     weights);
+@ARGUMENTS
+@A H
+Hypergraph.
+@A nedges
+Number of edges \code{H} should have.
+@A edge\_sizes
+Number of vertices for each edge.
+@A edges
+Vertex indices of each edge. 
+@A weights
+Edge weights (if \code{NULL} then all edge weights are 1).
+
+@RETURNVALUE
+Returns zero if the edges were defined successfully.
+
+@EXAMPLE
+/* Construct a complete hypergraph on 3 vertices 
+   with edge weights 1 (no error checking) */
+
+gst_hg_ptr h;
+static int edge_sizes [] = {2, 2, 2, 3};
+static int edges [] = {0, 1, 0, 2, 1, 2, 0, 1, 2};
+
+h = gst_create_hg (NULL);
+gst_set_hg_number_of_vertices (h, 3);
+gst_set_hg_edges (h, 4, edge_sizes, edges, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_edge_weights
+
+@DESCRIPTION
+Set all edge weights of a hypergraph. 
+
+@FUNCTION
+int gst_set_hg_edge_weights (gst_hg_ptr  H,
+                             double*     weights);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A weights
+Array of edge weights of length equal to the number of edges in
+\code{H} (if \code{NULL} then all edge weights are set to 1).
+
+@RETURNVALUE
+Returns zero if the edges weights were set successfully.
+
+@EXAMPLE
+/* Assume that h is a hypergraph with 4 edges */
+
+static double weights [] = {1.0, 2.0, 3.0, 4.0};
+int status;
+
+status = gst_set_hg_edge_weights (h, weights);
+if (status != 0) {
+        fprintf (stderr, "Error setting edge weights\n");
+        exit (1);
+}
+/* The edges of h now have weights 1, 2, 3 and 4 */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_vertex_embedding
+
+@DESCRIPTION
+Embed the vertices in a hypergraph in some $k$-dimensional space.
+(In the current version only the $2$-dimensional space, the plane, is
+supported.) 
+
+@FUNCTION
+int gst_set_hg_vertex_embedding (gst_hg_ptr  H,
+                                 int         dim,
+                                 double*     coords);
+
+@ARGUMENTS
+@A H
+Hypergraph whose vertices should be embedded.
+@A dim
+Dimension of space (currently only dimension 2 is supported). 
+@A coords
+Vertex coordinates ($x_1, y_1, x_2, y_2, \ldots$). Length must be
+the dimension times the number of vertices in the hypergraph.
+
+@RETURNVALUE
+Returns zero if the vertices were embedded successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph with four vertices */
+static double coords [] = {0, 0, 1, 0, 1, 1, 0, 1};
+int status;
+status = gst_set_hg_vertex_embedding (h, 2, coords);
+if (status != 0) {
+        fprintf (stderr, "Error embedding vertices\n");
+        exit (1);
+}
+/* The four vertices of h are now embedded as 
+   (0,0), (0,1), (1,1) and (0,1). */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_metric
+
+@DESCRIPTION
+Set the metric object associated with a hypergraph.
+
+@FUNCTION
+int gst_set_hg_metric (gst_hg_ptr      H,
+                       gst_metric_ptr  metric);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A metric
+Metric object that should be associated with \code{H} (see
+Section~\ref{metric_functions} for information on metric objects).
+If \code{NULL}, then the hypergraph metric will be set to "None".
+
+@RETURNVALUE
+Returns zero if metric was set successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph */
+
+/* Create a Euclidean metric object */
+gst_metric_ptr metric;
+metric = gst_create_metric (GST_METRIC_L, 2, NULL);
+
+/* Associate it with h */
+gst_set_hg_metric (h, metric);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_hg_scale_info
+
+@DESCRIPTION
+Set the scaling information associated with a hypergraph.
+
+@FUNCTION
+int gst_set_hg_scale_info (gst_hg_ptr          H,
+                           gst_scale_info_ptr  scinfo);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A scinfo
+Scaling information that should be associated with this hypergraph (see
+Section~\ref{io_functions}).
+If \code{NULL}, then no scaling is used for this hypergraph.
+
+@RETURNVALUE
+Returns zero if the scaling information was set successfully.
+
+@EXAMPLE
+/* Read a set points from stdin, generate FST hypergraph
+   and set scaling information */
+
+gst_hg_ptr hg;
+gst_scale_info_ptr scinfo;
+int n;
+double* terms;
+
+n = gst_get_points (stdin, 0, &terms, scinfo);
+hg = gst_generate_efsts (n, terms, NULL, NULL);
+gst_set_hg_scale_info (hg, scinfo);
+
+% -------------------------------------------------------------------------
+% @FUNCNAME
+% gst_set_hg_terminals
+%
+% @DESCRIPTION
+% Define terminals for a hypergraph. The terminal indices are given in
+% the \code{terms} array. 
+%
+% @FUNCTION
+% int gst_set_hg_terminals (gst_hg_ptr  H,
+%                           int         nterms,
+%                           int*        terms);
+%
+% @COMMENT
+% BN: This function is NOT implemented.
+
+% -------------------------------------------------------------------------
+% @FUNCNAME
+% gst_set_hg_groups
+%
+% @DESCRIPTION
+% Define groups for a hypergraph. A group is a set of vertices, one of
+% which must be spanned by a feasible tree solution. Groups are allowed
+% to overlap. The \code{group_sizes} gives the size of each group and the
+% \code{groups} array holds the vertex indices. 
+%
+% @FUNCTION
+% int gst_set_hg_groups (gst_hg_ptr  H,
+%                        int         ngroups,
+%                        int*        group_sizes,
+%                        int*        groups);
+% 
+% @COMMENT
+% BN: This function is NOT implemented.
+
+% -------------------------------------------------------------------------
+% @FUNCNAME
+% gst_set_hg_vertex_weights
+% 
+% @DESCRIPTION
+% Specify vertex weight information for each vertex in a hypergraph.
+% The vertex weight is given for each vertex in the \code{weight} array.
+% 
+% @FUNCTION
+% int gst_set_hg_vertex_weights (gst_hg_ptr  H,
+%                                double*     weight);
+% 
+% @COMMENT
+% BN: This function is NOT implemented.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_terminals
+
+@DESCRIPTION
+Get terminal vertices for a hypergraph. The terminal indices are
+returned in the \code{terms} array. 
+
+@FUNCTION
+int gst_get_hg_terminals (gst_hg_ptr  H,
+                          int*        nterms,
+                          int*        terms);
+
+% -------------------------------------------------------------------------
+% @FUNCNAME
+% gst_get_hg_groups
+%
+% @DESCRIPTION
+% Get groups for a hypergraph. If any of the three final pointers is
+% \code{NULL}, the corresponding information is not returned. 
+%
+% @FUNCTION
+% int gst_get_hg_groups (gst_hg_ptr  H,
+%                        int*        ngroups,
+%                        int*        group_sizes,
+%                        int*        groups);
+%
+% @COMMENT
+% BN: This function is NOT implemented.
+
+% -------------------------------------------------------------------------
+% @FUNCNAME
+% gst_get_hg_vertex_weights
+%
+% @DESCRIPTION
+% Get vertex weight information for each vertex in a hypergraph. The
+% vertex weight is returned for each vertex in the \code{weight} array. 
+%
+% @FUNCTION
+% int gst_get_hg_vertex_weights (gst_hg_ptr  H,
+%                                double*     weight);
+% 
+% @COMMENT
+% BN: This function is NOT implemented.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_number_of_vertices
+
+@DESCRIPTION
+Get the number of vertices of a hypergraph.
+
+@FUNCTION
+int gst_get_hg_number_of_vertices (gst_hg_ptr  H);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+
+@RETURNVALUE
+A return value of -1 implies that the hypergraph was invalid.
+
+@EXAMPLE
+/* Assume that hg is an existing hypergraph */
+int nverts;
+
+nverts = gst_get_hg_number_of_vertices (hg);
+
+/* nverts is now equal to the number of vertices in hg */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_edges
+
+@DESCRIPTION
+Get the set of edges of a hypergraph. If any of the three final arguments
+is \code{NULL}, the corresponding information is not returned. The
+user has to allocate space for holding the returned
+data. Necessary sizes for arrays can be obtained by first
+obtaining the number of edges, then the edge sizes and finally the
+vertices for each edge (see example below).
+
+@FUNCTION
+int gst_get_hg_edges (gst_hg_ptr  H,
+                      int*        nedges,
+                      int*        edge_sizes,
+                      int*        edges,
+                      double*     weight);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A nedges
+Number of edges in this hypergraph.
+@A edge\_sizes
+Number of vertices for each edge (pointer to an array allocated by the
+user).
+@A edges
+Vertex indices of each edges (pointer to an array allocated by the user). 
+@A weights
+Edge weights (pointer to an array allocated by the user).
+
+@RETURNVALUE
+Returns zero if the edges were queried successfully.
+\newpage
+
+@EXAMPLE
+/* Assume that H is some hypergraph */
+int i, nedges, nedgeverts;
+int* edge_sizes;
+int* edges;
+double* weight;
+
+/* First we query the number of edges */
+gst_get_hg_edges (H, &nedges, NULL, NULL, NULL);
+
+/* Allocate space for edge sizes and edge weights */
+edge_sizes = (int *)    malloc (nedges * sizeof (int));
+weight     = (double *) malloc (nedges * sizeof (double));
+
+/* Query edge sizes and weights */
+gst_get_hg_edges (H, NULL, edge_sizes, NULL, weight);
+
+/* Count the number of vertices in all edges */
+nedgeverts = 0;
+for (i = 0; i < nedges; i++)
+   nedgeverts += edge_sizes[i];
+edges = (int *) malloc (nedgeverts * sizeof (int));
+
+/* Finally query vertices of edges */
+gst_get_hg_edges (H, NULL, NULL, edges, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_one_edge
+
+@DESCRIPTION
+Get information about one edge in the hypergraph. If any of the three
+last arguments to the function is \code{NULL}, the corresponding
+information is not returned. 
+
+@FUNCTION
+int gst_get_hg_one_edge (gst_hg_ptr  H,
+                         int         edge_number,
+                         double*     weight,
+                         int*        nverts,
+                         int*        verts);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A edge\_number
+Edge number to query (first edge is number 0).
+@A weight
+Weight of edge (pointer to a double variable).
+@A nverts
+Number of vertices in this edge (pointer to an int variable).
+@A terms
+Vertex indices of this edges (pointer to an array allocated by user). 
+
+@RETURNVALUE
+Returns zero if the edge was queried successfully.
+
+@EXAMPLE
+/* Assume that H is some hypergraph with at least 10 edges  */
+int nverts;
+int* verts;
+double weight;
+
+/* Query edge number 10 */
+gst_get_hg_one_edge (H, 10, &weight, &nverts, NULL);
+
+/* Allocate space for vertex indices */
+verts = (int *) malloc (nverts * sizeof (int));
+
+/* Query vertex indices */
+gst_get_hg_one_edge (H, 10, NULL, NULL, verts);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_vertex_embedding
+
+@DESCRIPTION
+Get the embedding of the vertices in a hypergraph.
+
+@FUNCTION
+int gst_get_hg_vertex_embedding (gst_hg_ptr  H,
+                                 int*        dim,
+                                 double*     coords);
+
+
+@ARGUMENTS
+@A H
+Hypergraph whose vertices are embedded.
+@A dim
+Dimension of the space (pointer to an integer variable).
+@A coords
+Array in which to place the vertex coordinates of the embedding ($x_1,
+y_1, x_2, y_2, \ldots$). This array must be allocated by the user, and
+its length must be dimension times the number of vertices in the
+hypergraph. 
+
+@RETURNVALUE
+Returns zero if the embedding was returned successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph with four vertices 
+   embedded in the plane */
+double coords[8];
+int status;
+
+status = gst_get_hg_vertex_embedding(H, NULL, coords);
+if (status != 0) {
+        fprintf (stderr, "Error querying vertex embedding\n");
+        exit (1);
+}
+
+/* coords now holds the coordinates of the embedded vertices */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_one_vertex_embedding
+
+@DESCRIPTION
+Return the embedding of a single vertex in a hypergraph.
+
+@FUNCTION
+int gst_get_hg_one_vertex_embedding 
+                        (gst_hg_ptr  H,      
+                         int         vertex_number,
+                         double*     coords);
+
+@ARGUMENTS
+@A H
+Hypergraph whose vertices are embedded.
+@A vertex\_number
+Vertex number whose embedding should be queried (first vertex is
+number 0).
+@A coords
+Coordinates of the vertex embedding ($x_1, y_1$). This array must be
+allocated by the user, and its length equal to the dimension of the
+space of the embedding.
+
+@RETURNVALUE
+Returns zero if the embedding was returned successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph with four vertices 
+   embedded in the plane */
+double coords[2];
+int status;
+
+/* Query embedding of vertex number 3 */
+status = gst_get_hg_one_vertex_embedding(H, 3, coords);
+if (status != 0) {
+        fprintf (stderr, "Error querying vertex embedding\n");
+        exit (1);
+}
+
+/* coords now holds the coordinates of vertex number 3 */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_edge_embedding
+
+@DESCRIPTION
+Return the embedding of a subset of edges in a hypergraph. If any
+of the four last arguments to the function is \code{NULL}, the
+corresponding information is not returned. 
+
+@FUNCTION
+int gst_get_hg_edge_embedding (gst_hg_ptr  H,
+                               int         nhgedges,
+                               int*        hgedges,
+                               int*        nsps,
+                               double*     sps,
+                               int*        nedges,
+                               int*        edges);
+
+@ARGUMENTS
+@A H
+Hypergraph
+@A nhgedges
+Number of hyperedges that should be queried for embedding
+information (when equal to 0 all edges are returned).
+@A hgedges
+List of indices of hyperedges that should be queried.
+If this argument is \code{NULL} then the first \code{nhgedges}
+are returned.
+@A nsps
+Number of Steiner points in embedding of all queried hyperedges
+(pointer to int variable).
+@A sps
+Coordinates of Steiner points in the embedded hyperedges (pointer to
+double array allocated by user).
+@A nedges
+Number of edges in the {\em embedding} (pointer to int variable).
+@A edges
+Indices of the edge endpoints in {\em embedding} (pointer to int array
+allocated by user). Let $n$ be the number of vertices in hypergraph
+\code{H}. Then hypergraph vertex endpoints have indices $0$ to $n-1$
+while Steiner endpoints have indices $n$ and up.
+
+@RETURNVALUE
+Returns zero if the embedding was queried successfully.
+\newpage
+
+@EXAMPLE
+/* Assume that H is an embedded hypergraph with 
+   5 vertices and 10 edges. The complete embedding 
+   has 15 Steiner points and 30 edges. We would like 
+   to get the embedding of hyperedges with even indices. */
+
+int nsps;
+int nedges;
+double sps[30];
+int edges[60];
+
+static int hgedges [] = {0, 2, 4, 6, 8};
+
+gst_get_hg_edge_embedding (H, 5, hgedges, 
+                           &nsps, sps, &nedges, edges);
+
+/* Now sps contains the Steiner point coordinates,
+   while edges contain edge endpoints; hypergraph 
+   vertices have endpoint indices 0..4 and Steiner
+   points endpoint indices 5..19. */
+  
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_one_edge_embedding
+
+@DESCRIPTION
+Return the embedding of a single edge in a hypergraph.
+Note that the indices of vertices spanned by an edge can be obtained
+by using {\bf gst\_get\_hg\_one\_edge()}.
+
+@FUNCTION
+int gst_get_hg_one_edge_embedding 
+                        (gst_hg_ptr  H,
+                         int         edge_number,
+                         int*        nsps,
+                         double*     coords,
+                         int*        nedges,
+                         int*        edges);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A edge\_number
+Hyperedge number whose embedding should be queried (first hyperedge has
+number 0).
+@A nsps
+Number of Steiner points in the embedding for the hyperedge (pointer
+to int variable). 
+@A coords
+Coordinates of Steiner points in embedded hyperedge (pointer to
+double array allocated by user).
+@A nedges
+Number of edges in the {\em embedding} (pointer to int variable).
+@A edges
+Indices of edge endpoints in the {\em embedding} (pointer to int array
+allocated by user). Let $k$ be the number of vertices in the hyperedge.
+Then hypergraph vertex endpoints have indices $0$ to $k-1$ while Steiner
+endpoints have indices $k$ and up. 
+
+@RETURNVALUE
+Returns zero if embedding was queried successfully.
+\newpage
+
+@EXAMPLE
+/* Assume that H is an embedded hypergraph with 10 edges. 
+   We would like to get the embedding of hyperedge 7. */
+
+int nsps;
+int nedges;
+double* sps;
+int* edges;
+
+gst_get_hg_one_edge_embedding (H, 7, &nsps, NULL, &nedges, NULL);
+
+/* Allocate space */
+sps   = (double *) malloc (2*nsps   * sizeof (double));
+edges = (int *)    malloc (2*nedges * sizeof (int));
+
+gst_get_hg_one_edge_embedding (H, 7, NULL, sps, NULL, edges);
+
+/* Now sps contains the Steiner point coordinates,
+   while edges contain edge endpoints. */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_edge_status
+
+@DESCRIPTION
+Return the pruning status of an edge.  When \code{gst\_prune\_edges}
+runs, it may determine that some edges are ``required'' (such edges
+{\em must} appear in any optimal solution).  It may also determine
+that certain other edges are ``unneeded'' (at least one optimal
+solution exists that does not use any ``unneeded'' edge).  By default,
+edges are neither ``unneeded'' nor ``required.''  It is impossible
+for an edge to be simultaneously ``unneeded'' and ``required.''
+
+@FUNCTION
+int gst_get_hg_edge_status (gst_hg_ptr  H,
+                            int         edge_number,
+                            int*        unneeded,
+                            int*        required);
+@ARGUMENTS
+@A H
+Hypergraph.
+@A edge\_number
+Hyperedge whose pruning status should be queried.
+@A unneeded
+Non-zero if edge is ``unneeded'' (pointer to an int variable).
+@A required
+Non-zero if edge is ``required'' (pointer to an int variable).
+
+@RETURNVALUE
+Returns zero if pruning status was queried successfully.
+\newpage
+
+@EXAMPLE
+/* Assume that H is an embedded hypergraph with N
+   edges that has been pruned.  We would like to
+   get the pruning status of its edges. */
+
+int i, unneeded, required;
+const char * s;
+
+for (i = 0; i < N; i++) {
+  gst_get_hg_edge_status (H, i, &unneeded, &required);
+  if (required) {
+    s = "required";
+  } else if (unneeded) {
+    s = "unneeded";
+  } else {
+    s = "undecided";
+  }
+  printf (" Edge %d is %s\n", s);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_metric
+
+@DESCRIPTION
+Get the metric object associated with a hypergraph.
+
+@FUNCTION
+int gst_get_hg_metric (gst_hg_ptr       H,
+                       gst_metric_ptr*  metric);
+@ARGUMENTS
+@A H
+Hypergraph.
+@A metric
+Metric object associated with this hypergraph (see
+Section~\ref{metric_functions} for information on metric objects).
+
+@RETURNVALUE
+Returns zero if the metric was queried successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph */
+
+gst_metric_ptr metric;
+
+/* Get metric associated with h */
+gst_get_hg_metric (h, metric);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_scale_info
+
+@DESCRIPTION
+Get the scaling information associated with a hypergraph.
+
+@FUNCTION
+int gst_get_hg_scale_info 
+                     (gst_hg_ptr           H,
+                      gst_scale_info_ptr*  scinfo);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A scinfo
+Scaling information associated with this hypergraph (see
+Section~\ref{io_functions}).
+
+@RETURNVALUE
+Returns zero if the scaling information was queried successfully.
+
+@EXAMPLE
+/* Assume that h is an existing hypergraph */
+
+gst_scale_info_ptr scinfo;
+
+/* Get scaling information associated with h */
+gst_get_hg_scale_info (h, scinfo);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_hg_properties
+
+@DESCRIPTION
+Return the list of properties associated with a hypergraph.
+
+@FUNCTION
+gst_proplist_ptr 
+        gst_get_hg_properties (gst_hg_ptr  H);
+
+@ARGUMENTS
+@A H
+Hypergraph
+
+@RETURNVALUE
+Returns the property list.
+
+@EXAMPLE
+/* Assume we are given a hypergraph H */
+double gtime, ptime;
+gst_proplist_ptr hgprop;
+
+/* Get timing information from the hypergraph, if available */
+hgprop = gst_get_hg_properties (H);
+gtime = 0.0; ptime = 0.0;
+gst_get_dbl_property (hgprop, GST_PROP_HG_GENERATION_TIME, &gtime);
+gst_get_dbl_property (hgprop, GST_PROP_HG_PRUNING_TIME, &ptime);
+
+printf ("Generation time: %.2f\n", gtime);
+printf ("Pruning time: %.2f\n", ptime);
+printf ("Total time: %.2f\n", ptime + gtime);
+
+/* We can set our own property in the same list e.g. for later use */
+#define GST_PROP_USER_TOTAL_TIME       -1000
+gst_set_dbl_property (hgprop, GST_PROP_USER_TOTAL_TIME, gtime + ptime);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_hg_to_graph
+
+@DESCRIPTION
+Given a hypergraph having a geometric embedding for each of its vertices
+and edges, construct an ordinary graph
+containing the individual edges in the embedding. For a rectilinear
+embedding the parameter \code{GST\_PARAM\_GRID\_OVERLAY} is used to specify
+that the edges of the reduced grid graph rather than individual edges of the
+embedding should be returned.
+
+The original vertices in the hypergraph are marked as {\em terminals} in
+the new graph, but the only way\footnote{In a future release of the
+library, there will be other means of obtaining this information.} to
+get this information out of the new graph is to print it using
+function {\bf gst\_save\_hg()}.
+
+@FUNCTION
+gst_hg_ptr gst_hg_to_graph (gst_hg_ptr     H,
+                            gst_param_ptr  param, 
+                            int*           status);
+
+@ARGUMENTS
+@A H
+Hypergraph
+@A param
+Parameter set.
+@A status
+Status code (zero if the operation was successful and non-zero
+otherwise). 
+
+@RETURNVALUE
+Returns the new graph which represents the embedding.
+
+@EXAMPLE
+/* Assume we are given an embedded hypergraph H */
+
+H2 = gst_hg_to_graph (H, NULL, NULL);
+
+/* Now H2 is a graph of the embedding of H. Print it. */
+gst_save_hg (stdout, H2, NULL);
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+FST generation and pruning functions
+
+@DESCRIPTION
+\label{fst_functions}
+
+All algorithms for solving geometric Steiner tree problems in
+\geosteiner{} use the two-phase approach that consists of full Steiner
+tree (FST) generation and concatenation.
+
+FST generation is the process of generating a (hopefully small) set
+of FSTs that is known to contain a Steiner minimum tree (SMT) as a
+subset. The input to an FST generation algorithm is the set of
+terminal points, and the output is an embedded hypergraph in which the
+vertices correspond to terminals and the edges correspond to FSTs. The
+embedding of each hyperedge (or FST) is the geometric tree structure
+of the FST.  
+
+In this section we describe the interface to all FST generation
+algorithms. They are all fairly similar. In addition, a FST {\em
+pruning} function is given. This function reduces the set of FSTs ---
+or removes edges from the hypergraph --- such that the resulting
+hypergraph still contains an SMT. This may speed up the following
+concatenation algorithm, in particular for very large problem
+instances. 
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_generate_fsts
+
+@DESCRIPTION
+Given a point set (terminals) in the plane, generate a set of FSTs
+(hyperedges) known to contain an SMT for the point set. The metric
+that should be used is passed as a parameter (see
+section~\ref{metric_functions} for more on creating metric objects). 
+The generated FSTs are returned as edges in an embedded hypergraph.  
+
+@FUNCTION
+gst_hg_ptr 
+    gst_generate_fsts (int             nterms,
+                       double*         terms,
+                       gst_metric_ptr  metric,
+                       gst_param_ptr   param,
+                       int*            status);
+
+@ARGUMENTS
+@A nterms
+Number of terminals.
+@A terms
+Terminals in an array of doubles ($x_1, y_1, x_2, y_2, \ldots$)
+@A metric
+The metric for which FSTs are to be generated.
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the resulting FSTs in a hypergraph structure.
+
+@EXAMPLE
+int            n;
+double *       terms;
+gst_hg_ptr     hg;
+gst_metric_ptr metric;
+
+/* Read points from stdin */
+n = gst_get_points (stdin, 0, &terms, NULL);
+
+/* Establish lambda-6 metric */
+metric = gst_create_metric (GST_METRIC_UNIFORM, 6, NULL);
+
+/* Generate lambda-6 FSTs */
+hg = gst_generate_fsts (n, terms, metric, NULL, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_generate_efsts
+
+@DESCRIPTION
+Given a point set (terminals) in the plane, generate a set of FSTs
+(hyperedges) known to contain an {\em Euclidean} SMT for the point
+set. The FSTs are returned as edges in an embedded hypergraph.
+
+@FUNCTION
+gst_hg_ptr 
+    gst_generate_efsts (int            nterms,
+                        double*        terms,
+                        gst_param_ptr  param,
+                        int*           status);
+
+@ARGUMENTS
+@A nterms
+Number of terminals.
+@A terms
+Terminals in an array of doubles ($x_1, y_1, x_2, y_2, \ldots$)
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the resulting FSTs in a hypergraph structure.
+
+@EXAMPLE
+int            n;
+double *       terms;
+gst_hg_ptr     hg;
+
+/* Read points from stdin */
+n = gst_get_points (stdin, 0, &terms, NULL);
+
+/* Generate Euclidean FSTs */
+hg = gst_generate_efsts (n, terms, NULL, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_generate_rfsts
+
+@DESCRIPTION
+Given a point set (terminals) in the plane, generate a set of FSTs
+(hyperedges) known to contain a {\em rectilinear} SMT for the point
+set. The FSTs are returned as edges in an embedded hypergraph.
+
+@FUNCTION
+gst_hg_ptr 
+    gst_generate_rfsts (int            nterms, 
+                        double*        terms, 
+                        gst_param_ptr  param,
+                        int*           status);
+
+@ARGUMENTS
+@A nterms
+Number of terminals.
+@A terms
+Terminals in an array of doubles ($x_1, y_1, x_2, y_2, \ldots$)
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the resulting FSTs in a hypergraph structure.
+
+@EXAMPLE
+int            n;
+double *       terms;
+gst_hg_ptr     hg;
+
+/* Read points from stdin */
+n = gst_get_points (stdin, 0, &terms, NULL);
+
+/* Generate rectilinear FSTs */
+hg = gst_generate_rfsts (n, terms, NULL, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_generate_ofsts
+
+@DESCRIPTION
+Given a point set (terminals) in the plane, generate a set of FSTs
+(hyperedges) known to contain an {\em octilinear} SMT for the
+point set. The FSTs are returned as edges in an embedded
+hypergraph. 
+
+@FUNCTION
+gst_hg_ptr 
+    gst_generate_ofsts (int            nterms, 
+                        double*        terms,
+                        gst_param_ptr  param, 
+                        int*           status);
+
+@ARGUMENTS
+@A nterms
+Number of terminals.
+@A terms
+Terminals in an array of doubles ($x_1, y_1, x_2, y_2, \ldots$)
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the resulting FSTs in a hypergraph structure.
+
+@EXAMPLE
+int            n;
+double *       terms;
+gst_hg_ptr     hg;
+
+/* Read points from stdin */
+n = gst_get_points (stdin, 0, &terms, NULL);
+
+/* Generate octilinear FSTs */
+hg = gst_generate_ofsts (n, terms, NULL, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_hg_prune_edges
+
+@DESCRIPTION
+Given a hypergraph $H$, return a hypergraph $H'$ that has the same
+vertices as $H$, but a (possibly) reduced set of edges such that there
+still exists an optimal solution to $H$ in $H'$. The pruning algorithms
+are metric dependent and require a geometric embedding of the hypergraph
+vertices and edges.
+
+@FUNCTION
+gst_hg_ptr gst_hg_prune_edges (gst_hg_ptr     H,
+                               gst_param_ptr  param, 
+                               int*           status);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns new pruned hypergraph.
+
+@EXAMPLE
+/* Assume that hg is an FST hypergraph */
+
+gst_hg_ptr hg1;
+
+/* Prune the set of FSTs in hg */
+
+hg1 = gst_hg_prune_edges (hg, NULL, NULL);
+
+/* Hypergraph hg1 now has the same set of vertices as hg, 
+   but (in most cases) a significantly smaller set of edges that
+   still contains an SMT as a subset */ 
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Hypergraph optimization functions
+
+@DESCRIPTION
+\label{solver_functions}
+
+The optimization problem associated with hypergraphs is the {\em
+minimum spanning tree (MST) in hypergraph problem}. Solving this problem
+solves the FST concatenation problem --- which is the second of the
+two phases for solving geometric Steiner tree problems. 
+
+The library contains a powerful solver for the general MST in
+hypergraph problem. This solver uses linear programming and
+branch-and-cut (or backtrack search for very small problem
+instances). A large number of parameters can be set to control the
+solver; consult Appendix~\ref{parameters_solver_alg},
+\ref{parameters_stop} and \ref{parameters_io} for a complete list of
+all solver parameters.
+
+A solution state object has type \code{gst\_solver\_ptr}. It has an
+associated hypergraph for which an MST should be found. The solver can
+be stopped and restarted, e.g., depending on either the quality of
+(approximate) solutions that are found in the solution process, or on
+the amount of running time used. The solution state object can contain zero or
+more feasible (though not necessarily optimal) solutions to the
+problem. A solution state object refers to both an hypergraph object and a
+parameter object (from which all necessary parameter values are
+obtained), as illustrated in Figure~\ref{fig:solutionstate} on
+page~\pageref{fig:solutionstate}. A demonstration program is given in 
+Figure~\ref{fig:demo4} on page~\pageref{fig:demo4}.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_solver
+
+@DESCRIPTION
+Create a solution state object for a given hypergraph. The solution
+process is started by calling the function {\bf gst\_hg\_solve()}, and
+passing the created object as parameter.
+
+@FUNCTION
+gst_solver_ptr 
+    gst_create_solver (gst_hg_ptr     H, 
+                       gst_param_ptr  param,
+                       int*           status);
+
+@ARGUMENTS
+@A H
+Hypergraph.
+@A param
+Parameter set (\code{NULL}=default parameters).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns new problem solution state object.
+
+An example is given in Section~\ref{low_level_interfaces}
+(Figure~\ref{fig:demo4} on page~\pageref{fig:demo4}).
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_solver
+
+@DESCRIPTION
+Free a solution state object. All memory associated with this solution
+state object, except from the associated hypergraph and its objects,
+are destroyed.
+
+@FUNCTION
+int gst_free_solver (gst_solver_ptr  solver);
+
+@ARGUMENTS
+@A solver
+Solution state object. Does nothing if \code{NULL}. 
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+An example is given in Section~\ref{low_level_interfaces}
+(Figure~\ref{fig:demo4} on page~\pageref{fig:demo4}).
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_hg_solve
+
+@DESCRIPTION
+Solve a tree problem for a given hypergraph. In the current version,
+this function by default computes a {\em minimum spanning tree (MST)}
+in the hypergraph associated with the given solution state object;
+depending on the parameters given, this function may also compute an
+heuristic solution to this problem. 
+
+This function can be repeatedly called to solve a (time-consuming)
+problem, e.g., by setting a CPU time limit for each call. The quality
+of any solution(s) obtained within the given constraints can be
+queried by calling {\bf gst\_get\_solver\_status()}.
+
+@HEADERINFO
+#define GST_SOLVE_NORMAL		0
+#define GST_SOLVE_GAP_TARGET		1
+#define GST_SOLVE_LOWER_BOUND_TARGET	2
+#define GST_SOLVE_UPPER_BOUND_TARGET	3
+#define GST_SOLVE_MAX_BACKTRACKS	4
+#define GST_SOLVE_MAX_FEASIBLE_UPDATES	5
+#define GST_SOLVE_ABORT_SIGNAL		6
+#define GST_SOLVE_TIME_LIMIT		7
+#define GST_SOLVE_BB_NODE_LIMIT		8
+#define GST_SOLVE_BB_LP_LIMIT		9
+#define GST_SOLVE_BB_STOP_REQUESTED	10
+#define GST_SOLVE_BACKTRACK_BAD_COSTS	11
+
+@FUNCTION
+int gst_hg_solve (gst_solver_ptr  solver,
+                  int *           reason);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+@A reason
+Reason that the solver exited --- see the description below. If this
+parameter is \code{NULL}, the reason for exiting is not returned. 
+
+@RETURNVALUE
+The function return value indicates whether any serious errors were
+encountered in the solution process. If this value is zero it means
+the solver ran successfully and without problems --- although it might
+have deliberately have been preempted by the user.
+
+A non-zero function return value indicates the error causing the
+solver to exit prematurely. This could for example be
+\code{GST\_ERR\_BACKTRACK\_OVERFLOW} which can happen if one has set
+the solver to use backtrack search on an instance which is too big for
+this purpose (\code{GST\_PARAM\_SOLVER\_ALGORITHM}), i.e., more than 32
+hyperedges. 
+
+When using default parameters (and when not using abort signals) then
+a value of zero for the \code{reason} parameter means that the solution 
+search space was completely exhausted. In this case the optimal
+solution has been found --- unless the problem was found to be infeasible. 
+However, if the user has set any of the solver stopping condition
+parameters, such as the CPU time limit, the actual 
+reason for exiting the solution process is returned using the
+\code{reason} parameter. Possible return values are one of the
+following:
+
+\bigskip
+{\small
+\begin{tabular}{|ll|} \hline
+{\bf Macro Name}                          & {\bf Description} \\ \hline
+\code{GST\_SOLVE\_NORMAL}                 & Normal exit (search space exhausted) \\
+\code{GST\_SOLVE\_GAP\_TARGET}            & Requested gap target obtained \\
+\code{GST\_SOLVE\_LOWER\_BOUND\_TARGET}   & Requested lower bound obtained \\
+\code{GST\_SOLVE\_UPPER\_BOUND\_TARGET}   & Requested upper bound obtained \\
+\code{GST\_SOLVE\_MAX\_BACKTRACKS}        & Max.\ number of backtracks exceeded \\
+\code{GST\_SOLVE\_MAX\_FEASIBLE\_UPDATES} & Max.\ feasible updates exceeded \\
+\code{GST\_SOLVE\_ABORT\_SIGNAL}          & Abort signal received \\
+\code{GST\_SOLVE\_TIME\_LIMIT}            & CPU time limit exceeded \\
+\code{GST\_SOLVE\_BB\_STOP\_REQUESTED}	  & Caller requested early termination \\
+\code{GST\_SOLVE\_BACKTRACK\_BAD\_COSTS}  & Backtrack search does not permit negetive edge costs \\
+\hline
+\end{tabular}}
+
+An example is given in Section~\ref{low_level_interfaces}
+(Figure~\ref{fig:demo4} on page~\pageref{fig:demo4}).
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_solver_status
+
+@DESCRIPTION
+Return the status of the solution (if any) associated with the given
+solution state object.  
+
+@FUNCTION
+int gst_get_solver_status (gst_solver_ptr  solver,
+                           int*            status);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+@A status
+Status of the current solution (if any).
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+The value of the \code{status} parameter is one of the following: 
+
+\bigskip
+{\small
+\begin{tabular}{|ll|} \hline
+{\bf Macro Name}                 & {\bf Description} \\ \hline
+\code{GST\_STATUS\_OPTIMAL}      & Optimal solution is available  \\
+\code{GST\_STATUS\_INFEASIBLE}   & Problem is infeasible \\
+\code{GST\_STATUS\_FEASIBLE}     & Search incomplete, feasible solution(s) known \\
+\code{GST\_STATUS\_NO\_FEASIBLE} & Search incomplete, no feasible solutions known \\
+\code{GST\_STATUS\_NO\_SOLUTION} & Solver never invoked/hypergraph changed \\
+ \hline
+\end{tabular}}
+
+An example is given in Section~\ref{low_level_interfaces}
+(Figure~\ref{fig:demo4} on page~\pageref{fig:demo4}).
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_solver_hypergraph
+
+@DESCRIPTION
+Return the hypergraph associated with the given solution state object.
+
+@FUNCTION
+gst_hg_ptr gst_get_solver_hypergraph (gst_solver_ptr  solver);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+
+@RETURNVALUE
+Pointer to associated hypergraph object.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_solver_param
+
+@DESCRIPTION
+Return the hypergraph associated with the given solution state object.
+
+@FUNCTION
+gst_param_ptr gst_get_solver_param (gst_solver_ptr  solver);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+
+@RETURNVALUE
+Pointer to associated parameter set object.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_hg_solution
+
+@DESCRIPTION
+Retrieve (one of) the best feasible solutions currently known for a
+given solution state object.
+
+@FUNCTION
+int gst_hg_solution (gst_solver_ptr  solver,
+                     int*            nedges,
+                     int*            edges,
+                     double*         length,
+                     int             rank);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+@A nedges
+Number of edges in the returned solution tree.
+@A edges
+Array of edge numbers in the returned solution tree.
+@A length
+Length of the returned tree.
+@A rank
+Rank of the solution that should be returned, where 0 is the best
+solution (see also discussion below). 
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+The maximal number of feasible solutions that will be retained by
+the solver is determined by
+the parameter \code{GST\_PARAM\_NUM\_FEASIBLE\_SOLUTIONS}. However,
+for a given solution state object, the actual number of feasible
+solutions may be less than this maximum --- and even zero.
+
+The function returns \code{GST\_ERR\_RANK\_OUT\_OF\_RANGE} when
+\code{rank} is less than 0 or greater than or equal to the number of
+feasible solutions available.
+\newpage
+
+@EXAMPLE
+/* We assume that solver is a solution state object.
+   This code prints all feasible solutions ordered by their rank. */
+
+int i, rank = 0;
+int nedges;
+int* edges; 
+double length;
+
+while (1) {
+   /* Get number of edges in this solution. 
+      Exit when no more solutions are available. */ 
+   if (gst_hg_solution (solver, &nedges, NULL, NULL, rank) != 0) 
+      break;
+
+   /* Get edge indices and length of solution. */
+   edges = (int *) malloc (nedges * sizeof (int));
+   gst_hg_solution (solver, NULL, edges, &length, rank);
+
+   /* Print edge indices and length. */
+   printf ("Rank %d: Length is %f. Edges:", rank, length);
+   for (i = 0; i < nedges; i++)
+      printf(" %d", edges[i]);
+   printf("\n");
+   free (edges);
+   rank++;
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_solver_properties
+
+@DESCRIPTION
+Return the property list associated with a solution state object.
+
+@FUNCTION
+gst_proplist_ptr 
+    gst_get_solver_properties (gst_solver_ptr  solver);
+
+@ARGUMENTS
+@A solver
+Solution state object.
+
+@RETURNVALUE
+Returns the property list.
+
+@EXAMPLE
+/* We assume that solver is defined ...*/
+double lower_bound;
+
+if (!gst_get_dbl_property(gst_get_solver_properties(solver), 
+                          GST_PROP_SOLVER_LOWER_BOUND,
+                          &lower_bound) {
+   printf("Lower bound for solver object is %f\n", lower_bound);
+}
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Optimization callback functions
+
+@DESCRIPTION
+\label{callbacks}
+The \geosteiner{} API provides the ability to invoke user-written code
+at key points within the internal \geosteiner{} algorithms.
+This is accomplished by means of callback functions.
+The user establishes such a callback function by providing two pointers:
+\begin{itemize}
+ \item \code{cb\_func}: A pointer to a function to call
+ \item \code{cb\_data}: A pointer to user-specified data to pass to the
+	\code{cb\_func} functions
+\end{itemize}
+When \code{cb\_func} is a \code{NULL} pointer (the default), no callback
+function is invoked.
+The \code{cb\_data} pointer can be anything (in particular, a \code{NULL}
+pointer --- \geosteiner{} does nothing with this except pass it as an
+argument to the callback function.
+
+User-written callback functions are passed the following arguments:
+% \begin{verbatim}
+%        int            wherefrom,
+%        gst_node_ptr   node,
+%        void *         cb_data
+% \end{verbatim}
+The \code{wherefrom} argument indicates the location within
+\geosteiner{}'s internal algorithms from which the callback
+function has been invoked.
+The code in the user's callback function should test this
+parameter to determine whether that particular calling context
+requires action.
+There is a single callback function that is invoked from many
+places within \geosteiner{}, but most callback functions are
+only interested in one (or a small number) of these calling
+contexts.
+
+The \code{node} argument is an opaque object that provides
+access to a variety of internal \geosteiner{} data that may
+be of interest to the callback function.
+The \geosteiner{} API provides various accessor functions that
+use this \code{node} object to access these data.
+Note that the \code{node} argument is ephemeral --- the object
+it refers to exists {\em only} during the execution of the
+callback function.
+The user must not attempt to use this pointer in any other context
+(e.g., by storing it in a global variable or in her \code{cb\_data}
+object or other data structure for later use).
+
+The \code{cb\_data} argument is the data pointer provided by
+the user when the callback function was established.
+
+The \geosteiner{} API defines a macro
+\code{GST\_BB\_CALLBACK\_ARGS} that encapsulates the argument
+list declarations above.
+Using this macro helps to automatically update the argument lists
+of user-written callback functions in the event that future
+versions of \geosteiner{} pass additionsl arguments to callback
+functions.
+
+The \code{wherefrom} argument can have one of the following values:
+\begin{itemize}
+  \item \code{GST\_CALLBACK\_BB\_LP\_SOLVED}:
+	Invoked each time a node finishes solving its LP over the
+	constraint pool.  (Solving over the constraint pool is an
+	iterative process that may invoke the LP solver several
+	times until the current LP solution satisfies all
+	constraints in the pool.  This callback is only invoked
+	when this iteration completes and all pool constraints
+	are satisfied.)
+  \item \code{GST\_CALLBACK\_BB\_NEW\_UPPER\_BOUND}:
+	Invoked whenever an improved upper bound (integer feasible
+	solution) is obtained.
+  \item \code{GST\_CALLBACK\_BB\_NODE\_COMPLETED}:
+	Invoked when processing of a node has finished.  For
+	fractional solutions, this is invoked before selecting
+	the branch candidate.
+\end{itemize}
+
+@HEADERINFO
+/* Argument list passed to the bb_callback_func */
+#define	GST_BB_CALLBACK_ARGS \
+	int wherefrom, gst_node_ptr node, void * cb_data
+
+typedef void gst_bb_callback_func_t (GST_BB_CALLBACK_ARGS);
+
+/* Callback values for wherefrom */
+
+#define GST_CALLBACK_BB_LP_SOLVED		1
+#define GST_CALLBACK_BB_NEW_UPPER_BOUND		2
+#define GST_CALLBACK_BB_NODE_COMPLETED		3
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_set_bb_callback_func
+
+@DESCRIPTION
+Set the branch-and-bound callback function (and data) for the given
+solution state object to the given function and data pointers.
+
+@FUNCTION
+int gst_set_bb_callback_func (
+        gst_solver_ptr    solver,
+        void              (*cb_func) (GST_BB_CALLBACK_ARGS),
+        void *            cb_data);
+
+@RETURNVALUE
+Returns status code, which is zero upon success.
+
+@EXAMPLE
+void my_callback (int wherefrom, gst_node_ptr node, void * cb_data)
+{
+	printf ("Callback invoked from %d.\n", wherefrom);
+}
+
+struct mydata  data;
+
+gst_set_bb_callback_func (solver, my_callback, &data);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_solver
+
+@DESCRIPTION
+A callback node accessor function to get the solution state object
+on whose behalf this callback function has been invoked.
+
+@FUNCTION
+gst_solver_ptr gst_node_get_solver (gst_node_ptr node);
+
+@RETURNVALUE
+Returns solution state object for which the callback function was
+invoked.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+gst_solver_ptr    solver;
+  solver = gst_node_get_solver (node);
+  ...
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_z
+
+@DESCRIPTION
+A callback node accessor function to get the LP objective value
+associated with the given node.
+
+@FUNCTION
+double gst_node_get_z (gst_node_ptr node);
+
+@ARGUMENTS
+@A node
+The node accessor object passed to the callback function by
+\geosteiner{}.
+
+@RETURNVALUE
+Returns the LP objective value.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+double            z;
+
+  z = gst_node_get_z (node);
+  ...
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_lb_status
+
+@DESCRIPTION
+A callback node accessor function to get the current node's
+"lower bound status."
+
+@FUNCTION
+int gst_node_get_lb_status (gst_node_ptr node);
+
+@RETURNVALUE
+Returns an integer having one of the following values:
+\begin{itemize}
+  \item \code{GST\_LB\_STATUS\_INFEASIBLE}
+  \item \code{GST\_LB\_STATUS\_CUTOFF}
+  \item \code{GST\_LB\_STATUS\_INTEGRAL}
+  \item \code{GST\_LB\_STATUS\_FRACTIONAL}
+  \item \code{GST\_LB\_STATUS\_PREEMPTED}
+\end{itemize}
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	status;
+  status = gst_node_get_lb_status (node);
+  switch (status) {
+  case GST_LB_STATUS_INFEASIBLE:   ...   break;
+  case GST_LB_STATUS_CUTOFF:       ...   break;
+  case GST_LB_STATUS_INTEGRAL:     ...   break;
+  case GST_LB_STATUS_FRACTIONAL:   ...   break;
+  case GST_LB_STATUS_PREEMPTED:    ...   break;
+  default:  abort ();
+  }
+  ...
+}
+@HEADERINFO
+/* Return values from gst_node_get_lb_status */
+
+#define GST_LB_STATUS_INFEASIBLE    1
+#define GST_LB_STATUS_CUTOFF        2
+#define GST_LB_STATUS_INTEGRAL      3
+#define GST_LB_STATUS_FRACTIONAL    4
+#define GST_LB_STATUS_PREEMPTED     5
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_node_index
+
+@DESCRIPTION
+A callback node accessor function to get the index of the current node.
+
+@FUNCTION
+int gst_node_get_node_index (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the integer node index.  Index 0 represents the root node,
+with child nodes having positive indices.  An index of -1 indicates
+a candidate child node during branch variable selection.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	node_index;
+  node_index = gst_node_get_node_index (node);
+  printf ("Node %d\n", node_index);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_parent_node_index
+
+@DESCRIPTION
+A callback node accessor function to get the index of the parent
+node of the current node.
+
+@FUNCTION
+int gst_node_get_parent_node_index (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the integer index of the parent node.  The parent of the
+root node has index -1.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	parent_node_index;
+  parent_node_index = gst_node_get_parent_node_index (node);
+  printf ("Parent node %d\n", parent_node_index);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_node_depth
+
+@DESCRIPTION
+A callback node accessor function to get the depth of the current
+node within the branch-and-bound tree.  The root node has depth
+zero.
+
+@FUNCTION
+int gst_node_get_node_depth (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the depth of the current node.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	depth;
+  depth = gst_node_get_node_depth (node);
+  printf ("Node depth %d\n", depth);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_node_branch_var
+
+@DESCRIPTION
+A callback node accessor function to get the index of the
+fractional variable that was branched upon to create the current
+node from its parent.  This is -1 for the root node.
+
+@FUNCTION
+int gst_node_get_node_branch_var (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the branch variable used to create the current node.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	bvar;
+  bvar = gst_node_get_node_branch_var (node);
+  printf ("Branch variable %d\n", bvar);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_node_branch_direction
+
+@DESCRIPTION
+A callback node accessor function to get the direction in which
+the branch variable was constrained to create the current node
+from its parent.  A value of 0 indicates the var=0 branch.  A
+value of 1 indicates the var=1 branch.  This is 0 for the root
+node.
+
+@FUNCTION
+int gst_node_get_node_branch_direction (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the direction of the branch used to create the current node.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	dir;
+  dir = gst_node_get_node_branch_direction (node);
+  printf ("Branch direction %d\n", dir);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_lp_index
+
+@DESCRIPTION
+A callback node accessor function to get the number of LPs solved
+at the current node.  (The separation algorithms are run on the
+solution of each such LP.  If violated constraints are found, they
+are added to the LP which is then re-solved, which increments this
+index.)
+
+@FUNCTION
+int gst_node_get_lp_index (gst_node_ptr node);
+
+@RETURNVALUE
+Returns the index of the most recently solved LP at the current
+node.  The first LP solved receives an index of zero.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int	lp_index;
+  lp_index = gst_node_get_lp_index (node);
+  printf ("LP %d\n", lp_index);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_solution
+
+@DESCRIPTION
+A callback node accessor function to get the LP solution vector
+associated with the given node.
+
+@FUNCTION
+int gst_node_get_solution (gst_node_ptr node, double * x);
+
+@ARGUMENTS
+@A node
+The node accessor object passed to the callback function by
+\geosteiner{}.
+@A x
+Address of an array of \code{double} having sufficiently many
+elements to receive the solution vector.
+
+@RETURNVALUE
+Returns an error code, which is zero upon success.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int               nedges;
+gst_solver_ptr    solver;
+gst_hg_ptr        H;
+double            x;
+  /* Query number of edges in problem. */
+  solver = gst_node_get_solver (node);
+  H = gst_get_solver_hypergraph (solver);
+  gst_get_hg_edges (H, &nedges, NULL, NULL, NULL);
+  /* Allocate array for solution vector. */
+  x = malloc (nedges * sizeof (double));
+
+  gst_node_get_solution (node, x);
+  ...
+  free (x);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_lb
+
+@DESCRIPTION
+A callback node accessor function to get the current node's
+vector of lower bounds.
+
+@FUNCTION
+int gst_node_get_lb (gst_node_ptr node, double * lb);
+
+@ARGUMENTS
+@A node
+The node accessor object passed to the callback function by
+\geosteiner{}.
+@A lb
+Address of an array of \code{double} having sufficiently many
+elements to receive the lower bound vector.
+
+@RETURNVALUE
+Returns an error code, which is zero upon success.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int               nedges;
+gst_solver_ptr    solver;
+gst_hg_ptr        H;
+double            lb;
+  /* Query number of edges in problem. */
+  solver = gst_node_get_solver (node);
+  H = gst_get_solver_hypergraph (solver);
+  gst_get_hg_edges (H, &nedges, NULL, NULL, NULL);
+  /* Allocate array for lower bound vector. */
+  lb = malloc (nedges * sizeof (double));
+
+  gst_node_get_lb (node, lb);
+  ...
+  free (lb);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_node_get_ub
+
+@DESCRIPTION
+A callback node accessor function to get the current node's
+vector of upper bounds.
+
+@FUNCTION
+int gst_node_get_ub (gst_node_ptr node, double * ub);
+
+@ARGUMENTS
+@A node
+The node accessor object passed to the callback function by
+\geosteiner{}.
+@A ub
+Address of an array of \code{double} having sufficiently many
+elements to receive the upper bound vector.
+
+@RETURNVALUE
+Returns an error code, which is zero upon success.
+
+@EXAMPLE
+void my_callback (GST_BB_CALLBACK_ARGS)
+{
+int               nedges;
+gst_solver_ptr    solver;
+gst_hg_ptr        H;
+double            ub;
+  /* Query number of edges in problem. */
+  solver = gst_node_get_solver (node);
+  H = gst_get_solver_hypergraph (solver);
+  gst_get_hg_edges (H, &nedges, NULL, NULL, NULL);
+  /* Allocate array for upper bound vector. */
+  ub = malloc (nedges * sizeof (double));
+
+  gst_node_get_ub (node, ub);
+  ...
+  free (ub);
+}
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Message handling functions
+
+@DESCRIPTION
+\label{message_functions}
+All output messages from \geosteiner{} are passed through
+user-controllable channels. A given channel may write its output to
+more than one output (screen/files). Channels have type
+\code{gst\_channel\_ptr}. 
+
+In this section we describe the functions for creating and freeing
+channels, for adding output (screen/files) to a channel, and the basic
+functions for writing to channels.
+
+@HEADERINFO
+/* Flags */
+#define GST_CHFLG_POSTSCRIPT                    0x01
+
+typedef struct {
+        short           indent;         /* columns, default = 0 */
+        short           flags;          /* various options */   
+        /* The following items can only be "gotten", not "set" */
+        int             column;         /* current column position */
+        short           state;          /* various state flags */
+        /* Reserved for future use */
+        int             reserved1;
+        int             reserved2;
+} gst_channel_options;
+
+typedef void (*gst_channel_function_ptr) (void *        handle,
+                                          const char *  text,
+                                          size_t        nbytes);
+
+typedef struct gst_destination *        gst_dest_ptr;
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_channel
+
+@DESCRIPTION
+Create a channel with an optional set of options. By default, output
+is unformatted. In the current version, the only formatted output is
+Postscript; see function {\bf gst\_channel\_setopts()} for an example of
+how to activate Postscript formatting. Consult \code{geosteiner.h} for
+the detailed structure of \code{gst\_channel\_options}.
+
+@FUNCTION
+gst_channel_ptr 
+    gst_create_channel 
+        (const gst_channel_options*  chanopts, 
+         int*                        status);
+
+@ARGUMENTS
+@A chanopts
+Channel options (if \code{NULL} then default options are
+used).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the new channel object.
+
+@EXAMPLE
+/* Create a channel with default options. 
+   Ignore returned status. */
+gst_channel_ptr chan;
+chan = gst_create_channel(NULL, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_channel
+
+@DESCRIPTION
+Free a channel and all its destinations.
+
+@FUNCTION
+int gst_free_channel (gst_channel_ptr  chan);
+
+@ARGUMENTS
+@A chan
+Channel object. Does nothing if \code{NULL}. 
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that chan is an existing channel object */
+gst_free_channel (chan);
+
+/* All memory used by chan is now freed */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_getopts
+
+@DESCRIPTION
+Get channel options.
+
+@FUNCTION
+int gst_channel_getopts 
+        (gst_channel_ptr       chan,
+         gst_channel_options*  options);
+
+@ARGUMENTS
+@A chan
+Channel opbject.
+@A options
+Pointer to the channel option structure where channel options should
+be returned.
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that chan is a channel */
+gst_channel_options chanopts;
+
+/* Get options and active Postscript output */
+gst_channel_getopts (chan, &chanopts);
+chanopts.flags |= GST_CHFLG_POSTSCRIPT;
+gst_channel_setopts (chan, &chanopts);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_setopts
+
+@DESCRIPTION
+Set channel options.
+
+@FUNCTION
+int gst_channel_setopts 
+        (gst_channel_ptr             chan,
+         const gst_channel_options*  options);
+
+@ARGUMENTS
+@A chan
+Channel opbject.
+@A options
+Pointer to the channel option structure that contains new channel
+options. 
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that chan is a channel */
+gst_channel_options chanopts;
+
+/* Get options and active Postscript output */
+gst_channel_getopts (chan, &chanopts);
+chanopts.flags |= GST_CHFLG_POSTSCRIPT;
+gst_channel_setopts (chan, &chanopts);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_add_file
+
+@DESCRIPTION
+Add a file destination to a channel.
+
+@FUNCTION
+gst_dest_ptr 
+    gst_channel_add_file (gst_channel_ptr  chan,
+                          FILE*            fp,
+                          int*             status);
+
+@ARGUMENTS
+@A chan
+Channel object.
+@A fp
+File handle.
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the new destination object (of type \code{gst\_dest\_ptr}).
+
+@EXAMPLE
+/* Setup a channel for stdout */
+gst_channel_ptr chan;
+
+chan = gst_create_channel (NULL, NULL);
+gst_channel_add_file (chan, stdout, NULL);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_add_functor
+
+@DESCRIPTION
+Add a function as destination to a channel.
+
+@FUNCTION
+typedef size_t 
+    gst_channel_func (const char*  buf,
+                      size_t       cnt,
+                      void*        handle);
+
+gst_dest_ptr 
+    gst_channel_add_functor 
+                     (gst_channel_ptr    chan,
+                      gst_channel_func*  func,
+                      void*              handle,
+                      int*               status);
+
+@ARGUMENTS
+@A chan
+Channel object.
+@A func
+Function that should be added as destination.
+@A handle
+Handle used for passing error codes from the function back to the
+application.
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the new destination object (of type \code{gst\_dest\_ptr}).
+\newpage
+
+@EXAMPLE
+static void
+ output_text_to_GUI (void *       handle,
+                     const char * text,
+                     size_t       nbytes)
+{
+Widget *            widget = handle;
+   my_gui_write_text_to_text_widget (widget, text, nbytes);
+}
+
+int main (int argc, char **argv)
+{
+int               status;
+Widget *          widget = my_gui_create_text_widget ();
+gst_channel_ptr   mychan = gst_create_channel (NULL, NULL);
+gst_param_ptr     myparm = gst_create_param (NULL);
+
+    /* Add functor to write output to GUI window. */
+    gst_channel_add_functor (mychan,
+                             output_text_to_GUI,
+                             widget,
+                             &status);
+    gst_set_cnh_param (myparm,
+                       GST_PARAM_PRINT_SOLVE_TRACE,
+                       mychan);
+    /* Problems solved using myparm will send */
+    /* trace output to the GUI window. */
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_rmdest
+
+@DESCRIPTION
+Remove a destination from a channel.
+
+@FUNCTION
+int gst_channel_rmdest (gst_dest_ptr  dest);
+
+@ARGUMENTS
+@A dest
+Destination that should be removed.
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that dest is a destination object */
+gst_channel_rmdest (dest);
+
+/* Destination object dest is now removed from its channel */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_write
+
+@DESCRIPTION
+Write a string to all destinations in a channel.
+
+@FUNCTION
+int gst_channel_write (gst_channel_ptr  chan,
+                       const char*      text,
+                       size_t           nbytes);
+
+@ARGUMENTS
+@A chan
+Channel object.
+@A text
+Buffer with text that should be written.
+@A nbytes
+Number of bytes in buffer.
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that chan is a channel. */
+char* hello = "Hello, World!\n";
+gst_channel_write (chan, hello, strlen(hello));
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_channel_printf
+
+@DESCRIPTION
+Print a formatted string to all destinations in a channel.
+
+@FUNCTION
+int gst_channel_printf (gst_channel_ptr  chan,
+                        const char*      format,
+                        ...) _GST_PRINTF_ARGS (2,3);
+
+@ARGUMENTS
+@A chan
+Channel object.
+@A format
+Printf formatting string.
+@A ...
+Arguments for formatting string.
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Let chan be a channel, and let i1 and i2  
+   be two integer variables. */
+gst_channel_printf (chan, "i1 = %d  i2 = %d\n", i1, i2);
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Input and output functions
+
+@DESCRIPTION
+\label{io_functions}
+A number of functions are provided for input and output of
+hypergraphs. The input/output format can be chosen using
+parameters. Scaling information can be associated with input points,
+and numbers can be printed in unscaled using this information.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_create_scale_info
+
+@DESCRIPTION
+Create a scaling information object.
+
+@FUNCTION
+gst_scale_info_ptr gst_create_scale_info (int* status);
+
+@ARGUMENTS
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the new scaling information object.
+
+@EXAMPLE
+/* Create a new scaling information object
+   and use it to hold scaling information for 
+   a set of points read from stdin. */
+int n;
+double* terms;
+gst_scale_info_ptr scinfo;
+
+scinfo = gst_create_scale_info (NULL);
+n = gst_get_points (stdin, 0, &terms, scinfo);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_free_scale_info
+
+@DESCRIPTION
+Free a scaling information object.
+
+@FUNCTION
+int gst_free_scale_info (gst_scale_info_ptr scinfo);
+
+@ARGUMENTS
+@A scinfo
+Scaling information object that should be freed.
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that scinfo is a scaling information object */
+gst_free_scale_info (scinfo);
+
+/* All memory used by scinfo is now freed */
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_get_points
+
+@DESCRIPTION
+Reads a point set from a file (e.g., stdin). Point coordinates should be
+separated by whitespace. Reads until end-of-file or until
+a specified number of points have been read. 
+
+A scaling information object can be associated with the set of points
+that are read; if such an object is passed as an argument, this function
+attempts to find an appropriate scaling for the points to
+maximize the accuracy of the internal (double) representation. If the
+scaling information object is \code{NULL}, no scaling is performed.
+
+@FUNCTION
+int gst_get_points (FILE*               fp,
+                    int                 maxpoints,
+                    double**            points,
+                    gst_scale_info_ptr  scinfo);
+
+@ARGUMENTS
+@A fp
+Input file to read from.
+@A maxpoints
+Maximum number of points to read (if zero then read until end-of-file).
+@A points
+Array containing read points (which must be allocated by the user {\em
+except} when \code{maxpoints = 0}). 
+@A scinfo
+Scaling information object.
+
+@RETURNVALUE
+Returns the number of read points.
+
+@EXAMPLE
+/* Read a set of points from stdin (until end-of-file). 
+   A scaling information object is used. */
+int n;
+double* terms;
+gst_scale_info_ptr scinfo;
+
+scinfo = gst_create_scale_info (NULL);
+n = gst_get_points (stdin, 0, &terms, scinfo);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_compute_scale_info_digits
+
+@DESCRIPTION
+Set up various parameters needed for outputting scaled
+coordinates. Coordinates/distances are printed with the minimum
+fixed precision whenever this gives the exact result, that is, if all
+terminal coordinates are integral, they should always be written
+without a decimal point. Otherwise we will print the
+coordinates/distances with full precision.
+
+@FUNCTION
+int gst_compute_scale_info_digits 
+        (int                 nterms,
+         double*             terms,
+         gst_scale_info_ptr  scinfo);
+
+@ARGUMENTS
+@A nterms
+Number of terminals.
+@A terms
+Terminals in an array of doubles ($x_1, y_1, x_2, y_2, \ldots$)
+@A scinfo
+Scaling information object that should be modified.
+
+@RETURNVALUE
+Returns zero if operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Assume that terms holds a set of n terminals
+   and that scinfo is an associated scaling 
+   information object. Find the minimum number of digits 
+   necessary when printing unscaled coordinates. */
+gst_compute_scale_info_digits (n, terms, scinfo);
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_unscale_to_string
+
+@DESCRIPTION
+Convert a given internal scaled coordinate to a
+printable unscaled ASCII string.  The internal form is in most
+cases an integer (to eliminate numeric problems), but the unscaled data 
+may involve decimal fractions. 
+
+@FUNCTION
+char* gst_unscale_to_string 
+          (char*               buffer,
+           double              val,
+           gst_scale_info_ptr  scinfo);
+
+@ARGUMENTS
+@A buffer
+Write unscaled string to this buffer. It should be allocated to
+hold at least 32 characters.
+@A val
+Double value that should be unscaled.
+@A scinfo
+Scaling information object.
+
+@RETURNVALUE
+Returns a pointer to a string holding the unscaled value.
+
+@EXAMPLE
+/* Print a set of n terminals in array terms 
+   to channel chan. Scaling information is 
+   given by scinfo. */ 
+int i;
+char buf1[32], buf2[32];
+
+for (i = 0; i < n; i++) {
+   gst_unscale_to_string (buf1, terms[2*i],   scinfo);
+   gst_unscale_to_string (buf2, terms[2*i+1], scinfo);
+   gst_channel_printf (chan, "(%s, %s)\n", buf1, buf2);
+}
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_unscale_to_double
+
+@DESCRIPTION
+Convert a given internal form coordinate to an unscaled double.
+
+@FUNCTION
+double gst_unscale_to_double 
+           (double              val,
+            gst_scale_info_ptr  scinfo);
+
+@ARGUMENTS
+@A val
+Double value that should be unscaled.
+@A scinfo
+Scaling information object.
+
+@RETURNVALUE
+Returns an unscaled double approximation.
+
+@EXAMPLE
+/* Compute an unscaled array of terminal coordinates 
+   from a scaled set of n terminals in array terms. 
+   Scaling information is given by scinfo. */ 
+int i;
+double* unscaled_terms;
+
+unscaled_terms = (double *) malloc (2 * n * sizeof (double));
+
+for (i = 0; i < 2*n; i++) {
+   unscaled_terms[i] = gst_unscale_to_double (terms[i], 
+                                              scinfo);
+}
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_load_hg
+
+@DESCRIPTION
+Load a hypergraph from an input file. The function creates a new
+hypergraph and adds the vertices and edges read from the input
+file. The file format must be one of the FST data formats given in
+Appendix~\ref{sec:fst_formats}. 
+
+@FUNCTION
+gst_hg_ptr gst_load_hg (FILE*          fp,
+                        gst_param_ptr  param,
+                        int*           status);
+
+@ARGUMENTS
+@A fp
+Input file to read from.
+@A param
+Parameter set (currently not used).
+@A status
+Status code (zero if successful).
+
+@RETURNVALUE
+Returns the hypergraph that is read.
+
+@EXAMPLE
+/* Load a hypergraph from stdin */
+gst_hg_ptr H;
+H = gst_load_hg (stdin, NULL, NULL);
+
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_save_hg
+
+@DESCRIPTION
+Print a hypergraph to a file. The print format can be specified by
+parameter \code{GST\_PARAM\_SAVE\_FORMAT}.
+
+@FUNCTION
+int gst_save_hg (FILE*          fp,
+                 gst_hg_ptr     H,
+                 gst_param_ptr  param);
+
+@ARGUMENTS
+@A fp
+Print to this file.
+@A H
+Hypergraph that should be printed.
+@A param
+Parameter set (\code{NULL}=default parameters).
+
+@RETURNVALUE
+Returns zero if the operation was successful and non-zero
+otherwise. 
+
+@EXAMPLE
+/* Print a hypergraph H to stdout using 
+   the default print format */
+gst_save_hg (stdout, H, NULL);
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+@SECTION
+Miscellaneous functions
+
+@DESCRIPTION
+\label{miscellaneous_functions}
+In this section we describe a few miscellaneous functions, e.g.,
+asynchronous functions that may be used by signal handlers.
+
+% -------------------------------------------------------------------------
+@FUNCNAME
+gst_deliver_signals
+
+@DESCRIPTION
+This function is designed to be safely callable from a signal
+handler. The given signals are delivered to the given solver,
+which responds to them at some point in the near future.
+The signals parameter is the bit-wise OR of one or more special
+signal values defined below.  
+
+@FUNCTION
+void gst_deliver_signals (gst_solver_ptr  solver,
+                          int             gstsignals);
+
+@HEADERINFO
+/* Signals for gst_deliver_signals */
+#define GST_SIG_ABORT           0x0001  /* Abort computation ASAP */
+#define GST_SIG_FORCE_BRANCH    0x0002  /* Stop cutting and force a branch */
+#define GST_SIG_STOP_TEST_BVAR  0x0004  /* Stop testing branch vars and */
+                                        /* use the best one seen so far */
+#define GST_SIG_STOP_SEP        0x0008  /* Abort the separation routines */
+                                        /* and continue with all cuts */
+                                        /* discovered so far */
+
+@ARGUMENTS
+@A solver
+Solution state object.
+@A gstsignals
+Bit vector defining the signals that should be delivered to the
+solver; see table below for a list of possible signals.
+
+@RETURNVALUE
+Returns nothing.
+
+The following is a list of possible signals that can be delivered to
+the solver:
+
+\bigskip
+{\small
+\begin{tabular}{|ll|} \hline
+{\bf Macro Name}                  & {\bf Description} \\ \hline
+\code{GST\_SIG\_ABORT}            & Abort computation \\
+\code{GST\_SIG\_FORCE\_BRANCH}    & Stop cutting and force a branch \\
+\code{GST\_SIG\_STOP\_TEST\_BVAR} & Stop testing branch variables and \\
+                                  & use the best one seen so far \\
+\code{GST\_SIG\_STOP\_SEP}        & Abort the separation routines \\
+                                  & and continue with all cuts \\
+                                  & discovered so far \\
+ \hline
+\end{tabular}}
+
+@EXAMPLE
+/* Assume that solver is a solution state object. 
+   Deliver a signal to force a branch. */
+gst_deliver_signals (solver, GST_SIG_FORCE_BRANCH);

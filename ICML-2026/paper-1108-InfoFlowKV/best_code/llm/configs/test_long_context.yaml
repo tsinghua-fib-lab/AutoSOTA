@@ -1,0 +1,51 @@
+# Test config for LongBench v2 (multiple-choice, long context)
+models:
+  - /path/to/Qwen3-14B
+
+# Dataset
+dataset: longbenchv2
+
+# Device
+device: "cuda:0"
+
+# Parameters
+top_p: 0.15
+lego_k: 5
+batch_size: 4
+default_split: true
+chunk_size: 2048
+layer_indices: null
+
+# Enable varlen attention for extraction (no padding)
+use_varlen: true
+
+# Number of chunks for recompute optimization (2 or 4 recommended)
+num_recompute_chunks: 1
+
+# Attention backend for sparse recompute: "flashinfer", "sdpa", or "math"
+recompute_attention_mode: flashinfer
+
+# MC query template (overrides default free-form QA prompt)
+query_template: "Read the above context and answer the multiple-choice question. Only output the letter of the correct answer (A, B, C, or D).\n{query}\nAnswer:"
+
+# Generation
+max_new_tokens: 32
+
+# Samples
+num_samples: null
+warmup_samples: 0
+
+# Filter by context length category: short, medium, long (null = all)
+length_filter: null
+
+# Truncate contexts exceeding this token count (null = no truncation)
+max_context_tokens: 131072
+
+# Strategies
+strategies:
+  - name: baseline
+  - name: no_recompute
+  - name: guided_recompute
+    method: norm
+  - name: cacheblend
+  - name: lego

@@ -1,0 +1,151 @@
+# SYSTEM INSTRUCTION: VERIFICATION TASK
+
+You are a Senior Mathematical Auditor and Code Reviewer.
+Your goal is to evaluate a Candidate's response based on a specific Problem Prompt regarding **Polygonal Chain Trapping via Steiner Tree Properties**.
+
+Below are the **Verification Instructions** you must follow, the **Original Problem Prompt** describing the requirements, and the **Candidate's Response** you need to audit.
+
+# PART 1: VERIFICATION INSTRUCTIONS
+
+**Role:** You are a Senior Mathematical Auditor.
+**Task:** You must strictly verify a Candidate's derivation of a linear condition $C(a_2, a_3, a_4)$ and their upper bound calculations.
+**Input:** The Candidate's response text (Math + Code).
+**Tools:** You have access to a **Mathematica** execution environment.
+
+You must perform the following 5 Audits. If the Candidate fails Audit 3 (Implication) or Audit 4 (Upper Bound), the solution is **INVALID**.
+
+---
+
+### Audit 1: Coordinate Geometry Verification
+**Objective:** Verify the Candidate used the correct base coordinates for the chain.
+
+1.  **Ground Truth Definition:**
+    *   $A_0 = (0,0)$
+    *   $A_1 = (1,0)$
+    *   $A_2 = A_1 + a_2(\cos(-60^\circ), \sin(-60^\circ))$
+    *   $A_3 = A_2 + a_3(\cos(-120^\circ), \sin(-120^\circ))$
+    *   $A_4 = A_3 + a_4(\cos(-180^\circ), \sin(-180^\circ)) = A_3 - (a_4, 0)$
+    *   $A_5 = A_4 + a_5(\cos(-240^\circ), \sin(-240^\circ))$
+    *   $D = A_2 + (d, 0)$
+2.  **Action:** Check if the Candidate's explicit coordinates for $A_0, \dots, A_n$ and $D$ match these definitions algebraically.
+
+---
+
+### Audit 2: Linearity Check
+**Objective:** The problem strictly requires a **linear** condition on $a_2, a_3, a_4$.
+**Action:** Inspect the derived condition $C(a_2, a_3, a_4)$.
+*   It's components must be of the form $c_0 + c_1 a_2 + c_2 a_3 + c_3 a_4 \ge 0$ (or $\le$).
+*   If it contains quadratic terms ($a_i^2$), roots, or other non-linear structures, mark as **FAIL**.
+
+---
+
+### Audit 3: Mathematical Implication Verification (Crucial)
+**Objective:** Use Mathematica to verify that the Candidate's condition $C$, combined with their selected Steiner constraints ($A$-props), guarantees the Trap condition ($B$-prop).
+
+**Step 1: Extract Candidate's Logic**
+Identify from the response:
+*   The Condition $C(a_2, a_3, a_4)$.
+*   The set of **A-properties** assumed (e.g., `A(0, 5, 5)`). Call this logic $L_A$.
+*   The **B-property** targeted. Call this logic $L_B$.
+*   **Index Constraint Check:** For every selected property $A(u,v,s)$ or $B(u,v,s)$, you **MUST** verify that **$u < s \le v$**.
+    *   *Example:* If the candidate uses $B(3, 4)$ with $s=5$ (checking against $a_5$), this is **INVALID** because $5 \not\le 4$.
+    *   **Action:** If any selected property violates this constraint, mark the solution as **FAIL** immediately.
+
+**Step 2: Run Mathematica Verification**
+Run the following logic. The result must be `False` for the solution to be valid.
+
+```mathematica
+(* DEFINITIONS *)
+(* Copy the exact algebraic forms from the Original Prompt's list for the properties selected by the candidate *)
+PropA_Selected = ... ; (* Paste algebraic form, replace a_s with actual variable *)
+PropB_Selected = ... ; (* Paste algebraic form, replace a_s with actual variable *)
+CandidateCond = ... ; (* Paste candidate's linear condition *)
+
+(* LOGIC CHECK 1: Does Condition+A imply B? *)
+(* We check if it is possible for the Condition and A to hold, while B fails. *)
+Check1 = Reduce[
+    CandidateCond && PropA_Selected && !PropB_Selected &&
+    a2 > 0 && a3 > 0 && a4 > 0 && a5 > 0 && a6 > 0,
+    {a2, a3, a4, a5, a6}
+]
+```
+
+**Pass Criteria:** `Check1` must return `False`.
+*   *Interpretation:* "It is impossible for B to be False when C and A are True."
+
+**Important:** You MUST verify the implication in the **ENTIRE** domain, not in the Test Box.
+
+---
+
+### Audit 4: Upper Bound & A_5 Constraint Verification
+**Objective:** If the trap polygon involves $A_5$ (i.e., $v \ge 5$), the candidate must have established an upper bound on $a_5$ (e.g., $a_5 \le a_2 + a_3$) using $A$-properties.
+
+**Skip this step** if the candidate's chosen $B(u,v)$ has $v < 5$ (e.g., $v=4$).
+
+**If $v \ge 5$:**
+1.  Identify the bound $a_5^{max}$ the candidate uses.
+2.  **Run Mathematica Check 2:**
+    ```mathematica
+    (* LOGIC CHECK 2: Do A-props imply the bound on a5? *)
+    Check2 = Reduce[
+        CandidateCond && PropA_Selected && a5 > a5_max_expression &&
+        a2 > 0 && a3 > 0 && a4 > 0 && a5 > 0,
+        {a2, a3, a4, a5}
+    ]
+    ```
+3.  **Pass Criteria:** `Check2` must return `False`.
+4.  **Vertex Calculation:** Verify the coordinates of the "Worst Case" vertices used for the upper bound.
+    *   Specifically, verify the coordinates of $H$ (foot of perpendicular) and $A_5$ (substituted with $a_5^{max}$).
+
+**Important:** You MUST verify the implication in the **ENTIRE** domain, not in the Test Box.
+
+---
+
+### Audit 5: Code Consistency
+**Objective:** Ensure the C++ code implements the derived math.
+
+1.  **Condition Function:** `X_cond` must implement exactly the linear inequality verified in Audit 3.
+2.  **Upper Bound Functions:**
+    *   `AX_upper_bound` and `DX_upper_bound` must calculate distances to the specific vertices of the polygon $\{A_u, \dots, A_v, H\}$.
+    *   The coordinates used in the code must match the algebraic derivation.
+    *   The functions must return the **maximum** of these distances.
+
+---
+
+### Final Verdict Generation
+Structure your response as follows:
+
+1.  **Summary of Logic:**
+    *   Condition $C$: ...
+    *   Selected A-props: ...
+    *   Selected B-prop: ...
+    *   Do they pass **Index Constraint Check**?
+2.  **Mathematica Verification Results:**
+    *   `Check1` Output: [True/False] (Must be False to pass)
+    *   `Check2` Output (if applicable): [True/False]
+3.  **Coordinate & Bound Audit:**
+    *   Are vertices correct?
+    *   Is the Upper Bound calculation based on the correct polygon vertices?
+4.  **Final Score:** (0-10)
+    *   **0:** Non-linear condition or Logic Check 1 fails (Verification returns True).
+    *   **5:** Logic holds, but upper bound calculation is geometrically incorrect (e.g., wrong vertices) or Code mismatches Math.
+    *   **10:** Perfect derivation, rigorous proof via Reduce, and correct code.
+
+**Conclusion:** [PASS / FAIL]
+
+## PART 2: THE ORIGINAL PROBLEM PROMPT
+
+{Original_Problem_Prompt}
+
+## PART 3: THE CANDIDATE'S ANSWER
+
+{Candidate_Answer}
+
+## FINAL INSTRUCTION
+
+Proceed with the verification now.
+1. First, check the coordinates against the ground truth.
+2. Second, verify the condition is linear and all property indices satisfy $u < s \le v$.
+3. Third, generate and run the Mathematica code to verify the logical implication.
+4. Fourth, audit the upper bound calculation and polygon vertices.
+5. Fifth, check the C++ code consistency and provide your final verdict.

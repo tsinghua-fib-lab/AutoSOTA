@@ -1,0 +1,63 @@
+#!/bin/sh
+#***********************************************************************
+#
+#	$Id: tilted_lattice_points,v 1.5 2022/11/19 13:45:55 warme Exp $
+#
+#	File:	tilted_lattice_points
+#	Rev:	e-2
+#	Date:	09/05/2016
+#
+#	Copyright (c) 2001, 2022 by Pawel Winter, Martin Zachariasen.
+#	This work is licensed under a Creative Commons
+#	Attribution-NonCommercial 4.0 International License.
+#
+#***********************************************************************
+#
+#	A shell script to generate pathological RSMT instances.
+#
+#***********************************************************************
+#
+#	Modification Log:
+#
+#	a-1:	02/12/2006	warme
+#		: Added banner and modlog.
+#	e-1:	04/14/2015	warme
+#		: Changes for 5.0 release.
+#	e-2:	09/05/2016	warme
+#		: Change notices for 5.1 release.
+#
+#***********************************************************************
+
+case $# in
+0)	echo "Usage: $0 N" 1>&2
+	echo "  Produces N by N tilted lattice" 1>&2
+	exit 1
+	;;
+esac
+
+n=$1
+
+i=1
+while [ $i -le $n ]
+do
+    j=1
+    while [ $j -le $n ]
+    do
+	x=`expr 2 \* $i - 2`
+	y=`expr 2 \* $j - 2`
+	echo "$x $y"
+	j=`expr $j + 1`
+    done
+    if [ $i -lt $n ]
+    then
+	j=1
+	while [ $j -lt $n ]
+	do
+	    x=`expr 2 \* $i - 1`
+	    y=`expr 2 \* $j - 1`
+	    echo "$x $y"
+	    j=`expr $j + 1`
+	done
+    fi
+    i=`expr $i + 1`
+done

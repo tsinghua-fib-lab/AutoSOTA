@@ -1,0 +1,14 @@
+# Smoke test sweep: 3 seeds x 3 alpha values = 9 parallel jobs.
+# Each job runs on its own A100 via Modal.
+#
+# Usage:
+#   modal deploy modal_runner.py                                # one-time
+#   modal run modal_runner.py --sweep sweep_configs/test_sweep.yaml
+
+base_config: smoke
+cache: true
+overrides: []
+
+parameters:
+  initial_seed: [0, 1, 2]
+  conformal_policy_control.alpha: [0.1, 0.2, 0.4]

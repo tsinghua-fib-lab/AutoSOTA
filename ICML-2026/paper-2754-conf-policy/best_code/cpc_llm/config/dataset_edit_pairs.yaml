@@ -1,0 +1,21 @@
+source_dataset_path: "s3://prescient-data-dev/sandbox/chena78/mtfuji_datasets/l32_n1000_pm0.001/plain_pairs.jsonl"
+n: null  # size of the dataset to generate
+format: "minimal_edit_pairs"
+# format: "dense_neighborhood_pairs" # "minimal_edit_pairs"
+dist_y_threshold: null
+dist_x_threshold: 0.3
+score_lower_threshold: null
+max_proportion_infeasible: 0.2  # the maximum proportion of the dataset that infeasible examples
+                                # or pairs containing infeasible examples can be
+distance_metric: "hamming"
+seed: 0
+n_neighbors: 30  # how many approx. nearest neighbors to compute -- higher is more accurate but more expensive
+output_path: "s3://prescient-data-dev/sandbox/chena78/mtfuji_datasets/l32_n1000_pm0.001/minimal_edit_pairs_30nn.jsonl"
+log_level: "info"
+allow_same_score_pair: False
+filter_by_likelihood: True
+likelihood_quantile_threshold: 0.6  # only keep examples with likelihood above this
+filter_by_likelihood_range: False
+likelihood_quantile_range: [0.25,0.5]
+filter_by_input_score: False
+input_score_quantile_threshold: 0.25

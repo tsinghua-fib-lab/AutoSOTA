@@ -1,0 +1,120 @@
+namespace __f3_detail {
+bool steiner_cond(double b, double c, double d, double s, double e) {
+	const double k = std::sqrt(3.0)/2.0;
+	// Helper: bound g(c,d,s) from Mathematica reduction of dot(AV,AR) >= 0
+	auto g_bound = [](double c, double d, double s) {
+	    double num = 2.0 + c*c + 3.0*d + 2.0*s + 3.0*c*s + 3.0*d*s + 2.0*s*s;
+	    double den = 2.0 + c + 3.0*d + s;
+	    return num / den;
+	};
+
+    // Nonnegativity
+    if (b < 0 || c < 0 || d < 0 || s < 0 || e < 0) return false;
+
+    // Simple linear bounds on e
+    if (e + c < 1.0) return false;
+    if (e > s + c + d + 2.0) return false;
+    if (e < 2.0 - c - d + s) return false;
+
+    // Auxiliary monotone bound on e (from Reduce on dot(AV,AR) >= 0)
+    if (e > g_bound(c, d, s)) return false;
+	if (e > 3.0*s) return false;
+
+    // Angle constraints at D and Q (stronger <=90° form via dot>=0)
+    // dot(DU, DQ) >= 0
+    double dot_D = (c + d) * (1.0 - 0.5*e + 0.5*s + 0.5*c + 0.5*d);
+    if (dot_D < 0.0) return false;
+
+    // dot(QU, QD) >= 0
+    double dot_Q = (c + d) * (-1.0 + 0.5*e - 0.5*s + 0.5*c + 0.5*d);
+    if (dot_Q < 0.0) return false;
+
+    // Intersection angle <=120° between RD and AQ: 2*dot + |RD||AQ| >= 0
+    {
+        double RDx = d + c/2.0 + e;
+        double RDy = k*c;
+        double AQx = 1.0 + s/2.0 - c/2.0 + d/2.0;
+        double AQy = -k*(s + c + d);
+        double dot3 = RDx*AQx + RDy*AQy;
+        double expr3 = 2.0*dot3 + std::hypot(RDx, RDy)*std::hypot(AQx, AQy);
+        if (expr3 < 0.0) return false;
+    }
+
+    // Angle at R (<=120°): 2*dot(RV,RA) + |RV||RA| >= 0
+    {
+        double RAx = e - 1.0 - s/2.0 + c/2.0;
+        double RAy = k*(s + c);
+        double RVx = 1.5*d + c + e;
+        double RVy = -k*d;
+        double dotR = RAx*RVx + RAy*RVy;
+        double exprR = 2.0*dotR + std::hypot(RAx, RAy)*std::hypot(RVx, RVy);
+        if (exprR < 0.0) return false;
+    }
+
+    // Angle at A (<=120°): 2*dot(AV,AR) + |AV||AR| >= 0
+    {
+        double AVx = 1.0 + s/2.0 + 1.5*d + c/2.0;
+        double AVy = -k*(s + c + d);
+        double ARx = 1.0 + (s - c)/2.0 - e;
+        double ARy = -k*(s + c);
+        double dotA = AVx*ARx + AVy*ARy;
+        double exprA = 2.0*dotA + std::hypot(AVx, AVy)*std::hypot(ARx, ARy);
+        if (exprA < 0.0) return false;
+    }
+
+    // Convexity: the three easy cross-product tests are automatic under nonnegativity.
+    // The fourth (QR × RA ≤ 0) is ensured by e + c ≥ 1 (already checked).
+    return true;
+}
+
+double steiner_length(double b, double c, double d, double s, double e) {
+	const double k = std::sqrt(3.0)/2.0;
+    // |UV| with U and V computed in closed form:
+    // U = (0.5 - 0.5e - 0.5s - c, k*(e - 1 - s))
+    // V = (1 + 0.5s + 1.5d + 0.5c, -k*(s + c + d))
+    double UVx = 0.5 + 0.5*e + 1.5*d + s + 1.5*c;
+    double UVy = -k*(c + d + e - 1.0);
+    return std::hypot(UVx, UVy);
+}
+
+}
+template<> struct F<945> {
+constexpr static int split_id = 63;
+constexpr static int lemma_id = 3;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b + b + 1);
+ld L_s_plus;
+if(!__f3_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f3_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<946> {
+constexpr static int split_id = 64;
+constexpr static int lemma_id = 3;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b - b*d + b*s - 2*b*u + d*d + d*s + d*u + s*s - s*u + u*u);
+ld L_s_plus;
+if(!__f3_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f3_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+template<> struct F<947> {
+constexpr static int split_id = 65;
+constexpr static int lemma_id = 3;
+ld operator()(ull mono_mask, ld b, ld c, ld d, ld s, ld u, ld v, ld e, ld f) {
+if(F_VAL == 1 || mono_mask != 0) return INF;
+ld L_s_minus = b + c + d + e + f + s + 1;
+ld L_t = sqrt(b*b - b*d + b*s + b*v + d*d + d*s + d*v + s*s + 2*s*v + v*v);
+ld L_s_plus;
+if(!__f3_detail::steiner_cond(b, c, d, s, e)) return INF;
+else L_s_plus = __f3_detail::steiner_length(b, c, d, s, e);
+return rho*L_t + L_s_plus - L_s_minus;
+}};
+
+const int M3 = 948;

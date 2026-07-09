@@ -1,0 +1,61 @@
+hydra:
+  run:
+    # This creates a unique folder for every single job based on the overrides
+    dir: outputs/${exp_id}-ds${data_seed}/${sim_id}
+  job:
+    chdir: true
+    env_set:
+      HOSTNAME: ${oc.env:HOSTNAME}
+      CUDA_VISIBLE_DEVICES: ${oc.env:CUDA_VISIBLE_DEVICES}
+      SLURM_JOB_ID: ${oc.env:SLURM_JOB_ID,null}
+      SLURM_NODELIST: ${oc.env:SLURM_NODELIST,null}
+    
+defaults:
+  - _self_
+  - encoder: linear
+  - decoder: poly
+
+# Global Metadata
+exp_id: "default_exp"
+sim_id: 0
+main_seed: 0
+data_seed: 42
+mix_seed: null
+
+data:
+  n_pop: 2
+  dim_z: 4
+  fixed_sig: 1
+  mixing_type: "linear"
+  polymix_degree: 2
+  cayley_max_norm: 0.5
+  invmlp_actfun: "leaky_relu"
+  discretize: 0
+  intercept: 0
+  n_train: 10000
+  n_val: 2000
+  batch_size: 500
+  dim_v_true: 2
+  dim_w_true: 2
+
+model:
+  dim_v: 2
+  dim_w: 2
+
+loss:
+  lam1: 1.0
+  lam2: 1.0
+  lam3: 0.0
+  inv_loss_type: "poly"
+  inv_ker_poly_degree: 2
+  inv_ker_rbf_sigma: null
+  inv_ker_rbf_scales: [1.0]
+  rbf_global_sigma: false
+  ind_loss_type: "poly"
+  ind_ker_rbf_sigma: null
+  ind_ker_rbf_scales: [1.0]
+  ind_ker_poly_degree: 2
+
+trainer:
+  max_epochs: 200
+  gradient_clip_val: 1.0

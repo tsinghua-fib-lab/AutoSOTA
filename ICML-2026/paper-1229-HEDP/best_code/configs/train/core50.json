@@ -1,0 +1,61 @@
+{
+    "prefix": "train",
+    "dataset": "core50",
+    "data_path": "./data/core50_128x128",
+    "task_name": [
+        "s1",
+        "s2",
+        "s4",
+        "s5",
+        "s6",
+        "s8",
+        "s9",
+        "s11"
+    ],
+    "total_sessions": 8,
+    "knn_K": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+    ],
+    "energy_border": -36,
+    "energy_midline": -40,
+    "energy_tau": 7,
+    "distance_tau": 1,
+    "energy_T": 1,
+    "reg_loss_lamda": 0.05,
+    "init_cls": 50,
+    "increment": 50,
+    "model_name": "hybrid_energy_distance_prompt_trainer",
+    "query_type": "l1",
+    "shuffle": false,
+    "class_token_position": "end",
+    "CSC": false,
+    "embd_dim": 768,
+    "textual_prompt_length": 16,
+    "visual_prompt_length": 14,
+    "visual_prompt_layers": [
+        0,
+        9,
+        10
+    ],
+    "device": [
+        "1"
+    ],
+    "seed": [
+        1993
+    ],
+    "init_epoch": 20,
+    "init_lr": 0.01,
+    "init_weight_decay": 0.0005,
+    "epochs": 20,
+    "lrate": 0.01,
+    "weight_decay": 2e-4,
+    "batch_size": 128,
+    "num_workers": 16
+}

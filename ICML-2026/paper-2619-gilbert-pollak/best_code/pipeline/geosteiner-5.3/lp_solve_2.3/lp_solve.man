@@ -1,0 +1,330 @@
+
+
+
+LP_SOLVE(1)                                           LP_SOLVE(1)
+
+
+NNAAMMEE
+       lp_solve  - Solve (mixed integer) linear programming prob-
+       lem.
+
+SSYYNNOOPPSSIISS
+       lp_solve [option]* "<" <input-file>
+
+OOPPTTIIOONNSS
+       -v          Verbose mode. Among other  things,  shows  all
+                   the pivots.
+
+       -h          Help mode, prints the usage.
+
+       -d          Debug   mode,  all  intermediate  results  are
+                   printed, and the branch-and-bound decisions in
+                   case of (mixed) integer problems.
+
+       -min        minimize  the  objective function. This is the
+                   default for MPS input.  In lp_solve format you
+                   can  specify  minimization  or maximization in
+                   the input  file  as  well.  The  command  line
+                   option overrides.
+
+       -max        maximize  the  objective function. This is the
+                   default  for  lp_solve   format   input.    In
+                   lp_solve  format  you can specify minimization
+                   or maximization in the input file as well. The
+                   command line option overrides.
+
+       -p          Only  functional  for  pure LP problems. Print
+                   the values of the dual variables  as  well  in
+                   the  result.  They are named r_1 until r_XXXXX
+                   unless  specified  by  the  user.   Note  that
+                   bounds  (constraints on just one variable) are
+                   not considered real constraints, and  are  not
+                   given  a  row in the matrix, and are therefore
+                   not printed here.
+
+       -b <bound>  Specify an upper (when  minimizing)  or  lower
+                   (when  maximizing)  limit for the value of the
+                   objective function to the program. Only useful
+                   for   (mixed)   integer  problems.   If  close
+                   enough, may speed  up  the  calculations.  The
+                   same result can be obtained by adding an extra
+                   constraint to the problem.
+
+       -c          When branching  in  MILP  problems,  take  the
+                   ceiling  of  the selected non-integer variable
+                   first instead of the floor. This can influence
+                   the speed of MILP problems.
+
+       -e <value>  Specify  the accuracy with which it is checked
+                   whether the value  of  a  variable  is  really
+                   integer.  <value>  must  be between 0 and 0.5.
+
+
+
+                                                                1
+
+
+
+
+
+LP_SOLVE(1)                                           LP_SOLVE(1)
+
+
+                   Default value is 1e-6 and  should  be  OK  for
+                   most  applications.  Of course only useful for
+                   MILP problems.
+
+       -i          Print all intermediate  valid  solutions.  Can
+                   give  you  useful  solutions even if the total
+                   run time is too long.  Only useful for (mixed)
+                   integer problems.
+
+       -s          Both  rows and columns are scaled according to
+                   the geometric mean of the coefficients on them
+                   before solving. This might improve the numeri-
+                   cal stability of your problem.
+
+       -I          Print info after reinverting.
+
+       -t          Trace pivot selection.
+
+       -mps        Read from MPS file instead of lp file.  For  a
+                   short  introduction  to  MPS  see  ftp://soft-
+                   lib.cs.rice.edu/pub/miplib/mps_format.
+
+       -degen      Use random perturbations to reduce degeneracy,
+                   can increase numerical instability.
+
+DDEESSCCRRIIPPTTIIOONN
+       The linear programming problem can be formulated as: Solve
+       A.x >= V1, with V2.x maximal. A is a matrix, x a vector of
+       (nonnegative) variables, V1 a vector called the right hand
+       side, and V2 a vector specifying the objective function.
+       Any number of the variables may be specified to be of type
+       integer.
+       This  program solves problems of this kind. It is slightly
+       more general than the above problem, in that every row  of
+       A  (specifying one constraint) can have its own (in)equal-
+       ity, <=, >= or =. The  result  specifies  values  for  all
+       variables.
+       Uses  a 'Simplex' algorithm and sparse matrix methods, for
+       pure LP problems.  If one or  more  of  the  variables  is
+       declared integer, the Simplex algorithm is iterated with a
+       branch and bound  algorithm,  until  the  desired  optimal
+       solution is found.
+       The  "-i"  option  will print all intermediate valid solu-
+       tions.
+
+IINNPPUUTT SSYYNNTTAAXX
+       The default input syntax is a set of algebraic expressions
+       and "int" declarations in the following order:
+
+       <objective function>
+       <constraint>+
+       <declaration>*
+
+       where:
+
+
+
+                                                                2
+
+
+
+
+
+LP_SOLVE(1)                                           LP_SOLVE(1)
+
+
+       - <objective  function>  is  a linear combination of vari-
+         ables, ending with a semicolon, optionally  preceded  by
+         "max: " or "min: " to indicate whether you want it to be
+         minimized or  maximized.  The  case  is  not  important,
+         "Max:"  or "MAX:" will work as well. Maximization is the
+         default.
+
+       - <constraint> is an optional constraint name followed  by
+         a  colon plus a linear combination of variables and con-
+         stants, followed  by  a  relational  operator,  followed
+         again  by  a  linear  combination  of variables and con-
+         stants, ending with a semicolon. The relational operator
+         can  be  any  of  the  following: "<" "<=" "=" ">" ">=".
+         There is no semantic difference between "<" and "<=" nor
+         between ">" and ">=" (even for integer variables!).
+
+       - <declaration>  is  of  the form: "int" <var>+ ";" Commas
+         are allowed between variables.
+
+         So, the simplest linear problem consists of an objective
+         function and 1 constraint.
+
+EEXXAAMMPPLLEE
+       The simple problem:
+
+       x1 >= 1
+       x2 >= 1
+       x1 + x2 >= 2
+       minimize x1 + x2 (= maximize -(x1 + x2)), with x1 integer
+
+       can be written as follows:
+
+       -x1 + -x2;
+       (or min: x1 + x2;)
+       x1 > 1;
+       x2 > 1;
+       x1 + x2 > 2;
+       int x1;
+
+       The correct result for (x1, x2) is of course (1, 1).
+       With  the  -mps  option, lp_solve will accept MPS as input
+       format.
+
+BBUUGGSS
+       Specifying a constraint name for a bound  (constraints  on
+       just  single  variables) does not have an effect: they are
+       not stored inside the main matrix and are not  assigned  a
+       dual variable.
+
+       -      The  problem  consists  entirely  of constraints on
+              just single variables (so-called "bounds", like x <
+              1;  )  and  no constraint with more than 1 variable
+              (like x + 3 y > 17; ). This leaves lp_solve with an
+              empty  problem  matrix, as bounds are not stored in
+
+
+
+                                                                3
+
+
+
+
+
+LP_SOLVE(1)                                           LP_SOLVE(1)
+
+
+              the main matrix. No real-life examples should be of
+              this form, so I am not really chasing this problem.
+
+       -      Many people forget that lp_solve  can  only  handle
+              POSITIVE  values  for  the variables. While reading
+              MPS files it will however handle free  or  negative
+              variables  by  replacing  them with a variable pair
+              <var>_neg and <var>_pos or -<var> respectively.  It
+              is  up  to the user to interpret the result of this
+              transformation.
+
+       - Sometimes problems are numerically unstable, and  the
+              unavoid- able rounding
+              errors inside lp_solve will  cause  aborts.  It  is
+              very  hard  to give general solutions to this prob-
+              lem, but try to keep all values in your problem  in
+              the order of magnitude of 1 by proper scaling. This
+              is almost always better than using lp_solves built-
+              in  scaling  (with -s). Almost parallel constraints
+              are also not very good for numerical stability. Use
+              "lp_solve  -v" and observe the values of the pivots
+              to see if there are any dangerously  large  or  low
+              numbers there.
+              Building  lp_solve with long doubles (see the Make-
+              file) can help to increase numerical stability, but
+              will also increase the run time considerably.
+              You can consult the author as well if you encounter
+              numerical problems, but please remember that it  is
+              very easy to formulate an infeasible LP problem, so
+              be sure there is a solution.
+
+SSEEEE AALLSSOO
+       The implementation of the simplex kernel was mainly  based
+       on:
+       W.  Orchard-Hays:  "Advanced  Linear Programming Computing
+       Techniques", McGraw-Hill 1968
+       The mixed integer branch and bound part was inspired by:
+       section 6.4 of "An Introduction to Linear Programming  and
+       Game  Theory" by Paul R. Thie, second edition published by
+       John Wiley and Sons in 1988.
+       This book refers to:
+       Dakin, R.J., "A Tree Search Algorithm for MILP  Problems",
+       Comput. J., 8 (1965) pp. 250-255
+
+AACCKKNNOOWWLLEEDDGGEEMMEENNTTSS
+       The  work  of  Jeroen  Dirks  made the transition from the
+       basic version 1.5 to the full  version  2.0  possible.  He
+       contributed  the  procedural  interface,  a  built-in  MPS
+       reader, and many fixes and enhancements to the code.
+
+CCOONNTTRRIIBBUUTTEEDD BBYY
+       M.R.C.M. Berkelaar
+       Eindhoven University of Technology
+       Design Automation Section
+
+
+
+                                                                4
+
+
+
+
+
+LP_SOLVE(1)                                           LP_SOLVE(1)
+
+
+       P.O. Box 513
+       NL-5600 MB Eindhoven, The Netherlands
+       phone +31-40-2474792
+       E-mail: michel@es.ele.tue.nl
+
+SSTTAATTUUSS
+       Use at own risk. Bug reports are welcome, as well as  suc-
+       cess stories.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                5
+
+

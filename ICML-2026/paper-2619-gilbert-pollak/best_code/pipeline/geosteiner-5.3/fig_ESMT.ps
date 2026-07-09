@@ -1,0 +1,507 @@
+%!PS-Adobe-3.0
+%%Creator: Steiner Tree Version 5.0
+%%Copyright: Copyright (c) 1998, 2022 by David M. Warme. This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.
+%%LanguageLevel: 1
+%%DocumentNeededResources: font Times-Roman
+%%DocumentSuppliedResources: procset SteinerTreeProcs 2.0 0
+%%+ procset TreeArray 1.0 0
+%%EndComments
+%%BeginProlog
+%%BeginProcSet: SteinerTreeProcs 2.0 0
+/LabelTerminals	0		def	% set non-zero to label terminals
+/inch { 72 mul } def
+/PaperWidth	8.5 inch	def
+/PaperHeight	11 inch		def
+/BigBoxSize	7 inch		def
+/SmallBoxSize	2 inch		def
+/SmallBoxHeight	SmallBoxSize	def
+/SmallBoxWidth	SmallBoxSize	def
+/BoxHeight	BigBoxSize	def
+/BoxWidth	BigBoxSize	def
+/MinX		0		def
+/MaxX		1		def
+/MinY		0		def
+/MaxY		1		def
+/BoxMode	0		def	% (0 ==> big plot, 1 ==> small plots)
+/SmallBoxCount	0		def
+/TermRadius	1 32 div inch	def
+/LineWidth	currentlinewidth	def
+
+% Define the clipping region to be the inside edge of the box.
+
+/ClipHeight	BigBoxSize LineWidth sub def
+/ClipWidth	ClipHeight def
+
+% Define the plotting region so that points plotted at the extremes will
+% exactly meet the edge of the clipping region.  (Reduce by the terminal
+% radius on each side.)
+
+/PlotHeight	ClipHeight TermRadius 2 mul sub def
+/PlotWidth	ClipWidth  TermRadius 2 mul sub	def
+/XlateX { MinX sub MaxX MinX sub div PlotWidth mul } def
+/XlateY { MinY sub MaxY MinY sub div PlotHeight mul } def
+/XlateXY { exch XlateX exch XlateY } def
+/Dup2 { dup 3 -1 roll dup 4 1 roll exch } def
+/Swap2 { 4 2 roll } def
+% define the two fonts we will use:
+%	- one for numbering the terminals
+%	- one for printing the plot's title
+/TermNumPointsize	8	def
+/TitlePointsize		15	def
+/TermNumFont
+	/Times-Roman findfont TermNumPointsize scalefont
+def
+/UseTermNumFont { TermNumFont setfont } def
+/TitleFont
+	/Times-Roman findfont TitlePointsize scalefont
+def
+/UseTitleFont { TitleFont setfont } def
+/DefineTerminals {
+	/NumTerms exch def
+	/TermX NumTerms TreeArray def
+	/TermY NumTerms TreeArray def
+	/TermIndex 0 def
+} def
+/DT {
+	TermY TermIndex 3 -1 roll TreeArrayPut
+	TermX TermIndex 3 -1 roll TreeArrayPut
+	/TermIndex TermIndex 1 add def
+} def
+/SetAxes {	% minx maxx miny maxy
+	/MaxY exch def
+	/MinY exch def
+	/MaxX exch def
+	/MinX exch def
+} def
+/PTString	12 string	def
+/Plot_Terminals {
+	LabelTerminals 0 eq {
+		% Display terminals, no labels
+		0 1 NumTerms 1 sub {			% i
+			dup				% i i
+			TermX exch TreeArrayGet exch	% x i
+			TermY exch TreeArrayGet
+			newpath
+			XlateXY
+			TermRadius 0 360 arc fill
+		} for
+	}
+	{	% Display terminals, with labels
+		0 1 NumTerms 1 sub {			% i
+			dup				% i i
+			PTString cvs exch dup		% str i i
+			TermX exch TreeArrayGet exch	% str x i
+			TermY exch TreeArrayGet		% str x y
+			newpath
+			XlateXY
+			Dup2
+			TermRadius 0 360 arc fill
+			moveto TermRadius 3 mul dup neg rmoveto
+			UseTermNumFont
+			show
+		} for
+	} ifelse
+} def
+% n T ==> Xn Yn, get coordinates of terminal n.
+/T {
+	dup
+	TermX exch TreeArrayGet exch
+	TermY exch TreeArrayGet
+} def
+% Draw a line segment.
+/S {
+	gsave
+	LineWidth setlinewidth
+	newpath
+	XlateXY
+	moveto
+	XlateXY
+	lineto
+	stroke
+	grestore
+} def
+% Draw a corner.  First point is incident to vertical segment.
+% Second point is incident to horizontal segment.
+/C {	% x1 y1 x2 y2
+	newpath
+	% x1 y1 x2 y2 -> x1 y1 x1 y2 x2 y2
+	4 -1 roll dup 5 1 roll exch dup 4 -1 roll exch
+	XlateXY
+	moveto
+	XlateXY
+	lineto
+	XlateXY
+	lineto
+	stroke
+} def
+/BeginPlot {
+	FlushSmallPlot
+	gsave
+	PaperWidth BoxWidth sub 2 div
+	 PaperHeight BoxHeight sub 2 div
+	  translate
+	newpath
+	0 0 moveto
+	BoxWidth 0 lineto
+	BoxWidth BoxHeight lineto
+	0 BoxHeight lineto
+	closepath
+	stroke
+	gsave
+	% establish a clipping region at the inside edge of the box
+	LineWidth 2 div dup moveto
+	ClipWidth 0 rlineto
+	0 ClipHeight rlineto
+	ClipWidth neg 0 rlineto
+	closepath
+	clip
+	% establish the origin for the plotting region
+	LineWidth 2 div TermRadius add
+	 dup
+	  translate
+} def
+/EndPlot {
+	grestore
+	newpath
+	UseTitleFont
+	0 0 moveto
+		dup stringwidth pop BigBoxSize exch sub 2 div
+		TitlePointsize -2 mul
+	rmoveto
+	show
+	grestore
+	showpage
+} def
+/BeginSmallPlot {
+	gsave
+	.75 inch SmallBoxCount 3 mod SmallBoxWidth .5 inch add mul add
+	  .75 inch 3 SmallBoxCount 3 idiv sub SmallBoxHeight .5 inch add mul add
+	    translate
+	SmallBoxWidth BoxWidth div
+	 SmallBoxHeight BoxHeight div
+	  scale
+	newpath
+	0 0 moveto
+	BoxWidth 0 lineto
+	BoxWidth BoxHeight lineto
+	0 BoxHeight lineto
+	closepath
+	stroke
+	gsave
+	% establish a clipping region at the inside edge of the box
+	LineWidth 2 div dup moveto
+	ClipWidth 0 rlineto
+	0 ClipHeight rlineto
+	ClipWidth neg 0 rlineto
+	closepath
+	clip
+	% establish the origin for the plotting region
+	LineWidth 2 div TermRadius add
+	 dup
+	  translate
+} def
+/EndSmallPlot2 {
+	grestore
+	newpath
+	UseTitleFont
+	0 0 moveto
+		dup stringwidth pop BigBoxSize exch sub 2 div
+		TitlePointsize -2 mul
+	rmoveto
+	show
+	grestore
+	/SmallBoxCount SmallBoxCount 1 add def
+	SmallBoxCount 12 ge {
+		FlushSmallPlot
+	} if
+} def
+/FlushSmallPlot {
+	SmallBoxCount 0 gt {
+		showpage
+		/SmallBoxCount	0 def
+	} if
+} def
+/PT {
+	dup				% i i
+	TermX exch TreeArrayGet exch	% x i
+	TermY exch TreeArrayGet
+	newpath
+	XlateXY
+	TermRadius 0 360 arc fill
+} def
+%%EndProcSet
+%%BeginProcSet: TreeArray 1.0 0
+/TreeArrayNodeSize	32768 def
+% Test whether the given object is the 'null' object.
+/isNull { type /nulltype eq } def
+% Throw an error of the given type.
+/TreeArrayError { errordict exch get exec } def
+% Create a TreeArray of the specified size.
+% This is a 5-element array: [ /TreeArray size rsize n arrayNode ].
+/TreeArray {
+	% Verify operand type and value.
+	dup type /integertype ne
+		{ /TreeArray /typecheck TreeArrayError } if
+	dup 1 lt
+		{ /TreeArray /rangecheck TreeArrayError } if
+	10 dict begin
+	/size exch def
+	/n TreeArrayNodeSize def
+	/ta 5 array def
+	/rsize size 1 sub def
+	% Divide rsize iteratively by n until it becomes <= n.
+	% This is the size of the root node.  All others have size n.
+	{ rsize n le { exit } if /rsize rsize n idiv def } loop
+	/rsize rsize 1 add def
+	/node rsize array def
+	ta 0 /TreeArray put
+	ta 1 size put
+	ta 2 rsize put
+	ta 3 n put
+	ta 4 node put
+	ta
+	end
+} def
+% Validate the given TreeArray.
+/TreeArrayValidate {
+	dup type /arraytype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 0 get /TreeArray ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 1 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 2 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 3 get type /integertype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	dup 4 get type /arraytype ne
+		{ /TreeArrayValidate /typecheck TreeArrayError } if
+	pop
+} def
+/TreeArrayIndex {	% TreeArray index ==> nodeArray index
+	10 dict begin
+	/i exch def
+	/ta exch def
+	ta TreeArrayValidate
+	i type /integertype ne
+		{ ta i /TreeArrayIndex /typecheck TreeArrayError } if
+	/size	ta 1 get def
+	/rsize	ta 2 get def
+	/n	ta 3 get def
+	/root	ta 4 get def
+	i 0 lt { ta i /TreeArrayIndex /rangecheck TreeArrayError } if
+	i size ge { ta i /TreeArrayIndex /rangecheck TreeArrayError } if
+	% Generate array of successive indices.
+	mark
+	{
+		size n le { exit } if
+		i n mod		% push next index
+		/i i n idiv def
+		/size size n idiv def
+	} loop
+	i			% Push last index
+	/node root def
+	{
+		/i exch def	% Pop next index
+		dup type /marktype eq { pop exit } if
+		node i get isNull { node i n array put } if
+		/node node i get def
+	} loop
+	node i
+	end
+} def
+% Get specified entry of given TreeArray.
+/TreeArrayGet {		% treearray index TreeArrayGet ==> value
+	TreeArrayIndex get
+} def
+% Put given value into specified entry of given TreeArray.
+/TreeArrayPut {		% treearray index value TreeArrayPet ==>
+	3 1 roll	% ta index value ==> value ta index
+	TreeArrayIndex
+	3 -1 roll	% value node index ==> node index value
+	put
+} def
+%%EndProcSet
+%%EndProlog
+
+ % ./bb
+ % Args:
+ % Phase 1: 0.00 seconds
+
+%%BeginSetup
+
+0 10000 0 10000 SetAxes
+
+20 DefineTerminals
+	1857.000000000000	2738.000000000000	DT
+	2894.000000000000	8773.000000000000	DT
+	1463.000000000000	5183.000000000000	DT
+	6905.000000000000	8268.000000000000	DT
+	3221.000000000000	2457.000000000000	DT
+	3473.000000000000	730.0000000000000	DT
+	2983.000000000000	4045.000000000000	DT
+	5486.000000000000	5208.000000000000	DT
+	815.0000000000000	6755.000000000000	DT
+	1875.000000000000	934.0000000000000	DT
+	606.0000000000000	7576.000000000000	DT
+	6045.000000000000	4078.000000000000	DT
+	9323.000000000000	8669.000000000000	DT
+	7952.000000000000	2547.000000000000	DT
+	303.0000000000000	8201.000000000000	DT
+	6131.000000000000	4811.000000000000	DT
+	7871.000000000000	9452.000000000000	DT
+	854.0000000000000	1630.000000000000	DT
+	5468.000000000000	655.0000000000000	DT
+	7539.000000000000	7194.000000000000	DT
+
+%%EndSetup
+
+ % _gst_initialize_constraint_pool: 0.00 seconds.
+ % Constraint pool initialized with:
+ % 	1	Total degree rows	48	coeffs.
+ % 	20	Cutset rows		140	coeffs.
+ % 	0	Incompatibility rows	0	coeffs.
+ % 	40	2-terminal SEC rows	143	coeffs.
+ % 	60	Total rows in pool	21	in LP
+ % @PMEM 60 rows, 1 blocks, 935 nzfree, 0 nzwasted, 1324 nztotal
+ % _gst_build_initial_formulation: 0.00 seconds.
+% Resuming node 0
+ % @PAP adding 21 rows, 188 nz to LP
+  % @PL 21 rows, 48 cols, 236 nonzeros, 10 slack, 11 tight.
+  % @D deleting 10 slack rows
+  % @PAP adding 7 rows, 34 nz to LP
+  % @PL 18 rows, 48 cols, 191 nonzeros, 3 slack, 15 tight.
+  % @D deleting 3 slack rows
+  % @PAP adding 4 rows, 16 nz to LP
+  % @PL 19 rows, 48 cols, 185 nonzeros, 2 slack, 17 tight.
+  % @D deleting 2 slack rows
+  % @PAP adding 2 rows, 13 nz to LP
+  % @PL 19 rows, 48 cols, 179 nonzeros, 1 slack, 18 tight.
+  % @D deleting 1 slack rows
+  % @PAP adding 2 rows, 8 nz to LP
+  % @PL 20 rows, 48 cols, 184 nonzeros, 1 slack, 19 tight.
+  % @D deleting 1 slack rows
+  % @PAP adding 1 rows, 4 nz to LP
+  % @PL 20 rows, 48 cols, 181 nonzeros, 0 slack, 20 tight.
+  % @PAP adding 1 rows, 6 nz to LP
+  % @PL 21 rows, 48 cols, 187 nonzeros, 0 slack, 21 tight.
+  % Node 0 LP 1 Solution, length = 28148.143371, 0.00 0
+ % 0 fractional variables
+ % @LO 0.00 28148.14337126926693599671 99.9000000000
+ % @LN 0.00 28148.14337126926693599671 99.9000000000
+ % @UO 0.00 30347.53466514592582825571 7.2473474967
+ % @UN 0.00 30347.53466514592582825571 7.2473474967
+ % Fixed 1 vars to 0 and 0 vars to 1.
+ % @cutset: 3 connected components.
+ % initially 5 congested vertices:
+ % _gst_find_congested_components found 1 components:
+ % 	component 0:	5 verts,	5 edges
+ % @PAP adding 10 rows, 155 nz to LP
+ % @PMEM 70 rows, 1 blocks, 770 nzfree, 0 nzwasted, 1324 nztotal
+  % @PL 31 rows, 48 cols, 342 nonzeros, 4 slack, 27 tight.
+  % @D deleting 4 slack rows
+  % @PAP adding 1 rows, 2 nz to LP
+  % @PL 28 rows, 48 cols, 314 nonzeros, 0 slack, 28 tight.
+  % Node 0 LP 2 Solution, length = 30016.070987, 0.00/0.00/0.00/0.00/0.00/0.00/0.00 10
+ % 0 fractional variables
+ % @LO 0.00 28148.14337126926693599671 7.2473474967
+ % @LN 0.00 30016.07098694170053931884 1.0922260469
+ % @UO 0.00 30347.53466514592582825571 1.0922260469
+ % @UN 0.00 30223.63135156120188185014 0.6867485982
+ % Fixed 2 vars to 0 and 0 vars to 1.
+ % @cutset: 2 connected components.
+ % initially 4 congested vertices:
+ % _gst_find_congested_components found 1 components:
+ % 	component 0:	3 verts,	3 edges
+ % @PAP adding 2 rows, 24 nz to LP
+ % @PMEM 72 rows, 1 blocks, 744 nzfree, 0 nzwasted, 1324 nztotal
+  % @PL 30 rows, 48 cols, 338 nonzeros, 2 slack, 28 tight.
+  % @D deleting 2 slack rows
+  % @PAP adding 1 rows, 5 nz to LP
+  % @PL 29 rows, 48 cols, 326 nonzeros, 2 slack, 27 tight.
+  % @D deleting 2 slack rows
+  % Node 0 LP 3 Solution, length = 30133.799336, 0.00/0.00/0.00/0.00/0.00/0.00/0.00 2
+ % 4 fractional variables
+ % @LO 0.00 30016.07098694170053931884 0.6867485982
+ % @LN 0.00 30133.79933562145743053406 0.2972244298
+ % @UO 0.00 30223.63135156120188185014 0.2972244298
+ % @UN 0.00 30213.19418714918356272392 0.2627820516
+ % Fixed 9 vars to 0 and 1 vars to 1.
+ % initially 5 congested vertices:
+ % _gst_find_congested_components found 1 components:
+ % 	component 0:	5 verts,	6 edges
+ % @PAP adding 1 rows, 14 nz to LP
+ % @PMEM 73 rows, 1 blocks, 729 nzfree, 0 nzwasted, 1324 nztotal
+  % @PL 28 rows, 48 cols, 318 nonzeros, 0 slack, 28 tight.
+  % Node 0 LP 4 Solution, length = 30213.194187, 0.00/0.00/0.00/0.00/0.00/0.00/0.00 1
+ % 4 fractional variables
+ %       0     0        cutoff    30213.1942
+% @LO 0.00 30133.79933562145743053406 0.2627820516
+% @LN 0.00 30213.19418714918356272392 0.0000000000
+
+ % Certificate of solution:
+ % @C	1358.774630450230	1673.449405504500
+ % @C	659.1169269302972	7913.086731107861
+ % @C	6770.625650253472	2620.080947691455
+ % @C	5989.768392041534	5145.284109176802
+ % @C	2815.910515324769	3988.874435650504
+ % @C	2614.395504797304	2992.410085859946
+ % @C	7246.594925233262	8185.552505375690
+ % @C	8008.330453219958	8986.309193972585
+%%Page: 1 1
+BeginPlot
+	Plot_Terminals
+ % fs10: 17 0 9
+	17 T	1358.774630450230	1673.449405504500	S
+	1358.774630450230	1673.449405504500	0 T	S
+	1358.774630450230	1673.449405504500	9 T	S
+ % fs11: 14 1 10
+	14 T	659.1169269302972	7913.086731107861	S
+	659.1169269302972	7913.086731107861	1 T	S
+	659.1169269302972	7913.086731107861	10 T	S
+ % fs15: 18 11 13
+	18 T	6770.625650253472	2620.080947691455	S
+	6770.625650253472	2620.080947691455	11 T	S
+	6770.625650253472	2620.080947691455	13 T	S
+ % fs16: 19 15 7
+	19 T	5989.768392041534	5145.284109176802	S
+	5989.768392041534	5145.284109176802	15 T	S
+	5989.768392041534	5145.284109176802	7 T	S
+ % fs19: 6 4 0 2
+	6 T	2815.910515324769	3988.874435650504	S
+	2815.910515324769	3988.874435650504	2614.395504797304	2992.410085859946	S
+	2614.395504797304	2992.410085859946	4 T	S
+	2614.395504797304	2992.410085859946	0 T	S
+	2815.910515324769	3988.874435650504	2 T	S
+ % fs24: 19 3 16 12
+	19 T	7246.594925233262	8185.552505375690	S
+	7246.594925233262	8185.552505375690	3 T	S
+	7246.594925233262	8185.552505375690	8008.330453219958	8986.309193972585	S
+	8008.330453219958	8986.309193972585	16 T	S
+	8008.330453219958	8986.309193972585	12 T	S
+ % fs30: 15 11
+	15 T	11 T	S
+ % fs32: 8 10
+	8 T	10 T	S
+ % fs39: 5 9
+	5 T	9 T	S
+ % fs41: 2 8
+	2 T	8 T	S
+ % fs43: 18 5
+	18 T	5 T	S
+  (Euclidean SMT:  20 points,  length = 30213.19418714918,  0.00 seconds)
+EndPlot
+
+% @0 Euclidean SMT
+% N M Nodes LPs P1CPU P2CPU TotCPU
+% @1 20 48 1 4 0.00 0.00 0.00
+% Z RootZ %Gap RootLPs RootCPU RedMST
+% @2 30213.19418714918 (30213.194187) 0.00000 4 0.00 2.3894
+% InitPRows InitPNZ InitLPRows InitLPNZ
+% @3 60 329 21 236
+% RootPRows RootPNZ RootLPRows RootLPNZ
+% @4 73 522 28 318
+% FinalPRows FinalPNZ FinalLPRows FinalLPNZ
+% @5 73 522 28 318
+% SMTFSTs SMTAvgFSTSz SMTMaxFSTSz #2FSTs #3FSTs ... #10FSTS #>10FSTs
+% @6 11 2.727273 4 5 4 2 0 0 0 0 0 0 0

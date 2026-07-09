@@ -1,0 +1,26 @@
+defaults:
+  - optimizer: discrete_evolution
+  - test_function: ehrlich
+
+random_seed: 0
+log_interval: 1
+log_level: info
+num_opt_steps: 512
+wandb_host: null
+wandb_mode: online
+project_name: sherpa
+exp_name: dry_run
+job_name: test_sherpa
+__version__: 0.0
+dtype: float32
+
+output_dir: ???
+
+# Dataset generation parameters
+num_test_fns: 1
+max_sequences: null # 500
+
+# Hyperparameters to run iterations of the GA for
+hyperparameter_ranges:
+  survival_quantile: [0.1] # [0.0001] # [0.02, 0.1]
+  # mutation_prob: [0.25] # [0.1, 0.25]

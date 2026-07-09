@@ -1,0 +1,37 @@
+[project]
+name = "cdt-agents"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "cpc-llm",
+    "matplotlib>=3.9",
+    "scikit-learn>=1.5",
+    "seaborn>=0.13",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "modal>=0.73",
+    "pytest>=8.2",
+    "ruff>=0.8",
+]
+
+[tool.uv.sources]
+cpc-llm = { workspace = true }
+
+[tool.uv.workspace]
+members = ["cpc_llm"]
+
+[tool.pytest.ini_options]
+pythonpath = ["QA_expts", "constrained_AL"]
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = [
+    "E402",  # import order in notebooks is often intentional
+    "E741",  # ambiguous variable names (e.g. `l`) common in math-heavy notebooks
+    "F402",  # shadowed imports across notebook cells
+    "F821",  # undefined names — often defined in earlier cells
+]
+"constrained_AL/run_SplitCP_MFCS_ALexpts.py" = ["E402"]  # sys.path manipulation before imports
+"cpc_llm/src/cpc_llm/test_functions/finetune_ehrlich.py" = ["E402"]  # conditional import after try/except

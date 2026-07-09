@@ -1,0 +1,24 @@
+# Model
+model: /path/to/Qwen3-VL-8B-Instruct
+cache_dir: /path/to/models/
+
+# Paths
+dataset_dir: /path/to/dataset_cache
+output_dir: /path/to/output
+
+# Dataset
+dataset: blink_jigsaw
+
+# KV cache recomputation
+strategy: lego  # no_recompute, lego, cacheblend, guided_recompute
+recompute_ratio: 0.15
+method: norm  # norm, mass, entropy
+
+# Generation
+max_new_tokens: 512
+run_baseline: false
+run_recompute: true
+
+# Multi-image comparison: chunk_k=0 vs chunk_k=1
+#num_samples: 150
+chunk_k: [0, 2, 4, 6, 8, 16]

@@ -1,0 +1,24 @@
+# Source SHAs for the release branch
+#
+# This file records the development snapshots from which the release/llm
+# and release/vlm trees were built, plus the third-party submodule SHA.
+# Captured at the start of the release prep work; verified unchanged after push.
+
+origin/ring                               9d2b9208568c78d34845f21adbcc73d4a4318f1e
+origin/vlm-dev                            15cafbec4d3160d6d8c513c8a55c0fcd7525ee07
+
+release-prep-llm (cleaned)                0fed0720eed92a7b1ccb07c5cc469996b3028703
+release-prep-vlm (cleaned)                759c139d2b62619e6fb3bb973132b4f302c8e263
+
+ring-flash-attention (submodule, v0.1.8)  786677930bce4f6022166899c88ce2c00c814ee2
+
+# Verification (post-push)
+# ------------------------
+# After this release branch is pushed to origin, the source branches
+# origin/ring and origin/vlm-dev MUST still resolve to the SHAs above.
+# Run:
+#   git fetch origin ring vlm-dev
+#   git rev-parse origin/ring          # expected: 9d2b9208568c78d34845f21adbcc73d4a4318f1e
+#   git rev-parse origin/vlm-dev       # expected: 15cafbec4d3160d6d8c513c8a55c0fcd7525ee07
+# Any divergence indicates the release prep accidentally rewrote the source
+# branches, which is forbidden.
