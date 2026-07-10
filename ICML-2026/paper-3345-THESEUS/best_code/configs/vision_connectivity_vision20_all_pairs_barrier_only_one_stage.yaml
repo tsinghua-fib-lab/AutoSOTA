@@ -1,0 +1,56 @@
+suite: vision20
+tasks: all
+all_pairs: true
+
+clip_model: ViT-B-32
+clip_pretrained: openai
+device: cuda
+dtype: null
+
+batch_size: 128
+num_workers: 6
+val_fraction: 0.1
+seed: 42
+eval_split: val
+
+base_ckpt: null
+strict_load: false
+forward_mode: auto
+
+text_features_source: auto
+text_features_checkpoint: pair_task
+
+alpha_min: 0.0
+alpha_max: 1.0
+alpha_step: 0.1
+
+# Barrier-only mode: skip 2D connectivity plane.
+run_heatmap: false
+heatmap_alpha_min: 0.0
+heatmap_alpha_max: 1.0
+heatmap_alpha_step: 0.1
+
+save_plots: true
+output_dir: src/.cache/vision_connectivity/vision20_all_pairs_barrier_only_one_stage
+
+tuned_ckpts:
+  Cars: src/checkpoints/finetune/ViT-B-32/openai/Cars/full_last_ep.pt
+  DTD: src/checkpoints/finetune/ViT-B-32/openai/DTD/full_last_ep.pt
+  EuroSAT: src/checkpoints/finetune/ViT-B-32/openai/EuroSAT/full_last_ep.pt
+  GTSRB: src/checkpoints/finetune/ViT-B-32/openai/GTSRB/full_last_ep.pt
+  MNIST: src/checkpoints/finetune/ViT-B-32/openai/MNIST/full_last_ep.pt
+  RESISC45: src/checkpoints/finetune/ViT-B-32/openai/RESISC45/full_last_ep.pt
+  SUN397: src/checkpoints/finetune/ViT-B-32/openai/SUN397/full_last_ep.pt
+  SVHN: src/checkpoints/finetune/ViT-B-32/openai/SVHN/full_last_ep.pt
+  CIFAR100: src/checkpoints/finetune/ViT-B-32/openai/CIFAR100/full_last_ep.pt
+  STL10: src/checkpoints/finetune/ViT-B-32/openai/STL10/full_last_ep.pt
+  Flowers102: src/checkpoints/finetune/ViT-B-32/openai/Flowers102/full_last_ep.pt
+  OxfordIIITPet: src/checkpoints/finetune/ViT-B-32/openai/OxfordIIITPet/full_last_ep.pt
+  PCAM: src/checkpoints/finetune/ViT-B-32/openai/PCAM/full_last_ep.pt
+  FER2013: src/checkpoints/finetune/ViT-B-32/openai/FER2013/full_last_ep.pt
+  EMNIST: src/checkpoints/finetune/ViT-B-32/openai/EMNIST/full_last_ep.pt
+  CIFAR10: src/checkpoints/finetune/ViT-B-32/openai/CIFAR10/full_last_ep.pt
+  Food101: src/checkpoints/finetune/ViT-B-32/openai/Food101/full_last_ep.pt
+  FashionMNIST: src/checkpoints/finetune/ViT-B-32/openai/FashionMNIST/full_last_ep.pt
+  RenderedSST2: src/checkpoints/finetune/ViT-B-32/openai/RenderedSST2/full_last_ep.pt
+  KMNIST: src/checkpoints/finetune/ViT-B-32/openai/KMNIST/full_last_ep.pt

@@ -1,0 +1,134 @@
+common:
+  seed: 42
+  deterministic: false
+
+  device: cuda
+  dtype: fp32
+
+  backbone:
+    name: openclip
+    clip_model: ViT-L-14
+    clip_pretrained: openai
+
+  data:
+    batch_size: 16
+    num_workers: 6
+    val_fraction: 0.1
+    pin_memory: true
+
+  train:
+    epochs: null
+    optimizer:
+      name: adamw
+    lr: 1.0e-5
+    weight_decay: 0.1
+    accumulate_grad_batches: 8
+    lr_scheduler:
+      name: cosine
+    grad_clip_norm: 1.0
+    early_stopping: false
+    early_stopping_patience: 5
+
+  strategy:
+    name: full
+    params: {}
+
+  output:
+    out_dir: src/checkpoints/finetune
+    save_format: full
+    save_last_epoch: true
+
+  logging:
+    use_wandb: false
+    project: null
+    entity: null
+    tags: []
+    mode: online
+    local_log_dir: null
+    log_every_n_steps: 50
+    run_name: null
+
+datasets_order:
+  - SUN397
+  - Cars
+  - RESISC45
+  - EuroSAT
+  - SVHN
+  - GTSRB
+  - MNIST
+  - DTD
+  - CIFAR100
+  - STL10
+  - Flowers102
+  - OxfordIIITPet
+  - PCAM
+  - FER2013
+  - EMNIST
+  - CIFAR10
+  - Food101
+  - FashionMNIST
+  - RenderedSST2
+  - KMNIST
+
+# Per-dataset overrides. Only put what changes from common.
+datasets:
+  SUN397:
+    train:
+      epochs: 14
+  Cars:
+    train:
+      epochs: 35
+  RESISC45:
+    train:
+      epochs: 15
+  EuroSAT:
+    train:
+      epochs: 12
+  SVHN:
+    train:
+      epochs: 4
+  GTSRB:
+    train:
+      epochs: 11
+  MNIST:
+    train:
+      epochs: 5
+  DTD:
+    train:
+      epochs: 76
+  CIFAR100:
+    train:
+      epochs: 6
+  STL10:
+    train:
+      epochs: 6
+  Flowers102:
+    train:
+      epochs: 147
+  OxfordIIITPet:
+    train:
+      epochs: 82
+  PCAM:
+    train:
+      epochs: 1
+  FER2013:
+    train:
+      epochs: 10
+  EMNIST:
+    train:
+      epochs: 2
+  CIFAR10:
+    train:
+      epochs: 6
+  Food101:
+    train:
+      epochs: 4
+  FashionMNIST:
+    train:
+      epochs: 5
+  RenderedSST2:
+    train:
+      epochs: 39
+  KMNIST:
+    train:
+      epochs: 5

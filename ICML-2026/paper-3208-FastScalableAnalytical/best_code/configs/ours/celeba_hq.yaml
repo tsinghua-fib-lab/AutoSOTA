@@ -1,0 +1,36 @@
+defaults:
+  - /defaults.yaml
+
+experiment:
+  run_name: ours_celeba_hq
+  tags: [baseline, ours, celeba_hq]
+  conditional: False
+
+
+dataset:
+  name: celeba_hq
+  split: train
+  download: true
+  batch_size: 256
+  subset_size: null  # Set to a smaller value to limit projection cache size
+  resolution: 64  # Keep resolution manageable for covariance projections
+
+model:
+  name: ours
+  params:
+    temperature: 1.0
+    mask_threshold: 0.030
+    chunk_size: 512
+    k_min: 1500    # = N/20 (N=30000 for CelebA-HQ), lower bound of k_t (Eq. 6)
+    k_max: 3000    # = N/10, upper bound of k_t and lower bound of m_t (Sec. 3.4)
+    low_res_dim: 16
+    posterior_chunk_size: 256
+    weight_method: ss
+
+
+metrics:
+  baseline_name: baseline_unet
+  baseline_unet_path: "services/base_models/baseline_unet/celeba_hq/ckpt_epoch_200.pt"
+
+
+

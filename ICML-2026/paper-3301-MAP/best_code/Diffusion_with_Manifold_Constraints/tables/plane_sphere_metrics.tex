@@ -1,0 +1,104 @@
+\begin{table}[H]
+\scriptsize
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c  c  l  >{\centering\arraybackslash}p{0.8cm}  >{\centering\arraybackslash}p{1.0cm}  >{\centering\arraybackslash}p{0.8cm}  >{\centering\arraybackslash}p{0.8cm}  >{\centering\arraybackslash}p{0.8cm}}
+\hline
+ & & Method & Train time & Sampling time & COV $\uparrow$ & JSD $\downarrow$ & TVD $\downarrow$ \\
+\hline
+% ===================== PLANE – Diffusion ===================== %
+\multirow{7}{*}{\rotatebox{90}{\textbf{Plane}}}%
+ & \multirow{4}{*}{\rotatebox{90}{\textbf{DMs}}}
+&PDM & 0.0012 & 0.4991 & 0.8678 & 0.0555 & 0.2270 \\
+&&PIDM & 0.0019 & 0.1959 & 0.8119 & 0.0873 & 0.2913 \\
+&&$\tilde{p}_{\sigma}$ & 0.0012 & 0.2908 & 0.8736 & 0.0515 & 0.2015 \\
+&&DDPM & 0.0012 & 0.1960 & 0.8632 & 0.0475 & 0.1967 \\
+&&DDPM (proj.) & 0.0012 & 0.1966 & \textbf{0.8852} & 0.0442 & 0.1893 \\
+&&DDPM (proj., iso.) & 0.0012 & 0.1966 & 0.8096 & 0.0821 & 0.2817 \\
+\cline{2-8}
+% ===================== PLANE – Normalizing Flows ============= %
+ & \multirow{6}{*}{\rotatebox{90}{\textbf{NFs}}}
+&Glow (iso.) & 0.0169 & 0.6182 & 0.9358 & 0.1026 & 0.3135 \\
+&&Glow ($\tilde{p}_{\sigma}$, ours) & 0.0169 & 0.6181 & 0.9219 & 0.1056 & 0.3187 \\
+&&Glow (proj.) & 0.0170 & 0.6197 & 0.9115 & 0.2826 & 0.5962 \\
+&&Glow & 0.0170 & 0.6176 & 0.9115 & 0.2790 & 0.5931 \\
+&&RealNVP (iso.) & 0.0062 & 0.1191 & 0.9340 & 0.0506 & 0.2034 \\
+&&RealNVP ($\tilde{p}_{\sigma}$, ours) & 0.0062 & 0.1193 & 0.9115 & 0.0500 & 0.2038 \\
+&&RealNVP (proj.) & 0.0055 & 0.1193 & 0.9392 & 0.1433 & 0.3853 \\
+&&RealNVP & 0.0055 & 0.1188 & 0.9358 & 0.1417 & 0.3880 \\
+\hline
+% ===================== SPHERE – Diffusion ==================== %
+\multirow{8}{*}{\rotatebox{90}{\textbf{Sphere}}}%
+ & \multirow{4}{*}{\rotatebox{90}{\textbf{DMs}}}
+&PDM & 0.0012 & 0.3763 & 0.8888 & 0.0771 & 0.2733 \\
+&&PIDM & 0.0020 & 0.1965 & 0.5664 & 0.1570 & 0.4058 \\
+&&$\tilde{p}_{\sigma}$ & 0.0012 & 0.2656 & \textbf{0.9105} & 0.0657 & 0.2341 \\
+&&DDPM & 0.0012 & 0.1975 & 0.7976 & 0.0777 & 0.2694 \\
+&&DDPM (proj.) & 0.0012 & 0.1979 & 0.9011 & 0.0662 & 0.2393 \\
+&&DDPM (proj., iso.) & 0.0012 & 0.1979 & 0.8717 & 0.0989 & 0.3097 \\
+\cline{2-8}
+% ===================== SPHERE – Normalizing Flows ============ %
+ & \multirow{7}{*}{\rotatebox{90}{\textbf{NFs}}}
+&Glow & 0.0161 & 0.3927 & 0.7685 & 0.3475 & 0.6708 \\
+&&Glow ($\tilde{p}_{\sigma}$, ours) & 0.0161 & 0.3583 & 0.8837 & 0.0911 & 0.2925 \\
+&&Glow (proj.) & 0.0161 & 0.3938 & 0.8686 & 0.0963 & 0.3000 \\
+&&Glow (iso.) & 0.0161 & 0.3938 & 0.9181 & 0.1360 & 0.3727 \\
+&&RealNVP & 0.0055 & 0.0660 & 0.8018 & 0.3389 & 0.6672 \\
+&&RealNVP ($\tilde{p}_{\sigma}$, ours) & 0.0055 & 0.0710 & 0.8675 & 0.0769 & 0.2638 \\
+&&RealNVP (proj.) & 0.0055 & 0.0664 & 0.7048 & 0.2817 & 0.5969 \\
+&&RealNVP (iso.) & 0.0055 & 0.0664 & 0.7108 & 0.3114 & 0.6295 \\
+\hline
+\end{tabular}
+\caption*{Extrinsic metrics.}
+
+\begin{tabular}{c
+    c
+    l
+    >{\centering\arraybackslash}p{0.9cm}  % Intrinsic metric 1
+    >{\centering\arraybackslash}p{0.9cm}  % Intrinsic metric 2
+    >{\centering\arraybackslash}p{0.9cm}  % Intrinsic metric 3 (optional)
+}
+\hline
+ & & Method & COV $\uparrow$ & JSD $\downarrow$ & TVD $\downarrow$ \\
+\hline
+% ===================== PLANE – Diffusion ===================== %
+\multirow{7}{*}{\rotatebox{90}{\textbf{Plane}}}%
+ & \multirow{4}{*}{\rotatebox{90}{\textbf{DMs}}}
+&PDM & 0.8678 & 0.0438 & 0.1999 \\
+&&$\tilde{p}_{\sigma}$ & 0.8736 & 0.0400 & 0.1810 \\
+&&DDPM (proj.) & \textbf{0.8852} & \textbf{0.0340} & \textbf{0.1667} \\
+&&DDPM (proj., iso.) & 0.8096 & 0.0686 & 0.2543 \\
+\cline{2-6}
+% ===================== PLANE – Normalizing Flows ============= %
+ & \multirow{6}{*}{\rotatebox{90}{\textbf{NFs}}}
+&Glow (iso.) & 0.8539 & 0.0109 & 0.0999 \\
+&&Glow ($\tilde{p}_{\sigma}$, ours) & 0.8560 & 0.0114 & 0.1049 \\
+&&Glow (proj.) & 0.6393 & 0.0362 & 0.2059 \\
+&&RealNVP (iso.) & 0.9062 & 0.0035 & 0.0607 \\
+&&RealNVP ($\tilde{p}_{\sigma}$, ours) & 0.9182 & 0.0040 & 0.0623 \\
+&&RealNVP (proj.) & 0.8105 & 0.0206 & 0.1660 \\
+\hline
+% ===================== SPHERE – Diffusion ==================== %
+\multirow{8}{*}{\rotatebox{90}{\textbf{Sphere}}}%
+ & \multirow{4}{*}{\rotatebox{90}{\textbf{DMs}}}
+&PDM & 0.8883 & 0.0489 & 0.2223 \\
+&&$\tilde{p}_{\sigma}$ & \textbf{0.9105} & \textbf{0.0369} & \textbf{0.1791} \\
+&&DDPM (proj.) & 0.8985 & 0.0378 & 0.1841 \\
+&&DDPM (proj., iso.) & 0.8724 & 0.0684 & 0.2637 \\
+\cline{2-6}
+% ===================== SPHERE – Normalizing Flows ============ %
+ & \multirow{7}{*}{\rotatebox{90}{\textbf{NFs}}}
+&Glow ($\tilde{p}_{\sigma}$, ours) & 0.8792 & 0.0581 & 0.2264 \\
+&&Glow (proj.) & 0.8860 & 0.0600 & 0.2271 \\
+&&Glow (iso.) & 0.8480 & 0.0975 & 0.3193 \\
+&&RealNVP ($\tilde{p}_{\sigma}$, ours) & 0.8958 & 0.0516 & 0.2156 \\
+&&RealNVP (proj.) & 0.6986 & 0.2254 & 0.5381 \\
+&&RealNVP (iso.) & 0.6579 & 0.2700 & 0.5898 \\
+\hline
+\end{tabular}
+\caption*{Intrinsic metrics (using 2-D representations).}
+
+\caption{Metrics for plane and sphere tasks at $\sigma = 0.05$. Among these experiments, learning $p_{\sigma}$ \emph{always} improves the sampled distribution compared to either learning $p_{0}$ or modifying the learning or sampling algorithms for the diffusion models. For NF approaches, we highlight the best-performing method within each architecture.}
+\label{tab:PlaneSphereMetrics}
+\end{table}

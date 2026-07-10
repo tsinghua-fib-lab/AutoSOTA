@@ -1,0 +1,52 @@
+[project]
+name = "softmatcha"
+version = "1.0.0"
+description = "SoftMatcha: Fast and Soft Pattern Matcher"
+authors = [
+    { name = "Masataka Yoneda", email = "e869120@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "datasets>=4.4.1",
+    "fasttext>=0.9.3",
+    "gensim>=4.3.3",
+    "h5py>=3.12.1",
+    "icu-tokenizer>=0.0.1",
+    "ipadic>=1.0.0",
+    "mecab-python3>=1.0.10",
+    "numba>=0.60.0",
+    "numpy>=1.26.4",
+    "pip>=25.3",
+    "pysimdjson>=6.0.2",
+    "sacremoses>=0.1.1",
+    "simple-parsing>=0.1.6",
+    "termcolor>=2.5.0",
+    "torch>=2.5.1",
+    "transformers>=4.47.0",
+    "psutil>=5.9.0",
+    "tqdm>=4.66",
+]
+
+[project.scripts]
+softmatcha-index = "softmatcha.cli.build_main:cli_main"
+softmatcha-exact = "softmatcha.cli.exact_main:cli_main"
+softmatcha-search = "softmatcha.cli.search_main:cli_main"
+softmatcha-estimate = "softmatcha.cli.estimate:cli_main"
+softmatcha-bench = "softmatcha.cli.bench_main:cli_main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "maturin>=1.10.2",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.2",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]

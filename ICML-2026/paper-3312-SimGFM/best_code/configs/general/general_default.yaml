@@ -1,0 +1,13 @@
+# General settings
+name: 'graph-tf-model'      # Warning: 'debug' and 'test' are reserved name that have a special behavior
+gpus: 1                     # Multi-gpu is not implemented on this branch
+resume: null            # If resume, path to ckpt file from outputs directory in main directory
+test_only: null         # Use absolute path
+check_val_every_n_epochs: 5
+samples_to_generate: 512 #       # We advise to set it to 2 x batch_size maximum
+# Test
+num_folds: 1
+# Conditional Generation
+conditional: False
+target: 'k2'
+evaluate_all_checkpoints: False

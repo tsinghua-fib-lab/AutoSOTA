@@ -1,0 +1,35 @@
+problem:
+  name: muller_brown
+
+model:
+  type: conservative
+  dim_hidden: [128, 128]
+  emb_dim_hidden: [64, 64]
+  activation: gelu
+
+bridge:
+  base_drift: false
+  guiding_type: brownian
+  decay_coeff: false
+  sampler: euler
+
+train:
+  self_consistency: nodrift # standard, nodrift
+  num_steps: 1000
+  num_outer_iterations: 4_000
+  num_inner_iterations: 1
+  traj_batch_size: 64
+  train_batch_size: 20_000
+  lr: 3.0e-4
+  ema_rate: 1.0
+  grad_ema_rate: 1.0
+  jacobian_method: euler
+  beta_schedule: average
+  B_ratio: 0.9
+  ckpt_freq: 100
+  STL_adjustments: false
+  loss_clip: 1.0e4
+  seed: 0
+
+plotting:
+  plot_fn: plot_multiple_trajectories

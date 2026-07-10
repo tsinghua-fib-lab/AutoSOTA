@@ -1,0 +1,45 @@
+common:
+  seed: 42
+  deterministic: false
+  device: cuda
+  dtype: fp32
+  backbone:
+    name: openclip
+    clip_model: ViT-B-16
+    clip_pretrained: laion2b_s34b_b88k
+  data:
+    batch_size: 128
+    num_workers: 6
+    val_fraction: 0.1
+    pin_memory: true
+  train:
+    epochs: null
+    optimizer:
+      name: adamw
+    lr: 1.0e-05
+    weight_decay: 0.1
+    accumulate_grad_batches: 1
+    lr_scheduler:
+      name: cosine
+      warmup_steps: 200
+    grad_clip_norm: 1.0
+    early_stopping: false
+    early_stopping_patience: 5
+  strategy:
+    name: full
+    forward_mode: standard
+    params: {}
+  output:
+    out_dir: src/checkpoints/theseus/models/checkpoints
+    save_format: full
+    save_last_epoch: true
+  logging:
+    use_wandb: false
+    local_log_dir: null
+    log_every_n_steps: 50
+datasets_order:
+  - SVHN
+datasets:
+  SVHN:
+    train:
+      epochs: 4

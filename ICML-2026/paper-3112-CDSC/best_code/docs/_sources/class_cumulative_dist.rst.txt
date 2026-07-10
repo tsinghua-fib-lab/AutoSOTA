@@ -1,0 +1,26 @@
+CumulativeDist class
+==================================
+
+The ``cenreg.distribution.cdf.CumulativeDist`` class is a representation of a cumulative distribution function (CDF) that is defined on a set of bins.
+
+The parameter ``b`` represents the bins used to define the discrete distribution. The parameter ``p`` represents the probabilities corresponding to each bin, and the ``cum_p`` parameter represents the cumulative probabilities of ``p`` (i.e., ``cum_p[i] = sum(p[:i+1])``).
+
+The ``interpolate`` parameter determines how the CDF is interpolated between the bins, with options for 'right', 'left', and 'linear'.
+
+.. figure:: ./CumulativeDist_right.png
+    :width: 80%
+    :align: center
+
+    The illustration of the CDF, where the ``interpolate`` parameter is set to ``right``.
+
+.. figure:: ./CumulativeDist_left.png
+    :width: 80%
+    :align: center
+
+    The illustration of the CDF, where the ``interpolate`` parameter is set to ``left``.
+
+.. figure:: ./CumulativeDist_linear.png
+    :width: 80%
+    :align: center
+
+    The illustration of the CDF, where the ``interpolate`` parameter is set to ``linear``.

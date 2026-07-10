@@ -1,0 +1,79 @@
+# Configuration for function minimization example
+max_iterations: 1000
+checkpoint_interval: 50
+log_level: "INFO"
+
+# LLM configuration
+llm:
+  primary_model: "deepseek-chat"
+  primary_model_weight: 0.5
+  secondary_model: "deepseek-reasoner" #
+  secondary_model_weight: 0.5
+  evaluator_model: "deepseek-chat" # "deepseek-chat"
+  evaluator_model_weight: 1.0
+  key_set: "./configs/my_key_set.yaml"
+  temperature: 0.7
+  timeout: 3600
+  top_p: 0.95
+  max_tokens: 8192
+
+# Ensure good generalization, avoid overfitting, and keep model complexity appropriate. 
+# You may use nonlinear transformations and nested functions for feature interactions, but maintain computational efficiency. 
+
+# Prompt configuration
+prompt:
+  system_message: |
+    You are an expert in machine learning for combinatorial optimization. Design a Python function that scores a candidate variable for branching in a branch and bound algorithm. 
+    The function will receive a feature vector (numpy.ndarray with dimension (n, 91)) including the 91 features of n decision variables and params you extract to use in your score function. You should use these features to compute a score for each variable, return np.ndarray with dimension (n,)
+    Use at most 10 features in total.
+    
+    Input features (all normalized to [0,1]) are structured as follows:
+
+    Part 1 - NodeBipartite Features (indices 0-18):
+    0: objective coefficient
+    1-4: binary indicators (binary, integer, implicit integer, continuous)
+    5-6: bound indicators (has lower/upper bound)
+    7: normalized reduced cost
+    8-9: LP solution value and fractional part
+    10-11: LP solution bound indicators
+    12: scaled age (iterations since last basic)
+    13-14: incumbent value and average value
+    15-18: basis status indicators (lower, basic, upper, zero)
+
+    Part 2 - Khalil2016 Features (indices 19-90):
+    19-21: objective coefficient (raw, positive part, negative part)
+    22: number of participating constraints
+    23-26: static constraint degree stats (mean, std, min, max)
+    27-31: positive constraint coefficients (count, mean, std, min, max)
+    32-36: negative constraint coefficients (count, mean, std, min, max)
+    37-38: fractional distance and ceiling distance
+    39-43: pseudocost values (up, down, ratio, sum, product)
+    44-47: cutoff counts and ratios (up/down)
+    48-54: dynamic constraint degrees (mean, std, min, max) and ratios to static (mean, min, max)
+    55-66: coefficient-to-RHS ratios and coefficient interaction ratios (min/max for positive/negative cases)
+    67-90: active constraint statistics under four weighting schemes (unit, 1/sum_all, 1/sum_candidate, dual_cost), each including count, sum, mean, std, min, max.
+  num_top_programs: 0
+  num_diverse_programs: 0
+  use_template_stochasticity: true
+
+# Database configuration
+database:
+  population_size: 120
+  archive_size: 20
+  num_islands: 8
+  migration_interval: 400
+  migration_rate: 0.1 
+  elite_selection_ratio: 0.2
+  exploitation_ratio: 0.7
+
+# Evaluator configuration
+evaluator:
+  timeout: 10000
+  cascade_evaluation: true
+  cascade_thresholds: [0.85, 0.75]
+  parallel_evaluations: 4
+  use_llm_feedback: false
+
+# Evolution settings
+diff_based_evolution: false
+allow_full_rewrites: true

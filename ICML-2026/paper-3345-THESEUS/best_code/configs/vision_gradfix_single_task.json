@@ -1,0 +1,35 @@
+{
+    "suite": "vision8",
+    "tasks": "EuroSAT",
+
+    "source_clip_model": "ViT-B-16",
+    "source_clip_pretrained": "openai",
+
+    "target_clip_model": "ViT-B-16",
+    "target_clip_pretrained": "laion2b_s34b_b88k",
+
+    "mask_mode": "normal",
+    "vote": "max",
+
+    "alpha_search": false,
+    "alpha_min": 0.0,
+    "alpha_max": 1.0,
+    "alpha_step": 0.1,
+    "alpha": 0.0,
+
+    "batch_size": 32,
+    "num_workers": 6,
+    "val_fraction": 0.1,
+    "seed": 42,
+    "no_humanize": true,
+
+    "grad_imgs_per_class": 2,
+    "grad_batch_size": 32,
+    "grad_num_batches": null,
+
+    "weights": null,
+
+    "tuned_ckpts": {
+        "EuroSAT": "src/checkpoints/tsv/models/checkpoints/ViT-B-16/EuroSATVal/nonlinear_finetuned.pt"
+    }
+}

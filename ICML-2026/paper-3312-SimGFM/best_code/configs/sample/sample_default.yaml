@@ -1,0 +1,18 @@
+# generation settings
+sample_steps: 200
+time_distortion: "polydec"     # 'identity', 'cosine', polyinc, polydec
+adaptive_step: False
+tail_process: True
+# SID-style re-noising (skip rate matrix, blend prediction with prior)
+use_sid: False
+# Temperature for prediction sharpening (1.0 = no change, <1.0 = sharper)
+temperature: 1.0
+# rate matrix selector for sampling
+rate_matrix: "rvf_denoiser" # defog, rvf_denoiser, vf_denoiser
+# defog rate matrix parameters
+omega: 0.0                # target guidance strength
+eta: 0.0                  # stochasticity
+# fixed
+rdb: 'general'            # general | column | entry
+rdb_crit: dummy           # max_marginal | x_t | p_x1_g_xt | x_1 | p_xt_g_x1 | p_xtdt_g_xt | x_0 | xhat_t
+                          # abs_state

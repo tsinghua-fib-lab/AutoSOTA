@@ -1,0 +1,53 @@
+suite: vision8
+
+# Evaluate barrier/connectivity only on these two tasks.
+tasks:
+  - DTD
+  - SVHN
+pair_tasks:
+  - DTD
+  - SVHN
+all_pairs: false
+
+clip_model: ViT-B-32
+clip_pretrained: openai
+device: cuda
+dtype: null
+
+batch_size: 128
+num_workers: 6
+val_fraction: 0.1
+seed: 42
+eval_split: val
+
+base_ckpt: null
+strict_load: false
+forward_mode: auto
+
+text_features_source: auto
+text_features_checkpoint: pair_task
+
+alpha_min: 0.0
+alpha_max: 1.0
+alpha_step: 0.05
+
+heatmap_alpha_min: -2.0
+heatmap_alpha_max: 2.0
+heatmap_alpha_step: 0.3
+
+save_plots: true
+output_dir: src/.cache/vision_connectivity_one_stage/vision8_two_tasks
+
+# You can also use checkpoint_a/checkpoint_b.
+# Here we use task->checkpoint mapping so it is easy to switch to all_pairs later.
+tuned_ckpts:
+  EuroSAT: src/checkpoints/finetune/ViT-B-32/openai/EuroSAT/full.pt
+  Cars: src/checkpoints/finetune/ViT-B-32/openai/Cars/full.pt
+  GTSRB: src/checkpoints/finetune/ViT-B-32/openai/GTSRB/full.pt
+  RESISC45: src/checkpoints/finetune/ViT-B-32/openai/RESISC45/full.pt
+  SVHN: src/checkpoints/finetune/ViT-B-32/openai/SVHN/full.pt
+  SUN397: src/checkpoints/finetune/ViT-B-32/openai/SUN397/full.pt
+  DTD: src/checkpoints/finetune/ViT-B-32/openai/DTD/full.pt
+  MNIST: src/checkpoints/finetune/ViT-B-32/openai/MNIST/full.pt
+  CIFAR100: src/checkpoints/finetune/ViT-B-32/openai/CIFAR100/full.pt
+  STL10: src/checkpoints/finetune/ViT-B-32/openai/STL10/full.pt

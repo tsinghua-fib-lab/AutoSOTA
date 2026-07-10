@@ -1,0 +1,46 @@
+# @package _global_
+wandb:
+    project: "moses"
+    name: "moses"
+dataset:
+    compute_moses: True
+    compute_guacamol: False
+    compute_fcd: False  #compute the fcd of moses need use check_moses.py
+    remove_h: null
+    resume: null
+    save_smiles_dir: ${hydra:runtime.cwd}/moses_generated_smiles/
+general:
+    name : 'moses'
+    gpus : 1
+    remove_h: True
+    resume: null
+    test_only: null
+    check_val_every_n_epochs: 5
+    samples_to_generate: 25000
+    num_folds: 1
+train:
+    optimizer: adamw
+    n_epochs: 300
+    batch_size: 256
+    save_model: True
+    lr: 2e-4
+    num_workers: 4
+    time_distortion: 'polydec'
+sample:
+    time_distortion: 'polydec-10' #'polydec'
+    sample_steps: 50
+model:
+    ema_decay: 0.0
+    model_weights_dir: ${hydra:runtime.cwd}/model_weights/${dataset.name}-${general.name}-${model.time_emb_type}-${model.extra_features}-${model.rrwp_steps}-${model.ema_decay}
+    # time_emb_type: "zero"
+    # extra_features: 'rrwp_only'        # 'all', 'cycles', 'eigenvalues', 'rrwp', 'rrwp-cycle', 'rrwp_comp' or null
+    rrwp_steps: 20
+    n_layers: 12
+    type: 'discrete'
+    transition: 'marginal'                          # uniform or marginal
+    model: 'graph_tf'
+    # Do not set hidden_mlp_E, dim_ffE too high, computing large tensors on the edges is costly
+    # At the moment (03/08), y contains quite little information
+    hidden_mlp_dims: { 'X': 256, 'E': 128, 'y': 256}
+    # The dimensions should satisfy dx % n_head == 0
+    hidden_dims: { 'dx': 256, 'de': 64, 'dy': 128, 'n_head': 8, 'dim_ffX': 256, 'dim_ffE': 128, 'dim_ffy': 256}

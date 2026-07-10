@@ -1,0 +1,30 @@
+{
+  "suite": "nli6",
+  "model_name_or_path": "google/t5-v1_1-small",
+  "model_arch": "t5",
+  "device": "cuda",
+  "dtype": "fp32",
+  "eval_mode": "head_logits",
+  "task_heads": "src/checkpoints/finetune_text/google__t5-v1_1-small/heads.pt",
+  "head_key_pattern": "classification_head",
+  "model_kind": "sequence_classification",
+  "split": "test",
+  "method": "task_arithmetic",
+  "alpha_search": true,
+  "peft_subspace": "full",
+  "low_memory_all_methods": true,
+  "stream_task_arithmetic": true,
+  "inplace_task_arithmetic": true,
+  "alpha_min": 0.0,
+  "alpha_max": 1.0,
+  "alpha_step": 0.1,
+  "weights": null,
+  "tuned_ckpts": {
+    "snli": "src/checkpoints/finetune_text/google__t5-v1_1-small/snli/full_best_ep.pt",
+    "mnli": "src/checkpoints/finetune_text/google__t5-v1_1-small/mnli/full_best_ep.pt",
+    "sick": "src/checkpoints/finetune_text/google__t5-v1_1-small/sick/full_best_ep.pt",
+    "qnli": "src/checkpoints/finetune_text/google__t5-v1_1-small/qnli/full_best_ep.pt",
+    "rte": "src/checkpoints/finetune_text/google__t5-v1_1-small/rte/full_best_ep.pt",
+    "scitail": "src/checkpoints/finetune_text/google__t5-v1_1-small/scitail/full_best_ep.pt"
+  }
+}

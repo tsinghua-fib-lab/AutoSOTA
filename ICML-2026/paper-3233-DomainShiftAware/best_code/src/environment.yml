@@ -1,0 +1,47 @@
+name: cp
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python
+  - python=3.10
+
+  # Core scientific stack
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+
+  # Plotting
+  - matplotlib
+  - seaborn
+
+  # Deep learning
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cpuonly   # remove if using CUDA
+
+  # Gradient boosting
+  - xgboost
+
+  # Utilities
+  - tqdm
+  - pyyaml
+  - pillow
+
+  # Jupyter
+  - jupyterlab
+  - ipykernel
+
+  # Pip-only packages
+  - pip
+  - pip:
+      - sentence-transformers
+      - transformers
+      - tokenizers
+      - accelerate
+      - rich
+

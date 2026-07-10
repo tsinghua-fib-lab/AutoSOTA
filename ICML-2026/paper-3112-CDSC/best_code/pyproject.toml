@@ -1,0 +1,119 @@
+[build-system]
+requires = ["hatchling >= 1.26", "uv-dynamic-versioning >= 0.14.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cenreg"
+dynamic = ["version"]
+authors = [
+  { name="Hiroki Yanagisawa", email="yanagisawa_hiroki@cyberagent.co.jp" },
+]
+description = "A Python library for censored regression."
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E*"]
+
+dependencies = [
+  "numpy>=2.2.6,<3",
+  "scipy>=1.15.3,<2",
+]
+
+[project.optional-dependencies]
+pytorch = [
+  "torch>=2.11.0,<3",
+]
+
+[dependency-groups]
+dev = [
+  "ty",
+  "ruff",
+  "pytest",
+]
+optional = [
+  "pandas",
+  "scikit-learn",
+  "matplotlib",
+]
+
+[project.urls]
+Homepage = "https://github.com/CyberAgentAILab/cenreg"
+Issues = "https://github.com/CyberAgentAILab/cenreg/issues"
+
+[tool.uv]
+exclude-newer = "1 week"
+
+[tool.ruff]
+extend-exclude = ["*.ipynb"]
+# Ruff only supports pyproject.toml, not setup.cfg.
+# Implicit configurations as default: https://docs.astral.sh/ruff/configuration/
+lint.select = [
+    "W",      # pycodestyle warnings
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "S",      # flake8-bandit
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "I",      # isort
+    "C90",    # mccabe complexity
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "ARG001", # unused arguments in functions
+]
+lint.ignore = [
+    "S101", # allow assertion-based validation in the current codebase
+    "N802", # keep legacy function names for now
+    "N803", # keep legacy parameter names for now
+    "N806", # keep legacy local variable names for now
+    "N999", # keep legacy module names for now
+]
+# Allow automatic fixes for all fixable issues
+lint.fixable = ["ALL"]
+# Same as MacBookPro (15inch) and IDEs, 1920px full width.
+line-length = 120
+
+[tool.ruff.lint.pep8-naming]
+# torch.nn.functional is imported as F, so ignore N812 errors for names starting with F.
+extend-ignore-names = ["F"]
+
+[tool.ty.rules]
+unused-ignore-comment = "warn"
+
+[tool.ty.terminal]
+# Error if ty emits any warning-level diagnostics.
+error-on-warning = true
+# The format to use for printing diagnostic messages.
+output-format = "full"
+
+[tool.ty.src]
+include = ["src", "tests"]
+exclude = ["notebooks"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver2"
+version_provider = "scm"
+version_files = [
+    "src/cenreg/__version__.py:version",
+]
+update_changelog_on_bump = true
+major_version_zero = true
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+format = "{base}"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.hooks.version]
+path = "src/cenreg/__version__.py"
+template = '''
+version = "{version}"
+'''

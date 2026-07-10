@@ -1,0 +1,33 @@
+# @package _global_
+wandb:
+    project: "qm9"
+    name: "qm9"
+general:
+    name: "qm9_no_h"
+    gpus : 1
+    test_only: null
+    evaluate_all_checkpoints: False
+    # debug
+    check_val_every_n_epochs: 50
+    samples_to_generate: 10000
+train:
+    n_epochs: 1000
+    batch_size: 1024
+    save_model: True
+    time_distortion: 'identity'
+sample:
+    sample_steps: 10
+    time_distortion: 'polydec-20' #polydec'
+model:
+    ema_decay: 0.0
+    time_emb_type: "scaled"
+    extra_features: 'rrwp_only'        # 'all', 'cycles', 'eigenvalues', 'rrwp', 'rrwp-cycle', 'rrwp_comp' or null
+    rrwp_steps: 12
+    n_layers: 9
+    transition: marginal
+dataset:
+    remove_h: True
+    pin_memory: True
+    num_workers: 16
+    compute_scaf: False
+    compute_fcd: True

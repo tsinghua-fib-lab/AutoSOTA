@@ -1,0 +1,34 @@
+# @package _global_
+wandb:
+    project: "planar"
+    name: "planar"
+general:
+    name : 'planar'
+    gpus : 1
+    resume: null            # If resume, path to ckpt file from outputs directory in main directory
+    test_only: null
+    check_val_every_n_epochs: 2000
+    samples_to_generate: 40
+train:
+    n_epochs: 100000
+    batch_size: 64
+    save_model: True
+    time_distortion: 'identity'
+sample:
+    time_distortion: 'polydec-10' #'polydec'
+    sample_steps: 200
+model:
+    ema_decay: 0.0
+    time_emb_type: "zero"
+    extra_features: 'rrwp_only'        # 'all', 'cycles', 'eigenvalues', 'rrwp', 'rrwp-cycle', 'rrwp_comp' or null
+    rrwp_steps: 32
+    # alpha: 1.1
+    # beta: 0.1
+    n_layers: 10
+
+    # Do not set hidden_mlp_E, dim_ffE too high, computing large tensors on the edges is costly
+    # At the moment (03/08), y contains quite little information
+    hidden_mlp_dims: { 'X': 128, 'E': 64, 'y': 128 }
+
+    # The dimensions should satisfy dx % n_head == 0
+    hidden_dims: { 'dx': 256, 'de': 64, 'dy': 64, 'n_head': 8, 'dim_ffX': 256, 'dim_ffE': 64, 'dim_ffy': 256 }

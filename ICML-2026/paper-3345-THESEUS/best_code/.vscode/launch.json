@@ -1,0 +1,485 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Vision8 GradFix Rebase (all tasks)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_rebase",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_gradfix_rebase.json",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "GradFix Rebase Single Task",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_rebase",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision_gradfix_single_task.json",
+                "--device",
+                "cuda:1"
+            ]
+        },
+        {
+            "name": "Theseus Rebase Single Task",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_rebase",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_theseus_single_task.json",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "Theseus Rebase All Tasks",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_rebase",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_theseus_all.json",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "Vision8 Merge (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic.json",
+                "--device",
+                "cuda:1",
+            ]
+        },
+        {
+            "name": "Vision8 Merge (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic.json",
+                "--device",
+                "cuda:1",
+            ]
+        },
+        {
+            "name": "Vision8 Merge core space TA (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_lora_tsv_core.json",
+                "--device",
+                "cuda",
+                //"--recompute-single-acc",
+                "--method=task_arithmetic",
+                "--no-alpha-search",
+                "--alpha=0.2"
+            ]
+        },
+        {
+            "name": "Vision8 Merge FWP TA LORA FULL (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic_fwp.json",
+                "--device",
+                "cuda",
+                "--recompute-single-acc",
+                "--method=task_arithmetic",
+                "--no-alpha-search",
+                "--alpha=0.2"
+            ]
+        },
+        {
+            "name": "Vision8 Merge core full tsv (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config=configs/vision8_task_arithmetic.json",
+                "--device=cuda",
+                "--method=core_full_tsv",
+                "--alpha-search"
+            ]
+        },
+        {
+            "name": "Vision8 Merge WA (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config=configs/vision8_task_arithmetic.json",
+                "--device=cuda",
+                "--method=weighted_average",
+                "--alpha-search"
+            ]
+        },
+        {
+            "name": "Vision8 Merge isoc lora (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config=configs/vision8_lora_tsv_core.json",
+                "--device=cuda",
+                "--method=isoc_merge",
+                "--alpha-search"
+            ]
+        },
+        {
+            "name": "Vision8 Merge TIES (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic.json",
+                "--device=cuda",
+                "--method=ties_merge",
+                "--single-acc-zero-shot"
+            ]
+        },
+        {
+            "name": "Vision8 Merge TSV (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic.json",
+                "--device=cuda",
+                "--method=tsv_merge",
+                "--alpha-search"
+            ]
+        },
+        {
+            "name": "Vision8 Merge ISO (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision8_task_arithmetic.json",
+                "--device=cuda",
+                "--method=isoc_merge"
+            ]
+        },
+        {
+            "name": "Vision14 Merge TA (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision14_lora_ta_full_coop.json",
+                "--device",
+                "cuda",
+                "--alpha-search"
+            ]
+        },
+        {
+            "name": "Vision20 Merge TA (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.vision_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/vision20_task_arithmetic.json",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "LLM NLI6 Merge (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.eval.llm_merge",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--config",
+                "configs/llm_merge_llama3_8b_knots_hf_tsv.json",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "LLM NLI6 Train T5 (config file)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_text",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--text-config",
+                "src/merge_and_rebase/finetune/configs/text.yaml",
+                "--device",
+                "cuda:1"
+            ]
+        },
+        {
+            "name": "KMNIST Debug Finetune ViT-B-32",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config",
+                "src/merge_and_rebase/finetune/configs/vision-kmnist-debug.yaml",
+                "--datasets",
+                "KMNIST",
+                "--device",
+                "cuda"
+            ]
+        },
+        {
+            "name": "EuroSAT Finetune",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config=src/merge_and_rebase/finetune/configs/vision.yaml",
+                "--dataset=PCAM"
+            ]
+        },
+        {
+            "name": "EuroSAT Finetune LoRA",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config=src/merge_and_rebase/finetune/configs/vision-peft.yaml",
+                "--dataset=EuroSAT"
+            ]
+        },
+        {
+            "name": "EuroSAT Finetune NTK",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config=src/merge_and_rebase/finetune/configs/vision-ntk.yaml",
+                "--dataset=EuroSAT"
+            ]
+        },
+        {
+            "name": "EuroSAT Finetune fwp",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config=src/merge_and_rebase/finetune/configs/vision-peft-linear.yaml",
+                "--dataset=EuroSAT"
+            ]
+        },
+        {
+            "name": "EuroSAT Finetune NTK KFAC",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.train_vision",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--vision-config=src/merge_and_rebase/finetune/configs/vision-ntk-kfac-reg.yaml",
+                "--dataset=EuroSAT",
+            ]
+        },
+        {
+            "name": "Repro TransFusion (debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/repro_transfusion_main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--dataset", "eurosat",
+                "--finetuned-checkpoint-a", "src/checkpoints/theseus/models/checkpoints/ViT-B-16/commonpool_l_s1b_b8k/eurosat/best.pt",
+                "--first-n-batches", "2",
+                "--device", "cuda"
+            ]
+        },
+        {
+            "name": "Compute KFAC",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "merge_and_rebase.finetune.utils.kfac",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--task=SUN397",
+                "--clip-model=ViT-B-32",
+                "--clip-pretrained=openai",
+                "--device=cuda:1",
+                "--train-percent=0.3",
+                "--num-samples-expectation=1",
+                "--precision=fp64",
+                "--normalize",
+                "--out-dir=src/checkpoints/kfac"
+            ]
+        }
+    ]
+}

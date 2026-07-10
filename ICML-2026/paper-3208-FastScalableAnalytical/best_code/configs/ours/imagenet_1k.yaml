@@ -1,0 +1,34 @@
+defaults:
+  - /defaults.yaml
+
+experiment:
+  run_name: ours_imagenet_1k
+  tags: [baseline, ours, imagenet_1k]
+  conditional: True
+
+dataset:
+  name: imagenet_1k
+  split: train
+  download: true
+  batch_size: 128
+  subset_size: null  # Set to a smaller value to limit projection cache size
+  resolution: 64  # Keep resolution manageable for covariance projections
+
+model:
+  name: ours
+  params:
+    temperature: 1.0
+    mask_threshold: 0.020
+    chunk_size: 512
+    # Conditional generation (default): per-class N ~ 1200, so k_min = N/20 = 60, k_max = m_min = N/10 = 120.
+    # For unconditional (full N = 1.28M), scale up accordingly (e.g., k_min=10000, k_max=20000).
+    k_min: 60      # lower bound of k_t (Eq. 6)
+    k_max: 120     # upper bound of k_t and lower bound of m_t (Sec. 3.4)
+    low_res_dim: 16
+    weight_method: ss
+
+metrics:
+  baseline_name: baseline_edm_conditional
+  baseline_edm_path: "services/base_models/baseline_edm/imagenet_1k/edm-imagenet-64x64-cond-adm.pkl"
+
+

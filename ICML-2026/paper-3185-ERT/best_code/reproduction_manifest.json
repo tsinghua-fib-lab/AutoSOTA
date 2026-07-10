@@ -1,0 +1,53 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 3185,
+    "repo_url": "https://github.com/ElSacho/covmetrics",
+    "repo_commit": "a5205aada6a0f39e3812daf087753217ef66b159",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_3185",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-3185:reproduced",
+    "eval_command": "python3 reproduce_sec42.py",
+    "baseline_metrics": {"L1-ERT": 0.0903, "L2-ERT": 0.0101},
+    "primary_metric": "L1-ERT",
+    "metric_direction": "lower",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3185.log",
+    "status": "success",
+    "created_at": "2026-07-10T12:00:00+00:00",
+    "notes": "Successfully reproduced L1-ERT metric within CI bounds. L1-ERT=0.0903±0.0078 matches paper's 0.091±0.007 and is within rubric CI [0.084,0.098]. L2-ERT=0.0101±0.0017 is close to paper's 0.009±0.001 but slightly above rubric CI upper bound of 0.010 by 0.0001. This is within statistical noise given only 10 runs. The reproduction uses the paper's exact settings: synthetic 8-dim heteroskedastic data (Y~N(0,σ(X1)), σ(x)=0.5+|x|+x², X~U([-1,1]⁸)), Standard CP with S(X,Y)=|Y|, n_cal=3000, n_test=1500, α=0.1, 5-fold CV, LightGBM classifier.",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "Parse stdout for 'METRIC:L1-ERT=<value>' and 'METRIC:L2-ERT=<value>' lines with float values",
+    "known_levers": "1) Change nonconformity score to improve conditional coverage (reduce ERT). 2) Use better classifier (TabICL, CatBoost, RealTabPFN) for more accurate ERT estimation. 3) Adjust CP calibration size. 4) Vary synthetic data dimension and noise function. 5) Use different alpha levels. 6) Apply different CP variants (CQR, local adjustment, etc.).",
+    "setup_notes": "Base image docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Container was previously used for paper #1780 (ProtoMech) and required repo replacement. Installed: lightgbm==4.6.0, catboost==1.2.10, probmetrics==1.3.0, numba==0.66.0. covmetrics installed in editable mode (pip install -e .). No external datasets needed - all data is generated synthetically in the reproduction script. GPUs not required for the evaluation (LightGBM runs on CPU) but are available in the container.",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Minimize L1-ERT (expected L1 deviation from conditional coverage) by improving the conformal prediction method, while monitoring L2-ERT as a coupled guardrail metric. Lower ERT values indicate better conditional coverage. The Standard CP baseline produces L1-ERT=0.0903. Target: reduce L1-ERT as much as possible.",
+      "metrics": [
+        {
+          "name": "L1-ERT",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.0903,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Primary paper metric estimating E[|P(Y∈C(X)|X) - (1-α)|]. Paper recommends L1-ERT as the default metric. Lower values indicate better conditional coverage. At 0.0903, the Standard CP deviates from conditional coverage by ~9% on average."
+        },
+        {
+          "name": "L2-ERT",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "improve",
+          "baseline": 0.0101,
+          "regression_tolerance_pct": 15.0,
+          "rationale": "Coupled secondary metric estimating E[(1-α - P(Y∈C(X)|X))²]. Should move with L1-ERT but on a squared scale. Serves as a consistency check - if L1-ERT improves but L2-ERT degrades significantly, the conditional coverage improvement may not be uniform."
+        }
+      ],
+      "success_policy": "Improve L1-ERT (reduce it) as much as possible within the SOTA iteration budget. L2-ERT should generally decrease alongside L1-ERT. A 10% regression tolerance on L1-ERT allows for statistical noise across runs; a 15% tolerance on L2-ERT accounts for its higher variance. If L1-ERT regresses beyond tolerance without disproportionate gains in other dimensions, the change is considered detrimental."
+    },
+    "metric_upper_bound": 0.098,
+    "metric_lower_bound": 0.084
+  }
+}

@@ -1,0 +1,52 @@
+USED_FEATURES = [0, 7, 9, 22, 39, 40, 43, 48, 67]
+PARAMS = [1.0786976161645492, 0.23806897907821495, 1.2220001238555878, 0.9458262526360364, 0.1, 0.1, 0.1, 0.1, 0.1]
+BOUNDS = [[0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2]]
+
+import numpy as np
+
+def score_function(variable_features, params):
+    # Extract core features
+    obj_coeff = variable_features[:, 0]          # Objective coefficient
+    reduced_cost = variable_features[:, 7]       # Reduced cost
+    fractional_part = variable_features[:, 9]    # Fractional part of LP solution
+    constraint_count = variable_features[:, 22]  # Number of participating constraints
+    pseudocost_up = variable_features[:, 39]     # Pseudocost up value
+    pseudocost_down = variable_features[:, 40]   # Pseudocost down value
+    pseudocost_product = variable_features[:, 43] # Pseudocost product
+    dyn_degree_mean = variable_features[:, 48]   # Dynamic constraint degree mean
+    active_constraint_count = variable_features[:, 67] # Active constraint count
+
+    # Nonlinear transformations for branching decision quality
+    # Strong branching centrality: peaks at 0.5 fractionality
+    centrality = 4.0 * fractional_part * (1.0 - fractional_part)
+
+    # Weighted pseudocost based on fractional distance to bounds
+    weighted_pseudocost = fractional_part * pseudocost_down + (1.0 - fractional_part) * pseudocost_up
+
+    # Logarithmic pseudocost strength for stability against outliers
+    pseudocost_strength = np.log1p(np.abs(pseudocost_product) + 1e-8)
+
+    # Constraint participation with saturation
+    constraint_activity = np.tanh(dyn_degree_mean * 0.4) * np.tanh(active_constraint_count * 0.06)
+
+    # Reduced cost magnitude as tiebreaker
+    dual_importance = np.tanh(np.abs(reduced_cost) * 2.5)
+
+    # Objective-fractionality synergy
+    obj_fraction_synergy = np.tanh(np.abs(obj_coeff)) * centrality
+
+    # Combined score with component separation for learnability
+    raw_score = (
+        params[0] * centrality +
+        params[1] * dual_importance +
+        params[2] * fractional_part +
+        params[3] * constraint_count +
+        params[4] * weighted_pseudocost +
+        params[5] * pseudocost_strength +
+        params[6] * constraint_activity +
+        params[7] * obj_fraction_synergy +
+        params[8] * np.log1p(active_constraint_count) / np.log(2.0)
+    )
+
+    # Centered softplus for stable, non-negative output
+    return np.log1p(np.exp(raw_score - 2.0))

@@ -1,0 +1,36 @@
+# @package _global_
+wandb:
+    project: "sbm"
+    name: "sbm"
+general:
+    name : 'sbm'
+    gpus : 1
+    resume: null            # If resume, path to ckpt file from outputs directory in main directory
+    test_only: null
+    check_val_every_n_epochs: 2000
+    samples_to_generate: 40
+    num_folds: 5
+train:
+    n_epochs: 50000
+    batch_size: 16
+    save_model: True
+    num_workers: 4
+    time_distortion: 'polydec'
+    accumulate_grad_batches: 4 
+sample:
+    sample_steps: 200
+    time_distortion: 'identity'
+model:
+    model_weights_dir: ${hydra:runtime.cwd}/model_weights/${dataset.name}-${general.name}-${model.time_emb_type}-${model.extra_features}-${model.rrwp_steps}-${model.ema_decay}
+    ema_decay: 0.0
+    time_emb_type: "default"
+    transition: 'absorbfirst'
+    n_layers: 8
+    rrwp_steps: 20
+    extra_features: "rrwp"
+    # Do not set hidden_mlp_E, dim_ffE too high, computing large tensors on the edges is costly
+    # At the moment (03/08), y contains quite little information
+    hidden_mlp_dims: { 'X': 128, 'E': 64, 'y': 128 }
+
+    # The dimensions should satisfy dx % n_head == 0
+    hidden_dims: { 'dx': 256, 'de': 64, 'dy': 64, 'n_head': 8, 'dim_ffX': 256, 'dim_ffE': 64, 'dim_ffy': 256 }

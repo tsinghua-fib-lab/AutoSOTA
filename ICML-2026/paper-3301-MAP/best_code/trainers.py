@@ -1,0 +1,1641 @@
+import math
+import time
+import copy
+import math
+import time
+
+import numpy as np
+import torch
+import torch.nn as nn
+from torch import optim
+from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
+
+import wandb
+from datasets import *
+from models import *
+from utils.constraints import *
+
+
+class SinusoidalEmbedding(nn.Module):
+    """Sinusoidal positional embedding for diffusion timesteps.
+
+    Maps a scalar timestep in [0, 1] to a fixed sinusoidal encoding of
+    dimension `dim`, following the Transformer positional encoding scheme
+    (Vaswani et al. 2017) adapted for continuous diffusion timesteps.
+    """
+
+    def __init__(self, dim: int):
+        super().__init__()
+        self.dim = dim
+
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
+        # t: (B,) float in [0, 1]
+        device = t.device
+        half_dim = self.dim // 2
+        emb_factor = math.log(10000.0) / float(max(1, half_dim - 1))
+        emb = torch.exp(torch.arange(half_dim, device=device, dtype=torch.float32) * (-emb_factor))
+        emb = t.float().unsqueeze(-1) * emb.unsqueeze(0)  # (B, half_dim)
+        emb = torch.cat([torch.sin(emb), torch.cos(emb)], dim=-1)  # (B, dim)
+        if self.dim % 2 == 1:
+            emb = torch.cat([emb, torch.zeros(emb.shape[0], 1, device=device)], dim=-1)
+        return emb
+
+
+class DDPMTrainer:
+    def __init__(
+        self,
+        dataset,
+        timesteps=100,
+        batch_size=64,
+        lr=1e-3,
+        mu=0.01,
+        project_x0=False,
+        penalize_P=False,
+        sample_x0=False,
+        penalize_orth_dist=False,
+        project_x0_sample=False,
+        constraints_dict={},
+        hidden_dim=64,
+        time_embed_dim=32,
+        time_conditioning="default",
+        time_concat=False,
+        denoiser_predicts_score=False,
+        # residual variance schedule for mean-estimation path
+        residual_scale=1.0,
+        residual_power=0.5,
+        mesh=False,
+        projector={},
+        size=3,  # Dimension of samples,
+        image=False,  # Whether the data is image data
+        unet=False,   # Whether to use a 1D UNet for vector data
+        # Reduce projector LBFGS work by default to speed up training.
+        # Set to None to leave the projector's default unchanged.
+        projector_max_iter=10,
+        # Multi-step manifold projection during sampling.
+        # If > 0, project onto the constraint manifold every project_every
+        # reverse-diffusion steps (not just at the final step).
+        project_every=25,
+        # Noise schedule type for the forward diffusion process.
+        # "linear": standard linear beta schedule (beta_1=1e-4, beta_T=0.02)
+        # "cosine": cosine schedule (Nichol & Dhariwal 2021) with s=0.008
+        noise_schedule="linear",
+    ):
+        self.project_x0 = project_x0
+        self.project_every = project_every
+        self.penalize_P = penalize_P
+        self.penalize_orth_dist = penalize_orth_dist
+        self.project_x0_sample = project_x0_sample
+        self.sample_x0 = sample_x0
+        self.projector = projector
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.size = size
+        # Residual variance hyperparameters (scale and power for t-norm)
+        self.residual_scale = residual_scale
+        self.residual_power = residual_power
+        # If True, the denoiser returns a score estimate s_theta(xt, t) instead
+        # of the usual epsilon (noise) prediction. When True we will use the
+        # score directly in the x0 reconstruction below; otherwise we convert
+        # epsilon -> score via s = -epsilon / sqrt(1 - alpha_bar_t).
+        self.denoiser_predicts_score = denoiser_predicts_score
+        if self.projector == {}:
+            if mesh:
+                self.projector = MeshConstraintProjector(constraints_dict, self.device)
+            else:
+                self.projector = SimpleConstraintProjector(self.device)
+                self.projector.add_constraints_from_dict(constraints_dict)
+
+        # Optionally reduce LBFGS iterations to speed up per-batch projection.
+        if projector_max_iter is not None:
+            try:
+                if hasattr(self.projector, "max_iter"):
+                    self.projector.max_iter = int(projector_max_iter)
+                elif hasattr(self.projector, "max_iters"):
+                    self.projector.max_iters = int(projector_max_iter)
+            except Exception:
+                pass
+
+        self.training_losses = []  # Store loss for each epoch
+        self.projection_norms = []  # Store projection norm for each epoch
+
+        # Per-epoch timing breakdowns: list of dicts with averaged timings for each epoch.
+        # Each dict will contain keys: 'project', 'sampling_to_t0', 'model_forward',
+        # 'backprop', 'other', and ancillary counts used to compute averages.
+        self.epoch_timing_breakdowns = []
+
+        # Timing metrics for projections
+        self.projection_times = []  # List of times for each projection in training step
+        self.projection_sample_times = (
+            []
+        )  # List of times for each projection in sampling
+
+        # Prepare dataset
+        self.dataset = dataset
+        self.input_dim = dataset.size(-1)
+        self.dataloader = DataLoader(
+            self.dataset.to(self.device), batch_size=batch_size, shuffle=True
+        )
+        del dataset
+        # Diffusion process
+        self.timesteps = timesteps
+        self.noise_schedule = noise_schedule
+
+        if noise_schedule == "cosine":
+            # Cosine schedule (Nichol & Dhariwal 2021, "Improved DDPM").
+            # Allocates more timesteps to moderate-SNR regimes where the
+            # denoiser learns most effectively. s=0.008 as in the paper.
+            s = 0.008
+            steps = timesteps + 1
+            t = torch.linspace(0, timesteps, steps, device=self.device)
+            alphas_cumprod = torch.cos(
+                (t / timesteps + s) / (1.0 + s) * math.pi / 2.0
+            ) ** 2
+            alphas_cumprod = alphas_cumprod / alphas_cumprod[0]
+            self.betas = 1.0 - alphas_cumprod[1:] / alphas_cumprod[:-1]
+            self.betas = torch.clamp(self.betas, max=0.999)
+        else:
+            # Standard linear schedule (beta_1=1e-4, beta_T=0.02)
+            self.betas = torch.linspace(0.0001, 0.02, timesteps, device=self.device)
+
+        self.alphas = 1.0 - self.betas
+        self.alpha_bars = torch.cumprod(self.alphas, dim=0)
+        alpha_bars_prev = torch.cat(
+            [torch.ones(1, device=self.device), self.alpha_bars[:-1]], dim=0
+        )
+        posterior_variance = (
+            self.betas * (1.0 - alpha_bars_prev) / (1.0 - self.alpha_bars)
+        )
+        self.posterior_variance_clipped = posterior_variance.clone()
+        if timesteps > 1:
+            self.posterior_variance_clipped[0] = posterior_variance[1]
+        self.posterior_variance_clipped = self.posterior_variance_clipped.clamp_min(
+            1e-12
+        )
+        snr = self.alpha_bars / (1.0 - self.alpha_bars)
+        self.pidm_lambda_t = torch.minimum(snr, torch.full_like(snr, 5.0))
+        self.mu = mu
+
+        # Denoiser model
+        # If caller requests time_concat, force time_embed_dim->1. Otherwise use
+        # the provided time_embed_dim. No external time embedding modules are supported.
+        if time_concat:
+            effective_time_embed_dim = 1
+        else:
+            effective_time_embed_dim = time_embed_dim
+
+        if image:
+            # Use 2D UNet for image data
+            self.denoiser = UNetDenoiser(
+                time_embed_dim=effective_time_embed_dim, time_concat=time_concat
+            ).to(self.device)
+        elif unet:
+            # Use 1D UNet for vector data
+            self.denoiser = UNetDenoiser1D(
+                input_dim=self.input_dim,
+                time_embed_dim=effective_time_embed_dim,
+                time_concat=time_concat,
+            ).to(self.device)
+        else:
+            self.denoiser = MLPDenoiser(
+                input_dim=self.input_dim,
+                hidden_dim=hidden_dim,
+                time_embed_dim=effective_time_embed_dim,
+                time_concat=time_concat,
+            ).to(self.device)
+
+        # Attach external time embedding module for sinusoidal/fourier conditioning.
+        # When time_concat is False and time_conditioning is "sinusoidal", replace
+        # the default learned MLP time embed with a fixed sinusoidal positional encoding.
+        # The sinusoidal embedding has zero learnable parameters, so we null out the
+        # default time_embed MLP to avoid dead weights in the optimizer.
+        self.time_conditioning = time_conditioning
+        if not time_concat and time_conditioning == "sinusoidal":
+            self.denoiser.time_embed_module = SinusoidalEmbedding(time_embed_dim).to(self.device)
+            self.denoiser.time_embed = None  # disable unused learned MLP
+            print(f"[DDPM] Attached sinusoidal time embedding (dim={time_embed_dim})")
+
+        self.optimizer = optim.Adam(self.denoiser.parameters(), lr=lr)
+        self.criterion = nn.MSELoss()
+
+        # EMA (Exponential Moving Average) of denoiser weights for improved
+        # sample quality (Karras et al. CVPR 2024). The EMA model is updated
+        # after each optimizer step and used for sampling/evaluation.
+        self.ema_decay = 0.999
+        self.ema_denoiser = copy.deepcopy(self.denoiser)
+        self.ema_denoiser.eval()
+        for param in self.ema_denoiser.parameters():
+            param.requires_grad = False
+
+        # Check whether the final noised data approximates standard Gaussian
+        with torch.no_grad():
+            x0_test = torch.randn(1024, self.input_dim).to(
+                self.device
+            )  # Start from standard normal
+            t_final = torch.full(
+                (x0_test.shape[0],),
+                self.timesteps - 1,
+                device=self.device,
+                dtype=torch.long,
+            )
+
+            sqrt_alpha_bar = torch.sqrt(self.alpha_bars[t_final]).view(-1, 1)
+            sqrt_one_minus_alpha_bar = torch.sqrt(1 - self.alpha_bars[t_final]).view(
+                -1, 1
+            )
+            noise = torch.randn_like(x0_test)
+            x_T = sqrt_alpha_bar * x0_test + sqrt_one_minus_alpha_bar * noise
+
+            mean_T = x_T.mean().item()
+            std_T = x_T.std().item()
+
+            print(f"[DDPM Init Check] x_T Mean: {mean_T:.4f}, Std: {std_T:.4f}")
+
+            # Raise a warning or error if it deviates too much
+            if abs(mean_T) > 0.1 or abs(std_T - 1.0) > 0.1:
+                raise ValueError(
+                    f"[DDPM Init Check Failed] x_T is not standard normal.\n"
+                    f"Mean: {mean_T:.4f}, Std: {std_T:.4f}\n"
+                    f"Consider increasing timesteps (currently {self.timesteps})."
+                )
+            del x0_test, t_final, x_T, mean_T, std_T  # Clean up memory
+
+    def _constraint_residual(self, x):
+        if hasattr(self.projector, "constraint_residual"):
+            return self.projector.constraint_residual(x)
+
+        projected, _, extra = self.projector.project(x.detach())
+        if isinstance(projected, torch.Tensor) and projected.shape == x.shape:
+            projected_x = projected
+        elif isinstance(extra, torch.Tensor) and extra.shape == x.shape:
+            projected_x = extra
+        else:
+            projected_x = projected.reshape_as(x)
+        return x - projected_x.detach().to(device=x.device, dtype=x.dtype)
+
+    def _x0_reconstruction_loss(self, prediction, target, t, use_pidm_lambda=False):
+        if not use_pidm_lambda:
+            return self.criterion(prediction, target)
+
+        prediction_flat = prediction.reshape(target.shape[0], -1)
+        target_flat = target.reshape(target.shape[0], -1)
+        per_sample_loss = (prediction_flat - target_flat).square().mean(dim=1)
+        lambda_t = self.pidm_lambda_t[t].to(
+            device=per_sample_loss.device, dtype=per_sample_loss.dtype
+        )
+        return (lambda_t * per_sample_loss).mean()
+
+    def _prepare_time(self, t_tensor):
+        """Prepare timestep tensor for passing into the denoiser.
+
+        Behavior:
+        - If the denoiser has an external `time_embed_module` (sinusoidal or
+          fourier), normalize integer timesteps to [0, 1] by dividing by
+          (self.timesteps - 1).
+        - Otherwise preserve previous behavior: return float timesteps.
+
+        The returned tensor is a float tensor with shape (B,) suitable for
+        feeding into MLPDenoiser which will accept (B,) or (B,1).
+        """
+        # Accept both scalar/int tensors and already-float tensors
+        t_float = t_tensor.float()
+
+        has_external = getattr(self.denoiser, "time_embed_module", None) is not None
+        if has_external:
+            # Normalize to [0,1]
+            denom = float(max(1, self.timesteps - 1))
+            return (t_float / denom).to(self.device)
+
+        return t_float.to(self.device)
+
+    def update_ema(self):
+        with torch.no_grad():
+            for ema_param, param in zip(
+                self.ema_denoiser.parameters(), self.denoiser.parameters()
+            ):
+                ema_param.data.mul_(self.ema_decay).add_(
+                    (1.0 - self.ema_decay) * param.data
+                )
+
+    def forward_diffusion(self, x0, t):
+        """Adds noise to x0 at time step t"""
+        sqrt_alpha_bar = torch.sqrt(self.alpha_bars[t]).view(-1, 1)
+        sqrt_one_minus_alpha_bar = torch.sqrt(1 - self.alpha_bars[t]).view(-1, 1)
+
+        noise = torch.randn_like(x0)
+        xt = sqrt_alpha_bar * x0 + sqrt_one_minus_alpha_bar * noise
+        return xt, noise  # Return noisy x and true x0
+
+    def train(self, epochs=100):
+        """Train the diffusion model."""
+        epoch_times = []
+        for epoch in tqdm(range(epochs), desc="Training", unit="epoch"):
+            start_time = time.time()
+            total_loss = 0.0
+            total_projection_norm = 0.0
+            total_projection_time = 0.0
+            projection_count = 0
+            # Per-epoch timing accumulators
+            total_model_forward_time = 0.0
+            model_forward_count = 0
+            total_backprop_time = 0.0
+            backprop_count = 0
+            total_sampling_to_t0_time = 0.0
+            sampling_to_t0_count = 0
+            total_other_time = 0.0
+            other_count = 0
+
+            for x0 in self.dataloader:
+                batch_start = time.perf_counter()
+                x0 = x0.to(self.device)
+                self.size = x0.shape[-1]
+                t = torch.randint(0, self.timesteps, (x0.shape[0],), device=self.device)
+                xt, noise = self.forward_diffusion(x0, t)
+                # Prepare timestep according to denoiser capability (normalizes to [0,1]
+                # when an external time embedding module is attached).
+                t_for_denoiser = self._prepare_time(t)
+
+                # Model forward timing
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_start = time.perf_counter()
+                epsilon_pred = self.denoiser(
+                    xt, t_for_denoiser.unsqueeze(-1)
+                )  # denoiser accepts (B,1) or (B,)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_end = time.perf_counter()
+                model_forward_time = mf_end - mf_start
+                total_model_forward_time += model_forward_time
+                model_forward_count += 1
+
+                # Track projection timing
+                projection_time = None
+                normal = None  # Needed for penalize_orth_dist check
+                norm_residual = 0.0
+
+                if self.sample_x0:
+                    # Estimate x0
+                    alpha_t = self.alphas[t].unsqueeze(-1)
+                    alpha_bars_t = self.alpha_bars[t].unsqueeze(-1)
+                    beta_t = self.betas[t].unsqueeze(-1)
+
+                    # Construct x0 estimate using the score-based identity
+                    # (see Eq.19 / Appendix A.1):
+                    #   x_hat0 = (1 / alpha_t) * (xt + sigma_t^2 * s_theta(xt, t))
+                    # For our discrete-time DDPM parameterization:
+                    #   alpha_t == sqrt(alpha_bar_t),  sigma_t^2 == 1 - alpha_bar_t
+                    # If the denoiser predicts epsilon (noise), convert to score
+                    # via s = -epsilon / sqrt(1 - alpha_bar_t). If the denoiser
+                    # already predicts the score, use it directly. This makes the
+                    # math explicit and supports either output convention.
+                    if self.denoiser_predicts_score:
+                        score_pred = epsilon_pred
+                    else:
+                        # convert epsilon -> score: s = -epsilon / sqrt(1 - alpha_bar_t)
+                        score_pred = -epsilon_pred / torch.sqrt(1 - alpha_bars_t)
+
+                    # x0 estimate from score: x0 = (xt + (1 - alpha_bar_t) * s) / sqrt(alpha_bar_t)
+                    x0_estimate = (xt + (1 - alpha_bars_t) * score_pred) / torch.sqrt(
+                        alpha_bars_t
+                    )
+                    assert x0_estimate.shape == x0.shape
+
+                    # # Optionally replace the closed-form x0_estimate with a
+                    # # deterministic DDIM reconstruction from x_t -> x_0. This
+                    # # performs multiple model forwards for intermediate
+                    # # timesteps; we time this operation and include it in the
+                    # # sampling_to_t0 counters below.
+                    # sampling_time_for_batch = None
+                    # # Always perform DDIM deterministic reconstruction grouped by
+                    # # unique timesteps in the batch to avoid per-sample loops.
+                    # # Use the reduced two-step schedule tau = [1, t] (single large
+                    # # jump from t -> 1, then final model forward at t=1 to obtain x0).
+                    # start_sampling = time.perf_counter()
+                    # x0_est_ddim = x0_estimate.clone()
+
+                    # # unique timesteps present in this batch (descending)
+                    # unique_ts = torch.unique(t)
+                    # unique_ts, _ = torch.sort(unique_ts, descending=True)
+
+                    # for u in unique_ts.tolist():
+                    #     mask = (t == u)
+                    #     if mask.sum() == 0:
+                    #         continue
+                    #     x_sub = xt[mask].clone()
+
+                    #     # epsilon at the starting timestep u (re-use the batch epsilon_pred)
+                    #     eps_s = epsilon_pred[mask]
+
+                    #     # alpha bars for u and for 1
+                    #     alpha_bar_u = self.alpha_bars[int(u)].view(1, 1).to(self.device)
+                    #     alpha_bar_1 = self.alpha_bars[1].view(1, 1).to(self.device)
+
+                    #     sqrt_ab_u = torch.sqrt(alpha_bar_u)
+                    #     sqrt_ab_1 = torch.sqrt(alpha_bar_1)
+                    #     sqrt_1_ab_u = torch.sqrt(1.0 - alpha_bar_u)
+
+                    #     # predicted x0 at time u
+                    #     # predicted x0 at time u (conditional mean E[x0 | x_u])
+                    #     x0_pred_u = (x_sub - sqrt_1_ab_u * eps_s) / sqrt_ab_u
+
+                    #     # --- Stochastic residual sampling (replace DDIM deterministic step) ---
+                    #     # Motivation: avoid the Jensen-gap conflict by sampling from a
+                    #     # broader residual likelihood for large t while enforcing
+                    #     # tighter adherence as t -> 0. We add zero-mean Gaussian noise
+                    #     # whose std increases with t. The simplest schedule used here
+                    #     # is linear in normalized timestep: var_scale = u / (T-1).
+                    #     # This is a conservative, easy-to-tune choice; alternatives
+                    #     # (sqrt, power-law, or schedule based on alpha_bar) are
+                    #     # reasonable and can be experimented with.
+
+                    #     # normalized timestep in [0,1]
+                    #     denom = float(max(1, self.timesteps - 1))
+                    #     t_norm = float(u) / denom
+
+                    #     # Reverse-variance-based residual std (matches paper Eq.13 idea)
+                    #     # Compute single-step reverse variance beta_tilde
+                    #     alpha_bar_prev = self.alpha_bars[max(int(u) - 1, 0)].view(1, 1).to(self.device)
+                    #     beta_u = self.betas[int(u)].view(1, 1).to(self.device)
+                    #     beta_tilde = beta_u * (1.0 - alpha_bar_prev) / torch.clamp(1.0 - alpha_bar_u, min=1e-12)
+
+                    #     # Noise std tied to reverse variance, with extra t-dependent growth
+                    #     noise_std = (
+                    #         self.residual_scale * (t_norm ** self.residual_power)
+                    #     ) * torch.sqrt(torch.clamp(beta_tilde, min=1e-12))
+
+                    #     # draw noise and form sampled x0 estimate
+                    #     noise = torch.randn_like(x0_pred_u, device=self.device) * noise_std
+                    #     x0_sampled = x0_pred_u + noise
+                    #     x0_est_ddim[mask] = x0_sampled
+
+                    # end_sampling = time.perf_counter()
+                    # sampling_time_for_batch = end_sampling - start_sampling
+                    # total_sampling_to_t0_time += sampling_time_for_batch
+                    # sampling_to_t0_count += 1
+                    # # replace the closed-form estimate with the DDIM reconstruction
+                    # x0_estimate = x0_est_ddim
+
+                    if self.project_x0:
+                        start_proj = time.time()
+                        x0_estimate_projected, norm_residual, normal = (
+                            self.projector.project(x0_estimate)
+                        )
+                        end_proj = time.time()
+                        projection_time = end_proj - start_proj
+                        total_projection_time += projection_time
+                        projection_count += 1
+                        self.projection_times.append(projection_time)
+                        print(
+                            f"[Projection timing][train] {projection_time:.6f} seconds for batch size {x0_estimate.shape[0]}"
+                        )
+
+                        if self.project_x0:
+                            loss = self._x0_reconstruction_loss(
+                                x0_estimate_projected.reshape_as(x0),
+                                x0,
+                                t,
+                                use_pidm_lambda=self.penalize_P,
+                            )
+                        else:
+                            loss = self._x0_reconstruction_loss(
+                                x0_estimate, x0, t, use_pidm_lambda=self.penalize_P
+                            )
+                    else:
+                        loss = self._x0_reconstruction_loss(
+                            x0_estimate, x0, t, use_pidm_lambda=self.penalize_P
+                        )
+
+                    if self.penalize_P:
+                        start_residual = time.time()
+                        residual = self._constraint_residual(x0_estimate)
+                        residual = residual.reshape(residual.shape[0], -1)
+                        end_residual = time.time()
+                        residual_time = end_residual - start_residual
+                        projection_time = (
+                            residual_time
+                            if projection_time is None
+                            else projection_time + residual_time
+                        )
+                        total_projection_time += residual_time
+                        projection_count += 1
+                        self.projection_times.append(residual_time)
+                        print(
+                            f"[Residual timing][train/PIDM] {residual_time:.6f} seconds for batch size {x0_estimate.shape[0]}"
+                        )
+
+                        c = 1e-3
+                        sigma_t = self.posterior_variance_clipped[t].unsqueeze(-1)
+                        weight = c / (2.0 * sigma_t)
+                        weight = weight.to(self.device)
+                        loss += (weight * residual.square()).mean()
+                        norm_residual = (
+                            residual.detach().square().sum(dim=1).sqrt().mean().item()
+                        )
+
+                if self.penalize_orth_dist and normal is not None:
+                    dot = (x0 - x0_estimate_projected) @ normal
+                    loss += self.mu * torch.norm(dot)
+                else:
+                    # Preserve the x0-estimate-based loss when sample_x0=True
+                    # (used by PIDM / penalize_P). Only fall back to the
+                    # epsilon_pred vs noise loss when we are NOT using the
+                    # sample_x0 path.
+                    if not self.sample_x0:
+                        loss = self.criterion(epsilon_pred, noise)
+
+                self.optimizer.zero_grad()
+                # Backprop + optimizer timing
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                bp_start = time.perf_counter()
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    self.denoiser.parameters(), 1.0
+                )  # Clip gradients
+                self.optimizer.step()
+                self.update_ema()
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                bp_end = time.perf_counter()
+                backprop_time = bp_end - bp_start
+                total_backprop_time += backprop_time
+                backprop_count += 1
+
+                # Batch-level total and 'other' time accounting
+                batch_end = time.perf_counter()
+                batch_elapsed = batch_end - batch_start
+                measured = (
+                    model_forward_time
+                    + (
+                        projection_time
+                        if "projection_time" in locals() and projection_time is not None
+                        else 0.0
+                    )
+                    + backprop_time
+                )
+                other_time = max(batch_elapsed - measured, 0.0)
+                total_other_time += other_time
+                other_count += 1
+
+                total_loss += loss.item()
+                if self.project_x0 or self.penalize_P:
+                    total_projection_norm += norm_residual
+
+            if total_projection_norm != 0:
+                avg_projection_norm = total_projection_norm / len(self.dataloader)
+                self.projection_norms.append(avg_projection_norm)
+
+            # Compute average loss for the epoch
+            avg_loss = total_loss / len(self.dataloader)
+            self.training_losses.append(avg_loss)
+
+            # Compute per-epoch averaged timing breakdowns (use counts to avoid div-by-zero)
+            epoch_timing = {
+                "project": (
+                    (total_projection_time / projection_count)
+                    if projection_count > 0
+                    else 0.0
+                ),
+                "sampling_to_t0": (
+                    (total_sampling_to_t0_time / sampling_to_t0_count)
+                    if sampling_to_t0_count > 0
+                    else 0.0
+                ),
+                "model_forward": (
+                    (total_model_forward_time / model_forward_count)
+                    if model_forward_count > 0
+                    else 0.0
+                ),
+                "backprop": (
+                    (total_backprop_time / backprop_count)
+                    if backprop_count > 0
+                    else 0.0
+                ),
+                "other": (total_other_time / other_count) if other_count > 0 else 0.0,
+                "projection_count": projection_count,
+                "model_forward_count": model_forward_count,
+                "backprop_count": backprop_count,
+                "sampling_to_t0_count": sampling_to_t0_count,
+                "other_count": other_count,
+            }
+            self.epoch_timing_breakdowns.append(epoch_timing)
+
+            # Log metrics to wandb
+            wandb.log(
+                {
+                    "epoch": epoch + 1,
+                    "loss": avg_loss,
+                    "projection_norm": (
+                        avg_projection_norm if total_projection_norm != 0 else 0
+                    ),
+                    "avg_projection_time": (
+                        total_projection_time / projection_count
+                        if projection_count > 0
+                        else 0
+                    ),
+                    # also log the per-epoch timing breakdowns for ease of dashboarding
+                    "avg_model_forward_time": epoch_timing["model_forward"],
+                    "avg_backprop_time": epoch_timing["backprop"],
+                    "avg_sampling_to_t0_time": epoch_timing["sampling_to_t0"],
+                    "avg_other_time": epoch_timing["other"],
+                    "projection_count": projection_count,
+                }
+            )
+            print(
+                f"[Projection timing][train][epoch {epoch+1}] avg: {(total_projection_time / projection_count if projection_count > 0 else 0):.6f}, count: {projection_count}"
+            )
+            end_time = time.time()
+            epoch_duration = end_time - start_time
+            epoch_times.append(epoch_duration)
+        if epoch_times:
+            avg_epoch_time = sum(epoch_times) / len(epoch_times)
+            print(
+                f"Average time spent per epoch during training: {avg_epoch_time:.4f} seconds"
+            )
+
+    # ---- Checkpoint helpers to persist timing info ----
+    def save_checkpoint(self, path, epoch=None):
+        """Save model + optimizer + timing metadata to a checkpoint file.
+
+        The saved dict is backward-compatible: older checkpoints without the
+        timing fields will still load because load_checkpoint uses .get(...).
+        """
+        state = {
+            "epoch": epoch,
+            "model_state": self.denoiser.state_dict(),
+            "ema_model_state": self.ema_denoiser.state_dict(),
+            "optimizer_state": self.optimizer.state_dict(),
+            "training_losses": self.training_losses,
+            "projection_times": self.projection_times,
+            "projection_norms": self.projection_norms,
+            "epoch_timing_breakdowns": self.epoch_timing_breakdowns,
+        }
+        torch.save(state, path)
+
+    def load_checkpoint(self, path, map_location=None, load_optimizer=True):
+        """Load checkpoint and restore model + optimizer + timing metadata.
+
+        If the checkpoint does not contain timing metadata, this will leave
+        the corresponding attributes unchanged.
+        """
+        device = self.device if map_location is None else map_location
+        state = torch.load(path, map_location=device)
+        # Accept multiple common keys for saved model state dicts to be robust
+        model_state = None
+        for key in ("model_state", "model_state_dict", "state_dict"):
+            if key in state:
+                model_state = state[key]
+                break
+        if model_state is not None:
+            # Prefer EMA-smoothed weights for evaluation when available.
+            # EMA weights are recorded during training and produce better sample quality
+            # (Karras et al. CVPR 2024). Fall back to raw model_state for legacy checkpoints.
+            ema_state = state.get("ema_model_state", None)
+            effective_state = ema_state if ema_state is not None else model_state
+            try:
+                self.denoiser.load_state_dict(effective_state)
+            except Exception:
+                # Last-resort: if the saved dict is itself a checkpoint-like object,
+                # try to extract nested 'model_state' or 'model_state_dict'
+                nested = None
+                if isinstance(model_state, dict):
+                    for k2 in ("model_state", "model_state_dict", "state_dict"):
+                        if k2 in model_state:
+                            nested = model_state[k2]
+                            break
+                if nested is not None:
+                    # Prefer EMA weights in nested dict too
+                    nested_ema = nested.get("ema_model_state", None) if isinstance(nested, dict) else None
+                    self.denoiser.load_state_dict(nested_ema if nested_ema is not None else nested)
+                else:
+                    raise
+        if load_optimizer and "optimizer_state" in state:
+            try:
+                self.optimizer.load_state_dict(state["optimizer_state"])
+            except Exception:
+                # Optimizer state may be incompatible across runs; ignore if so.
+                pass
+        # Restore optional tracking arrays
+        self.training_losses = state.get("training_losses", self.training_losses)
+        self.projection_times = state.get("projection_times", self.projection_times)
+        self.projection_norms = state.get("projection_norms", self.projection_norms)
+        self.epoch_timing_breakdowns = state.get(
+            "epoch_timing_breakdowns", self.epoch_timing_breakdowns
+        )
+
+        # Restore noise schedule from checkpoint if present, so that
+        # evaluation-time sampling uses the same diffusion variance schedule
+        # that was used during training (e.g. cosine vs linear).
+        if "betas" in state:
+            saved_betas = state["betas"]
+            if not isinstance(saved_betas, torch.Tensor):
+                saved_betas = torch.tensor(saved_betas)
+            self.betas = saved_betas.to(self.device)
+            self.alphas = 1.0 - self.betas
+            self.alpha_bars = torch.cumprod(self.alphas, dim=0)
+            alpha_bars_prev = torch.cat(
+                [torch.ones(1, device=self.device), self.alpha_bars[:-1]], dim=0
+            )
+            posterior_variance = (
+                self.betas * (1.0 - alpha_bars_prev) / (1.0 - self.alpha_bars)
+            )
+            self.posterior_variance_clipped = posterior_variance.clone()
+            if len(self.betas) > 1:
+                self.posterior_variance_clipped[0] = posterior_variance[1]
+            self.posterior_variance_clipped = self.posterior_variance_clipped.clamp_min(1e-12)
+            self.noise_schedule = state.get("noise_schedule", "unknown")
+
+    def sample(self, num_samples=1000, PDM=False):
+        use_pdm = bool(PDM)
+        x_t = torch.randn(num_samples, self.size, device=self.device)
+        self.scores = []
+        norms = None
+
+        total_projection_sample_time = 0.0
+        total_model_forward_time = 0.0
+        # per-call lists to allow finer-grained analysis
+        self.model_forward_times = []
+        projection_sample_count = 0
+
+        # Initialize a mask to track failures per sample
+        ever_failed = torch.zeros(num_samples, dtype=torch.bool, device=self.device)
+
+        failure_count = 0
+        sample_start_time = time.time()
+
+        # Warm-up to amortize one-time costs (cuDNN workspace, kernel launches, projector precomputation)
+        # This helps avoid the first-method / first-call skew when comparing methods sequentially.
+        try:
+            with torch.no_grad():
+                dummy_x = torch.randn(1, self.size, device=self.device)
+                dummy_t = torch.tensor([0], device=self.device, dtype=torch.long)
+                # Prepare the dummy timestep the same way we prepare real timesteps
+                try:
+                    dummy_t_prepared = self._prepare_time(dummy_t)
+                except Exception:
+                    dummy_t_prepared = dummy_t.float().to(self.device)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                _ = self.denoiser(dummy_x, dummy_t_prepared.unsqueeze(-1))
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                # Projector warm-up (may perform lazy mesh/graph initialization)
+                try:
+                    _ = self.projector.project(dummy_x)
+                except Exception:
+                    # Some projectors may expect different shapes; ignore warm-up failures
+                    pass
+        except Exception:
+            # Best-effort warm-up; continue even if warm-up fails for some configurations
+            pass
+
+        for t in reversed(range(self.timesteps)):
+            t_tensor = torch.full(
+                (num_samples,), t, device=self.device, dtype=torch.long
+            )
+            # Prepare timestep for denoiser (normalized if required)
+            t_normalized = self._prepare_time(t_tensor)
+
+            alpha_bar_t = self.alpha_bars[t_tensor]
+            beta_t = self.betas[t_tensor]
+            gamma_t = (beta_t / self.alpha_bars[-1]).unsqueeze(
+                -1
+            )  # γ_t ← σ_t² / (2σ_T²)
+            sqrt_one_minus_abt = torch.sqrt(1 - alpha_bar_t).unsqueeze(
+                -1
+            )  # shape: (B, 1)
+            if use_pdm:
+                M = getattr(self, "PDM_steps", 2)
+                gamma_t = (beta_t / alpha_bar_t).unsqueeze(-1)  # shape: (B, 1)
+
+                for i in range(M):
+                    t_tensor_loop = t_tensor  # remains the same
+                    t_norm_loop = t_normalized.unsqueeze(-1)  # shape: (B, 1)
+
+                    # Predict noise and compute score (measure model forward time)
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    start_model = time.perf_counter()
+                    epsilon_pred = self.denoiser(
+                        x_t.to(self.device), t_norm_loop.to(self.device)
+                    )  # shape: (B, D)
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    end_model = time.perf_counter()
+                    model_time = end_model - start_model
+                    total_model_forward_time += model_time
+                    self.model_forward_times.append(model_time)
+                    score = -epsilon_pred / sqrt_one_minus_abt  # shape: (B, D)
+
+                    # Logging norms
+                    norm = torch.norm(score, dim=1).mean().detach().cpu()
+                    if torch.isnan(norm) or torch.isinf(norm):
+                        print(f"[Warning] NaN or Inf in score at step {t}, iter {i}")
+                        self.scores.append(torch.tensor(float("nan")))
+                    elif i == 0:  # only record once per t
+                        self.scores.append(norm)
+
+                    # Langevin update with noise
+                    noise = torch.randn_like(x_t).to(self.device)
+                    # print(f"noise size: {noise.size()}, x_t size: {x_t.size()}, gamma_t size: {gamma_t.size()}, score size: {score.size()}")
+                    step = gamma_t * score + torch.sqrt(2 * gamma_t) * noise
+                    x_t = x_t.to(self.device)
+                    step = step.to(self.device)
+                    x_t = x_t + step
+
+                    # Project onto constraint set (timing)
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    start_proj_sample = time.perf_counter()
+                    x_t, norms, _ = self.projector.project(x_t.detach())
+                    x_t = x_t.reshape(num_samples, -1)
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    end_proj_sample = time.perf_counter()
+                    proj_time = end_proj_sample - start_proj_sample
+                    total_projection_sample_time += proj_time
+                    projection_sample_count += 1
+                    self.projection_sample_times.append(proj_time)
+                    # print(f"[Projection timing][sample/PDM] {proj_time:.6f} seconds for batch size {x_t.shape[0]}")
+                # After updating x_t each step:
+                failure_mask = torch.isnan(x_t) | torch.isinf(x_t)
+                failure_mask = failure_mask.to(self.device)
+                # Update the ever_failed mask for any sample that's NaN/Inf now
+                ever_failed |= failure_mask.any(dim=1)  # if x_t is shape [batch, D]
+            else:
+                # === Standard DDPM Sampling Step ===
+                # measure model forward time
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                start_model = time.perf_counter()
+                epsilon_pred = self.denoiser(x_t, t_normalized.unsqueeze(-1))
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                end_model = time.perf_counter()
+                model_time = end_model - start_model
+                total_model_forward_time += model_time
+                self.model_forward_times.append(model_time)
+                sqrt_one_minus_abt = torch.sqrt(1 - alpha_bar_t)
+
+                score = -epsilon_pred / sqrt_one_minus_abt.unsqueeze(-1)
+
+                # Compute per-sample norms and filter out NaN/Inf before averaging
+                norms = torch.norm(score, dim=1).detach().cpu().numpy()
+                finite_norms = norms[np.isfinite(norms)]
+                if finite_norms.size == 0:
+                    norm_val = 0.0
+                else:
+                    norm_val = np.median(finite_norms)
+                self.scores.append(norm_val)
+
+                alpha_t = self.alphas[t_tensor]
+                beta_t = self.betas[t_tensor]
+                mean = (1 / torch.sqrt(alpha_t).unsqueeze(-1)) * (
+                    x_t - (beta_t / sqrt_one_minus_abt).unsqueeze(-1) * epsilon_pred
+                )
+
+                # After updating x_t each step:
+                failure_mask = torch.isnan(x_t) | torch.isinf(x_t)
+                # Update the ever_failed mask for any sample that's NaN/Inf now
+                ever_failed |= failure_mask.any(dim=1)  # if x_t is shape [batch, D]
+
+                if t > 0:
+                    z = torch.randn_like(x_t)
+                    x_t = mean + torch.sqrt(beta_t).unsqueeze(-1) * z
+                    # Periodic manifold projection during reverse diffusion.
+                    # Projects onto the sphere every project_every steps to reduce
+                    # accumulated off-manifold drift (SearchCard-08: cMP 16x error reduction).
+                    project_every = getattr(self, 'project_every', 0)
+                    if project_every > 0 and t % project_every == 0:
+                        if torch.cuda.is_available():
+                            torch.cuda.synchronize()
+                        start_proj = time.perf_counter()
+                        x_t, _, _ = self.projector.project(x_t.detach())
+                        if torch.cuda.is_available():
+                            torch.cuda.synchronize()
+                        end_proj = time.perf_counter()
+                        proj_time = end_proj - start_proj
+                        total_projection_sample_time += proj_time
+                        projection_sample_count += 1
+                        self.projection_sample_times.append(proj_time)
+                else:
+                    x_t = mean
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    start_proj_sample = time.perf_counter()
+                    x_t_proj, norms, _ = self.projector.project(x_t.detach())
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    end_proj_sample = time.perf_counter()
+                    proj_time = end_proj_sample - start_proj_sample
+                    total_projection_sample_time += proj_time
+                    projection_sample_count += 1
+                    self.projection_sample_times.append(proj_time)
+                    print(
+                        f"[Projection timing][sample/final] {proj_time:.6f} seconds for batch size {x_t.shape[0]}"
+                    )
+                    if self.project_x0_sample:
+                        x_t = x_t_proj
+
+        sample_end_time = time.time()
+        sampling_time = sample_end_time - sample_start_time
+        print(f"[Sampling] Total time spent sampling: {sampling_time:.6f} seconds")
+        total_failures = ever_failed.sum().item()
+        print(
+            f"Total number of failures during sampling: {total_failures} / {num_samples}"
+        )
+        print(
+            f"[Projection timing][sample] total: {total_projection_sample_time:.6f}, count: {projection_sample_count}, avg: {(total_projection_sample_time / projection_sample_count if projection_sample_count > 0 else 0):.6f}"
+        )
+        # Save summary projection timing attributes on the trainer instance for external inspection
+        self.total_projection_sample_time = float(total_projection_sample_time)
+        self.projection_sample_count = int(projection_sample_count)
+        self.avg_projection_sample_time = float(
+            (total_projection_sample_time / projection_sample_count)
+            if projection_sample_count > 0
+            else float("nan")
+        )
+        self.sampling_time = float(sampling_time)
+
+        return x_t.cpu().detach().numpy(), norms
+
+
+class RealNVPTrainer:
+    """A thin trainer for a tabular RealNVP flow (vector data).
+
+    Minimal MLE loop with train/sample/save/load convenience.
+    """
+
+    def __init__(
+        self,
+        dataset,
+        batch_size: int = 256,
+        lr: float = 1e-3,
+        epochs: int = 100,
+        save_dir: str = "realnvp_experiments",
+        n_coupling_layers: int = 6,
+        hidden_dim: int = 128,
+        device=None,
+    ):
+        import os
+
+        self.device = (
+            torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            if device is None
+            else device
+        )
+
+        # Accept dataset as torch tensor or numpy; store as float32 tensor
+        if not torch.is_tensor(dataset):
+            try:
+                dataset = torch.from_numpy(dataset)
+            except Exception:
+                dataset = torch.tensor(dataset)
+        data = dataset.float()
+        if data.dim() == 4:
+            N = data.shape[0]
+            flat = data.view(N, -1)
+        elif data.dim() == 2:
+            flat = data
+        else:
+            N = data.size(0)
+            flat = data.view(N, -1)
+
+        self.dataset = flat
+        self.N = int(flat.shape[0])
+        self.data_dim = int(flat.shape[1])
+        self.batch_size = int(batch_size)
+        self.lr = float(lr)
+        self.epochs = int(epochs)
+        self.save_dir = save_dir
+        self.training_losses: list[float] = []
+        self.best_loss = float("inf")
+
+        # Timing metrics (DDPM-like schema)
+        self.epoch_timing_breakdowns = []
+        self.projection_times = []
+        self.projection_sample_times = []
+
+        self.model = RealNVPFlow(
+            data_dim=self.data_dim,
+            n_coupling_layers=int(n_coupling_layers),
+            hidden_dim=int(hidden_dim),
+        ).to(self.device)
+        trainable = [p for p in self.model.parameters() if p.requires_grad]
+        self.optimizer = (
+            torch.optim.Adam(trainable, lr=self.lr) if len(trainable) > 0 else None
+        )
+
+    def _log_prob(self, x):
+        if hasattr(self.model, "log_prob") and callable(getattr(self.model, "log_prob")):
+            lp = self.model.log_prob(x)
+            return lp.view(lp.shape[0])
+        # Fallback via forward
+        out = self.model(x)
+        if isinstance(out, (list, tuple)) and len(out) >= 2:
+            z, logdet = out[0], out[1]
+        else:
+            z, logdet = out, torch.zeros(x.shape[0], device=x.device)
+        log2pi = math.log(2 * math.pi)
+        logpz = -0.5 * (z.pow(2) + log2pi).view(z.shape[0], -1).sum(dim=1)
+        if logdet.dim() > 1:
+            logdet = logdet.view(logdet.shape[0], -1).sum(dim=1)
+        return logpz + logdet
+
+    def train(self, epochs=None):
+        import time
+        import os
+
+        epochs = self.epochs if epochs is None else int(epochs)
+        device = self.device
+        X = self.dataset.to(device)
+        loader = torch.utils.data.DataLoader(
+            X, batch_size=self.batch_size, shuffle=True
+        )
+
+        for epoch in range(1, epochs + 1):
+            epoch_loss = 0.0
+            it = 0
+            self.model.train()
+            start = time.time()
+
+            # Per-epoch timing accumulators
+            total_model_forward_time = 0.0
+            model_forward_count = 0
+            total_backprop_time = 0.0
+            backprop_count = 0
+            total_other_time = 0.0
+            other_count = 0
+
+            for batch in loader:
+                batch_start = time.perf_counter()
+                x = batch.to(device)
+                # Forward timing
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_start = time.perf_counter()
+                logpx = self._log_prob(x)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_end = time.perf_counter()
+                total_model_forward_time += (mf_end - mf_start)
+                model_forward_count += 1
+
+                loss = -logpx.mean()
+
+                # Backprop timing
+                if self.optimizer is not None:
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    bp_start = time.perf_counter()
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1e3)
+                    self.optimizer.step()
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    bp_end = time.perf_counter()
+                    total_backprop_time += (bp_end - bp_start)
+                    backprop_count += 1
+                else:
+                    # If no optimizer (no trainable params), count but with 0 time
+                    backprop_count += 1
+
+                epoch_loss += float(loss.item())
+                it += 1
+
+                # Other timing
+                batch_end = time.perf_counter()
+                measured = (mf_end - mf_start) + (
+                    (bp_end - bp_start) if 'bp_end' in locals() and 'bp_start' in locals() else 0.0
+                )
+                other_time = max((batch_end - batch_start) - measured, 0.0)
+                total_other_time += other_time
+                other_count += 1
+
+            avg_loss = epoch_loss / max(1, it)
+            self.training_losses.append(avg_loss)
+
+            # Per-epoch averaged timing dict (DDPM schema)
+            epoch_timing = {
+                "project": 0.0,
+                "sampling_to_t0": 0.0,
+                "model_forward": (total_model_forward_time / model_forward_count) if model_forward_count > 0 else 0.0,
+                "backprop": (total_backprop_time / backprop_count) if backprop_count > 0 else 0.0,
+                "other": (total_other_time / other_count) if other_count > 0 else 0.0,
+                "projection_count": 0,
+                "model_forward_count": model_forward_count,
+                "backprop_count": backprop_count,
+                "sampling_to_t0_count": 0,
+                "other_count": other_count,
+            }
+            self.epoch_timing_breakdowns.append(epoch_timing)
+
+            try:
+                if avg_loss < self.best_loss:
+                    self.best_loss = avg_loss
+                    os.makedirs(self.save_dir, exist_ok=True)
+                    torch.save(
+                        {
+                            "state_dict": self.model.state_dict(),
+                            "dims": self.data_dim,
+                        },
+                        os.path.join(self.save_dir, "checkpt.pth"),
+                    )
+            except Exception:
+                pass
+
+            elapsed = time.time() - start
+            print(
+                f"[RealNVP] Epoch {epoch}/{epochs} avg NLL: {avg_loss:.6f} time: {elapsed:.2f}s"
+            )
+
+    def sample(self, num_samples=1000):
+        self.model.eval()
+        xs = []
+        bs = int(self.batch_size)
+        # Sampling timing
+        total_model_forward_time = 0.0
+        total_projection_sample_time = 0.0  # N/A here; kept for schema parity
+        self.model_forward_times = []
+        projection_sample_count = 0
+        sample_start_time = time.time()
+        with torch.no_grad():
+            for s in range(0, int(num_samples), bs):
+                n = min(bs, int(num_samples) - s)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                fwd_start = time.perf_counter()
+                if hasattr(self.model, "sample") and callable(getattr(self.model, "sample")):
+                    out = self.model.sample(n)
+                    x = out[0] if isinstance(out, (list, tuple)) else out
+                else:
+                    z = torch.randn(n, self.data_dim, device=self.device)
+                    if hasattr(self.model, "reverse") and callable(getattr(self.model, "reverse")):
+                        out = self.model.reverse(z)
+                        x = out[0] if isinstance(out, (list, tuple)) else out
+                    else:
+                        out = self.model(z, reverse=True)
+                        x = out[0] if isinstance(out, (list, tuple)) else out
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                fwd_end = time.perf_counter()
+                dt = fwd_end - fwd_start
+                total_model_forward_time += dt
+                self.model_forward_times.append(dt)
+                xs.append(x)
+        sample_end_time = time.time()
+        x = torch.cat(xs, dim=0)
+        sampling_time = sample_end_time - sample_start_time
+        print(f"[Sampling][RealNVP] Total time spent sampling: {sampling_time:.6f} seconds")
+        print(
+            f"[Projection timing][sample][RealNVP] total: {total_projection_sample_time:.6f}, count: {projection_sample_count}, avg: {(total_projection_sample_time / projection_sample_count if projection_sample_count > 0 else 0):.6f}"
+        )
+        self.total_projection_sample_time = float(total_projection_sample_time)
+        self.projection_sample_count = int(projection_sample_count)
+        self.avg_projection_sample_time = float(
+            (total_projection_sample_time / projection_sample_count) if projection_sample_count > 0 else float("nan")
+        )
+        self.sampling_time = float(sampling_time)
+        self.avg_model_forward_time_sample = float(
+            (total_model_forward_time / max(1, len(self.model_forward_times)))
+        )
+        return x.detach().cpu().numpy(), None
+
+    def save_checkpoint(self, path):
+        torch.save(
+            {
+                "state_dict": self.model.state_dict(),
+                "training_losses": self.training_losses,
+                "optimizer_state": self.optimizer.state_dict() if getattr(self, 'optimizer', None) is not None else None,
+                "projection_times": self.projection_times,
+                "projection_norms": [],
+                "epoch_timing_breakdowns": self.epoch_timing_breakdowns,
+            },
+            path,
+        )
+
+    def load_checkpoint(self, path, map_location=None):
+        map_loc = map_location or self.device
+        state = torch.load(path, map_location=map_loc)
+        sd = None
+        for k in ("state_dict", "model_state", "model_state_dict"):
+            if k in state:
+                sd = state[k]
+                break
+        if sd is None:
+            raise RuntimeError("Checkpoint missing state dict for RealNVP model")
+        self.model.load_state_dict(sd)
+        # Restore optimizer state if present and compatible
+        if "optimizer_state" in state and getattr(self, "optimizer", None) is not None:
+            try:
+                self.optimizer.load_state_dict(state["optimizer_state"])
+            except Exception:
+                pass
+        # Restore timing arrays (DDPM-like keys)
+        self.training_losses = state.get("training_losses", self.training_losses)
+        self.projection_times = state.get("projection_times", self.projection_times)
+        self.epoch_timing_breakdowns = state.get(
+            "epoch_timing_breakdowns", self.epoch_timing_breakdowns
+        )
+
+    def get_training_metrics(self):
+        return self.training_losses
+
+class GlowTrainer:
+    """PyTorch Glow trainer for vector/tabular or image-like data.
+
+    The model is implemented locally with Glow flow steps: ActNorm, invertible
+    1x1 convolutions, affine coupling, and squeeze/split multiscale levels when
+    spatial dimensions allow them. Low-dimensional vectors are represented as
+    1x1 images with C=D channels.
+
+    Notes:
+      - Dataset may be numpy or torch; we convert to float32 torch tensor.
+      - Shapes can be vectors (N, D) or images (N, H, W, C). Training stores
+        data internally as (N, C, H, W), and metadata is kept to reshape samples
+        back on output.
+    """
+
+    def __init__(
+        self,
+        dataset,
+        batch_size: int = 256,
+        lr: float = 1e-3,
+        epochs: int = 100,
+        save_dir: str = "glow_experiments",
+        # Optional image hints (for reshaping/saving aesthetics only)
+        image_size: int | None = None,
+        n_channels: int | None = None,
+        hidden_dim: int = 64,
+        # Optional bits for dequantization reporting (not strictly used here)
+        n_bits_x: int | None = None,
+        device=None,
+    ):
+        import os
+
+        self.device = (
+            torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            if device is None
+            else device
+        )
+
+        # Accept dataset as torch tensor or numpy; store as float32 tensor.
+        # Glow operates on NCHW image tensors. Flat vectors are represented as
+        # 1x1 images with C=D channels.
+        if not torch.is_tensor(dataset):
+            try:
+                dataset = torch.from_numpy(dataset)
+            except Exception:
+                # Last resort: iterate and stack
+                dataset = torch.tensor(dataset)
+        data = dataset.float()
+
+        # Remember original shape metadata so sampling can preserve the public
+        # trainer API: vectors return flat arrays, image-like inputs return NHWC.
+        self._orig_is_image = False
+        self._orig_H = None
+        self._orig_W = None
+        self._orig_C = None
+        self._orig_format = None
+        if data.dim() == 4:
+            self._orig_is_image = True
+            is_nhwc = False
+            is_nchw = False
+            if n_channels is not None:
+                channels_hint = int(n_channels)
+                if int(data.shape[-1]) == channels_hint:
+                    is_nhwc = image_size is None or (
+                        int(data.shape[1]) == int(image_size)
+                        and int(data.shape[2]) == int(image_size)
+                    )
+                if int(data.shape[1]) == channels_hint:
+                    is_nchw = image_size is None or (
+                        int(data.shape[2]) == int(image_size)
+                        and int(data.shape[3]) == int(image_size)
+                    )
+            if is_nchw and not is_nhwc:
+                # Caller supplied NCHW tensors.
+                N, C, H, W = data.shape
+                image_data = data.contiguous()
+                self._orig_format = "NCHW"
+            else:
+                # Repository Glow callers historically pass NHWC tensors.
+                N, H, W, C = data.shape
+                image_data = data.permute(0, 3, 1, 2).contiguous()
+                self._orig_format = "NHWC"
+            self._orig_H, self._orig_W, self._orig_C = int(H), int(W), int(C)
+        elif data.dim() == 2:
+            N, D = data.shape
+            if (
+                image_size is not None
+                and n_channels is not None
+                and int(image_size) * int(image_size) * int(n_channels) == int(D)
+            ):
+                self._orig_is_image = True
+                self._orig_H = self._orig_W = int(image_size)
+                self._orig_C = int(n_channels)
+                self._orig_format = "NHWC"
+                image_data = data.view(N, int(image_size), int(image_size), int(n_channels))
+                image_data = image_data.permute(0, 3, 1, 2).contiguous()
+            else:
+                self._orig_H = self._orig_W = 1
+                self._orig_C = int(D)
+                self._orig_format = "flat"
+                image_data = data.view(N, int(D), 1, 1).contiguous()
+        else:
+            # Collapse everything after batch and treat it as vector data.
+            N = data.size(0)
+            flat = data.view(N, -1)
+            self._orig_H = self._orig_W = 1
+            self._orig_C = int(flat.shape[1])
+            self._orig_format = "flat"
+            image_data = flat.view(N, int(flat.shape[1]), 1, 1).contiguous()
+
+        self.dataset = image_data  # (N, C, H, W) float32
+        self.N = int(self.dataset.shape[0])
+        self.image_shape = tuple(int(v) for v in self.dataset.shape[1:])
+        self.data_dim = int(np.prod(self.image_shape))
+        self.batch_size = int(batch_size)
+        self.lr = float(lr)
+        self.epochs = int(epochs)
+        self.save_dir = save_dir
+        self.training_losses: list[float] = []
+        self.best_loss = float("inf")
+        self.n_bits_x = None if n_bits_x is None else int(n_bits_x)
+
+        # Timing metrics (DDPM-like schema)
+        self.epoch_timing_breakdowns = []
+        self.projection_times = []
+        self.projection_sample_times = []
+
+        self.model = GlowFlow(
+            image_shape=self.image_shape,
+            n_flow_steps=6,
+            n_levels=3,
+            hidden_channels=int(hidden_dim),
+        ).to(self.device)
+        # Create optimizer only if the model has trainable parameters.
+        trainable = [p for p in self.model.parameters() if p.requires_grad]
+        self.optimizer = (
+            torch.optim.Adam(trainable, lr=self.lr) if len(trainable) > 0 else None
+        )
+
+    def _log_prob_from_forward(self, x):
+        """Compute per-sample log p(x) using forward() -> (z, logdet).
+
+        - x: (B, D) float tensor on the correct device
+        - returns: (B,) log-prob tensor
+        """
+        out = self.model(x)
+        if isinstance(out, (list, tuple)) and len(out) >= 2:
+            z, logdet = out[0], out[1]
+        else:
+            # Best-effort: treat output as z with zero logdet
+            z, logdet = out, torch.zeros(x.shape[0], device=x.device)
+
+        # Standard normal prior
+        log2pi = math.log(2 * math.pi)
+        logpz = -0.5 * (z.pow(2) + log2pi).view(z.shape[0], -1).sum(dim=1)
+        if logdet.dim() > 1:
+            logdet = logdet.view(logdet.shape[0], -1).sum(dim=1)
+        return logpz + logdet
+
+    def _log_prob(self, x):
+        # Prefer a native log_prob if provided
+        if hasattr(self.model, "log_prob") and callable(getattr(self.model, "log_prob")):
+            lp = self.model.log_prob(x)
+            # Ensure 1D per-sample
+            return lp.view(lp.shape[0])
+        # Fallback to computing from forward()
+        return self._log_prob_from_forward(x)
+
+    def train(self, epochs=None):
+        import time
+        import os
+
+        epochs = self.epochs if epochs is None else int(epochs)
+        device = self.device
+        X = self.dataset.to(device)
+        loader = torch.utils.data.DataLoader(
+            X, batch_size=self.batch_size, shuffle=True
+        )
+
+        for epoch in range(1, epochs + 1):
+            epoch_loss = 0.0
+            it = 0
+            self.model.train()
+            start = time.time()
+
+            # Per-epoch timing accumulators
+            total_model_forward_time = 0.0
+            model_forward_count = 0
+            total_backprop_time = 0.0
+            backprop_count = 0
+            total_other_time = 0.0
+            other_count = 0
+
+            for batch in loader:
+                batch_start = time.perf_counter()
+                x = batch.to(device)
+                # Forward timing
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_start = time.perf_counter()
+                logpx = self._log_prob(x)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                mf_end = time.perf_counter()
+                total_model_forward_time += (mf_end - mf_start)
+                model_forward_count += 1
+
+                loss = -logpx.mean()
+
+                # Backprop timing
+                if self.optimizer is not None:
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    bp_start = time.perf_counter()
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1e3)
+                    self.optimizer.step()
+                    if torch.cuda.is_available():
+                        torch.cuda.synchronize()
+                    bp_end = time.perf_counter()
+                    total_backprop_time += (bp_end - bp_start)
+                    backprop_count += 1
+                else:
+                    backprop_count += 1
+
+                epoch_loss += float(loss.item())
+                it += 1
+
+                # Other timing
+                batch_end = time.perf_counter()
+                measured = (mf_end - mf_start) + (
+                    (bp_end - bp_start) if 'bp_end' in locals() and 'bp_start' in locals() else 0.0
+                )
+                other_time = max((batch_end - batch_start) - measured, 0.0)
+                total_other_time += other_time
+                other_count += 1
+
+            avg_loss = epoch_loss / max(1, it)
+            self.training_losses.append(avg_loss)
+
+            # Per-epoch averaged timing dict (DDPM schema)
+            epoch_timing = {
+                "project": 0.0,
+                "sampling_to_t0": 0.0,
+                "model_forward": (total_model_forward_time / model_forward_count) if model_forward_count > 0 else 0.0,
+                "backprop": (total_backprop_time / backprop_count) if backprop_count > 0 else 0.0,
+                "other": (total_other_time / other_count) if other_count > 0 else 0.0,
+                "projection_count": 0,
+                "model_forward_count": model_forward_count,
+                "backprop_count": backprop_count,
+                "sampling_to_t0_count": 0,
+                "other_count": other_count,
+            }
+            self.epoch_timing_breakdowns.append(epoch_timing)
+
+            # Keep a simple best checkpoint under save_dir
+            try:
+                if avg_loss < self.best_loss:
+                    self.best_loss = avg_loss
+                    os.makedirs(self.save_dir, exist_ok=True)
+                    torch.save(
+                        {
+                            "state_dict": self.model.state_dict(),
+                            "dims": self.data_dim,
+                        },
+                        os.path.join(self.save_dir, "checkpt.pth"),
+                    )
+            except Exception:
+                pass
+
+            elapsed = time.time() - start
+            print(
+                f"[Glow] Epoch {epoch}/{epochs} avg NLL: {avg_loss:.6f} time: {elapsed:.2f}s"
+            )
+
+    def _sample_chunk(self, n):
+        # Prefer native sample(batch_size)
+        if hasattr(self.model, "sample") and callable(getattr(self.model, "sample")):
+            out = self.model.sample(n)
+            if isinstance(out, (list, tuple)):
+                out = out[0]
+            return out
+        # Else try reverse(z)
+        z = torch.randn(n, self.data_dim, device=self.device)
+        if hasattr(self.model, "reverse") and callable(getattr(self.model, "reverse")):
+            x = self.model.reverse(z)
+            if isinstance(x, (list, tuple)):
+                x = x[0]
+            return x
+        # Last resort: some flows support call(..., reverse=True)
+        try:
+            out = self.model(z, reverse=True)
+            if isinstance(out, (list, tuple)):
+                out = out[0]
+            return out
+        except Exception as e:
+            raise RuntimeError(
+                f"Glow model does not expose a sampling path (sample/reverse). Underlying error: {e}"
+            )
+
+    def sample(self, num_samples=1000):
+        self.model.eval()
+        xs = []
+        bs = int(self.batch_size)
+        total_model_forward_time = 0.0
+        total_projection_sample_time = 0.0  # Glow has no projector here; keep for schema parity
+        self.model_forward_times = []
+        projection_sample_count = 0
+        sample_start_time = time.time()
+        with torch.no_grad():
+            for s in range(0, int(num_samples), bs):
+                n = min(bs, int(num_samples) - s)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                fwd_start = time.perf_counter()
+                x = self._sample_chunk(n)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                fwd_end = time.perf_counter()
+                dt = fwd_end - fwd_start
+                total_model_forward_time += dt
+                self.model_forward_times.append(dt)
+                xs.append(x)
+        sample_end_time = time.time()
+        x = torch.cat(xs, dim=0)
+
+        # Preserve the old trainer-facing convention: vector datasets sample as
+        # (N, D), while image datasets sample as NHWC unless the caller supplied
+        # NCHW explicitly.
+        if x.dim() == 4:
+            if self._orig_is_image:
+                if self._orig_format == "NHWC":
+                    x = x.permute(0, 2, 3, 1).contiguous()
+            else:
+                x = x.view(x.shape[0], -1)
+        elif self._orig_is_image and x.dim() == 2:
+            try:
+                B = x.shape[0]
+                x = x.view(B, self._orig_H, self._orig_W, self._orig_C)
+            except Exception:
+                pass
+        sampling_time = sample_end_time - sample_start_time
+        print(f"[Sampling][Glow] Total time spent sampling: {sampling_time:.6f} seconds")
+        print(
+            f"[Projection timing][sample][Glow] total: {total_projection_sample_time:.6f}, count: {projection_sample_count}, avg: {(total_projection_sample_time / projection_sample_count if projection_sample_count > 0 else 0):.6f}"
+        )
+        self.total_projection_sample_time = float(total_projection_sample_time)
+        self.projection_sample_count = int(projection_sample_count)
+        self.avg_projection_sample_time = float(
+            (total_projection_sample_time / projection_sample_count) if projection_sample_count > 0 else float("nan")
+        )
+        self.sampling_time = float(sampling_time)
+        self.avg_model_forward_time_sample = float(
+            (total_model_forward_time / max(1, len(self.model_forward_times)))
+        )
+        return x.detach().cpu().numpy(), None
+
+    def save_checkpoint(self, path):
+        torch.save(
+            {
+                "state_dict": self.model.state_dict(),
+                "training_losses": self.training_losses,
+                "optimizer_state": self.optimizer.state_dict() if getattr(self, 'optimizer', None) is not None else None,
+                "projection_times": self.projection_times,
+                "projection_norms": [],
+                "epoch_timing_breakdowns": self.epoch_timing_breakdowns,
+            },
+            path,
+        )
+
+    def load_checkpoint(self, path, map_location=None):
+        map_loc = map_location or self.device
+        state = torch.load(path, map_location=map_loc)
+        sd = None
+        for k in ("state_dict", "model_state", "model_state_dict"):
+            if k in state:
+                sd = state[k]
+                break
+        if sd is None:
+            raise RuntimeError("Checkpoint missing state dict for Glow model")
+        self.model.load_state_dict(sd)
+        # Restore optimizer state if present and compatible
+        if "optimizer_state" in state and getattr(self, "optimizer", None) is not None:
+            try:
+                self.optimizer.load_state_dict(state["optimizer_state"])
+            except Exception:
+                pass
+        # Restore timing arrays (DDPM-like keys)
+        self.training_losses = state.get("training_losses", self.training_losses)
+        self.projection_times = state.get("projection_times", self.projection_times)
+        self.epoch_timing_breakdowns = state.get(
+            "epoch_timing_breakdowns", self.epoch_timing_breakdowns
+        )
+
+    def get_training_metrics(self):
+        return self.training_losses

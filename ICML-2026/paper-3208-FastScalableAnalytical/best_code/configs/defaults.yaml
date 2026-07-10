@@ -1,0 +1,33 @@
+# Base configuration with common defaults
+# Use this as a base for other configs via the defaults feature
+
+experiment:
+  seed: 7
+  name: default
+  run_name: default # Name of the run - overwritten in each individual config file
+  append_timestamp: true # if true, run name is augmented with timestamp
+                         # if false, running the same config will overwrite the previous run (same name)
+  device: cuda # cuda / mps / cpu
+
+#cifar-10 16, fashon-mnist 32, afhq 32, celeba-hq 32
+sampling:
+  num_samples: 128
+  batch_size: 64
+  num_inference_steps: 10
+  timestep_schedule: uniform  # uniform, quadratic, cosine, snr (ALGO-03)
+
+metrics:
+  baseline_unet_path: null # Path to the baseline UNET model checkpoint to compare against
+  baseline_edm_path: null # Path to the baseline EDM model checkpoint to compare against
+  output:
+    code_snapshot: false
+    save_metrics: true
+    save_final_images: true
+    save_image_grid: true
+    save_intermediate_images: true
+  wandb:
+    enabled: false # Disable wandb for faster experiments run
+    project: locality-diffusion
+    mode: online # online / offline
+    job_type: generation
+

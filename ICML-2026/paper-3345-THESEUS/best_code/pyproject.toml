@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merge-and-rebase"
+version = "0.1.0"
+authors = [
+  {name = "Aniello Panariello", email = "a.panariello4@gmail.com"},
+  {name = "Filippo Rinaldi", email = "filippo.rinaldi@unimore.it"}
+]
+description = "Codebase for model merging and rebasin"
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "torch>=2.1",
+  "tqdm>=4.66",
+  "numpy>=1.24",
+  "pyyaml>=6.0.1",
+  "open_clip_torch>=2.24.0",
+  "torchvision>=0.16",
+  "transformers>=4.45",
+  "peft>=0.14.0",
+  "accelerate>=0.26",
+  "safetensors>=0.4",
+  "Pillow>=10.0.0",
+  "protobuf>=6.33.5",
+  "sentencepiece>=0.2.1",
+  "tiktoken>=0.12.0",
+  "wandb>=0.22",
+  "matplotlib>=3.10.9",
+]
+
+[project.optional-dependencies]
+# Core data stack for your vision benchmarks (HF datasets + PIL + hub)
+data = [
+  "datasets>=2.16",
+  "huggingface-hub>=0.20",
+]
+
+gdrive = ["gdown>=5.2.0"]
+
+dev = [
+  "ruff>=0.6.0",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+]
+
+[tool.uv]
+python-preference = "managed"
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+torchvision = [{ index = "pytorch-cu128" }]
+torchaudio = [{ index = "pytorch-cu128" }]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+exclude = ["src/.cache", "*.ipynb", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "I",   # pycodestyle/pyflakes/isort
+  "B",             # flake8-bugbear
+  "UP",            # pyupgrade
+]
+ignore = [
+  "E501",          # allow long lines; handled by formatter policy / readability
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["merge_and_rebase"]

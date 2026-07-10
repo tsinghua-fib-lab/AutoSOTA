@@ -1,0 +1,41 @@
+problem:
+  name: cir
+  a: 1.0
+  b: 1.0
+  sigma: 1.0
+  d: 1
+  T: 1.0
+  x_0: [2.0]
+  x_T: [2.0]
+
+model:
+  type: conservative
+  dim_hidden: [128, 128]
+  emb_dim_hidden: [64, 64]
+  activation: gelu
+
+bridge:
+  base_drift: false
+  guiding_type: brownian
+  decay_coeff: false
+  sampler: euler
+
+train:
+  self_consistency: standard # standard, nodrift
+  num_steps: 500
+  num_outer_iterations: 2000
+  num_inner_iterations: 1
+  traj_batch_size: 64
+  train_batch_size: 20_000
+  lr: 1.0e-4
+  ema_rate: 1.0
+  grad_ema_rate: 1.0
+  jacobian_method: euler
+  beta_schedule: average
+  B_ratio: 0.95
+  ckpt_freq: 100
+  STL_adjustments: false
+  seed: 0
+
+plotting:
+  plot_fn: plot_trajectories_1d

@@ -1,0 +1,34 @@
+defaults:
+  - /defaults.yaml
+
+experiment:
+  run_name: ours_cifar10
+  tags: [baseline, ours, cifar10]
+  conditional: False
+
+dataset:
+  name: cifar10
+  split: train
+  download: true
+  batch_size: 256
+  subset_size: null  # Set to a smaller value to limit projection cache size
+  num_classes: 10
+  resolution: 32  # Keep resolution manageable for covariance projections
+
+model:
+  name: ours
+  params:
+    temperature: 1.0
+    mask_threshold: 0.030
+    chunk_size: 1024
+    k_min: 2500    # = N/20 (N=50000 for CIFAR-10), lower bound of k_t (Eq. 6)
+    k_max: 2500    # Reduced from 5000 to 2500 (=k_min): halves matmul FLOPs in projection stage (73.9% of time). Dynamic schedule collapses to static 2500.
+    low_res_dim: 16
+    weight_method: ss
+
+
+metrics:
+  baseline_name: baseline_unet
+  baseline_unet_path: "services/base_models/baseline_unet/cifar10/ckpt_epoch_200.pt"
+  baseline_edm_path: "services/base_models/baseline_edm/cifar10/edm-cifar10-32x32-uncond-ve.pkl"
+  # baseline_edm_path: "services/base_models/baseline_edm/cifar10/edm-cifar10-32x32-cond-ve.pkl"

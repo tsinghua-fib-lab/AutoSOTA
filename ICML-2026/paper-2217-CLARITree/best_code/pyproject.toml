@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core>=0.11", "pybind11[global]>=2.12", "numpy>=1.22"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "clari-tree"
+version = "0.1.0"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.22",
+    "pandas>=1.0.0",
+    "scikit-learn>=1.2.0",
+    "tqdm",
+    "optuna"
+]
+
+[tool.scikit_build]
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["clari_tree"]
+
+[tool.scikit_build.cmake]
+build-type = "Release"
+args = [
+    "-DCMAKE_CXX_STANDARD=17"
+]
