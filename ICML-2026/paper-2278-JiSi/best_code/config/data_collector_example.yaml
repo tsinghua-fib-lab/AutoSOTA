@@ -1,0 +1,46 @@
+# Minimal data-collection example for JiSi.
+
+models:
+  - name: gpt-4.1-mini
+    api_model_name: gpt-4.1-mini
+    generator_type: direct
+    base_url: https://api.openai.com/v1
+    api_key: OPENAI_API_KEY
+    temperature: 0.0
+    top_p: 1.0
+    timeout: 600
+    max_tokens: 8192
+    stream: false
+
+datasets:
+  - dataset_id: aime
+    splits: ["test"]
+
+run:
+  kind: bench
+  output_dir: results
+  overwrite: false
+  concurrency: 4
+  log_level: INFO
+  demo_mode: true
+  demo_limit: 5
+
+cache:
+  enabled: false
+  force_override_cache: false
+  mysql:
+    host: MYSQL_HOST
+    port: MYSQL_PORT
+    user: MYSQL_USER
+    password: MYSQL_PASSWORD
+    database: jisi_cache
+    table_name: generator_output_cache
+  key_generator:
+    cached_parameters: ["model", "temperature", "top_p", "messages", "reasoning_effort"]
+    hash_algorithm: blake2b
+    hash_digest_size: 16
+  conditions:
+    cache_successful_only: true
+    min_completion_tokens: 1
+    cache_raw_response: true
+    refresh_if_missing_raw_response: true

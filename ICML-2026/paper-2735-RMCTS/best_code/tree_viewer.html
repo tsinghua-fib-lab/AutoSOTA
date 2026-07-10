@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RMCTS Tree Viewer</title>
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #111827;
+      --panel: rgba(15, 23, 42, 0.72);
+      --panel-border: rgba(148, 163, 184, 0.28);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22d3ee;
+      --accent-2: #34d399;
+      --edge: #64748b;
+      --node-fill: #0b4f6c;
+      --node-border: #67e8f9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      color: var(--text);
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(34, 211, 238, 0.15), transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(52, 211, 153, 0.12), transparent 38%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      background: var(--panel);
+      animation: fadeIn 350ms ease-out;
+    }
+
+    .title {
+      font-family: "IBM Plex Mono", "Consolas", monospace;
+      letter-spacing: 0.04em;
+      margin-right: 6px;
+      color: #a5f3fc;
+    }
+
+    button,
+    input[type="file"] {
+      border-radius: 8px;
+      border: 1px solid var(--panel-border);
+      background: rgba(2, 6, 23, 0.7);
+      color: var(--text);
+      padding: 7px 10px;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-left: auto;
+    }
+
+    #cy {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: rgba(2, 6, 23, 0.35);
+      animation: riseIn 420ms ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <div class="title">RMCTS Tree Viewer</div>
+      <input id="jsonFile" type="file" accept=".json,application/json" />
+      <button id="loadDefaultBtn" type="button">Load R_tree.json</button>
+      <button id="fitBtn" type="button">Fit</button>
+      <button id="relayoutBtn" type="button">Relayout</button>
+      <span id="status" class="hint">Choose a JSON tree file to begin.</span>
+    </div>
+    <div id="cy"></div>
+  </div>
+
+  <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+  <script>
+    let currentRootId = "0";
+    let cy = cytoscape({
+      container: document.getElementById("cy"),
+      elements: [],
+      wheelSensitivity: 0.15,
+      minZoom: 0.05,
+      maxZoom: 5,
+      style: [
+        {
+          selector: "node",
+          style: {
+            "background-color": "#0b4f6c",
+            "border-color": "#67e8f9",
+            "border-width": 1,
+            "width": 12,
+            "height": 12,
+            "label": "",
+            "font-size": 10,
+            "color": "#f1f5f9",
+            "text-wrap": "none",
+            "text-valign": "top",
+            "text-margin-y": -8,
+            "text-outline-color": "#020617",
+            "text-outline-width": 2
+          }
+        },
+        {
+          selector: "edge",
+          style: {
+            "curve-style": "bezier",
+            "line-color": "#64748b",
+            "target-arrow-color": "#64748b",
+            "target-arrow-shape": "triangle",
+            "width": 1,
+            "arrow-scale": 0.7,
+            "label": "",
+            "font-size": 8,
+            "color": "#cbd5e1",
+            "text-background-opacity": 1,
+            "text-background-color": "#020617",
+            "text-background-padding": 1,
+            "text-rotation": "autorotate"
+          }
+        },
+        {
+          selector: ":selected",
+          style: {
+            "background-color": "#34d399",
+            "line-color": "#34d399",
+            "target-arrow-color": "#34d399",
+            "border-color": "#86efac"
+          }
+        }
+      ]
+    });
+
+    function setStatus(text) {
+      document.getElementById("status").textContent = text;
+    }
+
+    function toCytoscapeElements(treeData) {
+      if (!treeData || !Array.isArray(treeData.nodes) || !Array.isArray(treeData.edges)) {
+        throw new Error("Expected JSON with {nodes: [], edges: []}.");
+      }
+
+      const nodeElements = treeData.nodes.map((n) => ({
+        data: {
+          id: String(n.id),
+          label: typeof n.label === "number" ? Number(n.label).toPrecision(2) : String(n.label)
+        }
+      }));
+
+      const edgeElements = treeData.edges.map((e, idx) => ({
+        data: {
+          id: `e-${idx}-${e.source}-${e.target}`,
+          source: String(e.source),
+          target: String(e.target),
+          label: String(e.label)
+        }
+      }));
+
+      return [...nodeElements, ...edgeElements];
+    }
+
+    function applyLayout(rootId = "0") {
+      const rootCollection = cy.$id(String(rootId));
+      const layout = cy.layout({
+        name: "breadthfirst",
+        directed: true,
+        circle: false,
+        roots: rootCollection.length > 0 ? rootCollection : undefined,
+        spacingFactor: 1.8,
+        avoidOverlap: true,
+        nodeDimensionsIncludeLabels: true,
+        padding: 40,
+        animate: false
+      });
+      layout.run();
+
+      // A post-layout pass spreads siblings a bit if many edges visually overlap.
+      const root = cy.$id(String(rootId));
+      if (root.length === 1) {
+        const kids = root.outgoers("node");
+        if (kids.length >= 3) {
+          const rootPos = root.position();
+          const gap = 80;
+          kids.forEach((node, idx) => {
+            node.position({
+              x: rootPos.x + (idx - (kids.length - 1) / 2) * gap,
+              y: rootPos.y + 120
+            });
+          });
+        }
+      }
+    }
+
+    function updateEdgeCurvature() {
+      const root = cy.$id(String(currentRootId));
+      if (root.length !== 1) {
+        return;
+      }
+      const rootEdges = root.outgoers("edge");
+      rootEdges.forEach((e, idx) => {
+        const offset = (idx - (rootEdges.length - 1) / 2) * 28;
+        e.style("curve-style", "unbundled-bezier");
+        e.style("control-point-distances", `${offset}`);
+      });
+    }
+
+    function refreshViewport() {
+      cy.fit(undefined, 35);
+      applySemanticZoom();
+      updateEdgeCurvature();
+    }
+
+    function loadTreeData(treeData, sourceName = "data") {
+      const elements = toCytoscapeElements(treeData);
+      cy.elements().remove();
+      cy.add(elements);
+      const root = treeData.root !== undefined ? treeData.root : 0;
+      currentRootId = String(root);
+      applyLayout(root);
+      refreshViewport();
+      setStatus(`Loaded ${elements.length} elements from ${sourceName}. Nodes=${treeData.nodes.length}, edges=${treeData.edges.length}`);
+    }
+
+    async function loadFromUrl(url) {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Could not fetch ${url} (HTTP ${res.status}).`);
+      }
+      const data = await res.json();
+      loadTreeData(data, url);
+    }
+
+    document.getElementById("jsonFile").addEventListener("change", (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          loadTreeData(data, file.name);
+        } catch (err) {
+          setStatus(`Invalid JSON: ${err.message}`);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // "Load R_tree.json" only works when served over HTTP, not file://
+    const loadDefaultBtn = document.getElementById("loadDefaultBtn");
+    if (location.protocol === "file:") {
+      loadDefaultBtn.disabled = true;
+      loadDefaultBtn.title = "Not available when opened as a local file — use the file picker instead.";
+      loadDefaultBtn.style.opacity = "0.4";
+      loadDefaultBtn.style.cursor = "not-allowed";
+      setStatus("Open via file picker: click 'Choose File' and select R_tree.json.");
+    }
+
+    loadDefaultBtn.addEventListener("click", async () => {
+      try {
+        await loadFromUrl("./R_tree.json");
+      } catch (err) {
+        setStatus(`Load failed: ${err.message}. Use the file picker instead.`);
+      }
+    });
+
+    document.getElementById("fitBtn").addEventListener("click", () => {
+      refreshViewport();
+    });
+
+    document.getElementById("relayoutBtn").addEventListener("click", () => {
+      applyLayout(0);
+      refreshViewport();
+    });
+
+    cy.on("zoom", applySemanticZoom);
+    function applySemanticZoom() {
+      const z = cy.zoom();
+      let nodeLabel = "";
+      let edgeLabel = "";
+
+      if (z >= 0.45 && z < 1.1) {
+        nodeLabel = "data(label)";
+      } else if (z >= 1.1) {
+        nodeLabel = "data(label)";
+        edgeLabel = "data(label)";
+      }
+
+      cy.style()
+        .selector("node")
+        .style("label", nodeLabel)
+        .selector("edge")
+        .style("label", edgeLabel)
+        .update();
+    }
+
+  </script>
+</body>
+</html>

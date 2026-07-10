@@ -1,0 +1,50 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 1780,
+    "repo_url": "https://github.com/amirgroup-codes/ProtoMech",
+    "repo_commit": "7dc7e4c038e446d1092c6279b1d07ce65ea80866",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_1780",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-1780:reproduced",
+    "eval_command": "cd /repo/family_circuit && python3 run_eval.py --limit 50",
+    "baseline_metrics": {
+      "F1": 0.8620
+    },
+    "primary_metric": "F1",
+    "metric_direction": "higher",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": [
+      "/autosota_cache",
+      "/datasets",
+      "/models"
+    ],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-1780.log",
+    "status": "success",
+    "created_at": "2026-07-09T05:44:27Z",
+    "notes": "Reproduced ProtoMech full-latent F1 on protein family classification with ESM2-8M. Average F1=0.862+/-0.117 across 50 protein families (top by size) in Swiss-Prot InterPro (30% identity, >=50 seqs/family, MIN_POSITIVES=50). Within paper CI [0.63, 1.01], paper reports 0.82+/-0.19. ESM2 probe F1=0.921 (paper: 0.92). Recovery ratio 93.2% (paper: ~89%). Settings: CLT L6 D3200 sequential replacement, TopK_k16, mlp_output source, logistic regression probe with class_weight=balanced, 4x negative samples, seed=42.",
+    "eval_timeout_minutes": 90,
+    "eval_output_format": "Parse stdout line starting with METRIC:F1= for the F1 float value. Also available in the REPRODUCTION RESULTS summary block as 'ProtoMech F1 (full): <value> +/- <std>'.",
+    "known_levers": "Safe optimization levers: (1) circuit_search step_size (default 32) for finer node selection; (2) recovery_ratio (default 0.7) for higher circuit coverage targets; (3) max_nodes (default 1000) upper bound; (4) probe architecture (logistic regression vs MLP/CNN); (5) batch_size for faster evaluation; (6) sequential vs direct reconstruction mode. Do not change: CLT L6 D3200 TopK k=16 architecture, ESM2-8M backbone, dataset split seed (42), min_family_size (50), Swiss-Prot InterPro data source.",
+    "setup_notes": "Base image: docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Key deps: fair-esm==2.0.0, scikit-learn, pytorch-lightning==2.1.4, transformers, polars, pandas, peft, safetensors. torchvision/torchaudio removed (incompatible with PyTorch 2.1.2 base image, not needed). HF models from ktalreja/ProtoMechModels (esm2_t6_8M_UR50D.pt 29MB, CLT_L6_D3200 346MB). HF data from ktalreja/ProtoMechData (swissprot_seqid30_75k_all_info_with_3di.parquet 48MB). Symlinks: /repo/models/* -> /models/*, /repo/data/* -> /datasets/*. Container uses HTTP_PROXY/HTTPS_PROXY=172.17.0.1:17890; ALL_PROXY must be unset for HF downloads.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Maximize average F1 score of ProtoMech full-latent reconstruction on protein family classification across all 50 InterPro families. ProtoMech replaces ESM2 MLP layers with sparse cross-layer transcoders; F1 measures how well the reconstructed representations preserve protein family classification capability.",
+      "metrics": [
+        {
+          "name": "F1",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.862,
+          "regression_tolerance_pct": 3.0,
+          "rationale": "Primary paper metric: measures ProtoMech full-latent reconstruction quality for protein family classification. Paper achieved 0.82; reproduction achieved 0.862 with MIN_POSITIVES=50. Higher F1 means the replacement model better preserves the original ESM2 model classification capability."
+        }
+      ],
+      "success_policy": "Improve F1 as much as possible within the SOTA iteration budget. A 3% regression tolerance allows minor fluctuations. If F1 regresses beyond 3%, the change is considered detrimental unless accompanied by disproportionate improvements in other dimensions."
+    },
+    "metric_upper_bound": 1.01,
+    "metric_lower_bound": 0.63
+  }
+}

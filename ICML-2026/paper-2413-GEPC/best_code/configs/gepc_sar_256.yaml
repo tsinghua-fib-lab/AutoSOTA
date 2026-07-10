@@ -1,0 +1,59 @@
+# configs/gepc_sar_256.yaml
+# Expected SAR layout:
+#   <root>/train/0/*.png (or jpg)
+#   <root>/test/0/*.png
+# Each split folder must be a valid torchvision ImageFolder (single class "0").
+
+model: LSUN256_backbone
+image_size: 256
+data_image_size: 256
+
+adapter: improved
+model_path: checkpoints/lsun_uncond_100M_2400K_bs64.pt
+
+batch_size: 1
+device: 0
+seed: 1337
+strict_determinism: true
+
+eval:
+  id_train:
+    root: ./data/sar/id/train
+    limit: 500
+  id_test:
+    root: ./data/sar/id/test
+    limit: 100
+  ood:
+    - name: OODName
+      root: ./data/sar/ood/test
+      limit: 100
+
+
+slidpc:
+  verbose: true
+  amp: "fp32"
+
+  features: ["gepc_s"]
+  metric_default: "gepc_s"
+
+  density_mode: "kde"
+  bandwidth: 0.0
+  fit_batches: 128
+  mc_samples: 1
+
+  spatial_pool: "topk"
+  topk_rho: 0.3
+
+  group_shifts: true
+  shift_px: 1
+
+  t_mode: "snr"
+  snr_levels: [0.99997, 0.99990, 0.99790, 0.99690]
+  keep_k: 2
+  
+  agg_t: "wmean"
+  weight_t: "inv_cv"
+  agg_feat: "sum"
+  vector_mode: "none"
+  internal_bs: 64
+  seed: 1337

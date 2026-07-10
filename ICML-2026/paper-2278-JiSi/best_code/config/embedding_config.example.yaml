@@ -1,0 +1,34 @@
+# JiSi embedding endpoint configuration.
+# The endpoint should implement the OpenAI-compatible /embeddings API.
+
+embedding_model:
+  name: text-embedding-3-large
+  api_model_name: text-embedding-3-large
+  generator_type: embedding
+  base_url: https://api.openai.com/v1
+  api_key: EMBEDDING_API_KEY
+  timeout: 600
+  max_context_length: 31000
+  model_path: ""
+
+cache:
+  enabled: false
+  force_override_cache: false
+  mysql:
+    host: MYSQL_HOST
+    port: MYSQL_PORT
+    user: MYSQL_USER
+    password: MYSQL_PASSWORD
+    database: jisi_cache
+    table_name: generator_output_cache
+    ttl_seconds: null
+    use_connection_pool: false
+  key_generator:
+    cached_parameters: ["model", "input"]
+    hash_algorithm: blake2b
+    hash_digest_size: 16
+  conditions:
+    cache_successful_only: true
+    min_completion_tokens: 0
+  log_level: INFO
+  enable_stats: true

@@ -1,0 +1,42 @@
+# Convert collected benchmark results into JiSi train/test JSONL files.
+
+baseline:
+  results_dir: results/bench
+
+  filters:
+    skip_demo: true
+    datasets:
+      - aime
+      - gpqa
+      - hle
+      - livecodebench
+      - livemathbench
+      - mmlupro
+      - simpleqa
+      - arenahard
+    models: null
+    splits: null
+    exclude_datasets: null
+    exclude_models: null
+    exclude_splits: null
+
+  output:
+    format: jsonl
+    cache_dir: baselines/.cache
+    use_cache: false
+    batch_size: 10000
+
+  columns:
+    include:
+      - dataset_id
+      - split
+      - model_name
+      - record_index
+      - prompt
+      - prediction
+      - raw_output
+      - ground_truth
+      - score
+      - prompt_tokens
+      - completion_tokens
+      - cost

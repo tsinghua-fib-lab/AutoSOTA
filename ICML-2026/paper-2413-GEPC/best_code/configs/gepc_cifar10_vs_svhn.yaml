@@ -1,0 +1,57 @@
+image_size: 32
+data_image_size: 32
+model_path: checkpoints/celeba_ema_0.9999_499999.pt
+improved_args:
+  num_channels: 128
+  num_res_blocks: 3
+  learn_sigma: true
+  dropout: 0.3
+data_root: /datasets
+batch_size: 128
+device: 0
+strict_determinism: true
+eval:
+  id_train:
+    name: cifar10
+    split: train
+    limit: 2000
+    download: false
+  id_test:
+    name: cifar10
+    split: test
+    limit: 1000
+    download: false
+  ood:
+  - name: svhn
+    split: test
+    limit: 1000
+    download: false
+gepc:
+  seed: 1337
+  verbose: true
+  amp: fp32
+  features:
+  - gepc_s
+  metric_default: gepc_s
+  density_mode: kde
+  bandwidth: 0.0
+  fit_batches: 128
+  mc_samples: 1
+  spatial_pool: topk
+  topk_rho: 0.05
+  group_shifts: true
+  shift_px: 4
+  t_mode: snr
+  snr_levels:
+  - 0.99997
+  - 0.999
+  - 0.995
+  - 0.98
+  - 0.95
+  - 0.9
+  keep_k: 4
+  agg_t: wmean
+  weight_t: inv_cv
+  agg_feat: sum
+  vector_mode: none
+  internal_bs: 64

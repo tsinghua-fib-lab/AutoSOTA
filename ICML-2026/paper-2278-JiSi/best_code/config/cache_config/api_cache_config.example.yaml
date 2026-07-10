@@ -1,0 +1,33 @@
+# Optional JiSi API cache. Disabled by default for the open-source template.
+
+enabled: false
+force_override_cache: false
+mysql:
+  host: MYSQL_HOST
+  port: MYSQL_PORT
+  user: MYSQL_USER
+  password: MYSQL_PASSWORD
+  database: jisi_cache
+  table_name: generator_output_cache
+  charset: utf8mb4
+  autocommit: true
+  ttl_seconds: null
+  use_connection_pool: false
+  pool_size: 4
+  max_overflow: 2
+  pool_timeout: 10
+  pool_recycle: 3600
+
+key_generator:
+  cached_parameters: ["model", "temperature", "top_p", "messages", "reasoning_effort"]
+  hash_algorithm: blake2b
+  hash_digest_size: 16
+
+conditions:
+  cache_successful_only: true
+  min_completion_tokens: 1
+  cache_raw_response: true
+  refresh_if_missing_raw_response: true
+
+log_level: INFO
+enable_stats: true

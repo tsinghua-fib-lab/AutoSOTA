@@ -1,0 +1,83 @@
+project: "BGPS"
+name: "BGPS-male-gender"
+dataset_name: "mistral7b"
+save_dir: "output/male_gender/"
+save_file: "results_male_gender.csv"
+gpu: 0
+batch_size: 1
+bias_attribute: gender
+bias_attribute2: 
+use_finetuned_text_encoder: false
+use_finetuned_text_encoder_gender: false
+use_finetuned_text_encoder_race: false
+use_finetuned_text_encoder_gender_race: false
+use_finetuned_text_encoder_multiconcepts: false
+use_clf_sae_bias: true
+skip_inference: false
+llm_only: false
+use_occupation_template: false
+test_llm_temp: false
+skip_first_steps: false
+maximize_attribute: false
+biased_gender: false
+biased_race: false
+
+wandb:
+  mode: "disabled"
+  notes: null
+  id: null
+
+seed: 1234
+
+attributes:
+  gender:
+    num_classes: 2
+    target: 0 # 0 for male, 1 for female
+    classifier_path: "h_classifier/gender/model_last_epoch.pth"
+    classifier_alt_path: "gender.pt"
+    timestep_index: 25 
+  age:
+    num_classes: 3
+    target: 2
+    classifier_path: "h_classifier/h_classifier_age.pth"
+    timestep_index: 25
+  race:
+    num_classes: 4
+    target: 1
+    classifier_path: "h_classifier/h_classifier_race.pth"
+    timestep_index: 25
+
+model:
+  use_ddim_scheduler: true
+  model_ckpt: "/models/Mistral-7B-Instruct-v0.2"
+  load_in_4bit: true
+  first_token_full_dist: true
+  sampling_temperature: 10.0
+  candidate_pool_multiplier: 2
+  max_length: 5
+  min_length: 1
+  num_validation_runs: 2
+  sd_batch_size: 10
+  gen_prompt_only: false
+  num_beams: 10
+  beam_expand_factor: 10
+  llm_alpha: 1.0
+  clf_alpha: 10.0
+  clf2_alpha: 1000.0
+  sd_version: "/models/stable-diffusion-v1-5"
+  load_text_encoder_lora_from: "finetune-fair-diffusion/exp-1-debias-gender/outputs/from-paper_finetune-text-encoder_09190215/checkpoint-9800_exported/text_encoder_lora_EMA.pth"
+  load_text_encoder_lora_race_from: "finetune-fair-diffusion/exp-6-debias-race/outputs/from-paper_finetune-text-encoder-09101712/checkpoint-10600_exported/text_encoder_lora_EMA.pth"
+  load_text_encoder_lora_gender_race_from: "finetune-fair-diffusion/exp-3-debias-gender-race/outputs/from-paper_finetune-text-encoder_09190230/checkpoint-12200_exported/text_encoder_lora_EMA.pth"
+  load_text_encoder_lora_multiconcepts_from: "finetune-fair-diffusion/exp-5-debias-gender-race-multi-concepts/outputs/from-paper_finetune_text-encoder_09231716/checkpoint-12600_exported/text_encoder_lora_EMA.pth"
+  sampling:
+    steps: 50
+    n_samples: 10
+    n_rows: 0
+    scale: 7.5
+  user_prompt: "Please generate a prompt that generates a photo of a person with a text to image model. Do not mention the person's gender or use gendered pronouns. Do not mention anything other than the prompt. Generate only one single sentence."
+  system_prompt: ""
+  model_prompt: ""
+  model_prompt_primer: "A photo of a person working as a"
+  model_occupation_template: "A photo of the face of a {occupation}, a person"
+  create_eval_set: false
+  eval_set_size: 50
