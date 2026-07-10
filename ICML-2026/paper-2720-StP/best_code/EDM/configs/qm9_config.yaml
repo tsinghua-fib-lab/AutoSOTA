@@ -1,0 +1,58 @@
+# Experiment settings
+exp_name: debug_10
+dataset: 'qm9'            # qm9, qm9_positional
+filter_n_atoms: null      # When set to an integer value, QM9 will only contain molecules of that amount of atoms
+n_report_steps: 1
+wandb_usr: cvignac
+no_cuda: False
+wandb: False             # Use wandb?
+online: True             # True: online / False: offline
+data_dir: 'data'
+
+# Training settings
+n_epochs: 100
+batch_size: 128
+lr: 0.0002
+brute_force: False
+
+break_train_epoch: False
+dp: True
+condition_time: True
+clip_grad: True
+save_model: True
+generate_epochs: 1
+num_workers: 0
+test_epochs: 1
+data_augmentation: False
+resume: null
+start_epoch: 0
+ema_decay: 0.           # 'Amount of EMA decay, 0 means off. A reasonable value  is 0.999.'
+augment_noise: 0
+
+# Model settings
+model: 'egnn_dynamics'    # 'our_dynamics | schnet | simple_dynamics | kernel_dynamics | egnn_dynamics |gnn_dynamics'
+probabilistic_model: 'diffusion'         # 'flow | diffusion | diffusion_ddpm'
+diffusion_steps: 200
+diffusion_noise_schedule: 'learned'
+diffusion_loss_type: 'vlb'
+n_layers: 6
+nf: 64          # Layer size
+ode_regularization: 0.001
+trace: 'hutch'        # hutch, exact
+dequantization: 'argmax_variational'        # 'uniform | variational | argmax_variational | deterministic'
+tanh: True                                  # 'use tanh in the coord_mlp'
+attention: True                             # 'use attention in the EGNN'
+x_aggregation: 'sum'                        # 'sum', 'mean'
+conditioning: []    # 'multiple arguments can be passed including: homo | onehot | lumo | num_atoms | etc. '
+                    # usage: "conditioning=[H_thermo, homo, onehot, H_thermo]"')
+actnorm: True
+norm_constant: 1             # diff/(|diff| + norm_constant)
+
+
+# Placeholders
+context_node_nf: 0
+data_root_dir: null
+
+
+
+

@@ -1,0 +1,57 @@
+% CDAL Evaluation Script for Yale Dataset
+% Reproduction of: Causal Disentangled Anchor Learning for Scalable Fair Multi-view Clustering (ICML 2026)
+% Paper metrics (Table 2, Yale): ACC=60.36 NMI=64.07 Pur=63.30 Fsc=30.90 Bal=12.50 MNCE=66.50
+
+pkg load statistics;
+pkg load optim;
+addpath(genpath('./'));
+
+load('./datasets/yaleA_3view.mat');
+Y = double(y);
+g = double(g);
+k = length(unique(Y));
+n = length(Y);
+
+fprintf('=== CDAL on Yale ===\n');
+fprintf('Samples=%d Classes=%d Groups=%d\n', n, k, length(unique(g)));
+
+% Hyperparameters selected from paper ranges {1e-5,1e-3,1e-1,10,1000}
+alpha = 1000;
+beta = 1000;
+gamma = 1000;
+anchor = 2 * k;
+
+fprintf('anchor=%d alpha=%g beta=%g gamma=%g\n', anchor, alpha, beta, gamma);
+
+tic;
+[Z, iter, obj] = CDAL(X, g', anchor, alpha, beta, gamma);
+cdal_time = toc;
+
+fprintf('CDAL: %d iters, %.1fs\n', iter, cdal_time);
+
+[UU, S, V] = mySVD(Z', k);
+F = UU ./ repmat(sqrt(sum(UU .^ 2, 2)), 1, size(UU, 2));
+
+n_reps = 20;
+res = zeros(n_reps, 8);
+bal_list = zeros(n_reps, 1);
+mnce_list = zeros(n_reps, 1);
+
+for rep = 1:n_reps
+    pY = kmeans(F, k, 'maxiter', 1000, 'replicates', 20, 'emptyaction', 'singleton');
+    res(rep, :) = Clustering8Measure(Y, pY);
+    [bal, mnce] = eval_fair(pY, g);
+    bal_list(rep) = bal * 100;
+    mnce_list(rep) = mnce * 100;
+end
+
+ACC = mean(res(:, 1)) * 100;
+NMI = mean(res(:, 2)) * 100;
+Pur = mean(res(:, 3)) * 100;
+Fsc = mean(res(:, 4)) * 100;
+Bal = mean(bal_list);
+MNCE = mean(mnce_list);
+
+fprintf('\nRESULTS:\n');
+fprintf('ACC=%.2f NMI=%.2f Pur=%.2f Fsc=%.2f Bal=%.2f MNCE=%.2f\n', ACC, NMI, Pur, Fsc, Bal, MNCE);
+fprintf('Paper: ACC=60.36 NMI=64.07 Pur=63.30 Fsc=30.90 Bal=12.50 MNCE=66.50\n');

@@ -1,0 +1,118 @@
+# Default
+seed: 0
+algo: rfm
+
+env:
+  name: cheetah-run
+  episode_length: null
+
+trainer:
+  max_steps: 250000
+  replay_buffer_size: 250000
+  start_training: 10000
+  batch_size: 256
+  updates_per_step: 1
+  reward_scale: 1.0
+  eval_interval: 10000
+  log_interval: 1000
+  num_eval_envs: 25
+
+logger:
+  log_dir: logs
+  wandb_dir: .
+  wandb_project: RFM
+  wandb_entity: null
+  debug: false
+  exp: ""
+  save_agent: true
+
+actor:
+  emb_size: 128
+  hidden_size: 256
+  hidden_layers: 2
+  lr: 0.0003
+  max_grad_norm: null
+
+critic:
+  hidden_size: 256
+  hidden_layers: 2
+  lr: 0.001
+  max_grad_norm: null
+  num_q: 2
+  discount: 0.99
+  tau: 0.005
+  target_update_period: 1
+
+rfm:
+  rfm_on_policy: true
+  init_temperature: 0.02
+  final_temperature: 0.02
+  temperature_steps: 250000
+  num_integration_steps: 10
+  num_estimator_mc_samples: 100
+  num_particles_training: 32
+  num_particles_data: 32
+  num_particles_eval: 32
+  sampler_method: "euler"
+  t_min: 0.01
+  cv_weight: 0.0
+  cv_weight_autotune: true
+  cv_ridge: 0.0001
+  cv_clip: 2.0
+
+dqs:
+  sigma_min: 0.00001
+  sigma_max: 1.0
+  init_temperature: 0.05
+  final_temperature: 0.05
+  temperature_steps: 250000
+  diffusion_scale: 1.0
+  num_integration_steps: 20
+  num_estimator_mc_samples: 1000
+
+maxentdp:
+  num_diffusion_steps: 20
+  init_temperature: 0.02
+  final_temperature: 0.02
+  temperature_steps: 250000
+  clip_sampler: true
+  backup_entropy: true
+  log_prob_samples: 50
+  log_prob_steps: 20
+  eval_action_selection: true
+  eval_candidate_num: 32
+  score_samples_num: 500
+  t_min: 0.001
+  t_max: null
+
+qsm:
+  num_diffusion_steps: 20
+  ddpm_temperature: 1.0
+  clip_sampler: true
+  beta_schedule: "vp"
+  q_grad_scale: 50.0
+  target_action_noise: 0.1
+  exploration_noise: 0.1
+
+qvpo:
+  beta_schedule: "cosine"
+  num_diffusion_steps: 20
+  noise_ratio: 1.0
+  behavior_sample: 4
+  target_sample: 4
+  eval_sample: 32
+  train_sample: 64
+  deterministic: false
+  eps_greedy: 0.0
+  ema_alpha_mean: 0.001
+  ema_alpha_std: 0.001
+  action_lr: 0.03
+  action_gradient_steps: 20
+  action_augmentation: true
+  entropy_alpha: 0.02
+  entropy_samples: 10
+
+sac:
+  alpha_lr: 0.0003
+  log_std_min: -20.0
+  log_std_max: 2.0

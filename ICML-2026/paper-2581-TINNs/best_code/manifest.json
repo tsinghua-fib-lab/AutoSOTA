@@ -1,0 +1,56 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 2581,
+    "repo_url": "https://github.com/CYDai-ml/TINN",
+    "repo_commit": "9e44df238956006596483764351497f4cc17ca2d",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_2581",
+    "container_reusable": true,
+    "docker_image": "docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime",
+    "eval_command": "cd Allen-Cahn && python3 eval.py --seed 0",
+    "baseline_metrics": {
+      "Relative L2 Error": 3.60e-06,
+      "Training Time (hours)": 0.16
+    },
+    "primary_metric": "Relative L2 Error",
+    "metric_direction": "lower",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-1/logs/reproduction/paper-2581.log",
+    "status": "success",
+    "created_at": "2026-07-09T04:19:57Z",
+    "notes": "Successfully reproduced TINN Allen-Cahn Relative L2 Error. 5-seed mean: 3.60e-06 (paper: 3.85e-06 +/- 1.48e-06). All individual runs within paper CI bounds [2.37e-06, 5.33e-06]. Training on A100 GPUs yields ~0.16h per seed vs paper's 0.78h on A6000.",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "Parse stdout for 'Metric: Relative L2 Error = <value>' line; extract numeric value in scientific notation",
+    "known_levers": "Network architecture: t_layers (time encoder), layers (spatial network); Training: epochs, Nc (collocation points), Nic (IC points), lambda_ic (IC penalty weight); LM optimizer: mu_init, div_factor, mul_factor, mu_min, mu_max; Seed affects initialization and collocation sampling",
+    "setup_notes": "Base image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Install dependencies: pip install 'jax[cuda12]' flax optax scipy matplotlib. JAX 0.6.2 requires jax.tree.map instead of removed jax.tree_map. Reference data new_AC.mat (747KB) is included in repo Allen-Cahn/. Container commit failed due to overlay disk space (200GB limit) - same base image + pip install reproduces environment. Python 3.10, CUDA 12.1, double precision (float64) required.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize Relative L2 Error on Allen-Cahn benchmark while maintaining training stability. The TINN model solves the 1D Allen-Cahn PDE u_t - 0.0001*u_xx + 5*u^3 - 5*u = 0 with periodic BCs.",
+      "metrics": [
+        {
+          "name": "Relative L2 Error",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 3.60e-06,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Primary quality metric measuring how well the learned solution matches the reference solution on Allen-Cahn PDE"
+        },
+        {
+          "name": "Training Time (hours)",
+          "direction": "lower",
+          "role": "resource",
+          "goal": "maintain",
+          "baseline": 0.16,
+          "regression_tolerance_pct": 50.0,
+          "rationale": "Training time per seed; A100 hardware ~5x faster than paper A6000. Important but secondary to solution quality"
+        }
+      ],
+      "success_policy": "Core metric is Relative L2 Error — improve it as much as possible. Training time should not exceed 1.5x baseline (0.24h per seed) unless the accuracy improvement is substantial (>20% relative). LM optimizer stability must be maintained (no NaN/inf losses)."
+    },
+    "metric_upper_bound": 5.33e-06,
+    "metric_lower_bound": 2.37e-06
+  }
+}
