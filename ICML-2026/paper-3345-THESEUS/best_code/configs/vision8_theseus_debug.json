@@ -1,0 +1,32 @@
+{
+  "suite": "vision8",
+  "tasks": "EuroSAT",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "laion2b_s34b_b88k",
+  "target_clip_model": "ViT-B-16-plus-240",
+  "target_clip_pretrained": "laion400m_e32",
+  "patched_attn": true,
+  "attn_patch_cfg": {
+    "attn_impl": "softmax"
+  },
+  "method": "theseus",
+  "method_params": {
+    "num_batches": 1,
+    "batch_size": 32,
+    "seq_align": "interpolate2d",
+    "split_qkv": true,
+    "center_acts": false
+  },
+  "alpha_search": false,
+  "alpha_selection": "shared",
+  "alpha": 1.0,
+  "batch_size": 32,
+  "num_workers": 0,
+  "val_fraction": 0.1,
+  "seed": 89,
+  "no_humanize": true,
+  "weights": null,
+  "tuned_ckpts": {
+    "EuroSAT": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/eurosat/best.pt"
+  }
+}

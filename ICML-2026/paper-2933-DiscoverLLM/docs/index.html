@@ -1,0 +1,1968 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DiscoverLLM &mdash; From Executing Intents to Discovering Them</title>
+  <meta name="description" content="DiscoverLLM trains LLMs to help users form and discover their intents through an intent-aware user simulator. ICML 2026." />
+  <meta property="og:title" content="DiscoverLLM: From Executing Intents to Discovering Them" />
+  <meta property="og:description" content="A framework that trains LLMs to help users discover what they want — not just execute what they ask. ICML 2026." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://taesookim.com/discoverllm/" />
+  <meta property="og:image" content="https://taesookim.com/discoverllm/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%AD</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,500;0,600;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Lottie player (for the TL;DR teaser animation) -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+            serif: ['Lora', 'ui-serif', 'Georgia', 'serif'],
+          },
+          colors: {
+            accent: {
+              50:  '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-feature-settings: 'cv11', 'ss01', 'ss03'; }
+    .brand { font-variant: small-caps; letter-spacing: 0.02em; }
+    .figure-placeholder {
+      background:
+        repeating-linear-gradient(
+          45deg,
+          rgba(124, 58, 237, 0.04) 0,
+          rgba(124, 58, 237, 0.04) 12px,
+          rgba(124, 58, 237, 0.08) 12px,
+          rgba(124, 58, 237, 0.08) 24px
+        );
+      border: 1px dashed rgb(196 181 253);
+    }
+    .section-anchor { scroll-margin-top: 4rem; }
+    code.inline { background: rgb(243 244 246); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.92em; }
+    pre code { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    /* Step-hover highlight. Each step is a single sync-target containing its own
+       internal grid (chat + annotation), so the active background is a single rounded
+       block per step — no per-row grp-tagging needed. */
+    .sync-target { transition: background 120ms ease; cursor: help; border-radius: 0.75rem; }
+    .sync-target.is-active { background: rgba(124, 58, 237, 0.10); }
+    /* Chart panel SVGs fill their containers at the viewBox's aspect ratio. */
+    .panel-chart svg { width: 100%; height: auto; display: block; }
+    /* User-simulator walkthrough: active turn = colored left rail only, no fill, no radius. */
+    .sim-turn {
+      transition: border-color 160ms ease, opacity 220ms ease;
+      padding: 0.5rem;
+      margin: -0.5rem;
+      cursor: pointer;
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+    .sim-turn.is-active { border-left-color: #7c3aed; }
+    .sim-turn:focus { outline: none; border-left-color: #7c3aed; }
+    /* Walkthrough mode: turns appear one at a time. */
+    .sim-turn.is-locked { opacity: 0; pointer-events: none; max-height: 0; padding: 0; margin: 0; overflow: hidden; }
+    .sim-state { transition: opacity 180ms ease; }
+    .sim-pill { cursor: pointer; }
+    .sim-pill:disabled { opacity: 0.35; cursor: not-allowed; }
+    .sim-pill.is-active { background: #7c3aed; border-color: #7c3aed; color: white; }
+    /* Clickable buttons should always show a pointer (override any UA quirks). */
+    .results-tab, button:not(:disabled) { cursor: pointer; }
+  </style>
+
+  <!-- GoatCounter analytics — placeholder; replace data-goatcounter URL once registered -->
+  <!-- <script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script> -->
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var tabLlama = document.getElementById('tab-llama');
+      var tabQwen  = document.getElementById('tab-qwen');
+      var tblLlama = document.getElementById('results-llama');
+      var tblQwen  = document.getElementById('results-qwen');
+      function setActive(tab) {
+        var on  = 'border-accent-600 text-accent-700 bg-white';
+        var off = 'border-transparent text-gray-500 hover:text-gray-800';
+        if (tab === 'llama') {
+          tabLlama.className = 'results-tab px-5 py-3 text-[13px] font-medium border-b-2 ' + on;
+          tabQwen.className  = 'results-tab px-5 py-3 text-[13px] font-medium border-b-2 ' + off;
+          tblLlama.classList.remove('hidden');
+          tblQwen.classList.add('hidden');
+        } else {
+          tabQwen.className  = 'results-tab px-5 py-3 text-[13px] font-medium border-b-2 ' + on;
+          tabLlama.className = 'results-tab px-5 py-3 text-[13px] font-medium border-b-2 ' + off;
+          tblQwen.classList.remove('hidden');
+          tblLlama.classList.add('hidden');
+        }
+      }
+      if (tabLlama && tabQwen) {
+        tabLlama.addEventListener('click', function () { setActive('llama'); });
+        tabQwen.addEventListener('click',  function () { setActive('qwen'); });
+      }
+
+      // ============= Problem section: step ↔ chat hover sync =============
+      var problemSync = document.getElementById('problem-sync');
+      if (problemSync) {
+        var syncTargets = problemSync.querySelectorAll('.sync-target');
+        function setStepActive(step, on) {
+          problemSync.querySelectorAll('.sync-target[data-step="' + step + '"]').forEach(function (el) {
+            el.classList.toggle('is-active', !!on);
+          });
+        }
+        syncTargets.forEach(function (el) {
+          var step = el.getAttribute('data-step');
+          el.addEventListener('mouseenter', function () { setStepActive(step, true); });
+          el.addEventListener('mouseleave', function () { setStepActive(step, false); });
+          el.addEventListener('focusin',  function () { setStepActive(step, true); });
+          el.addEventListener('focusout', function () { setStepActive(step, false); });
+        });
+      }
+
+      // ============= User-simulator walkthrough: step-by-step then free =============
+      var simRoot = document.getElementById('sim-walkthrough');
+      if (simRoot) {
+        var simTurns      = simRoot.querySelectorAll('.sim-turn');
+        var simStates     = simRoot.querySelectorAll('.sim-state');
+        var simPills      = simRoot.querySelectorAll('.sim-pill');
+        var simCurEl      = document.getElementById('sim-current-turn');
+        var simCounterEl  = document.getElementById('sim-step-counter');
+        var continueWrap  = document.getElementById('sim-continue-wrap');
+        var continueBtn   = document.getElementById('sim-continue');
+        var doneHelp      = document.getElementById('sim-done-help');
+        var TOTAL = simTurns.length;          // 4
+        var unlocked = 1;                     // start with just Turn 1 visible
+        var current  = '1';
+
+        function isUnlocked(s) { return parseInt(s, 10) <= unlocked; }
+
+        function setSimState(idx) {
+          if (!isUnlocked(idx)) return;
+          if (idx === current) return;
+          current = idx;
+          simStates.forEach(function (s) { s.classList.toggle('hidden', s.getAttribute('data-state') !== idx); });
+          simTurns.forEach(function (t)  { t.classList.toggle('is-active', t.getAttribute('data-sim-state') === idx); });
+          simPills.forEach(function (p)  { p.classList.toggle('is-active', p.getAttribute('data-jump') === idx); });
+          if (simCurEl) simCurEl.textContent = idx;
+        }
+
+        function updateCounter() {
+          if (simCounterEl) simCounterEl.textContent = unlocked;
+        }
+        function unlockNext() {
+          if (unlocked >= TOTAL) return;
+          unlocked++;
+          // Reveal the newly-unlocked turn.
+          var newTurn = simRoot.querySelector('.sim-turn[data-sim-state="' + unlocked + '"]');
+          if (newTurn) newTurn.classList.remove('is-locked');
+          // Enable the matching pill.
+          var pill = simRoot.querySelector('.sim-pill[data-jump="' + unlocked + '"]');
+          if (pill) pill.disabled = false;
+          // Advance the panel to the new turn.
+          setSimState(String(unlocked));
+          updateCounter();
+          // Once everything is unlocked, retire the Continue button + show the "free nav" hint.
+          if (unlocked >= TOTAL) {
+            if (continueWrap) continueWrap.classList.add('hidden');
+            if (doneHelp)     doneHelp.classList.remove('hidden');
+          }
+        }
+
+        // Initialize: highlight Turn 1, pill T1 active.
+        // (Direct assignment because setSimState short-circuits when current === idx.)
+        simTurns.forEach(function (t)  { t.classList.toggle('is-active', t.getAttribute('data-sim-state') === '1'); });
+        simPills.forEach(function (p)  { p.classList.toggle('is-active', p.getAttribute('data-jump') === '1'); });
+        updateCounter();
+
+        // Hover / focus on an unlocked turn updates the panel.
+        simTurns.forEach(function (turn) {
+          var s = turn.getAttribute('data-sim-state');
+          turn.addEventListener('mouseenter', function () { setSimState(s); });
+          turn.addEventListener('focusin',    function () { setSimState(s); });
+        });
+        // Pill clicks jump to that state. NO scroll change.
+        simPills.forEach(function (pill) {
+          pill.addEventListener('click', function () {
+            if (pill.disabled) return;
+            setSimState(pill.getAttribute('data-jump'));
+          });
+        });
+        // Continue button advances the walkthrough.
+        if (continueBtn) {
+          continueBtn.addEventListener('click', function () { unlockNext(); });
+        }
+        // After full unlock, scroll-based passive sync keeps the panel honest.
+        if ('IntersectionObserver' in window) {
+          var io = new IntersectionObserver(function (entries) {
+            if (unlocked < TOTAL) return; // only kick in once everything is revealed
+            entries.forEach(function (e) {
+              if (e.isIntersecting && e.intersectionRatio > 0.55) {
+                setSimState(e.target.getAttribute('data-sim-state'));
+              }
+            });
+          }, { threshold: [0.55, 0.85], rootMargin: '-20% 0px -20% 0px' });
+          simTurns.forEach(function (t) { io.observe(t); });
+        }
+      }
+
+      // ============= Results: bar charts (one per metric, averaged across tasks) =============
+      var resultsData = {
+        llama: {
+          methods: ['Base', 'Prompted Base', 'CollabLLM', 'SFT', 'DPO', 'SFT+DPO'],
+          isOurs:  [false, false, false, true, true, true],
+          creative: { discover:[38.2,37.7,37.3,40.7,40.5,42.4], satisfy:[30.0,26.4,28.0,33.4,29.2,28.4], itr:[20.1,26.0,32.6,92.3,33.1,32.9], tokens:[3.09,2.97,2.93,1.71,2.91,2.77] },
+          tech:     { discover:[49.1,43.6,45.8,47.1,47.2,49.0], satisfy:[36.0,33.5,33.7,35.2,34.2,35.9], itr:[21.2,24.2,24.9,81.6,27.3,31.3], tokens:[3.32,3.05,3.13,2.09,3.11,2.94] },
+          svg:      { discover:[45.6,40.0,43.0,45.4,45.3,51.6], satisfy:[32.5,30.9,29.9,34.9,32.5,37.0], itr:[21.6,25.1,30.8,66.9,29.2,44.6], tokens:[3.59,3.18,3.18,2.92,2.89,2.61] }
+        },
+        qwen: {
+          methods: ['Base', 'Prompted Base', 'SFT', 'DPO', 'SFT+DPO', 'SFT+DPO+GRPO'],
+          isOurs:  [false, false, true, true, true, true],
+          creative: { discover:[35.2,39.0,34.9,42.6,44.0,45.2], satisfy:[30.4,30.8,31.0,33.5,33.4,33.7], itr:[36.2,62.9,90.4,70.5,72.1,83.1], tokens:[3.41,3.01,1.59,3.10,2.87,2.05] },
+          tech:     { discover:[40.7,41.3,41.6,42.2,47.5,48.2], satisfy:[33.7,33.8,33.7,33.3,36.4,35.5], itr:[35.3,64.0,81.0,67.2,69.1,55.0], tokens:[3.39,2.79,1.90,2.76,2.78,2.63] },
+          svg:      { discover:[47.0,47.0,48.9,46.9,42.6,48.7], satisfy:[32.0,35.6,38.8,35.1,38.7,38.6], itr:[54.4,75.1,70.2,75.9,32.7,46.3], tokens:[3.96,2.83,2.36,2.70,1.81,2.46] }
+        }
+      };
+      var METRICS = [
+        { key:'discover', label:'Discovery',     dir:'higher is better', invert:false, fmt:1 },
+        { key:'satisfy',  label:'Satisfaction',  dir:'higher is better', invert:false, fmt:1 },
+        { key:'itr',      label:'Interactivity', dir:'higher is better', invert:false, fmt:1 },
+        { key:'tokens',   label:'Tokens (k)',    dir:'lower is better',  invert:true,  fmt:2 }
+      ];
+      var TASK_KEYS = ['creative', 'tech', 'svg'];
+
+      function shortName(m) {
+        return m.replace('Prompted Base', 'Prompted');
+      }
+
+      function niceStep(range) {
+        var rough = range / 4;
+        var pow = Math.pow(10, Math.floor(Math.log10(rough)));
+        var n = rough / pow;
+        var nice = n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10;
+        return nice * pow;
+      }
+
+      // For one model class + one metric, average each method's score across the 3 tasks.
+      function averageAcrossTasks(data, metricKey) {
+        return data.methods.map(function (_, mi) {
+          var sum = 0;
+          TASK_KEYS.forEach(function (tk) { sum += data[tk][metricKey][mi]; });
+          return sum / TASK_KEYS.length;
+        });
+      }
+
+      // Render one mini bar chart (one metric) into a sub-svg.
+      function renderMetricBars(metric, data, w, h) {
+        var values = averageAcrossTasks(data, metric.key);
+        var invert = metric.invert;
+
+        // Best-ours among ours methods
+        var bestOursIdx = -1, ext = invert ? Infinity : -Infinity;
+        values.forEach(function (v, i) {
+          if (!data.isOurs[i]) return;
+          if ((invert && v < ext) || (!invert && v > ext)) { ext = v; bestOursIdx = i; }
+        });
+
+        var minV = Math.min.apply(null, values);
+        var maxV = Math.max.apply(null, values);
+        var range = maxV - minV;
+        var pad = range * 0.15 || (maxV * 0.1 || 1);
+        var step = niceStep((maxV + pad) - Math.max(0, minV - pad));
+        var yMin = Math.max(0, Math.floor((minV - pad) / step) * step);
+        var yMax = Math.ceil((maxV + pad) / step) * step;
+        if (yMax === yMin) yMax = yMin + step;
+
+        var marginL = 36, marginR = 8, marginT = 28, marginB = 60;
+        var plotW = w - marginL - marginR;
+        var plotH = h - marginT - marginB;
+        var n = values.length;
+        var bandW = plotW / n;
+        var barW = Math.min(bandW * 0.7, 28);
+
+        function xFor(i) { return marginL + bandW * (i + 0.5); }
+        function yFor(v) { return marginT + plotH * (1 - (v - yMin) / (yMax - yMin)); }
+
+        var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
+
+        // Title (metric label) — top-left
+        svg += '<text x="' + marginL + '" y="14" font-size="12" font-family="ui-sans-serif" fill="#111827" font-weight="700">' + metric.label + '</text>';
+        svg += '<text x="' + (w - marginR) + '" y="14" font-size="9" font-family="ui-sans-serif" fill="#9ca3af" text-anchor="end">' + metric.dir + '</text>';
+
+        // Y-axis ticks
+        var ticks = [];
+        for (var tk = yMin; tk <= yMax + 1e-9; tk += step) ticks.push(tk);
+        ticks.forEach(function (val) {
+          var y = yFor(val);
+          svg += '<line x1="' + marginL + '" x2="' + (w - marginR) + '" y1="' + y + '" y2="' + y + '" stroke="#e5e7eb" stroke-dasharray="3 3" stroke-width="1"/>';
+          svg += '<text x="' + (marginL - 6) + '" y="' + (y + 3) + '" font-size="9" font-family="ui-monospace, monospace" fill="#9ca3af" text-anchor="end">' + (metric.fmt === 2 ? val.toFixed(1) : Math.round(val)) + '</text>';
+        });
+
+        // Bars
+        values.forEach(function (v, i) {
+          var cx = xFor(i);
+          var bx = cx - barW / 2;
+          var by = yFor(v);
+          var bh = yFor(yMin) - by;
+          var ours = data.isOurs[i];
+          var isBest = (i === bestOursIdx);
+          var fill = ours ? '#7c3aed' : '#9ca3af';
+          var opacity = ours ? (isBest ? 1 : 0.85) : 0.5;
+          svg += '<rect x="' + bx + '" y="' + by + '" width="' + barW + '" height="' + bh + '" fill="' + fill + '" fill-opacity="' + opacity + '" rx="2"/>';
+          // Value label above bar (only ours, to reduce clutter)
+          if (ours) {
+            var vLabel = metric.fmt === 2 ? v.toFixed(2) : v.toFixed(1);
+            svg += '<text x="' + cx + '" y="' + (by - 4) + '" font-size="9" font-family="ui-monospace, monospace" fill="#7c3aed" text-anchor="middle" font-weight="' + (isBest ? '700' : '500') + '">' + (isBest ? '&#9733; ' : '') + vLabel + '</text>';
+          }
+          // Method label below
+          var label = shortName(data.methods[i]);
+          // Rotate labels for narrow bands
+          var labelX = cx, labelY = h - marginB + 12;
+          svg += '<text x="' + labelX + '" y="' + labelY + '" font-size="9.5" font-family="ui-sans-serif" fill="' + (ours ? '#4c1d95' : '#6b7280') + '" font-weight="' + (ours ? '600' : '400') + '" text-anchor="end" transform="rotate(-32 ' + labelX + ' ' + labelY + ')">' + label + '</text>';
+        });
+
+        svg += '</svg>';
+        return svg;
+      }
+
+      // Render one model panel: 4 mini bar charts in a flex row inside the panel-chart div.
+      function renderModelPanel(panelEl, model) {
+        var chartEl = panelEl.querySelector('.panel-chart');
+        var bestEl  = panelEl.querySelector('[data-best-of]');
+        if (!chartEl) return;
+        var data = resultsData[model];
+
+        var html = '<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">';
+        METRICS.forEach(function (m) {
+          html += '<div class="bg-gray-50/50 border border-gray-100 rounded-lg p-2">' + renderMetricBars(m, data, 260, 240) + '</div>';
+        });
+        html += '</div>';
+        chartEl.innerHTML = html;
+
+        if (bestEl) {
+          var parts = METRICS.map(function (m) {
+            var values = averageAcrossTasks(data, m.key);
+            var invert = m.invert;
+            var bestIdx = -1, ext = invert ? Infinity : -Infinity;
+            values.forEach(function (v, i) {
+              if (!data.isOurs[i]) return;
+              if ((invert && v < ext) || (!invert && v > ext)) { ext = v; bestIdx = i; }
+            });
+            if (bestIdx < 0) return null;
+            return m.label + ' ' + (m.fmt === 2 ? values[bestIdx].toFixed(2) : values[bestIdx].toFixed(1)) + ' (' + shortName(data.methods[bestIdx]) + ')';
+          }).filter(Boolean);
+          bestEl.textContent = 'best ours · ' + parts.join('  ·  ');
+        }
+      }
+
+      function refreshAll() {
+        document.querySelectorAll('.model-panel').forEach(function (p) {
+          renderModelPanel(p, p.getAttribute('data-model'));
+        });
+      }
+
+      // Initial render
+      refreshAll();
+    });
+  </script>
+</head>
+
+<body class="bg-white text-gray-800 antialiased">
+
+  <!-- ============================== STICKY NAV ============================== -->
+  <nav class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-6 h-12 flex items-center justify-between text-[13px]">
+      <a href="#" class="font-semibold tracking-tight text-gray-900 brand">DiscoverLLM</a>
+      <div class="hidden md:flex items-center gap-5 text-gray-600">
+        <a href="#problem" class="hover:text-accent-700">Problem</a>
+        <a href="#how-it-works" class="hover:text-accent-700">User simulator</a>
+        <a href="#comparison" class="hover:text-accent-700">Comparison</a>
+        <a href="#results" class="hover:text-accent-700">Results</a>
+        <a href="#user-study" class="hover:text-accent-700">User study</a>
+        <a href="#training" class="hover:text-accent-700">Training</a>
+      </div>
+      <a href="https://github.com/tsook/discoverllm" target="_blank" rel="noopener" class="text-gray-500 hover:text-gray-900" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-1.97c-3.2.7-3.87-1.54-3.87-1.54-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39.98 0 1.97.13 2.89.39 2.21-1.49 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.07.78 2.16v3.2c0 .31.21.68.79.56 4.57-1.52 7.86-5.83 7.86-10.91C23.5 5.65 18.35.5 12 .5z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ============================== HERO ============================== -->
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-accent-50/60 via-white to-white"></div>
+
+    <div class="max-w-4xl mx-auto px-6 pt-12 pb-14 text-center">
+      <div class="inline-flex items-center px-3.5 py-1 rounded-full bg-accent-100 text-accent-800 text-[12px] font-semibold tracking-wider uppercase mb-6">
+        ICML 2026
+      </div>
+
+      <h1 class="font-sans text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-3">
+        <span class="brand">DiscoverLLM</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-700 mb-6 leading-tight" style="font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; font-weight:500; letter-spacing:-0.015em;">
+        From Executing Intents to Discovering Them
+      </p>
+
+      <div class="text-gray-700 mb-1 text-sm">
+        <a href="https://taesookim.com" target="_blank" rel="noopener" class="hover:text-accent-700 underline-offset-2 hover:underline">Tae Soo Kim</a><sup class="text-gray-400">1</sup>,
+        <a href="https://yoonjoolee.com/" target="_blank" rel="noopener" class="hover:text-accent-700 underline-offset-2 hover:underline">Yoonjoo Lee</a><sup class="text-gray-400">2</sup>,
+        Jaesang Yu<sup class="text-gray-400">1</sup>,
+        <a href="https://johnr0.github.io/" target="_blank" rel="noopener" class="hover:text-accent-700 underline-offset-2 hover:underline">John Joon Young Chung</a><sup class="text-gray-400">3</sup>,
+        <a href="https://juhokim.com" target="_blank" rel="noopener" class="hover:text-accent-700 underline-offset-2 hover:underline">Juho Kim</a><sup class="text-gray-400">1,4</sup>
+      </div>
+      <div class="text-gray-500 text-[11px] mb-7">
+        <sup>1</sup>KAIST &nbsp;&middot;&nbsp;
+        <sup>2</sup>University of Michigan &nbsp;&middot;&nbsp;
+        <sup>3</sup>Midjourney &nbsp;&middot;&nbsp;
+        <sup>4</sup>SkillBench
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a href="https://arxiv.org/abs/2602.03429" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900 text-white text-[13px] font-medium hover:bg-gray-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Paper
+        </a>
+        <a href="https://github.com/tsook/discoverllm" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-800 text-[13px] font-medium hover:border-gray-900 hover:text-gray-900 transition">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-1.97c-3.2.7-3.87-1.54-3.87-1.54-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39.98 0 1.97.13 2.89.39 2.21-1.49 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.07.78 2.16v3.2c0 .31.21.68.79.56 4.57-1.52 7.86-5.83 7.86-10.91C23.5 5.65 18.35.5 12 .5z"/></svg>
+          Code
+        </a>
+        <a href="https://huggingface.co/datasets/kixlab/DiscoverLLM-multiturn-preferences" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-800 text-[13px] font-medium hover:border-gray-900 hover:text-gray-900 transition">
+          🤗 Dataset
+        </a>
+        <a href="https://huggingface.co/collections/kixlab/discoverllm-icml-2026" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-800 text-[13px] font-medium hover:border-gray-900 hover:text-gray-900 transition">
+          🤗 Models
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================== TL;DR ============================== -->
+  <section id="tldr" class="section-anchor max-w-5xl mx-auto px-6 py-12">
+    <div class="max-w-3xl mb-8">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">TL;DR</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-snug mb-4">
+        We train LLMs to help users figure out what they want, not just execute what they ask.
+      </h2>
+      <p class="text-gray-600 text-[15px] leading-relaxed">
+        LLM training and evaluation assume users start with fully-formed intents. Often they don't — users approach open-ended tasks with <em>ill-defined</em> intents they discover by reacting to what the model proposes. We built a <b>user simulator</b> that models this messy middle, then trained LLMs against it: models learn to <em>diverge</em> (explore options) when intents are unclear and <em>converge</em> (refine outputs) once they concretize.
+      </p>
+    </div>
+    <figure>
+      <lottie-player
+          src="assets/teaser.lottie.json"
+          background="transparent"
+          speed="1"
+          loop
+          autoplay
+          aria-label="DiscoverLLM framework: latent intent hierarchy → assistant probes → state updates → reward → fine-tuning."
+          class="w-full block"
+          style="height: 380px;"></lottie-player>
+      <figcaption class="mt-2 text-gray-500 text-[11px] leading-relaxed text-center">
+        Latent intents &rarr; assistant probes &rarr; state updates &rarr; reward &rarr; fine-tune.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================== PROBLEM ============================== -->
+  <section id="problem" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-14">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">The problem</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-2">
+        &ldquo;What would you like to change?&rdquo;
+      </h2>
+      <p class="text-gray-500 text-[15px] mb-8 max-w-xl">Doesn't help when the user can't name what they want yet.</p>
+
+      <p class="text-[11px] text-gray-400 mb-3 italic">Hover a step or message to highlight the match.</p>
+
+      <!-- Each step = one sync-target row containing both the chat bubble(s)
+           AND the matching annotation, so hover highlights a single unified block. -->
+      <div class="space-y-3" id="problem-sync">
+
+        <!-- Setup row (Turn 1 user + Turn 1 AI) — not part of any numbered step -->
+        <div class="grid md:grid-cols-12 gap-x-8 gap-y-3 items-start">
+          <div class="md:col-span-7">
+            <div class="flex justify-end">
+              <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+                Write a poem about my younger self.
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold pt-1.5">Setup &middot; the conversation starts</div>
+          </div>
+
+          <div class="md:col-span-7">
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">AI</div>
+              <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3.5 py-2 text-[13px] leading-snug text-gray-500 italic max-w-[80%]">
+                I was a quiet kid then. I didn't know how to ask for what I wanted&hellip;
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <p class="text-[12px] text-gray-500 leading-snug pt-1.5">A reasonable first draft. The user isn't sure why it doesn't land, but the following turns from the model don't help either.</p>
+          </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="sync-target p-2 -m-2 grid md:grid-cols-12 gap-x-8 items-start" data-step="1">
+          <div class="md:col-span-7">
+            <div class="flex justify-end">
+              <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+                Hmm&hellip; can it feel different?
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="flex gap-3 items-start">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-[12px] font-bold text-amber-700">1</div>
+              <div>
+                <div class="font-semibold text-gray-900 text-[14px] leading-tight">User can't articulate yet</div>
+                <p class="text-[12px] text-gray-600 leading-snug mt-1">Something feels off after the first draft, but the user can't name what.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: groups two chat turns (AI asks, user shrugs) with the matching annotation -->
+        <div class="sync-target p-2 -m-2 grid md:grid-cols-12 gap-x-8 gap-y-3 items-start" data-step="2">
+          <div class="md:col-span-7">
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">AI</div>
+              <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3.5 py-2 text-[14px] leading-snug text-gray-900 max-w-[80%]">
+                What would you like to change? Any specific aspects of the tone, perspective, or imagery?
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="flex gap-3 items-start">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center text-[12px] font-bold text-rose-700">2</div>
+              <div>
+                <div class="font-semibold text-gray-900 text-[14px] leading-tight">Asking doesn't help</div>
+                <p class="text-[12px] text-gray-600 leading-snug mt-1">The model asks a clarifying question. But the user cannot provide an answer.</p>
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-7">
+            <div class="flex justify-end">
+              <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+                I don't know how to describe it.
+              </div>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Step 3: the AI's contrast causes discovery -->
+        <div class="sync-target p-2 -m-2 grid md:grid-cols-12 gap-x-8 items-start" data-step="3">
+          <div class="md:col-span-7">
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">AI</div>
+              <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-[13px] leading-snug text-gray-900 space-y-2 max-w-[90%]">
+                <div>Here are two takes &mdash; tell me which feels closer:</div>
+                <div class="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5">
+                  <span class="text-[11px] font-mono text-gray-500 mr-1.5">A</span>
+                  <span class="text-gray-700">First-person, looking back. <em class="text-gray-500">&ldquo;When I was sixteen I thought I knew everything&hellip;&rdquo;</em></span>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5">
+                  <span class="text-[11px] font-mono text-gray-500 mr-1.5">B</span>
+                  <span class="text-gray-700">Talking to her, second-person. <em class="text-gray-500">&ldquo;You don't know it yet, but&hellip;&rdquo;</em></span>
+                </div>
+              </div>
+            </div>
+            <!-- Discovery is caused by the AI's contrast move, attached to its message. -->
+            <div class="flex mt-1.5 pl-9">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-accent-50 border border-accent-200 text-[11px] text-accent-800">
+                <span class="text-accent-600">✓</span> just discovered: <em class="ml-1">perspective &middot; second-person address</em>
+              </span>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="flex gap-3 items-start">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-[12px] font-bold text-emerald-700">3</div>
+              <div>
+                <div class="font-semibold text-gray-900 text-[14px] leading-tight">Showing &gt; asking &mdash; discovery happens</div>
+                <p class="text-[12px] text-gray-600 leading-snug mt-1">The AI provides contrasting options that surface what the user actually wanted: a second-person perspective.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: user can finally express the intent -->
+        <div class="sync-target p-2 -m-2 grid md:grid-cols-12 gap-x-8 items-start" data-step="4">
+          <div class="md:col-span-7">
+            <div class="flex justify-end">
+              <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+                B: talking to her. I want to address my younger self directly.
+              </div>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="flex gap-3 items-start">
+              <div class="flex-shrink-0 w-7 h-7 rounded-full bg-accent-100 border border-accent-300 flex items-center justify-center text-[12px] font-bold text-accent-700">4</div>
+              <div>
+                <div class="font-semibold text-gray-900 text-[14px] leading-tight">User can articulate it now</div>
+                <p class="text-[12px] text-gray-600 leading-snug mt-1">With this realized, the user can provide direct and specific feedback to the model, something they couldn't do three turns ago.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Closing -->
+      <p class="text-[13px] text-gray-600 leading-relaxed mt-8 max-w-3xl">
+        Most fine-tuning rewards complete answers or better-asked clarifying questions. Neither helps when users themselves don't yet know what they want.
+      </p>
+    </div>
+  </section>
+
+  <!-- visual bridge from Problem to How-it-works -->
+  <div aria-hidden="true" class="relative h-10 bg-gradient-to-b from-gray-50 to-white">
+    <div class="absolute left-1/2 -translate-x-1/2 -top-3 bg-white border border-gray-200 rounded-full px-3 py-1 text-[10px] font-mono text-gray-500 shadow-sm">
+      ↓ same conversation, simulator's view ↓
+    </div>
+  </div>
+
+  <!-- ============================== HOW IT WORKS ============================== -->
+  <section id="how-it-works" class="section-anchor max-w-6xl mx-auto px-6 py-14">
+    <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">User simulator</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">The simulator scores each model turn by which latent intents become discovered.</h2>
+
+    <!-- TOP ROW: concept on the left, initial tree on the right -->
+    <div class="grid md:grid-cols-12 gap-4 mt-6 mb-8">
+      <div class="md:col-span-7 bg-white border border-gray-200 rounded-xl p-5">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Simulated users maintain a tree of latent intents.</h3>
+        <p class="text-[14px] text-gray-600 leading-relaxed mb-3">
+          The user starts with a few abstract intents (the root) and discovers more specific child intents through the conversation. Each model response — whether a clarifying question or a generated artifact — can advance a node through three states:
+          <span class="inline-flex items-center gap-1 mx-0.5"><span class="w-2 h-2 rounded border border-dashed border-gray-400"></span><span class="text-gray-500">undiscovered</span></span>
+          &rarr;
+          <span class="inline-flex items-center gap-1 mx-0.5"><span class="w-2 h-2 rounded bg-amber-100 border border-amber-300"></span><span class="text-amber-700">emerging</span></span>
+          &rarr;
+          <span class="inline-flex items-center gap-1 mx-0.5"><span class="w-2 h-2 rounded bg-accent-600"></span><span class="text-accent-700">discovered</span></span>.
+          Reward is the count of newly <em>discovered</em> nodes per turn.
+        </p>
+        <div class="inline-flex items-center gap-2 bg-gray-900 text-white rounded-md px-3 py-1.5 text-[11px] font-mono">
+          <span class="text-gray-400 uppercase tracking-wider">reward</span>
+          <span>R(r<sub>t</sub>) = |I<sub>t+1</sub>| − |I<sub>t</sub>|</span>
+          <span class="text-gray-400">− length penalty</span>
+        </div>
+      </div>
+
+      <div class="md:col-span-5 bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Intent tree &middot; this artifact</div>
+          <div class="text-[10px] font-mono text-gray-400">initial state</div>
+        </div>
+        <div class="font-mono text-[12px] leading-relaxed">
+          <div class="flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white">poem about my younger self</span><span class="text-[10px] text-accent-700">✓ root</span></div>
+          <div class="flex items-center gap-1.5 mt-1 ml-4">
+            <span class="text-gray-300">├─</span>
+            <span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-400">perspective</span>
+          </div>
+          <div class="flex items-center gap-1.5 mt-1 ml-4"><span class="text-gray-300">│&nbsp;&nbsp;└─</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-400">second-person address</span></div>
+          <div class="flex items-center gap-1.5 mt-1 ml-4"><span class="text-gray-300">└─</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-400">imagery palette</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversation on the left, sticky simulator-state panel on the right.
+         Hover or scroll past a turn → the right panel switches to that turn's state.
+         All four states are stacked in one place so there's no per-row vertical waste. -->
+    <div class="grid md:grid-cols-12 gap-x-8 items-start" id="sim-walkthrough">
+
+      <!-- LEFT: chat stream -->
+      <div class="md:col-span-7 space-y-3">
+
+        <!-- Turn 1 -->
+        <div class="sim-turn space-y-2" data-sim-state="1" tabindex="0">
+          <div class="flex justify-end">
+            <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+              Write a poem about my younger self.
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">AI</div>
+            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3.5 py-2 text-[13px] leading-snug text-gray-500 italic max-w-[80%]">
+              I was a quiet kid then. I didn't know how to ask for what I wanted&hellip;
+            </div>
+          </div>
+        </div>
+
+        <!-- Turn 2 -->
+        <div class="sim-turn is-locked space-y-2" data-sim-state="2" tabindex="0">
+          <div class="flex justify-end">
+            <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+              Hmm&hellip; can it feel different?
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">AI</div>
+            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3.5 py-2 text-[14px] leading-snug text-gray-900 max-w-[80%]">
+              What would you like to change? Any specific aspects of the tone, perspective, or imagery?
+            </div>
+          </div>
+        </div>
+
+        <!-- Turn 3 — the AI's contrast triggers the discovery -->
+        <div class="sim-turn is-locked space-y-2" data-sim-state="3" tabindex="0">
+          <div class="flex justify-end">
+            <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+              I don't know how to describe it.
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <div class="flex-shrink-0 w-7 h-7 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-[10px] font-bold text-amber-700">&starf;</div>
+            <div class="bg-white border border-amber-200 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-[13px] leading-snug text-gray-900 space-y-2 max-w-[90%]">
+              <div>Here are two takes &mdash; tell me which feels closer:</div>
+              <div class="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5">
+                <span class="text-[11px] font-mono text-gray-500 mr-1.5">A</span>
+                <span class="text-gray-700">First-person, looking back. <em class="text-gray-500">&ldquo;When I was sixteen&hellip;&rdquo;</em></span>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5">
+                <span class="text-[11px] font-mono text-gray-500 mr-1.5">B</span>
+                <span class="text-gray-700">Talking to her, second-person. <em class="text-gray-500">&ldquo;You don't know it yet&hellip;&rdquo;</em></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Turn 4 — user can finally articulate the intent -->
+        <div class="sim-turn is-locked space-y-2" data-sim-state="4" tabindex="0">
+          <div class="flex justify-end">
+            <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3.5 py-2 text-[14px] leading-snug max-w-[80%]">
+              B &mdash; talking to her. I want to address my younger self directly.
+            </div>
+          </div>
+        </div>
+
+        <!-- Continue button (visible while turns are still locked) -->
+        <div id="sim-continue-wrap" class="flex items-center gap-3 pt-2">
+          <button id="sim-continue" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-600 text-white text-[13px] font-medium hover:bg-accent-700 transition">
+            Continue &rarr;
+          </button>
+          <span id="sim-continue-help" class="text-[11px] text-gray-500">Step <span id="sim-step-counter">1</span> of 4. Reveal the next turn to see how the simulator's state changes.</span>
+        </div>
+        <div id="sim-done-help" class="hidden text-[11px] text-gray-500 italic pt-1">All four turns shown &mdash; hover any turn or use the T1&ndash;T4 pills to revisit.</div>
+
+      </div>
+
+      <!-- RIGHT: sticky simulator state. Cards stacked; one visible at a time. -->
+      <div class="md:col-span-5">
+        <div class="sticky top-20">
+          <div class="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">
+            <span>Simulator state &middot; turn <span id="sim-current-turn">1</span> of 4</span>
+            <span class="hidden md:inline normal-case tracking-normal text-gray-400 italic">hover a turn &harr;</span>
+          </div>
+          <div class="relative">
+
+            <!-- State 1: No engagement -->
+            <div class="sim-state bg-gray-50 border border-gray-100 rounded-lg p-4" data-state="1">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-gray-600">No engagement</span>
+                <span class="font-mono text-[16px] font-bold text-gray-400">R = 0</span>
+              </div>
+              <p class="text-[12px] text-gray-700 leading-snug mb-3">
+                A neutral first draft. The model doesn't touch any node in the refinement space, so the tree is unchanged.
+              </p>
+              <div class="font-mono text-[12px] leading-relaxed bg-white border border-gray-200 rounded-md p-3">
+                <div class="flex items-center gap-2 flex-wrap"><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white">poem about my younger self</span><span class="text-[10px] text-accent-700 font-sans">&bull; root</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxvr;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">perspective</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxv;&nbsp;&nbsp;&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">second-person address</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">imagery palette</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+              </div>
+            </div>
+
+            <!-- State 2: Targets the root -->
+            <div class="sim-state bg-rose-50/40 border border-rose-100 rounded-lg p-4 hidden" data-state="2">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-rose-700">Targets the root</span>
+                <span class="font-mono text-[16px] font-bold text-gray-400">R = 0</span>
+              </div>
+              <p class="text-[12px] text-gray-700 leading-snug mb-3">
+                The model asks a clarifying question, but the user has no formed specific intent to give. Nothing in the refinement tree changes.
+              </p>
+              <div class="font-mono text-[12px] leading-relaxed bg-white border border-gray-200 rounded-md p-3">
+                <div class="flex items-center gap-2 flex-wrap"><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white">poem about my younger self</span><span class="text-[10px] text-rose-700 font-sans">&bull; already known</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxvr;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">perspective</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxv;&nbsp;&nbsp;&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">second-person address</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">imagery palette</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+              </div>
+            </div>
+
+            <!-- State 3: Contrast surfaces the intent — DISCOVERY -->
+            <div class="sim-state bg-accent-50/60 border border-accent-300 rounded-lg p-4 hidden" data-state="3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-accent-700">Contrast surfaces the intent</span>
+                <span class="font-mono text-[16px] font-bold text-accent-700">R = +2</span>
+              </div>
+              <p class="text-[12px] text-gray-700 leading-snug mb-3">
+                The AI's two-options move (A vs B) gives the user something concrete to react to. Both <em>perspective</em> and <em>second-person address</em> move from latent to <strong class="text-accent-700">discovered</strong>. The AI response gains the reward for causing this discovery.
+              </p>
+              <div class="font-mono text-[12px] leading-relaxed bg-white border border-accent-200 rounded-md p-3">
+                <div class="flex items-center gap-2 flex-wrap"><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white">poem about my younger self</span><span class="text-[10px] text-accent-700 font-sans">&bull; root</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxvr;</span><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white font-medium">perspective</span><span class="text-[10px] text-accent-700 font-sans">&bull; discovered &uarr; &starf;</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxv;&nbsp;&nbsp;&boxur;</span><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white font-medium">second-person address</span><span class="text-[10px] text-accent-700 font-sans">&bull; discovered &uarr; &starf;</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">imagery palette</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+              </div>
+            </div>
+
+            <!-- State 4: User can articulate it now — no NEW reward, but the discovery is now expressible -->
+            <div class="sim-state bg-emerald-50/50 border border-emerald-200 rounded-lg p-4 hidden" data-state="4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-emerald-700">User can articulate it now</span>
+                <span class="font-mono text-[16px] font-bold text-gray-400">R = 0</span>
+              </div>
+              <p class="text-[12px] text-gray-700 leading-snug mb-3">
+                With the more specific intent discovered, the simulated user can now express it directly in its turn, allowing the conversation to progress to more specific intents.
+              </p>
+              <div class="font-mono text-[12px] leading-relaxed bg-white border border-emerald-200 rounded-md p-3">
+                <div class="flex items-center gap-2 flex-wrap"><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white">poem about my younger self</span><span class="text-[10px] text-accent-700 font-sans">&bull; root</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxvr;</span><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white font-medium">perspective</span><span class="text-[10px] text-accent-700 font-sans">&bull; discovered</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxv;&nbsp;&nbsp;&boxur;</span><span class="px-1.5 py-0.5 rounded bg-accent-600 text-white font-medium">second-person address</span><span class="text-[10px] text-accent-700 font-sans">&bull; discovered &middot; now spoken</span></div>
+                <div class="flex items-center gap-2 mt-1.5 ml-4 flex-wrap"><span class="text-gray-300">&boxur;</span><span class="px-1.5 py-0.5 rounded border border-dashed border-gray-300 text-gray-500">imagery palette</span><span class="text-[10px] text-gray-400 font-sans">&bull; undiscovered</span></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Discrete turn pills -->
+          <div class="flex items-center gap-1.5 mt-3">
+            <span class="text-[10px] text-gray-400 mr-1">jump to:</span>
+            <button data-jump="1" class="sim-pill px-2 py-0.5 rounded-full text-[11px] font-mono border border-gray-300 text-gray-600 hover:border-gray-700 hover:text-gray-900">T1</button>
+            <button data-jump="2" class="sim-pill px-2 py-0.5 rounded-full text-[11px] font-mono border border-gray-300 text-gray-600 hover:border-gray-700 hover:text-gray-900" disabled>T2</button>
+            <button data-jump="3" class="sim-pill px-2 py-0.5 rounded-full text-[11px] font-mono border border-gray-300 text-gray-600 hover:border-gray-700 hover:text-gray-900" disabled>T3</button>
+            <button data-jump="4" class="sim-pill px-2 py-0.5 rounded-full text-[11px] font-mono border border-gray-300 text-gray-600 hover:border-gray-700 hover:text-gray-900" disabled>T4</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="text-[12px] text-gray-500 leading-snug mt-6 max-w-3xl">
+      A child node can only be discovered after its parent, so reward signals progressive discovery.
+    </p>
+  </section>
+
+  <!-- ============================== TRAINING PIPELINE ============================== -->
+  <section id="training" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Training pipeline</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">One simulator, two jobs.</h2>
+      <p class="text-gray-600 text-[15px] mb-10 max-w-2xl leading-relaxed">
+        First, the simulator serves for <em>data synthesis</em>, scoring candidate turns that advance discovery. Then, it serves as a <em>judge</em> for online RL training, scoring model rollouts in real time.
+      </p>
+
+      <!-- ===== Desktop: two-phase pipeline ===== -->
+      <div class="hidden lg:block">
+
+        <div class="grid grid-cols-4 gap-3 mb-2">
+
+          <!-- Step 1: Intent trees -->
+          <div class="bg-white border border-gray-200 rounded-xl p-4 flex flex-col">
+            <div class="flex items-baseline gap-2 mb-2">
+              <span class="font-mono text-[11px] text-accent-700 font-semibold">01</span>
+              <h3 class="text-[14px] font-semibold text-gray-900">Mine the intent tree</h3>
+            </div>
+            <div class="bg-gradient-to-b from-gray-50 to-white border border-gray-100 rounded-lg p-3 mb-3 h-[148px] flex items-center justify-center">
+              <svg viewBox="0 0 320 150" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <marker id="ah-mine" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker>
+                </defs>
+
+                <!-- LEFT: stacked artifact. Page y=8 to y=112. Lines evenly spaced 12px apart from y=18 to y=102, symmetric 10px top/bottom padding. -->
+                <g>
+                  <rect x="34" y="16" width="68" height="104" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" transform="rotate(4 68 68)"/>
+                  <rect x="28" y="12" width="68" height="104" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" transform="rotate(2 62 64)"/>
+                  <rect x="22" y="8"  width="68" height="104" rx="3" fill="#ffffff" stroke="#94a3b8" stroke-width="1.25"/>
+                  <line x1="30" y1="18"  x2="82" y2="18"  stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="30"  x2="76" y2="30"  stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="42"  x2="80" y2="42"  stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="54"  x2="82" y2="54"  stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="66"  x2="72" y2="66"  stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="78"  x2="80" y2="78"  stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="90"  x2="74" y2="90"  stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="30" y1="102" x2="68" y2="102" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                </g>
+
+                <!-- MIDDLE: mine arrow, centered at y=64 (matches both sides) -->
+                <path d="M 106 64 L 152 64" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#ah-mine)"/>
+
+                <!-- RIGHT: 4-level intent tree, now spans y=8 to y=120 -->
+                <g>
+                  <!-- edges: root → 3 children -->
+                  <line x1="238" y1="20" x2="194" y2="42" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="238" y1="20" x2="238" y2="42" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="238" y1="20" x2="282" y2="42" stroke="#cbd5e1" stroke-width="1"/>
+                  <!-- children → 5 grandchildren -->
+                  <line x1="194" y1="48" x2="170" y2="74" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="194" y1="48" x2="202" y2="74" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="238" y1="48" x2="234" y2="74" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="238" y1="48" x2="262" y2="74" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="282" y1="48" x2="294" y2="74" stroke="#cbd5e1" stroke-width="1"/>
+                  <!-- grandchildren → 7 leaves -->
+                  <line x1="170" y1="80" x2="158" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="170" y1="80" x2="182" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="202" y1="80" x2="210" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="234" y1="80" x2="234" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="262" y1="80" x2="258" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="262" y1="80" x2="278" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+                  <line x1="294" y1="80" x2="302" y2="106" stroke="#cbd5e1" stroke-width="1"/>
+
+                  <!-- root (level 0) — bigger -->
+                  <rect x="231" y="10" width="14" height="14" rx="2.5" fill="#5b21b6"/>
+                  <!-- level 1 (3) -->
+                  <rect x="187" y="38" width="14" height="14" rx="2" fill="#7c3aed"/>
+                  <rect x="231" y="38" width="14" height="14" rx="2" fill="#7c3aed"/>
+                  <rect x="275" y="38" width="14" height="14" rx="2" fill="#7c3aed"/>
+                  <!-- level 2 (5) -->
+                  <rect x="163" y="68" width="14" height="14" rx="2" fill="#a78bfa"/>
+                  <rect x="195" y="68" width="14" height="14" rx="2" fill="#a78bfa"/>
+                  <rect x="227" y="68" width="14" height="14" rx="2" fill="#a78bfa"/>
+                  <rect x="255" y="68" width="14" height="14" rx="2" fill="#a78bfa"/>
+                  <rect x="287" y="68" width="14" height="14" rx="2" fill="#a78bfa"/>
+                  <!-- level 3 (7 leaves) -->
+                  <rect x="152" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="176" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="204" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="228" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="252" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="272" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                  <rect x="296" y="100" width="12" height="12" rx="2" fill="#c4b5fd"/>
+                </g>
+
+                <!-- labels along the bottom -->
+                <text x="58" y="138" text-anchor="middle" font-size="8" fill="#6b7280" font-family="ui-monospace, monospace" letter-spacing="0.4">ARTIFACT</text>
+                <text x="232" y="138" text-anchor="middle" font-size="8" fill="#6b7280" font-family="ui-monospace, monospace" letter-spacing="0.4">INTENT TREE</text>
+              </svg>
+            </div>
+            <p class="text-[13px] text-gray-600 leading-relaxed flex-1">Given an artifact (story, code), an LLM pulls out its concrete properties (tones, structures, formats), then gradually abstracts them to create a parent-child refinement tree.</p>
+            <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-[11px] font-mono text-gray-500">
+              <span class="text-gray-400 uppercase tracking-wider">output</span>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 text-gray-700">T<sub>task</sub></span>
+              <span class="text-gray-400">&middot; one tree per task</span>
+            </div>
+          </div>
+
+          <!-- Step 2: Best-of-N rollouts — chat-flow tree -->
+          <div class="bg-white border border-gray-200 rounded-xl p-4 flex flex-col">
+            <div class="flex items-baseline gap-2 mb-2">
+              <span class="font-mono text-[11px] text-accent-700 font-semibold">02</span>
+              <h3 class="text-[14px] font-semibold text-gray-900">Best-of-<i>N</i> rollouts</h3>
+            </div>
+            <div class="bg-gradient-to-b from-gray-50 to-white border border-gray-100 rounded-lg p-3 mb-3 h-[148px] flex items-center justify-center">
+              <svg viewBox="0 0 320 150" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+                <defs>
+                  <marker id="ah-p2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d97706"/></marker>
+                  <marker id="ah-t2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+                  <marker id="ah-chain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+                </defs>
+
+                <!-- LEFT: 3 turns, compressed. Each turn = user bar + 2 candidate boxes. -->
+                <!-- TURN 1 -->
+                <rect x="42" y="6" width="68" height="11" rx="3" fill="#7c3aed"/>
+                <text x="76" y="14" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="600">User</text>
+                <rect x="8" y="20" width="66" height="16" rx="3" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+                <text x="41" y="31" text-anchor="middle" font-size="9" fill="#6b7280">AI 1</text>
+                <rect x="80" y="20" width="66" height="16" rx="3" fill="#ecfdf5" stroke="#059669" stroke-width="1.75"/>
+                <text x="113" y="31" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">AI 2 ✓</text>
+
+                <!-- TURN 2 -->
+                <rect x="42" y="46" width="68" height="11" rx="3" fill="#7c3aed"/>
+                <text x="76" y="54" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="600">User</text>
+                <rect x="8" y="60" width="66" height="16" rx="3" fill="#ecfdf5" stroke="#059669" stroke-width="1.75"/>
+                <text x="41" y="71" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">AI 1 ✓</text>
+                <rect x="80" y="60" width="66" height="16" rx="3" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+                <text x="113" y="71" text-anchor="middle" font-size="9" fill="#6b7280">AI 2</text>
+
+                <!-- TURN 3 -->
+                <rect x="42" y="86" width="68" height="11" rx="3" fill="#7c3aed"/>
+                <text x="76" y="94" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="600">User</text>
+                <rect x="8" y="100" width="66" height="16" rx="3" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+                <text x="41" y="111" text-anchor="middle" font-size="9" fill="#6b7280">AI 1</text>
+                <rect x="80" y="100" width="66" height="16" rx="3" fill="#ecfdf5" stroke="#059669" stroke-width="1.75"/>
+                <text x="113" y="111" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">AI 2 ✓</text>
+
+                <!-- Feeder arrows from candidates → datasets. Straight horizontal lines aimed at the boxes' left edges (x=187). -->
+                <path d="M 148 42 L 184 42" stroke="#d97706" stroke-width="1.5" fill="none" marker-end="url(#ah-p2)"/>
+                <path d="M 148 112 L 184 112" stroke="#059669" stroke-width="1.5" fill="none" marker-end="url(#ah-t2)"/>
+
+                <!-- RIGHT: D_pref box. Narrower (110px wide, centered around x=242) with content centered. -->
+                <text x="242" y="6" font-size="9" fill="#d97706" font-weight="700" letter-spacing="0.4" text-anchor="middle">D_pref</text>
+                <rect x="187" y="14" width="110" height="56" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.75"/>
+                <!-- 3 pair rows, centered around x=242. Use an SVG chevron for "≻" (the U+227B glyph is missing in default fonts and renders as tofu). -->
+                <!-- pair 1 -->
+                <rect x="215" y="22" width="14" height="10" rx="2" fill="#059669"/>
+                <path d="M 238 23 L 244 27 L 238 31" stroke="#d97706" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="251" y="22" width="14" height="10" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+                <!-- pair 2 -->
+                <rect x="215" y="38" width="14" height="10" rx="2" fill="#059669"/>
+                <path d="M 238 39 L 244 43 L 238 47" stroke="#d97706" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="251" y="38" width="14" height="10" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+                <!-- pair 3 -->
+                <rect x="215" y="54" width="14" height="10" rx="2" fill="#059669"/>
+                <path d="M 238 55 L 244 59 L 238 63" stroke="#d97706" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="251" y="54" width="14" height="10" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="1"/>
+
+                <!-- D_traj box. Chain centered around x=242. -->
+                <text x="242" y="86" font-size="9" fill="#059669" font-weight="700" letter-spacing="0.4" text-anchor="middle">D_traj</text>
+                <rect x="187" y="94" width="110" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.75"/>
+                <!-- Chain: 4 blocks + 3 arrows, each block 10px wide with 14px gaps. Span x=201 to x=283, centered around x=242. -->
+                <rect x="201" y="106" width="10" height="10" rx="2" fill="#7c3aed"/>
+                <path d="M 213 111 L 223 111" stroke="#059669" stroke-width="1.25" marker-end="url(#ah-chain)" fill="none"/>
+                <rect x="225" y="106" width="10" height="10" rx="2" fill="#059669"/>
+                <path d="M 237 111 L 247 111" stroke="#059669" stroke-width="1.25" marker-end="url(#ah-chain)" fill="none"/>
+                <rect x="249" y="106" width="10" height="10" rx="2" fill="#7c3aed"/>
+                <path d="M 261 111 L 271 111" stroke="#059669" stroke-width="1.25" marker-end="url(#ah-chain)" fill="none"/>
+                <rect x="273" y="106" width="10" height="10" rx="2" fill="#059669"/>
+              </svg>
+            </div>
+            <p class="text-[13px] text-gray-600 leading-relaxed flex-1">At each turn the model samples <i>N</i> candidate replies. The simulator scores each by newly-discovered nodes. The winner is committed and used to continue the conversation.</p>
+            <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-[11px] font-mono text-gray-500 flex-wrap">
+              <span class="text-gray-400 uppercase tracking-wider">output</span>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800">D<sub>traj</sub></span>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800">D<sub>pref</sub></span>
+            </div>
+          </div>
+
+          <!-- Step 3: Offline SFT + DPO -->
+          <div class="bg-white border border-gray-200 rounded-xl p-4 flex flex-col">
+            <div class="flex items-baseline gap-2 mb-2">
+              <span class="font-mono text-[11px] text-accent-700 font-semibold">03</span>
+              <h3 class="text-[14px] font-semibold text-gray-900">Offline &mdash; SFT then DPO</h3>
+            </div>
+            <div class="bg-gradient-to-b from-gray-50 to-white border border-gray-100 rounded-lg p-3 mb-3 h-[148px] flex items-center justify-center">
+              <svg viewBox="0 0 320 150" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, monospace">
+                <defs>
+                  <marker id="ah-sft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+                  <marker id="ah-dpo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+                  <marker id="ah-down-t" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,0 L5,10 z" fill="#059669"/></marker>
+                  <marker id="ah-down-p" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,0 L5,10 z" fill="#b45309"/></marker>
+                </defs>
+
+                <!-- Dataset chips, centered above their respective transition arrows -->
+                <rect x="70" y="10" width="60" height="26" rx="5" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+                <text x="100" y="27" text-anchor="middle" font-size="11" fill="#059669" font-weight="700">D_traj</text>
+
+                <rect x="190" y="10" width="60" height="26" rx="5" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+                <text x="220" y="27" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">D_pref</text>
+
+                <!-- Drop lines from each chip into the SFT/DPO flow (no arrowhead — they're feeders, not directed actions). -->
+                <path d="M 100 36 C 100 60, 100 75, 100 95" stroke="#059669" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>
+                <path d="M 220 36 C 220 60, 220 75, 220 95" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>
+
+                <!-- Three model boxes, identical size + stroke, gradient saturation BASE→M*→M** -->
+                <rect x="8" y="78" width="64" height="42" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.75"/>
+                <text x="40" y="98" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="700">BASE</text>
+                <text x="40" y="112" text-anchor="middle" font-size="8" fill="#9ca3af">model</text>
+
+                <rect x="128" y="78" width="64" height="42" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.75"/>
+                <text x="160" y="100" text-anchor="middle" font-size="13" fill="#5b21b6" font-weight="700">M*</text>
+                <text x="160" y="114" text-anchor="middle" font-size="8" fill="#7c3aed">after SFT</text>
+
+                <rect x="248" y="78" width="64" height="42" rx="6" fill="#c4b5fd" stroke="#5b21b6" stroke-width="1.75"/>
+                <text x="280" y="100" text-anchor="middle" font-size="13" fill="#4c1d95" font-weight="700">M**</text>
+                <text x="280" y="114" text-anchor="middle" font-size="8" fill="#4c1d95">after DPO</text>
+
+                <!-- Horizontal flow arrows BASE→M* (SFT, emerald) and M*→M** (DPO, amber) — coloured to match their loss types -->
+                <path d="M 74 99 L 124 99" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#ah-sft)"/>
+                <path d="M 194 99 L 244 99" stroke="#b45309" stroke-width="2" fill="none" marker-end="url(#ah-dpo)"/>
+
+                <!-- SFT / DPO labels — closer to the flow arrows (y=132 instead of 138) -->
+                <text x="100" y="132" text-anchor="middle" font-size="11" fill="#059669" font-weight="700">SFT</text>
+                <text x="220" y="132" text-anchor="middle" font-size="11" fill="#b45309" font-weight="700">DPO</text>
+              </svg>
+            </div>
+            <p class="text-[13px] text-gray-600 leading-relaxed flex-1"><b class="text-emerald-700">SFT</b> on D<sub>traj</sub> teaches the base model what good turns look like, producing M*. <b class="text-amber-700">Offline DPO</b> on D<sub>pref</sub> then widens the gap between winners and losers, producing M**.</p>
+            <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-[11px] font-mono text-gray-500 flex-wrap">
+              <span class="text-gray-400 uppercase tracking-wider">out</span>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-accent-50 border border-accent-200 text-accent-800 font-semibold">M**</span>
+              <span class="text-gray-400">&middot; checkpoint for online phase</span>
+            </div>
+          </div>
+
+          <!-- Step 4: Online RL -->
+          <div class="bg-white border border-gray-200 rounded-xl p-4 relative flex flex-col">
+            <div class="flex items-baseline gap-2 mb-2">
+              <span class="font-mono text-[11px] text-accent-700 font-semibold">04</span>
+              <h3 class="text-[14px] font-semibold text-gray-900">Online RL with sim-in-the-loop</h3>
+            </div>
+            <div class="bg-gradient-to-b from-accent-50/40 to-white border border-accent-100 rounded-lg p-3 mb-3 h-[148px] flex items-center justify-center">
+              <svg viewBox="0 0 320 150" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace, monospace">
+                <defs>
+                  <marker id="ah-roll" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+                  <marker id="ah-rew"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+                </defs>
+
+                <!-- Cards: M** (model after offline) on left, User Simulator on right.
+                     Cards centered at y=86; arcs originate from each card's outer edge. -->
+                <rect x="20" y="62" width="80" height="48" rx="8" fill="#c4b5fd" stroke="#5b21b6" stroke-width="1.75"/>
+                <text x="60" y="91" text-anchor="middle" font-size="14" fill="#4c1d95" font-weight="700">M**</text>
+
+                <rect x="220" y="62" width="80" height="48" rx="8" fill="#f9fafb" stroke="#9ca3af" stroke-width="1.75"/>
+                <text x="260" y="83" text-anchor="middle" font-size="11" fill="#374151" font-weight="700">User</text>
+                <text x="260" y="98" text-anchor="middle" font-size="11" fill="#374151" font-weight="700">Simulator</text>
+
+                <!-- Top arc: model → simulator (rollout). Endpoints sit on the card edges (100, 220);
+                     control points pulled in so the arc no longer clips the top. -->
+                <path d="M 100 76 C 140 36, 180 36, 220 76" stroke="#7c3aed" stroke-width="2.25" fill="none" marker-end="url(#ah-roll)"/>
+                <text x="160" y="32" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="700">rollout</text>
+
+                <!-- Bottom arc: simulator → model (reward). Same — pulled in so the label has breathing room. -->
+                <path d="M 220 96 C 180 132, 140 132, 100 96" stroke="#b45309" stroke-width="2.25" fill="none" marker-end="url(#ah-rew)"/>
+                <text x="160" y="142" text-anchor="middle" font-size="10" fill="#b45309" font-weight="700">reward</text>
+              </svg>
+            </div>
+            <p class="text-[13px] text-gray-600 leading-relaxed flex-1">M** generates rollouts on fresh tasks. The user simulator scores each turn live to update the gradient. Output: M**<sub>online</sub>.</p>
+            <div class="mt-3 pt-3 border-t border-accent-100 flex items-center gap-2 text-[11px] font-mono text-gray-500 flex-wrap">
+              <span class="text-gray-400 uppercase tracking-wider">output</span>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-accent-100 border border-accent-300 text-accent-800 font-semibold">M**<sub>online</sub></span>
+              <span class="text-gray-400">&middot; final shipped model</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- (legacy desktop flex pipeline below — replaced by the two-phase grid above) -->
+      <div class="hidden items-stretch gap-1 mb-4">
+
+        <!-- Step 1: Artifacts → Intent trees -->
+        <div class="flex-1 bg-white border border-gray-200 rounded-xl p-4 relative">
+          <div class="text-[10px] font-mono text-accent-700 uppercase tracking-wider mb-1">step 1</div>
+          <div class="font-semibold text-gray-900 text-[14px] mb-2">Artifacts &rarr; Intent trees</div>
+          <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mb-2">
+            <div class="flex items-center gap-3 h-[120px]">
+              <!-- Artifact: page silhouette with text lines -->
+              <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                <div class="w-12 h-16 rounded-sm border border-gray-300 bg-white px-1 py-1.5 space-y-1">
+                  <div class="h-px bg-gray-300 w-full"></div>
+                  <div class="h-px bg-gray-300 w-5/6"></div>
+                  <div class="h-px bg-gray-300 w-3/4"></div>
+                  <div class="h-px bg-gray-300 w-full"></div>
+                  <div class="h-px bg-gray-300 w-2/3"></div>
+                </div>
+                <div class="text-[8px] font-mono text-gray-500 uppercase tracking-wider">artifact</div>
+              </div>
+              <!-- Arrow across the gap -->
+              <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7-7 7M21 12H3"/>
+              </svg>
+              <!-- Tree (abstract → specific, top → bottom) -->
+              <div class="flex-1 flex items-stretch gap-1.5">
+                <div class="flex-1 flex flex-col items-center">
+                  <svg viewBox="0 0 120 80" class="w-full h-[80px]" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="60" y1="12" x2="34" y2="40" stroke="#cbd5e1" stroke-width="1"/>
+                    <line x1="60" y1="12" x2="86" y2="40" stroke="#cbd5e1" stroke-width="1"/>
+                    <line x1="34" y1="40" x2="20" y2="68" stroke="#cbd5e1" stroke-width="1"/>
+                    <line x1="34" y1="40" x2="48" y2="68" stroke="#cbd5e1" stroke-width="1"/>
+                    <line x1="86" y1="40" x2="72" y2="68" stroke="#cbd5e1" stroke-width="1"/>
+                    <line x1="86" y1="40" x2="100" y2="68" stroke="#cbd5e1" stroke-width="1"/>
+                    <circle cx="60" cy="12" r="6" fill="#5b21b6"/>
+                    <circle cx="34" cy="40" r="4.5" fill="#7c3aed"/>
+                    <circle cx="86" cy="40" r="4.5" fill="#7c3aed"/>
+                    <circle cx="20" cy="68" r="3" fill="#a78bfa"/>
+                    <circle cx="48" cy="68" r="3" fill="#a78bfa"/>
+                    <circle cx="72" cy="68" r="3" fill="#a78bfa"/>
+                    <circle cx="100" cy="68" r="3" fill="#a78bfa"/>
+                  </svg>
+                  <div class="text-[8px] font-mono text-gray-500 uppercase tracking-wider">intent tree</div>
+                </div>
+                <!-- Abstract → specific axis -->
+                <div class="flex flex-col justify-between text-[8px] font-mono text-gray-400 pl-1.5 border-l border-gray-200 py-1">
+                  <span>abstract</span>
+                  <span>specific</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="text-[12px] text-gray-600 leading-snug">Mine each artifact for concrete requirements, abstract them upward, organize into a parent-before-child refinement tree.</p>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex items-center px-1">
+          <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+
+        <!-- Step 2: Synthesize trajectories + preference pairs (with more breathing room) -->
+        <div class="flex-1 bg-white border border-gray-200 rounded-xl p-4 relative">
+          <div class="text-[10px] font-mono text-accent-700 uppercase tracking-wider mb-1">step 2</div>
+          <div class="font-semibold text-gray-900 text-[14px] mb-3">Synthesize (best-of-N)</div>
+          <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mb-2">
+            <div class="flex gap-3 h-[120px]">
+              <!-- Left: turn-by-turn fan-of-N, threaded by a "trajectory" line through the winners -->
+              <div class="flex-1 flex flex-col justify-around relative">
+                <div class="absolute left-[18px] top-3 bottom-7 w-px bg-emerald-400/70"></div>
+                <!-- 3 turn rows; winner = first dot (filled emerald, ringed); others = hollow grey -->
+                <div class="flex items-center gap-1.5 relative">
+                  <div class="w-3 h-2 rounded-sm bg-gray-300"></div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 relative z-10"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                </div>
+                <div class="flex items-center gap-1.5 relative">
+                  <div class="w-3 h-2 rounded-sm bg-gray-300"></div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 relative z-10"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                </div>
+                <div class="flex items-center gap-1.5 relative">
+                  <div class="w-3 h-2 rounded-sm bg-gray-300"></div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 relative z-10"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                  <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                </div>
+                <div class="text-[8px] font-mono text-emerald-700 uppercase tracking-wider pl-1">trajectory</div>
+              </div>
+              <!-- Right: stacked preference-pairs deck (W ≻ L) -->
+              <div class="flex flex-col items-center justify-center gap-1.5 flex-shrink-0 w-16 pl-2 border-l border-gray-200">
+                <div class="text-[9px] font-mono text-amber-700"><span class="text-emerald-600">W</span> &succ; <span class="text-gray-500">L</span></div>
+                <div class="relative w-12 h-10">
+                  <div class="absolute inset-0 rounded-sm border border-amber-300 bg-amber-50"></div>
+                  <div class="absolute inset-0 rounded-sm border border-amber-300 bg-amber-50 translate-x-1 translate-y-1"></div>
+                  <div class="absolute inset-0 rounded-sm border border-amber-300 bg-amber-50 translate-x-2 translate-y-2"></div>
+                </div>
+                <div class="text-[8px] font-mono text-gray-500 uppercase tracking-wider mt-1">pairs</div>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-600 leading-snug">N candidates per turn; the best is committed. (winner &succ; loser) per turn forms D<sub>pref</sub>.</p>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex items-center px-1">
+          <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+
+        <!-- Steps 3 + 4 combined into one column: offline above, online below -->
+        <div class="flex-1 flex flex-col gap-2">
+          <!-- Step 3: SFT + offline DPO -->
+          <div class="flex-1 bg-white border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-[10px] font-mono text-accent-700 uppercase tracking-wider">step 3</div>
+              <span class="text-[9px] font-mono text-gray-400 uppercase tracking-wider">offline</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-[14px] mb-2">SFT + Offline DPO</div>
+            <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mb-2">
+              <!-- A base "slab" with a single bright LoRA chip clipped on top; two numbered losses strike the chip. -->
+              <div class="relative h-[120px]">
+                <!-- Base slab (fills bottom 60%) -->
+                <div class="absolute left-0 right-0 bottom-0 h-14 rounded-md bg-gray-200 flex items-end px-2 pb-1 text-[10px] text-gray-600 font-mono">base 8B</div>
+                <!-- LoRA chip (overlaps slab top) -->
+                <div class="absolute left-1/2 -translate-x-1/2 bottom-10 w-20 h-7 rounded-md bg-amber-300 border border-amber-500 flex items-center justify-center text-[10px] font-bold text-amber-900 z-10 shadow-sm">LoRA</div>
+                <!-- Two numbered loss arrows striking the chip -->
+                <div class="absolute left-0 top-0 space-y-1 text-[9px]">
+                  <div class="flex items-center gap-1">
+                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[8px]">1</span>
+                    <span class="text-emerald-700 font-medium">SFT</span>
+                    <span class="text-gray-400">&middot; trajectories</span>
+                    <svg class="w-4 h-3 text-emerald-500" viewBox="0 0 18 12" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M1 6h14m-3-3l3 3-3 3"/></svg>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="w-3.5 h-3.5 rounded-full bg-accent-600 text-white font-bold flex items-center justify-center text-[8px]">2</span>
+                    <span class="text-accent-700 font-medium">DPO</span>
+                    <span class="text-gray-400">&middot; pairs</span>
+                    <svg class="w-4 h-3 text-accent-500" viewBox="0 0 18 12" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M1 6h14m-3-3l3 3-3 3"/></svg>
+                  </div>
+                </div>
+                <!-- Exit tag → tuned M* -->
+                <div class="absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] font-medium text-accent-700"><span>&rarr;</span><span class="font-bold">M*</span></div>
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-600 leading-snug">Two losses, one adapter: SFT teaches winners first, DPO then sharpens the chosen-over-rejected gap.</p>
+          </div>
+
+          <!-- Down chevron -->
+          <div class="flex justify-center -my-1">
+            <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+          </div>
+
+          <!-- Step 4: Online DPO / GRPO -->
+          <div class="flex-1 bg-white border-2 border-accent-200 rounded-xl p-4 relative">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-[10px] font-mono text-accent-700 uppercase tracking-wider">step 4</div>
+              <span class="inline-flex items-center gap-1 text-[9px] text-accent-700 font-mono uppercase tracking-wider">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse"></span>online
+              </span>
+            </div>
+            <div class="font-semibold text-gray-900 text-[14px] mb-2">Online DPO / GRPO</div>
+            <div class="bg-gray-50 border border-gray-100 rounded-md p-3 mb-2">
+              <!-- Closed-loop dial: amber model on left, grey simulator (rotated square) on right, two opposing arcs. -->
+              <div class="relative h-[120px]">
+                <svg viewBox="0 0 240 110" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <marker id="ah-purp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+                    <marker id="ah-amb"  viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+                  </defs>
+                  <!-- Top arc: rollout, model → simulator -->
+                  <path d="M 55 55 C 95 5, 145 5, 185 55" fill="none" stroke="#7c3aed" stroke-width="1.75" marker-end="url(#ah-purp)"/>
+                  <text x="120" y="15" font-size="10" font-family="ui-monospace, monospace" fill="#7c3aed" text-anchor="middle" font-weight="600">rollout (K turns)</text>
+                  <!-- Bottom arc: reward+grad, simulator → model -->
+                  <path d="M 185 55 C 145 105, 95 105, 55 55" fill="none" stroke="#b45309" stroke-width="1.75" marker-end="url(#ah-amb)"/>
+                  <text x="120" y="100" font-size="10" font-family="ui-monospace, monospace" fill="#b45309" text-anchor="middle" font-weight="600">reward r &rarr; grad</text>
+                  <!-- Continuity glyph at far right -->
+                  <text x="225" y="60" font-size="14" font-family="ui-sans-serif" fill="#9ca3af" text-anchor="middle">&#8634;</text>
+                </svg>
+                <!-- Overlay: model node (left) -->
+                <div class="absolute left-2 top-1/2 -translate-y-1/2 w-16 h-7 rounded-md bg-amber-300 border border-amber-500 flex items-center justify-center text-[10px] font-bold text-amber-900 shadow-sm">M*+LoRA</div>
+                <!-- Overlay: simulator node (right) — rotated square -->
+                <div class="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gray-200 border border-gray-400 rotate-45 flex items-center justify-center" style="right: 14%;">
+                  <span class="text-[9px] font-mono text-gray-700 -rotate-45 font-bold">sim</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-600 leading-snug">Model rolls out, simulator scores live, gradient updates the same LoRA, and the loop continues.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile fallback: stacked cards in the same two-phase grouping -->
+      <div class="lg:hidden">
+        <div class="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-700 font-semibold mb-2">Phase A &middot; Data synthesis</div>
+        <div class="grid grid-cols-1 gap-3 mb-5">
+          <div class="rounded-lg bg-white border border-gray-200 p-4">
+            <div class="font-mono text-[10px] text-accent-700 mb-1.5">01 &middot; intent trees</div>
+            <p class="text-[13px] text-gray-600">Mine each artifact for concrete requirements, abstract upward into a parent&rarr;child refinement tree.</p>
+          </div>
+          <div class="rounded-lg bg-white border border-gray-200 p-4">
+            <div class="font-mono text-[10px] text-accent-700 mb-1.5">02 &middot; best-of-N rollouts</div>
+            <p class="text-[13px] text-gray-600">N candidate responses per turn; simulator scores each by newly-discovered nodes. (winner &succ; loser) pairs form <code class="inline">D_pref</code>.</p><code class="inline">D_pref</code>.</p>
+          </div>
+        </div>
+        <div class="text-[10px] font-mono uppercase tracking-[0.2em] text-accent-700 font-semibold mb-2">Phase B &middot; Train</div>
+        <div class="grid grid-cols-1 gap-3 mb-4">
+          <div class="rounded-lg bg-white border border-gray-200 p-4">
+            <div class="font-mono text-[10px] text-accent-700 mb-1.5">03 &middot; offline SFT + DPO</div>
+            <p class="text-[13px] text-gray-600">SFT on winning trajectories, then DPO on preference pairs, both drawn from D<sub>pref</sub>. One LoRA adapter, two losses &rarr; <b>M*</b>.</p>
+          </div>
+          <div class="rounded-lg bg-white border-2 border-accent-300 p-4">
+            <div class="font-mono text-[10px] text-accent-700 mb-1.5">04 &middot; online DPO / GRPO <span class="text-accent-500">●&nbsp;live</span></div>
+            <p class="text-[13px] text-gray-600">M* rolls out on fresh tasks; the simulator judges every turn in real time; gradient updates the same LoRA.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method ↔ result link -->
+      <div class="mt-3 text-[12px] text-gray-500">
+        See the recipe in numbers in <a href="#results" class="text-accent-700 hover:text-accent-900 font-medium">Results</a>, and a single conversation difference in <a href="#comparison" class="text-accent-700 hover:text-accent-900 font-medium">Side-by-side</a>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== COMPARISON ============================== -->
+  <section id="comparison" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-14">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Side-by-side</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Same prompt. Same base model. Two different conversations.</h2>
+      <p class="text-gray-600 text-[14px] mb-8 max-w-2xl">
+        From the paper's case study. User wants a 500-word short story with a mid-twist. Base keeps refining the same draft. DiscoverLLM proposes options that help the user discover their intent.
+      </p>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+
+        <!-- LEFT: Base -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div class="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono text-gray-500">model</span>
+              <span class="text-[13px] font-semibold text-gray-700">Qwen3-8B (base)</span>
+            </div>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700">stuck refining</span>
+          </div>
+
+          <div class="p-3 md:p-4 space-y-2.5">
+            <!-- t=0 user -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  Write a short story under 500 words with a twist mid-story that reveals the fugitive is the CEO of the corporation being robbed.
+                </div>
+              </div>
+            </div>
+            <!-- AI -->
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-500">AI</div>
+              <div class="max-w-[80%]">
+                <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3 py-1.5 text-[13px] leading-snug text-gray-800">
+                  <div class="font-semibold text-[12px] text-gray-500 mb-0.5">"The Double Cross"</div>
+                  Jordan Vos crouched behind a stack of crates, heart pounding...
+                  <div class="text-[10px] text-gray-400 mt-1">442 words</div>
+                </div>
+              </div>
+            </div>
+            <!-- user feedback -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  this is cool but I dont know something about the <u>setting and the tech</u> feels a bit off
+                </div>
+              </div>
+            </div>
+            <!-- AI -->
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-500">AI</div>
+              <div class="max-w-[80%]">
+                <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3 py-1.5 text-[13px] leading-snug text-gray-800">
+                  Here's a cleaner, more grounded version. <em class="text-gray-500">[same plot, lightly rephrased]</em>
+                  <div class="text-[10px] text-gray-400 mt-1">402 words</div>
+                </div>
+              </div>
+            </div>
+            <!-- user -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  this is still cool but the tech and the setting still feel a bit off
+                </div>
+              </div>
+            </div>
+            <!-- AI -->
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-500">AI</div>
+              <div class="max-w-[80%]">
+                <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-3 py-1.5 text-[13px] leading-snug text-gray-800">
+                  Absolutely! Let me try a more grounded, plausible setting. <em class="text-gray-500">[plot still identical]</em>
+                  <div class="text-[10px] text-gray-400 mt-1">470 words</div>
+                </div>
+              </div>
+            </div>
+            <!-- user frustrated -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  no maybe try could it be different somehow
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-200 grid grid-cols-3 gap-2 text-center">
+            <div><div class="text-[14px] font-bold text-rose-700">5+</div><div class="text-[10px] text-gray-500">turns, no convergence</div></div>
+            <div><div class="text-[14px] font-bold text-rose-700">~0%</div><div class="text-[10px] text-gray-500">setting variation</div></div>
+            <div><div class="text-[14px] font-bold text-rose-700">stuck</div><div class="text-[10px] text-gray-500">on first draft</div></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: DiscoverLLM -->
+        <div class="bg-white rounded-xl border-2 border-accent-300 ring-2 ring-accent-100 overflow-hidden shadow-sm">
+          <div class="bg-accent-50 border-b border-accent-200 px-4 py-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono text-accent-700">model</span>
+              <span class="text-[13px] font-semibold text-accent-900">DiscoverLLM (Qwen3-8B + SFT+DPO)</span>
+            </div>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700">offers options</span>
+          </div>
+
+          <div class="p-3 md:p-4 space-y-2.5">
+            <!-- same prompt -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  Write a short story under 500 words with a twist mid-story that reveals the fugitive is the CEO of the corporation being robbed.
+                </div>
+              </div>
+            </div>
+            <!-- AI: offers options -->
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-[9px] font-bold text-accent-700">AI</div>
+              <div class="max-w-[85%]">
+                <div class="bg-white border border-accent-200 rounded-2xl rounded-tl-md px-3 py-2 text-[13px] leading-snug text-gray-800 space-y-1.5">
+                  <div class="text-[12px] font-semibold text-gray-500">"The Hollow Crew" — first draft.</div>
+                  <div class="text-gray-600 italic text-[12px]">Got it. I'll adjust the tone if you'd like — let me offer a few directions you can choose from:</div>
+                  <div class="bg-accent-50 border border-accent-200 rounded-md px-2 py-1">
+                    <span class="text-[11px] font-mono text-accent-700 mr-1.5">A</span>
+                    <span class="text-gray-700">Near-Future <span class="bg-yellow-100 text-yellow-900 px-0.5 rounded">Cyberpunk Setting</span></span>
+                  </div>
+                  <div class="bg-accent-50 border border-accent-200 rounded-md px-2 py-1">
+                    <span class="text-[11px] font-mono text-accent-700 mr-1.5">B</span>
+                    <span class="text-gray-700">1980s Corporate <span class="bg-yellow-100 text-yellow-900 px-0.5 rounded">Espionage</span></span>
+                  </div>
+                  <div class="bg-accent-50 border border-accent-200 rounded-md px-2 py-1">
+                    <span class="text-[11px] font-mono text-accent-700 mr-1.5">C</span>
+                    <span class="text-gray-700">Modern <span class="bg-yellow-100 text-yellow-900 px-0.5 rounded">Offshore Heist</span></span>
+                  </div>
+                  <div class="text-[10px] text-gray-400 mt-1">372 words</div>
+                </div>
+              </div>
+            </div>
+            <!-- user picks -->
+            <div class="flex items-start gap-2 justify-end">
+              <div class="max-w-[80%]">
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-md px-3 py-1.5 text-[13px] leading-snug">
+                  oh — I guess the cyberpunk vibe but with more <u>stolen tech</u> stuff involved
+                </div>
+                <div class="mt-1 text-right">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-[10px] text-emerald-700">
+                    <span class="text-emerald-600">●</span> contrast surfaced "cyberpunk"
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- AI converges -->
+            <div class="flex items-start gap-2">
+              <div class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-[9px] font-bold text-accent-700">AI</div>
+              <div class="max-w-[80%]">
+                <div class="bg-white border border-accent-200 rounded-2xl rounded-tl-md px-3 py-1.5 text-[13px] leading-snug text-gray-800">
+                  Great — leaning <span class="bg-yellow-100 text-yellow-900 px-0.5 rounded">cyberpunk</span> with a focus on <span class="bg-yellow-100 text-yellow-900 px-0.5 rounded">stolen tech</span>. Updated draft: neon market, hijacked smart-glass, the fugitive's CEO badge revealed via biometric override...
+                  <div class="text-[10px] text-gray-400 mt-1">341 words</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 py-2.5 bg-accent-50 border-t border-accent-200 grid grid-cols-3 gap-2 text-center">
+            <div><div class="text-[14px] font-bold text-accent-700">3</div><div class="text-[10px] text-gray-500">turns to converge</div></div>
+            <div><div class="text-[14px] font-bold text-accent-700">3</div><div class="text-[10px] text-gray-500">distinct setting options</div></div>
+            <div><div class="text-[14px] font-bold text-accent-700">−23%</div><div class="text-[10px] text-gray-500">tokens used</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-[12px] text-gray-500 text-center max-w-3xl mx-auto">
+        Adapted from the paper's case study (§5). Same artifact, same Qwen3-8B base; only the fine-tuning differs.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================== SAMPLE BROWSER ============================== -->
+  <section id="samples" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-5xl mx-auto px-6 py-14">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Browse the dataset</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Real conversations, real criteria.</h2>
+      <p class="text-gray-600 text-[14px] mb-6 max-w-2xl">
+        Pick a domain and an artifact, and see the hidden intent tree, the full exchange, and turn-by-turn awareness shifts.
+      </p>
+
+      <div id="sample-browser" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <iframe
+            src="https://huggingface.co/datasets/kixlab/DiscoverLLM-multiturn-preferences/embed/viewer/creative_writing/train"
+            frameborder="0"
+            width="100%"
+            height="560px"
+            title="DiscoverLLM-multiturn-preferences dataset viewer"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== RESULTS ============================== -->
+  <section id="results" class="section-anchor max-w-6xl mx-auto px-6 py-14">
+    <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Results</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Across two base models and three domains.</h2>
+
+    <!-- Row 2: full-width chart panel — 4 bar charts per model class, averaged across tasks -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-1">Per model class &middot; averaged across tasks</div>
+          <h3 class="text-lg font-bold text-gray-900">All four metrics at a glance</h3>
+        </div>
+        <span class="text-[11px] text-gray-400">Tokens lower is better &middot; all others higher is better</span>
+      </div>
+
+      <!-- 2 model panels stacked — 4 bar charts each (one per metric) -->
+      <div class="space-y-8" id="chart-panels">
+        <div class="model-panel" data-model="llama">
+          <div class="flex items-baseline justify-between mb-2">
+            <div class="text-[12px] font-semibold text-gray-800">Llama-3.1-8B-Instruct</div>
+            <div class="text-[10px] text-gray-500 font-mono" data-best-of></div>
+          </div>
+          <div class="panel-chart w-full"></div>
+        </div>
+        <div class="model-panel" data-model="qwen">
+          <div class="flex items-baseline justify-between mb-2">
+            <div class="text-[12px] font-semibold text-gray-800">Qwen3-8B</div>
+            <div class="text-[10px] text-gray-500 font-mono" data-best-of></div>
+          </div>
+          <div class="panel-chart w-full"></div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-3 text-[11px] text-gray-500">
+        <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm" style="background:#7c3aed"></span>ours</span>
+        <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm" style="background:#9ca3af; opacity:0.6"></span>baseline</span>
+        <span class="text-gray-300 mx-1">|</span>
+        <span class="text-accent-700">&starf;</span>
+        <span>best ours per metric</span>
+      </div>
+    </div>
+
+    <details class="mt-8 group">
+      <summary class="cursor-pointer select-none list-none [&amp;::-webkit-details-marker]:hidden">
+        <div class="flex items-center gap-4">
+          <span class="flex-1 border-t border-gray-200"></span>
+          <span class="inline-flex flex-col items-center gap-0.5 text-[12px] text-gray-600 hover:text-gray-900 transition">
+            <span class="inline-flex items-center gap-1.5 font-medium">
+              <span class="group-open:hidden">Show full breakdown</span>
+              <span class="hidden group-open:inline">Hide full breakdown</span>
+              <svg class="w-3 h-3 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </span>
+            <span class="text-[10px] text-gray-400 font-mono">per task &middot; both base models</span>
+          </span>
+          <span class="flex-1 border-t border-gray-200"></span>
+        </div>
+      </summary>
+      <div class="mt-3">
+            <div>
+          <!-- Table tab switcher -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div class="flex border-b border-gray-200 bg-gray-50">
+            <button id="tab-llama" class="results-tab px-5 py-3 text-[13px] font-medium border-b-2 border-accent-600 text-accent-700 bg-white">
+              Llama-3.1-8B-Instruct
+            </button>
+            <button id="tab-qwen" class="results-tab px-5 py-3 text-[13px] font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800">
+              Qwen3-8B
+            </button>
+            <div class="ml-auto flex items-center gap-3 pr-4 text-[10px] text-gray-500">
+              <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-2 rounded-sm" style="background:#e1f0ff"></span> ours</span>
+              <span class="inline-flex items-center gap-1"><span class="inline-block w-3 h-2 rounded-sm" style="background:#fff3e0"></span> rel.&nbsp;improv.</span>
+            </div>
+          </div>
+    
+          <div class="overflow-x-auto">
+            <!-- Llama table -->
+            <table id="results-llama" class="results-table w-full text-[12px]">
+              <thead class="text-gray-700 bg-gray-50/60">
+                <tr class="border-b border-gray-200">
+                  <th class="text-left font-semibold px-3 py-2.5"></th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">Creative Writing</th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">Technical Writing</th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">SVG Drawing</th>
+                </tr>
+                <tr class="border-b border-gray-200 text-[11px] text-gray-500">
+                  <th class="text-left font-medium px-3 py-1.5"></th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200" title="Discovery score">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5" title="Satisfaction score">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5" title="Interactivity rating">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5" title="Tokens (k), lower is better">#Tok&darr;</th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">#Tok&darr;</th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">#Tok&darr;</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr><td class="px-3 py-2 text-gray-700">Base</td><td class="text-center px-2">38.2</td><td class="text-center px-2">30.0</td><td class="text-center px-2">20.1</td><td class="text-center px-2">3.09</td><td class="text-center px-2 border-l border-gray-100">49.1</td><td class="text-center px-2">36.0</td><td class="text-center px-2">21.2</td><td class="text-center px-2">3.32</td><td class="text-center px-2 border-l border-gray-100">45.6</td><td class="text-center px-2">32.5</td><td class="text-center px-2">21.6</td><td class="text-center px-2">3.59</td></tr>
+                <tr><td class="px-3 py-2 text-gray-700">Prompted Base</td><td class="text-center px-2">37.7</td><td class="text-center px-2">26.4</td><td class="text-center px-2">26.0</td><td class="text-center px-2">2.97</td><td class="text-center px-2 border-l border-gray-100">43.6</td><td class="text-center px-2">33.5</td><td class="text-center px-2">24.2</td><td class="text-center px-2">3.05</td><td class="text-center px-2 border-l border-gray-100">40.0</td><td class="text-center px-2">30.9</td><td class="text-center px-2">25.1</td><td class="text-center px-2">3.18</td></tr>
+                <tr><td class="px-3 py-2 text-gray-700">CollabLLM</td><td class="text-center px-2">37.3</td><td class="text-center px-2">28.0</td><td class="text-center px-2">32.6</td><td class="text-center px-2">2.93</td><td class="text-center px-2 border-l border-gray-100">45.8</td><td class="text-center px-2">33.7</td><td class="text-center px-2">24.9</td><td class="text-center px-2">3.13</td><td class="text-center px-2 border-l border-gray-100">43.0</td><td class="text-center px-2">29.9</td><td class="text-center px-2">30.8</td><td class="text-center px-2">3.18</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-800">SFT</td><td class="text-center px-2">40.7</td><td class="text-center px-2">33.4</td><td class="text-center px-2">92.3</td><td class="text-center px-2">1.71</td><td class="text-center px-2 border-l border-blue-200/50">47.1</td><td class="text-center px-2">35.2</td><td class="text-center px-2">81.6</td><td class="text-center px-2">2.09</td><td class="text-center px-2 border-l border-blue-200/50">45.4</td><td class="text-center px-2">34.9</td><td class="text-center px-2">66.9</td><td class="text-center px-2">2.92</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-800">DPO</td><td class="text-center px-2">40.5</td><td class="text-center px-2">29.2</td><td class="text-center px-2">33.1</td><td class="text-center px-2">2.91</td><td class="text-center px-2 border-l border-blue-200/50">47.2</td><td class="text-center px-2">34.2</td><td class="text-center px-2">27.3</td><td class="text-center px-2">3.11</td><td class="text-center px-2 border-l border-blue-200/50">45.3</td><td class="text-center px-2">32.5</td><td class="text-center px-2">29.2</td><td class="text-center px-2">2.89</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-900 font-semibold">SFT+DPO</td><td class="text-center px-2 font-semibold">42.4</td><td class="text-center px-2">28.4</td><td class="text-center px-2 font-semibold">32.9</td><td class="text-center px-2 font-semibold">2.77</td><td class="text-center px-2 border-l border-blue-200/50 font-semibold">49.0</td><td class="text-center px-2">35.9</td><td class="text-center px-2 font-semibold">31.3</td><td class="text-center px-2 font-semibold">2.94</td><td class="text-center px-2 border-l border-blue-200/50 font-semibold">51.6</td><td class="text-center px-2 font-semibold">37.0</td><td class="text-center px-2 font-semibold">44.6</td><td class="text-center px-2 font-semibold">2.61</td></tr>
+                <tr style="background:#fff3e0" class="text-[11px]"><td class="px-3 py-2 text-amber-900 font-medium italic">Rel. Improv.</td><td class="text-center px-2 text-amber-900 font-semibold">+11.0%</td><td class="text-center px-2 text-amber-900 font-semibold">+11.3%</td><td class="text-center px-2 text-amber-900 font-semibold">+183%</td><td class="text-center px-2 text-amber-900 font-semibold">−44.7%</td><td class="text-center px-2 border-l border-amber-200 text-amber-900 font-semibold">−0.0%</td><td class="text-center px-2 text-amber-900 font-semibold">−0.0%</td><td class="text-center px-2 text-amber-900 font-semibold">+227%</td><td class="text-center px-2 text-amber-900 font-semibold">−11.4%</td><td class="text-center px-2 border-l border-amber-200 text-amber-900 font-semibold">+13.2%</td><td class="text-center px-2 text-amber-900 font-semibold">+13.8%</td><td class="text-center px-2 text-amber-900 font-semibold">+117%</td><td class="text-center px-2 text-amber-900 font-semibold">−27.3%</td></tr>
+              </tbody>
+            </table>
+    
+            <!-- Qwen table -->
+            <table id="results-qwen" class="results-table w-full text-[12px] hidden">
+              <thead class="text-gray-700 bg-gray-50/60">
+                <tr class="border-b border-gray-200">
+                  <th class="text-left font-semibold px-3 py-2.5"></th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">Creative Writing</th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">Technical Writing</th>
+                  <th colspan="4" class="font-semibold px-3 py-2 border-l border-gray-200 text-center">SVG Drawing</th>
+                </tr>
+                <tr class="border-b border-gray-200 text-[11px] text-gray-500">
+                  <th class="text-left font-medium px-3 py-1.5"></th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">#Tok&darr;</th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">#Tok&darr;</th>
+                  <th class="font-medium px-2 py-1.5 border-l border-gray-200">Disc&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">Sat&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">ITR&uarr;</th>
+                  <th class="font-medium px-2 py-1.5">#Tok&darr;</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr><td class="px-3 py-2 text-gray-700">Base</td><td class="text-center px-2">35.2</td><td class="text-center px-2">30.4</td><td class="text-center px-2">36.2</td><td class="text-center px-2">3.41</td><td class="text-center px-2 border-l border-gray-100">40.7</td><td class="text-center px-2">33.7</td><td class="text-center px-2">35.3</td><td class="text-center px-2">3.39</td><td class="text-center px-2 border-l border-gray-100">47.0</td><td class="text-center px-2">32.0</td><td class="text-center px-2">54.4</td><td class="text-center px-2">3.96</td></tr>
+                <tr><td class="px-3 py-2 text-gray-700">Prompted Base</td><td class="text-center px-2">39.0</td><td class="text-center px-2">30.8</td><td class="text-center px-2">62.9</td><td class="text-center px-2">3.01</td><td class="text-center px-2 border-l border-gray-100">41.3</td><td class="text-center px-2">33.8</td><td class="text-center px-2">64.0</td><td class="text-center px-2">2.79</td><td class="text-center px-2 border-l border-gray-100">47.0</td><td class="text-center px-2">35.6</td><td class="text-center px-2">75.1</td><td class="text-center px-2">2.83</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-800">SFT</td><td class="text-center px-2">34.9</td><td class="text-center px-2">31.0</td><td class="text-center px-2">90.4</td><td class="text-center px-2">1.59</td><td class="text-center px-2 border-l border-blue-200/50">41.6</td><td class="text-center px-2">33.7</td><td class="text-center px-2">81.0</td><td class="text-center px-2">1.90</td><td class="text-center px-2 border-l border-blue-200/50">48.9</td><td class="text-center px-2">38.8</td><td class="text-center px-2">70.2</td><td class="text-center px-2">2.36</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-800">DPO</td><td class="text-center px-2">42.6</td><td class="text-center px-2">33.5</td><td class="text-center px-2">70.5</td><td class="text-center px-2">3.10</td><td class="text-center px-2 border-l border-blue-200/50">42.2</td><td class="text-center px-2">33.3</td><td class="text-center px-2">67.2</td><td class="text-center px-2">2.76</td><td class="text-center px-2 border-l border-blue-200/50">46.9</td><td class="text-center px-2">35.1</td><td class="text-center px-2">75.9</td><td class="text-center px-2">2.70</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-800">SFT+DPO</td><td class="text-center px-2">44.0</td><td class="text-center px-2">33.4</td><td class="text-center px-2">72.1</td><td class="text-center px-2">2.87</td><td class="text-center px-2 border-l border-blue-200/50">47.5</td><td class="text-center px-2">36.4</td><td class="text-center px-2">69.1</td><td class="text-center px-2">2.78</td><td class="text-center px-2 border-l border-blue-200/50">42.6</td><td class="text-center px-2">38.7</td><td class="text-center px-2">32.7</td><td class="text-center px-2">1.81</td></tr>
+                <tr style="background:#e1f0ff"><td class="px-3 py-2 text-gray-900 font-semibold">SFT+DPO+GRPO</td><td class="text-center px-2 font-semibold">45.2</td><td class="text-center px-2 font-semibold">33.7</td><td class="text-center px-2 font-semibold">83.1</td><td class="text-center px-2 font-semibold">2.05</td><td class="text-center px-2 border-l border-blue-200/50 font-semibold">48.2</td><td class="text-center px-2 font-semibold">35.5</td><td class="text-center px-2 font-semibold">55.0</td><td class="text-center px-2 font-semibold">2.63</td><td class="text-center px-2 border-l border-blue-200/50 font-semibold">48.7</td><td class="text-center px-2 font-semibold">38.6</td><td class="text-center px-2 font-semibold">46.3</td><td class="text-center px-2 font-semibold">2.46</td></tr>
+                <tr style="background:#fff3e0" class="text-[11px]"><td class="px-3 py-2 text-amber-900 font-medium italic">Rel. Improv.</td><td class="text-center px-2 text-amber-900 font-semibold">+13.7%</td><td class="text-center px-2 text-amber-900 font-semibold">+9.4%</td><td class="text-center px-2 text-amber-900 font-semibold">+43.7%</td><td class="text-center px-2 text-amber-900 font-semibold">−31.9%</td><td class="text-center px-2 border-l border-amber-200 text-amber-900 font-semibold">+14.3%</td><td class="text-center px-2 text-amber-900 font-semibold">+7.7%</td><td class="text-center px-2 text-amber-900 font-semibold">+26.6%</td><td class="text-center px-2 text-amber-900 font-semibold">−31.9%</td><td class="text-center px-2 border-l border-amber-200 text-amber-900 font-semibold">+4.0%</td><td class="text-center px-2 text-amber-900 font-semibold">+9.0%</td><td class="text-center px-2 text-amber-900 font-semibold">+1.1%</td><td class="text-center px-2 text-amber-900 font-semibold">−40.4%</td></tr>
+              </tbody>
+            </table>
+          </div>
+    
+          <div class="px-4 py-2 bg-gray-50 border-t border-gray-200 text-[11px] text-gray-500">
+            <strong class="text-gray-700">Disc</strong> &mdash; discovery &middot;
+            <strong class="text-gray-700">Sat</strong> &mdash; satisfaction &middot;
+            <strong class="text-gray-700">ITR</strong> &mdash; interactivity &middot;
+            <strong class="text-gray-700">#Tok</strong> &mdash; tokens (k) &middot; rel. improv. = best ours vs. best baseline.
+          </div>
+        </div>
+        </div>
+    
+          </div>
+    </details>
+
+    <!-- Generalization callout + custom behavior bars -->
+    <div class="grid lg:grid-cols-5 gap-6 mt-8 items-start">
+
+      <!-- Generalization -->
+      <div class="lg:col-span-2 bg-accent-50 border border-accent-200 rounded-xl p-5">
+        <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Generalization (held-out)</p>
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="text-3xl font-bold text-accent-700">+11.9%</span>
+          <span class="text-[12px] text-accent-900/70">Discovery on unseen tasks</span>
+        </div>
+        <p class="text-[12px] text-accent-900/80 leading-relaxed mb-3">
+          Trained only on creative writing. Evaluated on web dev, travel planning, &amp; more (50 unseen artifacts).
+        </p>
+        <!-- Mini bar comparison -->
+        <div class="space-y-1.5 text-[11px]">
+          <div class="flex items-center gap-2">
+            <span class="w-24 text-gray-600">DiscoverLLM</span>
+            <span class="flex-1 bg-white rounded-full overflow-hidden border border-accent-200/60 h-3 relative">
+              <span class="absolute inset-y-0 left-0 bg-accent-600" style="width: 95%"></span>
+            </span>
+            <span class="font-mono text-gray-900">54.6</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-24 text-gray-500">best baseline</span>
+            <span class="flex-1 bg-white rounded-full overflow-hidden border border-gray-200 h-3 relative">
+              <span class="absolute inset-y-0 left-0 bg-gray-400" style="width: 85%"></span>
+            </span>
+            <span class="font-mono text-gray-900">48.8</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Behavior pattern stacked bars -->
+      <div class="lg:col-span-3 bg-white border border-gray-200 rounded-xl p-5">
+        <p class="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-1">Three-turn behavior patterns</p>
+        <p class="text-[12px] text-gray-600 mb-3 leading-snug">
+          Slide a 3-turn window through each conversation. What does the model do in those three turns? Pure
+          <span class="font-semibold text-amber-700">refine</span> (keep iterating one draft), pure
+          <span class="font-semibold text-blue-800">explore</span> (offer new options each time), or some
+          <span class="font-semibold text-accent-700">mix</span>.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 text-[10px] mb-3">
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#f59e0b"></span><span class="text-gray-600">All refine</span></span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#a78bfa"></span><span class="text-gray-600">Mixed</span></span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#1e3a8a"></span><span class="text-gray-600">All explore</span></span>
+        </div>
+
+        <div class="space-y-2" id="behavior-bars">
+          <!-- Merged: Mixed = 2-Consecutive + Alternating from the paper -->
+          <!-- Base: 91 / 7 / 3 -->
+          <!-- Prompted Base: 53 / 38 / 9 -->
+          <!-- SFT: 3 / 55 / 43 -->
+          <!-- DPO: 40 / 47 / 13 -->
+          <!-- SFT+DPO: 46 / 44 / 10 -->
+          <!-- +GRPO: 31 / 54 / 15 -->
+
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px]">
+            <div class="col-span-3 text-gray-700">Base</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center font-semibold" style="width:91%; background:#f59e0b">91%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:7%; background:#a78bfa" title="7% mixed">7%</span>
+              <span style="width:3%; background:#1e3a8a" title="3% all-explore"></span>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px]">
+            <div class="col-span-3 text-gray-700">Prompted Base</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center font-semibold" style="width:53%; background:#f59e0b">53%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:38%; background:#a78bfa">38%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:9%; background:#1e3a8a">9%</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px]" style="background:#fafafa">
+            <div class="col-span-3 text-gray-700 pl-1">SFT</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:3%; background:#f59e0b" title="3% all-refine"></span>
+              <span class="text-white text-[9px] flex items-center justify-center font-semibold" style="width:54%; background:#a78bfa">54%</span>
+              <span class="text-white text-[9px] flex items-center justify-center font-semibold" style="width:43%; background:#1e3a8a">43%</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px]" style="background:#fafafa">
+            <div class="col-span-3 text-gray-700 pl-1">DPO</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:40%; background:#f59e0b">40%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:47%; background:#a78bfa">47%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:13%; background:#1e3a8a">13%</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px] font-medium" style="background:#eef4ff">
+            <div class="col-span-3 text-gray-900 pl-1">SFT+DPO</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:46%; background:#f59e0b">46%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:44%; background:#a78bfa">44%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:10%; background:#1e3a8a">10%</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-12 gap-2 items-center text-[11px] font-medium" style="background:#eef4ff">
+            <div class="col-span-3 text-gray-900 pl-1">+GRPO</div>
+            <div class="col-span-9 flex h-5 rounded overflow-hidden">
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:31%; background:#f59e0b">31%</span>
+              <span class="text-white text-[9px] flex items-center justify-center font-semibold" style="width:54%; background:#a78bfa">54%</span>
+              <span class="text-white text-[9px] flex items-center justify-center" style="width:15%; background:#1e3a8a">15%</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-500 mt-3 leading-snug">
+          Base is stuck refining (91%). Our methods shift the mass to <em>mixed</em>, the behavior that drives discovery.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== USER STUDY ============================== -->
+  <section id="user-study" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-14">
+      <div class="flex items-baseline gap-3 mb-2">
+        <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold">User study</p>
+        <span class="text-[11px] text-gray-500">75 Prolific participants &middot; randomly assigned condition &middot; 8+ turns each</span>
+      </div>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Holds up with real humans, too.</h2>
+
+      <!-- Row 1: figure full width with generous padding -->
+      <figure class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 mb-6">
+        <img src="assets/figures/user_study.png"
+             alt="User study results: interaction rating distribution, writing rating distribution, time spent, interaction ratings by turn."
+             class="w-full" />
+        <figcaption class="mt-4 text-gray-500 text-[12px] leading-relaxed text-center">
+          (a) interaction ratings &middot; (b) writing ratings &middot; (c) time spent &middot; (d) ratings across turns. <span class="text-accent-700 font-semibold">DiscoverLLM</span> climbs early and stays high.
+        </figcaption>
+      </figure>
+
+      <!-- Row 2: two stat containers side by side -->
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white border border-accent-200 rounded-xl p-5">
+          <div class="flex items-baseline gap-2 mb-2">
+            <span class="text-4xl font-bold text-accent-700 leading-none">84%</span>
+            <span class="text-[12px] text-gray-500 uppercase tracking-wider">rated DiscoverLLM 8+/10</span>
+          </div>
+          <p class="text-[13px] text-gray-600 leading-snug">
+            vs <span class="font-mono text-gray-700">80%</span> Base &middot; <span class="font-mono text-gray-700">72%</span> Prompted Base
+          </p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <div class="flex items-baseline gap-2 mb-2">
+            <span class="text-4xl font-bold text-gray-900 leading-none">faster</span>
+            <span class="text-[12px] text-gray-500 uppercase tracking-wider">+ lower variance</span>
+          </div>
+          <p class="text-[13px] text-gray-600 leading-snug">
+            Participants reach high satisfaction by turn 3 and stay there. Baselines climb more slowly and never quite catch up.
+          </p>
+        </div>
+      </div>
+
+      <!-- Row 3: quote tiles -->
+      <div class="mb-6">
+        <p class="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-2">What participants said</p>
+        <div class="grid md:grid-cols-3 gap-2">
+          <blockquote class="bg-white border border-gray-200 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-800 leading-snug italic">&ldquo;anticipated what I was thinking&rdquo;</p>
+            <p class="text-[10px] text-gray-500 mt-0.5">on DiscoverLLM</p>
+          </blockquote>
+          <blockquote class="bg-white border border-gray-200 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-800 leading-snug italic">&ldquo;creating something amazing from the start&rdquo;</p>
+            <p class="text-[10px] text-gray-500 mt-0.5">on DiscoverLLM</p>
+          </blockquote>
+          <blockquote class="bg-white border border-gray-200 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-800 leading-snug italic">&ldquo;turning brief thoughts into fluent sections&rdquo;</p>
+            <p class="text-[10px] text-gray-500 mt-0.5">on DiscoverLLM</p>
+          </blockquote>
+          <blockquote class="bg-white border border-rose-100 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-700 leading-snug italic">&ldquo;repeated things, only made minor changes&rdquo;</p>
+            <p class="text-[10px] text-rose-600 mt-0.5">on Base</p>
+          </blockquote>
+          <blockquote class="bg-white border border-rose-100 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-700 leading-snug italic">&ldquo;cliched and generic outputs&rdquo;</p>
+            <p class="text-[10px] text-rose-600 mt-0.5">on Base</p>
+          </blockquote>
+          <blockquote class="bg-white border border-rose-100 rounded-md px-3 py-2 relative">
+            <p class="text-[13px] text-gray-700 leading-snug italic">&ldquo;wasted time before starting the task&rdquo;</p>
+            <p class="text-[10px] text-rose-600 mt-0.5">on Prompted Base</p>
+          </blockquote>
+        </div>
+      </div>
+
+      <!-- Row 4: limitations callout, always visible -->
+      <div class="bg-amber-50/60 border border-amber-300 rounded-lg px-4 py-3">
+        <p class="text-[11px] uppercase tracking-widest text-amber-800 font-semibold mb-1.5">Honest limitations participants noted</p>
+        <p class="text-[13px] text-gray-700 leading-relaxed">
+          Some found DiscoverLLM's options <em>&ldquo;overwhelming&rdquo;</em> or <em>&ldquo;a bit standardised.&rdquo;</em> Others noted it occasionally made <em>&ldquo;overly aggressive changes,&rdquo;</em> removing an idea when asked to adjust it.
+          <span class="text-gray-500"> Open direction: more diverse exploration, less destructive refinement.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================== CITATION ============================== -->
+  <section id="citation" class="section-anchor bg-gray-50 border-y border-gray-100">
+    <div class="max-w-3xl mx-auto px-6 py-12">
+      <p class="text-[10px] uppercase tracking-widest text-accent-700 font-semibold mb-2">Citation</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">If you use this work</h2>
+      <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-[12px] leading-relaxed overflow-x-auto"><code>@article{kim2026discoverllm,
+  title={DiscoverLLM: From Executing Intents to Discovering Them},
+  author={Kim, Tae Soo and Lee, Yoonjoo and Yu, Jaesang and Chung, John Joon Young and Kim, Juho},
+  journal={arXiv preprint arXiv:2602.03429},
+  year={2026}
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ============================== FOOTER ============================== -->
+  <!-- Minimal placeholder; will be replaced with acknowledgements later. -->
+  <footer class="max-w-5xl mx-auto px-6 py-8 text-[12px] text-gray-500">
+    <div class="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+      <p>
+        <span class="brand font-semibold text-gray-700">DiscoverLLM</span> &middot; ICML 2026
+      </p>
+      <div class="flex items-center gap-4">
+        <a href="https://arxiv.org/abs/2602.03429" target="_blank" rel="noopener" class="hover:text-accent-700">Paper</a>
+        <a href="https://github.com/tsook/discoverllm" target="_blank" rel="noopener" class="hover:text-accent-700">Code</a>
+        <a href="https://huggingface.co/collections/kixlab/discoverllm-icml-2026" target="_blank" rel="noopener" class="hover:text-accent-700">Models &amp; data</a>
+        <a href="mailto:taesoo.kim@kaist.ac.kr" class="hover:text-accent-700">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

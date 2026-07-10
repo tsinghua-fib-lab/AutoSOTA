@@ -1,0 +1,35 @@
+defaults:
+  - /defaults.yaml
+
+experiment:
+  run_name: ours_mnist
+  tags: [baseline, ours, mnist]
+  conditional: False
+
+dataset:
+  name: mnist
+  split: train
+  download: true
+  batch_size: 256
+  subset_size: null  # Set to a smaller value to limit projection cache size
+  num_classes: 10
+  resolution: 28  # Keep resolution manageable for covariance projections
+
+
+model:
+  name: ours
+  params:
+    temperature: 1.0
+    mask_threshold: 0.020
+    chunk_size: 1024
+    k_min: 3000    # = N/20 (N=60000 for MNIST), lower bound of k_t (Eq. 6)
+    k_max: 6000    # = N/10, upper bound of k_t and lower bound of m_t (Sec. 3.4)
+    low_res_dim: 16
+    weight_method: ss
+
+metrics:
+  baseline_name: baseline_unet
+  baseline_unet_path: "services/base_models/baseline_unet/mnist/ckpt_epoch_200.pt"
+
+
+

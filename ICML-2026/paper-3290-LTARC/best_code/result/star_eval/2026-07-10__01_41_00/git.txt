@@ -1,0 +1,45 @@
+dc6d4fc7c749b83a5b874db9698159059239fe98
+diff --git a/method/weights_p_bound.py b/method/weights_p_bound.py
+index 19b115b..958578a 100644
+--- a/method/weights_p_bound.py
++++ b/method/weights_p_bound.py
+@@ -11,7 +11,7 @@ class Weights:
+         self.Z_0 = Z_0
+         self.Z_1 = Z_1
+         self.alpha = alpha
+-        self.delta = 0.1
++        self.delta = self.alpha
+ 
+     def get_obj_and_constr(self, a_policy):
+         Z = np.where(a_policy == 0, self.Z_0, self.Z_1)
+@@ -65,17 +65,19 @@ class Weights:
+         return min(self.hoeffding_bound(n, R_lambda, t), self.bentkus_bound(n, R_lambda, t))
+ 
+     def upper_confidence_bound(self, R_hat_lambda, n):
+-        """Compute the (1 - delta) upper confidence bound \hat{R}^+_{HB}(\lambda)."""
+-        R = 0.0
+-        in_interval = False
+-        bound = self.lower_tail_prob(n, R, R_hat_lambda)
+-        while (bound >= self.delta or not in_interval) and R < 1:
+-            R += 0.001  # Increment step size
+-            if bound >= self.delta:
+-                in_interval = True
+-            bound = self.lower_tail_prob(n, R, R_hat_lambda)
+-        return R - 0.001
+-
++        """Compute the (1 - delta) upper confidence bound using binary search."""
++        if R_hat_lambda >= 1.0:
++            return 1.0
++        if self.lower_tail_prob(n, 1.0, R_hat_lambda) >= self.delta:
++            return 1.0
++        lo, hi = R_hat_lambda, 1.0
++        for _ in range(60):
++            mid = (lo + hi) / 2.0
++            if self.lower_tail_prob(n, mid, R_hat_lambda) < self.delta:
++                hi = mid
++            else:
++                lo = mid
++        return hi
+     def get_conformal_weight(self, Z, Z_max):
+         n = len(Z)
+         Z = np.sort(Z)

@@ -1,0 +1,39 @@
+problem:
+  name: ou
+  a: 0.0
+  b: 2.0
+  sigma: 0.1
+  d: 2
+  x_0: [1.0, 0.0]
+  x_T: [0.0, 1.0]
+  T: 1.0
+
+model:
+  type: conservative  # "score", "conservative"
+  dim_hidden: [128, 128]
+  emb_dim_hidden: [64, 64]
+  activation: gelu
+
+bridge:
+  base_drift: false
+  guiding_type: brownian
+  decay_coeff: false
+  sampler: euler
+
+train:
+  self_consistency: standard # standard, nodrift
+  num_steps: 100
+  num_outer_iterations: 2000
+  num_inner_iterations: 1
+  traj_batch_size: 64
+  train_batch_size: 20000
+  lr: 1.0e-4
+  ema_rate: 1.0
+  jacobian_method: euler
+  beta_schedule: average
+  B_ratio: 0.9
+  ckpt_freq: 100
+  seed: 0
+
+plotting:
+  plot_fn: plot_multiple_trajectories

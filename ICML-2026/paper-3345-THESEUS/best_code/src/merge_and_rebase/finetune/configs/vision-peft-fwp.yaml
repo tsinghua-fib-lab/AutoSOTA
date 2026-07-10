@@ -1,0 +1,162 @@
+common:
+  seed: 42
+  deterministic: false
+
+  device: cuda
+  dtype: fp32
+
+  backbone:
+    name: openclip
+    clip_model: ViT-B-32
+    clip_pretrained: openai
+
+  data:
+    batch_size: 32
+    num_workers: 6
+    val_fraction: 0.1
+    pin_memory: true
+
+  train:
+    epochs: null              # fallback if a dataset doesn't specify it
+    optimizer:
+      name: adamw
+    lr: 1.0e-4
+    weight_decay: 0.05
+    accumulate_grad_batches: 4 # should be 128 / batch_size to simulate batch size of 128
+    lr_scheduler:
+      name: cosine              # cosine | linear | constant
+    grad_clip_norm: 1.0
+    early_stopping: false
+    early_stopping_patience: 5
+
+  strategy:
+    name: peft_lora
+    attention:
+      attn_impl: linear
+      kernel: elu_plus_one
+      eps: 1.0e-6
+      linear_rule: delta
+      delta_eta: 1.0
+      delta_exclude_cls_from_store: true
+      delta_cls_only_readout: false
+      delta_learn_w0: true
+      delta_w0_rank: 0
+      ramp_fraction: 0.5
+    peft:
+      target_modules: ["q_proj", "k_proj", "v_proj", "out_proj"] #, "c_proj", "c_fc"] # possible keys attns: ["q_proj", "k_proj", "v_proj", "out_proj"] linears ["c_proj", "c_fc"] openclip fuses q,k,v so cant target them individually, model will be patched if using any of q_proj, k_proj, v_proj, out_proj
+      r: 16
+      lora_alpha: 16
+      lora_dropout: 0.05
+      bias: "none"
+  output:
+    save_format: peft
+    save_last_epoch: true
+    out_dir: src/checkpoints/finetune_fwp
+
+  logging:
+    use_wandb: false
+    project: null
+    entity: null
+    tags: []
+    mode: online              # online | offline | disabled
+    local_log_dir: null
+    log_every_n_steps: 50
+    run_name: null
+
+# List of datasets you want to run, if you want the config to drive selection.
+# You can still override via CLI --suite/--datasets.
+datasets_order:
+  - SUN397
+  - Cars
+  - RESISC45
+  - EuroSAT
+  - SVHN
+  - GTSRB
+  - MNIST
+  - DTD
+  - CIFAR100
+  - STL10
+  - Flowers102
+  - OxfordIIITPet
+  - PCAM
+  - FER2013
+  - EMNIST
+  - CIFAR10
+  - Food101
+  - FashionMNIST
+  - RenderedSST2
+  - KMNIST
+
+
+# Per-dataset overrides. Only put what changes from common.
+datasets:
+  SUN397:
+    train:
+      epochs: 14
+  Cars:
+    train:
+      epochs: 35
+  RESISC45:
+    train:
+      epochs: 15
+  EuroSAT:
+    train:
+      epochs: 12
+  SVHN:
+    train:
+      epochs: 4
+  GTSRB:
+    train:
+      epochs: 11
+  MNIST:
+    train:
+      epochs: 5
+  DTD:
+    train:
+      epochs: 76
+  CIFAR100:
+    train:
+      epochs: 6
+  STL10:
+    train:
+      epochs: 6
+  Flowers102:
+    train:
+      epochs: 147
+  OxfordIIITPet:
+    train:
+      epochs: 82
+  PCAM:
+    train:
+      epochs: 1
+  FER2013:
+    train:
+      epochs: 10
+  EMNIST:
+    train:
+      epochs: 2
+  CIFAR10:
+    train:
+      epochs: 6
+  Food101:
+    train:
+      epochs: 4
+  FashionMNIST:
+    train:
+      epochs: 5
+  RenderedSST2:
+    train:
+      epochs: 39
+  KMNIST:
+    train:
+      epochs: 5
+
+  # Example of strategy override on one dataset (if you ever need it)
+  # SomeDataset:
+  #   strategy:
+  #     name: peft_lora
+  #     forward_mode: linearized_ntk
+  #     params:
+  #       freeze_backbone: true
+  #   train:
+  #     epochs: null

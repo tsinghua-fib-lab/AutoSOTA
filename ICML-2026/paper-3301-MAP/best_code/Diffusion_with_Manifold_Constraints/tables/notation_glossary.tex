@@ -1,0 +1,56 @@
+\begin{table}[H]
+\centering
+\label{tab:notation}
+\begin{tabular}{cl}
+\toprule
+\textbf{Symbol} & \textbf{Description} \\
+\midrule
+\multicolumn{2}{l}{\textit{Spaces and Manifolds}} \\
+$\mathbb{R}^d$ & Ambient space (dimension $d$) \\
+$\mathcal{M}$ & $m$-dimensional constraint manifold embedded in $\mathbb{R}^d$ \\
+$m$ & Intrinsic dimension of $\mathcal{M}$ \\
+$k = d - m$ & Codimension of $\mathcal{M}$ \\
+$T_x\mathcal{M}$ & Tangent space to $\mathcal{M}$ at point $x$ \\
+$N_x\mathcal{M}$ & Normal space to $\mathcal{M}$ at point $x$ \\
+$\text{reach}(\mathcal{M})$ & Global reach of manifold $\mathcal{M}$ \\
+$\tau(z)$ & Pointwise reach function at $z \in \mathcal{M}$ \\
+$r < \text{reach}(\mathcal{M})$ & Radius of reach tube $T_r(\mathcal{M})$ \\
+\midrule
+\multicolumn{2}{l}{\textit{Constraints}} \\
+$h: \mathbb{R}^d \to \mathbb{R}^m$ & Constraint function defining $\mathcal{M} = \{x : h(x) = 0\}$ \\
+$J_h(x)$ & Jacobian of constraint function at $x$ \\
+\midrule
+\multicolumn{2}{l}{\textit{Distributions and Measures}} \\
+$p_0(x)$ & Original data distribution on $\mathcal{M}$ \\
+$p_\sigma(x)$ & Perturbed (lifted) distribution in $\mathbb{R}^d$ \\
+$\tilde{p}_\sigma(x)$ & Projected distribution $\Pi_\# p_\sigma$ on $\mathcal{M}$ \\
+$p_T(x)$ & Terminal/latent distribution (typically $\mathcal{N}(0, I)$) \\
+$\mu$ & Probability measure/law \\
+$\lambda^d$ & $d$-dimensional Lebesgue measure \\
+$\mathcal{H}^m$ & $m$-dimensional Hausdorff measure \\
+\midrule
+\multicolumn{2}{l}{\textit{Random Variables}} \\
+$Z$ & Random variable with law $p_0$ on $\mathcal{M}$ \\
+$N | Z=z$ & Conditional Gaussian noise in $N_z\mathcal{M}$ \\
+$X = Z + N$ & Lifted random variable with law $p_\sigma$ \\
+$Y = \Pi(X)$ & Projected random variable with law $\tilde{p}_\sigma$ \\
+\midrule
+\multicolumn{2}{l}{\textit{Operators and Functions}} \\
+$\Pi: \mathbb{R}^d \to \mathcal{M}$ & Nearest-point projection onto $\mathcal{M}$ \\
+\midrule
+\multicolumn{2}{l}{\textit{Hyperparameters}} \\
+$\sigma$ & Noise scale for perturbation \\
+$t \in [0, T]$ & Virtual time for diffusion process \\
+$T$ & Terminal time (typically $T=250$ in experiments) \\
+\midrule
+\multicolumn{2}{l}{\textit{Metrics}} \\
+$\text{TV}(p, q)$ & Total variation distance: $\frac{1}{2}\int_{\mathcal{M}} |p(x) - q(x)| d\mathcal{H}^m(x)$ \\
+$\text{JSD}(p \| q)$ & Jensen-Shannon divergence \\
+$\text{COV}$ & Coverage metric \\
+$\text{FID}$ & Fr\'echet Inception Distance. \\
+$\text{RMSD}$ & Root mean square deviation \\
+$\text{MMD}$ & Maximum Mean Discrepancy \\
+\bottomrule
+\end{tabular}
+\caption{Summary of notation used throughout this paper.}
+\end{table}

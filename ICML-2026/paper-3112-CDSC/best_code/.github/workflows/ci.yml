@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "notebooks/**"
+      - "**/*.md"
+      - "**/*.ipynb"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "notebooks/**"
+      - "**/*.md"
+      - "**/*.ipynb"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        # astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --group dev
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      - name: ruff format (check)
+        run: uv run ruff format --check .
+
+      - name: ty
+        run: uv run ty check
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      # actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        # astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras --group dev --python ${{ matrix.python-version }}
+
+      - name: pytest
+        run: uv run --python ${{ matrix.python-version }} pytest

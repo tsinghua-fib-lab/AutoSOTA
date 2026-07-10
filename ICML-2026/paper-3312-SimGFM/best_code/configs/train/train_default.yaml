@@ -1,0 +1,12 @@
+# Training settings
+n_epochs: 1000
+batch_size: 512
+lr: 0.0002
+clip_grad: null          # float, null to disable
+save_model: True
+num_workers: 0
+weight_decay: 1e-12
+optimizer: adamw # adamw,nadamw,nadam => nadamw for large batches, see http://arxiv.org/abs/2102.06356 for the use of nesterov momentum with large batches
+seed: 0
+accumulate_grad_batches: 1
+time_distortion: "identity"  # 'identity', 'cosine', polyinc, polydec

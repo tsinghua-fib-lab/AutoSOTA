@@ -1,0 +1,17 @@
+\begin{table}[h]
+\scriptsize
+\centering
+\begin{tabular}{l     >{\centering\arraybackslash}p{0.8cm}     >{\centering\arraybackslash}p{0.8cm}     >{\centering\arraybackslash}p{0.4cm}     >{\centering\arraybackslash}p{0.4cm}     >{\centering\arraybackslash}p{1.8cm}}
+\toprule
+Method & Train time & Sampling time & COV & Pairwise RMSD & MMD \\ 
+\midrule
+$p_\sigma$ (ours) & 0.0040 & 5.5825 & 0.2200 & \textbf{1.6262} & $3.37\times10^{-4}$ \\ 
+DDPM & 0.0041 & 1.6013 & 0.2180 & 0.7414 & $\mathbf{3.35\times10^{-4}}$ \\ 
+PDM & 0.0041 & 270.3082 & \textbf{0.3630} & 1.3534 & $3.80\times10^{-4}$ \\ 
+DDPM (proj.) & n/a & 6.8878 & 0.2880 & 0.8445 & $3.36\times10^{-4}$ \\ 
+PIDM & 0.0070 & 1.6486 & 0.2240 & 1.4216 & $3.37\times10^{-4}$ \\ 
+\bottomrule
+\end{tabular}
+\caption{Protein backbone fragment metrics at $\sigma = 0.001$.}
+\label{tab:protein_metrics}
+\end{table}

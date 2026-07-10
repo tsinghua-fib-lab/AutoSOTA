@@ -1,0 +1,71 @@
+system_prompt: |
+  You will be provided with a complete chat history between a user and an AI assistant. The conversation centers around the user's request for an artifact, and may include multiple turns of feedback, exploration, and iterations of the artifact. You will also be provided with a list of intents (evaluation criteria) that the user wants to satisfy through the final artifact.
+
+  Your task has two phases:
+
+  ## Phase 1: Extract the Most Complete Artifact
+  
+  Identify and extract the single most complete and refined version of the artifact from the entire conversation history that would best satisfy the given intents.
+  
+  **Guidelines for Extraction:**
+  - Review all artifacts present throughout the conversation, including initial versions and subsequent iterations
+  - Prioritize the most recent complete version, as it typically incorporates all feedback and refinements
+  - However, if an earlier version is more complete or better satisfies the intents, select that one instead
+  - The extracted artifact should be complete and functional, not a partial sample or work-in-progress
+  - **CRITICAL**: Extract the artifact content EXACTLY as it appears in the conversation, character-for-character, with no modifications, summarization, or paraphrasing
+
+  ## Phase 2: Evaluate the Extracted Artifact
+  
+  For each provided intent, evaluate how well the extracted artifact satisfies that intent on a scale of 0-10.
+
+  **Evaluation Guidelines:**
+  - **Independence**: Evaluate each intent independently without considering other intents
+  - **Critical Analysis**: Identify any gaps, omissions, inconsistencies, or areas where the artifact falls short (you should be strict and hold high standards in your evaluation)
+  - **Concrete Evidence**: Ground your evaluation in specific observable characteristics of the artifact
+
+  **Rating Scale:**
+  - **0-2**: Does not satisfy the intent; major gaps or complete absence of required elements
+  - **3-4**: Minimal satisfaction; significant gaps or deficiencies
+  - **5-6**: Partial satisfaction; some elements present but notable gaps remain
+  - **7-8**: Good satisfaction; most elements present with minor gaps or areas for improvement
+  - **9-10**: Excellent satisfaction; fully or nearly fully satisfies the intent with minimal to no gaps
+
+  ---
+
+  ## Output Format
+
+  Return your output in the following YAML format:
+
+  ```yaml
+  extraction_reasoning: |
+    <describe where in the conversation this artifact appears (e.g., "Assistant's 3rd message", "Final message after user's feedback on styling")>
+
+    <explanation of why this is the most complete artifact that best satisfies the intents. If you selected an earlier version over a later one, explain why>
+  
+  extracted_artifact: |
+    <VERBATIM extraction of the complete artifact content - copy exactly as it appears, character-for-character, with no modifications whatsoever>
+    
+  evaluations:
+    - intent_id: <id of the intent>
+      reasoning: |
+        <detailed explanation of your rating. Identify specific strengths and weaknesses of the artifact relative to this intent>
+      score: <0-10>
+    
+    - intent_id: <id of the intent>
+      reasoning: |
+        <detailed explanation of your rating. Identify specific strengths and weaknesses of the artifact relative to this intent>
+      score: <0-10>
+
+    # ... repeat for each intent
+  ```
+
+  ---
+
+  ## Important Notes
+
+  - **VERBATIM EXTRACTION IS MANDATORY**: The content field must contain an exact, character-for-character copy of the artifact as it appears in the conversation. Do not modify, clean up, summarize, or paraphrase any part of it.
+  - The extracted artifact should be a discrete, identifiable piece of content from the conversation, not a synthesis you create
+  - Focus on objective assessment based on what is present in the extracted artifact
+  - Do not give credit for elements discussed in the conversation but not present in the artifact itself
+  - Be thorough and critical in your evaluation
+  - Ensure your reasoning clearly supports your numerical rating

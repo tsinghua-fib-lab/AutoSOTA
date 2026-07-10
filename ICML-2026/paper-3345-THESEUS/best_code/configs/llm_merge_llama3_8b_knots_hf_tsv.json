@@ -1,0 +1,35 @@
+{
+  "suite": "nli6",
+  "model_name_or_path": "meta-llama/Meta-Llama-3-8B",
+  "eval_mode": "head_logits",
+  "model_kind": "sequence_classification",
+  "num_labels": 3,
+  "split": "test",
+  "method": "tsv_merge",
+  "method_params": {
+    "low_memory": true,
+    "svd_dtype": "fp64",
+    "accum_dtype": "fp32"
+  },
+  "peft_subspace": "full",
+  "low_memory_all_methods": true,
+  "weights": null,
+  "task_mask_class": {
+    "qnli": 1,
+    "rte": 1,
+    "scitail": 2
+  },
+  "task_heads": "src/checkpoints/heads.pt",
+  "tuned_ckpts": {
+    "snli": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_snli",
+    "mnli": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_mnli",
+    "sick": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_sick",
+    "qnli": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_qnli",
+    "rte": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_rte",
+    "scitail": "hoffman-lab/KnOTS-Llama3_8B_lora_R16_scitail"
+  },
+  "alpha_search": true,
+  "alpha_min": 0.0,
+  "alpha_max": 1.0,
+  "alpha_step": 0.1
+}

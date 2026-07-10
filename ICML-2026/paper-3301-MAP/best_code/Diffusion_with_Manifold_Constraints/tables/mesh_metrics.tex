@@ -1,0 +1,21 @@
+\begin{table}[h]
+\scriptsize
+\centering
+\begin{tabular}{l     >{\centering\arraybackslash}p{0.8cm}
+    >{\centering\arraybackslash}p{0.8cm}
+    >{\centering\arraybackslash}p{0.8cm}
+    >{\centering\arraybackslash}p{0.8cm}
+    >{\centering\arraybackslash}p{0.8cm}}
+\toprule
+Method & Train time   & Sampling time   & COV $\uparrow$ & JSD $\downarrow$ & TVD $\downarrow$\\
+\midrule
+PDM & 0.0013 & 8.4991 & 0.8626 & 0.1912 & 0.4318 \\ 
+PIDM & 0.0033 & 0.2196 & 0.5952 & 0.1298 & 0.3248 \\ 
+$p_{\\sigma}$ (ours) & 0.0012 & 0.3663 & 0.8506 & 0.1484 & 0.3471 \\ 
+DDPM & 0.0013 & 0.2246 & 0.7104 & \textbf{0.1266} & \textbf{0.3090} \\ 
+DDPM (proj.) & 0.0013 & 0.2415 & \textbf{0.8643} & 0.1480 & 0.3458 \\ 
+\bottomrule
+\end{tabular}
+\caption{Mesh task metrics at $\sigma = 0.0005$. Learning $p_{\sigma}$ is consistently competitive or an improvement upon other methods.}
+\label{tab:MeshMetrics}
+\end{table}

@@ -1,0 +1,43 @@
+#!/bin/bash
+# Reproduction script for DSD on ETTh1
+# Computes average MSE/MAE over prediction horizons {96, 192, 336, 720}
+set -e
+
+cd /repo
+PRED_LENS=(96 192 336 720)
+MSE_SUM=0
+MAE_SUM=0
+COUNT=0
+
+for PL in ${PRED_LENS[@]}; do
+    echo "=== Running DSD for pred_len=${PL} ==="
+    
+    # Find teacher checkpoint
+    CKPT_DIR=$(find ./checkpoints -maxdepth 1 -type d -name "*pl${PL}_*dm128*" | head -1)
+    TEACHER_CKPT="${CKPT_DIR}/checkpoint.pth"
+    
+    RESULT_FILE="./results_eval_pl${PL}.txt"
+    # Truncate result file to avoid reading stale data from previous runs
+    > "${RESULT_FILE}"
+    
+    python3 run.py       --task_name hetero_dsd       --is_training 1       --root_path ./data/ETT-small/       --data_path ETTh1.csv       --model_id ETTh1_96_${PL}       --model LMPNet       --data ETTh1       --features M       --seq_len 96       --label_len 48       --pred_len ${PL}       --e_layers 3       --d_model 128       --d_ff 512       --enc_in 7       --c_out 7       --batch_size 32       --learning_rate 0.01       --train_epochs 20       --patience 3       --gpu 0       --teacher_model PatchTST       --teacher_ckpt "${TEACHER_CKPT}"       --lambda_kd 0.5       --lambda_align 0.1       --alpha_ot 0.1       --kd_gamma 0.5       --result_file "${RESULT_FILE}"       --des eval
+    
+    # Extract MSE/MAE
+    MSE=$(grep -oP 'mse:\K[0-9.]+' "${RESULT_FILE}" | tail -1)
+    MAE=$(grep -oP 'mae:\K[0-9.]+(?=,)' "${RESULT_FILE}" | tail -1)
+    
+    echo "  pred_len=${PL}: MSE=${MSE}, MAE=${MAE}"
+    MSE_SUM=$(python3 -c "print(${MSE_SUM} + ${MSE})")
+    MAE_SUM=$(python3 -c "print(${MAE_SUM} + ${MAE})")
+    COUNT=$((COUNT + 1))
+done
+
+AVG_MSE=$(python3 -c "print(round(${MSE_SUM} / ${COUNT}, 4))")
+AVG_MAE=$(python3 -c "print(round(${MAE_SUM} / ${COUNT}, 4))")
+
+echo ""
+echo "=========================================="
+echo "DSD ETTh1 Average over ${COUNT} horizons:"
+echo "  MSE: ${AVG_MSE}"
+echo "  MAE: ${AVG_MAE}"
+echo "=========================================="

@@ -1,0 +1,48 @@
+{
+  "suite": "vision8",
+  "tasks": "all",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "laion2b_s34b_b88k",
+  "target_clip_model": "ViT-B-16-plus-240",
+  "target_clip_pretrained": "laion400m_e32",
+  "method": "theseus",
+  "method_params": {
+    "num_batches": 10,
+    "batch_size": 32,
+    "seq_align": "interpolate2d",
+    "split_qkv": true,
+    "center_acts": false
+  },
+  "logging": {
+    "use_wandb": true,
+    "project": null,
+    "entity": null,
+    "tags": [],
+    "mode": "online",
+    "local_log_dir": "logs",
+    "log_every_n_steps": 50,
+    "run_name": null
+  },
+  "alpha_search": true,
+  "alpha_selection": "per_task",
+  "alpha_min": 0.8,
+  "alpha_max": 10.0,
+  "alpha_step": 0.2,
+  "alpha_patience": 5,
+  "batch_size": 32,
+  "num_workers": 0,
+  "val_fraction": 0.1,
+  "seed": 89,
+  "no_humanize": true,
+  "weights": null,
+  "tuned_ckpts": {
+    "Cars": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/cars/best.pt",
+    "DTD": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/dtd/best.pt",
+    "EuroSAT": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/eurosat/best.pt",
+    "GTSRB": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/gtsrb/best.pt",
+    "MNIST": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/mnist/best.pt",
+    "RESISC45": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/resisc45/best.pt",
+    "SUN397": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/sun397/best.pt",
+    "SVHN": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/svhn/best.pt"
+  }
+}

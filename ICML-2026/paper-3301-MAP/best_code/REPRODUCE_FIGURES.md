@@ -1,0 +1,416 @@
+# Figure and Table Reproduction Guide
+
+This guide maps the figures and tables in
+`Diffusion_with_Manifold_Constraints/main.tex` to the data, training commands,
+and plotting scripts used to regenerate them.
+
+Run commands from the repository root unless a command explicitly says
+otherwise. Most plotting scripts read checkpoints from `models/` and write fresh
+outputs under `results/`. The paper source uses checked-in copies under
+`Diffusion_with_Manifold_Constraints/figures/` and
+`Diffusion_with_Manifold_Constraints/tables/`; after regenerating results, copy
+or convert the relevant `results/` outputs into those paper directories before
+recompiling the paper.
+
+## Environment
+
+Create and activate the Python environment:
+
+```bash
+bash setup.sh
+source .venv/bin/activate
+```
+
+On NERSC-like systems, `setup.sh` loads the configured modules and installs the
+overlay dependencies from `requirements.nersc.txt`. On other systems it installs
+from `requirements.txt`. The setup script writes an environment snapshot under
+`.reproducibility/`.
+
+## Data
+
+Verify or download the small in-repository datasets:
+
+```bash
+bash download_datasets.sh
+```
+
+The repository includes:
+
+- `data/smileyface_plane.npy`
+- `data/smileyface_sphere.npy`
+- `data/stanford-bunny.obj`
+- `data/MNIST/raw/` IDX files
+
+Protein experiments use a processed SidechainNet archive. Generate it locally:
+
+```bash
+python training/process_protein_fragments.py --name casp12 --fragment-length 10 --max-data-length 20000
+```
+
+This writes:
+
+- `data/protein/casp12_fragments_L10_N20000.npz`
+- `data/protein/casp12_fragments_L10_N20000.manifest.json`
+
+The canonical archive and manifest are tracked for exact reproduction. If you
+regenerate the archive locally, verify checksums with:
+
+```bash
+bash scripts/publish_protein_artifact.sh --check-only
+```
+
+For an external mirror, publish the same files as release assets:
+
+```bash
+bash scripts/publish_protein_artifact.sh protein-data-v1
+```
+
+## Training Recipes
+
+The shell scripts in `training/` are the authoritative experiment recipes. They
+set `--seed=42`, disable W&B with `--no_wandb`, and encode the sample counts,
+epochs, hidden dimensions, batch sizes, and sigma sweeps used by the paper.
+
+| Experiment family | Training command |
+|---|---|
+| Plane diffusion | `bash training/smileyface_plane.sh` |
+| Sphere diffusion | `bash training/smileyface_sphere.sh` |
+| Bunny mesh | `bash training/bunny.sh` |
+| MNIST fixed-sum | `bash training/mnist.sh` |
+| Protein fragments | `bash training/protein.sh` |
+| Plane normalizing flows | `bash training/smileyface_plane_nf.sh` |
+| Sphere normalizing flows | `bash training/smileyface_sphere_nf.sh` |
+
+### Sigma Sweeps
+
+| Experiment family | Sigma values |
+|---|---|
+| Plane diffusion | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+| Sphere diffusion | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+| Bunny mesh | `0.0001, 0.0005, 0.001, 0.005, 0.05, 0.1, 0.5, 1.0` |
+| MNIST fixed-sum | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+| Protein fragments | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+| Plane normalizing flows | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+| Sphere normalizing flows | `0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0` |
+
+MNIST additionally sweeps over `100`, `1000`, and `10000` training samples.
+
+## Plotting Entry Points
+
+Use these wrappers after the corresponding training runs complete:
+
+```bash
+bash plotting/plotting_3d_points.sh
+bash plotting/plotting_mnist.sh
+bash plotting/plotting_protein.sh
+```
+
+The wrappers call the individual plotting scripts and table builders with the
+expected ordering. To run scripts manually, use:
+
+The MNIST wrapper also ensures `train_mnist_classifier.py` has produced
+`models/mnist_classifier.pth` before running any MNIST plotting scripts.
+
+```bash
+python plotting/plotting_smileyface_plane.py
+python plotting/plotting_smileyface_sphere.py
+python plotting/plotting_smileyface_plane_varied_sigmas.py
+python plotting/plotting_smileyface_sphere_varied_sigmas.py
+python plotting/plotting_nf_smileface_plane.py
+python plotting/plotting_nf_smileyface_sphere.py
+python plotting/plotting_nf_smileyface_plane_varied_sigmas.py
+python plotting/plotting_nf_smileyface_sphere_varied_sigmas.py
+python plotting/plotting_bunny.py
+python plotting/plotting_bunny_varied_sigmas.py
+python plotting/plotting_mnist.py
+python plotting/plotting_mnist_varied_sigmas.py
+python plotting/plotting_mnist_varied_num_samples.py
+python plotting/plotting_protein.py
+python plotting/plotting_protein_varied_sigmas.py
+python plotting/build_plane_sphere_metrics_table.py
+python plotting/build_main_tex_tables.py --only all --strict
+```
+
+## Main Paper Items
+
+### Figure 1: Illustrative Example
+
+- Label: `fig:Illustrative_Example`
+- Paper asset: `Diffusion_with_Manifold_Constraints/figures/noise_comparison_figure.png`
+- Source: static illustrative figure, not regenerated by the training pipeline.
+- Related script: `public_figure.py` generates `public_figure.pdf` and
+  `public_figure.svg`, which can be used as a source for this illustration if
+  the figure is refreshed.
+
+### Table 1: Plane and Sphere Metrics
+
+- Label: `tab:PlaneSphereMetrics`
+- Required training:
+  `training/smileyface_plane.sh`,
+  `training/smileyface_sphere.sh`,
+  `training/smileyface_plane_nf.sh`,
+  `training/smileyface_sphere_nf.sh`
+- Scripts:
+  `plotting/plotting_smileyface_plane.py`,
+  `plotting/plotting_smileyface_sphere.py`,
+  `plotting/plotting_nf_smileface_plane.py`,
+  `plotting/plotting_nf_smileyface_sphere.py`,
+  `plotting/build_plane_sphere_metrics_table.py`
+- Generated outputs:
+  `results/plane_sphere_metrics_table.tex`,
+  `results/plane_sphere_metrics_table.csv`
+- Paper table copy:
+  `Diffusion_with_Manifold_Constraints/tables/plane_sphere_metrics.tex`
+- Command:
+
+```bash
+python plotting/plotting_smileyface_plane.py
+python plotting/plotting_smileyface_sphere.py
+python plotting/plotting_nf_smileface_plane.py
+python plotting/plotting_nf_smileyface_sphere.py
+python plotting/build_plane_sphere_metrics_table.py
+python plotting/build_main_tex_tables.py --only plane_sphere --strict
+```
+
+### Figure 2: Plane and Sphere Sampling Stability
+
+- Label: `fig:PlaneSphereSamplingStability`
+- Required training: plane/sphere diffusion and NF runs.
+- Scripts:
+  `plotting/plotting_smileyface_plane_varied_sigmas.py`,
+  `plotting/plotting_smileyface_sphere_varied_sigmas.py`,
+  `plotting/plotting_nf_smileyface_plane_varied_sigmas.py`,
+  `plotting/plotting_nf_smileyface_sphere_varied_sigmas.py`
+- Generated outputs:
+  `results/smileyface_plane/scores_vs_time.svg`,
+  `results/smileyface_sphere/scores_vs_time.svg`,
+  `results/smileyface_plane/nf_varied_sigmas/logdet_vs_sigma.svg`,
+  `results/smileyface_sphere/nf_varied_sigmas/logdet_vs_sigma.svg`
+- Paper assets:
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_plane/scores_vs_time.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_sphere/scores_vs_time.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_plane/nf/logdet_vs_sigma.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_sphere/nf/logdet_vs_sigma.png`
+
+### Figure 3: Plane and Sphere Combined Metrics
+
+- Label: `fig:SpherePlaneCombinedMetrics`
+- Required training: plane/sphere diffusion and NF sigma sweeps.
+- Scripts:
+  `plotting/plotting_smileyface_plane_varied_sigmas.py`,
+  `plotting/plotting_smileyface_sphere_varied_sigmas.py`,
+  `plotting/plotting_nf_smileyface_plane_varied_sigmas.py`,
+  `plotting/plotting_nf_smileyface_sphere_varied_sigmas.py`
+- Generated outputs:
+  `results/smileyface_plane/combined_metrics.svg`,
+  `results/smileyface_sphere/combined_metrics.svg`,
+  `results/smileyface_plane/nf_varied_sigmas/combined_metrics.svg`,
+  `results/smileyface_sphere/nf_varied_sigmas/combined_metrics.svg`
+- Paper assets:
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_plane/combined_metrics.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_sphere/combined_metrics.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_plane/nf/combined_metrics.png`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_sphere/nf/combined_metrics.png`
+
+### Figure 4: Plane and Sphere Samples
+
+- Label: `fig:SmileyFaces`
+- Required training: plane/sphere diffusion and NF runs.
+- Scripts:
+  `plotting/plotting_smileyface_plane.py`,
+  `plotting/plotting_smileyface_sphere.py`,
+  `plotting/plotting_nf_smileface_plane.py`,
+  `plotting/plotting_nf_smileyface_sphere.py`
+- Generated output directories:
+  `results/smileyface_plane/`,
+  `results/smileyface_sphere/`,
+  `results/smileyface_plane/nf_plane/`,
+  `results/smileyface_sphere/nf_noise_0.05/`
+- Paper asset directories:
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_plane/`,
+  `Diffusion_with_Manifold_Constraints/figures/smileyface_sphere/`
+
+### Figure 5: Bunny Mesh Samples
+
+- Label: `fig:BunnyExamples`
+- Required training: `bash training/bunny.sh`
+- Script: `plotting/plotting_bunny.py`
+- Generated outputs:
+  `results/bunny/mesh_density_data_heat.svg`,
+  `results/bunny/mesh_density_samples_lifted_heat.svg`,
+  `results/bunny/mesh_density_samples_plain_heat.svg`,
+  `results/bunny/mesh_density_samples_plain_projected_heat.svg`,
+  `results/bunny/mesh_density_samples_PIDM_heat.svg`,
+  `results/bunny/mesh_density_samples_PDM_heat.svg`
+- Paper assets:
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_data_heat.png`,
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_samples_lifted_heat.png`,
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_samples_plain_heat.png`,
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_samples_plain_projected_heat.png`,
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_samples_PIDM_heat.png`,
+  `Diffusion_with_Manifold_Constraints/figures/bunny/mesh_density_samples_PDM_heat.png`
+
+### Table 2: Bunny Mesh Metrics
+
+- Label: `tab:MeshMetrics`
+- Required training: `bash training/bunny.sh`
+- Script: `plotting/plotting_bunny.py`
+- Generated outputs:
+  `results/bunny/metrics_table.tex`,
+  `results/bunny/metrics_table.csv`
+- Paper table copy:
+  `Diffusion_with_Manifold_Constraints/tables/mesh_metrics.tex`
+- Command:
+
+```bash
+python plotting/plotting_bunny.py
+python plotting/build_main_tex_tables.py --only mesh --strict
+```
+
+### Figure 6: Complex Task Combined Metrics
+
+- Label: `fig:ComplexCombinedMetrics`
+- Required training:
+  `training/bunny.sh`,
+  `training/mnist.sh`,
+  `training/protein.sh`
+- Scripts:
+  `plotting/plotting_bunny_varied_sigmas.py`,
+  `plotting/plotting_mnist_varied_sigmas.py`,
+  `plotting/plotting_protein_varied_sigmas.py`
+- Generated outputs:
+  `results/bunny/combined_metrics.svg`,
+  `results/mnist/combined_metrics_3panel.svg`,
+  `results/protein/combined_metrics_3panel.svg`
+- Paper assets:
+  `Diffusion_with_Manifold_Constraints/figures/bunny/combined_metrics.png`,
+  `Diffusion_with_Manifold_Constraints/figures/MNIST/combined_metrics_3panel.png`,
+  `Diffusion_with_Manifold_Constraints/figures/protein/combined_metrics_3panel.png`
+
+### Figure 7: MNIST Dataset Size and Sigma Ablations
+
+- Label: `fig:MNIST_Combined_Metrics`
+- Required training: `bash training/mnist.sh`
+- Script: `plotting/plotting_mnist_varied_num_samples.py`
+- Generated output:
+  `results/mnist/combined_metrics_3panel_num_samples.svg`
+- Paper asset:
+  `Diffusion_with_Manifold_Constraints/figures/MNIST/combined_metrics_3panel_num_samples.png`
+
+### Table 3: MNIST Metrics
+
+- Label: no explicit label in `main.tex`
+- Required training: `bash training/mnist.sh`
+- Scripts:
+  `train_mnist_classifier.py`,
+  `plotting/plotting_mnist.py`
+- Generated outputs:
+  `results/mnist/metrics_table.tex`,
+  `results/mnist/metrics_table.csv`
+- Optional paper table copy:
+  `Diffusion_with_Manifold_Constraints/tables/mnist_metrics.tex`
+- Command:
+
+```bash
+python train_mnist_classifier.py
+python plotting/plotting_mnist.py
+python plotting/build_main_tex_tables.py --only mnist --strict
+```
+
+Note: the current paper source embeds the MNIST table directly in `main.tex`.
+Use the generated table to verify or refresh those embedded values.
+
+### Figure 8: Protein Backbone Illustration
+
+- Label: no explicit label in `main.tex`
+- Source: TikZ code embedded directly in
+  `Diffusion_with_Manifold_Constraints/main.tex`
+- Generated output: none.
+
+### Table 4: Protein Metrics
+
+- Label: `tab:protein_metrics`
+- Required training: `bash training/protein.sh`
+- Required data: `data/protein/casp12_fragments_L10_N20000.npz`
+- Script: `plotting/plotting_protein.py`
+- Generated outputs:
+  `results/protein/metrics_table.tex`,
+  `results/protein/metrics_table.csv`
+- Optional paper table copy:
+  `Diffusion_with_Manifold_Constraints/tables/protein_metrics.tex`
+- Command:
+
+```bash
+python plotting/plotting_protein.py
+python plotting/build_main_tex_tables.py --only protein --strict
+```
+
+Note: the current paper source embeds the protein table directly in `main.tex`.
+Use the generated table to verify or refresh those embedded values.
+`plotting/plotting_protein.py` sets the table noise level to `0.001`.
+
+## Appendix Items
+
+### MNIST Classifier Training Curves
+
+- Label: `fig:MNIST_Classifier_Training_Validation_Losses`
+- Script: `train_mnist_classifier.py`
+- Generated outputs:
+  `plots/mnist_classifier_loss.svg`,
+  `plots/mnist_classifier_acc.svg`
+- Paper assets:
+  `Diffusion_with_Manifold_Constraints/figures/MNIST/mnist_classifier_loss.png`,
+  `Diffusion_with_Manifold_Constraints/figures/MNIST/mnist_classifier_acc.png`
+- Command:
+
+```bash
+python train_mnist_classifier.py
+```
+
+### Appendix Sampling Stability Figures
+
+| Label | Script | Generated output | Paper asset |
+|---|---|---|---|
+| `fig:SamplingStability_Mesh` | `plotting/plotting_bunny_varied_sigmas.py` | `results/bunny/scores_vs_time.svg` | `Diffusion_with_Manifold_Constraints/figures/bunny/scores_vs_time.png` |
+| `fig:SamplingStability_Image` | `plotting/plotting_mnist_varied_sigmas.py` | `results/mnist/scores_vs_time.svg` | `Diffusion_with_Manifold_Constraints/figures/MNIST/scores_vs_time.png` |
+| `fig:SamplingStability_Protein` | `plotting/plotting_protein_varied_sigmas.py` | `results/protein/scores_vs_time_varied_sigmas.svg` | `Diffusion_with_Manifold_Constraints/figures/protein/scores_vs_time_varied_sigmas.png` |
+
+## Static Appendix Tables
+
+The following paper tables are generated from constants in
+`plotting/build_main_tex_tables.py`:
+
+- `Diffusion_with_Manifold_Constraints/tables/notation_glossary.tex`
+- `Diffusion_with_Manifold_Constraints/tables/diffusion_training_config.tex`
+- `Diffusion_with_Manifold_Constraints/tables/model_parameter_counts.tex`
+
+Regenerate them with:
+
+```bash
+python plotting/build_main_tex_tables.py --only static
+```
+
+## Recompiling the Paper
+
+After copying refreshed figures/tables into `Diffusion_with_Manifold_Constraints/`,
+compile from the paper directory:
+
+```bash
+cd Diffusion_with_Manifold_Constraints
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+```
+
+## Provenance Records
+
+Each training run writes a manifest under:
+
+```text
+runs/<problem>/<timestamp>_<run_id>/manifest.json
+```
+
+The manifest records the exact command, CLI arguments, Git metadata, runtime
+environment, Slurm metadata when available, data file hashes, and checkpoint
+hashes. Checkpoints are stored under `models/` and are ignored by Git.

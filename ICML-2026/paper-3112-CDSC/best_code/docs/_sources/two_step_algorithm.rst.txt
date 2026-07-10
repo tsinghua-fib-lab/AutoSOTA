@@ -1,0 +1,47 @@
+Two-Step Algorithm
+==================================
+
+This section describes the two-step algorithm for survival analysis using the `cenreg` package. The two-step algorithm is a method for estimating survival functions in the presence of censored data.
+
+
+First Step: Censored Joint Distribution Estimation
+---------------------------------------------------
+
+Let :math:`(x,t,e)` be a data point for survival analysis, where :math:`x` is a feature vector, :math:`t` is the time of the event or censoring, and :math:`e` is an event indicator (1 if the event occurred, 0 if censored).
+If the time horizon is descretized, each :math:`(t,e)` can be represented as a vertical line segment (if :math:`e=0`) or a horizontal line segment ( (if :math:`e=1`)) in the two-dimensional space as shown in this figure.
+
+.. figure:: ./cjd_discretization_0.png
+    :width: 100%
+    :align: center
+
+    Censored Joint Distribution
+
+The first step of this algorithm estimates the distribution of the discretized observations by using a density model (e.g., LightGBM, neural network, etc.).
+
+.. figure:: ./density_estimation.png
+    :width: 100%
+    :align: center
+
+    Density Estimation
+
+
+Second Step: Estimate Survival Functions
+---------------------------------------------------
+
+The second step of this algorithm compute the survival function (equivalently, the CDFs of :math:`T_0` and :math:`T_1`) from the estimated distribution.
+
+.. figure:: ./solve_eq_with_copula.png
+    :width: 100%
+    :align: center
+
+    Estimate Survival Functions
+
+
+Jupyter Notebooks
+----------------------------
+
+We provide Jupyter notebooks that demonstrate the two-step algorithm using different models. You can find these notebooks in the `notebooks` directory of the `cenreg` repository.
+
+
+- `TS-LGB <https://github.com/CyberAgentAILab/cenreg/blob/main/notebooks/ts_lgb.ipynb>`_: An implementation with LightGBM 
+- `TS-Brier <https://github.com/CyberAgentAILab/cenreg/blob/main/notebooks/ts_brier.ipynb>`_: An implementation with a neural network whose loss function is the Brier score

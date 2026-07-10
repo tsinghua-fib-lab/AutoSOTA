@@ -1,0 +1,97 @@
+[build-system]
+requires = ["hatchling"]            
+build-backend = "hatchling.build"
+
+[project]
+name = "covmetrics"
+dynamic = ["version"]
+description = "Metrics for conditional coverage estimation"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ['Metrics', 'Conformal', 'Conditional', 'Coverage', 'Diagnostic']
+authors = [
+    { name = "Sacha Braun", email = "firstname.lastname@inria.fr" },
+    { name = "David Holzmüller", email = "firstname.lastname@inria.fr" },
+]
+license = { file = "LICENCE" }
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "License :: OSI Approved :: Apache Software License",
+]
+
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.25",
+    "pandas>=1.5.3",
+    "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+extra = [ 
+    "scipy>=1.13",
+    "lightgbm>=3.3.0",
+    "catboost>=1.1",
+    "probmetrics>=1.0.0",
+]
+
+dev = [
+    # testing
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[tool.hatch.version]
+path = "src/covmetrics/__about__.py"
+
+[tool.hatch.envs.default]
+installer = "uv"
+features = ["extra", "dev"]
+
+[tool.hatch.envs.hatch-test]
+installer = "uv"
+features = ["extra", "dev"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/covmetrics"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/covmetrics"]
+
+[project.urls]
+Documentation = "https://github.com/ElSacho/covmetrics#README"
+Issues = "https://github.com/ElSacho/covmetrics/issues"
+Source = "https://github.com/ElSacho/covmetrics"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+    "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:covmetrics tests}"
+
+[tool.coverage.run]
+source_pkgs = ["src/covmetrics", "tests"]
+branch = true
+parallel = true
+omit = [
+    "src/covmetrics/__about__.py",
+]
+
+[tool.coverage.paths]
+main = ["src/covmetrics"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

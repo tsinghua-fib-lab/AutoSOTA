@@ -1,0 +1,97 @@
+common:
+  seed: 42
+  deterministic: false
+
+  device: cuda
+  dtype: fp32
+
+  backbone:
+    name: hf_text
+    model_name_or_path: meta-llama/Meta-Llama-3-8B
+    model_arch: auto               # auto | llama | t5
+    model_kind: sequence_classification
+    num_labels: 3
+    trust_remote_code: false
+    use_fast_tokenizer: true
+
+  data:
+    batch_size: 8
+    num_workers: 4
+    max_length: 512
+    # max_train_samples: null
+    # max_val_samples: null
+    # max_test_samples: null
+
+  train:
+    epochs: 3
+    optimizer:
+      name: adamw
+    lr: 2.0e-5
+    weight_decay: 0.0
+    accumulate_grad_batches: 1
+    lr_scheduler:
+      name: cosine
+      warmup_steps: 200
+    grad_clip_norm: 1.0
+    early_stopping: true
+    early_stopping_patience: 5
+
+  strategy:
+    name: peft_lora               # full | linear_probe | peft_lora
+    forward_mode: standard        # standard | linearized_ntk
+    peft:
+      # For Llama-like blocks. For T5, use target_modules like ["q", "k", "v", "o"].
+      target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+      r: 16
+      lora_alpha: 16
+      lora_dropout: 0.1
+      bias: none
+      # modules_to_save is optional; when omitted, train_text auto-keeps classifier head modules.
+      # modules_to_save: ["score"]
+
+  output:
+    out_dir: src/checkpoints/finetune_text
+    save_format: peft              # full | head | peft
+    save_last_epoch: false
+    extract_heads: true
+    # heads_path: src/checkpoints/finetune_text/heads.pt
+
+  logging:
+    use_wandb: false
+    project: null
+    entity: null
+    tags: []
+    mode: online
+    local_log_dir: null
+    log_every_n_steps: 50
+    run_name: null
+
+# Tasks to train (can be overridden via CLI --suite/--tasks)
+datasets_order:
+  - snli
+  - mnli
+  - sick
+  - qnli
+  - rte
+  - scitail
+
+# Per-task overrides
+datasets:
+  snli:
+    train:
+      epochs: 3
+  mnli:
+    train:
+      epochs: 3
+  sick:
+    train:
+      epochs: 3
+  qnli:
+    train:
+      epochs: 3
+  rte:
+    train:
+      epochs: 5
+  scitail:
+    train:
+      epochs: 3

@@ -1,0 +1,14 @@
+defaults:
+    - _self_
+    - general : general_default
+    - model : discrete
+    - train : train_default
+    - dataset : qm9
+    - sample : sample_default
+    - wandb : wandb_default
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ../outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}-${dataset.name}-${general.name}
+

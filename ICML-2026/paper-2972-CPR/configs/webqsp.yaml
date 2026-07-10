@@ -1,0 +1,31 @@
+# CPR WebQSP config — reconstructed IDEA-12 best configuration (paper-2972).
+# This is the best-performing SOTA configuration found by AutoSoTA
+# (iteration 6, ECR=54.6% vs baseline 52.8%). See RECONSTRUCTION_NOTE.md.
+#
+# Run without LLM relation hints (no vLLM server was used for the reported run).
+no_llm: true
+
+# Dataset (downloaded separately; see data/README.md and scripts/download_data.md)
+train: ./data/webqsp/train.json
+test: ./data/webqsp/test.json
+max_hop: 2
+calib_frac: 0.1
+conformal_mode: path
+
+# Retrieval / TreeG
+beam_size: 32
+treeg_branch_size: 32
+treeg_active_size: 32
+
+# --- IDEA-12 best hyperparameters ---
+# Asymmetric TreeG value weights
+w_local: 2.0
+w_path: 0.5
+w_prior: 0.5
+
+# Residual value model (RCVNet)
+learn_residual_value: 1
+residual_lambda: 2.0
+value_lr: 0.001
+value_epochs: 12
+value_use_embeddings: 2

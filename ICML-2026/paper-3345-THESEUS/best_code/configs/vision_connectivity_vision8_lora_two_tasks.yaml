@@ -1,0 +1,45 @@
+suite: vision8
+
+# Evaluate barrier/connectivity only on these two tasks.
+tasks:
+  - EuroSAT
+  - Cars
+pair_tasks:
+  - EuroSAT
+  - Cars
+all_pairs: false
+
+clip_model: ViT-B-32
+clip_pretrained: openai
+device: cuda
+dtype: null
+
+batch_size: 128
+num_workers: 6
+val_fraction: 0.1
+seed: 42
+eval_split: val
+
+base_ckpt: null
+strict_load: false
+forward_mode: auto
+
+text_features_source: auto
+text_features_checkpoint: pair_task
+
+alpha_min: 0.0
+alpha_max: 1.0
+alpha_step: 0.1
+
+heatmap_alpha_min: 0.0
+heatmap_alpha_max: 1.0
+heatmap_alpha_step: 0.1
+
+save_plots: true
+output_dir: src/.cache/vision_connectivity_lora/vision8_two_tasks
+
+# You can also use checkpoint_a/checkpoint_b.
+# Here we use task->checkpoint mapping so it is easy to switch to all_pairs later.
+tuned_ckpts:
+  EuroSAT: src/checkpoints/finetune_two_stage_coop/ViT-B-32/openai/EuroSAT/peft_lora_last_ep.pt
+  Cars: src/checkpoints/finetune_two_stage_coop/ViT-B-32/openai/Cars/peft_lora_last_ep.pt

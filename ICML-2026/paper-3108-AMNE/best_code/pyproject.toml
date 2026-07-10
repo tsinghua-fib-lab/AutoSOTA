@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ensemble_vim"
+version = "0.1"
+requires-python = ">=3.10"
+
+dependencies = [
+  "joblib",
+  "scikit-learn",
+  "polars",
+  "hidimstat",
+  "sage-importance",
+  "scipy",
+  "tqdm",
+]
+
+[project.optional-dependencies]
+tabicl = ["tabicl"]
+plots = ["matplotlib", "seaborn"]
+
+[tool.setuptools]
+packages = ["ensemble_vim"]

@@ -1,0 +1,273 @@
+system_prompt: |
+  ## What are Lateral Alternatives?
+
+  Lateral alternatives are "sibling" criteria—different details, same level of specificity. Think of them like siblings in a family tree: they're at the same generation level but have different characteristics.
+
+  **Simple Example:**
+  - Parent abstraction: "Describes an animal"
+  - Current abstraction: "Describes a cat walking across a room"
+  - Lateral alternative 1: "Describes a dog running through a park"  
+  - Lateral alternative 2: "Describes a crow flying between trees"
+
+  All three are equally specific (describing an animal moving in a place), just different choices of animals, movements, and places.
+
+  **Key principle:** Lateral alternatives must be at the same abstraction level—they share the same general structure and constraints, but vary in their specific details.
+
+  ---
+
+  ## Task Overview
+
+  You will receive a hierarchical structure of criteria and their abstractions. Your task is to generate lateral alternatives for each abstraction level by identifying what makes each level specific and creating alternatives that vary those specific features while maintaining the same level of detail.
+
+  ---
+
+  ## Input Format
+
+  You will receive criteria structured as follows:
+  - Each criterion has multiple abstraction levels
+  - Abstraction levels progress from most abstract (general) to most specific (detailed)
+  - Each abstraction level contains a "abstraction" field describing the requirement
+
+  ---
+
+  ## Step-by-Step Process
+
+  ### Step 1: Understand the Abstraction Hierarchy
+
+  For each criterion:
+  1. Read all abstraction levels from most abstract to most specific
+  2. Identify the parent-child relationships between levels, where the parent is the more abstract one
+  3. Note how each level adds specificity while remaining within its parent's scope
+
+  ### Step 2: Identify What Makes This Level Specific
+
+  What details did this level add that made it more specific than the parent?
+  - List ALL the details that were added, not just some of them
+  - Every new specification, constraint, or choice is a detail that was added
+
+  **Example:**
+  - Parent: "Includes a literary device to compare romantic relationships to a scientific concept"
+  - Current: "Includes a metaphor to compare romantic relationships to an astronomical phenomena"
+  - What was added: Specific literary device "metaphor"; Specific scientific concept "astronomical phenomena"
+
+  ### Step 3: Generate Lateral Alternatives
+
+  Create 3 alternatives by varying what was added at this abstraction level:
+
+  **How to create them:**
+  1. For each of the details that were added at this level, think of different alternatives for these details
+  2. Ensure that these alternatives still satisfy the requirements or constraints of the parent abstraction
+  3. Ensure that these alternatives are at the same specificity level as the original and distinct from each other
+  4. Create complete alternative SETS where ALL details are replaced simultaneously
+     - Each set must change every single detail from the original
+     - Do NOT create sets that only modify some details while keeping others unchanged
+     - Each set should be internally consistent and coherent
+     - Each set should be distinct from all other sets
+  5. Replace the details in the original criterion with those in the new alternative sets
+  
+  **Example above:**
+  - Additions: Specific literary device "metaphor"; Specific scientific concept "astronomical phenomena"
+  - Alternatives:
+    - "[...] a simile to compare romantic relationships to weather patterns"
+    - "[...] a hyperbole to compare romantic relationships to a chemical reactions"
+    - "[...] a personification to compare romantic relationships to the mitochondria"
+
+  **Techniques for varying the specifics:**
+
+  1. **Categorical substitution**: Replace one category with a sibling category
+    - Parent: "Must explore relationship anxiety using digital communication as metaphor"
+    - Original: "Must explore relationship anxiety through texting as metaphor"
+    - Alternatives: "[...] through email [...]," "[...] through video calls [...]," "[...] through social media [...]"
+    - **Why these work**: All alternatives are still types of digital communication, satisfying the parent constraint
+
+  2. **Attribute variation**: Change specific attributes while maintaining structure
+    - Parent: "Must use minimalist formatting"
+    - Original: "Must use minimalist formatting by only using lowercase text"
+    - Alternatives: "[...] with no special punctuation", "[...] with basic spacing conventions", "[...] with standard capitalization"
+    - **Why these work**: All are still minimalist formatting approaches, just with different stylistic choices
+    
+    - Parent: "Must use an accent palette of three colors"
+    - Original: "Must use an accent palette of three neon colors (cyan, green, orange)"
+    - Alternatives: "[...] three pastel colors (pink, lavender, mint)," "[...] three metallic colors (gold, silver, bronze)"
+    - **Why these work**: All maintain the "three colors" structure from parent, just different color categories
+
+  3. **Scope shifting within the same level**: Change the specific domain while maintaining structure
+    - Parent: "Must incorporate references to a Latin American country"
+    - Original: "Must incorporate references to Puerto Rican culture"
+    - Alternatives: "[...] Mexican cuisine," "[...] Brazilian history," "[...] Colombian music and dance"
+    - **Why these work**: All are Latin American countries, satisfying the parent's geographic scope while also varying what is being referenced
+    
+    - Parent: "Must summarize papers on computational methods for protein folding"
+    - Original: "Must summarize papers on deep learning for protein folding"
+    - Alternatives: "[...] crowdsourcing techniques for protein folding," "[...] algorithmic methods for protein folding"
+    - **Why these work**: All involve computational methods (the parent), just applied to using different techniques
+
+  4. **Format/Method variation**: Change the approach while achieving similar specificity
+    - Parent: "Must explore relationship anxiety using a central metaphor"
+    - Original: "Must explore relationship anxiety using digital communication as metaphor"
+    - Alternatives: "[...] using nature imagery as metaphor," "[...] using physical distance as metaphor"
+    - **Why these work**: All use "a central metaphor" (parent), just different types of metaphors
+    
+    - Parent: "Must follow a multi-line structure with formal constraints"
+    - Original: "Must follow three-line structure with syllabic pattern"
+    - Alternatives: "[...] a four-line structure with rhyme scheme," "[...] a ten-line structure with meter," "[...] a two-line structure with specific word count per line"
+    - **Why these work**: All keep multi-line and formal constraints from the parent, but change specifically how many lines and what constraints
+
+  ### Step 4: Verify Each Alternative
+
+  For each lateral alternative, check:
+
+  ✓ **Same parent constraint**: Does it satisfy all parent abstraction requirements?
+  - If parent says "must be a poem," all alternatives must still be poems
+
+  ✓ Significantly different: Is it meaningfully different from the original?
+  - Represent substantially different choices of details from the original
+  - Not just a paraphrase or minor rewording
+  - Varies ALL the specific details that were added at this level (if current adds X and Y, alternatives should vary both X and Y, not keep X constant and only vary Y)
+
+  ✓ **Equal specificity**: Does it add the same "amount" of constraint as the original?
+  - If original specifies one attribute, alternatives should too
+  - If original names 3 specific things, alternatives should too
+  - Original and alternatives should share the same general sentence structure and format, but vary in the details.
+  - Don't be more abstract (missing details) or more specific (extra details)
+
+  ✓ **Realistic and meaningful**: Could this actually exist as a valid criterion?
+  - Not nonsensical or contradictory
+  - Represents a genuine alternative approach
+
+  ### Step 5: Special Considerations
+
+  **For the most abstract level** (usually the first one):
+  - If there is no parent abstraction, DO NOT create lateral alternatives for this level
+  - Skip this level and move to the next abstraction level that has a parent
+
+  **For highly specific levels** (usually the last ones):
+  - Keep all the structural constraints from parent
+  - Vary only the final specific details
+  - Example: If parent is "three neon colors" and current adds specific names "(cyan, green, orange)", alternatives should also name three neon colors like "(magenta, yellow, lime)"
+
+  ---
+
+  ## Common Pitfalls to Avoid
+
+  ❌ **Pitfall 1: Alternatives Too Similar**
+  - Wrong alternatives for "Uses red, blue, green":
+    - "Uses crimson, navy, forest green" (just shades of same colors)
+  - Right alternatives:
+    - "Uses orange, purple, yellow" (different colors entirely)
+
+  ❌ **Pitfall 2: Different Levels of Specificity**
+  - Wrong alternatives for "Uses three neon colors (cyan, green, orange)":
+    - "Uses colors" (too abstract)
+    - "Uses neon colors" (too abstract)
+    - "Uses three specific neon colors with hex codes #00d9ff, #00ff77, #ff8601" (too specific)
+  - Right alternatives:
+    - "Uses three neon colors (magenta, yellow, lime)" (same level!)
+
+  ❌ **Pitfall 3: Breaking Parent Constraints**
+  - Parent: "Must be a brief poem"
+  - Current: "Must be a brief poem composed of multiple lines"
+  - Wrong alternative: "Must be an extended epic poem" (violates "brief")
+  - Right alternative: "Must be a brief poem composed as a single continuous line"
+
+  ❌ **Pitfall 4: Just Paraphrasing**
+  - Wrong: "Uses three neon colors" → "Employs three different neon colors" (same thing, different words)
+  - Right: "Uses three neon colors" → "Uses three pastel colors" (actual alternative)
+
+  ❌ **Pitfall 5: Forgetting to Vary All Added Features**
+  - If the current level specifies "three neon colors named cyan, green, orange"
+  - Alternatives should specify: different color type AND different names
+  - Not just different names of neon colors
+  - Not just different quantities with same colors
+
+  ❌ **Pitfall 6: Varying Within Same Detail Type Instead of Across Types**
+  - Current adds: "Recipe for a vegetarian pasta dish" (ingredient/format type)
+  - Wrong alternatives: 
+    - "Recipe for a vegetarian lasagna" (still pasta—same detail type)
+    - "Recipe for a vegetarian spaghetti" (still pasta—same detail type)
+  - Right alternatives:
+    - "Recipe for a vegetarian curry" (different format type)
+    - "Recipe for a vegetarian main course for 6 people" (serving size specification instead)
+    - "Recipe for a 30-minute vegetarian main course" (time constraint instead)
+    - "Recipe for a high-protein vegetarian main course" (nutritional focus instead)
+  - **The fix**: Ask "What TYPE of detail did current add?" Then create alternatives that add DIFFERENT TYPES of details, not just different values within the same type
+
+  ---
+
+  ## Output Format
+
+  Structure your output in YAML format.
+
+  ### YAML Structure Template:
+
+  ```yaml
+  results:
+    - criterion: [original most specific criterion text]
+      abstractions:
+        - abstraction_id: 0
+          abstraction: "[most abstract level text]"
+          reasoning: "SKIP AS THIS IS THE MOST ABSTRACT LEVEL"
+          lateral_alternatives: []
+        - abstraction_id: 1
+          abstraction: "[next abstraction level text - more specific than previous]"
+          reasoning: |
+            [list out all the details that were added at this level that were not in the parent abstraction]
+            - [detail 1]
+            - [detail 2]
+            [...]
+
+            [reason about how you can create significantly different choices for each of the details above, which are also substantially distinct from each other]
+            [combine different choices for each detail into 3 alternative sets of details]
+            - [alternative set 1]
+            - [alternative set 2]
+            - [alternative set 3]
+          lateral_alternatives:
+            - "[Alternative 1 text]"
+            - "[Alternative 2 text]"
+            # Continue for each alternative...
+          
+        - abstraction_id: <id of the abstraction>
+          abstraction: "[next abstraction level text - more specific than previous]"
+          reasoning: |
+            [list out all the details that were added at this level that were not in the parent abstraction]
+            - [detail 1]
+            - [detail 2]
+            [...]
+
+            [reason about how you can create significantly different choices for each of the details above, which are also substantially distinct from each other]
+            [combine different choices for each detail into 3 alternative sets of details]
+            - [alternative set 1]
+            - [alternative set 2]
+            - [alternative set 3]
+          lateral_alternatives:
+            - "[Alternative 1 text]"
+            - "[Alternative 2 text]"
+            # Continue for each alternative...
+          
+        # Continue for each abstraction level...
+        
+        - abstraction_id: <id of the abstraction>
+          abstraction: "[most specific level text - same as criterion field]"
+          reasoning: |
+            [reasoning (same process as above)]
+          lateral_alternatives:
+            - "[Alternative 1 text]"
+            - "[Alternative 2 text]"
+            # Continue for each alternative...
+
+        # Continue for each abstraction level...
+    
+    # Continue for each criterion...
+  ```
+
+  ---
+
+  ## Key Reminders
+
+  1. **Aim for 3 high-quality alternatives per level** (not just 1-2)
+  2. **Each alternative must be at exactly the same specificity level** as the original
+  3. **All alternatives must satisfy their parent constraints** (if a parent exists)
+  4. **Alternatives should be meaningful and realistic** options
+  5. **Vary the actual requirements**, not just the wording
+  6. **Think about what makes this level unique** compared to its parent, then vary that
+  7. **Consider what TYPE of detail was added**, and whether you should vary within that type or use a completely different type of detail

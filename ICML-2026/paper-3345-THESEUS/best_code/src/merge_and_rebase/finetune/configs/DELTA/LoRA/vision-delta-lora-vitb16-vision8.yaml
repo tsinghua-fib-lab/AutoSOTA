@@ -1,0 +1,168 @@
+common:
+  seed: 42
+  deterministic: false
+  device: cuda
+  dtype: fp32
+  backbone:
+    name: openclip
+    clip_model: ViT-B-16
+    clip_pretrained: openai
+  data:
+    batch_size: 32
+    num_workers: 6
+    val_fraction: 0.1
+    pin_memory: true
+    train_preprocess: train
+  train:
+    epochs: null
+    optimizer:
+      name: adamw
+    lr: 0.0003
+    weight_decay: 0.1
+    accumulate_grad_batches: 4
+    lr_scheduler:
+      name: cosine
+      warmup_steps: 500
+    grad_clip_norm: -1.0
+    early_stopping: false
+    early_stopping_patience: 5
+  strategy:
+    name: peft_lora
+    forward_mode: standard
+    params:
+      parameterization: delta
+      trainable_params: regularized_only
+    peft:
+      target_modules: auto
+      r: 16
+      lora_alpha: 16
+      lora_dropout: 0
+      bias: none
+  regularization:
+    name: composite
+    regularizers:
+      - name: distillation
+        locations:
+          - student: image_features
+            teacher: image_features
+            loss: mse
+            weight: 1.0
+        along_path:
+          enabled: true
+          alpha_range: [0.5, 2.0]
+          sampling: curriculum
+          temperature: 0.5
+        teacher:
+          mode: online
+          stop_gradient: true
+          save_checkpoint: false
+          output_dir: src/checkpoints/delta_linear_teacher_vitb16_8vision_lora_both
+          strategy:
+            name: peft_lora
+            forward_mode: linearized_ntk
+            forward_mode_params:
+              linearized_feature_normalization: false
+              linearized_logit_normalization: true
+            params:
+              parameterization: delta
+              trainable_params: regularized_only
+            peft:
+              target_modules: auto
+              r: 16
+              lora_alpha: 16
+              lora_dropout: 0
+              bias: none
+          train:
+            optimizer:
+              name: adamw
+            lr: 0.0003
+            weight_decay: 0.1
+            lr_scheduler:
+              warmup_steps: 500
+            grad_clip_norm: -1.0
+          supervised:
+            enabled: true
+            weight: 1.0
+            loss:
+              name: cross_entropy
+          regularization:
+            name: ekfac_ggn
+            cache_dir: src/checkpoints/ekfac_ggn
+            precision: fp32
+            reg_lambda: 500.0
+            full_block_scaler: 10.0
+            projection_scaler: 0.1
+            cadence: 1
+            force_recompute: false
+            train_percent: 0.15
+            fisher_seed: 42
+            fisher_num_samples_expectation: 1
+            reference_datasets:
+              - ImageNet21KP
+      - name: ekfac_ggn
+        cache_dir: src/checkpoints/ekfac_ggn
+        precision: fp32
+        reg_lambda: 500.0
+        full_block_scaler: 10.0
+        projection_scaler: 0.1
+        cadence: 1
+        force_recompute: false
+        train_percent: 0.15
+        fisher_seed: 42
+        fisher_num_samples_expectation: 1
+        reference_datasets:
+          - ImageNet21KP
+  output:
+    out_dir: src/checkpoints/delta_vitb16_8vision_lora_both
+    save_format: peft
+    save_last_epoch: true
+  logging:
+    use_wandb: false
+    project: null
+    entity: null
+    tags:
+      - delta
+      - distillation
+      - ekfac_ggn
+      - lora-both
+      - vision8
+      - imagenet21kp-ref
+      - vitb16
+    mode: online
+    local_log_dir: .log
+    log_every_n_steps: 50
+    run_name: null
+datasets_order:
+  - Cars
+  - DTD
+  - EuroSAT
+  - GTSRB
+  - MNIST
+  - RESISC45
+  - SUN397
+  - SVHN
+datasets:
+  Cars:
+    train:
+      epochs: 35
+  DTD:
+    train:
+      epochs: 76
+  EuroSAT:
+    train:
+      epochs: 12
+  GTSRB:
+    train:
+      epochs: 11
+  MNIST:
+    train:
+      epochs: 5
+  RESISC45:
+    train:
+      epochs: 15
+  SUN397:
+    train:
+      epochs: 14
+  SVHN:
+    train:
+      epochs: 4

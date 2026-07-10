@@ -1,0 +1,81 @@
+common:
+  seed: 42
+  deterministic: false
+
+  device: cuda
+  dtype: fp32
+
+  backbone:
+    name: hf_text
+    model_name_or_path: google/t5-v1_1-base
+    model_arch: auto
+    model_kind: sequence_classification
+    num_labels: 3
+    trust_remote_code: false
+    use_fast_tokenizer: true
+
+  data:
+    batch_size: 4
+    num_workers: 4
+    # max_length: 512
+
+  train:
+    epochs: 3
+    optimizer:
+      name: adamw
+    lr: 5.0e-6
+    weight_decay: 0.01
+    accumulate_grad_batches: 32
+    lr_scheduler:
+      name: cosine
+      warmup_steps: 200
+    grad_clip_norm: 1.0
+    early_stopping: false
+    early_stopping_patience: 5
+
+  strategy:
+    name: full
+
+  output:
+    out_dir: src/checkpoints/finetune_text
+    save_format: full             # full | head | peft
+    save_last_epoch: false
+    extract_heads: true
+
+  logging:
+    use_wandb: false
+    project: null
+    entity: null
+    tags: []
+    mode: online
+    local_log_dir: null
+    log_every_n_steps: 50
+    run_name: null
+
+datasets_order:
+  - snli
+  - mnli
+  - sick
+  - qnli
+  - rte
+  - scitail
+
+datasets:
+  snli:
+    train:
+      epochs: 3
+  mnli:
+    train:
+      epochs: 3
+  sick:
+    train:
+      epochs: 20
+  qnli:
+    train:
+      epochs: 3
+  rte:
+    train:
+      epochs: 50
+  scitail:
+    train:
+      epochs: 50

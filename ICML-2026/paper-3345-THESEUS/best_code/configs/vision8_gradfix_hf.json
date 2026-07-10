@@ -1,0 +1,33 @@
+{
+    "_comment": "GradFix rebase using HuggingFace Hub checkpoint paths (hf-hub: prefix). Source=openai, Target=laion2b, fixed alpha=1.0.",
+    "suite": "vision8",
+    "tasks": "all",
+    "source_clip_model": "ViT-B-32",
+    "source_clip_pretrained": "openai",
+    "target_clip_model": "ViT-B-32",
+    "target_clip_pretrained": "laion2b_s34b_b79k",
+    "method": "gradfix",
+    "method_params": {
+        "mask_mode": "normal",
+        "vote": "max"
+    },
+    "alpha_search": false,
+    "alpha": 1.0,
+    "weights": null,
+    "batch_size": 32,
+    "num_workers": 6,
+    "val_fraction": 0.1,
+    "seed": 33,
+    "no_humanize": true,
+    "grad_imgs_per_class": 1,
+    "tuned_ckpts": {
+        "Cars": "hf-hub:fillo-rinaldi/ViT-B-32-openai/Cars/full_best_ep.pt",
+        "DTD": "hf-hub:fillo-rinaldi/ViT-B-32-openai/DTD/full_best_ep.pt",
+        "EuroSAT": "hf-hub:fillo-rinaldi/ViT-B-32-openai/EuroSAT/full_best_ep.pt",
+        "GTSRB": "hf-hub:fillo-rinaldi/ViT-B-32-openai/GTSRB/full_best_ep.pt",
+        "MNIST": "hf-hub:fillo-rinaldi/ViT-B-32-openai/MNIST/full_best_ep.pt",
+        "RESISC45": "hf-hub:fillo-rinaldi/ViT-B-32-openai/RESISC45/full_best_ep.pt",
+        "SUN397": "hf-hub:fillo-rinaldi/ViT-B-32-openai/SUN397/full_best_ep.pt",
+        "SVHN": "hf-hub:fillo-rinaldi/ViT-B-32-openai/SVHN/full_best_ep.pt"
+    }
+}

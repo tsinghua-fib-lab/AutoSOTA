@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pogo-torch"
+description = "A Proximal One-step Geometric Orthoptimizer in Pytorch"
+authors = [
+  {name = "Adrián Javaloy", email = "25713831+adrianjav@users.noreply.github.com"}
+]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+]
+dynamic = ["version"]
+keywords = [
+  "torch",
+  "pytorch",
+  "optimizer",
+  "orthoptimizer",
+  "constrained-optimization",
+  "deep learning",
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.1.0", 
+]
+
+[project.urls]
+source = "https://github.com/adrianjav/pogo"
+tracker = "https://github.com/adrianjav/pogo/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "pogo.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["pogo*"]
+
+[dependency-groups]
+example = [
+    "numpy>=2.4.2",
+]

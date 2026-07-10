@@ -1,0 +1,53 @@
+7a3f839d0b3a7afa576fe9d91bc6e79850943688
+diff --git a/method/fft.py b/method/fft.py
+index 0f65cc0..7972ca6 100644
+--- a/method/fft.py
++++ b/method/fft.py
+@@ -101,7 +101,9 @@ def calibrate_fft_bound(df_test, args, x_names, p_a_x, fft, policy_list):
+     for policy in policy_list:
+         a_new = fft.get_decisions_policy(policy, df_test)
+         obj, constr, _ = weighter_test.get_obj_and_constr(a_new)
+-        bound = weighter_test.get_hoeffding(a_new)
++        hoeffding_bound = weighter_test.get_hoeffding(a_new)
++        bernstein_bound = weighter_test.get_empirical_bernstein_bound(a_new)
++        bound = min(hoeffding_bound, bernstein_bound)
+         if len(policy) == 1 and a_new[0] == 0:
+             bound = 0
+         for ii, beta in enumerate(args.constraint_values):
+diff --git a/method/weights_p_bound.py b/method/weights_p_bound.py
+index 958578a..97e1f05 100644
+--- a/method/weights_p_bound.py
++++ b/method/weights_p_bound.py
+@@ -78,7 +78,31 @@ class Weights:
+             else:
+                 lo = mid
+         return hi
+-    def get_conformal_weight(self, Z, Z_max):
++    
++    def get_empirical_bernstein_bound(self, a_policy, prop=None, max_Z=None):
++        """Compute empirical Bernstein upper confidence bound (tighter than Hoeffding)."""
++        if prop is None:
++            prop = np.mean(a_policy)
++        if prop == 0:
++            return 1
++        Z = np.where(a_policy == 0, 0, self.Z_1) / prop
++        if max_Z is None:
++            max_Z = np.max(Z)
++        if max_Z == 0:
++            return 1
++        Z_standardized = Z / max_Z
++        R_hat = np.mean(Z_standardized)
++        n = len(Z)
++        v_n = np.var(Z_standardized, ddof=1)
++        if v_n <= 0:
++            v_n = 1e-10
++        # Empirical Bernstein inequality (Maurer & Pontil, 2009)
++        term1 = np.sqrt(2.0 * v_n * np.log(2.0 / self.delta) / n)
++        term2 = 7.0 * np.log(2.0 / self.delta) / (3.0 * (n - 1))
++        bernstein_ucb = R_hat + term1 + term2
++        return min(bernstein_ucb, 1.0) * max_Z
++
++def get_conformal_weight(self, Z, Z_max):
+         n = len(Z)
+         Z = np.sort(Z)
+         ind = int(np.ceil((1 - self.alpha)*(n+1)))-1

@@ -1,0 +1,38 @@
+{
+  "suite": "vision8",
+  "tasks": "all",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "datacomp_xl_s13b_b90k",
+  "target_clip_model": "ViT-B-16",
+  "target_clip_pretrained": "laion2b_s34b_b88k",
+  "method": "gradfix",
+  "method_params": {
+    "mask_mode": "normal",
+    "vote": "max"
+  },
+  "alpha_search": true,
+  "alpha_selection": "per_task",
+  "alpha_min": 0.0,
+  "alpha_max": 2.0,
+  "alpha_step": 0.1,
+  "alpha": 0.3,
+  "batch_size": 32,
+  "num_workers": 6,
+  "val_fraction": 0.1,
+  "seed": 33,
+  "no_humanize": true,
+  "grad_imgs_per_class": 1,
+  "grad_batch_size": null,
+  "grad_num_batches": null,
+  "weights": null,
+      "tuned_ckpts": {
+    "Cars": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/cars/best.pt",
+    "DTD": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/dtd/best.pt",
+    "EuroSAT": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/eurosat/best.pt",
+    "GTSRB": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/gtsrb/best.pt",
+    "MNIST": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/mnist/best.pt",
+    "RESISC45": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/resisc45/best.pt",
+    "SUN397": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/sun397/best.pt",
+    "SVHN": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/svhn/best.pt"
+  }
+}

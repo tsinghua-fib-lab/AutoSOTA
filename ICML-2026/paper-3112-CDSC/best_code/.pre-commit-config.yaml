@@ -1,0 +1,70 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_install_hook_types: [ pre-commit, commit-msg, pre-push ]
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: check-added-large-files
+    args: [--maxkb=100000] # keep files at or below GitHub's 100 MB limit
+  - id: check-executables-have-shebangs
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-shebang-scripts-are-executable
+  - id: check-toml
+  - id: check-yaml
+  - id: debug-statements
+  - id: detect-aws-credentials
+    args: [--allow-missing-credentials]
+  - id: detect-private-key
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+    args: [--fix=auto]
+  - id: name-tests-test
+  - id: pretty-format-json
+    exclude: \.ipynb$
+  - id: requirements-txt-fixer
+  - id: trailing-whitespace
+- repo: https://github.com/lovesegfault/beautysh
+  rev: v6.4.2
+  hooks:
+  - id: beautysh
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.13.9
+  hooks:
+  - id: commitizen
+  - id: commitizen-branch
+    stages:
+    - pre-push
+- repo: local
+  hooks:
+  - entry: uv run ruff check --fix
+    id: ruff-check
+    language: system
+    name: ruff check
+    stages:
+    - pre-commit
+    - manual
+    types_or:
+    - python
+    - jupyter
+  - entry: uv run ruff format
+    id: ruff-format
+    language: system
+    name: ruff format
+    stages:
+    - pre-commit
+    - manual
+    types_or:
+    - python
+    - jupyter
+  - entry: uv run ty check
+    id: ty
+    language: system
+    name: ty
+    stages:
+    - pre-commit
+    - manual
+    types_or:
+    - python
+    - pyi

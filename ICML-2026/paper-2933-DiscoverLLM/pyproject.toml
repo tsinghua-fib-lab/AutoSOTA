@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discoverllm"
+version = "0.1.0"
+description = "LLM-based dialogue simulation, evaluation, and training against an intent-aware user simulator"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "DiscoverLLM authors"}
+]
+keywords = ["llm", "dialogue", "simulation", "evaluation", "rlhf", "dpo", "grpo"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Runtime dependencies for the simulator + evaluation pipeline.
+# Training (TRL/peft/etc.) goes under the ``train`` extra to keep the base
+# install lightweight for users who only want simulation/eval.
+dependencies = [
+    "anthropic>=0.40.0",
+    "openai>=1.0.0",
+    "google-genai>=1.0.0",
+    "boto3>=1.28.0",
+    "pyyaml>=6.0",
+    "numpy>=1.24.0",
+    "tiktoken>=0.5.0",
+    "datasets>=2.14.0",
+    "typing_extensions>=4.5.0",
+    "packaging>=21.0",
+]
+
+[project.optional-dependencies]
+train = [
+    "torch>=2.1.0",
+    "transformers>=4.45.0",
+    "trl>=0.12.0",
+    "peft>=0.13.0",
+    "accelerate>=0.30.0",
+    "deepspeed>=0.14.0",
+    "bitsandbytes>=0.43.0",
+    "wandb>=0.16.0",
+    "litellm>=1.40.0",
+    "python-dotenv>=1.0.0",
+]
+dev = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+discoverllm-simulate = "discoverllm.simulate.run:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["discoverllm*"]
+
+[tool.setuptools.package-data]
+"discoverllm.core.prompts" = ["*.yaml"]
+"discoverllm.training.prompts" = ["*.txt"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py files re-export submodule names; F401 is by design.
+"**/__init__.py" = ["F401"]

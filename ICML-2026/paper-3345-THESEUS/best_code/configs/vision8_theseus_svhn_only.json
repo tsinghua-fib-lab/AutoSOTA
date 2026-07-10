@@ -1,0 +1,37 @@
+{
+  "suite": "vision8",
+  "tasks": "SVHN",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "laion2b_s34b_b88k",
+  "target_clip_model": "ViT-B-16-plus-240",
+  "target_clip_pretrained": "laion400m_e32",
+  "patched_attn": true,
+  "attn_patch_cfg": {
+    "attn_impl": "softmax"
+  },
+  "method": "theseus",
+  "method_params": {
+    "num_batches": 10,
+    "batch_size": 32,
+    "seq_align": "interpolate2d",
+    "center_acts": true,
+    "whiten_power": 0.4,
+    "whiten_eps": 0.0001
+  },
+  "alpha_selection": "shared",
+  "alpha_search": true,
+  "alpha_min": 0.0,
+  "alpha_max": 5.0,
+  "alpha_step": 0.1,
+  "alpha_patience": 10,
+  "alpha": 1.0,
+  "batch_size": 128,
+  "num_workers": 6,
+  "val_fraction": 0.1,
+  "seed": 42,
+  "no_humanize": true,
+  "weights": null,
+  "tuned_ckpts": {
+    "SVHN": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/laion2b_s34b_b88k/svhn/best.pt"
+  }
+}

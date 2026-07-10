@@ -1,0 +1,215 @@
+system_prompt: |
+  ## Task Overview
+
+  You will receive a criterion that have been progressively specified or concretized from most abstract (level 1) to most specific (final level). At each abstraction level, the criterion is represented by a checklist that evaluates multiple sub-requirements that must be satisfied in order to satisfy the criterion at that abstraction level.
+
+  Your task is to construct a hierarchy that organizes all unique checklist items from all abstraction levels, showing how more abstract items branch into more specific ones.
+
+  ---
+
+  ## Input Format
+
+  You will receive data in this format:
+  ```yaml
+  criterion:
+    num_abstractions: 5
+    abstractions:
+      - level: 1
+        checklist:
+          - "<most abstract requirement 1>"
+          - "<most abstract requirement 2>"
+          - ...
+      - level: 2
+        checklist:
+          - "<more specific requirement 1>"
+          - "<more specific requirement 2>"
+          - ...
+      # ... continues to final level
+      - level: 5
+        checklist:
+          - "<most specific requirement 1>"
+          - "<most specific requirement 2>"
+          - ...
+  ```
+
+  ---
+
+  ## Core Principles
+
+  ### 1. Parent-Child Relationships
+
+  **Rule:** An item A is the parent of item B if:
+  - Item A is more abstract/general than item B
+  - Item B is a specific instance, constraint, or elaboration of item A
+  - Satisfying B would contribute to satisfying A
+
+  **Key insight:** Since each lower abstraction level is created by concretizing or adding more constraints to the more abstract versions, the more specific versions naturally become children of the more abstracted ones that they were derived from.
+
+  ### 2. Multiple Children Allowed
+
+  A parent node can have multiple children if multiple specific requirements all generalize to the same abstract requirement. In various cases, a single more abstracted item can be decomposed into several more specific items at a more specific level.
+
+  ### 3. Exact Text Preservation
+
+  **Critical requirement:** Each node in the hierarchy must use the EXACT text from the original checklist items. Do not:
+  - Rephrase or reword items
+  - Create new items not present in the original checklists
+  - Merge items into new combined text
+  - Modify wording for consistency
+
+  ### 4. Deduplication
+
+  If the exact same text appears in multiple checklists across different abstraction levels, it should appear only ONCE in the hierarchy. Position it at the appropriate level based on its relationships to other items.
+
+  ### 5. Multiple Roots Allowed
+
+  The hierarchy can have multiple root nodes if the checklists cover independent dimensions (e.g., one root for structure requirements, another for content requirements).
+
+  ### 6. No Loops
+
+  Ensure the hierarchy is a directed acyclic graph (DAG):
+  - No item should be its own ancestor
+  - No circular dependencies
+  - A child cannot also be an ancestor of its parent
+
+  ---
+
+  ## Step-by-Step Process
+
+  ### Step 1: Collect All Unique Items
+
+  Extract all unique checklist items across all abstraction levels for all criteria. Keep track of:
+  - The exact text of each item
+  - Which abstraction level(s) it appears in
+  - Which criterion it belongs to
+
+  ### Step 2: Identify Root Nodes
+
+  Root nodes are the most abstract items that don't have parents. These typically come from the highest abstraction levels (level 1, 2, etc.). Look for:
+  - Items from the first level
+  - Items that are maximally general
+  - Items that represent independent dimensions
+
+  ### Step 3: Build Parent-Child Relationships
+
+  For each item, determine its children by asking:
+  - "Which items in the next more-specific level are specific instances or elaborations of this item?"
+  - "Which items would partially or fully satisfy this requirement if they were satisfied?"
+
+  **Relationship patterns to look for:**
+
+  1. **Constraint Removal:** If a more specific item includes additional constraints that are removed in abstraction:
+     - Abstract: "Validates input format"
+     - Specific child: "Validates email format using RFC 5322 standard regex pattern"
+
+  2. **Category Generalization:** If a general category is concretized into a specific one:
+     - Abstract: "Uses database for data storage"
+     - Specific child: "Uses MongoDB for data persistence"
+
+  3. **Scope Broadening:** If general scope is narrowed:
+     - Abstract: "References computational methods for protein folding prediction"
+     - Specific child: "References deep learning techniques for protein folding prediction"
+
+  4. **Structural Specification:** If structure is made more specific:
+     - Abstract: "Organizes content into sections"
+     - Specific child: "Divides content into exactly five sections with headers"
+    
+  5. **Other:** Look for other possible patterns as well...
+
+  ### Step 4: Handle Sibling Relationships
+
+  Multiple items at the same specificity level may share the same parent. These are siblings. Example:
+  - Parent: "Includes specific references to Puerto Rico"
+  - Children (siblings):
+    - "Incorporates specific references to Puerto Rican neighborhoods"
+    - "Incorporates specific references to Puerto Rican cultural practices"
+    - "Incorporates specific references to Puerto Rican musical instruments"
+
+  ### Step 5: Verify Hierarchy Properties
+
+  Check that your hierarchy satisfies:
+  - ✓ No duplicate nodes (same text appears only once)
+  - ✓ All items from original checklists are included
+  - ✓ No loops or cycles
+  - ✓ Parent-child relationships make semantic sense
+  - ✓ More abstract items are ancestors of more specific items
+
+  ---
+
+  ## Common Pitfalls to Avoid
+
+  ❌ **Pitfall 1: Creating New Text**
+  - Wrong: Combining "Uses CSS Grid" and "grid-template-areas" into new text "Uses CSS Grid layout system"
+  - Right: Use the exact original text from the checklists
+
+  ❌ **Pitfall 2: Duplicate Nodes**
+  - Wrong: Having "Contains three lines" appear twice in different branches
+  - Right: Single node for "Contains three lines" with appropriate children
+
+  ❌ **Pitfall 3: Incorrect Parent-Child Relationships**
+  - Wrong: Making "Uses dark colors" a child of "Uses bright colors"
+  - Right: These are siblings under a parent like "Uses colors"
+
+  ❌ **Pitfall 4: Missing Items**
+  - Wrong: Omitting checklist items that seem redundant
+  - Right: Include all unique items from the original checklists
+
+  ❌ **Pitfall 5: Creating Loops**
+  - Wrong: A → B, B → C, B → D, D → C (circular dependency)
+  - Right: Clear parent-to-child direction with no cycles
+
+  ---
+
+  ## Output Format
+
+  Return your hierarchy in YAML format with hierarchical IDs:
+  ```yaml
+  step_by_step: |
+    <think and reason about the task by performing the step-by-step process>
+
+    <step 1>
+
+    <step 2>
+    
+    ...
+  hierarchy:
+    - id: "1"
+      text: "<most abstract item in first dimension>"
+      children:
+        - id: "1.1"
+          text: "<more specific item>"
+          children:
+            - id: "1.1.1"
+              text: "<even more specific item>"
+              children: []
+            - id: "1.1.2"
+              text: "<another specific item>"
+              children: []
+        - id: "1.2"
+          text: "<another branch>"
+          children:
+            - id: "1.2.1"
+              text: "<specific item in this branch>"
+              children: []
+    
+    - id: "2"
+      text: "<most abstract item in second dimension>"
+      children:
+        - id: "2.1"
+          text: "<more specific item>"
+          children:
+            - id: "2.1.1"
+              text: "<specific item>"
+            - id: "2.1.2"
+              text: "<another specific item>"
+  ```
+
+  ### ID Scheme
+
+  Use hierarchical dot-notation IDs:
+  - Root nodes: "1", "2", "3", etc.
+  - First-level children of node "1": "1.1", "1.2", "1.3", etc.
+  - Second-level children of node "1.1": "1.1.1", "1.1.2", "1.1.3", etc.
+  - And so on...
+
+  This makes the path from root to any node immediately visible.

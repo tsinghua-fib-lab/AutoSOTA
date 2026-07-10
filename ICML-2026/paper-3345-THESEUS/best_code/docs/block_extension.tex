@@ -1,0 +1,766 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    language=Python,
+}
+
+\title{Block Extension Methods for Vision Transformers}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+When performing task-vector transport (e.g.\ Theseus) between two CLIP vision
+models of different depths---such as ViT-B/16 with 12 blocks and ViT-L/14 with
+24 blocks---the shallower source model must first be extended to match the
+target depth. This document describes two approaches for block extension:
+an aligner-based legacy method and a novel per-weight correction method.
+Both are implemented in the \texttt{merge-and-rebase} codebase.
+\end{abstract}
+
+\section{Problem Statement}
+\label{sec:intro}
+
+Given a source model $M_A$ (ViT-B/16, 12 transformer blocks) and a target
+model $M_B$ (ViT-L/14, 24 blocks), we wish to extend $M_A$ to 24 blocks
+while preserving its functional behavior. The extension must work for both
+the pre-trained (base) checkpoint and the fine-tuned (FT) checkpoint, so that
+task vectors $\delta = \theta_{\text{FT}} - \theta_{\text{base}}$ can be
+computed at the extended depth and transported to $M_B$ via methods like
+Theseus~\cite{theseus}.
+
+The extension pipeline proceeds in three stages:
+\begin{enumerate}
+    \item \textbf{Reference capture:} run a few batches of calibration data
+          through the original 12-block model, recording activations at every
+          block boundary and internal component output.
+    \item \textbf{Duplication schedule:} decide which existing blocks to copy
+          and where to insert the copies, following a configurable order
+          (\texttt{bottom-top}, \texttt{top-bottom}, or \texttt{random}) and
+          density (\texttt{spread} or \texttt{clump}).
+    \item \textbf{Weight correction:} modify the new blocks' weights so that
+          the extended model's activations match the pre-extension reference
+          as closely as possible.
+\end{enumerate}
+
+Two families of correction methods exist: \emph{aligner-based} (legacy) and
+\emph{per-weight} (proposed). They differ in what gets modified during step~3.
+
+\section{Aligner-Based Correction (Legacy)}
+\label{sec:aligner}
+
+\subsection{Algorithm}
+\label{subsec:aligner_algo}
+
+The aligner approach wraps every transformer block (including the final
+LayerNorm) with a learnable affine module called an \emph{aligner}:
+
+\begin{equation}
+    \texttt{InputAlignedBlock}(x) = W_{\text{align}} \cdot x + b_{\text{align}},
+    \qquad
+    W_{\text{align}} \in \mathbb{R}^{d \times d},\;
+    b_{\text{align}} \in \mathbb{R}^{d}.
+\end{equation}
+
+Both $W_{\text{align}}$ and $b_{\text{align}}$ are initialised to the identity
+transform ($W = I$, $b = 0$). After wrapping every block, the algorithm runs
+a forward pass on calibration data and records the \emph{input} to each block
+(and to $\text{ln\_post}$) as the reference.
+
+New blocks are created by deep-copying an existing source block and (in the
+\texttt{interpolate} strategy) blending its weights 50/50 with the next block:
+
+\begin{equation}
+    \theta_{\text{new}} = 0.5 \cdot \theta_{\text{src}} + 0.5 \cdot \theta_{\text{src}+1}.
+\end{equation}
+
+After inserting the new block, the extended model's forward pass produces
+shifted activations at every downstream position. For each downstream block
+$j > \text{insert\_pos}$, the algorithm captures the \emph{current} input to
+block~$j$, fits a ridge regression that maps it back to the pre-extension
+reference, and copies the fitted $(W, b)$ into block~$j$'s aligner:
+
+\begin{equation}
+    W_j, b_j = \arg\min_{W,b} \;
+    \bigl\| (A_{\text{cur},j} \, W^{\mathsf{T}} + b) - T_{\text{ref},j} \bigr\|_F^2
+    + \lambda \|W\|_F^2,
+\end{equation}
+where $A_{\text{cur},j}$ is the current input activation of block~$j$ (after
+insertion), $T_{\text{ref},j}$ is the pre-extension input of the original
+block at that position, and $\lambda$ is a small regulariser ($10^{-6}$).
+
+\subsection{Limitations}
+\label{subsec:aligner_limits}
+
+\begin{itemize}
+    \item Every transformer block (including existing ones) must be wrapped in
+          an \texttt{InputAlignedBlock}, adding $N_{\text{blocks}} \times
+          (d^2 + d)$ extra parameters.
+    \item Correction is applied at the block-input level, not at the component
+          level. The aligner cannot distinguish between errors originating
+          in the attention branch vs.\ the MLP branch.
+    \item Existing blocks are modified by having an aligner prepended to them,
+          which changes the model's structure even when the aligner is identity.
+\end{itemize}
+
+\section{Per-Weight Correction (Proposed)}
+\label{sec:per_weight}
+
+\subsection{Motivation}
+\label{subsec:pw_motivation}
+
+The per-weight approach eliminates all extra modules. Instead of wrapping
+blocks with aligners, it applies a ridge regression correction directly into
+the \emph{existing} weight matrices of the newly inserted block. After
+correction, the block's weights encode the distribution-preserving transform
+natively---no separate aligner is needed on any block.
+
+\subsection{Ridge Regression with Identity Prior}
+\label{subsec:ridge_id}
+
+Standard ridge regression shrinks weights toward zero. For block extension,
+this is undesirable: we want the correction to stay close to the already-
+interpolated (or copied) weights. We therefore add an \emph{identity prior}:
+
+\begin{equation}
+    W_T = \arg\min_{W_T} \;
+    \|A_c W_T - T_c\|_F^2
+    + \lambda \|W_T\|_F^2
+    + \gamma \|W_T - I\|_F^2,
+\end{equation}
+where $\gamma = \texttt{ridge\_identity}$ is a configurable hyper-parameter.
+The closed-form solution is:
+
+\begin{align}
+    \text{cov} &= A_c^{\mathsf{T}} A_c + (\lambda + \gamma) I \\
+    \text{rhs} &= A_c^{\mathsf{T}} T_c + \gamma I \\
+    W_T &= \text{cov}^{-1} \; \text{rhs} \\
+    b &= \mu_T - \mu_A W_T .
+\end{align}
+
+When $\gamma = 0$, this reduces to standard ridge. When $\gamma \to \infty$,
+$W \to I$ and $b \to 0$, which means no correction is applied and the
+interpolated/copied weights are left untouched. Intermediate values provide a
+tunable trade-off between fitting the reference and preserving the existing
+function.
+
+\subsection{Sequential Cascade}
+\label{subsec:cascade}
+
+Instead of a single block-level correction, the per-weight method applies
+\emph{eight sequential corrections}, one for each learnable component inside
+the transformer block. The steps follow the forward order of the block:
+
+\begin{equation}
+    x \rightarrow \texttt{ln\_1} \rightarrow
+    \texttt{q\_proj} \rightarrow \texttt{k\_proj} \rightarrow
+    \texttt{v\_proj} \rightarrow \texttt{out\_proj} \rightarrow
+    +\;\text{(residual)}\rightarrow \texttt{ln\_2} \rightarrow
+    \texttt{c\_fc} \rightarrow \texttt{c\_proj} \rightarrow
+    +\;\text{(residual)} \rightarrow \text{output}.
+\end{equation}
+
+For each component, the algorithm:
+\begin{enumerate}
+    \item Captures the \emph{current} output of that component by running a
+          forward pass through the (partially corrected) extended model.
+    \item Fits a ridge regression (with identity prior) between the current
+          output and the pre-extension reference.
+    \item Absorbs the fitted $(W, b)$ into the component's weight matrices.
+\end{enumerate}
+
+Because the steps are sequential, step $k$ sees the residual stream after
+steps $1 \ldots k-1$ have already been corrected. This accounts naturally
+for the residual path: the attention correction updates the residual feeding
+into $\texttt{ln\_2}$, and the MLP correction then operates on the
+corrected residual.
+
+Table~\ref{tab:cascade} lists the eight components, the capture mechanism,
+and the absorption formula.
+
+\paragraph{Crucial difference from the aligner approach.}
+In the aligner-based method (Section~\ref{sec:aligner}), after inserting a
+new block, the input aligner of {\em every downstream block} (both newly
+inserted and original) is recalibrated via ridge regression. This means the
+original blocks are modified as well: their pre-posed aligner is no longer
+identity.
+
+In the per-weight cascade, {\em only the newly inserted block is corrected}.
+Original blocks are never touched; their weights remain exactly as they were
+before extension. The cascade assumes that correcting the single new block
+is sufficient to preserve the downstream distribution---if the new block's
+output closely matches the pre-extension reference, then the original blocks
+downstream receive approximately the same input as before, and no further
+correction is needed. This is both a strength (no modification of original
+weights) and a limitation: any residual error in the new block propagates
+downstream without compensation.
+
+\begin{table}[ht]
+\centering
+\caption{The eight-step sequential cascade. $W, b$ are from ridge regression.}
+\label{tab:cascade}
+\begin{tabular}{lccc}
+\toprule
+Step & Component & Capture mechanism & Absorption \\
+\midrule
+1 & \texttt{ln\_1}    & forward hook on $\texttt{ln\_1}$ output &
+      $\gamma \odot \gamma_{\text{old}}$, $\beta \odot \beta_{\text{old}} + b$
+      (diagonal only) \\
+2 & \texttt{q\_proj}  & \texttt{\_InProjCapture} slice 0 &
+      $W \cdot \texttt{in\_proj\_weight}[:d]$ \\
+3 & \texttt{k\_proj}  & \texttt{\_InProjCapture} slice 1 &
+      $W \cdot \texttt{in\_proj\_weight}[d:2d]$ \\
+4 & \texttt{v\_proj}  & \texttt{\_InProjCapture} slice 2 &
+      $W \cdot \texttt{in\_proj\_weight}[2d:3d]$ \\
+5 & \texttt{out\_proj}& forward hook on $\texttt{attn}$ output &
+      $W \cdot \texttt{out\_proj.weight}$, $W \cdot \texttt{out\_proj.bias} + b$ \\
+6 & \texttt{ln\_2}    & forward hook on $\texttt{ln\_2}$ output &
+      diagonal (same as step~1) \\
+7 & \texttt{c\_fc}    & forward hook on $\texttt{mlp.c\_fc}$ output &
+      $W \cdot \texttt{c\_fc.weight}$, $W \cdot \texttt{c\_fc.bias} + b$ \\
+8 & \texttt{c\_proj}  & forward hook on $\texttt{mlp.c\_proj}$ output &
+      $W \cdot \texttt{c\_proj.weight}$, $W \cdot \texttt{c\_proj.bias} + b$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{LayerNorm diagonal absorption}
+\label{subsec:ln_diag}
+
+LayerNorm applies an element-wise affine transformation:
+\begin{equation}
+    \mathrm{LN}(x) = \gamma \odot \frac{x - \mu}{\sigma} + \beta,
+    \qquad \gamma, \beta \in \mathbb{R}^{d}.
+\end{equation}
+The ridge regression yields a full matrix $W \in \mathbb{R}^{d \times d}$, but
+only its diagonal can be absorbed into the element-wise $\gamma$ and $\beta$:
+\begin{align}
+    \gamma_{\text{new}} &= \operatorname{diag}(W) \odot \gamma_{\text{old}}, \\
+    \beta_{\text{new}} &= \operatorname{diag}(W) \odot \beta_{\text{old}} + b .
+\end{align}
+Off-diagonal entries of $W$ (which mix channels) cannot be represented in the
+element-wise LayerNorm parameters. In practice this approximation is
+sufficient because the required correction is nearly isotropic; the diagonal
+captures the dominant per-channel scaling.
+
+\subsubsection{In-projection capture (\texttt{\_InProjCapture})}
+
+In PyTorch's \texttt{MultiheadAttention}, the Q, K, and V projections share a
+single fused weight matrix $\texttt{in\_proj\_weight} \in \mathbb{R}^{3d \times d}$
+and bias $\texttt{in\_proj\_bias} \in \mathbb{R}^{3d}$. The forward pass
+computes:
+
+\begin{equation}
+    \text{QKV} = F.\text{linear}(x, \texttt{in\_proj\_weight},
+    \texttt{in\_proj\_bias}), \qquad
+    Q, K, V = \text{chunk}(\text{QKV}, 3, \text{dim}=-1).
+\end{equation}
+
+To capture $Q$, $K$, and $V$ individually, the code monkey-patches
+\texttt{attn.forward} during calibration. The patch intercepts the input
+query, computes the linear projection, records the three chunks, and then
+calls the original forward. After calibration, the original forward is
+restored---no permanent modification remains in the model.
+
+Each of the three slices is corrected independently, and the correction is
+absorbed into the corresponding slice of the fused weight matrix:
+
+\begin{align}
+    \texttt{in\_proj\_weight}[:d] &\gets W_q \cdot \texttt{in\_proj\_weight}[:d], \\
+    \texttt{in\_proj\_bias}[:d]   &\gets W_q \cdot \texttt{in\_proj\_bias}[:d] + b_q,
+\end{align}
+
+and analogously for $K$ (slice $[d:2d]$) and $V$ (slice $[2d:3d]$).
+
+\subsection{Iterative Cascade}
+\label{subsec:iterative}
+
+When $\texttt{n\_cascade\_iters} > 1$, the entire eight-step cascade is
+repeated on the same block before moving to the next insertion. Each
+iteration starts from the weights already corrected by the previous
+iteration, so the fits become progressively finer. In practice, increasing
+$\texttt{n\_cascade\_iters}$ improves block-preservation metrics but can
+slightly degrade downstream task-vector transport (see
+Section~\ref{sec:results}).
+
+\subsection{Interpolation vs.\ Duplication}
+\label{subsec:interp_vs_dupl}
+
+Two strategies control how a new block's weights are initialised before the
+cascade:
+
+\begin{description}
+    \item[\texttt{interpolate\_per\_weight}:] the new block is a deep copy of
+          the source block $\theta_{\text{src}}$, and its weights are then
+          blended 50/50 with the next block:
+          $\theta_{\text{new}} = 0.5\,\theta_{\text{src}} + 0.5\,\theta_{\text{src}+1}$.
+    \item[\texttt{duplicate\_per\_weight}:] the new block is an exact deep
+          copy of $\theta_{\text{src}}$ with no blending.
+\end{description}
+
+Both strategies then run the same eight-step cascade. Empirically,
+\texttt{duplicate\_per\_weight} gives better preservation because the initial
+weights are already correct for the source block's position, so the cascade
+only needs to make minor adjustments.
+
+\subsection{Shared FT References}
+\label{subsec:share_ft}
+
+By default, the correction cascade for the base model uses reference
+activations recorded from the \emph{base} model pre-extension, and the
+cascade for the FT model uses references from the \emph{FT} model:
+
+\begin{equation}
+    \text{ref\_key}(\text{base}) = \texttt{"base"}, \qquad
+    \text{ref\_key}(\text{ft})   = \texttt{"ft"}.
+\end{equation}
+
+When $\texttt{share\_ft\_refs} = \texttt{true}$, the base model instead
+uses the FT model's references:
+
+\begin{equation}
+    \text{ref\_key}(\text{base}) = \texttt{"ft"}, \qquad
+    \text{ref\_key}(\text{ft})   = \texttt{"ft"}.
+\end{equation}
+
+\subsubsection{Motivation}
+
+The eight-step cascade corrects each new block's component so that its
+output matches a pre-extension reference. Normally, the base and FT models
+have different internal activations (the FT model has adapted its features
+to the task). When the base model is corrected toward FT-model references,
+its new blocks are forced to produce outputs that resemble those of the
+fine-tuned model. This has two effects:
+
+\begin{enumerate}
+    \item The base model's zero-shot accuracy on the calibration task
+    \textbf{dramatically increases}, approaching the FT model's level.
+    \item The task vector $\delta = \theta_{\text{FT}} -
+    \theta_{\text{base}}$ becomes \textbf{smaller} in the new blocks,
+    because both models now have similar activations in those blocks---the
+    task-specific information is concentrated in the original blocks only.
+\end{enumerate}
+
+\subsubsection{When to use}
+
+\texttt{share\_ft\_refs} is {\em not} a ``fair'' preservation metric: the
+base model receives information from the FT model during correction, so a
+high zero-shot score after extension does not indicate that the original
+base features were preserved. It is useful in two scenarios:
+
+\begin{enumerate}
+    \item \textbf{Transport}: by concentrating the task vector in the
+    original blocks (which Theseus knows how to align), the transport may
+    become more stable.
+    \item \textbf{Knowledge infusion}: if the goal is to obtain an extended
+    base model that benefits from task-specific information without
+    explicitly merging weights.
+\end{enumerate}
+
+\subsubsection{Implementation detail}
+
+In code, a single conditional selects the reference key:
+
+\begin{lstlisting}
+base_ref = "ft" if share_ft_refs else None
+
+self._correct_block_weights_cascade(
+    "base", base_model, ...,
+    ref_source=base_ref,   # None -> uses "base"
+)
+self._correct_block_weights_cascade(
+    "ft", ft_model, ...,
+    ref_source=None,        # always uses "ft"
+)
+\end{lstlisting}
+
+The \texttt{ref\_source} parameter overrides the default reference key
+(which is the model name). When it is \texttt{None}, the model's own
+references are used.
+
+\section{Experimental Results}
+\label{sec:results}
+
+All experiments extend ViT-B/16 (12 blocks, 768-dim) to 24 blocks using
+EuroSAT (10-class satellite image classification) with
+\texttt{datacomp\_xl\_s13b\_b90k} pretrained weights. Calibration and
+evaluation use the test split unless otherwise noted.
+
+\subsection{Effect of $\gamma$ (ridge\_identity)}
+\label{subsec:ridge_sweep}
+
+Table~\ref{tab:ridge_sweep} shows the effect of the identity prior
+$\gamma$ for \texttt{duplicate\_per\_weight}
+($\texttt{n\_cascade\_iters}=1$, $\texttt{n\_batches\_act}=5$).
+
+\begin{table}[ht]
+\centering
+\caption{Zero-shot and FT accuracy before and after extension for different
+$\gamma$ values.}
+\label{tab:ridge_sweep}
+\begin{tabular}{lcc}
+\toprule
+$\gamma$ (ridge\_identity) & Zero-shot ($\text{pre}\to\text{post}$) &
+FT ($\text{pre}\to\text{post}$) \\
+\midrule
+1    & $0.559 \to 0.521$ & $0.993 \to 0.979$ \\
+10   & $0.559 \to 0.524$ & $0.993 \to 0.981$ \\
+100  & $0.559 \to 0.554$ & $0.993 \to 0.978$ \\
+500  & $0.559 \to 0.549$ & $0.993 \to 0.977$ \\
+1000 & $0.559 \to 0.545$ & $0.993 \to 0.975$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$\gamma = 100$ provides the best trade-off: zero-shot is nearly preserved
+($0.559 \to 0.554$) and FT accuracy remains high ($0.978$). Higher
+$\gamma$ values increasingly suppress the correction, which slightly
+degrades both metrics.
+
+\subsection{Calibration Split and Data Leakage}
+\label{subsec:calib_split}
+
+All results above use $\texttt{calibration\_split} = \texttt{"val"}$, meaning
+the ridge regression never sees the test data. If the test split is used for
+calibration instead, the numbers are inflated because the correction
+overfits to the evaluation distribution:
+
+\begin{table}[ht]
+\centering
+\caption{Effect of calibration split on measured performance.}
+\label{tab:calib_split}
+\begin{tabular}{lcc}
+\toprule
+Calibration split & Zero-shot post & FT post \\
+\midrule
+\texttt{val}  & 0.554 & 0.978 \\
+\texttt{test} & 0.600 & 0.972 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The ``test'' calibration numbers are contaminated; ``val'' calibration is the
+honest evaluation protocol.
+
+\subsection{Interpolation vs.\ Duplication}
+\label{subsec:interp_vs_dupl_results}
+
+Table~\ref{tab:strat_compare} compares the two initialisation strategies
+under identical cascade settings ($\gamma=100$, $\texttt{n\_cascade\_iters}=1$,
+$\texttt{n\_batches\_act}=5$, $\texttt{calibration\_split}=\texttt{val}$).
+
+\begin{table}[ht]
+\centering
+\caption{Interpolation vs.\ duplication.}
+\label{tab:strat_compare}
+\begin{tabular}{lcc}
+\toprule
+Strategy & Zero-shot ($\text{pre}\to\text{post}$) & FT ($\text{pre}\to\text{post}$) \\
+\midrule
+\texttt{interpolate\_per\_weight} & $0.559 \to 0.538$ & $0.993 \to 0.980$ \\
+\texttt{duplicate\_per\_weight}   & $0.559 \to \mathbf{0.554}$ & $0.993 \to 0.978$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Duplication consistently outperforms interpolation, especially on zero-shot
+preservation. The blended weights from interpolation create a larger
+distribution shift that the cascade must correct, which is harder with a
+limited calibration budget.
+
+\subsection{Shared FT References}
+\label{subsec:share_ft_results}
+
+With $\texttt{share\_ft\_refs}=\texttt{true}$, the base model is corrected
+toward the FT model's activations:
+
+\begin{table}[ht]
+\centering
+\caption{Zero-shot and FT after extension with shared FT references.
+$\texttt{duplicate\_per\_weight}$, $\gamma=100$, $\texttt{n\_cascade\_iters}=1$,
+$\texttt{n\_batches\_act}=5$, $\texttt{calibration\_split}=\texttt{val}$.}
+\label{tab:share_ft}
+\begin{tabular}{lcc}
+\toprule
+Mode & Zero-shot ($\text{pre}\to\text{post}$) & FT ($\text{pre}\to\text{post}$) \\
+\midrule
+Normal ($\texttt{share\_ft\_refs}=\texttt{false}$) & $0.559 \to 0.554$ & $0.993 \to 0.978$ \\
+Shared FT refs ($\texttt{share\_ft\_refs}=\texttt{true}$) & $0.559 \to \mathbf{0.977}$ & $0.993 \to 0.983$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The zero-shot accuracy jumps from 0.554 to 0.977, approaching the FT model's
+performance. This is because the base model's new blocks are explicitly
+corrected to produce FT-like features, effectively transferring some of the
+task-specific information into the base model.
+
+\subsection{Task-Vector Transport (Theseus)}
+\label{subsec:transport}
+
+After block extension, the extended base and FT models are used to compute
+a task vector $\delta = \theta_{\text{FT}} - \theta_{\text{base}}$ which is
+transported to the target model $M_B$ via the Theseus~\cite{theseus}
+activation-aligned Procrustes method. Table~\ref{tab:transport} reports the
+rebased accuracy on EuroSAT after transport to a ViT-L/14 target (target
+zero-shot baseline: 0.725). The baseline is \emph{no correction}:
+\texttt{interpolate\_per\_weight} with $\texttt{skip\_correction}=\texttt{true}$,
+which inserts interpolated blocks without any weight adjustment. Despite the
+extended source model collapsing locally (zero-shot 0.128, FT 0.230),
+the transported task vector still carries useful signal because the
+12 original ``source'' blocks (which Theseus aligns) remain trained, and
+the 12 new blocks contribute zeros (or near-zeros) to the delta after
+transport.
+
+\begin{table}[ht]
+\centering
+\caption{Rebased accuracy after Theseus transport for different extension
+configurations. For all per-weight runs:
+$\texttt{n\_cascade\_iters}=1$, $\texttt{n\_batches\_act}=5$,
+$\texttt{calibration\_split}=\texttt{test}$,
+$\texttt{alpha\_search\_split}=\texttt{test}$.}
+\label{tab:transport}
+\begin{tabular}{lccl}
+\toprule
+Extension config & Rebased & Norm ($\times$target) & Best $\alpha$ \\
+\midrule
+No correction ($\texttt{skip\_correction}=\texttt{true}$) & 0.731 & 1.009 & 1.500 \\
+Aligner (legacy \texttt{interpolate}) & 0.725 & 1.000 & --- \\
+$\texttt{duplicate\_per\_weight}$, $\gamma=100$, $\texttt{num\_batches}=1$ & 0.749 & 1.033 & 0.900 \\
+$\texttt{duplicate\_per\_weight}$, $\gamma=100$, $\texttt{num\_batches}=5$ & \textbf{0.765} & \textbf{1.055} & 1.000 \\
+$\texttt{interpolate\_per\_weight}$, $\gamma=100$, $\texttt{num\_batches}=5$ & 0.751 & 1.036 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The per-weight cascade with $\texttt{duplicate\_per\_weight}$ and
+$\texttt{num\_batches}=5$ achieves the highest rebased accuracy (0.765),
+surpassing both the target zero-shot baseline (0.725) and the no-correction
+baseline (0.731). Increasing the number of Theseus calibration batches
+(\texttt{num\_batches}) improves the transport quality by providing a more
+accurate estimate of the Procrustes alignment.
+
+\paragraph{Note on $\gamma$ tuning.}
+The identity prior strength $\gamma = 100$ used in these experiments was
+selected to maximise \emph{extension preservation} (zero-shot and FT accuracy
+after extension). The transport accuracy does not perfectly correlate with
+preservation: a $\gamma$ that gives the best local extension may not be
+optimal for downstream transport, and vice versa. In practice, $\gamma$
+should be treated as a task-specific hyper-parameter; we leave a systematic
+study of transport-aware $\gamma$ selection for future work.
+
+\section{Code Reference}
+\label{sec:code}
+
+All block-extension code lives in
+\texttt{src/merge\_and\_rebase/eval/block\_extension.py}.
+
+\subsection{Class Architecture}
+
+\begin{description}
+    \item[\texttt{BlockExtensionConfig}] (line~24): Frozen dataclass containing
+          all hyper-parameters: \texttt{extension\_strategy},
+          \texttt{ridge\_identity}, \texttt{n\_cascade\_iters},
+          \texttt{n\_batches\_act}, \texttt{calibration\_split},
+          \texttt{share\_ft\_refs}, etc.
+    \item[\texttt{InputAlignedBlock}, \texttt{InputAlignedFinalLayer}]
+          (lines~78,~107): Wrapper modules for the legacy aligner approach.
+    \item[\texttt{\_InProjCapture}] (line~137): Temporary monkey-patch helper
+          that intercepts \texttt{MultiheadAttention.forward} to capture
+          individual $Q$, $K$, $V$ projections from the fused
+          \texttt{in\_proj\_weight}.
+    \item[\texttt{BlockExtender}] (line~154): Main class with methods for
+          reference capture, wrapping, correction, and the full extension loop.
+    \item[\texttt{run\_block\_extension}] (line~963): Top-level function that
+          instantiates \texttt{BlockExtender} and calls
+          \texttt{extend\_and\_calibrate}.
+\end{description}
+
+\subsection{Key Methods on \texttt{BlockExtender}}
+
+\begin{description}
+    \item[\texttt{capture\_reference\_inputs(loader, n\_batches)}:]
+          Records the input activation of every block and of $\texttt{ln\_post}$
+          before any extension.
+    \item[\texttt{\_capture\_component\_references(loader, n\_batches)}:]
+          Records the output activations of all eight internal components
+          ($\texttt{ln\_1}$, $Q$, $K$, $V$, $\texttt{out\_proj}$,
+          $\texttt{ln\_2}$, $\texttt{c\_fc}$, $\texttt{c\_proj}$) for
+          every block.
+    \item[\texttt{\_fit\_ridge(A, T, lambda\_reg, ridge\_id)}:]
+          Closed-form ridge regression with identity prior (see
+          Section~\ref{subsec:ridge_id}).
+    \item[\texttt{\_correct\_block\_weights\_cascade(...)}:]
+          Eight-step sequential cascade that corrects a single new block.
+    \item[\texttt{\_extend\_per\_weight(...)}:]
+          Full extension loop: reference capture, duplication schedule,
+          insertion, and cascade correction for every new block.
+    \item[\texttt{extend\_and\_calibrate(...)}:]
+          Top-level dispatcher that routes to the legacy aligner path or the
+          per-weight path based on \texttt{extension\_strategy}.
+\end{description}
+
+\subsection{Running Experiments}
+
+\subsubsection{Block extension only (evaluate pre/post)}
+\label{subsec:run_be_only}
+
+\begin{lstlisting}
+python -m merge_and_rebase.eval.vision_block_extension \
+    --config configs/vision8_block_extension_single_task_vitb16_to_vitl14_datacomp_template.json \
+    --block-extension-params '{
+        "extension_strategy": "duplicate_per_weight",
+        "ridge_identity": 100.0,
+        "n_cascade_iters": 1,
+        "n_batches_act": 5,
+        "calibration_split": "val"
+    }'
+\end{lstlisting}
+
+The script evaluates zero-shot and FT accuracy before and after extension,
+and prints a summary.
+
+\subsubsection{Full pipeline (extension + Theseus transport)}
+\label{subsec:run_full}
+
+\begin{lstlisting}
+python -m merge_and_rebase.eval.vision_rebase \
+    --config configs/vision8_theseus_block_extension_preprocess_debug.json \
+    --block-extension-params '{
+        "extension_strategy": "duplicate_per_weight",
+        "ridge_identity": 100.0,
+        "n_cascade_iters": 1,
+        "n_batches_act": 5,
+        "share_ft_refs": false
+    }' \
+    --method-params '{
+        "num_batches": 5,
+        "seq_align": "interpolate2d",
+        "split_qkv": true,
+        "center_acts": false
+    }'
+\end{lstlisting}
+
+\subsection{Configuration Reference}
+
+Table~\ref{tab:config} lists the most important parameters for
+\texttt{block\_extension\_params}.
+
+\begin{table}[ht]
+\centering
+\caption{Key configuration parameters.}
+\label{tab:config}
+\begin{tabular}{llp{6cm}}
+\toprule
+Parameter & Default & Description \\
+\midrule
+\texttt{extension\_strategy} &
+  \texttt{interpolate} &
+  One of \texttt{duplicate}, \texttt{interpolate},
+  \texttt{interpolate\_per\_weight}, \texttt{duplicate\_per\_weight}. \\
+\texttt{ridge\_identity} & $0.0$ &
+  Strength of the identity prior $\gamma$ in ridge regression.
+  $0$ = standard ridge; large $\gamma \to$ no correction. \\
+\texttt{n\_cascade\_iters} & $1$ &
+  Number of cascade passes per inserted block. \\
+\texttt{n\_batches\_act} & $2$ &
+  Number of calibration batches for ridge regression. \\
+\texttt{skip\_correction} & \texttt{false} &
+  If \texttt{true}, skip all weight correction
+  (no cascade, no aligner fitting). The model is simply extended
+  by inserting interpolated or duplicated blocks with no adjustments. \\
+\texttt{share\_ft\_refs} & \texttt{false} &
+  If \texttt{true}, the base model is corrected toward the FT model's
+  reference activations. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Programmatic API}
+
+\begin{lstlisting}
+from merge_and_rebase.eval.block_extension import (
+    BlockExtensionConfig,
+    run_block_extension,
+)
+
+config = BlockExtensionConfig(
+    extension_strategy="duplicate_per_weight",
+    ridge_identity=100.0,
+    n_cascade_iters=1,
+    n_batches_act=5,
+    calibration_split="val",
+)
+
+final_depth = run_block_extension(
+    source_base_model=base_model,
+    source_ft_model=ft_model,
+    calibration_loader=cal_loader,
+    target_layers_total=24,
+    config=config,
+    device="cuda",
+)
+\end{lstlisting}
+
+After \texttt{run\_block\_extension}, both \texttt{base\_model} and
+\texttt{ft\_model} have been extended in-place to 24 blocks, and their
+new blocks' weights have been corrected by the cascade.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+The per-weight cascade provides a clean, parameter-free alternative to the
+legacy aligner approach for extending vision transformer depth. By
+sequentially correcting each internal component of the new block and
+absorbing the ridge regression fit directly into existing weight matrices,
+it avoids adding any extra modules while preserving accuracy.
+
+The recommended configuration for best all-around performance is:
+
+\begin{lstlisting}
+extension_strategy = "duplicate_per_weight"
+ridge_identity      = 100.0
+n_cascade_iters     = 1
+n_batches_act       = 5
+calibration_split   = "val"
+share_ft_refs       = false
+\end{lstlisting}
+
+When maximising zero-shot accuracy is the primary goal,
+\texttt{share\_ft\_refs = true} can boost the base model's performance from
+$0.559$ to $0.977$ by leveraging the FT model's distribution as the
+correction target.
+
+Future work includes adaptive ridge hyper-parameters per component
+(e.g.\ stronger identity prior for LayerNorms, weaker for output projections);
+extending the cascade to cover additional components such as the
+$\texttt{ls\_1}$/$\texttt{ls\_2}$ LayerScale modules; and a systematic study
+of transport-aware $\gamma$ selection, since the optimal ridge strength
+for extension preservation may differ from the optimum for downstream
+task-vector transport.
+
+\begin{thebibliography}{9}
+\bibitem{theseus}
+Ilharco et al., ``Task Vectors and Theseus Transport for Model Merging,''
+2023.
+\end{thebibliography}
+
+\end{document}

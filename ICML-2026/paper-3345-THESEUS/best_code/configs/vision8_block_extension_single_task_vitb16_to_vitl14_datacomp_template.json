@@ -1,0 +1,35 @@
+{
+  "suite": "vision8",
+  "tasks": "EuroSAT",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "datacomp_xl_s13b_b90k",
+  "target_clip_model": "ViT-L-14",
+  "target_clip_pretrained": "datacomp_xl_s13b_b90k",
+  "block_extension_enabled": true,
+  "block_extension_params": {
+    "blocks_to_add": null,
+    "insertion_order": "bottom-top",
+    "extension_density": "spread",
+    "extension_strategy": "interpolate_per_weight",
+    "dampening_factor": 1.0,
+    "n_batches_act": 10,
+    "calibration_split": "test",
+    "skip_correction": false,
+    "skip_final_ln": false,
+    "eval_before_extension": true,
+    "first_n_eval_batches": null,
+    "verbose": true,
+    "show_progress": true,
+    "ridge_identity": 0.1
+  },
+  "eval_split": "test",
+  "batch_size": 32,
+  "num_workers": 0,
+  "val_fraction": 0.1,
+  "seed": 89,
+  "no_humanize": true,
+  "strict_load": false,
+  "tuned_ckpts": {
+    "EuroSAT": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/eurosat/best.pt"
+  }
+}

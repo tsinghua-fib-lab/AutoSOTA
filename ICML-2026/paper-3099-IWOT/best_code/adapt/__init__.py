@@ -1,0 +1,11 @@
+from .dann import DANN as DANN
+from .erm import ERM as ERM
+#from .fdal import FDAL as FDAL
+from .oracle import OracleLJE as OracleLJE
+from .oracle import OracleCC as OracleCC
+from .reverse_kl import ReverseKL as ReverseKL
+from .weighted_wrr import WeightedWRR as WeightedWRR
+from .wrr import WRR as WRR
+from .jdot import JDOT as JDOT
+from .mmd import MMD as MMD
+from .pseudolabel import Pseudolabel as Pseudolabel

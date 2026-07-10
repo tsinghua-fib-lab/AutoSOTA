@@ -1,0 +1,16 @@
+\begin{table}[h]
+\scriptsize
+\centering
+\begin{tabular}{l     >{\centering\arraybackslash}p{0.4cm}     >{\centering\arraybackslash}p{0.8cm}     >{\centering\arraybackslash}p{0.8cm}     >{\centering\arraybackslash}p{1.5cm} >{\centering\arraybackslash}p{0.8cm}}
+\toprule
+Method & Train time   & Sampling time   & COV $\uparrow$ & FID $\downarrow$ & Class JSD $\downarrow$ \\ 
+\midrule
+$p_{\sigma}$ (ours) & 0.0083 & 39.0945 & 0.8765 & $1.512\times10^{-5}$ & \textbf{0.0730} \\ 
+PDM & 0.0083 & 78.1216 & 0.8457 & $2.218\times10^{-5}$ & 0.0874 \\ 
+DDPM & 0.0083 & 39.0982 & \textbf{0.8954} & $7.434\times10^{-6}$ & 0.0868 \\ 
+PIDM & 0.0089 & 39.0990 & 0.4713 & $1.665\times10^{-4}$ & 0.2174 \\ 
+DDPM (proj.) & 0.0083 & 39.1013 & 0.8954 & $\mathbf{7.379\times10^{-6}}$ & 0.0869 \\ 
+\bottomrule
+\end{tabular}
+\caption{MNIST metrics at $\sigma = 0.01$ with 10,000 training samples.}
+\end{table}

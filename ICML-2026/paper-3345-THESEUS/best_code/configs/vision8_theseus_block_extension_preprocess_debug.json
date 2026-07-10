@@ -1,0 +1,49 @@
+{
+  "suite": "vision8",
+  "tasks": "EuroSAT",
+  "source_clip_model": "ViT-B-16",
+  "source_clip_pretrained": "datacomp_xl_s13b_b90k",
+  "target_clip_model": "ViT-L-14",
+  "target_clip_pretrained": "datacomp_xl_s13b_b90k",
+  "method": "theseus",
+  "method_params": {
+    "num_batches": 1,
+    "seq_align": "interpolate2d",
+    "split_qkv": true,
+    "center_acts": false
+  },
+  "block_extension_enabled": true,
+  "block_extension_params": {
+    "blocks_to_add": null,
+    "insertion_order": "bottom-top",
+    "extension_density": "spread",
+    "extension_strategy": "interpolate_per_weight",
+    "dampening_factor": 1.0,
+    "n_batches_act": 10,
+    "calibration_split": "train",
+    "skip_correction": false,
+    "skip_final_ln": false,
+    "verbose": true,
+    "show_progress": true,
+    "ridge_identity": 1000
+  },
+  "eval_before_rebase": true,
+  "block_extension_eval_split": "test",
+  "alpha_search": true,
+  "alpha_selection": "per_task",
+  "alpha_min": 0,
+  "alpha_max": 20.0,
+  "alpha_step": 0.1,
+  "alpha_patience": 10,
+  "alpha_search_split": "test",
+  "batch_size": 32,
+  "num_workers": 0,
+  "val_fraction": 0.1,
+  "seed": 89,
+  "no_humanize": true,
+  "weights": null,
+  "strict_load": false,
+  "tuned_ckpts": {
+    "EuroSAT": "src/checkpoints/theseus/models/checkpoints/ViT-B-16/datacomp_xl_s13b_b90k/eurosat/best.pt"
+  }
+}

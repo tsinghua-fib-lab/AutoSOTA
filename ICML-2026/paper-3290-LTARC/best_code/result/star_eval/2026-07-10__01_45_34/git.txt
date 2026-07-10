@@ -1,0 +1,26 @@
+391543509be6014ae69b6cace386635dcd922bcf
+diff --git a/method/create_fft_constraint.py b/method/create_fft_constraint.py
+index 8bedd60..d940ce5 100644
+--- a/method/create_fft_constraint.py
++++ b/method/create_fft_constraint.py
+@@ -18,8 +18,9 @@ class FftPolicyConstraint(FftPolicyBase):
+ 
+     def find_best_loss(self, policy, active_criterias, loss, constraint, max_n_layers, lookahead):
+         n_lookahead = self.get_n_lookahead(policy, max_n_layers, lookahead)
+-        if lookahead != 1:
+-            loss = loss + 0.001
++        # Removed lookahead asymmetry penalty (Idea 09)
++        # if lookahead != 1:
++                # loss = loss + 0.001
+         loss_before = loss
+         alternative_policy = []
+         new_active_criterias = []
+@@ -75,7 +76,7 @@ class FftPolicyConstraint(FftPolicyBase):
+                         if not is_same:
+                             loss_i, loss_second, __ = self.get_obj_constraint(d_policy)
+                             n = len(new_policy)
+-                            loss_i = loss_i + 0.02 * n
++                            loss_i = loss_i + 0.005 * n
+ 
+                             if loss_i < loss and loss_second < self.constraint_value:
+                                 loss = loss_i
