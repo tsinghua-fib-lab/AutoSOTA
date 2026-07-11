@@ -1,0 +1,54 @@
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
+
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
+image: python:3.11
+
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# https://pip.pypa.io/en/stable/topics/caching/
+cache:
+  paths:
+    - .cache/pip
+
+before_script:
+  - apt-get update
+  - apt-get install -y doxygen libopenmpi-dev
+  - python --version ; pip --version  # For debugging
+  - pip install virtualenv
+
+lint:
+  script:
+    - virtualenv venv_lint
+    - source venv_lint/bin/activate
+    - pip install ".[test]"
+    - pylint chemtrain --fail-under 8.0
+
+test:
+  script:
+    - virtualenv venv_test
+    - source venv_test/bin/activate
+    - pip install --editable ".[test,all]"
+    - pytest tests --strict --disable-warnings -v
+
+pages:
+  script:
+    - virtualenv venv_docs
+    - source venv_docs/bin/activate
+    - pip install ".[all,docs]"
+    - make -C docs html
+    - mv docs/_build/html/ public # Documentation for each branch
+  pages:
+    path_prefix: "$CI_COMMIT_BRANCH"
+    expire_in: never
+  artifacts:
+    paths:
+      - public
+  only:
+    - branches

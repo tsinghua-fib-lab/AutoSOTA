@@ -1,0 +1,35 @@
+#!/bin/bash
+#SBATCH --job-name=utk_age_cert
+#SBATCH --partition=<gpu-partition>
+#SBATCH --account=<account>
+#SBATCH --nodes=1
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=32G
+#SBATCH --time=24:00:00
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --error=logs/%x_%j.err
+
+set -euo pipefail
+
+REPO_DIR=${REPO_DIR:-$PWD}
+PYTHON=${PYTHON:-python}
+UTK_DIR=${UTK_DIR:?Set UTK_DIR}
+MODEL_DIR=${MODEL_DIR:?Set MODEL_DIR}
+OUT_JSON=${OUT_JSON:?Set OUT_JSON}
+
+cd "$REPO_DIR"
+
+$PYTHON experiments/utkface_age/utkface_bounded_vs_alpha_experiment.py \
+  --utk_dir "$UTK_DIR" \
+  --model_dir "$MODEL_DIR" \
+  --out_json "$OUT_JSON" \
+  --n_points "${N_POINTS:-100}" \
+  --sigma "${SIGMA:-0.75}" \
+  --alpha "${ALPHA:-0.49}" \
+  --N "${N:-5000}" \
+  --alpha_n_tr "${ALPHA_N_TR:-5000}" \
+  --alpha_n_sample "${ALPHA_N_SAMPLE:-500}" \
+  --confidence "${CONFIDENCE:-0.9}" \
+  --mode "${MODE:-both}" \
+  --batch_size "${BATCH_SIZE:-256}"

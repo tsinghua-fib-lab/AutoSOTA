@@ -1,0 +1,25 @@
+seed: 42
+device: auto
+data_root: data
+output_dir: outputs/debug_node
+data:
+  datasets: [cora]
+  drop_node_features: true
+model:
+  K: 4
+  M: 8
+  feature_dim: 50
+  tau: 0.3
+  lambda_gw: 1.0
+  lambda_recon: 2.0
+  lambda_div: 0.02
+  div_margin: 4.0
+  num_projections: 8
+train:
+  epochs: 1
+  batch_size: 8
+  num_workers: 0
+  lr: 0.01
+  use_amp: false
+  accumulation_steps: 1
+  log_interval: 1

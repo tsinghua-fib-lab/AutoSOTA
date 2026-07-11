@@ -1,0 +1,541 @@
+# #############################################################################
+# All default build options below. These apply to all build commands.
+# #############################################################################
+# TODO: Enable Bzlmod
+common --noenable_bzlmod
+
+# Make Bazel print out all options from rc files.
+common --announce_rc
+
+# By default, execute all actions locally.
+common --spawn_strategy=local
+
+# The hermetic toolchain emits a crosstool module map. When both the CPU and
+# CUDA toolchains are visible, Bazel may pass both module maps to Clang in
+# module-enabled compilations, triggering:
+#   error: redefinition of module 'crosstool'
+# Disabling module maps avoids this.
+common --features=-module_maps
+common --host_features=-module_maps
+
+# Enable host OS specific configs. For instance, "common:linux" will be used
+# automatically when building on Linux.
+common --enable_platform_specific_config
+
+common --experimental_cc_shared_library
+
+common --incompatible_enable_cc_toolchain_resolution
+common --repo_env USE_HERMETIC_CC_TOOLCHAIN=1
+
+# TODO: Migrate for https://github.com/bazelbuild/bazel/issues/7260
+common:clang_local --noincompatible_enable_cc_toolchain_resolution
+common:clang_local --@rules_ml_toolchain//common:enable_hermetic_cc=False
+common:clang_local --repo_env USE_HERMETIC_CC_TOOLCHAIN=0
+
+# Toolchains for CUDA non-hermetic builds.
+common:cuda_clang_local --config=clang_local
+common:cuda_clang_local --host_crosstool_top="@local_config_cuda//crosstool:toolchain"
+common:cuda_clang_local --crosstool_top="@local_config_cuda//crosstool:toolchain"
+
+# Do not use C-Ares when building gRPC.
+common --define=grpc_no_ares=true
+
+common --define=tsl_link_protobuf=true
+
+# Enable optimization.
+common -c opt
+
+# Suppress all warning messages.
+common --output_filter=DONT_MATCH_ANYTHING
+
+common --copt=-DMLIR_PYTHON_PACKAGE_PREFIX=jaxlib.mlir.
+common --copt=-DNB_DOMAIN=jax
+
+common --legacy_external_runfiles=false
+
+# #############################################################################
+# Platform Specific configs below. These are automatically picked up by Bazel
+# depending on the platform that is running the build.
+# #############################################################################
+common:linux --config=posix
+common:linux --copt=-Wno-unknown-warning-option
+
+# Workaround for gcc 10+ warnings related to upb.
+# See https://github.com/tensorflow/tensorflow/issues/39467
+common:linux --copt=-Wno-stringop-truncation
+common:linux --copt=-Wno-array-parameter
+common:linux --copt=-Wno-deprecated-register
+common:linux --copt=-Wno-register
+
+common:macos --config=posix
+common:macos --apple_platform_type=macos
+
+# Bazel 7.0.0 no longer supports dynamic symbol lookup on macOS. To resolve
+# undefined symbol errors in macOS arm64 builds, explicitly add the necessary
+# linker flags until dependencies are well defined. See
+# https://github.com/bazelbuild/bazel/issues/19730.
+common:macos --linkopt=-Wl,-undefined,dynamic_lookup
+common:macos --host_linkopt=-Wl,-undefined,dynamic_lookup
+
+# Use cc toolchains from apple_support for Apple builds.
+# https://github.com/bazelbuild/apple_support/tree/master?tab=readme-ov-file#bazel-6-setup
+common:macos --config=clang_local
+common:macos --apple_crosstool_top=@local_config_apple_cc//:toolchain
+common:macos --crosstool_top=@local_config_apple_cc//:toolchain
+common:macos --host_crosstool_top=@local_config_apple_cc//:toolchain
+
+common:windows --config=clang_local
+
+# Windows has a relatively short command line limit, which JAX has begun to hit.
+# See https://docs.bazel.build/versions/main/windows.html
+common:windows --features=compiler_param_file
+common:windows --features=archive_param_file
+
+# XLA uses M_* math constants that only get defined by MSVC headers if
+# _USE_MATH_DEFINES is defined.
+common:windows --copt=/D_USE_MATH_DEFINES
+common:windows --host_copt=/D_USE_MATH_DEFINES
+# Make sure to include as little of windows.h as possible
+common:windows --copt=-DWIN32_LEAN_AND_MEAN
+common:windows --host_copt=-DWIN32_LEAN_AND_MEAN
+common:windows --copt=-DNOGDI
+common:windows --host_copt=-DNOGDI
+# https://devblogs.microsoft.com/cppblog/announcing-full-support-for-a-c-c-conformant-preprocessor-in-msvc/
+# otherwise, there will be some compiling error due to preprocessing.
+common:windows --copt=/Zc:preprocessor
+common:windows --cxxopt=/std:c++17
+common:windows --host_cxxopt=/std:c++17
+# Generate PDB files, to generate useful PDBs, in opt compilation_mode
+# --copt /Z7 is needed.
+common:windows --linkopt=/DEBUG
+common:windows --host_linkopt=/DEBUG
+common:windows --linkopt=/OPT:REF
+common:windows --host_linkopt=/OPT:REF
+common:windows --linkopt=/OPT:ICF
+common:windows --host_linkopt=/OPT:ICF
+common:windows --incompatible_strict_action_env=true
+
+# #############################################################################
+# Feature-specific configurations. These are used by the CI configs below
+# depending on the type of build. E.g. `ci_linux_x86_64` inherits the Linux x86
+# configs such as `avx_linux` and `mkl_open_source_only`, `ci_linux_x86_64_cuda`
+# inherits `cuda` and `build_cuda_with_nvcc`, etc.
+# #############################################################################
+common --repo_env=USE_PYWRAP_RULES=True
+common --copt=-DGRPC_BAZEL_BUILD
+common --host_copt=-DGRPC_BAZEL_BUILD
+common --action_env=GRPC_BAZEL_RUNTIME=1
+common --repo_env=PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=upb
+common --action_env=PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=upb
+
+# Some targets have the same py source file, but use different
+# configurations via `requires-` tags. This results in an action
+# conflict when precompiling. Disable to avoid that problem.
+# See https://github.com/bazel-contrib/rules_python/issues/2445
+common --@rules_python//python/config_settings:precompile=force_disabled
+
+# Do not do this. If enabled protobuf's core internal target 
+# @com_google_protobuf//python:protobuf_python will start depending on a bunch
+# of cc_binary shared libraries artifacts, which will mess with how we link 
+# protobuf dependencies ourselves. By default this value is false, but some 
+# projects enable it, which we don't want here.
+# common --define=use_fast_cpp_protos=true
+
+common:nonccl --define=no_nccl_support=true
+
+common:posix --copt=-fvisibility=hidden
+common:posix --copt=-Wno-sign-compare
+common:posix --cxxopt=-std=c++17
+common:posix --host_cxxopt=-std=c++17
+
+common:avx_posix --copt=-mavx
+common:avx_posix --host_copt=-mavx
+
+common:native_arch_posix --copt=-march=native
+common:native_arch_posix --host_copt=-march=native
+
+common:avx_linux --copt=-mavx
+common:avx_linux --host_copt=-mavx
+
+common:avx_windows --copt=/arch:AVX
+
+common:mkl_open_source_only --define=tensorflow_mkldnn_contraction_kernel=1
+
+# Config setting to build oneDNN with Compute Library for the Arm Architecture (ACL).
+common:mkl_aarch64_threadpool --define=build_with_mkl_aarch64=true
+common:mkl_aarch64_threadpool --@compute_library//:openmp=false
+common:mkl_aarch64_threadpool -c opt
+
+# Disable clang extention that rejects type definitions within offsetof.
+# This was added in clang-16 by https://reviews.llvm.org/D133574.
+# Can be removed once upb is updated, since a type definition is used within
+# offset of in the current version of ubp.
+# See https://github.com/protocolbuffers/upb/blob/9effcbcb27f0a665f9f345030188c0b291e32482/upb/upb.c#L183.
+common:clang --copt=-Wno-gnu-offsetof-extensions
+# Disable clang extention that rejects unknown arguments.
+common:clang --copt=-Qunused-arguments
+# Error on struct/class mismatches, since this causes link failures on Windows.
+common:clang --copt=-Werror=mismatched-tags
+# Required when building with clang>=19, see jax-ml/jax#27091
+common:clang --copt=-Wno-error=c23-extensions
+
+# Configs for CUDA
+common:cuda_v12 --repo_env=HERMETIC_CUDA_VERSION="12.9.1"
+common:cuda_v12 --repo_env=HERMETIC_CUDNN_VERSION="9.8.0"
+common:cuda_v12 --repo_env=HERMETIC_NVSHMEM_VERSION="3.3.9"
+common:cuda_v12 --repo_env=HERMETIC_NCCL_VERSION="2.27.7"
+# "sm" means we emit only cubin, which is forward compatible within a GPU generation.
+# "compute" means we emit both cubin and PTX, which is larger but also forward compatible to future GPU generations.
+common:cuda_v12 --repo_env HERMETIC_CUDA_COMPUTE_CAPABILITIES="sm_50,sm_60,sm_70,sm_80,sm_90,sm_100,compute_120"
+
+common:cuda_v13 --repo_env=HERMETIC_CUDA_VERSION="13.0.0"
+common:cuda_v13 --repo_env=HERMETIC_CUDNN_VERSION="9.12.0"
+common:cuda_v13 --repo_env=HERMETIC_NVSHMEM_VERSION="3.3.20"
+common:cuda_v13 --repo_env=HERMETIC_NCCL_VERSION="2.27.7"
+common:cuda_v13 --repo_env HERMETIC_CUDA_COMPUTE_CAPABILITIES="sm_75,sm_80,sm_90,sm_100,compute_120"
+
+common:cuda_common --repo_env TF_NEED_CUDA=1
+common:cuda_common --repo_env TF_NCCL_USE_STUB=1
+common:cuda_common --@local_config_cuda//:enable_cuda
+common:cuda_common --@local_config_cuda//cuda:include_cuda_libs=true
+
+# Force the linker to set RPATH, not RUNPATH. When resolving dynamic libraries,
+# ld.so prefers in order: RPATH, LD_LIBRARY_PATH, RUNPATH. JAX sets RPATH to
+# point to the $ORIGIN-relative location of the pip-installed NVIDIA CUDA
+# packages.
+# This has pros and cons:
+# * pro: we'll ignore other CUDA installations, which has frequently confused
+#   users in the past. By setting RPATH, we'll always use the NVIDIA pip
+#   packages if they are installed.
+# * con: the user cannot override the CUDA installation location
+#   via LD_LIBRARY_PATH, if the nvidia-... pip packages are installed. This is
+#   acceptable, because the workaround is "remove the nvidia-..." pip packages.
+# The list of CUDA pip packages that JAX depends on are present in setup.py.
+common:cuda_common --linkopt=-Wl,--disable-new-dtags
+
+common:cuda12 --config=cuda_common
+common:cuda12 --config=cuda_v12
+
+common:cuda13 --config=cuda_common
+common:cuda13 --config=cuda_v13
+
+# Alias for backward compatibility.
+common:cuda --config=cuda12
+
+# This config is used for building targets with CUDA/NVSHMEM libraries from stubs.
+common:cuda_libraries_from_stubs --@local_config_cuda//cuda:include_cuda_libs=false
+
+common:hermetic_cuda_umd --@cuda_driver//:include_cuda_umd_libs=true
+
+# common CUDA and other C++ targets with Clang
+common:build_cuda_with_clang --@local_config_cuda//:cuda_compiler=clang
+
+# common CUDA with NVCC and other C++ targets with Clang
+common:build_cuda_with_nvcc --action_env=TF_NVCC_CLANG="1"
+common:build_cuda_with_nvcc --@local_config_cuda//:cuda_compiler=nvcc
+
+# Requires MSVC and LLVM to be installed
+common:win_clang --config=clang_local
+common:win_clang --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
+common:win_clang --extra_execution_platforms=//jax/tools/toolchains:x64_windows-clang-cl
+common:win_clang --compiler=clang-cl
+
+common:rocm_base --config=clang_local
+common:rocm_base --crosstool_top=@local_config_rocm//crosstool:toolchain
+common:rocm_base --define=using_rocm=true --define=using_rocm_hipcc=true
+common:rocm_base --repo_env TF_NEED_ROCM=1
+common:rocm_base --action_env TF_ROCM_AMDGPU_TARGETS="gfx900,gfx906,gfx908,gfx90a,gfx940,gfx941,gfx942,gfx1030,gfx1100,gfx1200,gfx1201"
+
+# Build with hipcc for ROCm and clang for the host.
+common:rocm --config=rocm_base
+common:rocm --action_env=TF_ROCM_CLANG="1"
+common:rocm --action_env=CLANG_COMPILER_PATH="/usr/lib/llvm-18/bin/clang"
+common:rocm --copt=-Wno-gnu-offsetof-extensions
+common:rocm --copt=-Qunused-arguments
+common:rocm --action_env=TF_HIPCC_CLANG="1"
+
+# #############################################################################
+# Cache options below.
+# #############################################################################
+# Public read-only cache
+common:public_cache --remote_cache="https://storage.googleapis.com/jax-bazel-cache/" --remote_upload_local_results=false
+# Cache pushes are limited to JAX's CI system.
+common:public_cache_push --config=public_cache --remote_upload_local_results=true --google_default_credentials
+
+# Note: the following cache configs are deprecated and will be removed soon.
+# Public read-only cache for Mac builds. JAX uses a GCS bucket to store cache
+# from JAX's Mac CI build. By applying --config=macos_cache, any local Mac build
+# should be able to read from this cache and potentially see a speedup. The
+# "oct2023" in the URL is just the date when the bucket was created and can be
+# disregarded. It still contains the latest cache that is being used.
+common:macos_cache --remote_cache="https://storage.googleapis.com/tensorflow-macos-bazel-cache/oct2023" --remote_upload_local_results=false
+
+# Cache pushes are limited to JAX's CI system.
+common:macos_cache_push --config=macos_cache --remote_upload_local_results=true --google_default_credentials
+
+# #############################################################################
+# CI Build config options below.
+# JAX uses these configs in CI builds for building artifacts and when running
+# Bazel tests.
+# #############################################################################
+# Linux x86 CI configs
+common:ci_linux_x86_64 --config=avx_linux --config=avx_posix
+common:ci_linux_x86_64 --config=mkl_open_source_only
+common:ci_linux_x86_64 --config=clang --verbose_failures=true
+common:ci_linux_x86_64 --color=yes
+
+# Deprecated CI config with non-hermetic toolchains.
+# TODO(b/356695103): We do not have a CPU only toolchain so we use the CUDA
+# toolchain for both CPU and GPU builds.
+common:ci_linux_x86_64_clang_local --config=ci_linux_x86_64
+common:ci_linux_x86_64_clang_local --config=clang_local
+common:ci_linux_x86_64_clang_local --repo_env=TF_SYSROOT="/dt9"
+
+# Clang path needs to be set for remote toolchain to be configured correctly.
+common:ci_linux_x86_64_clang_local --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-18/bin/clang"
+
+common:ci_linux_x86_64_cuda_common --config=build_cuda_with_nvcc
+common:ci_linux_x86_64_cuda_common --config=ci_linux_x86_64
+
+# The toolchain in `--config=cuda` needs to be read before the toolchain in
+# `--config=ci_linux_x86_64`. Otherwise, we run into issues with manylinux
+# compliance.
+common:ci_linux_x86_64_cuda12 --config=cuda12 --config=ci_linux_x86_64_cuda_common
+# Alias for backward compatibility.
+common:ci_linux_x86_64_cuda --config=ci_linux_x86_64_cuda12
+
+common:ci_linux_x86_64_cuda13 --config=cuda13 --config=ci_linux_x86_64_cuda_common
+
+# Linux Aarch64 CI configs
+common:ci_linux_aarch64_base --config=clang --verbose_failures=true
+common:ci_linux_aarch64_base --color=yes
+
+# This appears to help avoid a timeout in CI for linalg_test.
+common:ci_linux_aarch64_base --test_env=OMP_NUM_THREADS=8
+
+common:ci_linux_aarch64 --config=ci_linux_aarch64_base
+
+common:ci_linux_aarch64_cuda_common --config=ci_linux_aarch64_base
+common:ci_linux_aarch64_cuda_common --config=build_cuda_with_nvcc
+
+# Aarch64 builds use CLANG_CUDA_COMPILER_PATH, which allows Clang to compile C++
+# targets and NVCC to compile CUDA targets.
+common:ci_linux_aarch64_cuda12 --config=ci_linux_aarch64_cuda_common
+common:ci_linux_aarch64_cuda12 --config=cuda12
+# Alias for backward compatibility.
+common:ci_linux_aarch64_cuda --config=ci_linux_aarch64_cuda12
+
+common:ci_linux_aarch64_cuda13 --config=ci_linux_aarch64_cuda_common
+common:ci_linux_aarch64_cuda13 --config=cuda13
+
+# Deprecated CI config with non-hermetic toolchains.
+common:ci_linux_aarch64_clang_local --config=clang_local
+common:ci_linux_aarch64_clang_local --config=ci_linux_aarch64_base
+
+common:ci_linux_aarch64_cuda_common_clang_local --config=cuda_clang_local
+common:ci_linux_aarch64_cuda_common_clang_local --config=ci_linux_aarch64_cuda_common
+common:ci_linux_aarch64_cuda_common_clang_local --action_env=CLANG_CUDA_COMPILER_PATH="/usr/lib/llvm-18/bin/clang"
+
+common:ci_linux_aarch64_cuda12_clang_local --config=ci_linux_aarch64_cuda_common_clang_local
+common:ci_linux_aarch64_cuda12_clang_local --config=cuda12
+
+common:ci_linux_aarch64_cuda13_clang_local --config=ci_linux_aarch64_cuda_common_clang_local
+common:ci_linux_aarch64_cuda13_clang_local --config=cuda13
+
+# Mac Arm64 CI configs
+common:ci_darwin_arm64 --config=clang_local
+common:ci_darwin_arm64 --macos_minimum_os=11.0
+common:ci_darwin_arm64 --config=macos_cache_push
+common:ci_darwin_arm64 --verbose_failures=true
+common:ci_darwin_arm64 --color=yes
+
+# Windows x86 CI configs
+common:ci_windows_amd64 --config=clang_local
+common:ci_windows_amd64 --config=avx_windows
+common:ci_windows_amd64 --compiler=clang-cl --config=clang --verbose_failures=true
+common:ci_windows_amd64 --crosstool_top="@xla//tools/toolchains/win2022/20241118:toolchain"
+common:ci_windows_amd64 --extra_toolchains="@xla//tools/toolchains/win2022/20241118:cc-toolchain-x64_windows-clang-cl"
+common:ci_windows_amd64 --host_linkopt=/FORCE:MULTIPLE --linkopt=/FORCE:MULTIPLE
+common:ci_windows_amd64 --color=yes
+
+# #############################################################################
+# RBE config options below. These inherit the CI configs above and set the
+# remote execution backend and authentication options required to run builds
+# with RBE. Linux x86 and Windows builds use RBE.
+# #############################################################################
+# Flag to enable remote config
+common --experimental_repo_remote_exec
+
+# Allow creation of resultstore URLs for any bazel invocation
+
+common:resultstore_base --google_default_credentials
+common:resultstore_base --bes_backend=buildeventservice.googleapis.com
+common:resultstore_base --bes_timeout=600s
+common:resultstore_base --bes_results_url="https://source.cloud.google.com/results/invocations"
+
+common:resultstore --config=resultstore_base
+common:resultstore --bes_instance_name="tensorflow-testing"
+
+# Configs for RBE cache. When using resultstore, we need to use these configs
+# as well to ensure that the logs that get uploaded to resultstore can be read
+# without any errors. Write is limited to CI
+common:ci_rbe_cache --config=resultstore_base
+common:ci_rbe_cache --remote_upload_local_results=true
+common:ci_rbe_cache --bes_instance_name="ml-oss-rbe-testing"
+common:ci_rbe_cache --remote_cache="grpcs://remotebuildexecution.googleapis.com"
+common:ci_rbe_cache --remote_instance_name=projects/ml-oss-rbe-testing/instances/default_instance
+
+common:use_tar_archive_files --repo_env=USE_CUDA_TAR_ARCHIVE_FILES=1
+common:use_tar_archive_files --repo_env=USE_NVSHMEM_TAR_ARCHIVE_FILES=1
+common:use_tar_archive_files --repo_env=USE_LLVM_TAR_ARCHIVE_FILES=1
+common:use_tar_archive_files --repo_env=USE_MIRRORED_TAR_ARCHIVE_FILES=1
+
+common:rbe --config=resultstore
+common:rbe --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+common:rbe --define=EXECUTOR=remote
+common:rbe --flaky_test_attempts=3
+common:rbe --jobs=200
+common:rbe --remote_executor=grpcs://remotebuildexecution.googleapis.com
+common:rbe --remote_timeout=3600
+common:rbe --spawn_strategy=remote,worker,standalone,local
+# Attempt to minimize the amount of data transfer between bazel and the remote
+# workers:
+common:rbe --remote_download_toplevel
+test:rbe --test_env=USER=anon
+test:rbe --test_env=IS_JAX_RBE_TESTING=1
+
+common:rbe_cpu_pool --repo_env=REMOTE_GPU_TESTING=0
+common:rbe_gpu_pool --repo_env=REMOTE_GPU_TESTING=1
+
+# RBE configs for Linux x86
+# Set the remote worker pool
+common:rbe_linux_x86_64_base --remote_instance_name=projects/tensorflow-testing/instances/default_instance
+
+common:rbe_linux_x86_64_base --config=rbe
+common:rbe_linux_x86_64_base --action_env=PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin"
+common:rbe_linux_x86_64_base --linkopt=-lrt
+common:rbe_linux_x86_64_base --host_linkopt=-lrt
+common:rbe_linux_x86_64_base --linkopt=-lm
+common:rbe_linux_x86_64_base --host_linkopt=-lm
+
+# Set the host, execution, and target platform
+common:rbe_linux_x86_64_base --host_platform="@ml_build_config_platform//:platform"
+common:rbe_linux_x86_64_base --extra_execution_platforms="@ml_build_config_platform//:platform"
+common:rbe_linux_x86_64_base --platforms="@ml_build_config_platform//:platform"
+
+common:rbe_linux_x86_64 --config=rbe_linux_x86_64_base
+common:rbe_linux_x86_64 --config=ci_linux_x86_64
+
+common:rbe_linux_x86_64_cuda_common --config=rbe_linux_x86_64_base
+common:rbe_linux_x86_64_cuda_common --config=rbe_gpu_pool
+# Update UMD version when RBE CUDA driver is updated.
+common:rbe_linux_x86_64_cuda_common --repo_env=HERMETIC_CUDA_UMD_VERSION="13.0.1"
+
+common:rbe_linux_x86_64_cuda12 --config=rbe_linux_x86_64_cuda_common
+common:rbe_linux_x86_64_cuda12 --config=ci_linux_x86_64_cuda12
+# Alias for backward compatibility.
+common:rbe_linux_x86_64_cuda --config=rbe_linux_x86_64_cuda12
+
+common:rbe_linux_x86_64_cuda13 --config=rbe_linux_x86_64_cuda_common
+common:rbe_linux_x86_64_cuda13 --config=ci_linux_x86_64_cuda13
+
+# RBE configs for Windows
+# Set the remote worker pool
+common:rbe_windows_amd64 --remote_instance_name=projects/tensorflow-testing/instances/windows
+
+common:rbe_windows_amd64 --config=clang_local
+common:rbe_windows_amd64 --config=rbe
+
+# Set the host, execution, and target platform
+common:rbe_windows_amd64 --host_platform="@xla//tools/toolchains/win2022:windows_ltsc2022_clang"
+common:rbe_windows_amd64 --extra_execution_platforms="@xla//tools/toolchains/win2022:windows_ltsc2022_clang"
+common:rbe_windows_amd64 --platforms="@xla//tools/toolchains/win2022:windows_ltsc2022_clang"
+
+common:rbe_windows_amd64 --shell_executable=C:\\tools\\msys64\\usr\\bin\\bash.exe
+common:rbe_windows_amd64 --enable_runfiles
+common:rbe_windows_amd64 --define=override_eigen_strong_inline=true
+
+# Don't build the python zip archive in the RBE build.
+common:rbe_windows_amd64 --nobuild_python_zip
+
+common:rbe_windows_amd64 --config=ci_windows_amd64
+
+# #############################################################################
+# Cross-compile config options below. Native RBE support does not exist for
+# Linux Aarch64 and Mac x86. So, we use a cross-compile toolchain to build
+# targets for Linux Aarch64 and Mac x86 on the Linux x86 RBE pool.
+# #############################################################################
+# Set execution platform to Linux x86
+# Note: Lot of the "host_" flags such as "host_cpu" and "host_crosstool_top"
+# flags seem to be actually used to specify the execution platform details. It
+# seems it is this way because these flags are old and predate the distinction
+# between host and execution platform.
+common:cross_compile_base --config=clang_local
+common:cross_compile_base --host_cpu=k8
+common:cross_compile_base --host_crosstool_top=@xla//tools/toolchains/cross_compile/cc:cross_compile_toolchain_suite
+common:cross_compile_base --extra_execution_platforms=@xla//tools/toolchains/cross_compile/config:linux_x86_64
+
+# Linux Aarch64
+common:cross_compile_linux_aarch64 --config=cross_compile_base
+
+# Set the target CPU to Aarch64
+common:cross_compile_linux_aarch64 --platforms=@xla//tools/toolchains/cross_compile/config:linux_aarch64
+common:cross_compile_linux_aarch64 --cpu=aarch64
+common:cross_compile_linux_aarch64 --crosstool_top=@xla//tools/toolchains/cross_compile/cc:cross_compile_toolchain_suite
+
+common:rbe_cross_compile_base --config=rbe
+common:rbe_cross_compile_base --remote_instance_name=projects/tensorflow-testing/instances/default_instance
+
+# RBE cross-compile configs for Linux Aarch64
+common:rbe_cross_compile_linux_aarch64 --config=cross_compile_linux_aarch64
+common:rbe_cross_compile_linux_aarch64 --config=rbe_cross_compile_base
+
+# Avoids a timeout in linalg_test on ARM.
+common:rbe_cross_compile_linux_aarch64 --test_env=OMP_NUM_THREADS=8
+
+# Mac x86
+common:cross_compile_darwin_x86_64 --config=cross_compile_base
+common:cross_compile_darwin_x86_64 --config=nonccl
+# Target Catalina (10.15) as the minimum supported OS
+common:cross_compile_darwin_x86_64 --action_env  MACOSX_DEPLOYMENT_TARGET=10.15
+
+# Set the target CPU to Darwin x86
+common:cross_compile_darwin_x86_64 --platforms=@xla//tools/toolchains/cross_compile/config:darwin_x86_64
+common:cross_compile_darwin_x86_64 --cpu=darwin
+common:cross_compile_darwin_x86_64 --crosstool_top=@xla//tools/toolchains/cross_compile/cc:cross_compile_toolchain_suite
+# When RBE cross-compiling for macOS, we need to explicitly register the
+# toolchain. Otherwise, oddly, RBE complains that a "docker container must be
+# specified".
+common:cross_compile_darwin_x86_64 --extra_toolchains=@xla//tools/toolchains/cross_compile/config:macos-x86-cross-compile-cc-toolchain
+# Map --platforms=darwin_x86_64 to --cpu=darwin and vice-versa to make selects()
+# and transistions that use these flags work. The flag --platform_mappings needs
+# to be set to a file that exists relative to the package path roots.
+common:cross_compile_darwin_x86_64 --platform_mappings=platform_mappings
+
+# RBE cross-compile configs for Darwin x86
+common:rbe_cross_compile_darwin_x86_64 --config=cross_compile_darwin_x86_64
+common:rbe_cross_compile_darwin_x86_64 --config=rbe_cross_compile_base
+
+#############################################################################
+# Some configs to make getting some forms of debug builds. In general, the
+# codebase is only regularly built with optimizations. Use 'debug_symbols' to
+# just get symbols for the parts of XLA/PJRT that jaxlib uses.
+# Or try 'debug' to get a build with assertions enabled and minimal
+# optimizations.
+# Include these in a local .bazelrc.user file as:
+#   common --config=debug_symbols
+# Or:
+#   common --config=debug
+#
+# Additional files can be opted in for debug symbols by adding patterns
+# to a per_file_copt similar to below.
+#############################################################################
+
+common:debug_symbols --strip=never --per_file_copt="xla/pjrt|xla/python@-g3"
+common:debug --config=debug_symbols -c fastbuild
+
+# Load `.jax_configure.bazelrc` file written by build.py
+try-import %workspace%/.jax_configure.bazelrc
+
+# Load rc file with user-specific options.
+try-import %workspace%/.bazelrc.user

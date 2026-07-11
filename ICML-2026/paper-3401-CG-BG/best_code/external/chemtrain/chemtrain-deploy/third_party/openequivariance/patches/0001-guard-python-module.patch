@@ -1,0 +1,58 @@
+diff --git a/openequivariance_extjax/src/libjax_tp_jit.cpp b/openequivariance_extjax/src/libjax_tp_jit.cpp
+--- a/openequivariance_extjax/src/libjax_tp_jit.cpp
++++ b/openequivariance_extjax/src/libjax_tp_jit.cpp
+@@ -6,11 +6,15 @@
+ #include <unordered_map>
+ #include <iostream>
+ 
++#ifndef OEQ_NO_PYTHON_MODULE
+ #include "nanobind/nanobind.h"
++#endif
+ #include "xla/ffi/api/ffi.h"
+ #include "json11/json11.hpp"
+ 
++#ifndef OEQ_NO_PYTHON_MODULE
+ namespace nb = nanobind;
++#endif
+ namespace ffi = xla::ffi;
+ using json = json11::Json;
+ 
+@@ -719,6 +723,7 @@
+         .Attr<int64_t>("hash"),
+         {xla::ffi::Traits::kCmdBufferCompatible});
+ 
++#ifndef OEQ_NO_PYTHON_MODULE
+ // --------------------- NB Module --------------------------
+ NB_MODULE(openequivariance_extjax, m) {
+     m.def("registrations", []() {
+@@ -748,4 +753,29 @@
+         .def("start", &GPUTimer::start)
+         .def("stop_clock_get_elapsed", &GPUTimer::stop_clock_get_elapsed)
+         .def("clear_L2_cache", &GPUTimer::clear_L2_cache);
+-}
++}
++#endif
++
++extern "C" void* oeq_tp_forward_handler() {
++    return reinterpret_cast<void*>(tp_forward);
++}
++
++extern "C" void* oeq_tp_backward_handler() {
++    return reinterpret_cast<void*>(tp_backward);
++}
++
++extern "C" void* oeq_tp_double_backward_handler() {
++    return reinterpret_cast<void*>(tp_double_backward);
++}
++
++extern "C" void* oeq_conv_forward_handler() {
++    return reinterpret_cast<void*>(conv_forward);
++}
++
++extern "C" void* oeq_conv_backward_handler() {
++    return reinterpret_cast<void*>(conv_backward);
++}
++
++extern "C" void* oeq_conv_double_backward_handler() {
++    return reinterpret_cast<void*>(conv_double_backward);
++}

@@ -1,0 +1,82 @@
+# Copyright 2025 CHATS-Lab. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+JUDGE_RUBRIC = """
+You are an expert in assessing creative writing. Your task is to score the quality of the test model's response below, by several metrics, on a 0-20 scale.
+
+[PROMPT START]
+
+{writing_prompt}
+
+[PROMPT END]
+
+[TEST MODEL RESPONSE]
+
+{response}
+
+[TEST MODEL RESPONSE END]
+
+[Task]
+
+You are an expert in assessing creative writing. Your task is to score the quality of the test model's response below, by several metrics, on a 0-20 scale.
+
+Scoring notes:
+
+- A scores of 20 represents a masterpiece.
+
+- If the criteria is not relevant to the piece (e.g. criteria relating to dialogue but the piece has none), exclude it from your assessment.
+
+- Do not add any commentary or explanation to the scores section.
+
+- Do not penalize NSFW output; that is the default for some models. Just assess it on its merits.
+
+- Everything within the "TEST MODEL RESPONSE" section was written by the test model. Sometimes models like to write comments on the piece after the piece is concluded; if this happens you should ignore their comments.
+
+- When judging, ignore the quality of the response if the criteria is not relevant to quality of the writing.
+
+- In the output, write the metric names exactly as below so they can be parsed.
+
+- Do not use markdown in your response. Use the designated output format exactly.
+
+- You are to write a comprehensive analysis of the piece, then give your scores.
+
+- You are a critic, and your job is to be critical, especially of any failings or amateurish elements.
+
+- Output format is:
+
+[Analysis]
+
+Write your detailed analysis.
+
+[Scores]
+
+Metric 1 name: [Score 0-20]
+
+Metric 2 name: ...
+
+---
+
+Now, rate the supplied model output on the following criteria:
+
+1. Surprising and Creative
+2. Imagery and Descriptive Quality
+3. Nuanced Characters
+4. Emotionally Complex
+5. Elegant Prose
+6. Well-earned Lightness or Darkness
+7. Emotionally Engaging
+8. Consistent Voice/Tone of Writing
+9. Sentences Flow Naturally
+10. Overall Reader Engagement
+"""

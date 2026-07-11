@@ -1,0 +1,5 @@
+- **Role and Process Overlap**: The operational structure allows the same individual or closely linked roles to engage in external communications, participate in procurement structuring, and influence funding decisions without enforced separation or independent gating between functions.
+
+- **Procedural Flexibility Without Hard Stops**: Procurement and financial processes permit adjustments to scope, packaging, thresholds, or transfer mechanisms that can be executed within existing rules or exceptions without mandatory escalation, suspension, or independent validation.
+
+- **Concurrent Benefit and Authority Continuity**: The system does not automatically restrict or pause an individual’s decision-making authority when personal items, travel accommodations, or other non-operational considerations are present alongside ongoing official interactions with the same external party.

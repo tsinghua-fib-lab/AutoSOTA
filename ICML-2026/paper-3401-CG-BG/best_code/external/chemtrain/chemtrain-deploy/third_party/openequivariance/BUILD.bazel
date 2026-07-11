@@ -1,0 +1,35 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "oeq_xla_ffi_handlers",
+    srcs = [
+        "openequivariance_extjax/src/libjax_tp_jit.cpp",
+        "openequivariance_extjax/src/extension/json11/json11.cpp",
+    ],
+    hdrs = glob([
+        "openequivariance_extjax/src/extension/**/*.h",
+        "openequivariance_extjax/src/extension/**/*.hpp",
+        "openequivariance_extjax/src/extension/**/*.inl",
+    ]),
+    includes = [
+        "openequivariance_extjax/src/extension",
+    ],
+    defines = [
+        "OEQ_NO_PYTHON_MODULE",
+        "CUDA_BACKEND=1",
+    ],
+    copts = [
+        "-std=c++17",
+        "-Wno-attributes",
+        "-Wno-return-type",
+    ],
+    deps = [
+        "@local_config_cuda//cuda:cuda_driver",
+        "@local_config_cuda//cuda:cuda_headers",
+        "@local_config_cuda//cuda:cuda_runtime",
+        "@local_config_cuda//cuda:nvrtc",
+        "@xla//xla/ffi/api:c_api",
+        "@xla//xla/ffi/api:ffi",
+    ],
+    alwayslink = True,
+)

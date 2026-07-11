@@ -1,0 +1,86 @@
+[project]
+name = "cg-bg"
+description = "A framework for training flow models as Coarse-Grained Boltzmann Generators"
+requires-python = "== 3.11.*"
+version = "0.1.0"
+license = { text = "MIT" }
+dependencies = ["rich>=13.7.0"]
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cg_bg"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[tool.pixi.pypi-dependencies]
+cg_bg = { path = ".", editable = true }
+chemtrain = { path = "./external/chemtrain", editable = true }
+chemutils = { path = "./external/chemutils", editable = true }
+torch = { version = ">=2.5.1", index = "https://download.pytorch.org/whl/cpu" }
+
+jax = ">=0.4.30, <0.5.0"
+flax = ">=0.8.0"
+optax = ">=0.2.0"
+equinox = ">=0.11.0"
+diffrax = ">=0.5.0"
+einops = ">=0.8.0"
+jax-md = ">=0.2.0"
+jax-tqdm = "*"
+hydra-core = "*"
+hydra-colorlog = "*"
+python-dotenv = ">=1.0.1"
+ott-jax = "*"
+huggingface-hub = ">=0.24.0"
+
+[tool.pixi.dependencies]
+tqdm = ">=4.67.0,<5"
+rich = ">=13.7.0"
+numpy = ">=1.26.0"
+scipy = ">=1.11.0,<1.13"
+matplotlib = ">=3.8.0"
+seaborn = ">=0.13.0"
+
+[tool.pixi.target.linux-64.pypi-dependencies]
+jax = { version = ">=0.4.30, <0.5.0", extras = ["cuda12"] }
+
+[tool.pixi.feature.lint.dependencies]
+ruff = ">=0.9.0"
+pre-commit = ">=3.7.0"
+
+[tool.pixi.feature.lint.tasks]
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+format = "ruff format ."
+check = "ruff check . && ruff format --check ."
+pre-commit-install = "pre-commit install"
+pre-commit-run = "pre-commit run --all-files"
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+lint = { features = ["lint"], solve-group = "default" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = ["./external/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pixi.tasks]
+mb_ub = "python main.py +experiment=mb_ub"
+mb_b = "python main.py +experiment=mb_b"
+ala2_cb_b = "python main.py +experiment=ala2_cb_b"
+ala2_cb_ub = "python main.py +experiment=ala2_cb_ub"
+ala2_ha_b = "python main.py +experiment=ala2_ha_b"
+ala2_ha_ub = "python main.py +experiment=ala2_ha_ub"
+ala3_ha_ub = "python main.py +experiment=ala3_ha_ub"
+ala6_cb_ub = "python main.py +experiment=ala6_cb_ub"
+
+[tool.hatch.metadata]
+allow-direct-references = true

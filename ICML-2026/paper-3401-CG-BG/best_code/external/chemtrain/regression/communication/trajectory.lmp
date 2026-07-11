@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: Apache-2.0
+# Compare the same deterministic Ti trajectory through both exported variants.
+#
+# The Python driver invokes this file once with internal communication disabled
+# and once with it enabled. Both runs start from the same lattice and initial
+# velocity seed. Frame 0 therefore permits a strict same-coordinate per-atom
+# prediction comparison. Later frames test whether the independently integrated
+# NVE trajectories remain close; they are not identical model inputs after the
+# first numerical difference has changed a position.
+
+variable model index model.ptb
+variable comm index off
+variable newton_setting index on
+variable atom_padding index 2.0
+variable edge_padding index 4.0
+variable trajectory_dump index trajectory.lammpstrj
+# These are standalone defaults. run_regression.py overrides them with LAMMPS
+# `-var` arguments, so each logged command records the exact tested variant,
+# padding, model bundle, and output path.
+
+units metal
+atom_style atomic
+boundary p p p
+newton ${newton_setting}
+
+# Two ranks split this box along x. Both ranks own atoms and exchange halo data.
+processors 2 1 1
+lattice bcc 3.21
+region box block 0 6 0 6 0 6 units lattice
+create_box 22 box
+create_atoms 22 box
+# All declared types need a mass before LAMMPS can initialize velocities. Only
+# type 22 is populated; it represents titanium through its atomic number.
+mass * 47.867
+
+# `comm` selects the baseline or internal-communication model variant. This
+# test supplies deliberately small capacity padding so compression triggers the
+# runtime buffer-growth path.
+pair_style chemtrain_deploy cuda 0.85 comm ${comm}
+pair_coeff * * ${model} ${atom_padding} ${edge_padding}
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+velocity all create 900.0 20260622 mom yes rot no dist gaussian
+fix integrate all nve
+timestep 0.001
+
+thermo 1
+thermo_style custom step atoms pe ke etotal
+thermo_modify format float %.16g
+compute atom_energy all pe/atom
+dump trajectory all custom 1 ${trajectory_dump} id type xu yu zu fx fy fz c_atom_energy
+dump_modify trajectory sort id format float %.16g first yes
+
+# The first NVE segment establishes ordinary trajectory agreement and gives an
+# energy-conservation signal for each variant independently. Compression then
+# changes the Hamiltonian intentionally, so the conservation baseline is reset
+# for the second NVE segment.
+run 20
+change_box all x scale 0.82 y scale 0.82 z scale 0.82 remap
+
+# Evaluate the compressed state without advancing time, then verify that the
+# trajectory continues after any required recompilation.
+run 0
+run 20

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "higher-order-certified-regression"
+version = "0.1.0"
+description = "Code release for higher-order certified robustness for regression"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "scikit-learn",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+experiments = [
+    "torch",
+    "torchvision",
+    "Pillow",
+    "transformers>=4.44",
+    "huggingface_hub>=0.23",
+    "timm>=0.9",
+    "e2cnn",
+    "seaborn",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

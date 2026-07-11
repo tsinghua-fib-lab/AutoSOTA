@@ -1,0 +1,21 @@
+_target_: cg_bg.pmf.trainers.get_ala_trainer
+_partial_: true
+dataset:
+  _target_: cg_bg.data.ala.data.get_ala_pmf_dataset
+  data_path: ${data_path}
+  scale_R: 1.0
+  scale_U: 1.0
+  fractional: true
+  train_frac: 1.0
+  seed: ${seed}
+batch_size: 256
+epochs: 100
+init_lr: 0.001
+decay_rate: 0.9
+r_cutoff: 0.5
+hidden_irreps: 32x0e+32x1o
+readout_irreps: 16x0e
+output_irreps: 1x0e
+max_ell: 3
+num_interactions: 2
+correlation: 3

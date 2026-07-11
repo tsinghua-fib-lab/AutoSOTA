@@ -1,0 +1,13 @@
+_target_: cg_bg.flow.ode_solver_diffrax.batched_sampler
+_partial_: true
+dt0: 0.005
+method: dopri5
+num_batches: 2000
+batch_size: 500
+n_nodes: ${n_nodes}
+n_dim: ${n_dim}
+rtol: 0.00001
+atol: 0.00001
+mu: ${dataloader.mu}
+sigma: ${dataloader.sigma}
+com_center: ${dataloader.com_center}

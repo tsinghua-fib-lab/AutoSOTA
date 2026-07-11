@@ -1,0 +1,19 @@
+# @package _global_
+defaults:
+  - override /dataset: mb
+  - override /dataloader: mb
+  - override /model: mb_mlp
+  - override /pmf_trainer: mb
+
+task: mb_b
+n_nodes: 1
+n_dim: 1
+num_samples: 20000
+batch_size: 256
+epochs: 1000
+
+data_path: ${hf:${hf_repo_id},MB/pmf_b/flow_b/data.npz}
+target_path: ${hf:${hf_repo_id},MB/pmf_b/flow_ub/data.npz}
+energy_params_path: ${hf:${hf_repo_id},MB/pmf_b/flow_b/energy_params.pkl}
+flow_params_path: ${hf:${hf_repo_id},MB/pmf_b/flow_b/flow_params.pkl}
+samples_path: ${hf:${hf_repo_id},MB/pmf_b/flow_b/samples_and_weights.npz}
