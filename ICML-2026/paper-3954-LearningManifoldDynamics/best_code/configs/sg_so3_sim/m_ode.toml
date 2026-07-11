@@ -1,0 +1,32 @@
+[experiment_config]
+model_type = "m_ode"
+dataset_name = "sg_so3_simulation"
+
+optimizer = "adamw"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+loss = "frobenius"
+seed = 1
+batch_size = 1024
+epochs = 15
+early_stopping_patience = 5
+
+training_mode = "conditional"
+manifold = "so3"
+hidden_state_mode = "euclidean"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "pid"
+solver = "tsit5"
+rtol = 1e-2
+atol = 1e-3
+dtmin = 1e-4
+dt0 = 0.05
+
+[m_ode_config]
+vf_hidden_dim = 32
+vf_mlp_depth = 3
+output_scale = 1.0

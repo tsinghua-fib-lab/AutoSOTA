@@ -1,0 +1,58 @@
+{
+  "paper_id": 3432,
+  "repo_url": "https://github.com/Sjn622/LoBCD-GW",
+  "repo_commit": "fb9b5bc0ae104702bf09e6f77314375e3f5b6529",
+  "repo_path": "/repo",
+  "container_name": "autosota_sota_paper_3432",
+  "container_reusable": true,
+  "docker_image": "autosota/paper-3432:reproduced",
+  "eval_command": "python3 run_LoBCD_GW.py --dataset reddit --use_gpu 1 --rho 0.1 --max_iter 2000 --eps 1e-6 --output_file result_eval.txt",
+  "baseline_metrics": {
+    "Accuracy": 96.99,
+    "Wall-Clock Time": 0.94
+  },
+  "primary_metric": "Accuracy",
+  "metric_direction": "higher",
+  "gpu_devices": "2,3",
+  "data_mounts": [],
+  "cache_mounts": [
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache:/autosota_cache",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/datasets:/datasets",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/models:/models"
+  ],
+  "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3432.log",
+  "status": "success",
+  "created_at": "2026-07-10T03:46:25Z",
+  "notes": "Reproduced Accuracy=96.99% on Reddit graph alignment (paper: 97.18%, CI: [92.68%, 97.63%]). Wall-Clock Time=0.94s/graph is outside the paper's CI [0.219s, 0.23s] — the 4.3x slowdown is likely due to PyTorch 2.1.0 vs paper's 2.2.2, and/or CUDA kernel differences. Both initializations (degree-based and uniform) were tested; degree-based init is better on 499/500 Reddit graph pairs. Dataset (REDDIT-BINARY/matching.pk) downloaded from KL-BAPG repo: https://github.com/squareRoot3/Gromov-Wasserstein-for-Graph.",
+  "eval_timeout_minutes": 30,
+  "eval_output_format": "Parse stdout line 'Data:reddit,...,acc2:XX.XX,...' for Accuracy percentage; or read result_eval.txt for the structured summary line. Per-graph wall-clock time = (Total processing time)/500 from stdout.",
+  "known_levers": "Key hyperparameters: rho (step size inverse, default 0.1 = τ=10; paper searches τ ∈ {2,5,10,20,100}), max_iter (default 2000; early stopping triggers automatically), eps (convergence tolerance, default 1e-6), sinkhorn_iters (default 4). The algorithm uses aggressive early stopping when coupling updates become sparse. tf32 and cudnn benchmarking are enabled by default. The code already implements the 'best of two initializations' strategy internally via degree-based heuristic init.",
+  "setup_notes": "Container uses PyTorch 2.1.0 CUDA 12.1 on A100-SXM4-80GB. Dependencies: numpy 1.26.0, scipy 1.15.3, networkx 3.1, pandas 2.3.3, scikit-learn 1.6.1. REDDIT-BINARY/matching.pk (32MB) downloaded from squareRoot3/Gromov-Wasserstein-for-Graph GitHub repo into /repo/data/REDDIT-BINARY/. No external models or checkpoints needed. POT (Python Optimal Transport) not required — the code has its own Sinkhorn implementation.",
+  "optimization_objective": {
+    "objective_type": "multi_metric_tradeoff",
+    "summary": "Improve accuracy while maintaining or reducing wall-clock time. The paper's core contribution is achieving state-of-the-art accuracy (97.18%) with fast computation (0.22s/graph) via localized block coordinate descent. Both metrics matter: accuracy is the quality measure, time is the efficiency measure that distinguishes LoBCD-GW from slower O(n³) baselines.",
+    "metrics": [
+      {
+        "name": "Accuracy",
+        "direction": "higher",
+        "role": "core",
+        "goal": "improve",
+        "baseline": 96.99,
+        "regression_tolerance_pct": 2.0,
+        "rationale": "Primary quality metric for graph alignment. Paper achieves 97.18% on Reddit. Must stay above baseline 92.68% (HOT). Accuracy improvements directly demonstrate algorithmic effectiveness."
+      },
+      {
+        "name": "Wall-Clock Time",
+        "direction": "lower",
+        "role": "guardrail",
+        "goal": "maintain",
+        "baseline": 0.94,
+        "regression_tolerance_pct": 20.0,
+        "rationale": "Efficiency metric that distinguishes LoBCD-GW. Should not regress significantly since the algorithm's O(r³) complexity advantage over O(n³) baselines is a key paper claim. Acceptable to increase moderately if accuracy improves substantially."
+      }
+    ],
+    "success_policy": "Primary goal is to improve Accuracy. Wall-Clock Time serves as a guardrail — improvements in accuracy that come with moderate time increases are acceptable, but time should not regress by more than 20% without a corresponding accuracy gain. Pareto-dominant improvements (higher accuracy AND lower time) are ideal. Do not sacrifice accuracy below 92.68% (the strongest GPU baseline) for speed gains."
+  },
+  "metric_upper_bound": 97.63,
+  "metric_lower_bound": 92.68
+}

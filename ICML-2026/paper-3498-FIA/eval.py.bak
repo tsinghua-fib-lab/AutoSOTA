@@ -1,0 +1,369 @@
+#!/usr/bin/env python3
+"""Evaluation script for Fair Rank Aggregation (Algorithm 3) on Movielens.
+
+Reproduces the metrics from:
+  "Fairness in Aggregation: Optimal Top-k and Improved Full Ranking"
+
+Uses scipy's HiGHS LP solver as a replacement for Gurobi due to license
+limitations. The LP formulation is identical; solver choice may lead to
+slightly different optimal solutions when the LP has multiple optima.
+
+Metrics:
+  - Spearman footrule objective cost (lower is better)
+  - Kendall-Tau objective cost (lower is better)
+  - BFI baseline (Spearman footrule)
+  - KT baseline (Kendall-Tau)
+"""
+
+import math
+import time
+import numpy as np
+from scipy.optimize import linprog
+from scipy.sparse import lil_matrix
+
+
+def parse_input(filepath):
+    """Parse Movielens input file. Returns data structures."""
+    with open(filepath) as f:
+        lines = [l.strip() for l in f.readlines()]
+
+    pos = 0
+    p = lines[pos].split(); pos += 1
+    NUM_RANKINGS = int(p[0])
+    NUM_GROUPS = int(p[2])
+
+    # Skip initial alpha/beta (overridden later)
+    for _ in range(NUM_GROUPS):
+        pos += 1
+
+    rankings = []
+    for _ in range(NUM_RANKINGS):
+        r = [int(x) for x in lines[pos].split()]; pos += 1
+        rankings.append(r)
+
+    DIM = len(rankings[0])
+    K = DIM // 2
+
+    item_to_group = {}
+    group_to_item = [[] for _ in range(NUM_GROUPS)]
+    group_count = [0] * NUM_GROUPS
+    for _ in range(DIM):
+        il = [int(x) for x in lines[pos].split()]; pos += 1
+        item_to_group[il[0]] = il[1]
+        group_to_item[il[1]].append(il[0])
+        group_count[il[1]] += 1
+
+    ALPHA = [group_count[g] / DIM for g in range(NUM_GROUPS)]
+    BETA = [group_count[g] / DIM for g in range(NUM_GROUPS)]
+
+    return NUM_RANKINGS, NUM_GROUPS, DIM, K, rankings, item_to_group, group_to_item, group_count, ALPHA, BETA
+
+
+def compute_cost_matrices(rankings, NUM_RANKINGS, DIM):
+    """Compute leftCostRank (for optimization) and trueCostRank (for evaluation)."""
+    leftCostRank = np.zeros((DIM, DIM), dtype=np.int16)
+    trueCostRank = np.zeros((DIM, DIM), dtype=np.int16)
+
+    for i in range(NUM_RANKINGS):
+        r = rankings[i]
+        for j in range(DIM):
+            elem = r[j]
+            for k in range(j):
+                leftCostRank[elem][k] += abs(j - k)
+            for k in range(DIM):
+                trueCostRank[elem][k] += abs(j - k)
+
+    return leftCostRank, trueCostRank
+
+
+def get_obj_cost(sol, costRank):
+    """Compute Spearman footrule objective cost of a ranking."""
+    ccost = 0
+    assigned = set()
+    for i in range(len(sol)):
+        ccost += int(costRank[sol[i]][i])
+        assigned.add(sol[i])
+    assert len(assigned) == len(sol), "Output is not a valid ranking"
+    return ccost
+
+
+def mergesort(ranking):
+    if len(ranking) <= 1:
+        return 0, ranking
+    leftsum, leftrank = mergesort(ranking[:len(ranking)//2])
+    rightsum, rightrank = mergesort(ranking[len(ranking)//2:])
+    csum = leftsum + rightsum
+    leftindex, rightindex = 0, 0
+    outrank = []
+    while leftindex < len(leftrank) and rightindex < len(rightrank):
+        if leftrank[leftindex] < rightrank[rightindex]:
+            outrank.append(leftrank[leftindex]); leftindex += 1
+        else:
+            outrank.append(rightrank[rightindex])
+            csum += len(leftrank) - leftindex; rightindex += 1
+    outrank += leftrank[leftindex:] + rightrank[rightindex:]
+    return csum, outrank
+
+
+def kendall_tau_dist(first, second):
+    mapped = [first.index(second[i]) for i in range(len(second))]
+    cost, _ = mergesort(mapped)
+    return cost
+
+
+def get_kt_obj_cost(sol, rankings):
+    return sum(kendall_tau_dist(sol, r) for r in rankings)
+
+
+def is_fair(ranking, item_to_group, ALPHA, BETA, K, NUM_GROUPS):
+    group_count = [0] * NUM_GROUPS
+    for i in range(K):
+        group_count[item_to_group[ranking[i]]] += 1
+    LB = [math.floor(ALPHA[g] * K) for g in range(NUM_GROUPS)]
+    UB = [math.ceil(BETA[g] * K) for g in range(NUM_GROUPS)]
+    for g in range(NUM_GROUPS):
+        if group_count[g] < LB[g] or group_count[g] > UB[g]:
+            return False
+    return True
+
+
+def solve_assignment_lp(cost_sub, K_lp, LB, UB, group_to_item, DIM, NUM_GROUPS, assigned_set=None):
+    """Solve LP for fair assignment problem using scipy HiGHS."""
+    is_avail = np.ones(DIM, dtype=bool)
+    if assigned_set:
+        for a in assigned_set:
+            is_avail[a] = False
+    avail = np.where(is_avail)[0]
+    n_avail = len(avail)
+    item_to_idx = {item: idx for idx, item in enumerate(avail)}
+    n_vars = n_avail * K_lp
+
+    # Objective
+    c = np.zeros(n_vars)
+    for idx, i in enumerate(avail):
+        for j in range(K_lp):
+            c[idx * K_lp + j] = cost_sub[i, j]
+
+    # A_eq: each position gets exactly 1 item
+    A_eq = lil_matrix((K_lp, n_vars))
+    for j in range(K_lp):
+        for idx in range(n_avail):
+            A_eq[j, idx * K_lp + j] = 1.0
+    A_eq = A_eq.tocsr()
+
+    # A_ub part 1: each item assigned at most once
+    A_ub1 = lil_matrix((n_avail, n_vars))
+    for idx in range(n_avail):
+        for j in range(K_lp):
+            A_ub1[idx, idx * K_lp + j] = 1.0
+
+    # A_ub parts 2,3: fairness constraints
+    A_ub_lb = lil_matrix((NUM_GROUPS, n_vars))
+    A_ub_ub = lil_matrix((NUM_GROUPS, n_vars))
+    for g in range(NUM_GROUPS):
+        for i in group_to_item[g]:
+            if is_avail[i]:
+                idx_i = item_to_idx[i]
+                for j in range(K_lp):
+                    A_ub_lb[g, idx_i * K_lp + j] = -1.0
+                    A_ub_ub[g, idx_i * K_lp + j] = 1.0
+
+    n_ub = n_avail + 2 * NUM_GROUPS
+    A_ub = lil_matrix((n_ub, n_vars))
+    A_ub[:n_avail] = A_ub1
+    A_ub[n_avail:n_avail + NUM_GROUPS] = A_ub_lb
+    A_ub[n_avail + NUM_GROUPS:] = A_ub_ub
+    A_ub = A_ub.tocsr()
+
+    b_ub = np.concatenate([
+        np.ones(n_avail),
+        [-LB[g] for g in range(NUM_GROUPS)],
+        [UB[g] for g in range(NUM_GROUPS)]
+    ])
+
+    res = linprog(c, A_eq=A_eq, b_eq=np.ones(K_lp), A_ub=A_ub, b_ub=b_ub,
+                  bounds=[(0, 1)] * n_vars, method='highs')
+
+    if not res.success:
+        raise RuntimeError(f"LP failed: {res.status} - {res.message}")
+
+    x = res.x.reshape(n_avail, K_lp)
+    positions = [-1] * K_lp
+    assigned = set()
+    for j in range(K_lp):
+        bi = np.argmax(x[:, j])
+        positions[j] = avail[bi]
+        assigned.add(avail[bi])
+
+    return positions, res.fun
+
+
+def algorithm_3(leftCostRank, trueCostRank, K, group_to_item, ALPHA, BETA,
+                rankings, NUM_RANKINGS, DIM, NUM_GROUPS, item_to_group):
+    """Run Algorithm 3 (ourAlgoWrapper) from the paper.
+
+    Solves the fair rank aggregation problem in two directions
+    (forward and reverse) and returns the better result.
+    """
+    LB = [math.floor(ALPHA[i] * K) for i in range(NUM_GROUPS)]
+    UB = [math.ceil(BETA[i] * K) for i in range(NUM_GROUPS)]
+
+    # Direction 1: forward
+    cost_sub1 = leftCostRank[:, :K]
+    positions1, _ = solve_assignment_lp(cost_sub1, K, LB, UB, group_to_item,
+                                         DIM, NUM_GROUPS)
+    assigned1 = set(p for p in positions1 if p >= 0)
+
+    remaining_K1 = DIM - K
+    cost_sub1b = leftCostRank[:, K:]
+    rem_UB1 = [len(group_to_item[g]) for g in range(NUM_GROUPS)]
+    positions1b, _ = solve_assignment_lp(cost_sub1b, remaining_K1,
+                                          np.zeros(NUM_GROUPS, dtype=int),
+                                          rem_UB1, group_to_item, DIM, NUM_GROUPS,
+                                          assigned1)
+
+    sigma1 = [-1] * DIM
+    for j in range(K):
+        sigma1[j] = positions1[j]
+    for j in range(remaining_K1):
+        sigma1[j + K] = positions1b[j]
+    sigma1val = get_obj_cost(sigma1, trueCostRank)
+
+    # Direction 2: reverse
+    new_LB = [len(group_to_item[i]) - UB[i] for i in range(NUM_GROUPS)]
+    new_UB = [len(group_to_item[i]) - LB[i] for i in range(NUM_GROUPS)]
+
+    newCostRank = np.zeros((DIM, DIM), dtype=np.int16)
+    for i in range(NUM_RANKINGS):
+        r = rankings[i]
+        for j in range(DIM):
+            e = r[j]
+            for k in range(j + 1, DIM):
+                newCostRank[e][k] += k - j
+    newCostRank = np.flip(newCostRank, axis=1)
+
+    cost_sub2 = newCostRank[:, :(DIM - K)]
+    positions2, _ = solve_assignment_lp(cost_sub2, DIM - K, new_LB, new_UB,
+                                         group_to_item, DIM, NUM_GROUPS)
+    assigned2 = set(p for p in positions2 if p >= 0)
+
+    cost_sub2b = newCostRank[:, (DIM - K):]
+    rem_UB2 = [len(group_to_item[g]) for g in range(NUM_GROUPS)]
+    positions2b, _ = solve_assignment_lp(cost_sub2b, K,
+                                          np.zeros(NUM_GROUPS, dtype=int),
+                                          rem_UB2, group_to_item, DIM, NUM_GROUPS,
+                                          assigned2)
+
+    sigma2 = [-1] * DIM
+    for j in range(DIM - K):
+        sigma2[j] = positions2[j]
+    for j in range(K):
+        sigma2[j + DIM - K] = positions2b[j]
+    sigma2 = sigma2[::-1]
+    sigma2val = get_obj_cost(sigma2, trueCostRank)
+
+    if sigma1val < sigma2val:
+        return sigma1, sigma1val
+    return sigma2, sigma2val
+
+
+def bfi_baseline(rankings, trueCostRank, K, item_to_group, ALPHA, BETA, DIM, NUM_GROUPS):
+    """Best From Input (BFI) baseline - 3-approximation."""
+    def get_closest_ranking(ranking):
+        group_taken = [[] for _ in range(NUM_GROUPS)]
+        LB = [math.floor(ALPHA[g] * K) for g in range(NUM_GROUPS)]
+        UB = [math.ceil(BETA[g] * K) for g in range(NUM_GROUPS)]
+
+        total_taken = 0
+        for i in range(DIM):
+            item = ranking[i]; g = item_to_group[item]
+            if len(group_taken[g]) < LB[g]:
+                group_taken[g].append(item); total_taken += 1
+        for i in range(DIM):
+            if total_taken >= K: break
+            item = ranking[i]; g = item_to_group[item]
+            if item in group_taken[g]: continue
+            if len(group_taken[g]) < UB[g]:
+                group_taken[g].append(item); total_taken += 1
+        new_ranking = []
+        for i in range(DIM):
+            item = ranking[i]; g = item_to_group[item]
+            if item in group_taken[g]: new_ranking.append(item)
+        for i in range(DIM):
+            item = ranking[i]; g = item_to_group[item]
+            if item not in group_taken[g]: new_ranking.append(item)
+        return new_ranking
+
+    best_obj, best_ranking = float('inf'), None
+    for ranking in rankings:
+        fr = get_closest_ranking(ranking)
+        obj = get_obj_cost(fr, trueCostRank)
+        if obj < best_obj:
+            best_obj, best_ranking = obj, fr
+    return best_ranking, best_obj
+
+
+def main():
+    import os
+    datapath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            'Movielens', 'movielens.in')
+    print(f"Loading data from: {datapath}")
+
+    (NUM_RANKINGS, NUM_GROUPS, DIM, K, rankings, item_to_group,
+     group_to_item, group_count, ALPHA, BETA) = parse_input(datapath)
+
+    print(f"n={NUM_RANKINGS}, d={DIM}, K={K}, groups={NUM_GROUPS}")
+    print(f"Group sizes: {group_count}")
+    print(f"ALPHA/BETA: {[f'{ALPHA[g]:.4f}' for g in range(NUM_GROUPS)]}")
+    print()
+
+    # Compute cost matrices
+    t0 = time.time()
+    leftCostRank, trueCostRank = compute_cost_matrices(rankings, NUM_RANKINGS, DIM)
+    print(f"Cost matrices computed in {time.time()-t0:.2f}s")
+
+    # BFI Baseline
+    print("\n--- BFI Baseline (3-approximation) ---")
+    t0 = time.time()
+    bfi_ranking, bfi_spearman = bfi_baseline(
+        rankings, trueCostRank, K, item_to_group, ALPHA, BETA, DIM, NUM_GROUPS)
+    bfi_kt = get_kt_obj_cost(bfi_ranking, rankings)
+    bfi_fair = is_fair(bfi_ranking, item_to_group, ALPHA, BETA, K, NUM_GROUPS)
+    print(f"Spearman footrule cost: {bfi_spearman}")
+    print(f"Kendall-Tau cost:       {bfi_kt}")
+    print(f"Fair ranking:           {bfi_fair}")
+    print(f"Time: {time.time()-t0:.2f}s")
+
+    # Algorithm 3
+    print("\n--- Algorithm 3 (Our Method) ---")
+    t0 = time.time()
+    algo3_ranking, algo3_spearman = algorithm_3(
+        leftCostRank, trueCostRank, K, group_to_item, ALPHA, BETA,
+        rankings, NUM_RANKINGS, DIM, NUM_GROUPS, item_to_group)
+    algo3_kt = get_kt_obj_cost(algo3_ranking, rankings)
+    algo3_fair = is_fair(algo3_ranking, item_to_group, ALPHA, BETA, K, NUM_GROUPS)
+    print(f"Spearman footrule cost: {algo3_spearman}")
+    print(f"Kendall-Tau cost:       {algo3_kt}")
+    print(f"Fair ranking:           {algo3_fair}")
+    print(f"Time: {time.time()-t0:.2f}s")
+
+    # Summary
+    print("\n" + "=" * 60)
+    print("REPRODUCTION SUMMARY")
+    print("=" * 60)
+    print(f"{'Method':<20} {'Spearman':>12} {'Kendall-Tau':>12} {'Fair':>6}")
+    print("-" * 50)
+    print(f"{'BFI (baseline)':<20} {bfi_spearman:>12} {bfi_kt:>12} {str(bfi_fair):>6}")
+    print(f"{'Algorithm 3':<20} {algo3_spearman:>12} {algo3_kt:>12} {str(algo3_fair):>6}")
+
+    if bfi_spearman > 0:
+        impr = (bfi_spearman - algo3_spearman) / bfi_spearman * 100
+        print(f"\nSpearman improvement over BFI: {impr:.1f}%")
+
+    print(f"\nKey metrics for rubric:")
+    print(f"  Spearman_Objective_Cost={algo3_spearman}")
+    print(f"  Kendall_Tau_Objective_Cost={algo3_kt}")
+
+
+if __name__ == '__main__':
+    main()

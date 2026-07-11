@@ -1,0 +1,56 @@
+# =====================================================================
+# Configuration for the CoQA bridge dataset.
+#
+# Used in Appendix D ("Reproducing results on CoQA") to validate the
+# methodology on a non-temporal, conversational benchmark.  Labels are
+# obtained via ROUGE-L >= 0.5 against the CoQA ground-truth answers
+# (per the INSIDE protocol), not via LLM-as-a-Judge.
+# =====================================================================
+
+[dataset]
+name                     = "CoQA-89K"
+path                     = "datasets/CoQA-89K.parquet"
+embedding_column         = "response_embeddings"
+label_column             = "hallucination"
+prompt_column            = "prompt_id"
+model_column             = "model_id"
+unify_years              = false            # no year axis in CoQA
+max_responses_per_prompt = 150
+
+
+[experiment]
+best_lambda    = 1.2
+n_permutations = 100
+random_state   = 42
+min_per_class  = 5
+
+
+[cache]
+root    = "cache/coqa"
+fig_dir = "figs/coqa"
+
+
+# =====================================================================
+# Models (the three small-sized LLMs evaluated in INSIDE)
+# =====================================================================
+
+[[models]]
+id             = 0
+name           = "Llama2-7B"
+huggingface_id = "meta-llama/Llama-2-7b-hf"
+latex_tag      = "\\LLAMATWO"
+size_b         = 7
+
+[[models]]
+id             = 1
+name           = "Llama2-13B"
+huggingface_id = "meta-llama/Llama-2-13b-hf"
+latex_tag      = "\\LLAMATWOLARGE"
+size_b         = 13
+
+[[models]]
+id             = 2
+name           = "OPT-6.7B"
+huggingface_id = "facebook/opt-6.7b"
+latex_tag      = "\\OPT"
+size_b         = 6.7

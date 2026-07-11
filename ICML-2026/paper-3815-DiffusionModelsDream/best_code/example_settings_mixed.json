@@ -1,0 +1,63 @@
+{
+  "name": "mass_mixed",
+
+  "fixed": {
+      "condition": {
+        "/res_metrics/soc":0.0,
+        "/res_metrics/avg_l":0.0,
+        "/res_metrics/cruise_aoa":0.0,
+        "/res_metrics/cruise_fom":0.0,
+        "/res_metrics/cruise_l":0.0,
+        "/res_metrics/avg_drag":0.0
+      },
+      "lambdas": [
+        {
+          "name": "battery_squared",
+          "x": "/design_tree/battery/mass",
+          "function": "lambda x: x**2"
+        }
+      ],
+      "mask_cond": [
+        "/res_metrics/avg_drag",
+        "/res_metrics/avg_l",
+        "/res_metrics/comp_weights/total",
+        "/res_metrics/cruise_aoa",
+        "/res_metrics/cruise_fom",
+        "/res_metrics/cruise_l",
+        "/res_metrics/soc"
+      ]
+  },
+
+  "investigations": [ 
+    {
+      "name": "mass_mixed_-1.0",
+      "condition": {
+        "/res_metrics/comp_weights/total":-1.0
+      }
+    },
+    {
+      "name": "mass_mixed_-0.5",
+      "condition": {
+        "/res_metrics/comp_weights/total":-0.5
+      }
+    },  
+    {
+      "name": "mass_mixed_0",
+      "condition": {
+        "/res_metrics/comp_weights/total":0.0
+      }
+    },
+    {
+      "name": "mass_mixed_0.5",
+      "condition": {
+        "/res_metrics/comp_weights/total":0.5
+      }
+    },
+    {
+      "name": "mass_mixed_1.0",
+      "condition": {
+        "/res_metrics/comp_weights/total":1.0
+      }
+    }
+  ]
+}

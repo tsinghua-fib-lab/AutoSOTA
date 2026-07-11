@@ -1,0 +1,42 @@
+[experiment_config]
+model_type = "bnrde"
+dataset_name = "synthetic_gbm"
+synthetic_gbm_dim = 12
+
+# Optimizer
+optimizer = "adamw"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+# Training
+loss = "mse"
+seed = 1
+batch_size = 256
+epochs = 5
+early_stopping_patience = 5
+
+# Training mode
+training_mode = "conditional"
+
+manifold = "euclidean"
+hidden_state_mode = "euclidean"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "constant"
+solver = "tsit5"
+rtol = 1e-3
+atol = 1e-3
+dtmin = 1e-4
+
+[bnrde_config]
+hidden_size = 32
+init_hidden_dim = 32
+vf_hidden_dim = 32
+initial_cond_mlp_depth = 2
+vf_mlp_depth = 2
+out_size = 12
+signature_depth = 2
+signature_window_size = 32
+rough_solution = "ito"

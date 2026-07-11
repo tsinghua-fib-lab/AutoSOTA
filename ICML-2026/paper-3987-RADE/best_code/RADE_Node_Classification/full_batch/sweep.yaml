@@ -1,0 +1,54 @@
+project: rade
+
+method: grid
+metric:
+  name: best/valid_acc
+  goal: maximize
+
+parameters:
+  dataset:
+    values: [cora]
+  gnn:
+    values: [gcn]
+  local_layers:
+    values: [2]
+#  hidden_channels:
+#    values: [64, 256, 512]
+  lr:
+    values: [0.001]
+  weight_decay:
+    values: [0.0]
+
+  aug_tech:
+    values: [rade]
+  rade_variant:
+    values: [rade-of]
+  aug_mode:
+    values: [both]
+#  dropout:
+#    values: [0.0]
+  ep_correction:
+    values: [True]
+  pq_gradnorm:
+    values: [True]
+  linear:
+    values: [False]
+
+  gat_heads:
+    values: [1]
+  gat_concat:
+    values: [True]
+
+  device:
+    values: [3]
+  runs:
+    values: [5]
+
+command:
+  - ${env}
+  - python
+  - main.py
+  - --wandb
+  - --wandb_project
+  - rade
+  - ${args}

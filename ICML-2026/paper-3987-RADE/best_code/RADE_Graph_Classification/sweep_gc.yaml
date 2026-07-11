@@ -1,0 +1,44 @@
+project: rade
+program: main_gc.py
+
+method: grid
+metric:
+  name: best/valid_primary
+  goal: maximize
+
+parameters:
+  dataset:
+    values: [ogbg]
+  gnn:
+    values: [gcn]
+  aug_tech:
+    values: [rade]
+  pq_update_unit:
+    values: [epoch]
+  pq_densification_penalty_lambda:
+    values: [0.1]
+
+  ep_correction:
+    values: [true]
+  pq_gradnorm:
+    values: [true]
+  aug_mode:
+    values: [both]
+  rade_variant:
+    values: [rade-of]
+  mask_sharing:
+    values: [shared]
+  pq_p_max:
+    values: [0.9]
+
+  device:
+    values: [2]
+
+command:
+  - ${env}
+  - python
+  - main_gc.py
+  - --wandb
+  - --wandb_project
+  - rade
+  - ${args}

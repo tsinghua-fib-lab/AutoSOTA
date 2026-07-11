@@ -1,0 +1,63 @@
+{
+  "name": "total_mass",
+
+  "fixed": {
+      "condition": {
+        "/res_metrics/soc": 0.0,
+        "/res_metrics/avg_drag": 0.0
+      },
+      "topo_mask": {
+        "wing": 1,
+        "fus": 1,
+        "htail": 1,
+        "vtail": 1,
+        "pboom": 0,
+        "slboom": 1,
+        "fprop": 1,
+        "net": 1,
+        "mass": 1,
+        "res":1
+      },
+      "lambdas": [
+        {
+          "name": "taper",
+          "x": "/design_tree/main_wings/0/root_cross_section/root_chord_percent",
+          "y": "/design_tree/main_wings/0/tip_cross_section/root_chord_percent",
+          "function": "lambda x,y: x*y"
+        }
+      ]
+  },
+
+  "investigations": [ 
+    {
+      "name": "total_mass_-1.0",
+      "condition": {
+        "/res_metrics/comp_weights/total": -1.0
+      }
+    },
+    {
+      "name": "total_mass_-0.5",
+      "condition": {
+        "/res_metrics/comp_weights/total": -0.5
+      }
+    },  
+    {
+      "name": "total_mass_0",
+      "condition": {
+        "/res_metrics/comp_weights/total": 0.0
+      }
+    },
+    {
+      "name": "total_mass_0.5",
+      "condition": {
+        "/res_metrics/comp_weights/total": 0.5
+      }
+    },
+    {
+      "name": "total_mass_1.0",
+      "condition": {
+        "/res_metrics/comp_weights/total": 1.0
+      }
+    }
+  ]
+}

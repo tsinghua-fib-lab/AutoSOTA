@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sigs"
+version = "0.1.0"
+description = "Neuro-Symbolic AI for Analytical Solutions of Differential Equations"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Orestis Oikonomou" },
+  { name = "Levi Lingsch" },
+  { name = "Dana Grund" },
+  { name = "Siddhartha Mishra" },
+  { name = "Georgios Kissas" },
+]
+keywords = [
+  "neuro-symbolic AI",
+  "symbolic regression",
+  "partial differential equations",
+  "analytical solutions",
+  "closed-form solutions",
+  "grammar VAE",
+  "scientific machine learning",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.23.0,<2.0",
+  "scipy>=1.10.0",
+  "sympy>=1.12",
+  "symengine>=0.11.0",
+  "torch>=2.0.0",
+  "lightning>=2.0.0",
+  "jax>=0.4.20",
+  "jaxlib>=0.4.20",
+  "optax>=0.1.7",
+  "nltk>=3.8",
+  "scikit-learn>=1.2.0",
+  "cma>=3.2.0",
+  "tqdm>=4.65.0",
+  "pyyaml>=6.0",
+  "h5py>=3.8.0",
+  "timeout-decorator>=0.5.0",
+  "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/oroikono/SIGS"
+Paper = "https://arxiv.org/abs/2502.01476"
+Video = "https://www.youtube.com/watch?v=a9MMvKVGhuQ"

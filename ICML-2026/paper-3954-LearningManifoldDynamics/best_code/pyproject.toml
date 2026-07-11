@@ -1,0 +1,53 @@
+[project]
+name = "taming-the-ito-lyon"
+version = "0.1.0"
+description = "Code for the ICML2026 paper Learning Manifold and Itô Dynamics with Branched Neural Rough Differential Equations"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jax[cuda]>=0.8.1",
+    "diffrax>=0.7.0",
+    "equinox>=0.13.2",
+    "optax>=0.2.6",
+    "stochastax",
+    "cyreal",
+    "numpy>=2.0.0",
+    "scipy>=1.16.0",
+    "pydantic>=2.12.3",
+    "tqdm>=4.67.1",
+    "matplotlib>=3.10.8",
+    "optuna>=4.6.0",
+    "lovely-jax>=0.1.4",
+    "diffrax-lowstorage",
+    "georax",
+    "pysiglib[cuda]>=3.1.0",
+    "roughrax"
+]
+
+[tool.uv.sources]
+stochastax = { path = "/autosota_cache/deps/Stochastax" }
+cyreal = { path = "/autosota_cache/deps/cyreal_dynamics" }
+diffrax = { path = "/autosota_cache/deps/diffrax" }
+diffrax-lowstorage = { path = "/autosota_cache/deps/diffrax-lowstorage" }
+georax = { path = "/autosota_cache/deps/georax" }
+roughrax = { path = "/autosota_cache/deps/roughrax" }
+
+[project.scripts]
+train = "taming_the_ito_lyon.training.train_cli:main"
+test = "taming_the_ito_lyon.training.test_cli:main"
+optimize = "taming_the_ito_lyon.training.optimize_cli:main"
+tables = "taming_the_ito_lyon.paper.tables_cli:main"
+shapes = "taming_the_ito_lyon.data.shapes_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["pytest>=9.0.2"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["taming_the_ito_lyon"]
+
+[tool.hatch.metadata]
+allow-direct-references = true

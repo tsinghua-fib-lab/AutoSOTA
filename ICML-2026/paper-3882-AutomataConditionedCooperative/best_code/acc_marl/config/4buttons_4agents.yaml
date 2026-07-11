@@ -1,0 +1,42 @@
+DEBUG: False
+WANDB: True
+WANDB_ENTITY: beyazit-y-berkeley-eecs
+WANDB_PROJECT: rad-marl-jax
+MAX_EP_LEN: 200
+LAYOUT: |
+    [ # ][ # ][ # ][ # ][ # ][   ][   ][   ][ 0 ][   ][   ][   ][ # ][ # ][ # ][ # ][ # ]
+    [ # ][ 0 ][   ][ 1 ][#,c][   ][ c ][   ][ A ][   ][ a ][   ][#,a][ 0 ][   ][ 2 ][ # ]
+    [ # ][   ][ 4 ][   ][#,c][   ][ c ][   ][   ][   ][ a ][   ][#,a][   ][ 8 ][   ][ # ]
+    [ # ][ 3 ][   ][ 2 ][#,c][   ][ c ][   ][ B ][   ][ a ][   ][#,a][ 6 ][   ][ 4 ][ # ]
+    [ # ][ # ][ # ][ # ][ # ][ 2 ][   ][   ][   ][   ][   ][ 3 ][ # ][ # ][ # ][ # ][ # ]
+    [ # ][ 5 ][   ][ 6 ][#,d][   ][ d ][   ][ C ][   ][ b ][   ][#,b][ 1 ][   ][ 3 ][ # ]
+    [ # ][   ][ 9 ][   ][#,d][   ][ d ][   ][   ][   ][ b ][   ][#,b][   ][ 9 ][   ][ # ]
+    [ # ][ 8 ][   ][ 7 ][#,d][   ][ d ][   ][ D ][   ][ b ][   ][#,b][ 7 ][   ][ 5 ][ # ]
+    [ # ][ # ][ # ][ # ][ # ][   ][   ][   ][ 1 ][   ][   ][   ][ # ][ # ][ # ][ # ][ # ]
+DFA_SAMPLER: RAD
+DFA_MAX_SIZE: 5
+DFA_SIZE_P: null
+DFA_PROB_STUTTER: 0.9
+ENCODER_DIM: 32
+SAVE_FILE_PREFIX: storage/4buttons_4agents/policy_params
+LOG_FILE_PREFIX: storage/4buttons_4agents/log
+# PPO PARAMS
+LR: 0.0003
+NUM_ENVS: 64
+NUM_STEPS: 1024
+TOTAL_TIMESTEPS: 10_000_000
+UPDATE_EPOCHS: 8
+NUM_MINIBATCHES: 8
+GAMMA: 0.99
+GAE_LAMBDA: 0.95
+CLIP_EPS: 0.2
+ENT_COEF: 0.05
+ENT_COEF_DECAY: False
+VF_COEF: 0.5
+MAX_GRAD_NORM: 0.5
+# LR_ANNEAL_LINEAR: True
+# LR_ANNEAL_EXP: True
+# EXP_DECAY_RATE: 0.001
+# LR_ANNEAL_COS: True
+# LR_ANNEAL_WARMUP: True
+# LR_ANNEAL_WARMUP_PARAM: 0.01

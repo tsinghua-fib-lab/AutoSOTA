@@ -1,0 +1,23 @@
+# CHAIR evaluation configuration for LLaVA-1.5-7B GREEDY baseline (no GIFT)
+model_name: "llava_1.5_7b"
+max_new_tokens: 1024
+
+# Model path (local cache)
+model_path: "/models/llava-1.5-7b-hf"
+
+# Data paths
+coco_annotations_path: "/datasets/coco/annotations/instances_val2014.json"
+image_dir: "/datasets/coco/val2014"
+output_path: "outputs/chair_llava_1.5_7b_greedy_results.json"
+
+# Number of images (null = all)
+max_images: null
+
+# Caption prompt
+caption_prompt: "Please describe this image in detail."
+
+# GIFT configuration - DISABLED for baseline
+use_gift: false
+visual_saliency_computation_layers: [11]
+attention_enhancement_layers: [12,13,14,15,16,17,18,19,20,21,22]
+alpha: 5.0

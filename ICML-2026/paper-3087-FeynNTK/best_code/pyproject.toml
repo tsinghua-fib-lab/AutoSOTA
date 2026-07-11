@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ntkunlimited"
+version = "0.1.0"
+requires-python = "~=3.11.0"
+dependencies = [
+    "neural-tangents>=0.6.5",
+    "jax[cuda12-local]<0.5.3",
+    "numpy",
+    "click",
+    "tqdm",
+    "dill",
+    "sympy",
+]
+authors = [
+    {name = "Philipp Misof"},
+]
+description = "Finite-width corrections to the infinite-width NTK limit of neural networks"
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+evaluation = [
+    "ipykernel",
+    "matplotlib",
+]
+
+[project.scripts]
+tensor_convergence_all_layers = "ntkunlimited.empirical.tensor_convergence_all_layers:cli"
+recursions = "ntkunlimited.recursions.recursions:cli"
+# convergence-layerwise = "ntkunlimited.convergence_layerwise:cli"
+# recursions = "ntkunlimited.recursions:cli"
+
+
+[tool.pytest.ini_options]
+pythonpath = ["ntkunlimited"]
+addopts = [
+    "--import-mode=importlib",
+]
+filterwarnings = [
+    'ignore:.*jax.core.* is deprecated.*:DeprecationWarning'
+]
+
+[tool.uv.sources]
+sympy = { git = "https://github.com/sympy/sympy.git", rev = "27c2a5613e5dcb6bb5c0c43f412f4afe4c807f1e" }
+
+[dependency-groups]
+dev = [
+    "joblib>=1.5.3",
+    "tqdm-joblib>=0.0.5",
+]

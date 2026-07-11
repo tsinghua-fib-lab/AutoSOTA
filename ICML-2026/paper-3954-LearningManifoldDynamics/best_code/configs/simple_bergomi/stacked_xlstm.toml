@@ -1,0 +1,40 @@
+[experiment_config]
+model_type = "stacked_xlstm"
+dataset_name = "simple_rbergomi"
+
+# Optimizer
+optimizer = "muon"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+# Training
+loss = "sigker"
+seed = 1
+batch_size = 64
+epochs = 100
+early_stopping_patience = 25
+
+# Training mode
+training_mode = "unconditional"
+
+manifold = "euclidean"
+hidden_state_mode = "euclidean"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "pid"
+solver = "heun"
+rtol = 1e-3
+atol = 1e-3
+dtmin = 1e-4
+
+[stacked_xlstm_config]
+d_model = 32
+num_heads = 4
+num_layers = 4
+d_conv = 4
+xlstm_expand = 2
+ffn_expand = 2
+use_ffn = true
+out_size = 1

@@ -1,0 +1,39 @@
+[experiment_config]
+model_type = "xlstm"
+dataset_name = "sg_so3_simulation"
+
+extrapolation_scheme = "hermite"
+n_recon = 12
+
+optimizer = "adamw"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+loss = "frobenius"
+seed = 1
+batch_size = 1024
+epochs = 15
+early_stopping_patience = 5
+
+training_mode = "conditional"
+manifold = "so3"
+hidden_state_mode = "euclidean"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "pid"
+solver = "tsit5"
+rtol = 1e-2
+atol = 1e-3
+dtmin = 1e-4
+dt0 = 0.05
+
+[xlstm_config]
+d_model = 32
+num_heads = 4
+d_conv = 4
+xlstm_expand = 2
+ffn_expand = 2
+use_ffn = true
+out_size = 6
