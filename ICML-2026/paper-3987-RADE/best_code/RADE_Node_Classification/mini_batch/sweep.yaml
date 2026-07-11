@@ -1,0 +1,68 @@
+project: rade
+
+method: grid
+metric:
+  name: best/valid_acc
+  goal: maximize
+
+parameters:
+  dataset:
+    values: [ogbn-arxiv]
+  gnn:
+    values: [gat]
+  local_layers:
+    values: [2]
+#  hidden_channels:
+#    values: [256]
+  lr:
+    values: [0.001]
+  weight_decay:
+    values: [0.0]
+#  dropout:
+#    values: [0.0]
+
+  aug_tech:
+    values: [rade]
+  aug_mode:
+    values: [both]
+  ep_correction:
+    values: [True]
+  rade_variant:
+    values: [rade-of,rade-ofs]
+  mask_sharing:
+    values: [layerwise]
+  linear:
+    values: [False]
+
+  pq_gradnorm:
+    values: [True]
+  pq_adam_lr:
+    values: [0.001]
+  pq_optimize_rho:
+    values: [True]
+  pq_densification_penalty_lambda:
+    values: [1.0]
+
+  gat_heads:
+    values: [1]
+  gat_concat:
+    values: [True]
+  gat_moment_samples:
+    values: [128]
+  gat_nonedge_samples:
+    values: [128]
+
+  device:
+    values: [3]
+  runs:
+    values: [5]
+
+command:
+  - ${env}
+  - python
+  - -m
+  - RADE_Node_Classification.mini_batch.mb_main
+  - --wandb
+  - --wandb_project
+  - rade
+  - ${args}

@@ -1,0 +1,239 @@
+"""Reproduction script: Train 2l1h64d3lr01drop on Unique Copy and evaluate."""
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from transformers import GPT2LMHeadModel, GPT2Config, TrainingArguments, Trainer, TrainerCallback
+import torch
+import numpy as np
+import random
+from patching_utils import set_seed
+from patching_data import *
+from train_new_models import customCollator, compute_metrics
+import json
+from pathlib import Path
+
+
+class EvalCallback(TrainerCallback):
+    def __init__(self, test_ranges, summary_file):
+        self.test_ranges = test_ranges
+        self.summary_file = summary_file
+        self.latest_acc = {}
+        self.current_epoch = 0
+        self.best_results = {}
+        self.first_perfect_step = None
+        self.best_ood_acc = 0.0
+        self.best_ood_step = 0
+        self.patience_steps = int(os.environ.get("SOTA_PATIENCE", "1500"))
+
+    def on_evaluate(self, args, state, control, metrics=None, logs=None, eval_dataloader=None, **kwargs):
+        if metrics is None:
+            return
+        epoch = metrics.get("epoch", 0)
+        if epoch > self.current_epoch:
+            self.latest_acc = {}
+            self.current_epoch = epoch
+        for key in metrics.keys():
+            if key.endswith("acc"):
+                self.latest_acc[key] = metrics[key]
+                if key not in self.best_results or metrics[key] > self.best_results[key]:
+                    self.best_results[key] = metrics[key]
+
+        msg = "Step {}/{} Epoch {:.4f}".format(state.global_step, state.max_steps, self.current_epoch)
+        acc_str = "\t".join(["{}: {:.4f}".format(k, v) for k, v in self.latest_acc.items()])
+        print("{}\t{}".format(msg, acc_str), flush=True)
+
+        train_key = "eval_len{}-{}_acc".format(self.test_ranges[0][0], self.test_ranges[0][1])
+
+        # Track best OOD checkpoint
+        ood_key = "eval_len{}-{}_acc".format(self.test_ranges[-1][0], self.test_ranges[-1][1])
+        if ood_key in self.latest_acc and self.latest_acc[ood_key] > self.best_ood_acc:
+            self.best_ood_acc = self.latest_acc[ood_key]
+            self.best_ood_step = state.global_step
+
+        # Patience-based early stopping
+        if train_key in self.latest_acc and self.latest_acc[train_key] == 1.0:
+            if self.first_perfect_step is None:
+                self.first_perfect_step = state.global_step
+                print("First perfect in-distribution at step {}. Patience: {} steps".format(
+                    self.first_perfect_step, self.patience_steps), flush=True)
+
+            if state.global_step >= self.first_perfect_step + self.patience_steps:
+                print("Early stopping: patience expired at step {} (first_perfect={}, patience={})".format(
+                    state.global_step, self.first_perfect_step, self.patience_steps), flush=True)
+                control.should_training_stop = True
+
+
+def main():
+    set_seed(0)
+
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    print("Using device: {}".format(device))
+    print("GPU count: {}".format(torch.cuda.device_count()))
+
+    task = "unique_copy"
+    train_length_range = (0, 50)
+    test_length_ranges = [train_length_range, (51, 100), (101, 150)]
+    max_test_length = test_length_ranges[-1][1]
+    batch_size = 64
+    per_device_bz = batch_size // torch.cuda.device_count() if torch.cuda.is_available() else batch_size
+    test_num = 2000
+
+    n_layer, n_head, d_model = 2, 1, 64
+    lr = 1e-3
+    dropout = 0.1
+    arch_name = "{}l{}h{}d3lr01drop".format(n_layer, n_head, d_model)
+
+    print("\n" + "=" * 60)
+    print("Task: {}".format(task))
+    print("Architecture: {}".format(arch_name))
+    print("Train range: {}".format(train_length_range))
+    print("Test ranges: {}".format(test_length_ranges))
+    print("Max steps: 30000, Batch size: {}".format(batch_size))
+    print("Learning rate: {}, Dropout: {}".format(lr, dropout))
+    print("=" * 60 + "\n")
+
+    tokenizer = get_tokenizer_for_task(task, max_test_length)
+    print("Vocab size: {}".format(len(tokenizer)))
+
+    train_dataset = get_dataset_for_task(task, tokenizer, train_length_range, max_test_length, {"period_for_data": 3})
+    test_dataset = {}
+    for test_range in test_length_ranges:
+        key = "len{}-{}".format(test_range[0], test_range[1])
+        test_dataset[key] = EvalDataset(
+            get_dataset_for_task(task, tokenizer, test_range, -1, {"period_for_data": 3}), test_num
+        )
+
+    print("\n--- Input examples ---")
+    for i in range(2):
+        tkey = "len{}-{}".format(train_length_range[0], train_length_range[1])
+        tokens = tokenizer.convert_ids_to_tokens(test_dataset[tkey][i][0])
+        print("  Example {}: {}".format(i, " ".join(tokens)))
+
+    n_positions = max_test_length * 2 + 3
+
+    sota_iter = os.environ.get("SOTA_ITER", "0")
+    output_dir = Path("/repo/share/saved_models") / "sota-iter{}".format(sota_iter) / "lm-out-new-{}".format(task) / arch_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print("\nOutput dir: {}".format(output_dir))
+
+    cfg = GPT2Config(
+        vocab_size=len(tokenizer),
+        n_positions=n_positions,
+        n_embd=d_model,
+        n_layer=n_layer,
+        n_head=n_head,
+        bos_token_id=tokenizer.bos_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id,
+        attn_pdrop=dropout,
+        resid_pdrop=dropout,
+        embd_pdrop=dropout,
+    )
+
+    model = GPT2LMHeadModel(cfg)
+    total_params = sum(p.numel() for p in model.parameters())
+    print("Total parameters: {:,}".format(total_params))
+
+    max_steps = 6000
+    warmup_steps = 500
+
+    training_args = TrainingArguments(
+        output_dir=str(output_dir),
+        overwrite_output_dir=True,
+        per_device_train_batch_size=per_device_bz,
+        per_device_eval_batch_size=per_device_bz,
+        max_steps=max_steps,
+        evaluation_strategy="steps",
+        eval_steps=3000,
+        save_strategy="no",
+        logging_strategy="steps",
+        logging_steps=3000,
+        learning_rate=lr,
+        weight_decay=0.01,
+        optim="adamw_torch",
+        lr_scheduler_type="cosine",
+        warmup_steps=warmup_steps,
+        report_to="none",
+        seed=0,
+        data_seed=0,
+    )
+
+    data_collator = customCollator(tokenizer.pad_token_id)
+
+    summary_file = open(str(output_dir / "summary.txt"), "w")
+
+    eval_callback = EvalCallback(test_length_ranges, summary_file)
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=test_dataset,
+        data_collator=data_collator,
+        compute_metrics=compute_metrics,
+        callbacks=[eval_callback],
+    )
+
+    print("\nStarting training...")
+    trainer.train()
+
+    print("\n--- Final Evaluation ---")
+    final_results = {}
+    for test_range in test_length_ranges:
+        key = "len{}-{}".format(test_range[0], test_range[1])
+        result = trainer.evaluate(eval_dataset=test_dataset[key])
+        acc = result.get("eval_{}_acc".format(key), result.get("eval_acc", 0))
+        metric_name = "Task Acc in < {}".format(test_range[1]) if test_range[0] == 0 else "Task Acc in [{}-{}]".format(test_range[0], test_range[1])
+        final_results[metric_name] = acc
+        print("  Length [{}-{}]: accuracy = {:.4f} ({:.1f}%)".format(test_range[0], test_range[1], acc, acc * 100))
+
+    best_name_map = {
+        "eval_len0-50_acc": "Task Acc in < 50",
+        "eval_len51-100_acc": "Task Acc in [51-100]",
+        "eval_len101-150_acc": "Task Acc in [101-150]",
+    }
+
+    print("\n--- Best Results (from callback) ---")
+    best_metrics = {}
+    for key, name in best_name_map.items():
+        val = eval_callback.best_results.get(key, 0)
+        best_metrics[name] = val
+        print("  {}: {:.4f} ({:.1f}%)".format(name, val, val * 100))
+
+    results_dict = {
+        "task": task,
+        "architecture": arch_name,
+        "final_results": final_results,
+        "best_results": best_metrics,
+        "config": {
+            "n_layer": n_layer, "n_head": n_head, "d_model": d_model,
+            "lr": lr, "dropout": dropout,
+            "max_steps": max_steps, "batch_size": batch_size,
+            "train_length_range": str(train_length_range),
+            "test_length_ranges": [str(r) for r in test_length_ranges],
+            "test_num": test_num,
+        }
+    }
+
+    results_path = output_dir / "results.json"
+    with open(str(results_path), "w") as f:
+        json.dump(results_dict, f, indent=2)
+    print("\nResults saved to {}".format(results_path))
+
+    model_path = str(output_dir / "final_model")
+    trainer.save_model(model_path)
+    print("Model saved to {}".format(model_path))
+
+    summary_file.close()
+
+    return best_metrics
+
+
+if __name__ == "__main__":
+    results = main()
+    print("\n" + "=" * 60)
+    print("REPRODUCTION COMPLETE")
+    print("=" * 60)
+    for name, val in results.items():
+        print("  {}: {:.4f} ({:.1f}%)".format(name, val, val * 100))

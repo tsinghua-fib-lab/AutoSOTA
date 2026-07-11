@@ -1,0 +1,51 @@
+description: gamba
+
+env_defaults:
+  NODES: 1
+  GPUS: 1
+  DATASET: 240-mammalian
+  MODEL_NAME: jamba-small
+  CONFIG_DIR: .
+
+target:
+  service: sing
+  name: msrresrchvc
+  workspace_name: biomlinterns2024
+  resource_group: gcr-singularity-resrch
+
+environment:
+  image: alexjlee/dev_evodiff2:latest
+  username: biomlinterns2024cr
+  registry: biomlinterns2024cr.azurecr.io
+  image_setup:
+    - pip install -U wandb[azure]
+
+# data:
+#     local_dir: /home/t-mconsens/gamba/data_processing/data/240-mammalian
+#     remote_dir: data/240-mammalian
+
+storage:
+  data:
+    storage_account_name: micaconsenshot
+    container_name: amulet
+    mount_dir: /mnt/data/
+
+code:
+  local_dir: $CONFIG_DIR/
+
+# list of jobs to run
+jobs:
+- name: mini_run
+  sku: G2-A100
+  command:
+    - pwd
+   #print the mnt data dir to see if it is mounted
+    - ls /mnt/data/
+    - pwd
+    - ls /mnt/data/data/240-mammalian/
+    - torchrun --nnodes 1 --nproc-per-node 2  src/test_train.py configs/${MODEL_NAME}-240mammalian.json --mini_run
+  mpi: True
+  submit_args:
+    env:
+      WANDB_BASE_URL: "https://microsoft-research.wandb.io"
+      WANDB_API_KEY: "$WANDB_API_KEY"

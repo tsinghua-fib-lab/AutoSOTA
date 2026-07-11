@@ -1,0 +1,105 @@
+# =====================================================================
+# Configuration for the SOCRATES-300K dataset.
+#
+# Used by every notebook to make experiments dataset-agnostic.
+# =====================================================================
+
+[dataset]
+name                     = "SOCRATES-300K"
+path                     = "datasets/SOCRATES-300K.parquet"
+embedding_column         = "response_embeddings"
+label_column             = "hallucination"
+prompt_column            = "prompt_id"
+model_column             = "model_id"
+unify_years              = true             # collapse 2020/2022 onto prompt_id axis
+max_responses_per_prompt = 150
+
+# Alternative embedding column for the stemmed-responses ablation:
+#   embedding_column = "stemmed_response_embeddings"
+
+
+[experiment]
+best_lambda    = 1.2
+n_permutations = 100
+random_state   = 42
+min_per_class  = 5
+
+
+[cache]
+root    = "cache/socrates"
+fig_dir = "figs/socrates"
+
+
+# =====================================================================
+# Models
+# =====================================================================
+
+[[models]]
+id             = 0
+name           = "Mistral-7B"
+huggingface_id = "mistralai/Mistral-7B-v0.1"
+latex_tag      = "\\MISTRAL"
+size_b         = 7
+
+[[models]]
+id             = 1
+name           = "Gemma-9B"
+huggingface_id = "google/gemma-2-9b"
+latex_tag      = "\\GEMMANINE"
+size_b         = 9
+
+[[models]]
+id             = 2
+name           = "Solar-11B"
+huggingface_id = "upstage/SOLAR-10.7B-v1.0"
+latex_tag      = "\\SOLAR"
+size_b         = 10.7
+
+[[models]]
+id             = 3
+name           = "Phi-14B"
+huggingface_id = "microsoft/phi-4"
+latex_tag      = "\\PHI"
+size_b         = 14
+
+[[models]]
+id             = 4
+name           = "Qwen-15B"
+huggingface_id = "Qwen/Qwen2.5-14B"
+latex_tag      = "\\QWENFOURTEEN"
+size_b         = 14
+
+[[models]]
+id             = 5
+name           = "Gemma-27B"
+huggingface_id = "google/gemma-2-27b"
+latex_tag      = "\\GEMMATWENTYSEVEN"
+size_b         = 27
+
+[[models]]
+id             = 6
+name           = "Qwen-32B"
+huggingface_id = "Qwen/Qwen2.5-32B"
+latex_tag      = "\\QWENTHIRTYTWO"
+size_b         = 32
+
+[[models]]
+id             = 7
+name           = "DeepSeek-7B"
+huggingface_id = "deepseek-ai/deepseek-llm-7b-base"
+latex_tag      = "\\DEEPSEEK"
+size_b         = 7
+
+[[models]]
+id             = 8
+name           = "Llama-8B"
+huggingface_id = "meta-llama/Llama-3.1-8B"
+latex_tag      = "\\LLAMA"
+size_b         = 8
+
+[[models]]
+id             = 9
+name           = "Yi-9B"
+huggingface_id = "01-ai/Yi-1.5-9B"
+latex_tag      = "\\YI"
+size_b         = 9

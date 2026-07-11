@@ -1,0 +1,186 @@
+======================================================================
+Experiment Log - 2026-07-10 06:31:45
+======================================================================
+
+
+======================================================================
+HSD-ONLY TRAINING - PAPER 3508 REPRODUCTION
+======================================================================
+Device: cuda
+GPU: NVIDIA A100-SXM4-80GB
+GPU Memory: 85.1 GB
+
+======================================================================
+[Step 1] Loading Dataset
+======================================================================
+Loaded 3000 samples, mesh: 3000 nodes, 5996 faces
+Train: 2040, Val: 360, Test: 600
+
+======================================================================
+[Step 4] Building Spectral Operators
+======================================================================
+[HOST] Building simplicial complex (3000 nodes)...
+[HOST] Extracting Boundary Matrices (B1, B2)...
+[HOST] Computing Hodge Laplacians (L0, L1, L2)...
+[HOST] Applying Symmetric Normalization to Laplacians...
+[HOST] Computing Eigenbases (Φ0, Φ1, Φ2)...
+[HOST] Building spectral de Rham operators...
+       [Ops] Md0(Grad): (128, 128), Mdelta1(Div): (128, 128)
+       [Ops] Md1(Curl): (128, 128), Mdelta2(Rot): (128, 128)
+[HOST] Complete: Nodes=3000, Edges=8994, Faces=5996
+Eigenbasis time: 4.23s
+
+======================================================================
+[Step 5] Preparing Spectral Datasets
+======================================================================
+
+[Dataset] Global Scaling Factors:
+         X_scale (Input): 1.000000
+         Y_scale (Output): 0.999903
+         Normalized X: min=-1.0000, max=1.0000
+         Normalized Y: min=-0.9999, max=1.0000
+[Dataset] Lifting Input to Full de Rham Complex...
+[Dataset] Computing GT Edge Flux...
+[Dataset] Projecting GT Flux to Spectral Coefficients...
+
+[Dataset] Spectral Coefficient Statistics:
+         c0_in: mean=0.564153, max=27.691851
+         c1_in: mean=0.050691, max=3.651572
+         c2_in: mean=0.000000, max=0.000000
+         c1_tgt: mean=0.040365, max=3.922717
+         gt_flux: mean=0.024170, max=0.103123
+
+[Dataset] Shapes: c0_in:(2400, 128), c1_in:(2400, 128), c2_in:(2400, 128)
+         Target: c1_tgt:(2400, 128), gt_flux:(2400, 8994)
+
+[Dataset] Global Scaling Factors:
+         X_scale (Input): 1.000000
+         Y_scale (Output): 0.999903
+         Normalized X: min=-1.0000, max=1.0000
+         Normalized Y: min=-0.9995, max=0.9998
+[Dataset] Lifting Input to Full de Rham Complex...
+[Dataset] Computing GT Edge Flux...
+[Dataset] Projecting GT Flux to Spectral Coefficients...
+
+[Dataset] Spectral Coefficient Statistics:
+         c0_in: mean=0.552328, max=26.214622
+         c1_in: mean=0.048996, max=4.183534
+         c2_in: mean=0.000000, max=0.000000
+         c1_tgt: mean=0.040269, max=3.899962
+         gt_flux: mean=0.024208, max=0.103128
+
+[Dataset] Shapes: c0_in:(600, 128), c1_in:(600, 128), c2_in:(600, 128)
+         Target: c1_tgt:(600, 128), gt_flux:(600, 8994)
+
+======================================================================
+[Step 7] Initializing HSD Model
+======================================================================
+HSD Parameters: 6,410,855
+
+======================================================================
+[Step 8] Training HSD
+======================================================================
+
+--------------------------------------------------
+Training HSD - Scalar Field
+--------------------------------------------------
+  Epoch   1/150 | Train: 0.989162 | Val: 0.958917 | ResScale: 0.1295 | LR: 1.00e-05
+  Epoch  10/150 | Train: 0.297101 | Val: 0.351527 | ResScale: 0.2764 | LR: 8.00e-04
+  Epoch  20/150 | Train: 0.103941 | Val: 0.156425 | ResScale: 0.3767 | LR: 7.81e-04
+  Epoch  30/150 | Train: 0.081524 | Val: 0.131525 | ResScale: 0.4573 | LR: 7.45e-04
+  Epoch  40/150 | Train: 0.068430 | Val: 0.113638 | ResScale: 0.5267 | LR: 6.92e-04
+  Epoch  50/150 | Train: 0.061343 | Val: 0.104066 | ResScale: 0.5849 | LR: 6.26e-04
+  Epoch  60/150 | Train: 0.056216 | Val: 0.097482 | ResScale: 0.6330 | LR: 5.49e-04
+  Epoch  70/150 | Train: 0.051721 | Val: 0.093146 | ResScale: 0.6727 | LR: 4.66e-04
+  Epoch  80/150 | Train: 0.049065 | Val: 0.090656 | ResScale: 0.7064 | LR: 3.79e-04
+  Epoch  90/150 | Train: 0.046969 | Val: 0.087945 | ResScale: 0.7339 | LR: 2.94e-04
+  Epoch 100/150 | Train: 0.045188 | Val: 0.086991 | ResScale: 0.7551 | LR: 2.13e-04
+  Epoch 110/150 | Train: 0.044211 | Val: 0.086091 | ResScale: 0.7712 | LR: 1.41e-04
+  Epoch 120/150 | Train: 0.043477 | Val: 0.085360 | ResScale: 0.7819 | LR: 8.18e-05
+  Epoch 130/150 | Train: 0.043085 | Val: 0.085109 | ResScale: 0.7880 | LR: 3.71e-05
+  Epoch 140/150 | Train: 0.042770 | Val: 0.084875 | ResScale: 0.7905 | LR: 9.38e-06
+  Epoch 150/150 | Train: 0.042711 | Val: 0.084844 | ResScale: 0.7909 | LR: 0.00e+00
+  Training time: 175.87s | Avg VRAM: 252.1 MB
+  Final Residual Scale: 0.7908
+HSD model saved
+
+======================================================================
+[Step 9] Evaluating HSD
+======================================================================
+HSD Vector MSE (normalized): 2.359134e-03
+
+======================================================================
+[Step 10] Topology & Physics Metrics Evaluation
+======================================================================
+
+================================================================================
+FLUX FIELD TOPOLOGY & PHYSICS METRICS EVALUATION
+Topology metrics now use VORTICITY instead of velocity magnitude
+================================================================================
+
+[Geometry]
+  Mesh: 3000 nodes, 8994 edges, 5996 faces
+
+[Evaluating Models...]
+  Processing HSD...
+
+====================================================================================================
+EVALUATION RESULTS SUMMARY
+====================================================================================================
+
+[Flux-Domain Metrics]
+  MSE          HSD: *8.47e-06* |
+  Div_Fid      HSD: *0.9999*   |
+
+[Physics Metrics (Vorticity)]
+  Curl_MSE     HSD: *7.91e-01* |
+  Vort_Fid     HSD: *0.8749*   |
+  Enst_Fid     HSD: *0.7493*   |
+
+[Topology Metrics (on Vorticity)
+  β0_Score     HSD: *0.4200*   |
+  IoU          HSD: *0.3068*   |
+  Vortex_Acc   HSD: *0.2568*   |
+
+[Spectral Metrics (on |u|)]
+  Grad_Fid     HSD: *0.9912*   |
+  Spec_Fid     HSD: *0.8788*   |
+  E_Fid        HSD: *0.9249*   |
+
+======================================================================
+=== RESULTS SUMMARY ===
+======================================================================
+
+============================================================
+PAPER 3508 REPRODUCTION RESULTS - External Aerodynamics
+============================================================
+Model: HSD (6,410,855 params)
+Mesh nodes: 3000
+Test samples: 600
+Spectral truncation (k): 128
+Training epochs: 150
+Batch size: 64
+Learning rate: 0.001
+Weight decay: 0.0001
+============================================================
+
+Vector Field MSE (normalized): 2.359134e-03
+
+Topology Metrics:
+  Gradient Fidelity:    0.991153
+  Divergence Fidelity:  0.999939
+  Enstrophy Fidelity:   0.749277
+  Energy Fidelity:      0.924878
+  Spectral Fidelity:    0.878760
+  Betti-0 Score:        0.419974
+  IoU:                   N/A
+  Curl MSE:              0.7911667823791504
+
+Training Time: 175.87s, VRAM: 252.1 MB
+Eigenbasis Time: 4.23s
+
+Results saved to ./output_flux/hsd_results.json
+
+======================================================================
+REPRODUCTION COMPLETE
+======================================================================

@@ -1,0 +1,304 @@
+import optax
+import types, jax
+import jax.numpy as jnp
+from tqdm import tqdm
+import orbax.checkpoint as ocp
+import matplotlib.pyplot as plt
+from pathlib import Path
+import math
+
+if not hasattr(jax, "tree"):
+    jax.tree = types.SimpleNamespace(
+        map=jax.tree_map,
+        flatten=jax.tree_flatten,
+        unflatten=lambda treedef, leaves: jax.tree_unflatten(treedef, leaves),
+    )
+
+from flax import nnx
+import time
+import numpy as np
+from jax.experimental import mesh_utils
+from jax.sharding import Mesh, PartitionSpec as P, NamedSharding
+
+def load_ckpt(
+    ckpt_dir,
+    abstract_model,                             
+    step = None,
+):
+    """
+    Returns
+    -------
+    model_restored : nnx.Module (ready to call)
+    meta           : dict       (whatever you stored)
+    step_loaded    : int        (the checkpoint index)
+    """
+    ckpt_dir = Path(ckpt_dir)
+    checkpointer = ocp.StandardCheckpointer()
+    restored_pure_dict = checkpointer.restore(ckpt_dir / 'train_state')
+    graphdef, abstract_state = nnx.split(abstract_model)
+    nnx.replace_by_pure_dict(abstract_state, restored_pure_dict)
+    model = nnx.merge(graphdef, abstract_state)
+    meta = torch.load(ckpt_dir / "meta.pt")
+
+    # model = nnx.merge(graph, state)
+    return model, step, meta
+
+def _save_ckpt(dir_: str | Path, model, state_repl, rest,
+               opt_state_repl, step):
+    
+    dir_ = Path(dir_)
+    dir_.mkdir(parents=True, exist_ok=True)
+    checkptr = ocp.StandardCheckpointer()
+
+    # materialise params on host
+    nnx.update(model, jax.tree_util.tree_map(lambda x: x[0], state_repl), rest)
+    _, state = nnx.split(model)
+
+    payload = dict(
+        state     = nnx.to_pure_dict(state),                    # model params
+        opt_state = jax.tree_util.tree_map(lambda x: x[0], opt_state_repl),
+        step      = step,
+    )
+    checkptr.save(dir_ / "train_state", payload, force=True)
+    checkptr.wait_until_finished()
+    print(f"[INFO] checkpoint saved ⇒ {dir_}")
+
+def pack_state(state, step, best_val=float("inf"), best_ep = 0):
+    return {
+        "nnx_state": state,
+        "meta": {"step": int(step), "best_val": float(best_val), "best_ep": int(best_ep)},
+    }
+
+# Instantiate model
+def initialize(train_args,modclass,*args,**kwargs):
+    "Prepares the nnx model, including forcing creation of all weights."
+
+    model = modclass(*args,**kwargs)
+
+    # Force lazy creation
+    B, T = train_args["batch_size"], train_args["nvals"]
+    t = jnp.zeros((B, 1, 1))
+    x = jnp.ones((B, T, 1))
+    node_ids = jnp.tile(jnp.arange(T)[None, :], (B, 1))
+    condition_mask = jnp.broadcast_to((jnp.arange(T) % 2 == 0), (B, T))
+    if train_args["topo"] == True:
+        topo_mask = jnp.ones((B, T, 1))
+        _ = model(t,x,topo_mask,node_ids,condition_mask)
+    else:
+        _ = model(t,x,node_ids,condition_mask)
+
+    # Separate params from stateless parts
+    graphdef, state, rest = nnx.split(model,nnx.Param,...)
+
+    # Count number of scalars in all params
+    def count_params(pytree):
+        leaves, _ = jax.tree.flatten(pytree)
+        return sum(leaf.size for leaf in leaves)
+
+    num_params = count_params(state)
+    print("Number of parameters:", num_params)
+
+    asdict = nnx.State.to_pure_dict(state)
+
+    def unravel(start,asdict):
+        for k,v in asdict.items():
+            if isinstance(v,dict):
+                s = start + "." + str(k)
+                unravel(s,v)
+            else:
+                print(start+ "."+str(k),v.shape)
+
+    # Optimizer
+    tx = optax.adamw(learning_rate=train_args["learning_rate"], weight_decay=1e-4)
+    opt = nnx.Optimizer(model, tx)
+
+    return opt, tx, model
+
+# Training loop
+def train(train_args, model, optx, training, validation, chkpt=None):
+    """Distributed training loop with EMA, validation, and checkpointing.
+
+    Args:
+        train_args: Dict of training hyperparameters.
+        model: nnx.Module to be trained.
+        optx: Optax optimizer.
+        training: Tuple (train_data, loader_fn, train_step) providing the
+            training dataset, batch loader, and pmapped training step.
+        validation: Tuple (test_data, testload_fn, valid_loss) providing the
+            validation dataset, batch loader, and loss function.
+        chkpt: Optional checkpoint configuration (interval, handler).
+
+    Returns:
+        mdl_eval: Model parameters merged with the best EMA weights.
+        losses: List of per‑epoch training losses.
+        verif: List of per‑epoch validation losses.
+        best_epoch: Epoch index achieving the best smoothed validation loss.
+    """
+
+    train_data, loader_fn, train_step = training
+    test_data, testload_fn, valid_loss = validation
+
+    num_train_samples = train_data.shape[0]
+    train_batch_size = train_args["batch_size"] * train_args["n_devices"]
+    num_train_steps = math.ceil(num_train_samples / train_batch_size)
+    
+    num_val_samples = test_data.shape[0]
+    val_batch_size = train_args["test_batch"] * train_args["n_devices"]
+    num_val_steps = math.ceil(num_val_samples / val_batch_size)
+    
+    losses = []
+    verif, verif_smth = [], []
+    best_loss = float("inf")
+    best_epoch = -1
+    saved_state_host = None
+
+    start = time.time()
+
+    keys = train_args["rng"]
+    data_key =jax.random.split(train_args["rng"], train_args["n_devices"])
+    graphdef, state, rest = nnx.split(model, nnx.Param, ...)
+    opt_state = optx.init(state)
+
+    # EMA
+    ema_decay = 0.999
+    ema_handler = optax.ema(decay=ema_decay)
+    ema_state = ema_handler.init(state) # Initialize EMA state with initial model parameters
+
+    devices = jax.devices()
+    state_rep = jax.device_put_replicated(state, devices)
+    rest_rep = jax.device_put_replicated(rest, devices)
+    opt_state_rep  = jax.device_put_replicated(opt_state, devices)
+    ema_state_rep = jax.device_put_replicated(ema_state, devices) # Replicate EMA state
+    data_key_rep = jax.random.split(train_args["rng"], train_args["n_devices"])
+
+    if train_args["restore"][0] == True:
+        if train_args["restore"][1] == "latest":
+            latest = chkpt[1].latest_step()
+            if latest is not None:
+                restored = chkpt[1].restore(latest, args=ocp.args.PyTreeRestore())
+                nnx.merge(graphdef, restored["nnx_state"], rest)
+                start_step = int(restored["meta"]["step"]) + 1
+                best_loss = float(restored["meta"].get("best_val", float("inf")))
+        elif train_args["restore"][1] == "best":
+            best = chkpt[1].best_step()
+            if best is not None:
+                restored = chkpt[1].restore(best, args=ocp.args.PyTreeRestore())
+                nnx.merge(graphdef, restored["nnx_state"], rest)
+                start_step = int(restored["meta"]["step"]) + 1
+                best_loss = float(restored["meta"].get("best_val", float("inf")))
+    else:
+        start_step = 0
+        best_loss = float("inf")
+    
+    start = time.time()
+    window = train_args["window"]
+    pbar = tqdm(range(train_args["epochs"]),initial=start_step, desc="Epochs")
+
+    if hasattr(rest_rep, 'transformer'):
+        count_before = jax.device_get(rest_rep.transformer._rngs.default.count.value[0]).item()
+    else:
+        count_before = jax.device_get(rest_rep.component_models[0]._rngs.default.count.value[0]).item()
+    print(f"DEBUG: RNG count BEFORE step: {count_before}")
+    for epoch in pbar:
+        l = 0
+
+        # ----------------- Training Phase -----------------
+        train_losses_epoch = []
+        for _i in range(num_train_steps):
+            batch = loader_fn()
+            (state_rep,rest_rep,opt_state_rep,ema_state_rep,loss, data_key_rep
+            ) = train_step(state_rep,rest_rep,opt_state_rep,ema_state_rep,batch,data_key_rep 
+            )
+            train_losses_epoch.append(float(jax.device_get(loss)))
+    
+        # Training loss
+        l = np.mean(train_losses_epoch) if train_losses_epoch else float('inf')
+        losses.append(l)
+    
+        # ----------------- Validation Phase -----------------        
+        val_losses_epoch = []
+        for _ in range(num_val_steps):
+            test_batch = testload_fn()
+        
+            rng_eval, train_args["rng"] = jax.random.split(train_args["rng"])
+        
+            v_batch = valid_loss(
+                ema_state_rep.ema,
+                rest_rep, 
+                test_batch, 
+                jax.random.split(rng_eval, train_args["n_devices"])
+            )
+        
+            val_losses_epoch.append(float(jax.device_get(v_batch)))
+
+        # Calculate the average validation loss for the entire epoch
+        v = np.mean(val_losses_epoch) if val_losses_epoch else float('inf')
+
+        # Materialize
+        v = float(jax.device_get(v))
+        verif.append(v)
+
+        if len(verif) >= window:
+            v_sm = float(np.mean(verif[-window:]))
+            if v_sm < best_loss:
+                best_loss = v_sm
+                best_epoch = epoch
+
+                # Save the best EMA state, not the live training state
+                saved_ema_state_rep = ema_state_rep 
+                saved_rest_host = jax.tree.map(lambda x: jax.device_get(x[0]), rest_rep)
+        else:
+            v_sm = np.nan
+        verif_smth.append(v_sm)
+        pbar.set_postfix({
+                "train_loss": f"{l:.4f}",
+                "val_loss": f"{v:.4f}",
+                "val_smooth": f"{v_sm:.4f}"
+            })
+
+        if chkpt is not None:
+            if (epoch % chkpt[0] == 0) and (jax.process_index() == 0):
+                # Checkpoint the current EMA state
+                # We save the EMA parameters (.ema attribute), not the whole state object
+                current_ema_params_rep = ema_state_rep.ema
+                rest_host = jax.tree.map(lambda x: jax.device_get(x[0]), rest_rep)
+                _save_ckpt(chkpt[1], model, current_ema_params_rep, rest_host, opt_state_rep, epoch)
+                losses_dic = {"train":losses, "val": verif}
+                np.save("loss_"+train_args["name"]+".npy", losses_dic)
+
+    end = time.time()
+    if hasattr(rest_rep, 'transformer'):
+        count_after = jax.device_get(rest_rep.transformer._rngs.default.count.value[0]).item()
+    else:
+        count_after = jax.device_get(rest_rep.component_models[0]._rngs.default.count.value[0]).item()
+    print(f"DEBUG: RNG count AFTER step:  {count_after}")
+    if count_before == count_after:
+         print("DEBUG: WARNING! RNG count did not change.")
+    # dereplicate state
+
+    # Save and return the best EMA model
+    if saved_ema_state_rep is not None:
+        # The state to save is the parameters contained within the .ema attribute
+        best_ema_params_rep = saved_ema_state_rep.ema
+        best_ema_params_host = jax.tree.map(lambda x: jax.device_get(x[0]), best_ema_params_rep)
+        
+        # Save the best EMA parameters to disk as the final model
+        _save_ckpt(chkpt[1], model, best_ema_params_rep, saved_rest_host, opt_state_rep, best_epoch)
+
+        # Save final:
+        current_ema_params_rep = ema_state_rep.ema
+        rest_host = jax.tree.map(lambda x: jax.device_get(x[0]), rest_rep)
+        
+        _save_ckpt(str(chkpt[1]) + "_final", model, current_ema_params_rep, rest_host, opt_state_rep, epoch)
+        
+        mdl_eval = nnx.merge(graphdef, best_ema_params_host, saved_rest_host)
+    else:
+        # Fallback: if no best model was found, use the final EMA weights
+        final_ema_params_host = jax.tree.map(lambda x: jax.device_get(x[0].ema), ema_state_rep)
+        rest_host = jax.tree.map(lambda x: jax.device_get(x[0]), rest_rep)
+        mdl_eval = nnx.merge(graphdef, final_ema_params_host, rest_host)
+
+    losses_dic = {"train":losses, "val": verif}
+    np.save("loss_"+train_args["name"]+".npy", losses_dic)
+
+    return mdl_eval, losses, verif, best_epoch

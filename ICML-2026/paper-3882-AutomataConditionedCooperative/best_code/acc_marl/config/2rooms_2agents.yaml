@@ -1,0 +1,42 @@
+DEBUG: False
+WANDB: True
+WANDB_ENTITY: beyazit-y-berkeley-eecs
+WANDB_PROJECT: rad-marl-jax
+MAX_EP_LEN: 200
+LAYOUT: |
+    [ # ][ # ][ # ][ # ][ # ][ # ][ # ][ # ][ # ]
+    [ # ][ 0 ][   ][ 2 ][ # ][ 1 ][   ][ 3 ][ # ]
+    [ # ][   ][   ][   ][ # ][   ][   ][   ][ # ]
+    [ # ][   ][   ][   ][ # ][   ][   ][   ][ # ]
+    [ # ][ a ][ 8 ][ A ][#,a][ B ][ 9 ][ a ][ # ]
+    [ # ][   ][   ][   ][ # ][   ][   ][   ][ # ]
+    [ # ][   ][   ][   ][ # ][   ][   ][   ][ # ]
+    [ # ][ 6 ][   ][ 4 ][ # ][ 7 ][   ][ 5 ][ # ]
+    [ # ][ # ][ # ][ # ][ # ][ # ][ # ][ # ][ # ]
+DFA_SAMPLER: RAD
+DFA_MAX_SIZE: 5
+DFA_SIZE_P: null
+DFA_PROB_STUTTER: 0.9
+ENCODER_DIM: 32
+SAVE_FILE_PREFIX: storage/2rooms_2agents/policy_params
+LOG_FILE_PREFIX: storage/2rooms_2agents/log
+# PPO PARAMS
+LR: 0.0003
+NUM_ENVS: 64
+NUM_STEPS: 1024
+TOTAL_TIMESTEPS: 10_000_000
+UPDATE_EPOCHS: 8
+NUM_MINIBATCHES: 8
+GAMMA: 0.99
+GAE_LAMBDA: 0.95
+CLIP_EPS: 0.2
+ENT_COEF: 0.02
+ENT_COEF_DECAY: False
+VF_COEF: 0.5
+MAX_GRAD_NORM: 0.5
+# LR_ANNEAL_LINEAR: True
+# LR_ANNEAL_EXP: True
+# EXP_DECAY_RATE: 0.001
+# LR_ANNEAL_COS: True
+# LR_ANNEAL_WARMUP: True
+# LR_ANNEAL_WARMUP_PARAM: 0.01

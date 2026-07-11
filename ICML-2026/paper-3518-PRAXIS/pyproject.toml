@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=64", "wheel", "pybind11>=2.13", "numpy>=1.23"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tree-praxis"
+version = "0.0.29"
+description = "PRAXIS computes exact and approximate Rashomon sets of decision trees, individual high-quality trees, and variable importance over the full set of good models."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+  { name = "Zakk Heile" },
+  { name = "Hayden McTavish" },
+  { name = "Varun Babbar" },
+  { name = "Margo Seltzer" },
+  { name = "Cynthia Rudin" }
+]
+dependencies = [
+  "numpy>=1.23",
+  "matplotlib>=3.6",
+  "scikit-learn>=1.1",
+  "pandas>=1.5",
+  "ipywidgets>=8.0",
+  "ipython>=8.0"
+]
+keywords = [
+  "interpretable machine learning",
+  "decision trees",
+  "rashomon set",
+  "optimization",
+  "variable importance"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: C++",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+[project.urls]
+Homepage = "https://github.com/zakk-h/PRAXIS"
+Repository = "https://github.com/zakk-h/PRAXIS"
+Issues = "https://github.com/zakk-h/PRAXIS/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+praxis = ["builder_static/index.html"]

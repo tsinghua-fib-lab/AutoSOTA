@@ -1,0 +1,39 @@
+[experiment_config]
+model_type = "xlstm"
+dataset_name = "spd_wishart_diffusion"
+
+# Optimizer
+optimizer = "muon"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+# Training
+loss = "sigker"
+seed = 1
+batch_size = 16
+epochs = 16
+early_stopping_patience = 3
+
+# Training mode
+training_mode = "unconditional"
+
+manifold = "euclidean"
+hidden_state_mode = "euclidean"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "pid"
+solver = "heun"
+rtol = 1e-3
+atol = 1e-3
+dtmin = 1e-4
+
+[xlstm_config]
+d_model = 64
+num_heads = 4
+d_conv = 4
+xlstm_expand = 2
+ffn_expand = 2
+use_ffn = true
+out_size = 6

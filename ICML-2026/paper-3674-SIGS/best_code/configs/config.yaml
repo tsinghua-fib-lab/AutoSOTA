@@ -1,0 +1,68 @@
+
+data:
+  data_path: "data/expressions.h5"
+  validation_split: 0.20
+  test_split: 0.10
+
+training:
+  batch_size: 120
+  epochs: 2000
+  learning_rate: 3e-4
+  clip: 1.0
+  early_stopping_patience: 50
+  accelerator: "gpu"
+  warmup_updates: 10000
+  beta0: 0.01
+  tightness: 1.0
+  decoder_samples: 1
+  # (optional) not read by code but useful for logs/dashboards:
+  monitor_metric: "val_elbo_full"
+  monitor_accuracy_metric: "val_acc"
+
+model:
+  encoder:
+    hidden_size: 256
+    conv_sizes: [64, 128, 256]
+    kernel_sizes: [2, 3, 4]
+    use_batch_norm: false
+    dropout: 0.0
+  decoder:
+    mode: "positional"
+    hidden_size: 512
+    num_layers: 1
+    use_batch_norm: false
+    rnn_type: "gru"
+    dropout: 0.0
+  shared:
+    z_dim: 32
+    max_length: 72
+    output_size: 53
+
+topo:
+  acc_threshold: 100.0
+  ramp_epochs: 5
+  gamma: 1.0
+  train_every: 50
+  val_every: 12
+  
+  # Reservoir & PH settings
+  deltas: [0.10, 0.50]
+  use_reservoir_for_ph: true
+  ph_max_points: 24
+  ph_max_dimension: 1
+  hessian_probes: 4
+  
+  # 5 geometric terms
+  w_hull: 0.8          # Hull barriers
+  w_ph: 0.8            # Persistent homology  
+  w_hess: 1.0e-4       # Hessian penalty
+  w_mid: 0.0           # Midpoint interior
+  w_gp: 0.0        # Encoder gradient penalty
+  
+  # Midpoint sampling budget
+  curv_pair_budget: 32
+
+saving:
+  base_dir: "checkpoints"
+  model_name: "sigs_grammar_vae"
+  logs_dir: "logs"

@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright (c) 1993-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+output_dir: "./results"
+
+model: "Qwen/Qwen2.5-7B-Instruct"
+dataset: "longbench-e"                                 # see DATASET_REGISTRY in evaluate_registry.py
+data_dir: "qasper_e"                                # Include _e suffix for longbench-e # Subdirectory of the dataset (if applicable) else leave "null"
+
+press_name: "no_press"                                # see PRESS_REGISTRY in evaluate_registry.py
+compression_ratio: 0.75                   # Warning: this is the fraction of points NOT kept # Compression ratio for the press (0.0 to 1.0)
+key_channel_compression_ratio: null                # For ThinKPress and ComposedPress (0.0 to 1.0)
+
+fraction: 1.0                            # Fraction of dataset to evaluate (0.0 to 1.0), for quick testing
+max_new_tokens: null                              # Maximum new tokens to generate (null = use dataset default)
+max_context_length: null                          # Maximum context length (null = use model maximum)
+compress_questions: false                         # Whether to compress questions with context
+needle_depth: null                                # Depth (int or list of ints) percentage of the needle in the haystack (0 to 100), only for needle_in_haystack dataset
+
+device: cuda  # Device to use (null = auto-detect, "cuda:0", "cpu", etc.)
+
+# You can add any model kwargs here.
+model_kwargs:
+  attn_implementation: null
+  dtype: "auto"
+  

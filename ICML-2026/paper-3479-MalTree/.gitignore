@@ -1,0 +1,47 @@
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+build/
+dist/
+
+# Secrets / API keys
+.env
+*.env
+
+# Local staging / planning directories (never committed)
+maltree_staging/
+maltree_planning/
+
+# Large released data, fetched via scripts/download_data.py from Zenodo.
+# The small artifacts in data/ (manifest.csv, family_labels.json,
+# timestamps.json, example/) ARE committed; the big files are not.
+data/static_features.json
+data/dynamic_features.json
+data/embeddings_static.json
+data/embeddings_dynamic.json
+data/embeddings_image.json
+data/embeddings_fused.json
+data/*.json.gz
+
+# Pipeline outputs
+results/
+*.npy
+*.phy
+distance_matrix*
+sample_labels.json
+label_mapping*.txt
+slurm-*.out
+*.log
+
+# Trained model weights (released on Zenodo, not committed)
+*.pth
+*.pt

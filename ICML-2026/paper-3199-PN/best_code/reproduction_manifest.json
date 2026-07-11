@@ -1,0 +1,66 @@
+{
+  "paper_id": 3199,
+  "repo_url": "https://github.com/Orange-OpenSource/learning-parities-with-product-networks",
+  "repo_commit": "fe3103708aa2b0e6b9874b2aadbcd047f8483af4",
+  "repo_path": "/repo",
+  "container_name": "autosota_repro_paper_3199",
+  "container_reusable": true,
+  "docker_image": "autosota/paper-3199:reproduced",
+  "eval_command": "python3 reproduce_3199.py",
+  "baseline_metrics": {
+    "Validation Accuracy": 100.0
+  },
+  "primary_metric": "Validation Accuracy",
+  "metric_direction": "higher",
+  "gpu_devices": "2,3",
+  "data_mounts": [],
+  "cache_mounts": [
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache:/autosota_cache",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/datasets:/datasets",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/models:/models"
+  ],
+  "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3199.log",
+  "status": "success",
+  "created_at": "2026-07-10T04:57:00Z",
+  "notes": "Reproduction successful. Product node converges to 100.00% validation accuracy at step 1,000 under sparse regime (p_e=1/N, N=16), exactly matching the paper claim in Section 5.2.4/Figure 6. No external datasets or pre-trained weights needed — all data is synthetically generated.",
+  "eval_timeout_minutes": 10,
+  "eval_output_format": "JSON output in /repo/reproduce_3199_results.json with 'value' field containing validation accuracy percentage.",
+  "known_levers": "Learning rate (0.02 from paper, sensitive); p_e sparsity probability (1/N is theoretically optimal); Gaussian weight initialization mean/std (0.5/0.25 default); batch size (100 from paper); number of parallel outputs n_outputs (250); seed (convergence to 100% is robust).",
+  "setup_notes": "Container from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. PyTorch 2.1.0 works despite requirements.txt specifying 2.11.0. Python 3.10.13 works despite README requiring 3.12. No additional pip installs needed. All data is synthetic — no external downloads.",
+  "optimization_objective": {
+    "objective_type": "representative_primary_metric",
+    "summary": "Maximize validation accuracy on 16-bit parity under sparse sampling, with convergence speed and sample efficiency as secondary goals. At N=16 baseline is already optimal; improvement means scaling to harder conditions while maintaining 100%.",
+    "metrics": [
+      {
+        "name": "Validation Accuracy",
+        "direction": "higher",
+        "role": "core",
+        "goal": "improve",
+        "baseline": 100.0,
+        "regression_tolerance_pct": 0.0,
+        "rationale": "Primary paper metric. 100% means perfect generalization from sparse observations."
+      },
+      {
+        "name": "Convergence Steps",
+        "direction": "lower",
+        "role": "secondary",
+        "goal": "improve",
+        "baseline": 1000,
+        "regression_tolerance_pct": 50.0,
+        "rationale": "Steps to reach 100% accuracy. Faster convergence implies better optimization efficiency."
+      },
+      {
+        "name": "Coverage at Convergence",
+        "direction": "lower",
+        "role": "secondary",
+        "goal": "improve",
+        "baseline": 2.8,
+        "regression_tolerance_pct": 50.0,
+        "rationale": "Fraction of truth table observed at convergence. Lower is better — stronger generalization."
+      }
+    ],
+    "success_policy": "Primary success: validation accuracy reaches 100%. Secondary improvements: faster convergence and lower coverage. If exploring higher N, find maximum N where 100% remains achievable. Regression below 95% at N=16 is failure."
+  },
+  "metric_upper_bound": 100.0,
+  "metric_lower_bound": 50.0
+}

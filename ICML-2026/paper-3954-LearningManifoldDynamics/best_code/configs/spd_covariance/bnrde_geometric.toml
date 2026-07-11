@@ -1,0 +1,48 @@
+[experiment_config]
+model_type = "bnrde"
+dataset_name = "spd_wishart_diffusion"
+
+# Optimizer
+optimizer = "muon"
+learning_rate = 5e-3
+weight_decay = 0.000001
+max_grad_norm = 1.0
+
+# Training
+loss = "sigker_branched"
+seed = 1
+batch_size = 16
+epochs = 16
+early_stopping_patience = 8
+
+# Training mode
+training_mode = "unconditional"
+
+manifold = "spd"
+hidden_state_mode = "problem_manifold"
+evolving_out = true
+
+[solver_config]
+stepsize_controller = "constant"
+solver = "cfees25"       # geometric solver; alternatives: cfees25
+adjoint = "recursive_checkpoint"
+rtol = 1e-3
+atol = 1e-3
+dtmin = 1e-4
+
+[bnrde_config]
+
+# BNRDE model parameters
+# Direct SPD(3) hidden/output state.
+initial_state_param_dim = 6
+init_hidden_dim = 32
+vf_hidden_dim = 32
+initial_cond_mlp_depth = 2
+vf_mlp_depth = 4
+out_size = 6
+
+# Log-signature configuration
+signature_depth = 2
+signature_window_size = 8
+
+rough_solution = "ito"

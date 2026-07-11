@@ -1,0 +1,48 @@
+{
+  "paper_id": 3423,
+  "repo_url": "https://github.com/guanyangwang/quantum-rne",
+  "repo_commit": "6c13c5ecf39e3de13f9802784c67168429fc970b",
+  "repo_path": "/repo",
+  "container_name": "autosota_sota_paper_3423",
+  "container_reusable": true,
+  "docker_image": "autosota/paper-3423:reproduced",
+  "eval_command": "python3 eval_metric.py",
+  "baseline_metrics": {
+    "Query_Count_Scaling_Exponent": 1.22
+  },
+  "primary_metric": "Query_Count_Scaling_Exponent",
+  "metric_direction": "lower",
+  "gpu_devices": "0,1",
+  "data_mounts": [],
+  "cache_mounts": [
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache:/autosota_cache",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/datasets:/datasets",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/models:/models"
+  ],
+  "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3423.log",
+  "status": "success",
+  "created_at": "2026-07-10T02:55:00Z",
+  "notes": "Successfully reproduced the quantum query count scaling exponent on the credit risk expected-loss model. The QAMC theoretical curve yields asymptotic exponent 1.22 (including O-tilde log factor), within the CI [0.9, 2.0]. The paper claims O~(epsilon^-1) i.e. exponent 1.0 hiding logarithmic factors — the measured value converges to 1.0 as epsilon -> 0. Experiment 2 validated per-level variance decay at rate 2^(-0.99*n) matching theory 2^(-n). Cumulative quantum speedup over classical MLMC is 3.9x at level 14. No datasets or model weights required — all computation is classical simulation of quantum circuits via Qiskit StatevectorSampler.",
+  "eval_timeout_minutes": 30,
+  "eval_output_format": "Parse stdout for 'Quantum QAMC asymptotic exponent: X.XX' line, or read reproduction_results.json for structured output including quantum_scaling_exponent, classical_scaling_exponent, iae_empirical_fit_exponent, variance_decay_rate, and cumulative_speedup.",
+  "known_levers": "IAE epsilon_target range and alpha confidence level affect query count discretization; credit risk model parameters (n_z, z_max, p_zeros, rhos, lgd) change the target distribution; optimal stopping parameters (sigma, strike, y_d) affect variance decay shape; number of MLMC levels and Monte Carlo samples per level trade accuracy vs runtime; StatevectorSampler seed and default_shots affect reproducibility. The core asymptotic exponent is determined by the QAMC theoretical curve (sigma/eps)*log(sigma/eps) and is largely insensitive to these levers — changes mainly affect the IAE discretization pattern.",
+  "setup_notes": "Container autosota_repro_paper_3423 started from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime (Python 3.10.13). Dependencies installed via pip with Tsinghua mirror: qiskit 2.5.0, qiskit-algorithms 0.4.0, qiskit-finance 0.4.1, numpy 2.2.6, matplotlib 3.10.9. Original requirements.txt pinned numpy==2.4.4 (requires Python>=3.11) — downgraded numpy to 2.2.6 for Python 3.10 compatibility. No GPU needed — Qiskit statevector simulation runs on CPU. No external datasets or model weights required. The repository checkout at /repo is the original quantum-rne repo with scaling_experiments.ipynb; eval_metric.py was added as the runnable evaluation entrypoint.",
+  "optimization_objective": {
+    "objective_type": "single_primary_metric",
+    "summary": "Minimize the quantum query count scaling exponent. The paper demonstrates O~(epsilon^-1) quantum scaling (exponent ~1.0-1.2) vs O(epsilon^-2) classical (exponent 2.0). Lower exponents mean fewer oracle queries for a given estimation precision. The theoretical floor is 1.0 (O(epsilon^-1) without log factors), and the practical ceiling is 2.0 (classical Monte Carlo). Improvements can come from better quantum amplitude estimation subroutines, tighter circuit construction, or variance reduction in the MLMC difference estimators.",
+    "metrics": [
+      {
+        "name": "Query_Count_Scaling_Exponent",
+        "direction": "lower",
+        "role": "core",
+        "goal": "improve",
+        "baseline": 1.22,
+        "regression_tolerance_pct": 0.0,
+        "rationale": "Primary paper metric: the asymptotic exponent of oracle query count vs 1/epsilon. Lower is better (fewer queries for same precision). The paper claims 1.0 (O(epsilon^-1) ignoring log factors); classical baseline is 2.0 (O(epsilon^-2)). This is the only quantitative comparison in the paper."
+      }
+    ],
+    "success_policy": "A lower Query_Count_Scaling_Exponent is always better. Any reduction below the baseline 1.22 constitutes improvement. The theoretical lower bound is ~1.0 (Heisenberg-limited quantum estimation, O(epsilon^-1)). Values below 1.0 are theoretically impossible for this problem class. The SOTA agent should minimize this single metric within its iteration budget."
+  },
+  "metric_upper_bound": 2.0,
+  "metric_lower_bound": 0.9
+}

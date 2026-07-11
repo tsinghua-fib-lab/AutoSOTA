@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>MalTree: Tracing Malware Evolution from Embeddings at Scale</title>
+  <meta name="description" content="MalTree builds large-scale phylogenetic trees of malware from multi-modal embeddings, reaching 87% temporal consistency across 103,883 samples and 538 families.">
+  <meta name="keywords" content="malware, malware evolution, phylogenetics, embeddings, machine learning, security, ICML">
+  <meta name="author" content="Akash Amalan, Georgios Smaragdakis, Tom Viering">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="MalTree: Tracing Malware Evolution from Embeddings at Scale">
+  <meta property="og:description" content="Large-scale phylogenetic trees of malware from multi-modal embeddings. 87% temporal consistency across 103,883 samples and 538 families.">
+  <meta property="og:image" content="overview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MalTree: Tracing Malware Evolution from Embeddings at Scale">
+  <meta name="twitter:description" content="Large-scale phylogenetic trees of malware from multi-modal embeddings.">
+  <meta name="twitter:image" content="overview.png">
+
+  <meta name="citation_title" content="MalTree: Tracing Malware Evolution from Embeddings at Scale">
+  <meta name="citation_author" content="Amalan, Akash">
+  <meta name="citation_author" content="Smaragdakis, Georgios">
+  <meta name="citation_author" content="Viering, Tom">
+  <meta name="citation_conference_title" content="International Conference on Machine Learning (ICML)">
+  <meta name="citation_publication_date" content="2026">
+
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico" sizes="any">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+
+  <!-- MalTree styling on top of the academic template -->
+  <style>
+    :root { --mt-ink: #0f172a; }
+
+    /* thin brand bar referencing the malware category palette */
+    .brandbar {
+      height: 5px;
+      background: linear-gradient(90deg,#2ea043,#1f6feb,#8957e5,#e8589c,#fb8500,#e5484d);
+    }
+
+    /* hero gets a soft, refined background instead of flat white */
+    .hero-main {
+      background:
+        radial-gradient(820px 360px at 50% -12%, rgba(37,99,235,.12), transparent 72%),
+        linear-gradient(180deg, #f7f9fc 0%, #ffffff 74%);
+    }
+    .publication-title { letter-spacing: -.02em; }
+    .hero-tagline {
+      max-width: 660px;
+      margin: -.5rem auto 1.6rem;
+      color: #64748b;
+      font-size: 1.15rem;
+      line-height: 1.6;
+    }
+
+    /* placeholder links that resolve to nothing yet */
+    .btn-soon {
+      opacity: .4 !important;
+      pointer-events: none;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
+
+    /* framed figures */
+    .framed {
+      max-width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 12px 22px -10px rgb(15 23 42 / .22);
+    }
+    .teaser-figure { display: block; margin: 0 auto; padding: 1.4rem; }
+    .figure-caption {
+      font-size: .95rem; color: #64748b; line-height: 1.65;
+      margin: 1.15rem auto 0; text-align: center; max-width: 800px;
+    }
+    .approach-figure { margin: 1.5rem 0 0; text-align: center; }
+    .approach-figure img { padding: 1.4rem; }
+
+    /* interactive tree: embedded and zoomed in a little */
+    .tree-frame {
+      position: relative;
+      width: 100%;
+      height: 900px;          /* default; refined by fitTree() in index.js */
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 12px 22px -10px rgb(15 23 42 / .22);
+      background: #282828;
+    }
+    .tree-frame iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 1200px;
+      height: 2010px;
+      border: 0;
+      transform-origin: top left;
+      transform: scale(0.8) translate(-24px, -446px); /* default; refined by fitTree() */
+    }
+    .tree-actions { text-align: center; margin-top: 1.5rem; }
+
+    /* key findings */
+    .finding { margin-bottom: 3.25rem; }
+    .finding:last-child { margin-bottom: 0; }
+    .finding-figure { margin: 1.5rem 0; text-align: center; }
+    .finding-figure img { padding: 1.1rem; }
+    .finding-figure figcaption {
+      font-size: .92rem; color: #64748b; line-height: 1.6;
+      margin: .95rem auto 0; max-width: 780px;
+    }
+
+    /* stat cards */
+    .stat-grid {
+      display: flex; flex-wrap: wrap; gap: 1.25rem;
+      justify-content: center; margin: 1.9rem 0 0;
+    }
+    .stat-card {
+      flex: 1 1 200px; max-width: 260px; text-align: center;
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px;
+      padding: 2rem 1rem; box-shadow: 0 6px 14px -8px rgb(15 23 42 / .20);
+    }
+    .stat-num {
+      font-family: 'Inter', sans-serif; font-weight: 900;
+      font-size: 2.8rem; line-height: 1;
+      background: linear-gradient(135deg,#1f6feb,#8957e5);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { margin-top: .65rem; color: #64748b; font-weight: 500; line-height: 1.45; }
+
+    @media screen and (max-width: 768px) {
+      .hero-tagline { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brandbar"></div>
+
+  <!-- Scroll to top -->
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <main id="main-content">
+
+  <!-- Hero -->
+  <section class="hero hero-main">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">MalTree: Tracing Malware Evolution from Embeddings at Scale</h1>
+
+            <p class="hero-tagline">
+              A phylogenetic lens on malware: reconstructing how families evolve across
+              103,883 samples and 538 families.
+            </p>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Akash Amalan,</span>
+              <span class="author-block">Georgios Smaragdakis,</span>
+              <span class="author-block">Tom Viering</span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Delft University of Technology</span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="publication-venue">International Conference on Machine Learning (ICML) 2026 &middot; Seoul, South Korea</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+
+                <span class="link-block">
+                  <a href="maltree_icml2026.pdf" target="_blank" rel="noopener"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a class="external-link button is-normal is-rounded is-dark btn-soon" title="Available soon" aria-disabled="true">
+                    <span class="icon"><i class="ai ai-arxiv"></i></span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a href="https://github.com/AJ730/MalwareEvolution" target="_blank" rel="noopener"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span>Code</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a href="https://doi.org/10.5281/zenodo.20261117" target="_blank" rel="noopener"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-database"></i></span>
+                    <span>Data (Zenodo)</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a href="inter_family_vis.html" target="_blank" rel="noopener"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-sitemap"></i></span>
+                    <span>Interactive Tree</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a href="maltree_slides.pdf" target="_blank" rel="noopener"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-powerpoint"></i></span>
+                    <span>Slides</span>
+                  </a>
+                </span>
+
+                <span class="link-block">
+                  <a class="external-link button is-normal is-rounded is-dark btn-soon" title="Available soon" aria-disabled="true">
+                    <span class="icon"><i class="fas fa-video"></i></span>
+                    <span>Video</span>
+                  </a>
+                </span>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teaser: simplified phylogenetic tree -->
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <img src="static/images/tree.png" class="framed teaser-figure"
+             alt="Simplified MalTree phylogeny: 32 malware families grouped into IoT botnets, banking and stealers, RATs, and ransomware">
+        <p class="figure-caption">
+          A simplified view of the malware phylogeny: 32 representative families grouped into IoT
+          botnets, banking and stealer malware, RATs, and ransomware. The full tree of all 538
+          families is interactive below.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Malware detection remains largely reactive: machine learning models trained on known
+              samples degrade as threats evolve. Understanding evolutionary relationships among
+              malware families can inform proactive defense, but traditional reverse engineering can
+              take months to years to uncover such lineage relationships. We propose MalTree, a
+              framework that applies bioinformatics-inspired phylogenetic techniques (UPGMA and
+              Neighbor-Joining) at scale to model malware evolution automatically using structural,
+              behavioral, and image-based features. We introduce temporal validation using
+              VirusTotal timestamps to assess whether inferred trees reflect actual evolutionary
+              order. MalTree achieves 87% temporal consistency, indicating that inferred evolutionary
+              relationships closely align with real-world emergence timelines. Our analysis shows
+              that some families mutate over 10 times faster than others, suggesting that detection
+              strategies should be tailored to family-specific evolutionary tempos. Case studies,
+              including the Mirai botnet, confirm that inferred relationships from our phylogenetic
+              tree align with documented threat intelligence. Our framework provides a foundation for
+              shifting malware analysis from sample-by-sample classification toward lineage-aware
+              evolutionary modeling.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Approach / pipeline -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="has-text-centered">
+        <h2 class="title is-3">The MalTree Pipeline</h2>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="content">
+            <p>
+              MalTree extracts three complementary embeddings from every sample: pseudo-static
+              features from memory dumps, dynamic features from sandbox behavior, and an image
+              embedding of the binary. The embeddings are fused and reduced into a single
+              representation, turned into a pairwise distance matrix, and resolved into a
+              phylogenetic tree with Neighbor-Joining or UPGMA.
+            </p>
+          </div>
+        </div>
+      </div>
+      <figure class="approach-figure">
+        <img src="overview.png" class="framed"
+             alt="The MalTree pipeline: static, dynamic, and image embeddings are concatenated and reduced to a distance matrix, then resolved into a phylogenetic tree">
+        <figcaption class="figure-caption">
+          Static, dynamic, and image embeddings are concatenated and reduced to a pairwise distance
+          matrix D, from which a phylogenetic tree is built. Clades correspond to functional malware
+          categories.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Interactive tree -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="has-text-centered">
+        <h2 class="title is-3">Interactive Phylogenetic Tree</h2>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="content">
+            <p>
+              Explore the full tree of 538 malware families below. Pan and zoom to follow how
+              families branch, cluster, and diverge across the malware landscape.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="tree-frame" id="tree-frame">
+        <iframe src="inter_family_vis.html"
+                title="Interactive MalTree phylogenetic tree" loading="lazy" allowfullscreen></iframe>
+      </div>
+      <div class="tree-actions">
+        <a href="inter_family_vis.html" target="_blank" rel="noopener"
+           class="button is-normal is-rounded is-dark">
+          <span class="icon"><i class="fas fa-external-link-alt"></i></span>
+          <span>Open the interactive tree in a new tab</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key findings -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="has-text-centered">
+        <h2 class="title is-3">Key Findings</h2>
+      </div>
+
+      <div class="finding">
+        <h3 class="title is-4">A validated phylogeny at unprecedented scale</h3>
+        <div class="content has-text-justified">
+          <p>
+            MalTree builds validated phylogenetic trees from 103,883 malware samples across 538
+            families in 11 hours with UPGMA or 3 days with Neighbor-Joining on 20 cores, the largest
+            such analysis to date. Neighbor-Joining with outgroup rooting reaches 87.1% temporal
+            consistency against VirusTotal first-submission timestamps. Those timestamps are
+            independent of the family labels used to train the embeddings, so the agreement shows
+            the trees capture genuine evolutionary order rather than feature similarity; random
+            ordering would score about 50%.
+          </p>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-num">87.1%</div>
+            <div class="stat-label">temporal consistency against VirusTotal timestamps</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">103,883</div>
+            <div class="stat-label">malware samples placed in one tree</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">538</div>
+            <div class="stat-label">malware families spanning 2010 to 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <h3 class="title is-4">Malware families evolve at very different tempos</h3>
+        <figure class="finding-figure">
+          <img src="static/images/drift.png" class="framed"
+               alt="Per-family embedding drift on a log scale; Bashlite and Syslogk drift far faster than other families">
+          <figcaption>
+            Embedding drift per family (distance per year, log scale). Maximum drift varies by more
+            than two orders of magnitude: families such as Bashlite and Syslogk move over ten times
+            faster than slow movers like Loda.
+          </figcaption>
+        </figure>
+        <div class="content has-text-justified">
+          <p>
+            This rate heterogeneity violates the constant-rate (molecular clock) assumption behind
+            UPGMA, and explains why Neighbor-Joining, which lets lineages evolve at different rates,
+            produces better-rooted trees. In practice, detection strategies may need to be tuned to
+            each family's evolutionary tempo.
+          </p>
+        </div>
+      </div>
+
+      <div class="finding">
+        <h3 class="title is-4">The Mirai lineage, recovered automatically</h3>
+        <figure class="finding-figure">
+          <img src="static/images/mirai.png" class="framed"
+               alt="Inferred Mirai inter-family subgraph: five validated descendants in red, three unvalidated links in gray">
+          <figcaption>
+            The inferred Mirai inter-family subgraph. Red edges are validated by public threat
+            intelligence; gray edges lack corroborating evidence. Lower edge weights indicate
+            stronger phylogenetic support.
+          </figcaption>
+        </figure>
+        <div class="content has-text-justified">
+          <p>
+            The 2016 Mirai source-code leak spawned many variants. Without supervision, MalTree
+            recovers five Mirai descendants, Bashlite, Okiru, MooBot, Gafgyt, and RapperBot, each
+            corroborated by documented threat intelligence. Weaker, unverified links to Conti,
+            Turla, and Rdat carry visibly higher edge weights, so MalTree both confirms known
+            relationships and flags hypotheses that warrant further investigation.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BibTeX -->
+  <section class="section hero is-light" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <div class="bibtex-header">
+        <h2 class="title">BibTeX</h2>
+        <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
+          <i class="fas fa-copy"></i>
+          <span class="copy-text">Copy</span>
+        </button>
+      </div>
+      <pre id="bibtex-code"><code>@inproceedings{amalan2026maltree,
+  title     = {MalTree: Tracing Malware Evolution from Embeddings at Scale},
+  author    = {Amalan, Akash and Smaragdakis, Georgios and Viering, Tom},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning (ICML)},
+  series    = {PMLR},
+  volume    = {306},
+  year      = {2026}
+}</code></pre>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content has-text-centered">
+            <p>
+              This page was built using the
+              <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>,
+              which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+              It is licensed under a
+              <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

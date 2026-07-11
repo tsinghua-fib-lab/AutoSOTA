@@ -1,0 +1,48 @@
+{
+  "paper_id": 2813,
+  "repo_url": "https://github.com/hudsonchen/thinned_mfld",
+  "repo_commit": "523ae6582be0799a875e4c2746936ff5f496e86c",
+  "repo_path": "/repo",
+  "container_name": "autosota_repro_paper_2813",
+  "container_reusable": true,
+  "docker_image": "autosota/paper-2813:reproduced",
+  "eval_command": "cd /repo && rm -rf results/ && python3 run_mfld.py --dataset student_teacher --seed 0 --particle_num 256 --step_size 0.01 --noise_scale 0.001 --bandwidth 1.0 --step_num 1000 --thinning kt --kernel sobolev --zeta 0.0001 --d 12 --teacher_num 100 --g 0 --kt_function compresspp_kt && python3 -c \"import numpy as np, glob; d=sorted(glob.glob('results/neural_network_student_teacher/thinning_kt/*__complete'))[-1]; tl=np.load(d+'/test_losses.npy'); print(f'Test Loss: {float(tl[-1]):.10f}')\"",
+  "baseline_metrics": {
+    "Test Loss": 0.0004086697
+  },
+  "primary_metric": "Test Loss",
+  "metric_direction": "lower",
+  "gpu_devices": "0,1",
+  "data_mounts": [],
+  "cache_mounts": [
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache:/autosota_cache",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/datasets:/datasets",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/models:/models"
+  ],
+  "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-2813.log",
+  "status": "success",
+  "created_at": "2026-07-09T10:13:33Z",
+  "notes": "",
+  "eval_timeout_minutes": 5,
+  "eval_output_format": "Final test loss printed as 'Test Loss: X.XXXXXXXXXX' to stdout.",
+  "known_levers": "Safe levers for SOTA optimization: step_num (more training steps), particle_num N (more particles improve performance at higher cost), g (KT oversampling, 0/1/2 trades cost for accuracy), step_size (learning rate), noise_scale sigma, zeta (L2 regularization strength), kt_function (compresspp_kt KT-MFLD1 vs compress_kt KT-MFLD2), kernel type (sobolev vs gaussian), d (input dimension), teacher_num (teacher network complexity).",
+  "setup_notes": "Base image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Installed JAX 0.6.2 with CUDA 12 GPU support via nvidia-cuda-* pip packages including cuDNN 9.24.0.43 and nvcc 12.9.86. Compiled goodpoints 0.6.2 from source with gcc. Container uses 2x A100-80GB GPUs. No external datasets needed (synthetic student-teacher data).",
+  "optimization_objective": {
+    "objective_type": "single_primary_metric",
+    "summary": "Minimize test loss (MSE) on Student-Teacher Network for KT-MFLD.",
+    "metrics": [
+      {
+        "name": "Test Loss",
+        "direction": "lower",
+        "role": "core",
+        "goal": "improve",
+        "baseline": 0.0004086697,
+        "regression_tolerance_pct": 10.0,
+        "rationale": "Primary paper metric comparing KT-MFLD variants and baselines."
+      }
+    ],
+    "success_policy": "Improve Test Loss (lower is better). Any reduction is a win."
+  },
+  "metric_upper_bound": 0.0015,
+  "metric_lower_bound": 0.000345
+}

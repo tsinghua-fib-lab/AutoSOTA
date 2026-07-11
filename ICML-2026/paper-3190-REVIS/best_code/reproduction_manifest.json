@@ -1,0 +1,58 @@
+{
+  "paper_id": 3190,
+  "repo_url": "https://github.com/antgroup/Revis",
+  "repo_commit": "75f4d29d402d4c1c4dbb2c69e88e3aa50cd0c9cc",
+  "repo_path": "/repo",
+  "container_name": "autosota_sota_paper_3190",
+  "container_reusable": true,
+  "docker_image": "autosota/paper-3190:reproduced",
+  "eval_command": "python3 compute_chair_metrics.py --response_file results/chair/Vis27_aV1.6_Gamma1.0_TauL0.2/chair_captions.jsonl",
+  "baseline_metrics": {
+    "CHAIRS": 20.0,
+    "CHAIRI": 6.53
+  },
+  "primary_metric": "CHAIRS",
+  "metric_direction": "lower",
+  "gpu_devices": "6,7",
+  "data_mounts": [],
+  "cache_mounts": [
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache:/autosota_cache",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/datasets:/datasets",
+    "/home/dataset-assist-0/rensijian/autosota-v2.5/cache/models:/models"
+  ],
+  "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3190.log",
+  "status": "success",
+  "created_at": "2026-07-09T19:02:03Z",
+  "notes": "REVIS CHAIR evaluation reproduced with Qwen2.5-VL-7B-Instruct on 100 val2014 images. CHAIRS=20.00% (paper: 25.00%, rubric CI: [24.60, 29.00]), CHAIRI=6.53% (paper: 8.23%, rubric CI: [7.49, 8.30]). Both metrics are lower (better) than paper-reported values. However, baseline (no steering) shows nearly identical results (CHAIRS=20.00%, CHAIRI=6.61%), suggesting the pre-computed steering vector has negligible effect on the current Hugging Face model version. The Qwen2.5-VL model on HF may have been updated with improved visual grounding, reducing the baseline hallucination rate from 31% to 20%. Steering vectors may need recomputation for this model version to show the paper-claimed 19.35% hallucination reduction.",
+  "eval_timeout_minutes": 60,
+  "eval_output_format": "JSON stdout with keys CHAIRs and CHAIRi as percentage floats. CHAIRs is sentence-level hallucination rate, CHAIRi is object-level.",
+  "known_levers": "1) Recompute steering vector with current model version (python3 main_all_visual_only.py compute). 2) Adjust alpha (steering intensity, paper optimum at 1.6). 3) Try different layers (paper optimum at layer 27 for Qwen2.5-VL-7B). 4) Adjust threshold percentile k (paper uses 0.8). 5) Try different max_new_tokens (64/128/512). 6) The tau_low and risk_gamma parameters control intervention sensitivity.",
+  "setup_notes": "Container based on docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Key dependencies: transformers==4.53.0 (downgraded from 5.13.0 for PyTorch 2.1.0 compatibility), qwen-vl-utils, nltk, pycocotools, pycocoevalcap, inflect, accelerate, openjdk-11-jre-headless (for PTBTokenizer). Model Qwen2.5-VL-7B-Instruct (16GB) downloaded from modelscope to /models. COCO val2014 annotations (808MB) downloaded via chunked HTTP Range requests from cocodataset.org to /datasets/coco/annotations. 100 val2014 images (~15MB) downloaded individually to /datasets/coco/val2014. Steering vector from repo vector/qwen2.5vl_none_image.pt (pre-computed). Stub modules created for missing text_halu.py and mmhal_bench.py. NLTK punkt data downloaded via jsDelivr CDN to /repo/utils/nltk_data.",
+  "optimization_objective": {
+    "objective_type": "constraint_satisfaction",
+    "summary": "Improve CHAIRS as the primary metric while maintaining or improving CHAIRI and general reasoning capability. The current baseline (no steering) is CHAIRS=20.00%. The REVIS steering should ideally reduce this further while preserving image description quality.",
+    "metrics": [
+      {
+        "name": "CHAIRS",
+        "direction": "lower",
+        "role": "core",
+        "goal": "improve",
+        "baseline": 20.0,
+        "regression_tolerance_pct": 5.0,
+        "rationale": "Sentence-level object hallucination rate — the paper's primary metric. Paper reports 25.00% with REVIS; our reproduction baseline is 20.00%. REVIS steering should reduce this below baseline."
+      },
+      {
+        "name": "CHAIRI",
+        "direction": "lower",
+        "role": "guardrail",
+        "goal": "maintain",
+        "baseline": 6.53,
+        "regression_tolerance_pct": 10.0,
+        "rationale": "Object-level hallucination rate — coupled with CHAIRS. Should not regress significantly when optimizing CHAIRS."
+      }
+    ],
+    "success_policy": "Primary goal: reduce CHAIRS below the baseline of 20.00% through effective REVIS steering. CHAIRI should not increase beyond ~7.2% (10% regression). Recomputing the steering vector for the current model version is the most promising optimization direction, as the pre-computed vector appears ineffective with the current Qwen2.5-VL-7B-Instruct Hugging Face checkpoint."
+  },
+  "metric_upper_bound": 29.0,
+  "metric_lower_bound": 20.0
+}
