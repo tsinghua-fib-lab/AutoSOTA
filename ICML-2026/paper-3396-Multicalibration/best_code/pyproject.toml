@@ -1,0 +1,56 @@
+[project]
+name = "wmcal"
+version = "0.1.0"
+description = "Weighted Multicalibration - ICML 2026 Submission"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [{ name = "Cem Sirin" }]
+
+dependencies = [
+    # Core dependencies
+    "numpy>=2.4.0",
+    "scipy>=1.16.3",
+    "torch>=2.9.1",
+    # Data processing
+    "polars>=1.36.1",
+    # Graph algorithms
+    "networkx>=3.6.1",
+    "rustworkx>=0.17.1",
+    # Plotting and visualization
+    "matplotlib>=3.10.8",
+    "tueplots>=0.2.1",
+    # CLI and utilities
+    "argparse-dataclass>=2.0.0",
+    "pyyaml>=6.0.3",
+    "rich>=14.2.0",
+    "tqdm>=4.67.1",
+    "psutil>=7.2.1",
+    "numba>=0.65.1",
+    "seaborn>=0.13.2",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "jupyter>=1.1.1",
+    "nbconvert>=7.17.1",
+    "ruff>=0.14.14",
+    "ty>=0.0.36",
+]
+
+[tool.uv]
+package = true
+
+[tool.setuptools]
+packages = ["wmcal"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E402"]
+
+[[tool.ty.overrides]]
+include = ["wmcal/plots/**/*.py"]
+rules = { unresolved-attribute = "ignore", unknown-argument = "ignore" }

@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dvmad"
+version = "0.1.0"
+description = "DVM-AD: Discriminant Vector Machine for Anomaly Detection (ICML 2026). PyOD-compatible."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [
+    { name = "DVM-AD Authors" }
+]
+keywords = [
+    "anomaly detection",
+    "outlier detection",
+    "one-class classification",
+    "discriminant analysis",
+    "pyod",
+    "icml2026"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.20",
+    "scikit-learn>=1.0",
+    "pyod>=1.0",
+]
+
+[project.optional-dependencies]
+faiss = ["faiss-cpu>=1.7"]
+test = ["pytest>=7.0"]
+dev = ["pytest>=7.0", "ruff", "build"]
+
+[project.urls]
+Homepage = "https://github.com/troisang1/dvmad"
+Issues = "https://github.com/troisang1/dvmad/issues"
+Paper = "https://icml.cc/"
+
+[tool.setuptools.packages.find]
+include = ["dvmad*"]
+exclude = ["tests*", "examples*"]

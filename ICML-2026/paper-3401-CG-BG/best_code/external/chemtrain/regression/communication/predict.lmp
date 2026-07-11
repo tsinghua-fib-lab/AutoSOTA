@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0
+# Evaluate fixed molecular conformations with ownership split across two ranks.
+#
+# `rerun` reads configurations prepared by the Python driver and evaluates each
+# one without time integration. The same input frames are used for the default
+# and communication variants, so all per-atom energies and forces are direct,
+# atom-ID-aligned prediction comparisons. The driver also compares both runs
+# against an independent prediction from the original MACE model.
+
+variable model index model.ptb
+variable comm index off
+variable data_file index molecule.lmpdat
+variable rerun_dump index molecule_input.lammpstrj
+variable prediction_dump index molecule_prediction.lammpstrj
+# These defaults support standalone inspection. run_regression.py overrides
+# every path and the comm switch through explicit LAMMPS `-var` arguments.
+
+units metal
+atom_style atomic
+newton on
+boundary p p p
+
+# Every input frame is centered across x=0. The processor grid makes this plane
+# the rank boundary, ensuring that atom features cross between the ranks.
+processors 2 1 1
+region box block -25 25 -25 25 -25 25 units box
+# LAMMPS atom types are used as atomic numbers by this exported model. Allocate
+# types through 90 so every element in the bundled molecular frames is valid.
+create_box 90 box
+read_data ${data_file} add append
+# Masses are required during run setup but do not affect static predictions.
+mass * 1.0
+
+# `comm` selects the baseline or internal-communication model variant. This
+# test targets predictions on fixed inputs rather than buffer growth.
+pair_style chemtrain_deploy cuda 0.85 comm ${comm}
+pair_coeff * * ${model} 2.0 4.0
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check no
+
+thermo 1
+thermo_style custom step atoms pe
+thermo_modify format float %.16g
+
+# `proc` records the owning rank for the ownership check.
+compute atom_energy all pe/atom
+dump prediction all custom 1 ${prediction_dump} id type proc x y z fx fy fz c_atom_energy
+dump_modify prediction sort id format float %.16g first yes
+
+# For every input frame, `rerun` replaces coordinates and the periodic box,
+# rebuilds neighbors, invokes the pair style, and writes a prediction frame.
+# It never updates positions or velocities through an integrator.
+rerun ${rerun_dump} dump x y z box yes add no replace yes trim no format native

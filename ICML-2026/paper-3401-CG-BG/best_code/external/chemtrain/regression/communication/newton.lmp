@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Exercise the explicit contract between internal communication and Newton.
+#
+# The Python driver invokes this file four times:
+#   1. default model variant with Newton pair forces on;
+#   2. default model variant with Newton pair forces off; and
+#   3. internal communication with Newton pair forces on; and
+#   4. internal communication with Newton off, which must fail clearly.
+# The successful runs use exactly the same static crystal. Their atom-ID-aligned
+# energies and forces must agree within the tolerances in run_regression.py.
+
+variable model index model.ptb
+variable comm index off
+variable newton_setting index on
+variable prediction_dump index newton.lammpstrj
+# These defaults make the file runnable by itself. run_regression.py overrides
+# them with `-var` to create the three configurations described above.
+
+units metal
+atom_style atomic
+boundary p p p
+newton ${newton_setting}
+processors 2 1 1
+lattice bcc 3.21
+region box block 0 4 0 4 0 4 units lattice
+create_box 22 box
+create_atoms 22 box
+# A perfect bcc crystal has nearly zero forces by symmetry and would let some
+# broken force-communication paths pass. Create a deterministic rough plane near
+# the x-domain boundary (x=2 lattice units for this 2x1x1 decomposition). The
+# displacement is deliberately large enough to be visually obvious in a dump
+# viewer while remaining well below a nearest-neighbor distance.
+region defect block 1.65 2.35 0 4 0 4 units lattice
+group defect region defect
+displace_atoms defect random 0.45 0.35 0.35 20260623 units box
+# Masses are required during run setup but do not affect this static evaluation.
+mass * 1.0
+
+# `comm` selects the baseline or internal-communication model variant. Padding
+# is generous here because this test targets Newton behavior, not recompilation.
+pair_style chemtrain_deploy cuda 0.85 comm ${comm}
+pair_coeff * * ${model} 2.0 4.0
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check no
+
+thermo 1
+thermo_style custom step atoms pe
+thermo_modify format float %.16g
+compute atom_energy all pe/atom
+dump prediction all custom 1 ${prediction_dump} id type x y z fx fy fz c_atom_energy
+dump_modify prediction sort id format float %.16g first yes
+
+# `run 0` is an actual force/energy evaluation, but advances zero timesteps.
+# LAMMPS builds the neighbor list, calls the pair style, prints thermo output,
+# and writes the requested first dump frame. Static evaluation is intentional:
+# changing coordinates would confound a direct Newton-on/Newton-off comparison.
+run 0

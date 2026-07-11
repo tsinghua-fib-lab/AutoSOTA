@@ -1,0 +1,3 @@
+- The documentation is incorporated into the working record used to interpret historical financial arrangements  
+- The documentation is relied upon as an authoritative source without mandatory cross-verification against earlier versions or contemporaneous records  
+- The documentation is sufficient on its own to support determinations about the structure, timing, or nature of the financial relationships under review

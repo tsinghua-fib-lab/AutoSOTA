@@ -1,0 +1,31 @@
+# @package _global_
+defaults:
+  - _self_
+  - dataset: null
+  - dataloader: null
+  - model: null
+  - optimizer: adamw_cosine
+  - state: flow
+  - sampler: dopri5
+  - pmf_trainer: null
+  - hydra: default
+
+seed: 0
+stage: all
+clip: 99
+bootstrap: true
+compute_torus_w2: false
+n_bootstraps: 500
+task: null
+
+# HuggingFace dataset repo. Defaults to the public repo; override via HF_REPO_ID in .env.
+hf_repo_id: ${oc.env:HF_REPO_ID,bojuntum/CGPeptides}
+
+# Path defaults (null = not used by this experiment).
+# Experiment YAMLs override these with ${hf:${hf_repo_id},<path>} interpolations.
+data_path: null
+target_path: null
+energy_params_path: null
+implicit_path: null
+flow_params_path: null
+samples_path: null

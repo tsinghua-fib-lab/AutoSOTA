@@ -1,0 +1,28 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+
+\begin{document}
+
+\begin{table}[h]
+\centering
+\caption*{\textbf{Table:} Ablation study on the ANCHOR auditor agent evaluated against Claude Code with Haiku~4.5. Each condition removes one component while keeping the others intact. All conditions run the same 10 cases with MAX\_TURNS=100.}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+\textbf{Condition} & \textbf{Component Removed} & \textbf{Task Completion} & \textbf{Avg Turns} \\
+\midrule
+Full auditor (baseline) & --- & 10/10 (100\%) & 8.3 \\
+w/o trained model & SFT+RL weights & 0/10 (0\%)$^\dagger$ & N/A \\
+w/o strategy toolbox & Options A--E & 2/10 (20\%) & 8.8 \\
+w/o rewriting pipeline & ICRL + best-of-N & 10/10 (100\%) & 15.8 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+\raggedright
+{\footnotesize $^\dagger$The base model refused to generate a harmful plan in all 10 cases. In one case, the refusal included a safety-compliance todo list, which the pipeline executed---producing governance documents rather than advancing the harmful objective.}\par
+\end{table}
+
+\end{document}

@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - override /dataset: ala
+  - override /dataloader: ala
+  - override /model: ala_graph_transformer
+  - override /pmf_trainer: ala
+
+task: ala3_ha_ub
+n_nodes: 20
+n_dim: 3
+num_samples: 200000
+batch_size: 1024
+epochs: 10000
+
+data_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/explicit/heavy_atom/pmf_b/flow_ub/data.npz}
+target_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/explicit/heavy_atom/pmf_b/flow_ub/data.npz}
+implicit_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/implicit/data.npz}
+energy_params_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/explicit/heavy_atom/pmf_b/flow_ub/energy_params.pkl}
+flow_params_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/explicit/heavy_atom/pmf_b/flow_ub/flow_params.pkl}
+samples_path: ${hf:${hf_repo_id},Ac-Ala3-NHMe/explicit/heavy_atom/pmf_b/flow_ub/samples_and_weights.npz}

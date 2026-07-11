@@ -1,0 +1,40 @@
+syntax = "proto3";
+// (TODO) merge synthetic data here
+package enmf.datasets;  
+
+message MethodConfig{
+    string method_name = 1;
+    int32 latent_dim = 2;
+    int32 constrained_time = 3;
+    float constrained_error = 4; 
+    string result_path = 5;
+    string result_dir = 6;
+    string result_storage = 7;
+}
+
+message RealDataset{
+// next id 6;   
+string name = 1;
+string data_dir = 2;
+string data_path = 3;
+repeated int32 latent_dim = 4 [packed=true];
+repeated MethodConfig method_config = 5;
+}
+
+
+message ExactDataset{
+// next id 6;   
+string name = 1;
+// includes X, U, V
+string data_dir = 2;
+string data_path = 3; 
+string sparsity = 5;
+int32 latent_dim = 7;
+repeated MethodConfig method_config = 6;
+}
+
+message Datasets {
+  repeated RealDataset  real_dataset  = 1;
+  // only applied for simulated datasets
+  repeated ExactDataset exact_dataset = 2;
+}

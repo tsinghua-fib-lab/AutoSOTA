@@ -1,0 +1,194 @@
+Bootstrap: docker
+From: condaforge/miniforge3:{{ MINIFORGE_TAG }}
+
+%arguments
+    # Override these with: apptainer build --build-arg NAME=value ...
+    # This tag is multi-architecture and was verified to exist. Override it to
+    # test a newer toolchain without editing the definition.
+    MINIFORGE_TAG=24.11.3-2
+    PYTHON_VERSION=3.12
+    CLANG_VERSION=18
+    OPENMPI_VERSION=4.1
+    LAMMPS_URL=https://github.com/lammps/lammps/archive/refs/tags/stable_29Aug2024.tar.gz
+    # Optional. Set this in reproducible builds to reject a changed archive.
+    LAMMPS_SHA256=
+    LAMMPS_DOWNLOAD_RETRIES=5
+    LAMMPS_DOWNLOAD_TIMEOUT=60
+    CUDA_VERSION=12.9.1
+    CUDNN_VERSION=9.5.0
+    CUDA_COMPUTE_CAPABILITIES=sm_90
+
+%files
+    ./connector /chemtrain_deploy/connector
+    ./lammps_plugin /chemtrain_deploy/lammps_plugin
+    ./third_party /chemtrain_deploy/third_party
+    ./.bazelversion /chemtrain_deploy/.bazelversion
+    ./build.py /chemtrain_deploy/build.py
+    ./jax.bazelrc /chemtrain_deploy/jax.bazelrc
+    ./WORKSPACE /chemtrain_deploy/WORKSPACE
+    # XLA requires only `xxd -i`; use the checked-in POSIX implementation
+    # instead of depending on a distribution-specific Vim/xxd package split.
+    ./tools/xxd /usr/local/bin/xxd
+
+%environment
+    export CHEMTRAIN_DEPLOY_ROOT=/chemtrain_deploy
+    export PATH="/usr/local/bin:/opt/conda/bin:$PATH"
+    export LAMMPS_PLUGIN_PATH="/chemtrain_deploy/plugin"
+    export JCN_PJRT_PATH="/chemtrain_deploy/lib"
+    export CC=clang
+    export CXX=clang++
+    # OpenMPI's wrappers otherwise remember the compiler used to package OpenMPI.
+    export OMPI_CC=clang
+    export OMPI_CXX=clang++
+    export LD_LIBRARY_PATH="/opt/conda/lib:${LD_LIBRARY_PATH:-}"
+
+%post
+    set -eu
+
+    # Miniforge provides Python and the package manager in the base image.  This
+    # replaces apt and avoids compiling OpenMPI merely to obtain MPI headers.
+    conda config --system --set channel_priority strict
+    conda install -y -c conda-forge \
+        "python={{ PYTHON_VERSION }}" \
+        "clang={{ CLANG_VERSION }}" \
+        "clangxx={{ CLANG_VERSION }}" \
+        "llvm-tools={{ CLANG_VERSION }}" \
+        "cmake>=3.27,<4" \
+        curl \
+        ninja \
+        "openmpi={{ OPENMPI_VERSION }}" \
+        patchelf
+
+    # Do not invoke conda again after replacing packages in the old Miniforge
+    # base environment. Its bundled libmamba plugin is linked against the old
+    # libxml2 ABI. The package cache contains only install artifacts, so
+    # removing it directly is both sufficient and deterministic.
+    rm -rf /opt/conda/pkgs/*
+
+    export PATH="/opt/conda/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/conda/lib:${LD_LIBRARY_PATH:-}"
+    export CC=clang
+    export CXX=clang++
+    export OMPI_CC=clang
+    export OMPI_CXX=clang++
+
+    # Fail before the long Bazel/LAMMPS builds if the selected compiler suite
+    # is incomplete. CMake does not reliably infer llvm-ar from conda's Clang.
+    command -v clang
+    command -v clang++
+    command -v llvm-ar
+    command -v llvm-ranlib
+    command -v cmake
+    command -v ninja
+
+    cd /chemtrain_deploy
+
+    # CUDA and cuDNN are downloaded by Bazel's hermetic CUDA toolchain.  The
+    # build image therefore does not need an NVIDIA CUDA development package.
+    python build.py \
+        --build_gpu_pjrt_plugin \
+        --enable_cuda \
+        --cuda_version "{{ CUDA_VERSION }}" \
+        --cuda_compute_capabilities "{{ CUDA_COMPUTE_CAPABILITIES }}" \
+        --cudnn_version "{{ CUDNN_VERSION }}"
+
+    python build.py \
+        --enable_cuda \
+        --cuda_version "{{ CUDA_VERSION }}" \
+        --cuda_compute_capabilities "{{ CUDA_COMPUTE_CAPABILITIES }}" \
+        --cudnn_version "{{ CUDNN_VERSION }}"
+
+    # Fetch the pinned LAMMPS source without wget or git.  Retry transient
+    # network errors and verify the archive when LAMMPS_SHA256 is supplied.
+    export LAMMPS_URL="{{ LAMMPS_URL }}"
+    export LAMMPS_SHA256="{{ LAMMPS_SHA256 }}"
+    export LAMMPS_DOWNLOAD_RETRIES="{{ LAMMPS_DOWNLOAD_RETRIES }}"
+    export LAMMPS_DOWNLOAD_TIMEOUT="{{ LAMMPS_DOWNLOAD_TIMEOUT }}"
+    curl \
+        --fail \
+        --location \
+        --show-error \
+        --retry "$LAMMPS_DOWNLOAD_RETRIES" \
+        --retry-all-errors \
+        --retry-delay 2 \
+        --connect-timeout "$LAMMPS_DOWNLOAD_TIMEOUT" \
+        --output /tmp/lammps.tar.gz \
+        "$LAMMPS_URL"
+
+    # The checksum is optional for local mirrors, but should be supplied by
+    # reproducible builds. sha256sum exits non-zero on any mismatch.
+    if [ -n "$LAMMPS_SHA256" ]; then
+        printf '%s  %s\n' "$LAMMPS_SHA256" /tmp/lammps.tar.gz | sha256sum --check --strict -
+    else
+        echo "LAMMPS archive SHA-256:"
+        sha256sum /tmp/lammps.tar.gz
+    fi
+
+    mkdir -p lammps
+    tar -xzf /tmp/lammps.tar.gz --strip-components=1 -C lammps
+    rm -f /tmp/lammps.tar.gz
+
+    # Build only LAMMPS's plugin package.  Ninja avoids a separate make
+    # dependency; MPI and its headers come from the conda-forge OpenMPI package.
+    cmake -S lammps/cmake -B lammps/build -G Ninja \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_AR=/opt/conda/bin/llvm-ar \
+        -D CMAKE_RANLIB=/opt/conda/bin/llvm-ranlib \
+        -D PKG_PLUGIN=yes
+    cmake --build lammps/build --parallel "$(nproc)"
+
+    # Build the external chemtrain plugin against the same LAMMPS headers and
+    # connector library, keeping all paths under one consistent prefix.
+    cmake -S lammps_plugin -B build -G Ninja \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_AR=/opt/conda/bin/llvm-ar \
+        -D CMAKE_RANLIB=/opt/conda/bin/llvm-ranlib \
+        -D LAMMPS_HEADER_DIR=/chemtrain_deploy/lammps/src \
+        -D CHEMTRAIN_DEPLOY_LIB_DIR=/chemtrain_deploy/lib
+    cmake --build build --parallel "$(nproc)"
+
+    # Stage only runtime artifacts before removing the very large Bazel/XLA
+    # output tree. Keeping `out` can add tens of gigabytes and has caused the
+    # host mksquashfs process to crash while creating the final SIF.
+    mkdir -p /chemtrain_deploy/plugin
+    cp /chemtrain_deploy/lammps/build/lmp /usr/local/bin/lmp
+    cp /chemtrain_deploy/build/chemtrain_deployplugin.so \
+        /chemtrain_deploy/plugin/chemtrain_deployplugin.so
+    chmod 0755 \
+        /usr/local/bin/lmp \
+        /chemtrain_deploy/plugin/chemtrain_deployplugin.so
+
+    rm -rf \
+        /chemtrain_deploy/out \
+        /chemtrain_deploy/build \
+        /chemtrain_deploy/connector \
+        /chemtrain_deploy/lammps \
+        /chemtrain_deploy/lammps_plugin \
+        /chemtrain_deploy/third_party
+    rm -f \
+        /chemtrain_deploy/.bazelversion \
+        /chemtrain_deploy/WORKSPACE \
+        /chemtrain_deploy/build.py \
+        /chemtrain_deploy/config.bazelrc \
+        /chemtrain_deploy/jax.bazelrc \
+        /usr/local/bin/xxd
+    rm -rf /chemtrain_deploy/bazel-*
+
+%test
+    test -x /usr/local/bin/lmp
+    test -f /chemtrain_deploy/lib/libconnector.so
+    test -f /chemtrain_deploy/plugin/chemtrain_deployplugin.so
+    /usr/local/bin/lmp -help >/dev/null
+
+%runscript
+    # Override Miniforge's OCI/Tini entrypoint. Apptainer is already the
+    # process supervisor, so execute the requested command directly.
+    if [ "$#" -eq 0 ]; then
+        exec lmp
+    fi
+    exec "$@"
+
+%labels
+    Author Paul Fuchs
+    Version 0.2
+    Description chemtrain-deploy LAMMPS plugin

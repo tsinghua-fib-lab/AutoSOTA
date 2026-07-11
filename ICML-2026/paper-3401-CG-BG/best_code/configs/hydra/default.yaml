@@ -1,0 +1,21 @@
+defaults:
+  - override hydra_logging: colorlog
+  - override job_logging: colorlog
+
+job:
+  chdir: true
+  env_set:
+    CUDA_VISIBLE_DEVICES: ${oc.env:CUDA_VISIBLE_DEVICES,0}
+    XLA_PYTHON_CLIENT_MEM_FRACTION: ${oc.env:XLA_PYTHON_CLIENT_MEM_FRACTION, 0.95}
+
+run:
+  dir: ${oc.env:SCRATCH_DIR}/outputs/${task}/runs/${now:%Y-%m-%d/%H-%M-%S}
+
+sweep:
+  dir: ${oc.env:SCRATCH_DIR}/outputs/${task}/multiruns/${now:%Y-%m-%d/%H-%M-%S}
+  subdir: ${hydra.job.override_dirname}
+
+job_logging:
+  handlers:
+    file:
+      filename: ${hydra.runtime.output_dir}/${task}.log

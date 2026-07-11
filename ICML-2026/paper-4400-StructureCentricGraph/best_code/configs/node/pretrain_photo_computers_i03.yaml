@@ -1,0 +1,27 @@
+data:
+  datasets:
+  - photo
+  - computers
+  drop_node_features: true
+data_root: data
+device: auto
+model:
+  K: 16
+  M: 32
+  div_margin: 10.0
+  feature_dim: 50
+  lambda_div: 0.05
+  lambda_gw: 1.0
+  lambda_recon: 2.0
+  num_projections: 200
+  tau: 0.3
+output_dir: outputs/node_pretrain
+seed: 42
+train:
+  accumulation_steps: 1
+  batch_size: 32
+  epochs: 100
+  log_interval: 20
+  lr: 0.01
+  num_workers: 0
+  use_amp: true

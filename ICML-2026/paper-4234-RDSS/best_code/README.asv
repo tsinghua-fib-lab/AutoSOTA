@@ -1,0 +1,116 @@
+
+# README: Refining Dual Spectral Sparsity in Transformed Tensor Singular Values
+
+This package provides a minimal MATLAB implementation of the proposed
+ADMM-based tensor completion method using $\ell_p(S_q)$ regularization,
+as used in the experiments on the Salinas A dataset.
+
+---
+
+## Directory Overview
+
+```text
+.
+├── runExpSalinas.m                    % Entry script to reproduce experiments
+├── f_ntc_LpSq_ADMM_dct.m             % ADMM solver for Lp(Sq) minimization
+├── HelperFunctions/                  % Utility routines (e.g., transform, metrics)
+└── SalinasA_corrected_83x86x204.mat  % Hyperspectral image tensor used in experiments
+````
+
+---
+
+## Environment
+
+* MATLAB or GNU Octave
+* No external dependencies required
+* Tested on macOS systems
+
+---
+
+## Usage
+
+To reproduce the Salinas A tensor completion results:
+
+1. Launch MATLAB and navigate to this directory.
+
+2. Execute the main experiment script:
+
+```matlab
+runExpSalinas
+```
+
+3. The script will:
+
+   * Load the Salinas A tensor,
+   * Use the first 30 spectral bands for efficiency,
+   * Randomly mask entries according to a sampling ratio,
+   * Call the ADMM-based optimization scheme using $\ell_p(S_q)$ regularization,
+   * Report PSNR, relative error, and runtime of the recovered tensor.
+
+---
+
+## Code Components
+
+### `f_ntc_LpSq_ADMM_dct.m`
+
+Implements the ADMM-based optimization scheme in the DCT-transformed
+domain. The solver updates the singular-value weights at every iteration
+(`opts.weightGap = 1`) and returns the recovered tensor in
+`memoLpSq.T_hat`.
+
+### `HelperFunctions/`
+
+Includes utility routines for:
+
+* Forward/inverse DCT transform along the 3rd tensor mode,
+* Singular-value shrinkage and reweighting,
+* PSNR computation.
+
+---
+
+## Data
+
+### `SalinasA_corrected_83x86x204.mat`
+
+Preprocessed hyperspectral image tensor with 204 spectral bands,
+commonly used in tensor recovery benchmarks.
+
+To reduce computational cost and provide a lightweight reproducible
+example, the released code only uses the first 30 spectral bands in the
+experiments.
+
+---
+
+## Notes
+
+* The example uses the fixed setting $(p,q)=(0.80,0.81)$.
+* The DCT transform is used as the default spectral basis.
+* The released code is intended as a minimal demonstration for reproducing
+  the core tensor completion experiment reported in the paper.
+
+---
+
+## Citation
+
+If you find this code useful, please cite:
+
+```bibtex
+@inproceedings{wang2026refining,
+  title     = {Refining Dual Spectral Sparsity in Transformed Tensor Singular Values},
+  author    = {Wang, Andong and Qiu, Yuning and Huang, Haonan and Jin, Zhong and Zhou, Guoxu and Zhao, Qibin},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning},
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=1ZIjW3LFcH}
+}
+```
+
+---
+
+## Acknowledgements
+
+We sincerely thank Dr. Zhifan Li for the exceptionally prompt and
+helpful responses to our questions on the technical details of
+Li et al. (2024), especially for clarifying several proof arguments
+during late-night correspondence.
+
+```

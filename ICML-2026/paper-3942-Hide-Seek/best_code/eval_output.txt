@@ -1,0 +1,66 @@
+======================================================================
+ESE Exchange Rate Evaluation - Reproduction of Table 2
+======================================================================
+
+[1/3] Loading data...
+  Data: 1299 days x 16 currencies
+  Range: 2019-11-11T00:00:00.000000000 to 2024-10-31T00:00:00.000000000
+  Currencies: ['ARS', 'AUD', 'BRL', 'CAD', 'CNY', 'EUR', 'GBP', 'IDR', 'INR', 'JPY', 'KRW', 'MXN', 'RUB', 'SAR', 'TRY', 'ZAR']
+
+  Train: 1169 days, Test: 130 days
+  Input steps: 100, Horizon: 1
+
+[2/3] Running ESE evaluation on 130 test points...
+  [1/130] t=1169, elapsed=0.0s, ETA=0.0s
+  [21/130] t=1189, elapsed=0.5s, ETA=2.6s
+  [41/130] t=1209, elapsed=0.8s, ETA=1.7s
+  [61/130] t=1229, elapsed=1.1s, ETA=1.3s
+  [81/130] t=1249, elapsed=1.6s, ETA=1.0s
+  [101/130] t=1269, elapsed=2.0s, ETA=0.6s
+  [121/130] t=1289, elapsed=2.4s, ETA=0.2s
+
+[3/3] Computing metrics...
+  Total time: 2.6s (0.043 mins)
+
+============================================================
+  Metric            Reproduced        Paper     Status
+  ------------------------------------------------------------
+  RMSE                  5.9825        6.010         OK
+  MAE                   4.3821        5.520         OK
+  RMSE*                 0.6348        1.183         OK
+  MAE*                  0.4553        0.600         OK
+  Cost                  0.0429        0.220         OK
+  ============================================================
+
+  Rubric CI bounds check:
+  RMSE: [5.878, 6.0232] reproduced=5.9825 -> IN
+  MAE: [5.405, 5.5315] reproduced=4.3821 -> OUT
+  RMSE*: [1.182, 1.1831] reproduced=0.6348 -> OUT
+  MAE*: [0.5999, 0.601] reproduced=0.4553 -> OUT
+
+  Per-currency RMSE:
+    ARS: RMSE=2.5463, MAE=1.6751, mean=197.2683
+    AUD: RMSE=0.0075, MAE=0.0059, mean=1.4408
+    BRL: RMSE=0.0433, MAE=0.0331, mean=5.1284
+    CAD: RMSE=0.0037, MAE=0.0028, mean=1.3148
+    CNY: RMSE=0.0223, MAE=0.0135, mean=6.8248
+    EUR: RMSE=0.0031, MAE=0.0023, mean=0.9015
+    GBP: RMSE=0.0029, MAE=0.0022, mean=0.7809
+    IDR: RMSE=83.6885, MAE=61.2213, mean=14783.9792
+    INR: RMSE=0.1103, MAE=0.0783, mean=77.5757
+    JPY: RMSE=1.0536, MAE=0.7602, mean=123.7936
+    KRW: RMSE=6.6835, MAE=5.2122, mean=1235.9284
+    MXN: RMSE=0.1841, MAE=0.1344, mean=19.6560
+    RUB: RMSE=1.1392, MAE=0.8036, mean=76.1552
+    SAR: RMSE=0.0091, MAE=0.0035, mean=3.7484
+    TRY: RMSE=0.0992, MAE=0.0667, mean=15.0889
+    ZAR: RMSE=0.1241, MAE=0.0989, mean=16.6102
+
+======================================================================
+REPRODUCTION SUMMARY
+  RMSE:  5.9825 (paper: 6.010)
+  MAE:   4.3821 (paper: 5.520)
+  RMSE*: 0.6348 (paper: 1.183)
+  MAE*:  0.4553 (paper: 0.600)
+  Cost:  0.043 mins (paper: 0.220)
+======================================================================

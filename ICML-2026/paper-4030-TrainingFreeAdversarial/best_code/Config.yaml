@@ -1,0 +1,27 @@
+device    : "cuda:0"
+ky        : 320
+kx        : 332 
+nc        : 15 
+axis      : [2,3]
+data_path : "./data/"
+
+# Attack 
+Attack:
+    mode         : "PGD"
+    epsilon      : 0.01  # Typical choice for alpha: epsilon/5
+    iterations   : 10
+
+# Mitigation
+Mitigation:
+    alpha_mitigate      : 0.005   # epsilon / 2
+    epsilon_proj        : 0.01
+    iterations_mitigate : 200
+    noise_jittering_std : 6
+    alpha_scheduler     : "Cosine" # "Linear" or "Exp"
+    cyclic_stages       : 2
+
+# Saving
+Saving:
+    Window_scale : 0.5
+    path         : "Results"   
+    Threshold    : 0.1

@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemutils"
+authors = [
+    {name = "Paul Fuchs", email = "paul.fuchs@tum.de"},
+]
+description = "Models and Datasets of the MFM Group"
+readme = "README.md"
+license = {"text" = "Apache-2.0"}
+dynamic = ["version"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers"
+]
+requires-python = ">=3.10"
+dependencies = [
+    'jax',
+    'jaxlib',
+    'scipy < 1.13', # Removed scipy.linal.tril, etc.
+    'jax-md',
+    'jax-sgmc',
+    'optax',
+    'dm-haiku',
+    'sympy',
+    'tree_math',
+    'cloudpickle',
+    'chex',
+    'blackjax==0.3.0',
+    'jaxopt',
+    'dm-tree',
+    'networkx',
+    'chemtrain',
+    'h5py'
+]
+
+[project.optional-dependencies]
+"silver" = [
+    "ase"
+]
+"docs" = [
+    'chemtrain[docs]',
+    'sphinxcontrib-bibtex'
+]
+
+
+[tool.setuptools.packages.find]
+namespaces = false
+include = ["chemutils*"]
+where = [""]
+
+[tool.setuptools.dynamic]
+version = {attr = "chemutils.version.__version__"}

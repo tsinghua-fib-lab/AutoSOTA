@@ -1,0 +1,129 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install MPI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openmpi-bin libopenmpi-dev
+        which mpicc
+        mpicc --version
+
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[test]
+
+    - name: Lint with pylint
+      run: |
+        pylint chemtrain --fail-under 7.5
+
+  doctest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install MPI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openmpi-bin libopenmpi-dev
+        which mpicc
+        mpicc --version
+
+    - name: Checkout LFS objects
+      run: git lfs pull
+
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[docs,all]
+
+    - name: Build documentation
+      run: |
+        make -C docs html
+        make -C docs doctest
+
+  test-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install MPI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openmpi-bin libopenmpi-dev
+        which mpicc
+        mpicc --version
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade build
+
+    - name: Build package
+      run: python -m build
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install MPI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openmpi-bin libopenmpi-dev
+        which mpicc
+        mpicc --version
+
+    - name: Checkout LFS objects
+      run: git lfs pull
+
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[test,all]
+
+    - name: Test with pytest
+      run: |
+        pytest --tb=line

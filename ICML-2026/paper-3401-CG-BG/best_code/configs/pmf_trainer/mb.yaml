@@ -1,0 +1,17 @@
+_target_: cg_bg.pmf.trainers.get_mb_trainer
+_partial_: true
+kT: 1.0
+dataloader:
+  _target_: cg_bg.data.mb.data.get_mb_dataloader
+  dataset:
+    _target_: cg_bg.data.mb.data.MBDataset
+    data_path: "/ds/project/weilong/bojun/cg-bg/preprocessed_data/mb_biased.npz"
+  num_samples: 200000
+  batch_size: 128
+  seed: ${seed}
+  flow: false
+  shuffle: false
+  drop_last: true
+hidden_dim: 128
+n_layers: 4
+learning_rate: 0.0001

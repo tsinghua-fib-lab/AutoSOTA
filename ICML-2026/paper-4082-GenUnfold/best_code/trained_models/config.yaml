@@ -1,0 +1,216 @@
+# Only relative distance map
+
+data_params:
+  # Data paths and preprocessing parameters
+  dataset_type: FEStructure
+  lazy: True # Is lazy to load large feature data
+
+  data_paths:
+    # Directory for raw data files (e.g., CSVs from experiments/simulations)
+    raw_data_dir: ../data/raw
+
+    # Directory for processed data files (ready for dataset loading)
+    processed_data_dir: ../data
+
+    # File names for processed data (relative to processed_data_dir)
+    processed_fe_curves_file: bsdb_fe_curves_0.npy
+    processed_sequences_file: features
+    processed_conditions_file: condition
+    data_table_file: bsdb_processed.csv
+    pickle_path: dataset.pkl
+
+    # Optional: File name for raw data input if loading a single file
+    # raw_input_file: my_protein_data.csv
+
+  data_preprocessing:
+    # Target fixed length for standardized Force-Extension curves
+    fe_curve_length: 512
+
+    # Number of channels in the F-E curve data (typically 1 for force)
+    fe_curve_channels: 1
+
+    # Type of protein sequence encoding used in the processed_sequences_file
+    # Options: 'raw', 'onehot', 'pretrained_embeddings'
+    seq_encoding_type: pretrained_embeddings # Or 'raw' or 'onehot'
+
+    # If using 'pretrained_embeddings', specify the input dimension (from PLM)
+    # protein_input_dim: 1024 # Example for a PLM like ESM-2 (depends on your PLM)
+
+    # If using 'onehot', specify the input dimensions (seq_len, alphabet_size)
+    # protein_input_dims_onehot: [50, 20] # Example: max seq len 50, 20 AA
+
+    # List of column names in the raw data file that contain the protein sequence(s)
+    # sequence_column: sequence # Name of the column containing sequence strings
+
+    # List of column names in the raw data file that contain experimental/simulation conditions
+    # These will be used to form the condition vector
+    condition_columns:
+      - pulling_speed_nm_per_s # Example condition: constant pulling speed
+
+    # Number of condition features (derived from length of condition_columns)
+    # condition_input_dim: 1 # Will be determined from condition_columns in script
+
+    # Strategy for Force-Extension curve normalization
+    # Options: 'max_force', 'contour_length', 'none'
+    fe_curve_normalization_strategy: max_force
+
+    # If fe_curve_normalization_strategy is 'max_force', provide the global maximum force
+    # This should be a value representative of the expected max force in your dataset
+    global_max_force: 300.0 # Example: 300 pN
+
+    # If your raw force data units are not in pN, specify a conversion factor to pN
+    # force_unit_conversion_to_pN: 1.0 # Example: 1.0 if already in pN
+
+  # Parameters for mechanical property analysis (used in evaluation/analysis modules)
+  # You might need these when evaluating the quality of generated curves based on properties
+  analysis_params:
+    # Parameters for peak finding (used by find_force_peaks)
+    find_peaks:
+      height: 0 # Minimum height of peaks
+      distance: 10 # Minimum horizontal distance between peaks
+      prominence: 0.05 # Minimum prominence of peaks
+      smoothing_window: 1 # Moving average smoothing window
+      smoothing_sigma: null # Gaussian smoothing sigma (use one smoothing method)
+      # Add other scipy.signal.find_peaks parameters as needed
+
+    # Parameters for WLC fitting (used by curve_fitting)
+    wlc_fitting:
+      temperature_K: 300.0 # Temperature in Kelvin
+      p_guess: 0.9 # Initial guess for persistence length (nm)
+      p_bounds: [ 0.1, 5.0 ] # Bounds for persistence length (min, max) in nm
+      Lc_bounds_min_factor: 1.0 # Lower bound for Lc = max_ext * factor
+      Lc_bounds_max_factor: 2.0 # Upper bound for Lc = max_ext * factor
+      # force_unit_conversion_to_pN: 1.0 # Ensure consistency with force units
+
+
+model_params:
+  # Model hyperparameters and architecture details
+
+  # --- Overall Model Parameters ---
+  model_type: 'SA_DiT'  # ['SA_DiT', 'SA_DiT_Unetlike']
+  seq_length: 512 # Must match data_config.fe_curve_length
+  in_channels: 1 # Must match data_config.fe_curve_channels
+  patch_size: 2
+  model_keys: ['res_feat', 'res_map', 'res_mask', 'protein_embed', ] # ['res_feat', 'res_map', 'res_mask', 'protein_embed', ]
+
+  # --- Protein Encoder Parameters ---
+  protein_encoding_type: pretrained_embeddings # Options: 'raw', 'onehot', 'pretrained_embeddings'
+  protein_embed_dim: 1280 # Input dimension from pre-computed embeddings
+  res_feature_dim: 24
+  contact_channels: 4
+
+  # Feature encoder parameters
+  feature_encoder: 'Bias' # ['Cross', 'Gate', 'Bias']
+  feature_encoder_config:
+    use_mech_bias: True
+    symmetric: False
+    width: 32
+    blocks: 1
+    use_analytic: False
+    use_cnn: True
+    use_D: False    # Use distance as analytical results
+    use_L: True     # Laplacian Γ
+    use_R: True    # effective resistance
+    use_dc: False  # compliance difference Δc
+
+
+  # --- Condition Encoder Parameters ---
+  # condition_input_dim: 1 # Input dimension from conditions (number of features). Will be inferred from data_config.condition_columns
+  condition_feature_size: 0 # Desired output dimension of the condition embedding
+
+  # --- Denoising Model Parameters ---
+  # This section configures the ConditionalDenoisingModel architecture
+  hidden_size: 256 # Base number of channels/features in the denoising network layers
+  depth: 2 # Number of processing layers/blocks in the denoising network
+  num_heads: 4 # Parameters if using Attention layers within the DenoisingModel
+
+  # --- Diffusion Process Parameters ---
+  diffusion_steps: 1000 # Number of diffusion steps (T)
+  noise_schedule: "linear" # Variance schedule for forward diffusion ('linear', "squaredcos_cap_v2" or "linear_flow")
+
+  # Timestep_respacing is either a list of numbers, or a string containing comma-separated numbers, indicating the step count per section.
+  # As a special case, use "ddimN" where N is a number of steps to use the striding from the DDIM paper.
+  timestep_respacing: "ddim100"
+  pred_sigma: False
+  learn_sigma: False
+
+  # flow matching
+  predict_flow_v: False
+  flow_shift: 0
+  snr_loss: False
+  weighting_scheme: logit_normal
+  logit_mean: 0.0
+  logit_std: 1.0
+  vis_sampler: flow_dpm-solver
+
+
+train_params:
+  # Training parameters
+  trainer_type: diffusion
+
+  # --- General Training Parameters ---
+  epochs: 50 # Total number of training epochs
+  batch_size: 64 # Batch size for training
+  use_ema: True # Exponential moving average
+  train_ratio: [0.80, 0.10, 0.10] # Ratio of train, val, test size
+  seed: 42
+  num_workers: 8
+
+  # Device to use for training ('cuda' or 'cpu')
+  device: cuda # Or cpu
+
+  # Logging and Checkpointing
+  log_dir: C:/RawData/checkpoints/             # Directory for TensorBoard logs
+  checkpoint_dir: C:/RawData/checkpoints/ # Directory to save model checkpoints
+  save_interval: 20           # Save a checkpoint every N epochs
+  eval_interval: 1            # Evaluate on the validation set every N epochs
+
+  # --- Optimizer Parameters ---
+  optimizer:
+    name: adamw # Optimizer name ('adam', 'adamw')
+    lr: 0.001 # Learning rate
+    weight_decay: 0.00001 # Weight decay (L2 penalty)
+
+  # --- Learning Rate Scheduler Parameters ---
+  scheduler:
+    name: cosine # Scheduler name ('step', 'reduceonplateau', 'cosine', 'none')
+    params: # Parameters specific to the scheduler type
+      # If name is 'step':
+      # step_size: 30 # Number of epochs before reducing LR
+      # gamma: 0.1 # Factor to multiply LR by
+
+      # If name is 'reduceonplateau':
+      # mode: min # 'min' or 'max' (monitor validation loss typically)
+      # factor: 0.5 # Factor by which the LR will be reduced
+      # patience: 10 # Number of epochs with no improvement before reducing LR
+      # threshold: 0.0001 # Threshold for measuring the new optimum
+      # cooldown: 0 # Number of epochs to wait before resuming normal operation after LR has been reduced
+      # min_lr: 0 # Minimum learning rate
+
+      # If name is 'cosine':
+      T_max: 100 # Maximum number of training epochs (should match or be less than total epochs)
+      eta_min: 0.000001 # Minimum learning rate
+
+      # If name is 'none', params can be empty or omitted {}
+
+  # --- Loss Function Parameters ---
+  # Weights for the different loss components. Total Loss = noise_weight*noise_loss + mech_prop_weight*mech_prop_loss + curve_match_weight*curve_match_loss
+  loss:
+    noise_weight: 1.0 # Weight for the primary noise prediction loss (MSE)
+
+    # Optional Losses (set weight > 0 to enable)
+    mech_prop_weight: 0 # Weight for the mechanical property loss (requires implementation and differentiable extraction)
+    curve_match_weight: 0.0 # Weight for the generated curve matching loss (requires implementation)
+
+    # If mech_prop_weight > 0, specify weights for individual properties
+    mech_prop_weights:
+       mean: 0.4
+       var:  0.2
+       max:  0.4
+    # unfolding_energy: 0.5
+    # max_force: 0.5
+    # num_peaks: 0.2 # Example: Could also penalize wrong number of peaks
+    # avg_unfolding_force: 0.3
+    # Add weights for other properties you want to penalize
+
+

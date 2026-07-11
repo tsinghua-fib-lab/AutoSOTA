@@ -1,0 +1,36 @@
+l2x:
+matters:
+- num important features, for both prediction and for explanation
+doesn't matter:
+- epochs, batch size, lmbda
+
+shap_xgboost
+doesn't matter:
+- epochs, batch size, lmbda
+note:
+- num_important_features does not matter for mask (abs of shap_values)
+but does matter for binary_mask (indicator of top num_important_features)
+
+realx:
+- synthetic 100 features: lmbda 1.4
+- synthetic: lmbda 0.15
+doesn't matter:
+- num_important_features
+
+invase
+- synthetic 100 features: lmbda 0.6 gives best results. lmbda 1.2 is learnt from the tuning curve
+- synthetic: lmbda 0.1
+doesn't matter:
+- num_important_features
+
+hide&seek
+- synthetic 100 features: lmbda 2.8
+- synthetic: lmbda 0.3
+doesn't matter:
+- num_important_features
+
+lime
+- synthetic: epochs 500, batch_size None
+- num_important_features matters
+doesn't matter:
+- lmbda

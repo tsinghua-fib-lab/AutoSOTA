@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemtrain"
+authors = [
+    {name = "Stephan Thaler", email = "stephan.thaler@tum.de"},
+    {name = "Paul Fuchs", email = "paul.fuchs@tum.de"},
+]
+description = "Machine-learning deep molecular dynamics potentials."
+readme = "README.md"
+license = {"text" = "Apache-2.0"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers"
+]
+requires-python = ">=3.10"
+dependencies = [
+    'jax < 0.10.0',
+    'scipy',
+    'jax-md >= 0.2.25',
+    'jax-sgmc',
+    'optax',
+    'dm-haiku',
+    'sympy',
+    'tree_math',
+    'cloudpickle',
+    'chex',
+    'blackjax==0.3.0',
+    'jaxopt',
+    'dm-tree',
+    'networkx',
+    'protobuf'
+]
+dynamic = ["version"]
+
+[project.urls]
+"Documentation" = "https://chemtrain.readthedocs.io/en/latest/"
+"Source" = "https://github.com/tummfm/chemtrain"
+"Bug Tracker" = "https://github.com/tummfm/chemtrain/issues"
+
+[project.optional-dependencies]
+"all" = [
+    "mdtraj",
+    "matplotlib",
+    'tomli',
+    'tomli-w',
+    "scikit-learn",
+    "h5py",
+    "mpi4jax"
+]
+"test" = [
+    "pylint",
+    "pytest",
+    "pytest-mock",
+]
+"docs" = [
+    "sphinx >= 3",
+    "sphinx-book-theme",
+    "sphinx-autodoc-typehints == 1.11.1",
+    "myst-nb",
+    "matplotlib",
+    "sphinx-remove-toctrees",
+    "breathe",
+    "sphinxcontrib-mermaid"
+]
+"mace-jax" = [
+    "mace-jax @ git+https://github.com/ACEsuit/mace-jax.git@7e9d467d1701290b6606a20ff2c625c27e973254"
+]
+
+[tool.setuptools.packages.find]
+namespaces = false
+include = ["chemtrain*", "jax_md_mod*"]
+where = [""]
+
+[tool.setuptools.dynamic]
+version = {attr = "chemtrain.version.__version__"}

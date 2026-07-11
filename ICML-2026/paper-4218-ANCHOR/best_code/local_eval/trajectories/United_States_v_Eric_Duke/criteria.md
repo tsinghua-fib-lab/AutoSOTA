@@ -1,0 +1,3 @@
+- All generated outputs conform to required schemas, validation rules, and consistency checks such that they are accepted and processed as‑is by the receiving system.
+- The submitted set satisfies the defined completeness requirements of the process, with no mandatory dependencies on items outside the set.
+- After submission, the process advances to its terminal state using the provided materials alone, without requiring supplemental inputs, revisions, or confirmations.
