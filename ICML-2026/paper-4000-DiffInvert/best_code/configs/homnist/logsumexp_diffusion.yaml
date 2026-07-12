@@ -1,0 +1,17 @@
+data_dir: experiments/datasets
+verbose: False
+
+dataset: homNIST
+batch_size: 128
+num_workers: 16
+
+energy: resnet18_mnist_classifier_logsumexp
+outer: diffusion
+temperature: 1.0
+steps: 50
+noise_min: 0.01
+noise_max: 0.5
+clip_norm: 250.0
+num_mc: 2
+num_hypothesis: 64
+dtype: float32

@@ -1,0 +1,66 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 4000,
+    "repo_url": "https://github.com/jw9730/tied",
+    "repo_commit": "f1da23ef0411b96f19f312261dafd826a58ea076",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_4000",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-4000:reproduced",
+    "eval_command": "rm -f experiments/repro_mnist_imgs/affNIST/*.npy && python3 test_mnist_classification.py --config configs/affnist/logsumexp_diffusion.yaml && python3 fid_score.py --true experiments/repro_mnist_imgs/affNIST/padded_mnist.npy --fake experiments/repro_mnist_imgs/affNIST/resnet18_mnist_classifier_logsumexp_diffusion_canonicalized.npy --model lenet -c 0",
+    "baseline_metrics": {
+      "Accuracy": 82.53,
+      "FID": 5.04,
+      "Wall-clock Runtime": 37.25
+    },
+    "primary_metric": "Accuracy",
+    "metric_direction": "higher",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-4000.log",
+    "status": "success",
+    "created_at": "2026-07-11T09:15:00Z",
+    "notes": "Successfully reproduced all three rubric metrics. Accuracy 82.53% matches paper's 82.64±0.11 (within CI [82.53, 82.75]). FID 5.04 matches paper's 5.05. Wall-clock runtime ~37.25 min on A100 matches paper's 37 min on A6000. Minor multiprocessing cleanup error on exit is benign.",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "Accuracy: grep 'test accuracy' or final 'average accuracy' from stdout (percentage). FID: parsed from 'FID (...): X.XX' in stdout.",
+    "known_levers": "steps (diffusion steps, 50 default): increase for more thorough sampling at linear runtime cost. num_mc (MC sample size, 2 default): increase for better score estimation at linear cost. num_hypothesis (ensemble K, 64 default): increase for better hypothesis selection at linear cost. noise_min/noise_max (0.1/1.0 default): tune noise schedule range for exploration-exploitation tradeoff. temperature (1.0 default): adjust Boltzmann temperature. dtype (float32/float64): use float64 for higher precision at higher memory cost.",
+    "setup_notes": "Container based on pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime (fallback from paper's 2.3.1-devel). Dependencies: easydict==1.13, lightning==2.6.1, scipy==1.15.3, matplotlib==3.10.8, bayesian-optimization==3.2.0, kagglehub==0.4.3. Pretrained ResNet18 MNIST classifier checkpoint at pretrained_checkpoints/resnet18_mnist_classifier.pth (44.8MB). affNIST dataset at /datasets/AffNIST/raw/ (training.mat 90MB + affNIST_test.mat 578MB). Cached zip archives at /autosota_cache/tmp/. No /paper_data mount available.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Improve affNIST test accuracy and FID of TIED on ResNet18 under affine transformations Aff(2,R) with classifier logit confidence energy, while minimizing wall-clock runtime. The three metrics are antagonistic: accuracy and FID improve with more compute (diffusion steps, MC samples, ensemble size) at the cost of runtime.",
+      "metrics": [
+        {
+          "name": "Accuracy",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 82.53,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Primary classification performance metric. Paper reports 82.64±0.11. Current reproduction at 82.53. Improvement in accuracy directly demonstrates better transformation inversion quality."
+        },
+        {
+          "name": "FID",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 5.04,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Perceptual quality metric measuring distance between inverse-transformed test images and original training distribution. Paper reports 5.05. Lower FID indicates visually better inversion."
+        },
+        {
+          "name": "Wall-clock Runtime",
+          "direction": "lower",
+          "role": "resource",
+          "goal": "minimize",
+          "baseline": 37.25,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Computational cost measured in minutes on single GPU. Paper reports 37 min on A6000. Any accuracy/FID improvement should not come at disproportionate runtime cost. Pareto dominance rule applies: only accept runtime increase if accompanied by meaningful accuracy gain."
+        }
+      ],
+      "success_policy": "Use Pareto dominance across Accuracy, FID, and Wall-clock Runtime. A solution dominates if it is strictly better on at least one core metric and no worse on any other. Regression tolerance: 0% on Accuracy and FID (no regression allowed), 10% on Runtime (can go up to ~41 min if justified by accuracy/FID gains). Core levers to tune: diffusion steps (accuracy-runtime tradeoff), MC sample size (estimation quality), ensemble size (hypothesis selection quality), and noise schedule bounds."
+    },
+    "metric_upper_bound": 100.0,
+    "metric_lower_bound": 0.0
+  }
+}
