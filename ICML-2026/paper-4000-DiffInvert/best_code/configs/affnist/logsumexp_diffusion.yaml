@@ -1,0 +1,24 @@
+data_dir: /datasets
+verbose: False
+
+dataset: affNIST
+batch_size: 128
+num_workers: 16
+
+energy: resnet18_mnist_classifier_logsumexp
+outer: diffusion
+temperature: 1.0
+steps: 50
+noise_min: 0.1
+noise_max: 1.0
+clip_norm: 100.0
+num_mc: 2
+num_hypothesis: 64
+dtype: float32
+
+# Temperature annealing: start high for exploration, end low for exploitation
+temperature_start: 2.0
+temperature_end: 0.5
+
+# Antithetic MC sampling: use negated pairs for variance reduction
+use_antithetic: True
