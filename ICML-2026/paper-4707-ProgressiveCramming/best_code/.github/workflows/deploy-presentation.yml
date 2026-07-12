@@ -1,0 +1,53 @@
+name: Deploy site to GitHub Pages
+
+# Auto-deploy the project page (page/) at the site root and the reveal.js video
+# deck (presentation/) under /slides, whenever either changes on the default branch.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'page/**'
+      - 'presentation/**'
+      - '.github/workflows/deploy-presentation.yml'
+  workflow_dispatch:        # allow manual runs from the Actions tab
+
+# Permissions required by actions/deploy-pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; cancel superseded in-progress runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # Serve the project page at the site root and the reveal.js deck under
+      # /slides. page/ is staged into _site/ root; presentation/ into _site/slides/.
+      - name: Stage site (project page at root, deck under /slides)
+        run: |
+          mkdir -p _site/slides
+          cp -r presentation/. _site/slides/
+          cp -r page/. _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

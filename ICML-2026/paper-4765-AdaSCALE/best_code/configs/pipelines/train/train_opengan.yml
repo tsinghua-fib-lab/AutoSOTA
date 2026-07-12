@@ -1,0 +1,34 @@
+exp_name: "'@{dataset.name}'_'@{network.name}'_'@{trainer.name}'_e'@{optimizer.num_epochs}'_lr'@{optimizer.lr}'_'@{mark}'/s'@{seed}'"
+output_dir: ./results/
+save_output: True
+merge_option: default
+mark: default
+seed: 0
+
+dataset:
+  # cached features extracted from classifier
+  feat_root: './results/cifar10_resnet18_32x32_feat_extract_opengan_default/s0'
+
+num_gpus: 1
+num_workers: 8
+num_machines: 1
+machine_rank: 0
+
+pipeline:
+  name: train_opengan
+
+trainer:
+  name: opengan
+
+evaluator:
+  name: ood
+
+optimizer:
+  name: Adam
+  num_epochs: 100
+  lr: 0.0001
+  beta1: 0.5
+
+recorder:
+  name: opengan
+  save_all_models: False

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "distribution_transformers"
+
+version = "0.0.0"
+dependencies = [
+    "torch>=2.0.0",
+    "tqdm",
+    "scikit-learn",
+    "threadpoolctl>=3.0.0",
+    "matplotlib",
+    "gpytorch",
+    "sacred",
+    "pytest (>=8.4.2,<9.0.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
+    "typing_extensions>=4.0.0",
+]
+requires-python = ">=3.10.0"
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "sacred",
+    "pyyaml",
+]
+
+
+[tools.pytest.ini.options]
+addopts = [
+    "--import-mode=importlib"
+]
+pythonpath = "src"

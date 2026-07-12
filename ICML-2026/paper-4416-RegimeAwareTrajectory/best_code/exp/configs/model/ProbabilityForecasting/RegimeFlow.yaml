@@ -1,0 +1,59 @@
+model:
+  _target_: models.FlowMatching.RegimeFlow.RegimeFlow.RegimeFlowCond
+
+  save_predictions_to_file_path: ${save_path_dir}/predictions/${experiment_name}/${seed}/
+
+  plot_n_samples: ${visualization.plot_n_samples}
+  plot_every_n_epochs: ${visualization.plot_every_n_epochs}
+
+  # Condition encoder parameters
+  use_condition: True
+  condition_dropout: 0.3  # CFG dropout probability
+  cond_dim: 128
+  num_patterns: 6
+  num_freqs: 128
+
+  backbone_params:
+    input_dim: 1
+    hidden_dim: 96
+    output_dim: 1
+    step_emb: 96
+    num_residual_blocks: 4
+
+    init_skip: False
+
+    ## Mamba
+    d_state: 16
+    d_conv: 4
+    expand: 2
+    dropout: 0.0
+
+    ## FFN
+    ffn_dim_multiplier: 4.0
+    ffn_dropout: 0.0
+
+  normalization: zscore
+ 
+  num_steps: 1
+  guidance_scale: 0  # CFG guidance scale
+  solver: euler
+  matching: random
+
+  # device: cuda:0
+  
+  optimizer_params: 
+    lr: 8.e-4
+
+  prior_params:
+    name: BLRTemplatePriorGenerator
+    alpha: 5.0
+    beta: 10.0
+    noise_scale: 0.24875342845916748
+    # saturation_rate: 3.0
+    # slope_window: 10
+    min_variance: 1e-6
+    num_harmonics: 1
+    saturation_scales: [0.2, 2.0, 5.0]
+
+  context_length: ${data.input_window} # 360 for `D`
+  prediction_length: ${data.output_window} # 30 for `D`

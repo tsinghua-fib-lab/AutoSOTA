@@ -1,0 +1,56 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 4734,
+    "repo_url": "https://github.com/GWhittle110/distribution-transformers",
+    "repo_commit": "8c28f969e350581838b1db176dfa0d0251544eb4",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_4734",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-4734:reproduced",
+    "eval_command": "GIT_PYTHON_REFRESH=quiet python3 main.py with experiments/configs/dt2_wide_rep.yaml -F experiments/runs/dt2_wide --force",
+    "baseline_metrics": {
+      "KL-Divergence": 0.005746,
+      "Inference Time per 1000 Problems (s)": 0.0144
+    },
+    "primary_metric": "KL-Divergence",
+    "metric_direction": "lower",
+    "gpu_devices": "0,1",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-1/logs/reproduction/paper-4734.log",
+    "status": "success",
+    "created_at": "2026-07-12T06:59:39Z",
+    "notes": "Successfully reproduced DT-2 wide meta-prior KL-Divergence (0.005746 vs paper 0.0058, within CI [0.0056, 0.0060]) and Inference Time (0.0144s vs paper 0.014s, within CI [0.003, 0.0151]). Experiment 4.1 inverse-gamma prior with normal-variance likelihood. Training: 20 epochs x 100 steps x 5000 batch = 10M samples. Testing: 1000 unseen priors with 10000 KL samples each. Used single GPU (cuda:0, A100-80GB). Container required Python 3.10 compatibility fixes: patched InverseGamma for PyTorch 2.1.0, fixed Python 3.11+ subscript unpacking syntax, made SDPBackend/sdpa_kernel, NotRequired, and tabpfn imports conditional for PyTorch 2.1.0 compatibility.",
+    "eval_timeout_minutes": 10,
+    "eval_output_format": "KL-Divergence from stdout grep 'Posterior mean KL divergence: '; Inference Time from sacred run info.json key 'model_inference_time'",
+    "known_levers": "n_components (2->5 for DT-5), epochs (20->40+), batch_size, lr (0.005), d_model (64->128), num_layers (6->8+), dim_feedforward (256->512), use_prior_loss (True/False). Model is small (426K params) so training cost is low.",
+    "setup_notes": "Container started from fallback image docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Python 3.10.13 required compatibility patches: (1) Added InverseGamma to torch.distributions via patch at /opt/conda/lib/python3.10/site-packages/torch/distributions/inverse_gamma_patch.py with import added to __init__.py; (2) Fixed Python 3.11+ subscript unpacking (*list inside [...]) in embeddings.py and ace_dt_morphology.py; (3) Made torch.nn.attention.SDPBackend/sdpa_kernel import conditional in train.py; (4) Changed typing.NotRequired to typing_extensions.NotRequired in distribution_transformer.py and train.py; (5) Made tabpfn import optional in test.py; (6) Lowered Python requirement in pyproject.toml from >=3.12.0 to >=3.10.0 and torch from >=2.5.0 to >=2.0.0. No pre-downloaded datasets needed - experiment generates synthetic data on-the-fly. Model checkpoint saved to /models/paper-4734/dt2_wide_model.pt.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Tune DT architecture to minimize KL-Divergence (posterior approximation quality) while keeping inference time competitive (Pareto trade-off). Primary metric is KL-Divergence; inference time is an antagonistic guardrail.",
+      "metrics": [
+        {
+          "name": "KL-Divergence",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.005746,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Primary quality metric from Table 1 of paper - measures how well DT approximates true Bayesian posterior. Paper reports 0.0058 ± 0.0002 for DT-2 wide meta-prior."
+        },
+        {
+          "name": "Inference Time per 1000 Problems (s)",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "preserve",
+          "baseline": 0.0144,
+          "regression_tolerance_pct": 50.0,
+          "rationale": "Speed metric from Table 1. Paper reports 0.014s for DT-2. Antagonistic to KL-Divergence - larger/more components improve accuracy but slow inference. Should stay below 0.02s to remain competitive."
+        }
+      ],
+      "success_policy": "Primary goal: reduce KL-Divergence below baseline 0.005746. Guardrail: keep inference time below 0.02s per 1000 problems. Any KL improvement at acceptable inference cost is a win. Accept up to 2x slower if KL improves >=10%. Downstream sequential inference (Sections 4.3.1/4.3.2) is NOT in scope for optimization."
+    },
+    "metric_upper_bound": 0.0060,
+    "metric_lower_bound": 0.0056
+  }
+}

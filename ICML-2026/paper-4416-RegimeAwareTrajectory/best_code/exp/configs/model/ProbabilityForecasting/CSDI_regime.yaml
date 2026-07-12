@@ -1,0 +1,39 @@
+model:
+  _target_: models.Diffusion.CSDI.CSDI_SA.CSDILightning
+  # save evaluation predictions to file
+  save_predictions_to_file_path: ${save_path_dir}/predictions/${experiment_name}/${seed}/
+
+  target_dim: 1
+  context_length: ${data.input_window}
+  prediction_length: ${data.output_window}
+
+  # Diffusion parameters
+  num_steps: 50
+  beta_start: 0.0001
+  beta_end: 0.5
+  schedule: "quad"
+  
+  # Model architecture parameters
+  layers: 4
+  channels: 64
+  nheads: 8
+  diffusion_embedding_dim: 128
+  timeemb: 128
+  featureemb: 16
+
+  
+  # Training parameters
+  optimizer_params:
+    lr: 1.0e-3
+    weight_decay: 1.0e-6
+  is_unconditional: false
+  target_strategy: "random"
+  # Conditions
+  use_conditions: true
+  
+  # Scheduler parameters (from training)
+  max_epochs: ${training.max_epochs}
+  
+  # Visualization parameters (from visualization)
+  plot_n_samples: ${visualization.plot_n_samples}
+  plot_every_n_epochs: ${visualization.plot_every_n_epochs}

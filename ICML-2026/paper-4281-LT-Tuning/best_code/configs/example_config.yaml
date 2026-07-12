@@ -1,0 +1,81 @@
+project: LT_Tuning
+name: example
+save_path: models
+save_dataset: true
+dataset_save_path: ../data/gsm8k
+train_path: data/gsm8k/train_socratic.jsonl
+val_path: data/gsm8k/test_socratic.jsonl
+model_name_or_path: meta-llama/Llama-3.2-1B
+load_model_path: null
+use_flash_attention: true
+only_eval: false
+dihr: true
+no_thoughts: false
+stage_epochs:
+- 1
+- 1
+- 1
+labels_per_stage:
+- 0
+- 10
+- 16
+stage_names:
+- stage0-cot
+- stage1-hidden-state
+- stage2-soft-fusion
+stage_modes:
+- common
+- hidden_state
+- soft_fusion
+eval_stage_mode: soft_fusion
+thinking_token: <thinking>
+use_unk_for_thinking: false
+thinking_strategy: confidence
+thinking_hidden_state_layer: -1
+thinking_insertion_prob:
+- 0.0
+- 0.85
+- 0.95
+thinking_secondary_insertion_prob:
+- 0.0
+- 0.15
+- 0.2
+thinking_operator_regex: '[0-9]+|[+\-*/=]'
+thinking_prompt_tokens: 0
+thinking_use_mlp: false
+thinking_mlp_hidden_dim: 1024
+thinking_mlp_activation: gelu
+reinforce_prob_threshold:
+- 0.0
+- 0.3
+- 0.2
+reinforce_max_eval_length: 2048
+fusion_alpha:
+- 0.5
+- 0.5
+- 0.6
+fusion_top_p: 0.9
+fusion_temperature: 1.0
+resume: 0
+reset_optimizer: false
+save_only_improve: false
+max_epoch_checkpoints: 5
+max_step_checkpoints: null
+save_every_n_steps: 0
+output_dir: models/example_exp
+per_device_train_batch_size: 4
+per_device_eval_batch_size: 4
+gradient_accumulation_steps: 1
+num_train_epochs: 3
+save_total_limit: 2
+remove_unused_columns: true
+learning_rate: 5.0e-05
+weight_decay: 0.01
+warmup_ratio: 0.05
+bf16: true
+logging_steps: 10
+save_strategy: epoch
+eval_strategy: 'no'
+report_to: wandb
+seed: 42
+deepspeed: configs/ds_config_zero2.json

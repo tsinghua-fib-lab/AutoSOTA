@@ -1,0 +1,110 @@
+# Dataset and Splits
+data_root: DATA
+dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_name:  REDDIT-BINARY
+data_splits_file:  DATA_SPLITS/COLLABORATIVE_DEGREE/REDDIT-BINARY/REDDIT-BINARY_outer10_inner1.splits
+
+
+# Hardware
+device:  cuda
+max_cpus: 32
+max_gpus: 3
+gpus_per_task:  0.5
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 2
+    pin_memory: True
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: GSPN_RESULTS/UNSUPERVISED
+exp_name: unsupervised_embedding_generation_gaussian
+experiment: unsupervised_embedding_generation.EmbeddingTask
+higher_results_are_better: True
+evaluate_every: 1
+final_training_runs: 1
+
+grid:
+  unsupervised_config:
+    model: model.GSPN
+    checkpoint: True
+    shuffle: True
+    batch_size: 32
+    epochs: 500
+
+
+    # Model specific arguments #
+
+    embeddings_folder: 'UNSUP_GSPN_EMBEDDINGS_BASIC/'
+
+    convolution_class: model.GSPNBaseConv
+    emission_class: model.GSPNGaussianEmission
+    num_mixtures:
+      - 10
+      - 5
+      - 20
+    num_hidden_neurons: 0  # not used at the moment
+    num_layers:
+      - 2
+      - 5
+      - 10
+      - 15
+      - 20
+
+    # ------------------------ #
+
+    # Optimizer
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr: 0.1
+          accumulate_gradients: False  # do/do not accumulate gradient across mini-batches
+
+    # Scheduler
+    scheduler: null
+
+    # Loss metric
+    loss:
+      - class_name: metric.GSPNNodeLogLikelihood
+        args:
+          use_nodes_batch_size: True
+
+    # Score metric
+    scorer:
+      - class_name: pydgn.training.callback.metric.MultiScore
+        args:
+          main_scorer:
+            - class_name: metric.GSPNNodeLogLikelihood
+              args:
+                use_nodes_batch_size: True
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper
+    early_stopper:
+      - class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience: 50
+          monitor: validation_main_score
+          mode: min
+          checkpoint: True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

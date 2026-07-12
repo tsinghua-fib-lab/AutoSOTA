@@ -1,0 +1,61 @@
+name: pnp_edm
+mode: edm
+num_iters: 100
+num_burn_in_iters: 40
+use_tau_to_anneal: true
+anneal_const: 30.0
+rho: 0.1
+rho_decay_rate: 1.0
+rho_min: 0.0
+num_samples_per_run: 20
+common_kwargs:
+  num_steps: 100
+  sigma_min: null
+  sigma_max: null
+  alpha: 1
+  S_churn: 0
+  S_min: 0
+  S_max: !!float .inf
+  S_noise: 1
+vp_kwargs:
+  solver: euler
+  discretization: vp
+  schedule: vp
+  scaling: vp
+  epsilon_s: 1.0e-3
+ve_kwargs:
+  solver: euler
+  discretization: ve
+  schedule: ve
+  scaling: none
+iddpm_kwargs:
+  solver: euler
+  discretization: iddpm
+  schedule: linear
+  scaling: none
+  C_1: 0.001
+  C_2: 0.008
+  M: 1000
+edm_kwargs:
+  solver: euler             # in ['euler', 'heun']
+  discretization: edm       # in ['vp', 've', 'iddpm', 'edm']
+  schedule: linear          # in ['vp', 've', 'linear']
+  scaling: none             # in ['vp', 'none']
+  rho: 7
+decomposition:
+  use: true
+  num_gibbs_iters: 1
+  use_patch: true
+  patch_size: 16
+  stride: 8
+  shape: [3, 256, 256]
+  orig_shape: [3, 256, 256]
+  init_rank: 100
+  init_method: randn
+  init_scale: 0.1
+  tau_alpha: 1e-3
+  tau_beta: 1e-3
+  nu_beta: 2.0
+  theta_alpha: 2.0
+  theta_beta: 2.0
+  theta_infty: 1e-3

@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+  - dataset: oxfordpet
+  - override hydra/job_logging: disabled
+  - override hydra/hydra_logging: disabled
+
+explainer_name: ig2
+save_dir: null
+seed: 0
+device: cuda
+
+model_name: resnet18
+
+exp_obj: prob
+
+steps: 201
+step_size: 0.02
+reference_mode: random
+
+max_eval_samples: 500
+num_vis_samples: 10
+
+hydra:
+  run:
+    dir: .         
+  output_subdir: null

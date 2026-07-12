@@ -1,0 +1,251 @@
+{
+  "timestamp": "2026-01-29T03:22:39.670329",
+  "args": {
+    "compare": false,
+    "json1": null,
+    "json2": null,
+    "gpu1": "H200",
+    "gpu2": "A6000",
+    "compare_output": "comparison.png",
+    "batch_size": 512,
+    "num_heads": 32,
+    "num_kv_heads": 8,
+    "head_size": 128,
+    "output": "results_h200.json"
+  },
+  "gpu": "NVIDIA H200",
+  "results": {
+    "pure_prefill": [
+      {
+        "seq_len": 128,
+        "total_tokens": 128,
+        "time_ms": 0.02433088008314371
+      },
+      {
+        "seq_len": 256,
+        "total_tokens": 256,
+        "time_ms": 0.025052799880504607
+      },
+      {
+        "seq_len": 512,
+        "total_tokens": 512,
+        "time_ms": 0.03445951983332634
+      },
+      {
+        "seq_len": 1024,
+        "total_tokens": 1024,
+        "time_ms": 0.06852416038513183
+      },
+      {
+        "seq_len": 2048,
+        "total_tokens": 2048,
+        "time_ms": 0.1735232013463974
+      }
+    ],
+    "pure_decode": [
+      {
+        "context_len": 128,
+        "total_query_tokens": 512,
+        "time_ms": 0.14015424013137817
+      },
+      {
+        "context_len": 256,
+        "total_query_tokens": 512,
+        "time_ms": 0.20557504028081894
+      },
+      {
+        "context_len": 512,
+        "total_query_tokens": 512,
+        "time_ms": 0.3309203195571899
+      },
+      {
+        "context_len": 1024,
+        "total_query_tokens": 512,
+        "time_ms": 0.5834169638156891
+      },
+      {
+        "context_len": 2048,
+        "total_query_tokens": 512,
+        "time_ms": 1.1462495923042297
+      }
+    ],
+    "mixed": {
+      "10pct": [
+        {
+          "prefill_len": 128,
+          "num_prefill": 51,
+          "num_decode": 461,
+          "total_query_tokens": 6989,
+          "time_ms": 0.5016409581899643
+        },
+        {
+          "prefill_len": 256,
+          "num_prefill": 51,
+          "num_decode": 461,
+          "total_query_tokens": 13517,
+          "time_ms": 0.8714489626884461
+        },
+        {
+          "prefill_len": 512,
+          "num_prefill": 51,
+          "num_decode": 461,
+          "total_query_tokens": 26573,
+          "time_ms": 1.8029849553108215
+        },
+        {
+          "prefill_len": 1024,
+          "num_prefill": 51,
+          "num_decode": 461,
+          "total_query_tokens": 52685,
+          "time_ms": 4.234119033813476
+        },
+        {
+          "prefill_len": 2048,
+          "num_prefill": 51,
+          "num_decode": 461,
+          "total_query_tokens": 104909,
+          "time_ms": 11.874558715820312
+        }
+      ],
+      "20pct": [
+        {
+          "prefill_len": 128,
+          "num_prefill": 102,
+          "num_decode": 410,
+          "total_query_tokens": 13466,
+          "time_ms": 0.5119257599115372
+        },
+        {
+          "prefill_len": 256,
+          "num_prefill": 102,
+          "num_decode": 410,
+          "total_query_tokens": 26522,
+          "time_ms": 1.0200864100456237
+        },
+        {
+          "prefill_len": 512,
+          "num_prefill": 102,
+          "num_decode": 410,
+          "total_query_tokens": 52634,
+          "time_ms": 2.319839367866516
+        },
+        {
+          "prefill_len": 1024,
+          "num_prefill": 102,
+          "num_decode": 410,
+          "total_query_tokens": 104858,
+          "time_ms": 5.943854064941406
+        },
+        {
+          "prefill_len": 2048,
+          "num_prefill": 102,
+          "num_decode": 410,
+          "total_query_tokens": 209306,
+          "time_ms": 17.777597541809083
+        }
+      ],
+      "40pct": [
+        {
+          "prefill_len": 128,
+          "num_prefill": 204,
+          "num_decode": 308,
+          "total_query_tokens": 26420,
+          "time_ms": 0.6193971252441406
+        },
+        {
+          "prefill_len": 256,
+          "num_prefill": 204,
+          "num_decode": 308,
+          "total_query_tokens": 52532,
+          "time_ms": 1.3608403134346008
+        },
+        {
+          "prefill_len": 512,
+          "num_prefill": 204,
+          "num_decode": 308,
+          "total_query_tokens": 104756,
+          "time_ms": 3.4812262439727784
+        },
+        {
+          "prefill_len": 1024,
+          "num_prefill": 204,
+          "num_decode": 308,
+          "total_query_tokens": 209204,
+          "time_ms": 9.353879070281982
+        },
+        {
+          "prefill_len": 2048,
+          "num_prefill": 204,
+          "num_decode": 308,
+          "total_query_tokens": 418100,
+          "time_ms": 30.581092491149903
+        }
+      ],
+      "80pct": [
+        {
+          "prefill_len": 128,
+          "num_prefill": 409,
+          "num_decode": 103,
+          "total_query_tokens": 52455,
+          "time_ms": 0.7785376012325287
+        },
+        {
+          "prefill_len": 256,
+          "num_prefill": 409,
+          "num_decode": 103,
+          "total_query_tokens": 104807,
+          "time_ms": 1.8394003224372864
+        },
+        {
+          "prefill_len": 512,
+          "num_prefill": 409,
+          "num_decode": 103,
+          "total_query_tokens": 209511,
+          "time_ms": 5.265212144851684
+        },
+        {
+          "prefill_len": 1024,
+          "num_prefill": 409,
+          "num_decode": 103,
+          "total_query_tokens": 418919,
+          "time_ms": 16.339660110473634
+        },
+        {
+          "prefill_len": 2048,
+          "num_prefill": 409,
+          "num_decode": 103,
+          "total_query_tokens": 837735,
+          "time_ms": 55.745619506835936
+        }
+      ]
+    }
+  },
+  "slopes": {
+    "pure_prefill": {
+      "slope_ms_per_token": 7.961176822518417e-05,
+      "intercept_ms": 0.0019982130421946735
+    },
+    "pure_decode": {
+      "slope_ms_per_context": 0.000523099095816599,
+      "intercept_ms": 0.06613178877780848
+    },
+    "mixed": {
+      "10pct": {
+        "slope_ms_per_prefill_len": 0.005972619715449653,
+        "intercept_ms": -0.8829204810162384
+      },
+      "20pct": {
+        "slope_ms_per_prefill_len": 0.009076222789796796,
+        "intercept_ms": -1.6882297770678993
+      },
+      "40pct": {
+        "slope_ms_per_prefill_len": 0.015747679174822633,
+        "intercept_ms": -3.418071144322555
+      },
+      "80pct": {
+        "slope_ms_per_prefill_len": 0.029000814629878902,
+        "intercept_ms": -7.021360553105669
+      }
+    }
+  }
+}

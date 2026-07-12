@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "progressive_cramming"
+version = "0.1.0"
+description = "Progressive Cramming: Reliable Token Compression"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate",
+    "datasets",
+    "numpy",
+    "scikit-learn",
+    "tensorboard",
+    "torch",
+    "tqdm",
+    "transformers",
+]
+
+[project.scripts]
+progressive-cramming = "progressive_cramming.run:main"
+
+[tool.setuptools.packages.find]
+include = ["progressive_cramming*"]

@@ -1,0 +1,65 @@
+name: factor_stochastic_volatility
+module_path: "dynamic.factor_stochastic_volatility"
+seed: 1
+load_path: "1/state_dicts/model_state_dict_120.pt"
+
+n_components: 10
+state_size: 10
+
+meta_prior_kwargs:
+  scale_eps: 0.0001
+  scale_parametrisation: scale_tril
+  default_scale_multiple: 0.01
+
+observation_model_kwargs:
+  obs_1:
+    n_observations: 30
+    residual_variance: 1.0
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [ 32 ]
+  activation: gelu
+  jitter: 0.00001
+  eps: 0.000001
+  scale_parametrisation: scale_tril
+
+observation_embedding_kwargs:
+  obs_1:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 64
+  n_head: 8
+  dim_feedforward: 2048
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+motion_model_kwargs:
+  delta: [0.99, 0.98, 0.97, 0.96, 0.95, 0.94, 0.93, 0.92, 0.91, 0.9]
+  sigma: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
+  alpha: [-1., -0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8, 1.]
+
+training_kwargs:
+  warmup_epochs: 5
+  epochs: 130
+  steps_per_epoch: 500
+  batch_size: 1000
+  lr: 0.001
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: 20
+  save_loss_series: False
+
+testing_kwargs:
+  series_length: 100
+  n_test_series: 100
+  plotting_kwargs:
+    dim: 0
+  competitor_kwargs:
+    particle_filter:
+      n_particles: [50]
+      chunk_size: 1
+

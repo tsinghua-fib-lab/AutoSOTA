@@ -1,0 +1,35 @@
+defaults:
+  - _self_
+  - dataset: oxfordpet
+  - override hydra/job_logging: disabled
+  - override hydra/hydra_logging: disabled
+
+explainer_name: latent_gig
+save_dir: null
+seed: 0
+device: cuda
+
+# classifier
+model_name: resnet18
+
+# explainer
+num_steps: 200  # GIG typically needs more steps for adaptive path
+baseline_method: zero
+exp_obj: prob
+
+# GIG specific parameter
+fraction: 0.05  # Fraction of features to select at each step (5%)
+use_slerp: true
+
+# VAE settings
+vae_type: sd2  # sd1, sd2, mar, kd
+
+# evaluation
+max_eval_samples: 500  # Maximum number of samples to evaluate (null for all)
+num_vis_samples: 10    # Number of samples to visualize
+
+# hydra
+hydra:
+  run:
+    dir: .         
+  output_subdir: null

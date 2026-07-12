@@ -1,0 +1,90 @@
+name: gmm_closed_form
+module_path: "static.gmm_closed_form"
+seed: 0
+
+load_path: "69/state_dicts/model_state_dict.pt"
+
+n_components: 8
+state_size: 24
+
+meta_prior_kwargs:
+  scale_parametrisation: scale_tril
+  default_scale_multiple: .1
+
+observation_covariance_matrix:
+  obs_1: [[1, 0, 0, 0,], [0, 1, 0.5, 0], [0, 0.5, 1, 0.5], [0, 0, 0.5, 1]]
+
+observation_matrix:
+  obs_1: [[1]]
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [64]
+  activation: gelu
+  jitter: 0.00001
+  eps: null
+  scale_parametrisation: scale_tril
+
+observation_embedding_kwargs:
+  obs_1:
+    observation_size: 4
+    hidden_layer_sizes: [64]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 128
+  n_head: 8
+  dim_feedforward: 2048
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+training_kwargs:
+  warmup_epochs: 5
+  epochs: 240
+  steps_per_epoch: 100
+  batch_size: 1000
+  lr: 0.001
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: -1
+  save_loss_series: False
+
+testing_kwargs:
+  n_test_priors: 500
+  n_kl_samples: 1000
+  plot: False
+  competitor_kwargs:
+    vi:
+      lr: 0.01
+      lr_decay: 0.999
+      n_iters: 9600
+      repeats: 1
+      n_samples: 10
+      ewma_gamma: 0.01
+      progress_bar: True
+      initial_loc_std: .01
+      initial_scale_tril_std: 0.01
+#    pfns:
+#      transformer_kwargs:
+#        d_model: 32
+#        n_head: 8
+#        dim_feedforward: 2048
+#        dropout: 0
+#        num_layers: 6
+#        activation: gelu
+#      n_buckets: 10
+#      infinite_support: True
+#      hidden_layer_sizes: [ 32 ]
+#      activation: gelu
+#      training_kwargs:
+#        warmup_epochs: 5
+#        epochs: 10
+#        steps_per_epoch: 100
+#        batch_size: 5000
+#        lr: 0.0001
+#        weight_decay: 0
+#        verbose: True
+#        progress_bar: True
+#        save_interval: -1
+#        save_loss_series: False

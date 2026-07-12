@@ -1,0 +1,108 @@
+# ==================== Hydra Settings ====================
+defaults:
+  - _self_
+  - model: ProbabilityForecasting/RegimeFlow
+
+save_path_dir: ./results
+hydra:
+  run:
+    # Output directory pattern
+    dir: ${save_path_dir}/outputs/${experiment_name}/${seed}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    # Multirun output directory
+    dir: ${save_path_dir}/multirun/${experiment_name}/${seed}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  job:
+    # Change working directory to output dir
+    chdir: false
+
+# ==================== Experiment ====================
+experiment_name: bioseries
+seed: 42
+
+# Test mode flags
+test_only: false
+ckpt_path: null
+test_without_ckpt: false
+
+# ==================== Model ====================
+# ==================== Data ====================
+data:
+  # train type
+  data_type: BioTFM
+  # Out-of-distribution flag
+  OOD: true
+  # Dataset type
+  train_AR_dataset: false
+  # Paths
+  data_dir: ./SysBio-Traj
+  load_name: SysBio-Traj_index.csv
+  
+  # Splits
+  val_ratio: 0.1
+  test_ratio: 0.2
+  
+  # Windows
+  input_window: 96    # Input sequence length (context)
+  output_window: 256  # Prediction horizon
+  stride: 16           # Sliding window stride
+  
+  # Processing
+  transform_type: minmax
+  condition_names: [bound_min, bound_max, traj_pattern, period]
+  normalize: false    # Already transformed by MultiBioSeriesDataset
+  
+  # DataLoader
+  batch_size: 2048
+  num_workers: 4
+
+# ==================== Training ====================
+training:
+  max_epochs: 500
+  warmup_epochs: 50
+  check_val_every_n_epoch: 10
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 1
+  
+  # Early stopping
+  early_stopping: true
+  patience: 5
+  monitor: val/mse
+  mode: min
+  
+  # Validation
+  limit_val_batches: 1.0
+
+  # ema
+  use_ema: true
+  ema_decay: 0.995
+  ema_update_after_step: 200
+  ema_update_every: ${training.check_val_every_n_epoch}
+
+  # Resume from checkpoint (optional)
+  resume_from_checkpoint: null
+
+# ==================== Visualization ====================
+visualization:
+  log_val_plots: true
+  plot_n_samples: 10
+  plot_every_n_epochs: ${training.check_val_every_n_epoch}
+
+# ==================== Checkpoints ====================
+checkpoint:
+  save_dir: ${save_path_dir}/checkpoints/${experiment_name}/${seed}/
+  save_top_k: 3
+  monitor: val/mse
+  mode: min
+
+# ==================== Logging ====================
+logging:
+  log_dir: ${save_path_dir}/logs/${experiment_name}/${seed}/
+  wandb: true
+  wandb_project: full_biofm_bioseries_${seed}
+
+# ==================== Hardware ====================
+hardware:
+  accelerator: gpu
+  devices: [0]
+  precision: 32

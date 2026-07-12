@@ -1,0 +1,45 @@
+# Default training config for GAT-FM
+
+# Data paths
+adata_path: dataset/GSE100866_adata.h5ad
+rna_embed_path: dataset/rna_embedding/GSE100866.npy
+ppi_path: dataset/string_interactions_short_GSE100866.tsv
+
+# Output
+output_dir: outputs
+run_name: dit_fm_run
+
+# Model architecture
+model_type: dit_fm
+hidden_size: 512
+depth: 12
+num_heads: 8
+mlp_ratio: 4.0
+dropout: 0.1
+
+# Training
+epochs: 500
+batch_size: 512
+learning_rate: 2e-4
+weight_decay: 0.01
+warmup_epochs: 25
+grad_clip: 1.0
+
+# Flow Matching
+sigma: 0.001
+
+# Sampling evaluation during training
+sample_mask_ratio: 0.1
+sample_num_steps: 50
+sample_solver: dopri5
+sample_num_batches: 10
+
+# Data split
+train_split: 0.9
+val_split: 0.1
+
+# Misc
+seed: 3402
+num_workers: 16
+gpu: null
+resume: null

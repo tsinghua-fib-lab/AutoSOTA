@@ -1,0 +1,192 @@
+name: gmm_closed_form
+module_path: "static.quantum_system"
+seed: 2
+
+n_components: 5
+
+meta_prior_kwargs:
+  concentration1_concentration: 4
+  concentration1_rate: 6
+  concentration0_concentration: 4
+  concentration0_rate: 6
+
+initial_states_loc:
+  obs_1: [1., 0.]
+  obs_2: [1., 0.]
+  obs_3: [1., 0.]
+  obs_4: [1., 0.]
+  obs_5: [1., 0.]
+  obs_6: [0., 1.]
+  obs_7: [0., 1.]
+  obs_8: [1., 1.]
+  obs_9: [1., 1.]
+  obs_10: [1., 1.]
+
+initial_states_covariance_matrix:
+  obs_1: [[0.01, 0.], [0., 0.01]]
+  obs_2: [[0.01, 0.], [0., 0.01]]
+  obs_3: [[0.01, 0.], [0., 0.01]]
+  obs_4: [[0.01, 0.], [0., 0.01]]
+  obs_5: [[0.01, 0.], [0., 0.01]]
+  obs_6: [ [ 0.01, 0. ], [ 0., 0.01 ] ]
+  obs_7: [ [ 0.01, 0. ], [ 0., 0.01 ] ]
+  obs_8: [ [ 0.01, 0. ], [ 0., 0.01 ] ]
+  obs_9: [ [ 0.01, 0. ], [ 0., 0.01 ] ]
+  obs_10: [ [ 0.01, 0. ], [ 0., 0.01 ] ]
+
+measurement_times_loc:
+  obs_1: 1.
+  obs_2: 2.
+  obs_3: 3.
+  obs_4: 4.
+  obs_5: 5.
+  obs_6: 1.
+  obs_7: 2.
+  obs_8: 1.
+  obs_9: 2.
+  obs_10: 3.
+
+measurement_times_std:
+  obs_1: 0.05
+  obs_2: 0.05
+  obs_3: 0.05
+  obs_4: 0.05
+  obs_5: 0.05
+  obs_6: 0.05
+  obs_7: 0.05
+  obs_8: 0.05
+  obs_9: 0.05
+  obs_10: 0.05
+
+distribution_embedding_kwargs:
+  embedding_hidden_layer_sizes: [32, 64]
+  embedding_activation: gelu
+  conversion_hidden_layer_sizes: [64, 64]
+  conversion_activation: gelu
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [32]
+  activation: gelu
+  jitter: 0.000001
+  eps: null
+  scale_parametrisation: scale_tril
+
+observation_embedding_kwargs:
+  obs_1:
+    hidden_layer_sizes: [32]
+    activation: gelu
+  obs_2:
+    hidden_layer_sizes: [32]
+    activation: gelu
+  obs_3:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_4:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_5:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_6:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_7:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_8:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_9:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+  obs_10:
+    hidden_layer_sizes: [ 32 ]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 64
+  n_head: 8
+  dim_feedforward: 2048
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+training_kwargs:
+  warmup_epochs: 10
+  epochs: 50
+  steps_per_epoch: 100
+  batch_size: 2000
+  lr: 0.001
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: -1
+  save_loss_series: False
+
+testing_kwargs:
+  n_test_priors: 1000
+  n_kl_samples: 1000
+  plot: False
+  competitor_kwargs:
+    ace:
+        transformer_kwargs:
+          d_model: 64
+          n_head: 8
+          dim_feedforward: 2048
+          dropout: 0
+          num_layers: 6
+          activation: gelu
+          dim_y: 1
+          dim_yc: 1
+          dim_xc: 2
+          num_components: 5
+          emb_depth: 5
+        training_kwargs:
+          warmup_epochs: 10
+          epochs: 50
+          steps_per_epoch: 100
+          batch_size: 2000
+          lr: 0.0001
+          weight_decay: 0
+          verbose: True
+          progress_bar: True
+          save_interval: -1
+          save_loss_series: False
+          randomise_target: False
+    vi:
+      lr: 0.01
+      lr_decay: 0.999
+      n_iters: 100
+      repeats: 100
+      n_samples: 10
+      ewma_gamma: 0.01
+      progress_bar: True
+    pfns:
+      transformer_kwargs:
+        d_model: 64
+        n_head: 8
+        dim_feedforward: 2048
+        dropout: 0
+        num_layers: 6
+        activation: gelu
+      n_buckets: 5000
+      infinite_support: False
+      leftmost_border: 0.
+      rightmost_border: 1.
+      hidden_layer_sizes: [ 32 ]
+      activation: gelu
+      training_kwargs:
+        warmup_epochs: 10
+        epochs: 50
+        steps_per_epoch: 100
+        batch_size: 2000
+        lr: 0.0001
+        weight_decay: 0
+        verbose: True
+        progress_bar: True
+        save_interval: -1
+        save_loss_series: False
+
+    tabpfn:
+      n_training_samples: 10000
+

@@ -1,0 +1,108 @@
+# Telegram Bot
+# telegram_config_file: telegram_config.yml
+
+# Dataset and Splits
+data_root: DATA
+dataset_class: dataset.OGBGDatasetInterface
+dataset_name:  ogbg-molpcba
+data_splits_file:  DATA_SPLITS/CHEMICAL/ogbg_molpcba/ogbg_molpcba_outer1_inner1.splits
+
+
+# Hardware
+device:  cuda
+max_cpus:  20
+max_gpus: 3
+gpus_per_task:  1
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 1
+    pin_memory: True
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: GSPN_RESULTS/UNSUPERVISED
+exp_name: unsupervised_gae_embedding_generation_categorical
+experiment: unsupervised_embedding_generation.EmbeddingTask
+higher_results_are_better: True  # not used here - only embedding generation
+evaluate_every: 1
+final_training_runs: 1
+
+grid:
+  unsupervised_config:
+    model: baselines.GAE_Adj
+    checkpoint: True
+    shuffle: True
+    batch_size: 1024
+    epochs: 100
+
+
+    # Model specific arguments #
+
+    embeddings_folder: 'UNSUP_GAE_EMBEDDINGS_BASIC/'
+
+    num_layers:
+      - 2
+      - 3
+      - 5
+
+    dim_embedding:
+      - 32
+      - 128
+      - 256
+
+    num_hidden_neurons: 0  # not used
+
+    train_eps: True
+
+    concat_out_across_layers: True
+
+    # ------------------------ #
+
+    # Optimizer
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr:
+            - 0.1
+            - 0.01
+          accumulate_gradients: False  # do/do not accumulate gradient across mini-batches
+
+    # Scheduler
+    scheduler: null
+
+    # Loss metric
+    loss: metric.DotProductLink
+
+    # Score metric
+    scorer: metric.DotProductAccuracy
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper
+    early_stopper:
+      - class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience: 50
+          monitor: validation_main_score
+          mode: max
+          checkpoint: True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

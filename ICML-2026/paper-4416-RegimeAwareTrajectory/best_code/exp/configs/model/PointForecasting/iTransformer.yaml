@@ -1,0 +1,52 @@
+# ==================== Model ====================
+model:
+  _target_: models.PointForecasting.PointForecasting.UniversalTrainingModule
+  # save evaluation predictions to file
+  save_predictions_to_file_path: ${save_path_dir}/predictions/${experiment_name}/${seed}/
+  
+  loss_type: 'mse'
+  # Architecture
+  args:
+    task_name: long_term_forecast
+    seq_len: ${data.input_window}
+    pred_len: ${data.output_window}
+    label_len: ${data.input_window}
+
+    model: iTransformer
+    wo_mark: false
+
+    e_layers: 3
+    d_layers: 1
+    factor: 3
+    d_model: 512
+    d_ff: 512
+    enc_in: 1
+    dec_in: 1
+    c_out: 1
+    dropout: 0.1
+
+    # default settings from run
+    freq: m
+    embed: timeF
+    n_heads: 8
+    activation: gelu
+    channel_independence: 1
+    decomp_method: moving_avg
+    moving_avg: 25
+    use_norm: 1
+    down_sampling_layers: 0
+    down_sampling_window: 1
+    down_sampling_method: null
+
+  # Training hyperparameters
+  lr: 2e-4
+  min_lr: 2e-6
+  weight_decay: 1e-5
+  
+  # Scheduler parameters (from training)
+  warmup_epochs: ${training.warmup_epochs}
+  max_epochs: ${training.max_epochs}
+  
+  # Visualization parameters (from visualization)
+  plot_n_samples: ${visualization.plot_n_samples}
+  plot_every_n_epochs: ${visualization.plot_every_n_epochs}
