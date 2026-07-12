@@ -1,0 +1,40 @@
+model:
+  _target_: models.Diffusion.TSDiff.tsdiff_cond_base.TSDiffCond
+  # save evaluation predictions to file
+  save_predictions_to_file_path: ${save_path_dir}/predictions/${experiment_name}/${seed}/
+
+  backbone_parameters:
+    input_dim: 1
+    hidden_dim: 128
+    output_dim: 1
+    step_emb: 128
+    num_residual_blocks: 6
+    residual_block: s4
+  timesteps: 100
+  diffusion_scheduler: linear_beta_schedule
+  
+  context_length: ${data.input_window}
+  prediction_length: ${data.output_window}
+  num_feat_dynamic_real: 0
+  num_feat_static_cat: 1
+  num_feat_static_real: 1
+  cardinalities: [6]
+  freq: null
+
+  normalization: none
+  use_features: true
+  use_lags: false
+  init_skip: true
+  noise_observed: true
+  # Training hyperparameters
+  lr: 1e-4
+  min_lr: 5e-6
+  weight_decay: 1e-5
+  
+  # Scheduler parameters (from training)
+  warmup_epochs: ${training.warmup_epochs}
+  max_epochs: ${training.max_epochs}
+  
+  # Visualization parameters (from visualization)
+  plot_n_samples: ${visualization.plot_n_samples}
+  plot_every_n_epochs: ${visualization.plot_every_n_epochs}

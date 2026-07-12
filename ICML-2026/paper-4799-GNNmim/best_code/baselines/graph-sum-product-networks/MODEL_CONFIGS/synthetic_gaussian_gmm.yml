@@ -1,0 +1,113 @@
+# Dataset and Splits
+data_root: DATA
+dataset_class: dataset.SyntheticDataset
+dataset_name: SyntheticDataset_50_50
+data_splits_file: DATA_SPLITS/SyntheticDataset_50_50/SyntheticDataset_50_50_outer1_inner1.splits
+
+
+# Hardware
+device:  cuda
+max_cpus:  32
+max_gpus: 1
+gpus_per_task:  0.5
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 1
+    pin_memory: True
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: GSPN_RESULTS/UNSUPERVISED
+exp_name: synthetic_gaussian
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: False
+evaluate_every: 1
+final_training_runs: 3
+
+grid:
+  supervised_config:
+    model: model.GSPN
+    checkpoint: True
+    shuffle: True
+    batch_size: 32
+    epochs: 200
+
+
+    # Model specific arguments #
+
+    embeddings_folder: 'UNSUP_GSPN_EMBEDDINGS_BASIC/'
+
+    convolution_class: model.GSPNBaseConv
+    emission_class: model.GSPNGaussianEmission
+
+    num_layers:
+      - 1
+    avg_parameters_across_layers:
+      - False
+    num_mixtures:
+      - 40
+      - 5
+      - 15
+      - 20
+
+    init_max_variance: 30
+
+    num_hidden_neurons: 0
+
+    init_kmeans: True
+    add_self_loops: False
+
+    # ------------------------ #
+
+    # Optimizer
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr:
+            - 0.1
+            - 0.001
+          accumulate_gradients: False  # do/do not accumulate gradient across mini-batches
+
+    # Scheduler
+    scheduler: null
+
+    # Loss metric
+    loss: metric.GSPNNodeLogLikelihood
+
+    # Score metric
+    scorer:
+      - class_name: pydgn.training.callback.metric.MultiScore
+        args:
+          main_scorer: metric.GSPNNodeLogLikelihood
+          imputationlikelihood: metric.ConditionalMeanImputationLikelihood
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper
+    early_stopper:
+      - class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience: 50
+          monitor: validation_main_score
+          mode: min
+          checkpoint: True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

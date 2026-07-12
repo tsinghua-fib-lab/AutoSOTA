@@ -1,0 +1,86 @@
+# Dataset and Splits
+data_root: DATA/missing_data/
+dataset_class: dataset.TUDatasetInterfaceMissingData
+dataset_name: toluene
+data_splits_file: DATA_SPLITS/CHEMICAL/toluene/toluene_outer1_inner1.splits
+
+# Hardware
+device:  cuda
+max_cpus:  8
+max_gpus: 1
+gpus_per_task:  1
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 1
+    pin_memory: True
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: GSPN_RESULTS/UNSUPERVISED
+exp_name: missing_data_baseline
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: False
+evaluate_every: 1
+final_training_runs: 1
+
+grid:
+  supervised_config:
+    model: baseline_mask.GaussianImputation
+    checkpoint: True
+    shuffle: True
+    batch_size: 200000
+    epochs: 1
+
+
+    # Optimizer
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr:
+            - 0.1
+          accumulate_gradients: False  # do/do not accumulate gradient across mini-batches
+
+    # Scheduler
+    scheduler: null
+
+    # Loss metric
+    loss: metric.FakeLoss
+
+    # Score metric
+    scorer:
+      - class_name: pydgn.training.callback.metric.MultiScore
+        args:
+          main_scorer: metric.GSPNNodeLogLikelihood
+          mse: metric.MissingFeaturesMSE
+          mae: metric.MissingFeaturesMAE
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper
+    early_stopper:
+      - class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience: 1
+          monitor: validation_main_score
+          mode: min
+          checkpoint: True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

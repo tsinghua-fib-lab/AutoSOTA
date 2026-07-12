@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.17)
+project(Coverage)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
+#set(BOOST_ROOT E:/boost)
+#find_package(BOOST 1.79.0 COMPONENTS thread)
+#if(Boost_FOUND)
+#    message(Boost_INCLUDE_DIRS " ${Boost_INCLUDE_DIRS}")
+#    message(Boost_LIBRARY_DIRS " ${Boost_LIBRARY_DIRS}")
+#    include_directories(${Boost_INCLUDE_DIRS})
+#    link_directories(${Boost_LIBRARY_DIRS})
+    add_executable(Coverage main.cpp utilityfunction.h BFM-SWM.h Deng-Distorted.h Deng-ROI.h Deng-CostScaled.h )
+#endif()

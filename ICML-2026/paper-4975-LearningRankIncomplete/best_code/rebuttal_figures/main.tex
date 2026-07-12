@@ -1,0 +1,150 @@
+\documentclass[border=15pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+
+% --- 1. STATISTICAL SETTINGS (n=5 runs) ---
+\newcommand{\Nseeds}{5}      
+\newcommand{\zscore}{1.96}   % 95% Confidence Interval z-score
+
+% --- 2. FILE PATHS & TITLES ---
+\newcommand{\BasePath}{../output/experiment_batch_20260330_013957/}
+\newcommand{\FileA}{plackett-luce_mcar}
+\newcommand{\FileB}{plackett-luce_mnar}
+\newcommand{\FileC}{movielens_25m_top-25}
+\newcommand{\FileD}{sushi_mnar}
+
+\newcommand{\TitleA}{Plackett-Luce MCAR}
+\newcommand{\TitleB}{Plackett-Luce MNAR}
+\newcommand{\TitleC}{MovieLens Top-25}
+\newcommand{\TitleD}{Sushi MNAR}
+
+% --- 3. COLORS (Matplotlib defaults) ---
+\definecolor{cPirate}{HTML}{1F77B4}
+\definecolor{cPL}{HTML}{FF7F0E}
+\definecolor{cBorda}{HTML}{2CA02C}
+\definecolor{cRank}{HTML}{D62728}
+
+% --- 4. THE ROBUST CI MACRO ---
+\newcommand{\addshadedplot}[4]{
+    % Upper CI: mean + (1.96 * std / sqrt(5))
+    \addplot[name path=#4_upper, draw=none, forget plot] 
+        table[x={Number of Samples}, y expr=\thisrow{#2_mean} + (\zscore * \thisrow{#2_std} / sqrt(\Nseeds)), col sep=comma] {#1};
+    
+    % Lower CI: mean - (1.96 * std / sqrt(5))
+    \addplot[name path=#4_lower, draw=none, forget plot] 
+        table[x={Number of Samples}, y expr=\thisrow{#2_mean} - (\zscore * \thisrow{#2_std} / sqrt(\Nseeds)), col sep=comma] {#1};
+    
+    % Shading area
+    \addplot[forget plot, fill=#3, opacity=0.2] fill between[of=#4_upper and #4_lower];
+    
+    % Mean Line (Drawn last to sit on top of shading and grid)
+    \addplot[color=#3, thick] table[x={Number of Samples}, y={#2_mean}, col sep=comma] {#1};
+}
+
+\begin{document}
+
+\begin{minipage}{22cm}
+    \centering
+    % Tell the caption package we are inside a figure
+    \captionsetup{type=figure}
+    
+    % Adjust row spacing in the table
+    \renewcommand{\arraystretch}{1.0} 
+    
+    \begin{tabular}{cc}
+        % --- TOP ROW ---
+        \subcaptionbox{MCAR observations from a Plackett-Luce ranking model with $10$ items. The parameters have been sampled uniformly in $(0, 1)$. Each sample is obtained by choosing a pair of items uniformly at random and computing the pairwise preference feedback according to the latent ranking.\label{sub:a}}{
+            \begin{tikzpicture}
+                \begin{axis}[
+                    width=10cm, height=7.5cm, xmode=log, ymode=normal,
+                    grid=both, grid style={line width=.1pt, draw=gray!20},
+                    major grid style={line width=.2pt, draw=gray!40},
+                    xlabel={Samples}, ylabel={Kendall Tau Loss},
+                    title={\TitleA}, title style={font=\small\bfseries},
+                    enlarge x limits=false, 
+                    legend to name=sharedlegend, legend columns=-1,
+                    legend style={/tikz/every even column/.append style={column sep=0.5cm}}
+                ]
+                    \addshadedplot{\BasePath\FileA.csv}{PIRATE}{cPirate}{a1}
+                    \addshadedplot{\BasePath\FileA.csv}{PL Pairwise MLE}{cPL}{a2}
+                    \addshadedplot{\BasePath\FileA.csv}{BordaCount}{cBorda}{a3}
+                    \addshadedplot{\BasePath\FileA.csv}{RankCentrality}{cRank}{a4}
+                    
+                    \addlegendimage{color=cPirate, thick}\addlegendentry{PIRATE}
+                    \addlegendimage{color=cPL, thick}\addlegendentry{PL Pairwise MLE}
+                    \addlegendimage{color=cBorda, thick}\addlegendentry{BordaCount}
+                    \addlegendimage{color=cRank, thick}\addlegendentry{RankCentrality}
+                \end{axis}
+            \end{tikzpicture}
+        } & 
+        \subcaptionbox{MNAR observations from a Plackett-Luce ranking model with 15 items. The parameters have been sampled uniformly in $(0, 1)$. The learner observes that the first item in the latent ranking precedes the second which precedes the third and that the third last item precedes the second last which precedes the last.\label{sub:b}}{
+            \begin{tikzpicture}
+                \begin{axis}[
+                    width=10cm, height=7.5cm, xmode=log, ymode=normal,
+                    grid=both, grid style={line width=.1pt, draw=gray!20},
+                    major grid style={line width=.2pt, draw=gray!40},
+                    xlabel={Samples}, ylabel={Kendall Tau Loss},
+                    title={\TitleB}, title style={font=\small\bfseries},
+                    enlarge x limits=false
+                ]
+                    \addshadedplot{\BasePath\FileB.csv}{PIRATE}{cPirate}{b1}
+                    \addshadedplot{\BasePath\FileB.csv}{PL Pairwise MLE}{cPL}{b2}
+                    \addshadedplot{\BasePath\FileB.csv}{BordaCount}{cBorda}{b3}
+                    \addshadedplot{\BasePath\FileB.csv}{RankCentrality}{cRank}{b4}
+                \end{axis}
+            \end{tikzpicture}
+        } \\[1.8cm] % <--- INCREASED SPACING BETWEEN ROWS
+
+        % --- BOTTOM ROW ---
+        \subcaptionbox{Observations generated from the MovieLens-25M dataset. The 25 movies with the highest number of ratings are selected. Each user is treated as a sample. An independent portion of the dataset is used to estimate an underlying ranking from the average rating. The preferences observed by the learners are generated from the ratings of a given user: movie A is preferred to movie B according to user U if and only if U rated A strictly higher than B.\label{sub:c}}{
+            \begin{tikzpicture}
+                \begin{axis}[
+                    width=10cm, height=7.5cm, xmode=log, ymode=normal,
+                    grid=both, grid style={line width=.1pt, draw=gray!20},
+                    major grid style={line width=.2pt, draw=gray!40},
+                    xlabel={Samples}, ylabel={Kendall Tau Loss},
+                    title={\TitleC}, title style={font=\small\bfseries},
+                    enlarge x limits=false
+                ]
+                    \addshadedplot{\BasePath\FileC.csv}{PIRATE}{cPirate}{c1}
+                    \addshadedplot{\BasePath\FileC.csv}{PL Pairwise MLE}{cPL}{c2}
+                    \addshadedplot{\BasePath\FileC.csv}{BordaCount}{cBorda}{c3}
+                    \addshadedplot{\BasePath\FileC.csv}{RankCentrality}{cRank}{c4}
+                \end{axis}
+            \end{tikzpicture}
+        } & 
+        \subcaptionbox{MNAR observations generated from the Sushi Preference Data Set. An independent portion of the data is used to compute the underlying ranking from full-rankings thanks to a Borda count. The learner are trained by observing a MNAR portion of the comparisons in the full-ranking, according to the same positional censoring used in Figure~\ref{sub:b}.\label{sub:d}}{
+            \begin{tikzpicture}
+                \begin{axis}[
+                    width=10cm, height=7.5cm, xmode=log, ymode=normal,
+                    grid=both, grid style={line width=.1pt, draw=gray!20},
+                    major grid style={line width=.2pt, draw=gray!40},
+                    xlabel={Samples}, ylabel={Kendall Tau Loss},
+                    title={\TitleD}, title style={font=\small\bfseries},
+                    enlarge x limits=false
+                ]
+                    \addshadedplot{\BasePath\FileD.csv}{PIRATE}{cPirate}{d1}
+                    \addshadedplot{\BasePath\FileD.csv}{PL Pairwise MLE}{cPL}{d2}
+                    \addshadedplot{\BasePath\FileD.csv}{BordaCount}{cBorda}{d3}
+                    \addshadedplot{\BasePath\FileD.csv}{RankCentrality}{cRank}{d4}
+                \end{axis}
+            \end{tikzpicture}
+        }
+    \end{tabular}
+
+    \vspace{0.3cm}
+    
+    % The Shared Legend
+    \centerline{\ref{sharedlegend}}
+    
+    % --- THE FORCE FIGURE 1 RESET ---
+    \setcounter{figure}{0} 
+    
+    \captionof{figure}{Comparison of algorithms across experimental setups. The algorithms are compared by computing the Kendall Tau loss of the predicted ranking against the underlying one. Shaded regions denote the 95\% confidence interval over \Nseeds\ independent trials.}
+    \label{fig:main_results}
+\end{minipage}
+
+\end{document}

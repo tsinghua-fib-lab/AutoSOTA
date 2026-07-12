@@ -1,0 +1,29 @@
+defaults:
+  - _self_
+  - dataset: imagenet
+  - override hydra/job_logging: disabled
+  - override hydra/hydra_logging: disabled
+
+explainer_name: agi
+save_dir: null
+seed: 0
+device: cuda
+
+# classifier
+model_name: resnet18
+
+# explainer (agi.py settings with improved structure)
+exp_obj: prob
+num_neg_cls: 10
+step_size: 0.05
+max_iter: 15
+
+# evaluation
+max_eval_samples: 500  # Maximum number of samples to evaluate (null for all)
+num_vis_samples: 10    # Number of samples to visualize
+
+# hydra
+hydra:
+  run:
+    dir: .
+  output_subdir: null

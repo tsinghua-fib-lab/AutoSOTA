@@ -1,0 +1,99 @@
+name: gp_predictive
+module_path: "static.gp_predictive_hyperprior"
+seed: 0
+resume_path: "/home/juliuszz/distribution-transformers/experiments/runs/gp_predictive_hyperprior/96\\state_dicts\\model_state_dict_100.pt"
+
+n_components: 10
+state_size: 2
+
+meta_prior_kwargs:
+  dataset_size_low: 5
+  dataset_size_high: 6
+  x_domain_size: 5
+  lengthscale_prior_concentration_low: 100
+  lengthscale_prior_concentration_high: 105
+  lengthscale_prior_rate_low: 100.0
+  lengthscale_prior_rate_high: 700.0
+  output_scale_low: 1.0
+  output_scale_high: 1.00001
+  constant_mean_low: 0.0
+  constant_mean_high: 0.00001
+  x_dimensions: 5
+
+observation_covariance_matrix:
+  obs_1: [[10]]
+  obs_2: [[0.01]]
+
+distribution_embedding_kwargs:
+  embedding_hidden_layer_sizes: [256, 256]
+  embedding_activation: gelu
+  conversion_hidden_layer_sizes: [256, 256]
+  conversion_activation: gelu
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [256]
+  activation: gelu
+  jitter: 0.000001
+  eps: 0.001
+  scale_parametrisation: covariance_matrix
+
+observation_embedding_kwargs:
+  dataset:
+    hidden_layer_sizes: [256, 256]
+    activation: gelu
+    sequential: True
+  query:
+    hidden_layer_sizes: [256, 256]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 256
+  n_head: 16
+  dim_feedforward: 4096
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+training_kwargs:
+  warmup_epochs: 0
+  epochs: 100
+  steps_per_epoch: 100
+  batch_size: 1000
+  lr:  0.000152 
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: 50
+  save_loss_series: False
+
+testing_kwargs:
+  n_test_priors: 1000
+  n_kl_samples: 10000
+  plot: True
+
+  competitor_kwargs:
+    pfns:
+      transformer_kwargs:
+        d_model: 256
+        n_head: 16
+        dim_feedforward: 4096
+        dropout: 0
+        num_layers: 6
+        activation: gelu
+      n_buckets: 24
+      infinite_support: True
+      hidden_layer_sizes: [256, 256]
+      activation: gelu
+      training_kwargs:
+        warmup_epochs: 5
+        epochs: 30
+        steps_per_epoch: 100
+        batch_size: 1000
+        lr:  0.0000009
+        weight_decay: 0
+        verbose: True
+        progress_bar: True
+        save_interval: -1
+        save_loss_series: False
+
+

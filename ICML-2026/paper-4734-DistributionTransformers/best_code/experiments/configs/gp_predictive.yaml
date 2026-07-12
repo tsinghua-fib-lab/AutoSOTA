@@ -1,0 +1,87 @@
+name: gp_predictive
+module_path: "static.gp_predictive"
+seed: 0
+
+n_components: 1
+state_size: 1
+
+meta_prior_kwargs:
+  dataset_size_low: 200
+  dataset_size_high: 201
+  x_domain_size: 0.5
+  lengthscale: 0.5
+  output_scale_low: 0.9
+  output_scale_high: 1.1
+  constant_mean_low: -0.5
+  constant_mean_high: 0.5
+  x_dimensions: 5
+
+observation_covariance_matrix:
+  obs_1: [[10]]
+  obs_2: [[0.01]]
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [32]
+  activation: gelu
+  jitter: 0.000001
+  eps: 0.001
+  scale_parametrisation: covariance_matrix
+
+observation_embedding_kwargs:
+  dataset:
+    hidden_layer_sizes: [32, 32]
+    activation: gelu
+    sequential: True
+  query:
+    hidden_layer_sizes: [32, 32]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 32
+  n_head: 8
+  dim_feedforward: 2048
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+training_kwargs:
+  warmup_epochs: 5
+  epochs: 100
+  steps_per_epoch: 100
+  batch_size: 50
+  lr: 0.001
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: -1
+  save_loss_series: False
+
+testing_kwargs:
+  n_test_priors: 1000
+  n_kl_samples: 10000
+  plot: True
+  competitor_kwargs:
+    pfns:
+      transformer_kwargs:
+        d_model: 32
+        n_head: 8
+        dim_feedforward: 2048
+        dropout: 0
+        num_layers: 6
+        activation: gelu
+      n_buckets: 24
+      infinite_support: True
+      hidden_layer_sizes: [32, 32]
+      activation: gelu
+      training_kwargs:
+        warmup_epochs: 5
+        epochs: 30
+        steps_per_epoch: 100
+        batch_size: 500
+        lr: 0.001
+        weight_decay: 0
+        verbose: True
+        progress_bar: True
+        save_interval: -1
+        save_loss_series: False
+

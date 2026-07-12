@@ -1,0 +1,20 @@
+splitter:
+  root: DATA_SPLITS/CHEMICAL
+  class_name: pydgn.data.splitter.OGBGSplitter
+  args:
+    n_outer_folds: 1
+    n_inner_folds: 1
+    seed: 42
+    stratify: False  # use the given data splits
+    shuffle: True
+    inner_val_ratio: 0.
+    outer_val_ratio: 0.
+    test_ratio: 0.
+dataset:
+  root: DATA
+  class_name: dataset.OGBGmolpcbaFeatureMap
+  args:
+    root: DATA
+    name: ogbg-molpcba
+  transform:
+    - class_name: transform.DGICorruption

@@ -1,0 +1,22 @@
+{
+  "model": "Qwen/Qwen3-8B",
+  "device_name": "NVIDIA H200",
+  "fit_method": "least-squares quadratic on 1/tok_throughput vs decode_ratio r",
+  "fit_data_source": "reproduce/synthetic_e2e/outputs/e2e_grid_search/H200_Qwen3-8B (v1 baseline, pre-KVa)",
+  "scenarios": {
+    "decode_heavy": {"mu_L": 128, "mu_O": 1024, "r": 0.889, "tok_throughput_v1": 12081},
+    "balanced":     {"mu_L": 512, "mu_O": 512,  "r": 0.500, "tok_throughput_v1": 18317},
+    "prefill_heavy":{"mu_L": 1024,"mu_O": 128,  "r": 0.111, "tok_throughput_v1": 32374}
+  },
+  "beta_mb_coefficients": {
+    "a (s/tok)": 2.494e-05,
+    "b (s/tok)": 5.193e-05,
+    "c (s/tok)": 1.478e-05
+  },
+  "env_vars_for_pd_auto": {
+    "VLLM_PD_MB_COST_A": "2.493675e-05",
+    "VLLM_PD_MB_COST_B": "5.192856e-05",
+    "VLLM_PD_MB_COST_C": "1.477785e-05"
+  },
+  "timestamp": "2026-05-16"
+}

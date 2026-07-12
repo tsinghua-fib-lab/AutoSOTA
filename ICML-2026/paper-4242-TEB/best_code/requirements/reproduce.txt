@@ -1,0 +1,8 @@
+# Extra runtime dependencies for reproduce/ scripts beyond a base vllm install.
+# Install after the env is set up: pip install -r requirements/reproduce.txt
+datasets       # HF datasets — used by reproduce/common/export_dataset.py (ShareGPT, LongBench, NuminaMath, WildChat)
+aiohttp        # multi-turn benchmark client (benchmarks/multi_turn/benchmark_serving_multi_turn_threaded.py)
+quart          # disagg proxy server (benchmarks/disagg_benchmarks/disagg_prefill_proxy_server.py)
+matplotlib     # plot scripts in reproduce/*/plot*.py
+pandas         # analyze scripts in reproduce/*/analyze_*.py
+scipy          # plot_synthetic_e2e.py and similar

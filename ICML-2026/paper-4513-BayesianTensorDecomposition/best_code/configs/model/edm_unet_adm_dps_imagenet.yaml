@@ -1,0 +1,25 @@
+name: edm_from_unet_adm
+
+image_size: 256
+num_channels: 256
+num_res_blocks: 2
+channel_mult: ""
+learn_sigma: True
+class_cond: False
+use_checkpoint: False
+attention_resolutions: "32,16,8"
+num_heads: 4
+num_head_channels: 64
+num_heads_upsample: -1
+use_scale_shift_norm: True
+dropout: 0.0
+resblock_updown: True
+use_fp16: False
+use_new_attention_order: False
+model_path: ./model/256x256_diffusion_uncond.pt
+
+diffusion:
+  img_resolution: 256
+  beta_min: 0.1
+  beta_d: 19.9
+  M: 1000

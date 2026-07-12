@@ -1,0 +1,57 @@
+{
+  "description": "Data extracted from figs/validation_grid.pdf. H200, N=1024. Horizontal line values are exact (from legend text); blue curve data points are estimated from visual inspection (v2 corrected).",
+  "k_values": [128, 256, 384, 512, 640, 768, 896, 1024],
+  "workloads": {
+    "decode_heavy_in128_out1024": {
+      "throughput": {
+        "fixed_k": [14050, 13900, 13950, 13960, 13800, 13850, 14125, 14561],
+        "v1": 13974,
+        "ours": 15725,
+        "best_k": 1024,
+        "best_val": 14561
+      },
+      "tpot": {
+        "fixed_k_mean": [49, 39, 32, 34, 44, 44, 43, 49],
+        "fixed_k_p99":  [102, 70, 68, 79, 95, 93, 92, 97],
+        "v1_mean": 72.00,
+        "v1_p99": 127.31,
+        "ours_mean": 49.24,
+        "ours_p99": 57.92
+      }
+    },
+    "balanced_in512_out512": {
+      "throughput": {
+        "fixed_k": [19780, 19820, 19700, 19790, 19580, 19610, 20208, 19780],
+        "v1": 19509,
+        "ours": 20937,
+        "best_k": 896,
+        "best_val": 20208
+      },
+      "tpot": {
+        "fixed_k_mean": [60, 61, 62, 65, 68, 78, 75, 70],
+        "fixed_k_p99":  [260, 265, 340, 320, 370, 430, 480, 435],
+        "v1_mean": 89.06,
+        "v1_p99": 199.31,
+        "ours_mean": 60.36,
+        "ours_p99": 103.41
+      }
+    },
+    "prefill_heavy_in1024_out128": {
+      "throughput": {
+        "fixed_k": [32120, 32650, 32270, 32310, 32080, 32380, 32680, 32170],
+        "v1": 32228,
+        "ours": 32863,
+        "best_k": 896,
+        "best_val": 32669
+      },
+      "tpot": {
+        "fixed_k_mean": [170, 176, 179, 180, 200, 195, 185, 180],
+        "fixed_k_p99":  [1050, 1510, 2000, 2100, 2980, 3200, 2700, 2600],
+        "v1_mean": 176.06,
+        "v1_p99": 230.89,
+        "ours_mean": 114.23,
+        "ours_p99": 262.11
+      }
+    }
+  }
+}

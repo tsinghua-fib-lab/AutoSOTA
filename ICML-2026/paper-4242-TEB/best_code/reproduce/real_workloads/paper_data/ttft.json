@@ -1,0 +1,49 @@
+{
+  "description": "Data extracted from figs/ttft.pdf. TTFT (s) bar chart on real-world workloads. 2 GPUs × 3 models × 4 workloads × 3 methods. Y-axis is log scale.",
+  "workloads": ["ShareGPT", "LongBench", "WildChat", "NuminaMath"],
+  "methods": ["v0", "v1", "Ours"],
+  "models": ["Qwen3-8B", "Qwen3-30B-A3B", "Gemma-3-1B-IT"],
+  "unit": "s",
+  "gpus": {
+    "RTX PRO 6000": {
+      "Qwen3-8B": {
+        "v0":   [40, 190, 70, 2000],
+        "v1":   [28, 185, 50, 1900],
+        "Ours": [33, 190, 45, 1850],
+        "best": ["v1", "v1", "Ours", "Ours"]
+      },
+      "Qwen3-30B-A3B": {
+        "v0":   [80, 150, 55, 1800],
+        "v1":   [65, 130, 52, 2500],
+        "Ours": [75, 130, 52, 2800],
+        "best": ["v1", "v1", "Ours", "v0"]
+      },
+      "Gemma-3-1B-IT": {
+        "v0":   [28, 28, 22, 170],
+        "v1":   [28, 28, 22, 160],
+        "Ours": [28, 28, 13, 13],
+        "best": ["v0", "v0", "Ours", "Ours"]
+      }
+    },
+    "H200": {
+      "Qwen3-8B": {
+        "v0":   [7, 108, 37, 850],
+        "v1":   [19, 90, 40, 620],
+        "Ours": [18, 100, 53, 600],
+        "best": ["v0", "v1", "v0", "Ours"]
+      },
+      "Qwen3-30B-A3B": {
+        "v0":   [28, 98, 53, 520],
+        "v1":   [6, 70, 52, 400],
+        "Ours": [20, 70, 35, 530],
+        "best": ["v1", "v1", "Ours", "v1"]
+      },
+      "Gemma-3-1B-IT": {
+        "v0":   [28, 15, 24, 85],
+        "v1":   [24, 8, 22, 62],
+        "Ours": [28, 8, 24, 78],
+        "best": ["v1", "v1", "v1", "v1"]
+      }
+    }
+  }
+}

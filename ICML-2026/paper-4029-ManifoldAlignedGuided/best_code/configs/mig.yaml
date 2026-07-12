@@ -1,0 +1,36 @@
+defaults:
+  - _self_
+  - dataset: oxfordpet
+  - override hydra/job_logging: disabled
+  - override hydra/hydra_logging: disabled
+
+explainer_name: mig
+save_dir: null
+seed: 0
+device: cuda
+
+# classifier
+model_name: resnet18
+
+# explainer
+num_steps: 200  # Number of interpolation points (T)
+baseline_method: zero
+exp_obj: prob
+
+# Geodesic specific parameters
+alpha: 0.00005          # Learning rate for geodesic optimization
+max_iterations: 2    # Max iterations for geodesic path
+epsilon: 1000         # Convergence threshold
+
+# VAE settings
+vae_type: sd2  # sd1, sd2, mar, kd  (mar requires kl16.ckpt; see README)
+
+# evaluation
+max_eval_samples: 500  # Maximum number of samples to evaluate (null for all)
+num_vis_samples: 10    # Number of samples to visualize
+
+# hydra
+hydra:
+  run:
+    dir: .
+  output_subdir: null

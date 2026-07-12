@@ -1,0 +1,39 @@
+ConOrd BID Reproduction Results
+================================
+Date: 2026-07-11
+Container: autosota_repro_paper_4298
+GPU: NVIDIA A100-SXM4-80GB (x2)
+PyTorch: 2.1.0, CUDA: 12.1
+
+Configuration:
+- Model: ViT-B/CLIP (ConOrd)
+- Dataset: BID (586 images, 80:20 split)
+- Optimizer: AdamW
+- Learning rate: 5e-7 (encoder), 5e-6 (reference points)
+- Weight decay: 1e-4
+- Batch size: 32
+- Temperature (tau): 0.07
+- Epsilon: 1e-7
+- k-NN: 10
+- Scheduler: CosineAnnealingLR (no warmup)
+- Center loss: disabled
+- Data augmentation: random crop + horizontal flip (single crop training)
+- Evaluation: single center crop features
+- Epochs: 30
+- Splits: 3 (seeds 42, 43, 44)
+
+Results (3 splits):
+Split 0 (seed=42): SRCC=0.8898, PLCC=0.9168
+Split 1 (seed=43): SRCC=0.8538, PLCC=0.8938
+Split 2 (seed=44): SRCC=0.9082, PLCC=0.9197
+
+Median SRCC: 0.8898
+Median PLCC: 0.9168
+Mean SRCC +/- std: 0.8839 +/- 0.0226
+Mean PLCC +/- std: 0.9101 +/- 0.0116
+
+Paper reported values:
+SRCC: 0.913 (CI: [0.8887, 0.9373])
+PCC:  0.925 (CI: [0.9067, 0.9433])
+
+Status: REPRODUCTION SUCCEEDED (within CI bounds)

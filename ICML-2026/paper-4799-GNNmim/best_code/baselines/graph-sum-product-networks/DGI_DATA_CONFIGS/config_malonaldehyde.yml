@@ -1,0 +1,20 @@
+splitter:
+  root: DATA_SPLITS/CHEMICAL
+  class_name: pydgn.data.splitter.Splitter
+  args:
+    n_outer_folds: 1
+    n_inner_folds: 1
+    seed: 42
+    stratify: False
+    shuffle: True
+    inner_val_ratio: 0.1
+    outer_val_ratio: 0.1
+    test_ratio: 0.1
+dataset:
+  root: DATA
+  class_name: pydgn.data.dataset.TUDatasetInterface
+  args:
+    root: DATA
+    name: malonaldehyde
+  transform:
+    - class_name: transform.DGICorruption

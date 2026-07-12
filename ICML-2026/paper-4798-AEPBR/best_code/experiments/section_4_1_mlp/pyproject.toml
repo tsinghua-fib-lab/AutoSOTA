@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "approximate-equivariance-projection-section-4-1"
+version = "0.1.0"
+description = "SO(2) neural-network experiments for Section 4.1."
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.0",
+  "numpy",
+  "matplotlib",
+  "pytest",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = [
+  "approx_so2_equiv_nn",
+  "approx_so2_linear",
+  "approx_so2_tensor_product",
+  "so2_equiv_nn",
+  "so2_irreps_projection",
+  "so2_linear",
+  "so2_tensor_product",
+]
+

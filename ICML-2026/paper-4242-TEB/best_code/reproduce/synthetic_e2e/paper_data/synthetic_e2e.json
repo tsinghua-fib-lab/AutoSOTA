@@ -1,0 +1,51 @@
+{
+  "description": "Data extracted from figs/fig_synthetic_e2e.pdf. Qwen3-8B synthetic workloads on RTX PRO 6000 and H200. Bar chart: v0/v1/Ours × 3 workloads × 3 metrics × 2 GPUs.",
+  "workloads": ["Decode-heavy", "Balanced", "Prefill-heavy"],
+  "methods": ["v0", "v1", "Ours"],
+  "gpus": {
+    "RTX PRO 6000": {
+      "RPS": {
+        "v0":   [5.6, 8.4, 14.0],
+        "v1":   [5.3, 7.7, 10.3],
+        "Ours": [6.1, 9.2, 14.6],
+        "best": ["Ours", "Ours", "Ours"]
+      },
+      "ITL": {
+        "v0":   [0.095, 0.13, 0.23],
+        "v1":   [0.045, 0.07, 0.19],
+        "Ours": [0.065, 0.08, 0.14],
+        "best": ["v1", "Ours", "Ours"],
+        "unit": "s"
+      },
+      "TTFT": {
+        "v0":   [200, 140, 80],
+        "v1":   [245, 175, 135],
+        "Ours": [185, 130, 90],
+        "best": ["Ours", "Ours", "v0"],
+        "unit": "s"
+      }
+    },
+    "H200": {
+      "RPS": {
+        "v0":   [15.8, 21.0, 28.0],
+        "v1":   [14.0, 20.3, 28.2],
+        "Ours": [13.8, 20.5, 28.5],
+        "best": ["v0", "v0", "Ours"]
+      },
+      "ITL": {
+        "v0":   [0.065, 0.048, 0.175],
+        "v1":   [0.070, 0.044, 0.165],
+        "Ours": [0.059, 0.055, 0.110],
+        "best": ["v0", "v1", "Ours"],
+        "unit": "s"
+      },
+      "TTFT": {
+        "v0":   [47, 56, 41],
+        "v1":   [53, 58, 40],
+        "Ours": [61, 52, 44],
+        "best": ["v0", "Ours", "v0"],
+        "unit": "s"
+      }
+    }
+  }
+}

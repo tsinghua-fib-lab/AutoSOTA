@@ -1,0 +1,49 @@
+{
+  "description": "Data extracted from figs/tpot.pdf. TPOT (ms) bar chart on real-world workloads. 2 GPUs × 3 models × 4 workloads × 3 methods. Y-axis is log scale.",
+  "workloads": ["ShareGPT", "LongBench", "WildChat", "NuminaMath"],
+  "methods": ["v0", "v1", "Ours"],
+  "models": ["Qwen3-8B", "Qwen3-30B-A3B", "Gemma-3-1B-IT"],
+  "unit": "ms",
+  "gpus": {
+    "RTX PRO 6000": {
+      "Qwen3-8B": {
+        "v0":   [210, 500, 175, 82],
+        "v1":   [275, 480, 175, 85],
+        "Ours": [92, 530, 120, 68],
+        "best": ["Ours", "v1", "Ours", "Ours"]
+      },
+      "Qwen3-30B-A3B": {
+        "v0":   [195, 380, 105, 110],
+        "v1":   [190, 340, 140, 105],
+        "Ours": [110, 340, 92, 92],
+        "best": ["Ours", "v1", "Ours", "Ours"]
+      },
+      "Gemma-3-1B-IT": {
+        "v0":   [95, 125, 105, 18],
+        "v1":   [13, 500, 25, 18],
+        "Ours": [95, 125, 105, 18],
+        "best": ["v1", "Ours", "v1", "v1"]
+      }
+    },
+    "H200": {
+      "Qwen3-8B": {
+        "v0":   [200, 500, 190, 42],
+        "v1":   [70, 350, 125, 33],
+        "Ours": [75, 470, 80, 30],
+        "best": ["v1", "v1", "Ours", "Ours"]
+      },
+      "Qwen3-30B-A3B": {
+        "v0":   [155, 340, 125, 110],
+        "v1":   [95, 230, 65, 70],
+        "Ours": [75, 380, 70, 60],
+        "best": ["Ours", "v1", "v1", "Ours"]
+      },
+      "Gemma-3-1B-IT": {
+        "v0":   [13, 70, 17, 22],
+        "v1":   [8, 60, 15, 20],
+        "Ours": [13, 70, 15, 18],
+        "best": ["v1", "v1", "v1", "Ours"]
+      }
+    }
+  }
+}

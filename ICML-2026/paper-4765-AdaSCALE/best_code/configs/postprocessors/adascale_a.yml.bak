@@ -1,0 +1,18 @@
+postprocessor:
+  name: adascale_a
+  APS_mode: True
+  postprocessor_args:
+    num_samples: 5000
+    percentile: [75, 85]
+    k1: 1
+    k2: 5
+    lmbda: 10
+    o: 0.05
+  postprocessor_sweep:
+    percentile_list: [[60, 65], [60, 70], [60, 75], [60, 80], [60, 85], [60, 90], [60, 95], [60, 99]]
+    # For ResNet-50 model, following percentile hyperparameter works best
+    # percentile_list: [[80, 85]]
+    k1_list: [1]
+    k2_list: [5]
+    lmbda_list: [10]
+    o_list: [0.05]

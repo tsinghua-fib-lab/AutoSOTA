@@ -1,0 +1,99 @@
+name: gp_predictive
+module_path: "static.gp_predictive_hyperprior_plot_dist"
+seed: 4
+model_path: "/home/juliuszz/distribution-transformers/experiments/runs/gp_predictive_hyperprior/47\\state_dicts\\model_state_dict.pt"
+pfn_path: "/home/juliuszz/distribution-transformers/experiments/runs/gp_predictive_hyperprior_pfn/4\\state_dicts\\pfns\\pfn_state_dict.pt"
+
+n_components: 16
+state_size: 2
+
+meta_prior_kwargs:
+  dataset_size_low: 10
+  dataset_size_high: 11
+  x_domain_size: 1
+  lengthscale_prior_concentration_low: 2
+  lengthscale_prior_concentration_high: 4
+  lengthscale_prior_rate_low: 5
+  lengthscale_prior_rate_high: 7
+  output_scale_low: 2.0
+  output_scale_high: 2.00001
+  constant_mean_low: 0.0
+  constant_mean_high: 0.00001
+  x_dimensions: 1
+
+observation_covariance_matrix:
+  obs_1: [[10]]
+  obs_2: [[0.01]]
+
+distribution_embedding_kwargs:
+  embedding_hidden_layer_sizes: [256, 256]
+  embedding_activation: gelu
+  conversion_hidden_layer_sizes: [256, 256]
+  conversion_activation: gelu
+
+component_embedding_kwargs:
+  hidden_layer_sizes: [256]
+  activation: gelu
+  jitter: 0.000001
+  eps: 0.001
+  scale_parametrisation: covariance_matrix
+
+observation_embedding_kwargs:
+  dataset:
+    hidden_layer_sizes: [256, 256]
+    activation: gelu
+    sequential: True
+  query:
+    hidden_layer_sizes: [256, 256]
+    activation: gelu
+
+transformer_kwargs:
+  d_model: 256
+  n_head: 16
+  dim_feedforward: 4096
+  dropout: 0
+  num_layers: 6
+  activation: gelu
+
+training_kwargs:
+  warmup_epochs: 0
+  epochs: 300
+  steps_per_epoch: 100
+  batch_size: 1000
+  lr: 0.000001
+  weight_decay: 0
+  verbose: True
+  progress_bar: True
+  save_interval: 50
+  save_loss_series: False
+
+testing_kwargs:
+  n_test_priors: 1000
+  n_kl_samples: 10000
+  plot: True
+  competitor_kwargs:
+    pfns:
+      transformer_kwargs:
+        d_model: 256
+        n_head: 16
+        dim_feedforward: 4096
+        dropout: 0
+        num_layers: 6
+        activation: gelu
+      n_buckets: 24
+      infinite_support: True
+      hidden_layer_sizes: [256, 256]
+      activation: gelu
+      training_kwargs:
+        warmup_epochs: 5
+        epochs: 300
+        steps_per_epoch: 100
+        batch_size: 500
+        lr: 0.000001
+        weight_decay: 0
+        verbose: True
+        progress_bar: True
+        save_interval: 50
+        save_loss_series: False
+    
+

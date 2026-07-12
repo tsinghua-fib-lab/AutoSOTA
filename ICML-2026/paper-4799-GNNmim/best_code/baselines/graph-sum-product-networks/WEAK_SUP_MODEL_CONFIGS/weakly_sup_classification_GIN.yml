@@ -1,0 +1,117 @@
+# Telegram Bot
+# telegram_config_file: telegram_config.yml
+
+# Dataset and Splits
+data_root: DATA
+dataset_class: dataset.TUDatasetInterfaceRegression
+dataset_name:  malonaldehyde
+data_splits_file:  DATA_SPLITS/CHEMICAL/malonaldehyde/malonaldehyde_outer1_inner1.splits
+
+
+# Hardware
+device:  cuda
+max_cpus:  24
+max_gpus: 3
+gpus_per_task:  0.5
+
+
+# Data Loading
+dataset_getter: provider.WeakSupervisionDataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 1
+    pin_memory: True
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: GSPN_RESULTS/SUPERVISED/
+exp_name: gin_grid_search_weaksup_0001
+experiment: weakly_supervised_task.WeaklySupervisedTask
+higher_results_are_better: False  # MSE
+evaluate_every: 1
+final_training_runs: 10
+
+
+grid:
+  weak_supervision_percentage: 0.001
+
+  supervised_config:
+    model: baselines.GIN
+    checkpoint: True
+    shuffle: True
+    batch_size:
+      - 8
+      - 32
+      - 128
+    epochs: 1000
+
+    # Model specific arguments #
+    train_eps: True
+
+    global_aggregation:
+      - sum
+      - mean
+
+    dim_embedding:
+      - 32
+      - 256
+      - 512
+
+    num_layers:
+      - 2
+      - 5
+
+    dropout:
+      - 0
+      - 0.5
+
+    # ------------------------ #
+
+    # Optimizer (with an example - 3 possible alternatives)
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr:
+            - 0.01
+            - 0.0001
+          weight_decay: 0.
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric
+    loss: pydgn.training.callback.metric.MeanAverageError
+
+    # Score metric
+    scorer:
+      - class_name: pydgn.training.callback.metric.MultiScore
+        args:
+          main_scorer: pydgn.training.callback.metric.MeanAverageError
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional, with an example of "patience" early stopping on the validation score)
+    early_stopper:
+      -
+        class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience: 500
+          monitor: validation_main_loss
+          mode: min
+          checkpoint: True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

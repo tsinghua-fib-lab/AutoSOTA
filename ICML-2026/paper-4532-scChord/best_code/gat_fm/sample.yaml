@@ -1,0 +1,32 @@
+# Sampling / inference config for GAT-FM
+
+# Required
+checkpoint: outputs/dit_fm_run/best.ckpt
+adata_path: dataset/GSE100866_adata.h5ad
+rna_embed_path: dataset/rna_embedding/GSE100866.npy
+
+# Optional paths (auto-detected from checkpoint directory when null)
+config_path: null
+norm_stats_path: null
+ppi_path: dataset/string_interactions_short_GSE100866.tsv
+
+# Output
+output_path: predictions.npy
+
+# ODE sampling
+num_steps: 100
+solver: rk4
+
+# Guided sampling
+guided: true
+sample_mask_ratio: 0.2
+
+# Inference
+batch_size: 64
+seed: 42
+gpu: null
+
+# Evaluation
+evaluate: true
+save_normalized: false
+

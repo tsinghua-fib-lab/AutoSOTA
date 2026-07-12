@@ -1,0 +1,21 @@
+model:
+  pretrained_name: M3GNet-ANI-1x-Subset-PES
+  cutoff: 5.0
+train:
+  seed: 42
+  epochs: 50
+  batch_size: 16
+  lr: 0.001
+  energy_weight: 1.0
+  force_weight: 0.1
+  stress_weight: 0.0
+  decay_steps: 1000
+  decay_alpha: 0.01
+  num_workers: 0
+data:
+  train_path: data/prepared/combined_train.extxyz
+  val_path: data/prepared/combined_val.extxyz
+  test_path: data/prepared/combined_test.extxyz
+  cache_dir: data/cache/combined
+output:
+  run_dir: runs/combined

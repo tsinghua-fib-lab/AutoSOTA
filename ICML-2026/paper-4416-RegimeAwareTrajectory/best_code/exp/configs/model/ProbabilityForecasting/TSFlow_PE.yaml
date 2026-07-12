@@ -1,0 +1,48 @@
+model:
+  _target_: models.FlowMatching.TSFlow.tsflow_cond.TSFlowCond
+
+  save_predictions_to_file_path: ${save_path_dir}/predictions/${experiment_name}/${seed}/
+
+  target_dim: 1
+  frequency: const
+  use_lags: False
+  plot_n_samples: ${visualization.plot_n_samples}
+  plot_every_n_epochs: ${visualization.plot_every_n_epochs}
+
+  backbone_params:
+    input_dim: 1
+    output_dim: 1
+    step_emb: 256
+    num_residual_blocks: 4
+    residual_block: s4
+    hidden_dim: 256
+    dropout: 0.0
+    init_skip: False
+    feature_skip: True
+
+  normalization: zscore
+ 
+  use_ema: False
+  # use_lags: True
+  
+  num_steps: 16
+  solver: euler
+  matching: random
+
+  # device: cuda:0
+  
+  optimizer_params: 
+    lr: 2.e-3
+
+  prior_params:
+    kernel: PE
+    gamma: 1
+    context_freqs: ${data.input_window}
+
+  ema_params: 
+    beta: 0.9999
+    update_after_step: 128
+    update_every: 1
+
+  context_length: ${data.input_window} # 360 for `D`
+  prediction_length: ${data.output_window} # 30 for `D`
