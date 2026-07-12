@@ -153,9 +153,6 @@ function derivePaperStatus(paper) {
     isFailureValue(paper.pipeline_status) ||
     stages.some((stage) => stage.state === "failed");
 
-  const sotaSuccess = stages.some((stage) => stage.key === "sota" && stage.state === "success");
-  const repoSuccess = hasValue(paper.autosota_repo_url) && !hasFailure;
-
   if (pipelineSuccess) {
     return {
       key: "success",
@@ -172,16 +169,6 @@ function derivePaperStatus(paper) {
       label: STATUS_META.failed.label,
       className: STATUS_META.failed.className,
       failureCategory: getFailureCategory(paper, stages),
-      stages,
-    };
-  }
-
-  if (sotaSuccess || pipelineSuccess || repoSuccess) {
-    return {
-      key: "success",
-      label: STATUS_META.success.label,
-      className: STATUS_META.success.className,
-      failureCategory: "",
       stages,
     };
   }
