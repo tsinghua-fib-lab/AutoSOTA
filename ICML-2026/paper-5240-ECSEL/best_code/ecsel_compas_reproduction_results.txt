@@ -1,0 +1,21 @@
+======================================================================
+COMPAS Reproduction Results (Mon Jul 13 06:45:51 2026)
+======================================================================
+Dataset shape: (4589, 7)
+Train shape: (3671, 7), Test shape: (918, 7)
+Best CV F1: 0.6837
+Best params: {'K': 3, 'l1_strength': 0.001623616273384131, 'batch_size': 64, 'lr': 0.0017516096124643734, 'num_epochs': 869, 'patience': 50, 'sigmoid_threshold': 0.5}
+Learned formula:
+z = 0.11 * age^-0.39 * sex^0.12 * race^0.04 * priors_count^-0.32 * c_charge_degree^-0.04 + 0.75 * age^-0.59 * sex^0.03 * race^0.02 * priors_count^0.66 * juv_fel_count^-0.06 * juv_misd_count^-0.11 - 0.31 * age^0.12 * sex^-0.01 * priors_count^-0.10 * c_charge_degree^-0.03 * juv_fel_count^-0.11 * juv_misd_count^-0.13
+P(1) = sigmoid(z) = 1 / (1 + exp(-z))
+Test metrics:
+  Accuracy: 0.6819
+  LogLoss: 0.5907
+  F1: 0.6777
+  Precision: 0.6848
+  Recall: 0.6819
+  MinorityRecall: 0.5691
+  MajorityRecall: 0.7831
+  MinorityPrecision: 0.7017
+  MajorityPrecision: 0.6696
+Fit time: 10.07s | Test time: 0.0010s

@@ -1,0 +1,58 @@
+# @package _global_
+# Rebuttal Experiment 5b: Hyperparameter Sensitivity (Light Tunnel)
+#
+# Same LR x grad-clip sweep as rebuttal_hp_sensitivity, but on the light_tunnel task.
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "rebuttal_hp_sensitivity_lt"
+  description: "Hyperparameter sensitivity: LR and gradient clipping sweep (light tunnel)"
+  tags: ["rebuttal", "sensitivity", "hyperparameters", "light_tunnel"]
+  author: "pruhlman"
+
+data:
+  n_pool: 2000
+  n_test: 3000
+  calibration_sizes: [200]
+  n_sim: 50000
+  seed: 42
+
+tasks:
+  - light_tunnel
+
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: []
+
+seeds: [33, 43, 53]
+
+skip_existing: true
+
+evaluation:
+  enabled: true
+  metrics: ["joint_wasserstein", "joint_mmd"]
+  conditional_metrics: ["cond_c2st"]
+  conditional_tasks: []
+  num_joint_samples: 3000
+  num_conditional_obs: 5
+  num_posterior_samples: 2000
+  batch_size: 1000
+  skip_existing: true
+
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    max_patience: null
+
+task_overrides:
+  rescale: "z_score"

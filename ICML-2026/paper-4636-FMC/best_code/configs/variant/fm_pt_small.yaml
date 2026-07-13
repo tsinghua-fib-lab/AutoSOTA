@@ -1,0 +1,39 @@
+# Small fm_post_transform variant - base configuration
+#
+# Uses smaller flow networks to reduce overfitting on low-data calibration.
+# Architecture is task-specific - see variant/task/<task>/fm_pt_small.yaml
+#
+# Usage:
+#   python run_benchmark.py command=train_variant \
+#       +experiment=comparison_benchmark \
+#       variant_name=fm_pt_small
+
+variant_name: fm_pt_small
+method: fm_post_transform
+
+# Base distribution
+base_dist: fmpe
+
+# Training parameters
+training_params:
+  lr: 1e-4
+  epochs: 200
+  batch_size: 256
+  train_size: 0.8
+
+# Model configuration - architecture inherited from task config
+config:
+  npe: fmpe
+
+# HPO configuration
+hpo:
+  enabled: false
+  n_trials: 50
+  search_space:
+    lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-2
+    batch_size:
+      type: categorical
+      choices: [64, 128, 256]

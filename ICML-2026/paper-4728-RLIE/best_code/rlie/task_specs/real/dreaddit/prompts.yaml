@@ -1,0 +1,76 @@
+observations:
+  multi_content: |
+    A reddit post is the following: "${text}"
+    The poster's stress status is: ${label}.
+batched_generation:
+  system: |-
+    You're a psychologist and social scientist studying people's stress and their online posts.
+    given a set of reddit posts, we want to generate hypotheses that are useful for deciding people's stress status (has stress or no stress) based on reddit post.
+
+    Using the given examples, please propose ${num_hypotheses} possible hypothesis pairs.
+    These hypotheses should identify specific patterns that occur across the provided posts.
+
+    Each hypothesis should contain a pair of the following:
+    a. A hypothesis about what makes the post more likely to indicate that the poster has stress
+    b. The opposite hypothesis about what makes the post more likely to indicate that the poster does not have stress
+
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    The hypotheses should analyze what kind of posts are likely to indicate stress or no stress.
+  user: |-
+    We have seen some reddit posts:
+    ${observations}
+    Please generate hypotheses that are useful for deciding people's stress status (has stress or no stress) based on reddit post.
+    Propose ${num_hypotheses} possible hypotheses. Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+inference:
+  system: |-
+    You're a psychologist and social scientist working on a project to identify whether a person has stress based on reddit posts.
+    From past experiences, you learned a pattern.
+    You need to determine whether each of the patterns holds for the current reddit post, and also predict whether the poster of the reddit post has stress or not based on the content of the post.
+    Give an answer. The answer should be has stress, no stress or not applicable.
+    Give your final answer in the format of {Final answer: answer}
+  user: |-
+    Our learned patterns: ${hypothesis}
+    A reddit post is the following: "${text}"
+
+    Given the pattern you learned above, give an answer of whether the poster of the reddit post has stress or not based on the content of the post.
+
+    You can:
+    1. Consider if the pattern can be applied to the reddit post.
+    2. Based on the pattern, does the poster of a reddit post has stress or not? It is also fine if pattern does not apply.
+
+    Please give your final answer in the format of {Final answer: has stress}, {Final answer: no stress} or {Final answer: no applicable}
+batched_generation_refine:
+  system: |-
+    You're a psychologist and social scientist studying people's stress and their online posts.
+    Given misclassified reddit posts and prior hypotheses, your goal is to rethink and then propose ${num_hypotheses} new, more accurate hypothesis pairs.
+    These hypotheses should identify specific patterns that occur across the provided posts.
+
+    Each hypothesis should contain a pair of the following:
+    a. A hypothesis about what makes the post more likely to indicate that the poster has stress
+    b. The opposite hypothesis about what makes the post more likely to indicate that the poster does not have stress
+
+    Generate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    The hypotheses should analyze what kind of posts are likely to indicate stress or no stress.
+  user: |-
+    We have examples of reddit posts that the previous hypotheses got wrong:
+    ${observations}
+
+    Here are some of the prior hypotheses for reference:
+    ${hypotheses_text}
+
+    Please generate new hypotheses to improve predictions of whether a post indicates stress.
+    You may refine the previous hypotheses (like tightening conditions, adding exceptions, or rephrasing), or introduce new hypotheses to cover new, distinct angles when prior ones are insufficient or misaligned.
+
+    Propose ${num_hypotheses} possible hypotheses.
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+multiple_hypotheses_inference:
+  system: "You're a psychologist and social scientist working on a project to identify whether a person has stress based on reddit posts.\nFrom past experiences, you learned some patterns. \nYou need to determine whether each of the patterns holds for the current reddit post, and also predict whether the poster of the reddit post has stress or not based on the content of the post.\nGive an answer. The answer should be \"has stress\" or \"no stress\".\nGive your final answer in the format of {Final answer: answer}"
+  user: "Our learned patterns: ${hypotheses}                          \nA reddit post is the following: \"${text}\"\n\nGiven the pattern you learned above, give an answer of whether the poster of the reddit post has stress or not based on the content of the post.\n\nYou can:\n1. Think about which pattern can be applied to the reddit post.\n2. Based on the pattern, does the poster of a reddit post has stress or not? Answer should be \"has stress\" or \"no stress\".\n\nPlease give your final answer in the format of {Final answer: has stress} or {Final answer: no stress}"
+multiple_hypotheses_inference_with_linear_regression:
+  system: "You're a psychologist and social scientist working on a project to identify whether a person has stress based on reddit posts.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting \"has stress\" vs \"no stress\". The regression model also outputs a referenced label for the review, which should be treated as a suggestion.\nReview the weighted patterns, consider how the bias interacts with them, and use the regression model's suggested label as a reference. \nYou need to determine whether each of the patterns holds for the current reddit post, and also predict whether the poster of the reddit post has stress or not based on the content of the post.\nGive an answer. The answer should be \"has stress\" or \"no stress\".\nGive your final answer in the format of {Final answer: answer}"
+  user: "Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):\n${weighted_hypotheses}\n\nBias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):\n${bias}\n\nA reddit post is the following: \"${text}\"\n\nGiven the pattern you learned above, give an answer of whether the poster of the reddit post has stress or not based on the content of the post.\n\nYou can:\n1. Think about which pattern can be applied to the reddit post.\n2. Decide whether the poster of a reddit post has stress or not, you can used the weighted patterns and bias as reference. \n\nPlease give your final answer in the format of {Final answer: has stress} or {Final answer: no stress}."
+multiple_hypotheses_inference_with_linear_regression_and_label:
+  system: "You're a psychologist and social scientist working on a project to identify whether a person has stress based on reddit posts.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting \"has stress\" vs \"no stress\". The regression model also outputs a referenced label for the review, which should be treated as a suggestion.\nReview the weighted patterns, consider how the bias interacts with them, and use the regression model's suggested label as a reference. \nYou need to determine whether each of the patterns holds for the current reddit post, and also predict whether the poster of the reddit post has stress or not based on the content of the post.\nGive an answer. The answer should be \"has stress\" or \"no stress\".\nGive your final answer in the format of {Final answer: answer}"
+  user: "Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):\n${weighted_hypotheses}\n\nBias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):\n${bias}\n\nA reddit post is the following: \"${text}\"\n\nWe have used the regression model to get a referenced label: ${model_prediction}\n\nGiven the pattern you learned above, give an answer of whether the poster of the reddit post has stress or not based on the content of the post.\n\nYou can:\n1. Think about which pattern can be applied to the reddit post.\n2. Decide whether the poster of a reddit post has stress or not, you can used the weighted patterns, bias, predicted label as reference. \n\nPlease give your final answer in the format of {Final answer: has stress} or {Final answer: no stress}."

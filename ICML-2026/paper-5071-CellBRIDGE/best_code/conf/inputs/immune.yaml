@@ -1,0 +1,18 @@
+mode: from_h5ad
+h5ad_path: data/immune_lite.h5ad
+domain_key: timestamp
+start_label: "0"
+eval_label: "2"
+end_label: "6"
+t_eval: 0.33333333
+pair_mode: liana_immune
+name: immune
+subsample: false
+subsampling_size: 5000
+rep_transform:
+  _target_: cellbridge.data.representation.TransformPipeline
+  transforms:
+    - _target_: cellbridge.data.representation.truncate
+      n_dims: 20
+      _partial_: true
+folder_artifacts: "/mnt/data/nvth2.data/experiments/immune/align_sweep/2025-09-21/21-34-03/artifacts"

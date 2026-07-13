@@ -1,0 +1,187 @@
+# High-dimensional Gaussian task - refactored to use modular config system
+#
+# Architecture: resmlp
+# Rescaling: none (special for this task)
+#
+# RESCALING NOTE:
+# The 'rescale' parameter controls data preprocessing for all methods/baselines.
+# Options: "none", "z_score", "whiten"
+
+name: "high_dim_gaussian"
+num_samples: 50000
+rescale: "none"
+generation: "independent"
+num_cal: [10, 50, 200, 1000]
+use_sbi: False
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "pure_gaussian"
+  params:
+    theta_dim: 3
+    obs_dim: 10
+    prior_var_scale: 1
+    likelihood_var_scale: 1
+    noisy_var_scale: 0.1
+    seed: 0
+
+# =============================================================================
+# Method configurations - only overrides from defaults
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+fmpe:
+  config:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [64, 64, 64, 64, 64]
+        mlp_params: {}
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 20
+    train_size: 0.8
+
+fmcpe_fm:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+fm_post_transform:
+  config:
+    npe: "fmpe"
+    flow_theta:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: "resmlp"
+          hidden_dim: [64, 64, 64, 64, 64]
+          mlp_params: {}
+    flow_x:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: "resmlp"
+          hidden_dim: [64, 64, 64, 64, 64]
+          mlp_params: {}
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: null  # No early stopping, return model at last epoch
+    train_size: 0.8
+
+fm_post_transform_only_ut:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+fm_post_transform_plug_y:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+# Baselines
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+rope:
+  config:
+    tau: 1.0
+    gamma: 1.0
+  training_params:
+    lr: 1e-5
+    epochs: 1000
+    batch_size: 100
+    max_patience: 10
+    train_size: 0.8
+    rescale: ${task.npe.training.rescale}
+
+npe_rs:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: "z_score"
+    mmd_weight: 10.0
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+mf_npe:
+  # MF-NPE: Misspecification-Finetuned NPE
+  # Uses pretrained NPE architecture, finetunes on calibration data (theta, y)
+  training:
+    lr: 1e-5  # Lower LR for finetuning
+    batch_size: 256
+    epochs: 500
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.npe.training.rescale}
+
+npe_pfn:
+  # NPE-PFN: TabPFN-based Neural Posterior Estimation
+  # Uses in-context learning instead of gradient descent
+  # Valid filter types: 'latest_filtering', 'random_filtering', 'standardized_euclidean_filtering'
+  filter_type: "latest_filtering"  # Use latest samples if context exceeds limit
+  filter_context_size: 10000       # TabPFN context size limit

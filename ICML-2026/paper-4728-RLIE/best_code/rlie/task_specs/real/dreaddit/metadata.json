@@ -1,0 +1,38 @@
+{
+    "task_name": "Dreddit",
+    "task_type": "classification",
+    "task_description": "Detecting mental stress signals from Reddit posts across different communities. This task investigates linguistic features that are indicative to mental stress in social media content.",
+    
+    "features": {
+        "text": {
+            "type": "text",
+            "description": "Reddit posts from different communities. The text is preprocessed to remove URLs, usernames, and other non-textual content."
+        }
+    },
+    
+    "labels": {
+        "label": {
+            "type": "binary",
+            "values": ["has stress", "no stress"],
+            "description": "Binary label indicating whether the Reddit post contains mental stress signals."
+        }
+    },
+    
+    "dataset_sizes": {
+        "train": 200,
+        "validation": 300,
+        "test": 500,
+        "ood": 500
+    },
+    
+    "known_hypotheses": [
+        "**Increased self-focus** in language, especially when expressing negative emotions, often indicates stress.",
+        "Language indicative of stress frequently suggests **exhaustion**.",
+        "Expressions of **hurt, physical pain, and feeling sick** are often related to stress.",
+        "A perceived **lack of control** over situations can be a sign of stress.",
+        "High-stress social media posts often discuss **stressful situations, significant life events, and requests for community support**.",
+        "Discussions related to **health and mental well-being, the costs of school loans and debt, social relationships, and job considerations** often correlate with increased stress.",
+        "**Temporal patterns** in social media posts can be indicative of stress levels.",
+        "**Anticipation and uncertainty about the future** are recurring themes in topics that cause stress."
+    ]
+}

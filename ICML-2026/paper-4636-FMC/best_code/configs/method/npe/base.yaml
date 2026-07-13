@@ -1,0 +1,21 @@
+# NPE (Neural Posterior Estimation) base config
+# sbi-based baseline for simulation
+#
+# Usage: defaults: [method/npe: base]
+
+# @package _global_
+
+method_name: npe
+
+training_params:
+  lr: 1e-3
+  batch_size: 2048
+  epochs: 2000
+  train_size: 0.8
+
+density_estimator: 'nsf'
+
+params:
+  embedding_net: {}
+  npe_params:
+    transforms: 5

@@ -1,0 +1,38 @@
+# ResidualMLP architecture config
+# For simple synthetic tasks (gaussian, ou_process, etc.)
+#
+# Use: defaults: [architecture: resmlp]
+
+name: resmlp
+
+# Flow for theta|y
+flow_theta:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'power'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {}
+    prior_params: {"rate": 2.0}
+    base_dist_params: {}
+    drift:
+      architecture: "resmlp"
+      hidden_dim: [64, 64, 64, 64, 64]
+      mlp_params: {}
+
+# Flow for x|y
+flow_x:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'power'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {}
+    prior_params: {"rate": 2.0}
+    base_dist_params: {}
+    drift:
+      architecture: "resmlp"
+      hidden_dim: [64, 64, 64, 64, 64]
+      mlp_params: {}

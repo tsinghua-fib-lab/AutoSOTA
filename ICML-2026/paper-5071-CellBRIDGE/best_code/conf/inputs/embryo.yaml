@@ -1,0 +1,18 @@
+mode: from_h5ad
+h5ad_path: data/embryo_lite.h5ad
+domain_key: sample_labels
+start_label: Day 00-03
+eval_label: Day 06-09
+end_label: Day 12-15
+t_eval: 0.5
+pair_mode: liana_embryo
+name: embryo
+subsample: false
+folder_artifacts: "/mnt/data/nvth2.data/experiments/embryo/align_sweep/2025-09-23/15-39-24/artifacts"
+
+rep_transform:
+  _target_: cellbridge.data.representation.TransformPipeline
+  transforms:
+    - _target_: cellbridge.data.representation.truncate
+      n_dims: 5
+      _partial_: true

@@ -1,0 +1,23 @@
+_target_: pytorch_lightning.Trainer
+
+accelerator: auto
+devices: 1
+precision: 32
+log_every_n_steps: 50
+val_check_interval: 1.0
+check_val_every_n_epoch: 1
+enable_checkpointing: true
+max_epochs: ${max_epochs}
+overfit_batches: 0.0
+gradient_clip_val: 1.0
+enable_progress_bar: true
+default_root_dir: ${hydra:runtime.output_dir}
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  log_model: ${wandb.log_model}
+  save_dir: ${hydra:runtime.output_dir}
+  project: ${wandb.project}
+  name: ${wandb.run_name}
+  offline: ${wandb.offline}
+defaults:
+  - callbacks: default

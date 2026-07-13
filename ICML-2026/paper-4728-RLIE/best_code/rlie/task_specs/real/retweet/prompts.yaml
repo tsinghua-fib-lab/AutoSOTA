@@ -1,0 +1,142 @@
+observations:
+  multi_content: |
+    The first tweet: ${first_tweet}
+    The second tweet: ${second_tweet}
+    Final answer: The ${label} tweet got more retweets.
+batched_generation:
+  system: |-
+    You are a social media expert. You are an expert at determining which tweet will be retweeted more.
+    Given a set of observations, you want to generation hypotheses that will help predict which tweet out of a pair of tweets is more likely to be retweeted.
+    Please note that the paired tweets are about the same content and are posted by the same user, so you should focus on the wording difference between the two tweets in each pair.
+    Please propose ${num_hypotheses} possible hypotheses.
+    Please generate them in the format of:
+    1. [hypothesis]
+    2. [hypothesis]
+    ...
+    ${num_hypotheses}. [hypothesis].
+    Please make the hypotheses general enough to be applicable to new observations.
+  user: |-
+    We made some observations:
+    ${observations}
+    Generate hypotheses that are useful for predicting which tweet out of a pair of tweets is more likely to be retweeted.
+    Please note that the paired tweets are about the same content and are posted by the same user, so you should focus on the wording difference between the two tweets in each pair.
+    Please propose ${num_hypotheses} possible hypotheses.
+    Please generate them in the format of:
+    1. [hypothesis]
+    2. [hypothesis]
+    ...
+    ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+batched_generation_refine:
+  system: |-
+    You are a social media expert focused on maximizing retweet engagement.
+    Given misclassified tweet pairs and prior hypotheses, your goal is to rethink and propose ${num_hypotheses} new, more accurate hypotheses about which tweet in a pair will earn more retweets.
+    Please note that the paired tweets share the same content and author, so concentrate on wording differences, framing, and presentation.
+    Generate the hypotheses in the format of:
+    1. [hypothesis]
+    2. [hypothesis]
+    ...
+    ${num_hypotheses}. [hypothesis].
+    Please make the hypotheses general enough to be applicable to new observations.
+  user: |-
+    We have tweet pairs that previous hypotheses predicted incorrectly:
+    ${observations}
+
+    Here are some of the prior hypotheses for reference:
+    ${hypotheses_text}
+
+    Please generate new hypotheses that better capture which tweet in each pair will get more retweets.
+    You may refine the previous hypotheses (like tightening conditions, adding exceptions, or rephrasing), or introduce new hypotheses to cover new, distinct angles when prior ones are insufficient or misaligned.
+
+    Propose ${num_hypotheses} possible hypotheses.
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+IO_refine_with_feedback:
+  system: ''
+  user: |-
+    Applying your rule to the following inputs does not produce the expected outputs.
+    Here's your proposed hypothesis: ${hypothesis_text}
+    Below is some examples that you predicted wrong using the hypothesis.
+    ${observations}
+    Please generate new hypotheses that maps the given inputs to their corresponding outputs.
+    Propose ${num_hypotheses} possible hypotheses. Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+inference:
+  system: |-
+    You are a social media expert.
+    Given a pair of tweets, you are asked to predict which tweet will be retweeted more.
+    Please note that the paired tweets are about the same content and are posted by the same user, so you should focus on the wording difference between the two tweets.
+    From past experiences, you learned a pattern.
+    Now, at each time, you should apply a learned pattern to a pair of tweets and determine which one will get more retweets.
+    Give an answer. Respond with exactly one of: first, second, or not applicable.
+    Give your final answer in the format of {Final answer: first} or {Final answer: second}.
+  user: |-
+    Pattern: ${hypothesis}
+    The first tweet: ${first_tweet}
+    The second tweet: ${second_tweet}
+
+    Given the pattern you learned above, predict which one of the two tweets will get more retweets.
+
+    You can:
+    1.Consider if the pattern can be applied to analyze the textual difference between the two tweets.
+    2.Based on the pattern, which tweet is more likely to get more retweets? It is also fine if pattern does not apply.
+
+    Please give your final answer in the format of {Final answer: first}, {Final answer: second} or {Final answer: not applicable}.
+multiple_hypotheses_inference:
+  system: |-
+    You are a social media expert.
+    Given a pair of tweets, you are asked to determine which will get more retweets.
+    From past experiences, you learned some patterns.
+    You need to determine whether each of the patterns holds for the current pair of tweets, and also predict which tweet will get more retweets.
+    Give your final answer in the format of {Final answer: first} or {Final answer: second}.
+  user: |-
+    Our learned patterns: ${hypotheses}
+    The first tweet: ${first_tweet}
+    The second tweet: ${second_tweet}
+
+    Given the patterns you learned above, predict which one will get more retweets.
+
+    You can:
+    1. Think about which patterns can be applied to these tweets.
+    2. Based on the applicable patterns, which tweet is likely to get more retweets?
+
+    Please give your final answer in the format of {Final answer: first} or {Final answer: second}.
+multiple_hypotheses_inference_with_linear_regression:
+  system: "You are a social media expert.\nGiven a pair of tweets, you are asked to determine which will get more retweets.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting \"first\" vs \"second\". \nReview the weighted hypotheses, consider how the bias interacts with them, and use the regression model's suggested label only as a reference. \nGive your final answer in the format of {Final answer: first} or {Final answer: second}."
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    The first tweet: ${first_tweet}
+    The second tweet: ${second_tweet}
+
+    Given the patterns you learned above, predict which one will get more retweets.
+
+    You can:
+    1. Think about which patterns can be applied to these tweets.
+    2. Decide which tweet is likely to get more retweets, you can used the weighted patterns and bias as reference.
+
+    Please give your final answer in the format of {Final answer: first} or {Final answer: second}.
+multiple_hypotheses_inference_with_linear_regression_and_label:
+  system: "You are a social media expert.\nGiven a pair of tweets, you are asked to determine which will get more retweets.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting \"first\" vs \"second\". The regression model also outputs a referenced label for the review, which should be treated as a suggestion.\nReview the weighted hypotheses, consider how the bias interacts with them, and use the regression model's suggested label only as a reference. \nGive your final answer in the format of {Final answer: first} or {Final answer: second}."
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    The first tweet: ${first_tweet}
+    The second tweet: ${second_tweet}
+
+    We have used the regression model to get a referenced label: ${model_prediction}
+
+    Given the patterns you learned above, predict which one will get more retweets.
+
+    You can:
+    1. Think about which patterns can be applied to these tweets.
+    2. Decide which tweet is likely to get more retweets, you can used the weighted patterns, bias, predicted label as reference.
+
+    Please give your final answer in the format of {Final answer: first} or {Final answer: second}.

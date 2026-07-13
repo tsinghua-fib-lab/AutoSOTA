@@ -1,0 +1,32 @@
+# Test profile - minimal settings for quick testing
+#
+# Use for verifying the benchmark pipeline works end-to-end.
+#
+# Usage:
+#   python run_benchmark.py train_foundation +experiment=comparison_benchmark profile=test
+
+# Minimal data
+data:
+  n_pool: 50           # Small calibration pool
+  n_test: 100          # Small test set
+  calibration_sizes: [10, 20]  # Only 2 small sizes
+  n_sim: 100           # Minimal simulation data
+
+# Minimal training
+foundation:
+  simulation_models: ["npe"]  # Only NPE for speed
+  baselines: []               # Skip baselines for quick test
+
+# Single seed
+seeds: [0]
+
+# Evaluation
+evaluation:
+  num_posterior_samples: 50
+  num_test_observations: 10
+
+# Training overrides (applied to all methods)
+training_overrides:
+  epochs: 5
+  max_patience: 2
+  batch_size: 32

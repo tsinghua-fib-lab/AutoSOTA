@@ -1,0 +1,34 @@
+# fm_post_transform base configuration
+# Dual flow method: learns p(theta|y) and p(x|y) jointly
+#
+# Usage in config.yaml:
+#   defaults:
+#     - method/fm_post_transform: base
+#
+# For hyperparameter search, create variants like:
+#   configs/method/fm_post_transform/large.yaml
+
+# @package _global_
+defaults:
+  - /architecture: attention_mlp
+
+# Method identifier
+method_name: fm_post_transform
+
+# NPE type to use for pretrained model
+npe_type: "fmpe"
+
+# Training parameters
+training_params:
+  lr: 1e-3
+  epochs: 200
+  batch_size: 256
+  max_patience: 10
+  train_size: 0.8
+
+# Architecture is inherited from architecture config
+# Override specific parts as needed:
+# fm_post_transform:
+#   config:
+#     flow_theta: ${architecture.flow_theta}
+#     flow_x: ${architecture.flow_x}

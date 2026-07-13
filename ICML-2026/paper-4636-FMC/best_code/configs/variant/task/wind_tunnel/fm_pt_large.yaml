@@ -1,0 +1,67 @@
+# Task-specific "large" variant for wind_tunnel
+#
+# This variant inherits training params from fm_pt_large but uses
+# a larger CNN embedding architecture suited for wind tunnel data.
+#
+# Resolution: When training with variant_name=fm_pt_large on wind_tunnel,
+# this config is used instead of the global fm_pt_large.yaml
+
+_base: fm_pt_large  # Inherit training params from global variant
+
+# Override model architecture for this task
+config:
+  npe: fmpe
+  flow_theta:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: 1  # theta_dim for wind_tunnel
+          dropout: 0.0
+          batch_norm: False
+          context_dim: 20  # Larger context (was 10)
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: [64, 128, 256, 512, 256, 128, 64]  # Deeper than base
+        embedding_kwargs:
+          name: "conv1d_light"
+          output_dim: 20  # Larger embedding (was 10)
+          image_size: 50  # obs_dim for wind_tunnel
+  flow_x:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'data_eps'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {"eps": 0.5}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: 50  # obs_dim for wind_tunnel
+          dropout: 0.0
+          batch_norm: True
+          context_dim: 20  # Larger context
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: [64, 128, 256, 512, 512, 256, 128, 64]  # Deeper than base
+        theta_embedding_kwargs:
+          name: "conv1d_light"
+          time_embedding: True
+          output_dim: 20  # Larger embedding
+          image_size: 50
+          n_freqs: 3
+        embedding_kwargs:
+          name: "conv1d_light"
+          output_dim: 20  # Larger embedding
+          image_size: 50

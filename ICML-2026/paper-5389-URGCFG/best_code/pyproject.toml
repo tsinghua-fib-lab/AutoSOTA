@@ -1,0 +1,44 @@
+[tool.pytest.ini_options]
+# Pytest configuration for gconvex test suite
+
+# Test discovery patterns
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Test directories
+testpaths = ["tests"]
+pythonpath = ["."]
+
+# Exclude manual tests from default test runs
+# Run these explicitly: pytest tests/manual/ -v
+norecursedirs = ["tests/manual"]
+
+# Output options
+addopts = [
+    "--tb=short",                    # Shorter traceback format
+    "--strict-markers",              # Strict marker validation
+    "--disable-warnings",            # Reduce noise from dependencies
+    "-ra",                           # Show summary of all test outcomes
+    "--durations=0",                 # Show duration for all tests at the end
+]
+
+# Markers for organizing tests
+markers = [
+    "slow: marks tests as slow (integration tests >5s)",
+    "fast: marks tests as fast (unit tests <1s)",
+    "optimization: marks tests that involve optimization loops",
+]
+
+# Note: Timeout disabled to avoid conflict with TimedTestCase signal-based timeout
+# Individual test classes set their own timeouts via max_test_time attribute
+
+# Coverage settings (optional, requires pytest-cov)
+# Uncomment to enable coverage reporting
+# addopts = [
+#     "--cov=models",
+#     "--cov=optimal_transport",
+#     "--cov=tools",
+#     "--cov-report=html",
+#     "--cov-report=term-missing",
+# ]

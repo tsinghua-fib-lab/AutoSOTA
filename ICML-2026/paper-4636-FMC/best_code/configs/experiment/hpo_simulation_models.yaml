@@ -1,0 +1,112 @@
+# HPO for NPE and FMPE simulation models
+# Per-task Optuna tuning to find optimal hyperparameters
+#
+# Usage:
+#   # Sanity check on pure_gaussian
+#   python run_experiment.py +experiment=hpo_simulation_models profile=sanity
+#
+#   # Full production HPO across all tasks
+#   python run_experiment.py +experiment=hpo_simulation_models profile=production
+#
+#   # Tune only FMPE
+#   python run_experiment.py +experiment=hpo_simulation_models run.simulation_models=[fmpe]
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "hpo_simulation_models"
+  description: "Optuna HPO for NPE and FMPE - per-task tuning"
+  tags: ["hpo", "simulation", "npe", "fmpe"]
+  author: "pruhlman"
+
+# Tasks to run HPO on
+tasks:
+  - pure_gaussian
+  - pendulum
+  - ou_process
+  - wind_tunnel
+
+# What to train
+run:
+  simulation_models: ["npe", "fmpe"]
+  calibration_methods: []   # Skip calibration for this experiment
+  baselines: []
+  # seeds and num_cal are set by profile in Python
+
+# Optuna HPO configuration
+hpo:
+  enabled: true
+  backend: optuna
+  per_task: true              # Separate study per task
+  objective: val_loss         # Minimize validation loss
+  n_trials: 50
+  pruning: true
+
+  # Study persistence
+  storage: "sqlite:///optuna_studies.db"
+  # study_name_template is set in Python based on experiment name
+
+  # Search space for NPE
+  npe:
+    training_params.lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-2
+    training_params.batch_size:
+      type: categorical
+      choices: [128, 256, 512]
+    training_params.epochs:
+      type: int
+      low: 100
+      high: 1000
+    config.hidden_features:
+      type: categorical
+      choices: [50, 100, 200]
+    config.num_transforms:
+      type: int
+      low: 3
+      high: 10
+
+  # Search space for FMPE
+  fmpe:
+    training_params.lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-2
+    training_params.batch_size:
+      type: categorical
+      choices: [128, 256, 512]
+    training_params.epochs:
+      type: int
+      low: 100
+      high: 1000
+    config.params.drift.hidden_dim:
+      type: categorical
+      choices:
+        - [64, 64, 64]
+        - [64, 64, 64, 64, 64]
+        - [128, 128, 128, 128]
+    config.params.drift.architecture:
+      type: categorical
+      choices: [attention_mlp, resmlp]
+
+# Task-specific search space overrides (e.g., larger architectures for high-dim tasks)
+task_overrides:
+  wind_tunnel:
+    hpo:
+      fmpe:
+        config.params.drift.hidden_dim:
+          type: categorical
+          choices:
+            - [128, 128, 128, 128]
+            - [128, 128, 128, 128, 128]
+            - [256, 256, 256, 256]
+
+# Evaluation after HPO completes
+evaluation:
+  enabled: true
+  metrics: ["sbc_rank", "coverage"]
+  # num_test_samples is set by profile in Python
+  custom_script: null

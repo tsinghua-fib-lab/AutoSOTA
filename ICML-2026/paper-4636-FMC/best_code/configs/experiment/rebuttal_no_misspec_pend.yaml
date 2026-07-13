@@ -1,0 +1,66 @@
+# @package _global_
+# Rebuttal Experiment: No-Misspecification Sanity Check on Pendulum
+#
+# Verifies FMCPE degrades gracefully to NPE when there is no misspecification
+# on the pendulum task (alpha=0 for both simulator and DGP).
+#
+# Usage:
+#   python run_benchmark.py command=train_foundation +experiment=rebuttal_no_misspec_pend
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_base +experiment=rebuttal_no_misspec_pend
+#   python run_benchmark.py command=evaluate_all +experiment=rebuttal_no_misspec_pend
+#   python run_benchmark.py command=aggregate +experiment=rebuttal_no_misspec_pend
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "rebuttal_no_misspec_pend"
+  description: "No-misspecification sanity check on pendulum: FMCPE should match NPE when alpha=0"
+  tags: ["rebuttal", "sanity", "no_misspecification", "pendulum"]
+  author: "pruhlman"
+
+data:
+  n_pool: 2000
+  n_test: 3000
+  n_sim: 50000
+  calibration_sizes: [10, 50, 200, 1000]
+  seed: 42
+
+tasks:
+  - no_misspec_pendulum
+
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: ["dpe", "mf_npe", "rope"]
+
+seeds: [33]
+
+skip_existing: true
+
+evaluation:
+  enabled: true
+  metrics: ["joint_c2st", "joint_mmd"]
+  conditional_metrics: []
+  conditional_tasks: []
+  num_joint_samples: 3000
+  num_conditional_obs: 5
+  num_posterior_samples: 2000
+  batch_size: 1000
+  skip_existing: true
+
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    max_patience: null
+    epochs: 100
+
+task_overrides:
+  rescale: "none"

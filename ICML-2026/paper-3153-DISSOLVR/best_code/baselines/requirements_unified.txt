@@ -1,0 +1,42 @@
+# Unified Benchmark Environment for Regime-I & II
+# 
+# Create environment:
+#   conda create -n benchmark python=3.10 -y
+#   conda activate benchmark
+#   pip install -r requirements_unified.txt
+#
+# For GPU support (T4/A100), install PyTorch CUDA version:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+# ============ CORE ============
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+tqdm>=4.65.0
+joblib>=1.3.0
+
+# ============ CHEMISTRY ============
+rdkit>=2023.9.0
+
+# ============ DEEP LEARNING ============
+torch>=2.1.0
+# chemprop==2.0.5  # Install separately: pip install chemprop==2.0.5
+
+# ============ ML MODELS (Generic Baselines) ============
+lightgbm>=4.0.0
+xgboost>=2.0.0
+
+# ============ DEEPCHEM (Ulrich et al.) ============
+# tensorflow>=2.13.0  # DeepChem dependency - install separately
+# deepchem>=2.7.0     # Install separately: pip install deepchem
+
+# ============ FASTPROP ============
+# fastprop>=1.0.0  # Install separately: pip install fastprop
+
+# ============ VISUALIZATION ============
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ============ UTILITIES ============
+wandb>=0.15.0  # SolTranNet logging (optional)

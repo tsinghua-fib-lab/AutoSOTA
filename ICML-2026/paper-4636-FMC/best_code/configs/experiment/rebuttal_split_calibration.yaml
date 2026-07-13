@@ -1,0 +1,70 @@
+# @package _global_
+# Rebuttal Experiment 8: Split-Calibration / Cross-Fitting Analysis
+#
+# Compares performance when calibration data is split (train T_X on one half,
+# T_Theta on the other half) vs using all data for both (existing behavior).
+# Addresses Reviewer xKrR (Q3).
+#
+# Usage:
+#   python run_benchmark.py command=train_foundation +experiment=rebuttal_split_calibration
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_base +experiment=rebuttal_split_calibration +variant=fm_pt_base
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_split +experiment=rebuttal_split_calibration +variant=fm_pt_split
+#   python run_benchmark.py command=evaluate +experiment=rebuttal_split_calibration
+#   python run_benchmark.py command=aggregate +experiment=rebuttal_split_calibration
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "rebuttal_split_calibration"
+  description: "Split-calibration vs joint: cross-fitting analysis"
+  tags: ["rebuttal", "split_calibration", "cross_fitting"]
+  author: "pruhlman"
+
+data:
+  n_pool: 5000
+  n_test: 3000
+  calibration_sizes: [10, 50, 200, 1000, 5000]
+  n_sim: 50000
+  seed: 42
+
+tasks:
+  - pure_gaussian
+  - wind_tunnel
+
+foundation:
+  simulation_models: ["fmpe"]
+  baselines: []
+
+seeds: [33, 43, 53]
+
+skip_existing: true
+
+evaluation:
+  enabled: true
+  metrics: ["joint_mmd", "joint_wasserstein", "joint_c2st", "lpp", "joint_coverage"]
+  conditional_metrics: ["cond_c2st", "cond_mmd"]
+  conditional_tasks: ["pure_gaussian"]
+  num_joint_samples: 3000
+  num_conditional_obs: 5
+  num_posterior_samples: 2000
+  batch_size: 1000
+  skip_existing: true
+
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    max_patience: null
+  fm_post_transform_split:
+    max_patience: null
+
+task_overrides:
+  rescale: "none"

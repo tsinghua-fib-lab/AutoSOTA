@@ -1,0 +1,71 @@
+defaults:
+  - model: mlp
+  - trainer: default
+  - wandb: default
+  - inputs: cancer
+  - geopath: default
+  - _self_
+
+seed: 42
+
+alpha: "0.000"
+coupling_folder: ${inputs.folder_artifacts}/alpha_${alpha}/
+
+rep:
+  obsm_key: X_pca_whiten
+
+outputs:
+  out_dir: ./artifacts
+
+dataset:
+  coupling_sampling: sparse
+  topk: 10
+  val_frac: 0.1
+  dense_train_edges: null
+  dense_val_edges: null
+
+dataloader:
+  num_workers: 0
+  batch_size: 128
+
+training_mode: cfm
+score_model: null
+
+sf2m:
+  sigma_bridge: 1.0
+  sigma_sample: 1.0
+
+  t_epsilon: 0.0
+
+max_epochs: 500
+
+lit:
+  _target_: cellbridge.dynamics.flow_matching.FlowMatchingLitModule
+  _partial_: true
+  optim_cfg:
+    lr: 1e-3
+    wd: 1e-4
+    betas: [0.9, 0.999]
+    scheduler: cosine
+    val_batch_size: 2048
+    grad_clip: 1.0
+    warmup_divisor: 10
+    warmup_steps: none
+
+periodic_sampling:
+  enabled: true
+  eval_every_n_epochs: 25
+  subsample_size: null
+  t_final: ${inputs.t_eval}
+  metrics:
+    _target_: cellbridge.utils.metrics.MetricCollection
+    metrics:
+    - _target_: cellbridge.utils.metrics.Wasserstein2
+      numItermax: 500000
+    - _target_: cellbridge.utils.metrics.Wasserstein1
+      numItermax: 500000
+    include_baselines: false
+
+hydra:
+  run:
+    dir: ${coupling_folder}/fm/seed_${seed}

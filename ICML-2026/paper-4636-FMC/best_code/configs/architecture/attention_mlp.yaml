@@ -1,0 +1,38 @@
+# Attention MLP architecture config
+# For simple synthetic tasks requiring attention (gaussian variants)
+#
+# Use: defaults: [architecture: attention_mlp]
+
+name: attention_mlp
+
+# Flow for theta|y
+flow_theta:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'power'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {}
+    prior_params: {"rate": 2.0}
+    base_dist_params: {}
+    drift:
+      architecture: "attention_mlp"
+      hidden_dim: [64, 64, 64, 64, 64]
+      mlp_params: {}
+
+# Flow for x|y
+flow_x:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'power'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {}
+    prior_params: {"rate": 2.0}
+    base_dist_params: {}
+    drift:
+      architecture: "attention_mlp"
+      hidden_dim: [64, 64, 64, 64, 64]
+      mlp_params: {}

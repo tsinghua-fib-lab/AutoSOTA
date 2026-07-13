@@ -1,0 +1,32 @@
+# Development profile - moderate scale for iteration
+# Use during active development to validate changes
+#
+# Usage:
+#   python run_experiment.py +experiment=baseline_benchmark profile=development
+
+# @package profile
+name: "development"
+description: "2 representative tasks, moderate scale"
+
+# Task selection
+tasks_override: null   # Use experiment's task list
+tasks_subset: 2        # Take first 2 tasks from experiment
+
+# Moderate scale
+seeds: [0, 1]
+num_cal: [50, 200]
+num_test_samples: 50
+
+# Training scale factors
+training:
+  epochs_scale: 0.5    # 50% of base epochs
+  max_patience: 10
+
+# Data scale factors
+data:
+  num_samples_scale: 0.1  # 10% of base samples
+
+# HPO settings override
+hpo:
+  n_trials_override: 20
+  pruning: true

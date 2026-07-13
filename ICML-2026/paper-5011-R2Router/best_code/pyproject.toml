@@ -1,0 +1,25 @@
+[project]
+name = "r2-router"
+version = "0.1.0"
+description = "R2-Router: LLM routing with joint model-budget optimization"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "scikit-learn==1.7.2",
+    "joblib",
+]
+
+[tool.setuptools.packages.find]
+include = ["r2_router*"]
+
+[project.optional-dependencies]
+embed = ["vllm>=0.8"]
+hf = ["huggingface_hub"]
+dev = [
+    "vllm>=0.8",
+    "torch>=2.0",
+    "pandas",
+    "tqdm",
+    "matplotlib",
+]

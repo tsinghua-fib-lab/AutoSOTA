@@ -1,0 +1,32 @@
+# Split-calibration variant for cross-fitting experiment
+#
+# Trains T_X on first half of calibration data, T_Theta on second half.
+# Addresses Reviewer xKrR (Q3).
+#
+# Usage:
+#   python run_benchmark.py command=train_variant \
+#       +experiment=rebuttal_split_calibration \
+#       variant_name=fm_pt_split \
+#       +variant=fm_pt_split
+
+variant_name: fm_pt_split
+method: fm_post_transform_split
+
+# Base distribution to build on
+base_dist: fmpe  # "npe" or "fmpe"
+
+# Training parameters
+training_params:
+  lr: 1e-3
+  epochs: 200
+  batch_size: 256
+  train_size: 0.8
+
+# Model configuration (passed to trainer)
+config:
+  # NPE type for base distribution
+  npe: ${variant.base_dist}
+
+# HPO search space
+hpo:
+  enabled: false

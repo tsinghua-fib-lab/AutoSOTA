@@ -1,0 +1,61 @@
+# CFNet with 1D convolution embeddings
+# For tasks with 1D sequential observations (pendulum, wind_tunnel)
+#
+# Use: defaults: [architecture: cfnet_conv1d]
+
+name: cfnet_conv1d
+
+# Flow for theta|y
+flow_theta:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ???  # Must be overridden by task (theta_dim)
+        dropout: 0.0
+        batch_norm: False
+        context_dim: 10
+        theta_with_glu: True
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: [32, 64, 128, 256, 256, 128, 64, 32]
+      embedding_kwargs:
+        name: "conv1d"
+        output_dim: 10
+
+# Flow for x|y
+flow_x:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'data_eps'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {"eps": 5e-2}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ???  # Must be overridden by task (obs_dim)
+        dropout: 0.0
+        batch_norm: True
+        context_dim: 10
+        theta_with_glu: False
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: [32, 64, 128, 256, 512, 256, 128, 64, 32]
+      theta_embedding_kwargs:
+        name: "conv1d"
+        time_embedding: True
+        output_dim: 10
+        n_freqs: 5
+      embedding_kwargs:
+        name: "conv1d"
+        output_dim: 10

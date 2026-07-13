@@ -1,0 +1,23 @@
+# fm_post_transform_plug_y variant configuration
+#
+# Trains only theta flow, plugging y directly into NPE (no denoiser/x-flow).
+# Used as ablation component C in diagnostic experiments.
+#
+# Usage:
+#   python run_benchmark.py command=train_variant \
+#       +experiment=diagnostic_benchmark \
+#       variant_name=fm_pt_plug_y
+
+variant_name: fm_pt_plug_y
+method: fm_post_transform_plug_y
+
+base_dist: fmpe
+
+training_params:
+  lr: 1e-3
+  epochs: 200
+  batch_size: 256
+  train_size: 0.8
+
+config:
+  npe: fmpe

@@ -1,0 +1,46 @@
+# ROPE baseline variant
+#
+# Robust Posterior Estimation (ROPE) method from the trainer registry.
+#
+# Usage:
+#   python run_benchmark.py train_variant \\
+#       +experiment=comparison_benchmark \\
+#       variant_name=rope_base \\
+#       +variant=rope_base
+
+variant_name: rope_base
+method: rope  # Already registered in trainer registry
+
+# ROPE uses NPE as base
+base_dist: npe
+
+# Training parameters
+training_params:
+  lr: 1e-5
+  epochs: 1000
+  batch_size: 100
+  max_patience: 20
+  train_size: 0.8
+
+# ROPE-specific configuration
+config:
+  tau: 1.0
+  gamma: 1.0
+
+# HPO configuration
+hpo:
+  enabled: false
+  n_trials: 50
+  search_space:
+    lr:
+      type: loguniform
+      low: 1e-6
+      high: 1e-4
+    tau:
+      type: loguniform
+      low: 0.1
+      high: 10.0
+    gamma:
+      type: loguniform
+      low: 0.1
+      high: 10.0

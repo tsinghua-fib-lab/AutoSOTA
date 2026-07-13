@@ -1,0 +1,1 @@
+WRITING_ROOT = "tmp/"

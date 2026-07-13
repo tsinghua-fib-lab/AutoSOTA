@@ -1,0 +1,93 @@
+{
+  "router_name": "R2-Router",
+  "method": "Ridge Regression (per-LLM, per-budget)",
+  "embedding_model": "Qwen/Qwen3-0.6B",
+  "embedding_dim": 1024,
+  "default_lambda": 0.99999,
+  "token_limits": [10, 20, 30, 40, 50, 80, 100, 150, 200, 300, 500, 800, 1200, 2000, 4000, "unlimited"],
+  "models": {
+    "Qwen3-235B-A22B-Instruct-2507": {
+      "openrouter_id": "qwen/qwen3-235b-a22b-2507",
+      "input_price_per_million": 0.071,
+      "output_price_per_million": 0.10,
+      "checkpoint_dir": "Qwen3-235B-A22B-Instruct-2507_ridge_alpha10.0",
+      "available": true
+    },
+    "GLM-4.5-Air": {
+      "openrouter_id": "z-ai/glm-4.5-air",
+      "input_price_per_million": 0.13,
+      "output_price_per_million": 0.85,
+      "checkpoint_dir": "GLM-4.5-Air_ridge_alpha10.0",
+      "available": true
+    },
+    "Llama-3.1-70B-Instruct": {
+      "openrouter_id": "meta-llama/llama-3.1-70b-instruct",
+      "input_price_per_million": 0.40,
+      "output_price_per_million": 0.40,
+      "checkpoint_dir": "Llama-3.1-70B-Instruct_ridge_alpha10.0",
+      "available": true
+    },
+    "Qwen2.5-Math-7B-Instruct": {
+      "openrouter_id": "qwen/qwen2.5-math-7b-instruct",
+      "input_price_per_million": 0.10,
+      "output_price_per_million": 0.10,
+      "checkpoint_dir": "Qwen2.5-Math-7B-Instruct_ridge_alpha10.0",
+      "available": false,
+      "note": "Not on OpenRouter; price estimated. Requires self-hosting."
+    },
+    "Qwen2.5-Math-1.5B-Instruct": {
+      "openrouter_id": "qwen/qwen2.5-math-1.5b-instruct",
+      "input_price_per_million": 0.04,
+      "output_price_per_million": 0.04,
+      "checkpoint_dir": "Qwen2.5-Math-1.5B-Instruct_ridge_alpha10.0",
+      "available": false,
+      "note": "Not on OpenRouter; price estimated. Requires self-hosting."
+    },
+    "gemma-3-4b-it": {
+      "openrouter_id": "google/gemma-3-4b-it",
+      "input_price_per_million": 0.04,
+      "output_price_per_million": 0.08,
+      "checkpoint_dir": "gemma-3-4b-it_ridge_alpha10.0",
+      "available": true
+    },
+    "Llama-3.2-3B-Instruct": {
+      "openrouter_id": "meta-llama/llama-3.2-3b-instruct",
+      "input_price_per_million": 0.051,
+      "output_price_per_million": 0.34,
+      "checkpoint_dir": "Llama-3.2-3B-Instruct_ridge_alpha10.0",
+      "available": true
+    },
+    "Mistral-7B-Instruct-v0.2": {
+      "openrouter_id": "mistralai/mistral-7b-instruct",
+      "input_price_per_million": 0.11,
+      "output_price_per_million": 0.19,
+      "checkpoint_dir": "Mistral-7B-Instruct-v0.2_ridge_alpha10.0",
+      "available": true,
+      "note": "v0.2 not on OpenRouter; uses v0.1 endpoint."
+    },
+    "Qwen3-0.6B": {
+      "openrouter_id": "qwen/qwen3-0.6b",
+      "input_price_per_million": 0.02,
+      "output_price_per_million": 0.02,
+      "checkpoint_dir": "Qwen3-0.6B_ridge_alpha10.0",
+      "available": false,
+      "note": "Not on OpenRouter; price estimated. Requires self-hosting."
+    },
+    "gemma-3-1b-it": {
+      "openrouter_id": "google/gemma-3-1b-it",
+      "input_price_per_million": 0.02,
+      "output_price_per_million": 0.04,
+      "checkpoint_dir": "gemma-3-1b-it_ridge_alpha10.0",
+      "available": false,
+      "note": "Not on OpenRouter; price estimated. Requires self-hosting."
+    },
+    "gemma-3-270m-it": {
+      "openrouter_id": "google/gemma-3n-e4b-it",
+      "input_price_per_million": 0.01,
+      "output_price_per_million": 0.02,
+      "checkpoint_dir": "gemma-3-270m-it_ridge_alpha10.0",
+      "available": false,
+      "note": "Not on OpenRouter; closest model used. Requires self-hosting."
+    }
+  }
+}

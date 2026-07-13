@@ -1,0 +1,44 @@
+{
+    "task_name": "Retweet Prediction",
+    "task_type": "classification",
+    "task_description": "Given a pair of tweets, predict which one will get more retweets. The paired tweets are about the same contents and only differ by their linguistic styles.",
+    
+    "features": {
+        "first_tweet": {
+            "type": "text",
+            "description": "The content of the first tweet"
+        },
+        "second_tweet": {
+            "type": "text",
+            "description": "The content of the second tweet"
+        }
+    },
+    
+    "labels": {
+        "label": {
+            "type": "binary",
+            "values": ["first", "second"],
+            "description": "Label of which tweet ended up getting more retweets"
+        }
+    },
+    
+    "dataset_sizes": {
+        "train": 200,
+        "validation": 300,
+        "test": 500,
+        "ood": 500
+    },
+    
+    "known_hypotheses": [
+        "Tweets that express strong sentiments, especially negative emotions, are more likely to be retweeted as emotional involvement encourages sharing.",
+        "Longer tweets that provide more information and use informative language tend to receive more retweets, as they enhance social exchange value.",
+        "Including relevant hashtags (ideally 1-6) improves discoverability and increases retweet potential, though too many hashtags may reduce engagement.",
+        "Tweets that use provocative or surprising language, particularly when coming from high-status users, tend to get more retweets by capturing attention and evoking emotions.",
+        "Concise and readable tweets, especially those shortened by 10-20% while retaining key content words and emotional impact, have higher retweet probabilities.",
+        "Tweets that mimic news headlines—being informative, attention-grabbing, and relevant to current events—are more likely to be retweeted.",
+        "Placing topic-related keywords early in the tweet increases recognition and likelihood of retweets, as users often scan tweets quickly.",
+        "Explicit calls to action, such as 'please retweet,' significantly increase the likelihood of retweets across different industries.",
+        "Tweets containing URLs or links are generally more retweetable, although excessive reliance on external links can sometimes reduce engagement.",
+        "Use of mentions (tagging other users) and community-aligned language fosters engagement and boosts retweet likelihood by enhancing social interaction."
+    ]
+}

@@ -1,0 +1,90 @@
+# Gaussian task - refactored to use modular config system
+#
+# Architecture: attention_mlp (default)
+# Method configs inherited from configs/method/
+#
+# Usage:
+#   python train_calibration.py task=gaussian
+#   python train_calibration.py task=gaussian architecture=resmlp  # override arch
+
+name: "gaussian"
+num_samples: 50000
+rescale: "z_score"
+generation: "transitive"
+num_cal: [10, 50, 100, 500, 1000]
+num_test: 2000
+use_sbi: False
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: gaussian
+  params:
+    x_raw_dim: 100
+    prior_scale: 5
+    likelihood_scale: 1
+    misspecified_scale: 2
+
+# =============================================================================
+# Method configurations
+# Base configs inherited from configs/method/{method}/base.yaml
+# Only specify overrides here
+# =============================================================================
+
+# --- Simulation models ---
+npe:
+  training:
+    lr: 1e-3
+    batch_size: 2048
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+
+fmpe:
+  training_params:
+    max_patience: 20
+
+# --- Calibration methods ---
+fm_post_transform:
+  training_params:
+    max_patience: null  # No early stopping, return model at last epoch
+
+fm_post_transform_only_ut: {}
+
+fm_post_transform_plug_y: {}
+
+# Legacy methods (kept for backward compat)
+flow_matching_calibrated:
+  training_params:
+    max_patience: 5
+
+fmcpe_fm: {}
+
+fm_on_theta_cond: {}
+
+mf_fmpe: {}
+
+fmcpe_nf: {}
+
+# --- Baselines ---
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+
+rope:
+  training_params:
+    epochs: 2000

@@ -1,0 +1,106 @@
+[workspace]
+name = "ropefm"
+version = "0.1.0"
+description = "RoPE-FM: flow matching & neural posterior estimation for misspecified SBI"
+authors = ["pruhlman <pierre-louis.ruhlmann@inria.fr>"]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+# PyPI wheels (e.g. torch) dlopen the system libstdc++, which is older than
+# what recent conda-forge ICU needs (CXXABI_1.3.15). Prepend the env lib dir
+# so the env's newer libstdc++ wins the dynamic lookup.
+[activation.env]
+LD_LIBRARY_PATH = "$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+
+# ---------------------------------------------------------------------------
+# Base dependencies (shared by every environment).
+# The scientific stack comes from conda-forge; domain-specific libraries that
+# are only published on PyPI stay in [pypi-dependencies].
+# ---------------------------------------------------------------------------
+[dependencies]
+python = "3.12.*"
+pip = "*"
+numpy = "~=1.26.4"
+scipy = "~=1.12.0"
+pandas = "*"
+scikit-learn = "~=1.6.1"
+matplotlib = "*"
+seaborn = "*"
+tqdm = "*"
+filelock = "*"
+einops = "*"
+pot = "*"
+h5py = "*"
+hydra-core = "~=1.3.2"
+omegaconf = "~=2.3.0"
+ipython = "*"
+ipykernel = "*"
+ipywidgets = "*"
+jupyterlab = "*"
+
+[pypi-dependencies]
+# Core SBI / flow-matching stack (pinned to match the current fmcpe conda env).
+lampe = "==0.9.0"
+zuko = "==1.4.0"
+sbi = "==0.23.3"
+numpyro = "==0.18.0"
+pyro-ppl = "==1.9.1"
+mlxp = "==1.0.0"
+# Peripheral tooling
+glasflow = "*"
+causalchamber = "*"
+scienceplots = "*"
+optuna = "*"
+
+# ---------------------------------------------------------------------------
+# Dev tools (linting, type-checking, tests).
+# ---------------------------------------------------------------------------
+[feature.dev.dependencies]
+pytest = "*"
+ruff = "*"
+
+[feature.dev.pypi-dependencies]
+basedpyright = "*"
+
+# ---------------------------------------------------------------------------
+# CPU feature: local workstation without a CUDA GPU.
+# Uses the official PyTorch CPU wheel index and JAX's CPU extra.
+# ---------------------------------------------------------------------------
+[feature.cpu.pypi-dependencies]
+torch = { version = "==2.6.0", index = "https://download.pytorch.org/whl/cpu" }
+torchvision = { version = "==0.21.0", index = "https://download.pytorch.org/whl/cpu" }
+jax = { version = "==0.5.3", extras = ["cpu"] }
+
+# ---------------------------------------------------------------------------
+# GPU feature: Jean Zay (SLURM, CUDA 12.x).
+# Uses the PyTorch cu124 wheel index and JAX's cuda12 extra (CUDA bundled via
+# pip wheels, so no host CUDA toolchain is required).
+# ---------------------------------------------------------------------------
+[feature.gpu]
+system-requirements = { cuda = "12.0" }
+
+[feature.gpu.pypi-dependencies]
+torch = { version = "==2.6.0", index = "https://download.pytorch.org/whl/cu124" }
+torchvision = { version = "==0.21.0", index = "https://download.pytorch.org/whl/cu124" }
+jax = { version = "==0.5.3", extras = ["cuda12"] }
+
+# ---------------------------------------------------------------------------
+# Environments.
+#   * `default` is the CPU env — used locally (`pixi run ...`, `pixi shell`).
+#   * `gpu`     is the CUDA env — used on Jean Zay
+#     (`pixi run -e gpu ...` or `pixi shell -e gpu`).
+# ---------------------------------------------------------------------------
+[environments]
+default = { features = ["cpu", "dev"], solve-group = "cpu" }
+gpu = { features = ["gpu", "dev"], solve-group = "gpu" }
+
+# ---------------------------------------------------------------------------
+# Convenience tasks. Run with `pixi run <name>` (default env) or
+# `pixi run -e gpu <name>` (GPU env on Jean Zay).
+# ---------------------------------------------------------------------------
+[tasks]
+test = "pytest tests/"
+lint = "ruff check ."
+typecheck = "basedpyright"
+benchmark = "python run_benchmark.py"
+experiment = "python run_experiment.py"

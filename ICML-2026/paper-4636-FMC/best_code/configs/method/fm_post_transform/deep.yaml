@@ -1,0 +1,30 @@
+# fm_post_transform with deeper architecture
+# Use for hyperparameter search comparison
+#
+# Usage: python train_calibration.py method/fm_post_transform=deep
+
+# @package _global_
+defaults:
+  - /architecture: attention_mlp
+
+method_name: fm_post_transform
+
+npe_type: "fmpe"
+
+training_params:
+  lr: 5e-4  # Lower LR for deeper network
+  epochs: 300
+  batch_size: 256
+  max_patience: 15
+  train_size: 0.8
+
+# Override architecture with more layers
+architecture:
+  flow_theta:
+    params:
+      drift:
+        hidden_dim: [64, 64, 64, 64, 64, 64, 64, 64]
+  flow_x:
+    params:
+      drift:
+        hidden_dim: [64, 64, 64, 64, 64, 64, 64, 64]

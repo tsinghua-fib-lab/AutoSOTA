@@ -1,0 +1,38 @@
+# Default validation configuration
+# Override with: python validate_simulation.py validation=default validation.checks=[sbc,coverage]
+
+# Checks to run (available: sbc, coverage, predictive, log_prob, conditional, sbi_comparison)
+checks:
+  - sbc
+  - coverage
+  - predictive
+  - log_prob
+  - conditional
+
+# Models to validate (typically both npe and fmpe)
+models:
+  - npe
+  - fmpe
+
+# Number of simulations for validation
+num_simulations: 1000
+
+# Number of posterior samples per observation
+num_posterior_samples: 1000
+
+# Number of observations for conditional C2ST (expensive, typically ~5)
+n_obs_c2st: 5
+
+# Credible levels for coverage test
+alpha_levels: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+# Batch size for sampling (memory efficiency)
+batch_size: 500
+
+# Whether to save diagnostic plots
+save_plots: true
+
+# SBI library comparison settings
+sbi_comparison:
+  enabled: false
+  method: snpe  # snpe or fmpe

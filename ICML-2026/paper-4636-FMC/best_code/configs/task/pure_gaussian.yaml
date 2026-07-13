@@ -1,0 +1,94 @@
+# Pure Gaussian task - refactored to use modular config system
+#
+# Architecture: resmlp (simpler task)
+# Method configs inherited from configs/method/
+
+name: "pure_gaussian"
+num_samples: 50000
+rescale: "z_score"
+generation: "transitive"
+num_cal: [10, 50, 100, 500, 1000]
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "pure_gaussian"
+  params:
+    theta_dim: 2
+    obs_dim: 3
+    prior_var_scale: 2
+    likelihood_var_scale: 1
+    noisy_var_scale: 0.1
+    seed: 0
+
+# =============================================================================
+# Method configurations - only overrides from defaults
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+fmpe:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+fmcpe_fm:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_post_transform:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: null  # No early stopping, return model at last epoch
+
+fm_post_transform_split:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: null
+
+fm_post_transform_only_ut:
+  training_params:
+    rescale: ${task.rescale}
+
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+mf_npe:
+  training:
+    lr: 1e-5
+    batch_size: 256
+    epochs: 500
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.npe.training.rescale}
+
+rope:
+  training_params:
+    epochs: 2000
+    rescale: ${task.rescale}

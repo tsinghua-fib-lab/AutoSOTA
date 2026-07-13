@@ -1,0 +1,19 @@
+mode: from_h5ad
+h5ad_path: data/light_lite.h5ad
+domain_key: timestamp
+start_label: "0"
+eval_label: "1"
+end_label: "4"
+t_eval: 0.25
+pair_mode: liana_light
+name: light
+subsample: false
+subsampling_size: 5000
+
+folder_artifacts: "/mnt/data/nvth2.data/experiments/light/align_sweep/2025-09-21/19-04-26/artifacts"
+rep_transform:
+  _target_: cellbridge.data.representation.TransformPipeline
+  transforms:
+    - _target_: cellbridge.data.representation.truncate
+      n_dims: 20
+      _partial_: true

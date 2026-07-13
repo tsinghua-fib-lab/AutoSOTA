@@ -1,0 +1,70 @@
+# @package _global_
+# Rebuttal Experiment 7: Conditional Independence Verification
+#
+# Compares RoPE and FMCPE on tasks where y ⊥ θ | x holds vs. doesn't hold.
+# When CI is violated (direct_theta_scale > 0), RoPE should degrade while
+# FMCPE remains robust thanks to direct y-conditioning.
+# Addresses Reviewers uvU7 (main question) and uSAM (Q1).
+#
+# Usage:
+#   python run_benchmark.py command=train_foundation +experiment=rebuttal_independence
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_base +experiment=rebuttal_independence
+#   python run_benchmark.py command=evaluate +experiment=rebuttal_independence
+#   python run_benchmark.py command=aggregate +experiment=rebuttal_independence
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "rebuttal_independence"
+  description: "Conditional independence experiment: FMCPE vs RoPE with controlled CI violation"
+  tags: ["rebuttal", "independence", "conditional_independence"]
+  author: "pruhlman"
+
+data:
+  n_pool: 2000
+  n_test: 3000
+  calibration_sizes: [50, 200, 500]
+  n_sim: 50000
+  seed: 42
+
+tasks:
+  - independence_ci
+  - independence_no_ci_05
+  - independence_no_ci_10
+  - independence_no_ci_20
+
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: ["dpe", "mf_npe", "rope"]
+
+seeds: [33, 43, 53, 63, 73]
+
+skip_existing: true
+
+evaluation:
+  enabled: true
+  metrics: ["joint_mmd", "joint_wasserstein", "lpp", "joint_coverage"]
+  conditional_metrics: ["cond_c2st", "cond_mmd", "cond_wasserstein"]
+  conditional_tasks: ["independence_ci", "independence_no_ci_05", "independence_no_ci_10", "independence_no_ci_20"]
+  num_joint_samples: 3000
+  num_conditional_obs: 5
+  num_posterior_samples: 2000
+  batch_size: 1000
+  skip_existing: true
+
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    max_patience: null
+
+task_overrides:
+  rescale: "none"

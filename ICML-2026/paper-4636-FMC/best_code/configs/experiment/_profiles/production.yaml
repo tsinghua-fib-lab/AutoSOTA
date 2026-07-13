@@ -1,0 +1,32 @@
+# Production profile - full scale run
+# Use for final experiments and paper results
+#
+# Usage:
+#   python run_experiment.py +experiment=baseline_benchmark profile=production
+
+# @package profile
+name: "production"
+description: "Full run across all tasks"
+
+# Task selection
+tasks_override: null   # Use experiment's task list
+tasks_subset: null     # All tasks (no subset)
+
+# Full scale
+seeds: [33, 43, 53]
+num_cal: [10, 50, 200, 1000]
+num_test_samples: 100
+
+# Training scale factors
+training:
+  epochs_scale: 1.0    # 100% of base epochs
+  max_patience: 20
+
+# Data scale factors
+data:
+  num_samples_scale: 1.0  # 100% of base samples
+
+# HPO settings (full search)
+hpo:
+  n_trials_override: null  # Use experiment's n_trials
+  pruning: true

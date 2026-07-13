@@ -1,0 +1,20 @@
+# Auto-generated variant for HP sensitivity sweep
+# LR=0.005, grad_clip=None
+
+variant_name: hp_lr5e3_gcNone
+method: fm_post_transform
+
+base_dist: fmpe
+
+training_params:
+  lr: 0.005
+  epochs: 50
+  batch_size: 256
+  train_size: 0.8
+  grad_clip: 1000.0  # effectively no clipping
+
+config:
+  npe: ${variant.base_dist}
+
+hpo:
+  enabled: false

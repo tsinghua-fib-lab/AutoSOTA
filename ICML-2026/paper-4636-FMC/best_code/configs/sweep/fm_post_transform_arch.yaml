@@ -1,0 +1,80 @@
+# Hyperparameter sweep for fm_post_transform architecture
+#
+# Usage with Hydra multirun:
+#   python train_calibration.py -m \
+#     task=gaussian \
+#     +sweep=fm_post_transform_arch \
+#     sweep.hidden_dim=64,128,256 \
+#     sweep.depth=5,8
+#
+# Or use with Optuna sweeper plugin:
+#   python train_calibration.py -m \
+#     task=gaussian \
+#     +sweep=fm_post_transform_arch \
+#     hydra/sweeper=optuna
+#
+# See: https://hydra.cc/docs/plugins/optuna_sweeper/
+
+# @package _global_
+
+sweep:
+  # Method to sweep
+  method: fm_post_transform
+
+  # Architecture sweep parameters
+  hidden_dim: 64  # Try: 32, 64, 128, 256
+  depth: 5        # Try: 3, 5, 8
+  architecture: attention_mlp  # Try: resmlp, attention_mlp
+
+  # Training sweep parameters
+  lr: 1e-3       # Try: 1e-4, 5e-4, 1e-3
+  batch_size: 256  # Try: 128, 256, 512
+  epochs: 200
+  max_patience: 10
+
+# Apply sweep parameters to method config
+fm_post_transform:
+  config:
+    flow_theta:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: ${sweep.architecture}
+          hidden_dim: ${sweep._hidden_dims}
+          mlp_params: {}
+    flow_x:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: ${sweep.architecture}
+          hidden_dim: ${sweep._hidden_dims}
+          mlp_params: {}
+  training_params:
+    lr: ${sweep.lr}
+    epochs: ${sweep.epochs}
+    batch_size: ${sweep.batch_size}
+    max_patience: ${sweep.max_patience}
+    train_size: 0.8
+
+# Custom resolver to generate hidden_dims list from depth/width
+# Note: Requires registering a custom resolver in Python:
+#   from omegaconf import OmegaConf
+#   OmegaConf.register_new_resolver("repeat", lambda x, n: [x] * n)
+# Then use: hidden_dim: ${repeat:${sweep.hidden_dim},${sweep.depth}}
+#
+# For now, we use _hidden_dims as a workaround:
+sweep._hidden_dims: [64, 64, 64, 64, 64]  # Will be overridden by experiment

@@ -1,0 +1,48 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 5224,
+    "repo_url": "https://github.com/watcl-lab/exact_gnn",
+    "repo_commit": "9979cd7404128d7e36fb2418a3721f15da055e39",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_5224",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-5224:reproduced",
+    "eval_command": "cd /repo/training_flooding_trees && bash run_eval.sh",
+    "baseline_metrics": {
+      "case_accuracy": 1.0,
+      "sample_accuracy": 1.0,
+      "ensemble_size": 55
+    },
+    "primary_metric": "case_accuracy",
+    "metric_direction": "higher",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-3/logs/reproduction/paper-5224.log",
+    "status": "success",
+    "created_at": "2026-07-13T03:50:00Z",
+    "notes": "Successfully reproduced Message Flooding on trees with n=7, D=2, l=1. The ensemble of 55 MLPs (NTK-parameterized, hidden_dim=26000) trained for 7000 epochs each converges to perfect case_accuracy=1.0, exactly matching the paper's reported result in Figure 4. Training uses the NTKMLP architecture with orthogonal input encoding and ensemble averaging. The eval pipeline generates deterministic test data (all labeled trees with n=7, max_degree=2, all 2^l=2 messages) then trains the ensemble until convergence (delta=0.001).",
+    "eval_timeout_minutes": 240,
+    "eval_output_format": "Parse the final CSV line from results/n{N}_D{D}_l{L}/trial_0/results.csv. Columns: num_models,error,sample_accuracy,case_accuracy. The eval script also emits 'METRIC:case_accuracy=X.XXXX' on stdout. Primary metric is case_accuracy (fraction of test cases with zero wrong predictions).",
+    "known_levers": "epochs (default 7000): more epochs per model may reduce ensemble size needed; hidden_dim (default k*2000=26000): model capacity; lr (default 1e-3): SGD learning rate; sigma_w/sigma_b: NTK initialization variance; max_models (default 300): ensemble size cap; delta (default 0.001): convergence threshold; batch_size (default 256); n/D/l: problem size parameters",
+    "setup_notes": "Container uses PyTorch 2.1.0+cuda12.1, Python 3.10.13, numpy 1.26.0, networkx 3.1, tqdm 4.65.0. No conda environment needed - all deps from base image. Test data (test_samples_l1_D2_n7.json, test_cases_l1_D2_n7.json) pre-generated as they are deterministic functions of (n,D,l). Training from scratch produces the result in ~2-3 hours on A100. The run_eval.sh script wraps data generation + training + metric extraction. No external datasets or model downloads required - training data generated from algorithmic templates.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Case accuracy for Message Flooding on trees (n=7, D=2, l=1) is already at ceiling (1.0). Optimize for efficiency: reduce ensemble size needed, reduce training epochs per model, or scale to larger problem settings (higher n, D, l) while maintaining perfect accuracy.",
+      "metrics": [
+        {
+          "name": "case_accuracy",
+          "direction": "higher",
+          "role": "core",
+          "goal": "maintain_above_ci",
+          "baseline": 1.0,
+          "regression_tolerance_pct": 2.0,
+          "rationale": "Primary paper metric: fraction of test cases perfectly solved by the GNN ensemble. At ceiling (1.0) for the baseline setting. Must stay above reproduce CI lower bound (0.98)."
+        }
+      ],
+      "success_policy": "Maintain case_accuracy at or above 0.98 (CI lower bound) while reducing resource cost (ensemble size, training epochs) or scaling to larger settings. If accuracy drops below 0.98, optimization is failing."
+    },
+    "metric_upper_bound": 1.0,
+    "metric_lower_bound": 0.0
+  }
+}
