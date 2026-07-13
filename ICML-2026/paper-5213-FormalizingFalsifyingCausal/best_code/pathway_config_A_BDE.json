@@ -1,0 +1,19 @@
+{
+  "pathway": {
+    "nodes": ["A", "B", "D", "E"],
+    "description": "A: schizophrenia, B: substance abuse, D: unemployment, E: chronic homelessness. Collapsing C (social support loss) into B->D edge.",
+    "edges": [["A", "B"], ["B", "D"], ["D", "E"]]
+  },
+  "probabilities": {
+    "P_B_given_A": 0.55,
+    "P_D_given_B": 0.20,
+    "P_E_given_D": 0.20
+  },
+  "target": {
+    "node": "E",
+    "marginal_prob": 0.000457,
+    "_estimate": "HUD 2024 PIT: 153,000 chronically homeless / 335M population = 0.000457"
+  },
+  "root_cause": ["A"],
+  "_rationale": "P(D|B)=0.20: substance use disorders increase unemployment risk. Literature suggests 15-25% unemployment among people with SUD (Compton et al. 2014, Henkel 2011). This is a trivariate abstraction, collapsing social support loss (C)."
+}

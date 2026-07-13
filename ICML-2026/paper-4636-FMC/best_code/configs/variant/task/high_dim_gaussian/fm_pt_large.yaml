@@ -1,0 +1,41 @@
+# Task-specific "large" variant for high_dim_gaussian
+#
+# This variant inherits training params from fm_pt_large but uses
+# a wider MLP architecture suited for high-dimensional Gaussian tasks.
+#
+# Resolution: When training with variant_name=fm_pt_large on high_dim_gaussian,
+# this config is used instead of the global fm_pt_large.yaml
+
+_base: fm_pt_large  # Inherit training params from global variant
+
+# Override model architecture for this task
+config:
+  npe: fmpe
+  flow_theta:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [128, 128, 128, 128, 128, 128]  # Wider than base (6x128 vs 5x64)
+        mlp_params: {}
+  flow_x:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [128, 128, 128, 128, 128, 128]  # Wider than base
+        mlp_params: {}

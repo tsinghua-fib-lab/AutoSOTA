@@ -1,0 +1,65 @@
+# Task-specific "small" variant for light_tunnel
+#
+# Uses smaller cfnet architecture to reduce overfitting on low-data calibration.
+# Original: flow_x=[32,64,128,128,64,32], flow_theta=[32,64,128,256,256,128,64,32]
+# Small:    flow_x=[16,32,32,16], flow_theta=[16,32,32,16]
+
+_base: fm_pt_small  # Inherit training params from global variant
+
+# Override model architecture for this task
+config:
+  npe: fmpe
+  flow_theta:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: 4  # theta_dim
+          dropout: 0.0
+          batch_norm: False
+          context_dim: 10
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: [16, 32, 32, 16]  # Small (vs [32,64,128,256,256,128,64,32])
+        embedding_kwargs:
+          name: "conv2d"
+          output_dim: 10
+          image_size: [3, 64, 64]  # obs_dim
+  flow_x:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'data_eps'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {"eps": 5e-2}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: [3, 64, 64]  # obs_dim
+          dropout: 0.0
+          batch_norm: True
+          context_dim: 10
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: [16, 32, 32, 16]  # Small (vs [32,64,128,128,64,32])
+        theta_embedding_kwargs:
+          name: "conv2d"
+          time_embedding: True
+          output_dim: 10
+          image_size: [3, 64, 64]  # obs_dim
+          n_freqs: 3
+        embedding_kwargs:
+          name: "conv2d"
+          output_dim: 10
+          image_size: [3, 64, 64]  # obs_dim

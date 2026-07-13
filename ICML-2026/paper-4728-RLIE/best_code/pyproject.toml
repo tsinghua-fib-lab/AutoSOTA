@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rlie"
+version = "0.1.0"
+description = "Rule Learning via Iterative Estimation for interpretable text classification"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "colorlog>=6.8.0",
+  "numpy>=1.24.0",
+  "ollama>=0.3.0",
+  "openai>=1.40.0",
+  "pandas>=2.0.0",
+  "PyYAML>=6.0.0",
+  "scikit-learn>=1.3.0",
+  "tqdm>=4.66.0",
+]
+
+[project.scripts]
+rlie-train = "rlie.main:main"
+rlie-eval = "rlie.run_eval_only:main"
+
+[tool.setuptools.packages.find]
+include = ["rlie*"]

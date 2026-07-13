@@ -1,0 +1,146 @@
+# Independence experiment: Conditional Independence HOLDS (D=0)
+#
+# Baseline variant where y depends on theta only through x (Markov chain).
+# RoPE's assumption y ⊥ θ | x is valid here.
+#
+# Architecture: resmlp
+# Rescaling: none
+
+name: "independence_ci"
+num_samples: 50000
+rescale: "none"
+generation: "independent"
+num_cal: [50, 200, 500]
+use_sbi: False
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "pure_gaussian"
+  params:
+    theta_dim: 3
+    obs_dim: 10
+    prior_var_scale: 1
+    likelihood_var_scale: 1
+    noisy_var_scale: 0.1
+    seed: 0
+    direct_theta_scale: 0.0
+
+# =============================================================================
+# Method configurations
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+fmpe:
+  config:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [64, 64, 64, 64, 64]
+        mlp_params: {}
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 20
+    train_size: 0.8
+
+fm_post_transform:
+  config:
+    npe: "fmpe"
+    flow_theta:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: "resmlp"
+          hidden_dim: [64, 64, 64, 64, 64]
+          mlp_params: {}
+    flow_x:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: "resmlp"
+          hidden_dim: [64, 64, 64, 64, 64]
+          mlp_params: {}
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: null
+    train_size: 0.8
+
+# Baselines
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+rope:
+  config:
+    tau: 1.0
+    gamma: 1.0
+  training_params:
+    lr: 1e-5
+    epochs: 1000
+    batch_size: 100
+    max_patience: 10
+    train_size: 0.8
+    rescale: ${task.npe.training.rescale}
+
+mf_npe:
+  training:
+    lr: 1e-5
+    batch_size: 256
+    epochs: 500
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.npe.training.rescale}

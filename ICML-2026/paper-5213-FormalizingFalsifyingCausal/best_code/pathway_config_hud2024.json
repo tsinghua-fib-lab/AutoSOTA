@@ -1,0 +1,25 @@
+{
+  "pathway": {
+    "nodes": ["A", "B", "C", "D", "E"],
+    "description": "A: schizophrenia diagnosis, B: substance abuse, C: loss of social support, D: unemployment, E: chronic homelessness",
+    "edges": [["A", "B"], ["B", "C"], ["C", "D"], ["D", "E"]]
+  },
+  "probabilities": {
+    "P_B_given_A": 0.55,
+    "P_C_given_B": 0.80,
+    "P_D_given_C": 0.05,
+    "P_E_given_D": 0.20,
+    "_estimates": {
+      "P_B_given_A": "LLM estimate: probability of substance abuse given schizophrenia diagnosis",
+      "P_C_given_B": "LLM estimate: probability of losing social support given substance abuse",
+      "P_D_given_C": "LLM estimate: probability of unemployment given loss of social support",
+      "P_E_given_D": "LLM estimate: probability of chronic homelessness given unemployment"
+    }
+  },
+  "target": {
+    "node": "E",
+    "marginal_prob": 0.000457,
+    "_estimate": "HUD 2024 Point-in-Time count: ~153,000 chronically homeless individuals / ~335M US population = 0.000457. Source: HUD 2024 Annual Homelessness Assessment Report (AHAR) Part 1."
+  },
+  "root_cause": ["A"]
+}

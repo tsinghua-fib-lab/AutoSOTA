@@ -1,0 +1,40 @@
+defaults:
+  - cci: cci_from_adata_multi
+  - cluster: identity
+  - cci_transform: default
+  - inputs: cancer
+  - _self_
+
+rep:
+  obsm_key: X_pca_whiten
+
+align:
+  alphas: [0.5, 1.0]
+  use_previous_initialization: true
+
+cost:
+  fn:
+    _target_: cellbridge.ot.cost.pairwise_sqeuclidean
+    _partial_: true
+
+  pipeline_transform:
+    _target_: cellbridge.ot.cost.CostPipeline
+    steps:
+
+      - _target_: cellbridge.ot.cost.scale_FGW_multi
+        _partial_: true
+        numIterFGW: ${solver.numIterFGW}
+        numIterEMD: ${solver.numIterEMD}
+
+inputs:
+  pair_mode: random_lr
+
+solver:
+  _target_: cellbridge.ot.solvers.fgw_multi
+  _partial_: true
+  numIterFGW: 10000
+  numIterEMD: 500000
+
+hydra:
+  run:
+    dir: ${oc.env:EXPERIMENTS_ROOT,/mnt/data/nvth2.data/experiments}/${inputs.name}/align_sweep/${oc.env:RUN_GROUP,${now:%Y-%m-%d}/${now:%H-%M-%S}}

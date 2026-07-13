@@ -1,0 +1,39 @@
+{
+    "task_name": "Persuasive Arguments",
+    "task_type": "classification",
+    "task_description": "Predicting which text is more persuasive between pairs of arguments. The task explores linguistic features that contribute to effective persuasion in written communication",
+    
+    "features": {
+        "argument_1": {
+            "type": "text",
+            "description": "First argument of the paired arguments"
+        },
+        "argument_2": {
+            "type": "text",
+            "description": "Second argument of the paired arguments"
+        }
+    },
+    
+    "labels": {
+        "label": {
+            "type": "binary",
+            "values": ["first", "second"],
+            "description": "Which argument is more persuasive, i.e., which argument is more likely to convince the reader."
+        }
+    },
+    
+    "dataset_sizes": {
+        "train": 200,
+        "validation": 50,
+        "test": 500,
+        "ood": 500
+    },
+    
+    "known_hypotheses": [
+        "**Two-sided arguments** tend to be more persuasive for highly educated people as proponents put forward their own points and then also describe some of their opponents' points.",
+        "Arguments that appear at the **beginning of a message (primacy effect) or at the end of a message (recency effect)** can be more persuasive.",
+        "In certain circumstances, **several component arguments** are better than a single argument, and **repetition of similar arguments** may also be more persuasive than a single presentation.",
+        "The use of **explicit organizational markers** can improve the writing quality and persuasiveness of essays.",
+        "**Arguments using statistics and examples** are positively correlated with persuasiveness."
+    ]
+}

@@ -1,0 +1,19 @@
+# RoPE (Ratio Optimization Posterior Estimation) base config
+# Calibration baseline using density ratio estimation
+#
+# Usage: defaults: [method/rope: base]
+
+# @package _global_
+
+method_name: rope
+
+config:
+  tau: 1.0
+  gamma: 1.0
+
+training_params:
+  lr: 1e-5
+  epochs: 1000
+  max_patience: 20
+  batch_size: 100
+  train_size: 0.8

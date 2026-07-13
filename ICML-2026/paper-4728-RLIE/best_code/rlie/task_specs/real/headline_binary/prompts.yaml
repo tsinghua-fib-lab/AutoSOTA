@@ -1,0 +1,113 @@
+observations:
+  multi_content: |
+    Headline 1: ${headline_1}
+    Headline 2: ${headline_2}
+    Observation: ${label}
+batched_generation:
+  system: |-
+    You are a professional writer for an online newspaper company.
+    Given a pair of headlines created for the same article, you are asked to determine which will get more clicks. It is likely that the pair of headlines shares similarities, so please focus on their differences.
+    What difference in two headlines leads to more clicks on one than the other?
+    You will be given a set of observations of the format:
+    Headline 1: [headline]
+    Headline 2: [headline]
+    Observation: [observation].
+    Based on the observations, please generate hypotheses that are useful for explaining why one headline out of the pair gets more clicked than the other.
+    These hypotheses should identify patterns, phrases, wordings etc. that occur across the provided examples. They should also be generalizable to new instances.
+    Please propose ${num_hypotheses} possible hypotheses and generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+  user: |-
+    Here are the Observations:
+    ${observations}
+
+    Please generate hypotheses that can help determine which headlines have more clicks.
+    Please propose ${num_hypotheses} possible hypotheses.
+
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+
+    Proposed hypotheses:
+batched_generation_refine:
+  system: |-
+    You are a professional writer for an online newspaper company.
+    Given misclassified headline pairs and prior hypotheses, your goal is to rethink and then propose ${num_hypotheses} new, more accurate hypotheses about which headline will attract more clicks.
+    These hypotheses should identify specific wording or stylistic patterns that occur across the provided headline pairs.
+
+    Each hypothesis should explain why headline 1 or headline 2 is more likely to get more clicks when the pattern applies.
+    Generate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+  user: "We have headline pairs that previous hypotheses predicted incorrectly:\n${observations}\n\nHere are some of the prior hypotheses for reference:\n${hypotheses_text}\n\nPlease generate new hypotheses to improve predictions of which headline will get more clicks.\nYou may refine the previous hypotheses (like tightening conditions, adding exceptions, or rephrasing), or introduce new hypotheses to cover new, distinct angles when prior ones are insufficient or misaligned.\n\nPropose ${num_hypotheses} possible hypotheses.\nGenerate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].\nProposed hypotheses: "
+inference:
+  system: |-
+    You are a professional writer for an online newspaper company.
+    Given a pair of headlines created for the same article, you are asked to determine which will get more clicks. It is likely that the pair of headlines shares similarities, so please focus on their differences.
+    From past experiences, you learned some patterns.
+    Now, at each time, you should apply the learned pattern to a new pair of headlines that are created for a new article and determine which headline gets clicked more.
+    Give an answer. Respond with exactly one of: Headline 1, Headline 2, or not applicable.
+    Give your final answer in the format of {Final answer: Headline 1}, {Final answer: Headline 2} , or {Final answer: not applicable}.
+  user: |-
+    Learned pattern: ${hypothesis}
+    Given the pattern you learned above, predict which of the following headlines will get more clicks:
+    Headline 1: ${headline_1}
+    Headline 2: ${headline_2}
+
+    Consider if the pattern can be applied to these headlines.
+
+    You can:
+    1. Consider if the pattern can be applied to analyze the difference between "Headline 1" and "Headline 2".
+    2. Based on the pattern, which headline is likely to get more clicks? It is also fine if pattern does not apply.
+
+    Please give your final answer in the format of {Final answer: Headline 1}, {Final answer: Headline 2} , or {Final answer: not applicable}.
+multiple_hypotheses_inference:
+  system: "You are a professional writer for an online newspaper company.\nGiven a pair of headlines created for the same article, you are asked to determine which will get more clicks.\nFrom past experiences, you learned some patterns. \nYou need to determine whether each of the patterns holds for the current headlines, and also predict which headline will get more clicks.\nGive your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}"
+  user: |-
+    Our learned patterns: ${hypotheses}
+    Headline 1: ${headline_1}
+    Headline 2: ${headline_2}
+
+    Given the patterns you learned above, predict which headline will get more clicks.
+
+    You can:
+    1. Think about which patterns can be applied to these headlines.
+    2. Based on the applicable patterns, which headline is likely to get more clicks?
+
+    Please give your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}
+multiple_hypotheses_inference_with_linear_regression:
+  system: "You are a professional writer for an online newspaper company.\nGiven a pair of headlines created for the same article, you are asked to determine which will get more clicks.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting which healine has more clicks.\nReview the weighted patterns, consider how the bias interacts with them.  \nGive your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}."
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    Headline 1: ${headline_1}
+    Headline 2: ${headline_2}
+
+    Given the patterns you learned above, predict which headline will get more clicks.
+
+    You can:
+    1. Think about which patterns can be applied to these headlines.
+    2. Decide which headline will get more clicks, you can used the weighted patterns and bias as reference.
+
+    Please give your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}
+multiple_hypotheses_inference_with_linear_regression_and_label:
+  system: "You are a professional writer for an online newspaper company.\nGiven a pair of headlines created for the same article, you are asked to determine which will get more clicks.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting which healine has more clicks. The regression model also outputs a referenced label for the review, which should be treated as a suggestion.\nReview the weighted patterns, consider how the bias interacts with them, and use the regression model's suggested label as a reference.  \nGive your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}."
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    Headline 1: ${headline_1}
+    Headline 2: ${headline_2}
+
+    The regression model suggested headline: ${model_prediction}
+
+    We have used the regression model to get a referenced label: ${model_prediction}
+
+    Given the patterns you learned above, predict which headline will get more clicks.
+
+    You can:
+    1. Think about which patterns can be applied to these headlines.
+    2. Decide which headline will get more clicks, you can used the weighted patterns, bias, predicted label as reference.
+
+    Please give your final answer in the format of {Final answer: Headline 1} or {Final answer: Headline 2}

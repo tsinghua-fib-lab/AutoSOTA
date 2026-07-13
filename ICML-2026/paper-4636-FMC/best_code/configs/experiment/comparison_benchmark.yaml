@@ -1,0 +1,117 @@
+# @package _global_
+# Comparison Benchmark - NPE vs FMPE vs baselines vs fm_post_transform variants
+#
+# This experiment configuration defines the full benchmark protocol for comparing
+# simulation models, baselines, and calibration methods.
+#
+# Usage:
+#   # Quick sanity check
+#   python run_benchmark.py train_foundation +experiment=comparison_benchmark profile=sanity
+#
+#   # Full production benchmark
+#   python run_benchmark.py train_foundation +experiment=comparison_benchmark profile=production
+#
+#   # Train a variant
+#   python run_benchmark.py train_variant +experiment=comparison_benchmark variant_name=fm_pt_base
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "comparison_benchmark"
+  description: "NPE vs FMPE vs baselines vs fm_post_transform variants"
+  tags: ["benchmark", "comparison", "npe", "fmpe", "fm_post_transform"]
+  author: "pruhlman"
+
+# Data protocol (benchmark standard)
+data:
+  n_pool: 2000                           # Calibration pool size
+  n_test: 3000                           # Test pool size (≥5000 for reliable metrics)
+  calibration_sizes: [10, 50, 200, 1000] # Subsample sizes from n_pool
+  n_sim: 50000                           # Simulation data for NPE/FMPE (generative tasks)
+  seed: 42                               # Data split seed
+
+# Tasks to benchmark
+tasks:
+  - high_dim_gaussian
+  - pendulum
+  - wind_tunnel
+  - light_tunnel
+
+# Foundation training (Phase 1)
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: ["dpe", "mf_npe", "rope"]  # Baselines trained on calibration data
+
+# Skip retraining models if they already exist (for train commands)
+skip_existing: true
+
+# Seeds for calibration methods
+seeds: [33,43,53]
+
+# Parallel execution settings
+parallel:
+  enabled: false
+  use_locks: true
+  lock_timeout: 600.0  # 10 minutes
+  workers: 4           # For local parallel execution
+
+# Evaluation settings (Phase 3)
+#
+# Joint metrics: Use many observations, 1 sample per observation.
+#   Compare (theta_sampled_i, y_i) to (theta_true_i, y_i)
+#
+# Conditional metrics: Use few observations, many samples per observation.
+#   Compute metric per observation and average.
+#   Use for tasks where sample_reference_posterior is implemented.
+#
+evaluation:
+  enabled: true
+  # Default metrics (for tasks without sample_reference_posterior)
+  metrics: ["joint_mmd", "joint_wasserstein","joint_c2st"]
+
+  # Conditional metrics for tasks with sample_reference_posterior
+  # These tasks have tractable reference posteriors for comparison
+  conditional_metrics: ["cond_c2st", "cond_mmd"]
+
+  # Tasks that should use conditional metrics (have sample_reference_posterior)
+  # Automatically detected if not specified, but can be overridden here
+  conditional_tasks: ["high_dim_gaussian", "high_dim_adaptive_gaussian", "pure_gaussian",
+                      "adaptive_gaussian", "gaussian", "ou_process"]
+
+  # Joint metric settings
+  num_joint_samples: 3000     # Number of (y, theta) pairs for joint metrics
+
+  # Conditional metric settings
+  num_conditional_obs: 5        # Number of observations for conditional metrics
+  num_posterior_samples: 2000   # Samples per observation for conditional metrics
+
+  batch_size: 1000
+  # Skip recomputing metrics if they already exist (for evaluate commands)
+  skip_existing: true
+
+
+# Results directory
+results_dir: "results"
+
+# No HPO by default - use for specific variants
+hpo:
+  enabled: false
+
+# No sweep by default
+sweep:
+  enabled: false
+
+# Method-specific overrides (applied to all tasks for these methods)
+method_overrides:
+  fm_post_transform:
+    max_patience: null  # No early stopping, return last epoch model
+  fm_post_transform_only_ut:
+    max_patience: null
+  fm_post_transform_plug_y:
+    max_patience: null
+
+# Task-specific overrides (applied to all tasks)
+task_overrides:
+  rescale: "z_score"

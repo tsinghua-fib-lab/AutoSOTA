@@ -1,0 +1,22 @@
+defaults:
+  - task: pure_gaussian
+  - validation: default
+  - _self_
+
+# Benchmark command (for run_benchmark.py)
+command: null
+
+# Experiment configuration
+experiment_name: "test_local"
+results_dir: "./results"
+data_dir: "/home/pruhlman/data/ropefm"  # Directory for simulator data (wind_tunnel, js, light_tunnel)
+
+# Default seed for non-benchmark operations
+seed: 0
+
+# Hydra configuration - store all outputs in results_dir
+hydra:
+  run:
+    dir: ${results_dir}/${experiment_name}
+  job:
+    chdir: false  # Don't change working directory

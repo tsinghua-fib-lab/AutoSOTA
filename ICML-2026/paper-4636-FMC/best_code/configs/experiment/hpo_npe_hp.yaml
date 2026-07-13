@@ -1,0 +1,78 @@
+# HPO for NPE simulation model - Hyperparameter tuning
+# Focus on learning rate, batch size, and early stopping patience
+# No z-scoring (rescale: none), 30k simulation samples
+#
+# Usage:
+#   python run_experiment.py +experiment=hpo_npe_hp profile=sanity
+#   python run_experiment.py +experiment=hpo_npe_hp profile=production
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "hpo_npe_hp"
+  description: "HPO for NPE - learning rate, batch size, patience tuning (no z-score, 30k samples)"
+  tags: ["hpo", "simulation", "npe", "hyperparameters"]
+  author: "pruhlman"
+
+# Tasks to run HPO on
+tasks:
+  - high_dim_gaussian
+  - pendulum
+  - wind_tunnel
+  - light_tunnel
+
+# What to train
+run:
+  simulation_models: ["npe"]
+  calibration_methods: []
+  baselines: []
+
+# Optuna HPO configuration
+hpo:
+  enabled: true
+  backend: optuna
+  per_task: true
+  objective: val_loss
+  n_trials: 30
+  pruning: true
+
+  storage: "sqlite:///hpo_npe_hp.db"
+
+  # Search space for NPE
+  npe:
+    training_params.lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    training_params.batch_size:
+      type: categorical
+      choices: [128, 256, 512]
+    training_params.max_patience:
+      type: categorical
+      choices: [5, 10, 20]
+
+# Method-specific overrides - no z-scoring
+method_overrides:
+  npe:
+    training_params:
+      rescale: "none"
+      epochs: 1000
+
+# Task-specific overrides - 30k simulation samples
+task_overrides:
+  high_dim_gaussian:
+    num_samples: 30000
+  pendulum:
+    num_samples: 30000
+  wind_tunnel:
+    num_samples: 30000
+  light_tunnel:
+    num_samples: 30000
+
+# Evaluation after HPO completes
+evaluation:
+  enabled: true
+  metrics: ["sbc_rank", "coverage"]
+  custom_script: null

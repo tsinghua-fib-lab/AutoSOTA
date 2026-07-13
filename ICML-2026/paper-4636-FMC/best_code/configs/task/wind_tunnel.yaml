@@ -1,0 +1,272 @@
+# Wind Tunnel task - refactored
+#
+# Architecture: cfnet with conv1d_light embeddings
+# Data: Real 1D wind tunnel measurement data
+
+name: "wind_tunnel"
+num_samples: 50000
+rescale: "none"
+generation: "independent"
+num_cal: [10, 50, 200, 1000]
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "wind_tunnel"
+  params:
+    theta_dim: 1
+    obs_dim: 50
+    exp_name: "load_out_0.5_osr_downwind_4"
+
+# Task-level hidden dims
+hidden_dims_x: [32, 64, 128, 256, 256, 128, 64, 32]
+hidden_dims_theta: [32, 64, 128, 256, 128, 64, 32]
+
+# =============================================================================
+# Shared architecture definitions
+# =============================================================================
+
+flow_x_common: &flow_x_defaults
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'data_eps'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {"eps": 0.5}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ${task.simulator.params.obs_dim}
+        dropout: 0.0
+        batch_norm: True
+        context_dim: 10
+        theta_with_glu: True
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: ${task.hidden_dims_x}
+      theta_embedding_kwargs:
+        name: "conv1d_light"
+        time_embedding: True
+        output_dim: 10
+        image_size: ${task.simulator.params.obs_dim}
+        n_freqs: 3
+      embedding_kwargs:
+        name: "conv1d_light"
+        output_dim: 10
+        image_size: ${task.simulator.params.obs_dim}
+
+flow_theta_common: &flow_theta_defaults
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ${task.simulator.params.theta_dim}
+        dropout: 0.0
+        batch_norm: False
+        context_dim: 10
+        theta_with_glu: True
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: ${task.hidden_dims_theta}
+      embedding_kwargs:
+        name: "conv1d_light"
+        output_dim: 10
+        image_size: ${task.simulator.params.obs_dim}
+
+# =============================================================================
+# Method configurations
+# =============================================================================
+
+fmcpe_fm:
+  config: *flow_x_defaults
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 10
+    train_size: 0.8
+
+fm_post_transform:
+  config:
+    npe: "fmpe"
+    flow_x: *flow_x_defaults
+    flow_theta: *flow_theta_defaults
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 100
+    max_patience: null  # No early stopping, return model at last epoch
+    train_size: 0.8
+
+fm_post_transform_split:
+  config:
+    npe: "fmpe"
+    flow_x: *flow_x_defaults
+    flow_theta: *flow_theta_defaults
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 100
+    max_patience: null
+    train_size: 0.8
+
+fm_post_transform_only_ut:
+  config:
+    npe: "fmpe"
+    flow_x: *flow_x_defaults
+    flow_theta: *flow_theta_defaults
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 10
+    train_size: 0.8
+
+fm_post_transform_plug_y:
+  config:
+    npe: "fmpe"
+    flow_theta: *flow_theta_defaults
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 500
+    batch_size: 256
+    max_patience: 20
+    train_size: 0.8
+
+# =============================================================================
+# Baselines
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 256
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  params:
+    embedding_net:
+      model_path: 'models'
+      load: False
+      save: 'last_'
+      output_dim: 10
+      image_size: ${task.simulator.params.obs_dim}
+    npe_params:
+      embedding_dim: 10
+      ntransform: 1
+
+fmpe:
+  config:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: ${task.simulator.params.theta_dim}
+          dropout: 0.0
+          batch_norm: False
+          context_dim: 10
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: ${task.hidden_dims_theta}
+        embedding_kwargs:
+          name: "conv1d_light"
+          output_dim: 10
+          image_size: ${task.simulator.params.obs_dim}
+  training_params:
+    rescale: ${task.rescale}
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 20
+    train_size: 0.8
+
+dpe:
+  # Direct Posterior Estimation baseline - trained directly on (theta, y) calibration data
+  training:
+    lr: 1e-4
+    batch_size: 256
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  params:
+    embedding_net:
+      model_path: 'models'
+      load: False
+      save: 'last_'
+      output_dim: 10
+      image_size: ${task.simulator.params.obs_dim}
+    npe_params:
+      embedding_dim: 10
+      ntransform: 1
+
+rope:
+  config:
+    tau: 1.0
+    gamma: 1.0
+  training_params:
+    lr: 1e-5
+    epochs: 1000
+    batch_size: 100
+    train_size: 0.8
+    rescale: ${task.npe.training.rescale}
+
+npe_rs:
+  training:
+    lr: 1e-4
+    batch_size: 256
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: "z_score"
+    mmd_weight: 10.0
+  params:
+    embedding_net:
+      model_path: 'models'
+      load: False
+      save: 'last_'
+      output_dim: 10
+      image_size: ${task.simulator.params.obs_dim}
+    npe_params:
+      embedding_dim: 10
+      ntransform: 1
+
+mf_npe:
+  # MF-NPE: Misspecification-Finetuned NPE
+  # Uses pretrained NPE architecture, finetunes on calibration data (theta, y)
+  training:
+    lr: 1e-5  # Lower LR for finetuning
+    batch_size: 128
+    epochs: 500
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.npe.training.rescale}
+
+npe_pfn:
+  # NPE-PFN: TabPFN-based Neural Posterior Estimation
+  # Uses in-context learning instead of gradient descent
+  filter_type: "latest_filtering"
+  filter_context_size: 10000

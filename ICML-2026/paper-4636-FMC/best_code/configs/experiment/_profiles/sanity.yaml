@@ -1,0 +1,33 @@
+# Sanity check profile - quick single-task test
+# Use to verify experiment runs before committing to full production
+#
+# Usage:
+#   python run_experiment.py +experiment=baseline_benchmark profile=sanity
+
+# @package profile
+name: "sanity"
+description: "Quick single-task sanity check"
+
+# Override tasks to single representative task
+tasks_override: ["high_dim_gaussian"]
+tasks_subset: null  # Ignored when tasks_override is set
+
+# Minimal scale
+seeds: [0]
+num_cal: [50]
+num_test_samples: 20
+n_sim: 100
+
+# Training scale factors
+training:
+  epochs_scale: 0.1      # 10% of base epochs
+  max_patience: 3
+
+# Data scale factors
+data:
+  num_samples_scale: 0.01  # 1% of base samples
+
+# HPO settings override (reduce trials for sanity check)
+hpo:
+  n_trials_override: 5
+  pruning: true

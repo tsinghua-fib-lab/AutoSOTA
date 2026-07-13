@@ -1,0 +1,39 @@
+{
+    "task_name": "Deception Detection",
+    "task_type": "classification",
+    "task_description": "Predict whether a given hotel review is deceptive or truthful, i.e., whether the review is written by someone who has actually stayed at the hotel or by someone who has not stayed at the hotel.",
+    
+    "features": {
+        "review_sentence": {
+            "type": "text",
+            "description": "Hotel review"
+        }
+    },
+    
+    "labels": {
+        "label": {
+            "type": "binary",
+            "values": ["deceptive", "truthful"],
+            "description": "Whether the review is deceptive or truthful, i.e., whether the review is fake or genuine."
+        }
+    },
+    
+    "dataset_sizes": {
+        "train": 800,
+        "validation": 300,
+        "test": 500,
+        "ood": 640
+    },
+    
+    "known_hypotheses": [
+        "**Spatial Configuration**: **Truthful opinions** emphasize **spatial configurations** (e.g., *small, bathroom, on, location*), while **deceptive opinions** focus on **aspects external to the subject being reviewed** (e.g., *husband, business, vacation*). This may be because liars have difficulty encoding spatial information.",
+        "**Emotion Terms**: **Deceptive reviews** tend to have **more positive and fewer negative emotion terms**.",
+        "**First-Person Pronouns**: Increased usage of **first person singular pronouns** in reviews may indicate deception. Deceivers may be attempting to enhance the credibility of their reviews by emphasizing their own presence in the review.",
+        "**Parts of Speech**: **Truthful writings** typically consist of **more nouns, adjectives, prepositions, determiners, and coordinating conjunctions**, while **imaginative (deceptive) writing** consists of **more verbs, adverbs, pronouns, and pre-determiners**.",
+        "**Information Density**: **Deceptive language contains less information**. The contents of deceptive language may contain **fewer adjectives, prepositions, and comparative words**.",
+        "**Affective Cues**: **Increased affective cues** are related to deceptive language. Fraudulent reviewers are more likely to use **positive and negative emotional expressions** than people who post truthful reviews, and may also use **positive or negative affective words** more in deceptive reviews to mislead consumers.",
+        "**Detail Cues**: A **lack of detail cues** is indicative of deceptive reviews, particularly when the motive is a **perfunctory response**. The sentence structure and textual content of reviews with **perfunctory responses** is simple and less informative, leading to **a lack of detail**.",
+        "**Cognitive Cues**: **More cognitive cues** are present in deceptive reviews by paid posters compared to authentic reviews.",
+        "**Perceptual Cues**: All **deceptive online reviews** tend to **lack perceptual cues in their contents**."
+    ]
+}

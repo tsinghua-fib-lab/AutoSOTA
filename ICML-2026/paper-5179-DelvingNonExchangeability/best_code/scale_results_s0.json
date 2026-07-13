@@ -1,0 +1,269 @@
+[
+  {
+    "seed": 0,
+    "run_dir": "/repo/logs/scale/la/scale/2026-07-12/23-57-37",
+    "result": {
+      "per_alpha": {
+        "0.05": {
+          "observed_coverage": 0.9363129734992981,
+          "pi_width": 11.493711471557617,
+          "winkler": 18.223161697387695,
+          "pi_width_median": 9.25882625579834,
+          "delta_cov": -0.013687041588127613,
+          "target_coverage": 0.95
+        },
+        "0.1": {
+          "observed_coverage": 0.8830883502960205,
+          "pi_width": 8.793614387512207,
+          "winkler": 14.439770698547363,
+          "pi_width_median": 6.865994453430176,
+          "delta_cov": -0.016911610960960388,
+          "target_coverage": 0.9
+        },
+        "0.2": {
+          "observed_coverage": 0.7750678658485413,
+          "pi_width": 6.2716851234436035,
+          "winkler": 11.099222183227539,
+          "pi_width_median": 4.762556076049805,
+          "delta_cov": -0.024932121858000755,
+          "target_coverage": 0.8
+        }
+      },
+      "raw": {
+        "test_coverage_at_80": 0.7750678658485413,
+        "test_coverage_at_80_h1": 0.7750678658485413,
+        "test_coverage_at_90": 0.8830883502960205,
+        "test_coverage_at_90_h1": 0.8830883502960205,
+        "test_coverage_at_95": 0.9363129734992981,
+        "test_coverage_at_95_h1": 0.9363129734992981,
+        "test_delta_cov_at_80": -0.024932121858000755,
+        "test_delta_cov_at_80_h1": -0.024932121858000755,
+        "test_delta_cov_at_90": -0.016911610960960388,
+        "test_delta_cov_at_90_h1": -0.016911610960960388,
+        "test_delta_cov_at_95": -0.013687041588127613,
+        "test_delta_cov_at_95_h1": -0.013687041588127613,
+        "test_pi_width_at_80": 6.2716851234436035,
+        "test_pi_width_at_80_h1": 6.2716851234436035,
+        "test_pi_width_at_90": 8.793614387512207,
+        "test_pi_width_at_90_h1": 8.793614387512207,
+        "test_pi_width_at_95": 11.493711471557617,
+        "test_pi_width_at_95_h1": 11.493711471557617,
+        "test_pi_width_median_at_80": 4.762556076049805,
+        "test_pi_width_median_at_80_h1": 4.762556076049805,
+        "test_pi_width_median_at_90": 6.865994453430176,
+        "test_pi_width_median_at_90_h1": 6.865994453430176,
+        "test_pi_width_median_at_95": 9.25882625579834,
+        "test_pi_width_median_at_95_h1": 9.25882625579834,
+        "test_pinball": 32.173728942871094,
+        "test_pinball_h1": 32.173728942871094,
+        "test_winkler_at_80": 11.099222183227539,
+        "test_winkler_at_80_h1": 11.099222183227539,
+        "test_winkler_at_90": 14.439770698547363,
+        "test_winkler_at_90_h1": 14.439770698547363,
+        "test_winkler_at_95": 18.223161697387695,
+        "test_winkler_at_95_h1": 18.223161697387695,
+        "test_loss": 30.42607879638672
+      }
+    },
+    "metrics": {
+      "src_dir": "logs/base/la/stgnn/2026-07-12/19-39-45",
+      "metadata": {
+        "src_config": {
+          "optimizer": {
+            "name": "Adam",
+            "hparams": {
+              "lr": 0.003,
+              "weight_decay": 0.0
+            }
+          },
+          "dataset": {
+            "name": "la",
+            "connectivity": {
+              "method": "distance",
+              "threshold": 0.1,
+              "include_self": false,
+              "layout": "csr"
+            },
+            "splitting": {
+              "method": "temporal",
+              "val_len": 0.4,
+              "test_len": 0.2
+            }
+          },
+          "window": 12,
+          "horizon": 1,
+          "stride": 1,
+          "delay": 0,
+          "scale_target": false,
+          "add_exogenous": true,
+          "model": {
+            "name": "stgnn",
+            "hparams": {
+              "hidden_size": 32,
+              "emb_size": 16,
+              "temporal_layers": 1,
+              "gnn_layers": 2,
+              "activation": "elu"
+            }
+          },
+          "workers": 0,
+          "num_threads": 1,
+          "epochs": 200,
+          "train_batches": 100,
+          "patience": 50,
+          "batch_size": 32,
+          "grad_clip_val": 5,
+          "apply_scaler": true,
+          "scale_axis": "graph",
+          "save_outputs": true,
+          "run": {
+            "seed": 434100740,
+            "dir": "/repo/logs/base/la/stgnn/2026-07-12/19-39-45",
+            "name": "2026-07-12_19-39-45_434100740"
+          }
+        }
+      },
+      "args": {
+        "workers": 0,
+        "num_threads": 1,
+        "alphas": [
+          0.05,
+          0.1,
+          0.2
+        ],
+        "epochs": 30,
+        "batch_size": 16,
+        "patience": 3,
+        "grad_clip_val": 5,
+        "val_len": 0.1,
+        "lr": 0.0008,
+        "weight_decay": 0.0001,
+        "lr_scheduler": {
+          "name": "MultiStepLR",
+          "hparams": {
+            "gamma": 0.5,
+            "milestones": [
+              5,
+              8
+            ]
+          }
+        },
+        "device": "cuda",
+        "early_stop_metric": "val_loss",
+        "early_stop_min_delta": 0.0,
+        "scale_axis": "graph",
+        "apply_scaler": true,
+        "add_exogenous": false,
+        "target_as_input": false,
+        "src_dir": "logs/base/la/stgnn/2026-07-12/19-39-45",
+        "dataset": {
+          "name": "la",
+          "connectivity": {
+            "method": "distance",
+            "threshold": 0.1,
+            "include_self": false,
+            "layout": "dense"
+          }
+        },
+        "window": 12,
+        "horizon": 1,
+        "stride": 1,
+        "delay": 0,
+        "scale_target": false,
+        "model": {
+          "name": "scale",
+          "hparams": {
+            "model": {
+              "n_scales": 4,
+              "kernel_type": "mexican_hat",
+              "n_high_scales": null,
+              "backbone_out_dim": 128,
+              "enable_gating": true,
+              "backbone": {
+                "node_dim": 128,
+                "embed_dim": 128,
+                "num_layer": 5,
+                "temp_dim_tid": 128,
+                "temp_dim_diw": 128,
+                "time_of_day_size": 288,
+                "day_of_week_size": 7
+              },
+              "backbone_kwargs": {}
+            },
+            "loss": {
+              "crossing_penalty": 15.0
+            }
+          }
+        },
+        "run": {
+          "dir": "/repo/logs/scale/la/scale/2026-07-12/23-57-37",
+          "seed": 0,
+          "name": "2026-07-12_23-57-37_0"
+        }
+      },
+      "metrics": {
+        "per_alpha": {
+          "0.05": {
+            "observed_coverage": 0.9363129734992981,
+            "pi_width": 11.493711471557617,
+            "winkler": 18.223161697387695,
+            "pi_width_median": 9.25882625579834,
+            "delta_cov": -0.013687041588127613,
+            "target_coverage": 0.95
+          },
+          "0.1": {
+            "observed_coverage": 0.8830883502960205,
+            "pi_width": 8.793614387512207,
+            "winkler": 14.439770698547363,
+            "pi_width_median": 6.865994453430176,
+            "delta_cov": -0.016911610960960388,
+            "target_coverage": 0.9
+          },
+          "0.2": {
+            "observed_coverage": 0.7750678658485413,
+            "pi_width": 6.2716851234436035,
+            "winkler": 11.099222183227539,
+            "pi_width_median": 4.762556076049805,
+            "delta_cov": -0.024932121858000755,
+            "target_coverage": 0.8
+          }
+        },
+        "raw": {
+          "test_coverage_at_80": 0.7750678658485413,
+          "test_coverage_at_80_h1": 0.7750678658485413,
+          "test_coverage_at_90": 0.8830883502960205,
+          "test_coverage_at_90_h1": 0.8830883502960205,
+          "test_coverage_at_95": 0.9363129734992981,
+          "test_coverage_at_95_h1": 0.9363129734992981,
+          "test_delta_cov_at_80": -0.024932121858000755,
+          "test_delta_cov_at_80_h1": -0.024932121858000755,
+          "test_delta_cov_at_90": -0.016911610960960388,
+          "test_delta_cov_at_90_h1": -0.016911610960960388,
+          "test_delta_cov_at_95": -0.013687041588127613,
+          "test_delta_cov_at_95_h1": -0.013687041588127613,
+          "test_pi_width_at_80": 6.2716851234436035,
+          "test_pi_width_at_80_h1": 6.2716851234436035,
+          "test_pi_width_at_90": 8.793614387512207,
+          "test_pi_width_at_90_h1": 8.793614387512207,
+          "test_pi_width_at_95": 11.493711471557617,
+          "test_pi_width_at_95_h1": 11.493711471557617,
+          "test_pi_width_median_at_80": 4.762556076049805,
+          "test_pi_width_median_at_80_h1": 4.762556076049805,
+          "test_pi_width_median_at_90": 6.865994453430176,
+          "test_pi_width_median_at_90_h1": 6.865994453430176,
+          "test_pi_width_median_at_95": 9.25882625579834,
+          "test_pi_width_median_at_95_h1": 9.25882625579834,
+          "test_pinball": 32.173728942871094,
+          "test_pinball_h1": 32.173728942871094,
+          "test_winkler_at_80": 11.099222183227539,
+          "test_winkler_at_80_h1": 11.099222183227539,
+          "test_winkler_at_90": 14.439770698547363,
+          "test_winkler_at_90_h1": 14.439770698547363,
+          "test_winkler_at_95": 18.223161697387695,
+          "test_winkler_at_95_h1": 18.223161697387695,
+          "test_loss": 30.42607879638672
+        }
+      }
+    }
+  }
+]

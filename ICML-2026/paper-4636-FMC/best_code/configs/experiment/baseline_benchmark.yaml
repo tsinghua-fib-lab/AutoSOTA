@@ -1,0 +1,55 @@
+# Baseline benchmark - standard training across all methods
+# Use to establish baselines and compare methods
+#
+# Usage:
+#   # Quick sanity check
+#   python run_experiment.py +experiment=baseline_benchmark profile=sanity
+#
+#   # Full production benchmark
+#   python run_experiment.py +experiment=baseline_benchmark profile=production
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "baseline_benchmark"
+  description: "Standard benchmark across all methods with default hyperparameters"
+  tags: ["benchmark", "baseline"]
+  author: "pruhlman"
+
+# Tasks to benchmark
+tasks:
+  - pure_gaussian
+  - pendulum
+  - ou_process
+  - wind_tunnel
+
+# What to train
+run:
+  simulation_models: ["npe", "fmpe"]
+  calibration_methods: ["fm_post_transform"]
+  baselines: ["dpe", "mf_npe"]
+  # seeds and num_cal are set by profile in Python
+
+# No HPO - use default hyperparameters
+hpo:
+  enabled: false
+
+# No sweep - single config per method
+sweep:
+  enabled: false
+
+# Method-specific overrides (use defaults from method configs)
+method_overrides: {}
+
+# Task-specific overrides
+task_overrides: {}
+
+# Evaluation settings
+evaluation:
+  enabled: true
+  metrics: ["joint_mmd", "joint_c2st", "coverage"]
+  # num_test_samples is set by profile in Python
+  compare_across: ["method", "ncal"]
+  custom_script: null

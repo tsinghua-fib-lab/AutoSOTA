@@ -1,0 +1,133 @@
+observations:
+  multi_content: |
+    A hotel review is the following: "${review_sentence}"
+    The review is: ${label}.
+batched_generation:
+  system: |-
+    You're a professional hotel review analyst.
+    Given a set of hotel reviews, we want to generate high-quality hypotheses that are useful for predicting whether a review is truthful or deceptive. In other words, we want to know whether the review is written by a someone who actually lived in the hotel.
+
+    Using the given examples, please propose ${num_hypotheses} possible hypothesis.
+    These hypotheses should identify specific patterns that occur across the provided reviews.
+
+    Each hypothesis should contain both of the following:
+    a. A hypothesis about what makes reviews more likely to be truthful
+    b. The opposite hypothesis about what makes reviews more likely to be deceptive
+
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    The hypotheses should analyze what kind of reviews are likely to be truthful or deceptive.
+  user: |-
+    We have seen some hotel reviews:
+    ${observations}
+    Please generate hypotheses that are useful for predicting whether a review is truthful or deceptive.
+    Propose ${num_hypotheses} possible hypotheses. Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+batched_generation_refine:
+  system: |-
+    You're a professional hotel review analyst.
+    Given a set of hotel reviews, we want to generate high-quality hypotheses that are useful for predicting whether a review is truthful or deceptive. In other words, we want to know whether the review is written by someone who actually stayed at the hotel.
+
+    Using mispredicted (misclassified) examples and the past hypotheses, your goal is to rethink and then propose ${num_hypotheses} new, more accurate hypothesis pairs.
+    These hypotheses should identify specific patterns that occur across the provided reviews.
+
+    Each hypothesis should contain both of the following:
+    a. A hypothesis about what makes reviews more likely to be truthful
+    b. The opposite hypothesis about what makes reviews more likely to be deceptive
+
+    Generate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    The hypotheses should analyze what kind of reviews are likely to be truthful or deceptive.
+  user: |-
+    We have examples of hotel reviews that the previous hypotheses got wrong:
+    ${observations}
+
+    Here are some of the prior hypotheses for reference:
+    ${hypotheses_text}
+
+    Please generate new hypotheses to improve predictions of whether a review is truthful or deceptive.
+    You may refine the previous hypotheses (like tightening conditions, adding exceptions, or rephrasing), or introduce new hypotheses to cover new, distinct angles when prior ones are insufficient or misaligned.
+
+    Propose ${num_hypotheses} possible hypotheses.
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+inference:
+  system: |-
+    You are a professional deceptive detection agent and your job is to determine whether a hotel review is truthful or deceptive.
+    In other words, we want to know whether the review is written by someone who had real experiences with the hotel.
+    From past experiences, you learned a pattern.
+    You need to determine whether each of the patterns holds for the current hotel review, and also predict whether the current hotel review is truthful or deceptive.
+    Give an answer. Respond with exactly one of: truthful, deceptive, or not applicable.
+    Give your final answer in the format of {Final answer: truthful}, {Final answer: deceptive}, or {Final answer: not applicable}.
+  user: |-
+    Our learned patterns: ${hypothesis}
+    A hotel review is the following: "${review_sentence}"
+
+    Given the pattern you learned above, give an answer of whether the hotel review above is deceptive or truthful.
+
+    You can:
+    1. Consider if the pattern can be applied to the hotel review.
+    2. If the pattern applies, is this hotel review deceptive or truthful? It is also fine if pattern does not apply.
+
+    Please give your final answer in the format of {Final answer: truthful}, {Final answer: deceptive}, or {Final answer: not applicable}.
+multiple_hypotheses_inference:
+  system: |-
+    You are a professional deceptive detection agent and your job is to determine whether a hotel review is truthful or deceptive.
+    In other words, we want to know whether the review is written by someone who had real experiences with the hotel.
+    From past experiences, you learned some patterns.
+    You need to determine whether each of the patterns holds for the current hotel review, and also predict whether the current hotel review is truthful or deceptive.
+    Give an answer. The answer should be one word (truthful or deceptive).
+    Give your final answer in the format of {Final answer: answer}
+  user: |-
+    Our learned patterns: ${hypotheses}
+    A hotel review is the following: "${review_sentence}"
+
+    Given the patterns you learned above, give an answer of whether the hotel review above is deceptive or truthful.
+
+    You can:
+    1. Think about which pattern can be applied to the hotel review.
+    2. Decide whether the review is more likely truthful or deceptive, you can use these patterns as reference.
+
+    Please give your final answer in the format of {Final answer: truthful} or {Final answer: deceptive}.
+multiple_hypotheses_inference_with_linear_regression:
+  system: |-
+    You are a professional deceptive detection agent and your job is to determine whether a hotel review is truthful or deceptive.
+    In other words, we want to know whether the review is written by someone who had real experiences with the hotel.
+    We trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting "truthful" vs "deceptive".
+    You need to determine whether each of the pattern holds for the current hotel review, and also predict whether the current hotel review is truthful or deceptive.
+    Give an answer. The answer should be one word (truthful or deceptive).
+    Give your final answer in the format of {Final answer: answer}
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    A hotel review is the following: "${review_sentence}"
+
+    Given the patterns you learned above, give an answer of whether the hotel review above is deceptive or truthful.
+
+    You can:
+    1. Think about which pattern can be applied to the hotel review.
+    2.  Decide whether the review is more likely truthful or deceptive, you can use these weighted patterns and bias as reference.
+
+    Please give your final answer in the format of {Final answer: truthful} or {Final answer: deceptive}.
+multiple_hypotheses_inference_with_linear_regression_and_label:
+  system: "You are a professional deceptive detection agent and your job is to determine whether a hotel review is truthful or deceptive.\nIn other words, we want to know whether the review is written by someone who had real experiences with the hotel.\nWe trained a linear regression model on the training set to obtain a collection of weighted patterns plus a bias term. The learned weight reflects how strongly the pattern contributes to predicting \"truthful\" vs \"deceptive\". The regression model also outputs a referenced label for the review, which should be treated as a suggestion.\nReview the weighted patterns, consider how the bias interacts with them, and use the regression model's suggested label as a reference. \nGive your final answer in the format of {Final answer: answer} using exactly one of truthful or deceptive."
+  user: |-
+    Our learned weighted patterns (the weight's magnitude reflects the pattern's importance):
+    ${weighted_hypotheses}
+
+    Bias term (a constant offset added regardless of pattern activations; a positive bias means the model is overall more inclined toward ${pos_label}, while a negative bias leans toward ${neg_label}):
+    ${bias}
+
+    A hotel review is the following: "${review_sentence}"
+
+    We have used the regression model to get a referenced label: ${model_prediction}
+
+    Given the pattern you learned above, give an answer of whether the hotel review above is deceptive or truthful.
+
+    You can:
+    1. Think about which pattern can be applied to the hotel review.
+    2. Decide whether the review is more likely truthful or deceptive, you can used the weighted patterns, bias, predicted label as reference.
+
+    Please give your final answer in the format of {Final answer: truthful} or {Final answer: deceptive}.

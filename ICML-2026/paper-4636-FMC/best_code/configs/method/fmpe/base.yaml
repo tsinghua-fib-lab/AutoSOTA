@@ -1,0 +1,21 @@
+# FMPE (Flow Matching Posterior Estimation) base config
+# Single flow for p(theta|x) - simulation model
+#
+# Usage: defaults: [method/fmpe: base]
+
+# @package _global_
+defaults:
+  - /architecture: attention_mlp
+
+method_name: fmpe
+
+training_params:
+  lr: 1e-3
+  epochs: 200
+  batch_size: 256
+  max_patience: 20
+  train_size: 0.8
+
+# FMPE only uses flow_theta from architecture
+# config:
+#   ${architecture.flow_theta}

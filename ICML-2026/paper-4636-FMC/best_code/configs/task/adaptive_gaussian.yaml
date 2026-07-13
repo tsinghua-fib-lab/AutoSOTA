@@ -1,0 +1,127 @@
+# Adaptive Gaussian task - refactored to use modular config system
+#
+# Architecture: resmlp
+# Method configs inherited from configs/method/
+# Special: includes fm_joint_transform method
+
+name: "adaptive_gaussian"
+num_samples: 50000
+rescale: "z_score"
+generation: "transitive"
+use_sbi: False
+num_cal: [10, 50, 100, 500, 1000]
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "adaptive_gaussian"
+  params:
+    theta_dim: 2
+    obs_dim: 3
+    prior_var_scale: 1
+    likelihood_var_scale: 1
+    noisy_var_scale: 0.2
+    s: 0.4
+    t: 1.6
+    complex: "simulator"
+    seed: 0
+
+# =============================================================================
+# Method configurations - only overrides from defaults
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 1024
+    epochs: 200
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      bins: 8
+
+fmpe:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+# Special method: joint transform (unique to this task)
+fm_joint_transform:
+  config:
+    flow_joint:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'power'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {}
+        prior_params: {"rate": 2.0}
+        base_dist_params: {}
+        drift:
+          architecture: "resmlp"
+          hidden_dim: [64, 64, 64, 64, 64]
+          mlp_params: {}
+  training_params:
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 10
+    train_size: 0.8
+    rescale: ${task.rescale}
+
+# Calibration methods
+flow_matching_calibrated:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 5
+
+fmcpe_fm:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_on_theta_cond:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_post_transform:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: null  # No early stopping, return model at last epoch
+
+fm_post_transform_only_ut:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_post_transform_plug_y:
+  training_params:
+    rescale: ${task.rescale}
+
+fmcpe_nf:
+  training_params:
+    rescale: ${task.rescale}
+
+mf_fmpe:
+  training_params:
+    rescale: ${task.rescale}
+
+# Baselines
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8

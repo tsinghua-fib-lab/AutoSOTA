@@ -1,0 +1,21 @@
+{
+  "pathway": {
+    "nodes": ["A", "D", "E"],
+    "description": "A: schizophrenia diagnosis, D: unemployment, E: chronic homelessness. Coarser abstraction collapsing B (substance abuse) and C (social support loss) into direct A->D edge.",
+    "edges": [["A", "D"], ["D", "E"]]
+  },
+  "probabilities": {
+    "P_B_given_A": 0.55,
+    "P_C_given_B": 0.80,
+    "P_D_given_C": 0.05,
+    "P_E_given_D": 0.20,
+    "P_D_given_A": 0.80
+  },
+  "target": {
+    "node": "E",
+    "marginal_prob": 0.000457,
+    "_estimate": "HUD 2024 Point-in-Time count: ~153,000 chronically homeless / ~335M US population = 0.000457"
+  },
+  "root_cause": ["A"],
+  "_rationale": "Schizophrenia has 70-90% unemployment rate (literature: Marwaha & Johnson 2004, Rosenheck et al. 2006). Using P(D|A)=0.80 as the direct causal estimate. This is a trivariate abstraction collapsing B and C into the A->D edge, consistent with the paper Example 4.8 abstraction framework."
+}

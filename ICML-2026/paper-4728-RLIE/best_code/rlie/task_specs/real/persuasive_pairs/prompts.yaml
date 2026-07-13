@@ -1,0 +1,124 @@
+observations:
+  multi_content: |
+    Argument 1: ${argument_1}
+    Argument 2: ${argument_2}
+    Observation: The ${label} argument uses more persuasive language.
+batched_generation:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    Given a pair of arguments, you are asked to determine which one of them uses more persuasive language. The two arguments are often on the same topic and are similar, so focus on their differences.
+    What difference between the two arguments makes one more persuasive than the other?
+    You will be given a set of observations of the format:
+    Argument 1: [argument_1]
+    Argument 2: [argument_2]
+    Observation: The first/second argument uses more persuasive language.
+    Based on the observations, please generate hypotheses that are useful for explaining what make an argument more persuasive.
+    These hypotheses should identify patterns, phrases, wordings etc. that occur across the provided examples. They should also be generalizable to new instances.
+
+    **These hypotheses should describe what kind of general model would be more persuasive, regardless of the position of the argument (first/second).**
+
+    Please propose ${num_hypotheses} possible hypotheses and generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+  user: |-
+    Here are the Observations:
+    ${observations}
+
+    Please generate hypotheses that can help determine what make an argument more persuasive.
+    Please propose ${num_hypotheses} possible hypotheses.
+
+    Generate them in the format of 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+
+    Proposed hypotheses:
+batched_generation_refine:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    Given misclassified argument pairs and prior hypotheses, your goal is to rethink and then propose ${num_hypotheses} new, more accurate hypotheses that explain which argument uses more persuasive language.
+    These hypotheses should identify specific linguistic patterns that occur across the provided argument pairs.
+    These hypotheses should describe what kind of general model would be more persuasive, regardless of the position of the argument (first/second).
+
+    Generate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+  user: |-
+    We have argument pairs that previous hypotheses misclassified:
+    ${observations}
+
+    Here are some of the prior hypotheses for reference:
+    ${hypotheses_text}
+
+    Please generate new hypotheses to improve predictions of what kind of argument will be more persuasive.
+    You may refine the previous hypotheses (like tightening conditions, adding exceptions, or rephrasing), or introduce new hypotheses to cover new, distinct angles when prior ones are insufficient or misaligned.
+
+    Propose ${num_hypotheses} possible hypotheses.
+    Generate them in the format: 1. [hypothesis], 2. [hypothesis], ... ${num_hypotheses}. [hypothesis].
+    Proposed hypotheses:
+inference:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    Given a pair of arguments, you are asked to determine which one of them uses more persuasive language. The two arguments are often on the same topic and are similar, so focus on their differences.
+    From past experiences, you learned a pattern.
+    Now, at each time, you should apply the learned pattern to a new pair of arguments and determine which one uses more persuasive language.
+    The answer for the more persuasive language should be of the form "the _ argument" where _ is either first or second.
+    Please give your final answer in the format of {Final answer: the _ argument uses more persuasive language}
+  user: |-
+    Learned pattern: ${hypothesis}
+    Given the pattern you learned above, determine which of the following arguments uses more persuasive language:
+    Argument 1: ${argument_1}
+    Argument 2: ${argument_2}
+
+    Only answer if the pattern above can be applied.
+    Think step by step.
+    Step 1: Think about whether the pattern can be applied to the arguments.
+    Step 2: Analyze the difference between "Argument 1" and "Argument 2".
+    Step 3: give your final answer in the format of {Final answer: answer} (first or second).
+multiple_hypotheses_inference:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    Given a pair of arguments, you are asked to determine which one of them uses more persuasive language. The two arguments are often on the same topic and are similar, so focus on their differences.
+    From past experiences, you learned some patterns.
+    Apply the learned patterns to a new pair of arguments and determine which one uses more persuasive language.
+    The answer for the more persuasive language should be of the form "the _ argument" where _ is either first or second.
+    Please give your final answer in the format of {Final answer: the _ argument uses more persuasive language}
+  user: |-
+    Our learned patterns: ${hypotheses}
+    Argument 1: ${argument_1}
+    Argument 2: ${argument_2}
+
+    Think step by step.
+    Step 1: Think about which learned patterns can be applied to the arguments.
+    Step 2: Refer to these hypotheses (they may be incomplete or imperfect) and analyze the differences between "Argument 1" and "Argument 2".
+    Step 3: give your final answer in the format of {Final answer: answer} (first or second).
+multiple_hypotheses_inference_with_linear_regression:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    From past experiences, you learned some patterns, and you also have a linear regression model that assigns weights to each hypothesis plus a bias term.
+    Apply the weighted patterns to a new pair of arguments and determine which one uses more persuasive language.
+    Give your final answer in the format {Final answer: the _ argument uses more persuasive language}.
+  user: |-
+    Weighted hypotheses from linear regression (weight indicates contribution toward "the first argument" when positive):
+    ${weighted_hypotheses}
+    Bias term: ${bias}
+
+    Argument 1: ${argument_1}
+    Argument 2: ${argument_2}
+
+    Think step by step.
+    Step 1: Examine how each weighted hypothesis and the bias relate to this argument pair; highlight which hypotheses activate and whether their signs support the first or second argument being more persuasive.
+    Step 2: Refer to the weighted hypotheses and bias (they may be incomplete or imperfect) and use your professional judgment to decide which argument is more persuasive.
+    Step 3: give your final answer in the format of {Final answer: answer} (first or second).
+multiple_hypotheses_inference_with_linear_regression_and_label:
+  system: |-
+    You are an intelligent rhetorician and debater who masters persuasiveness in language.
+    From past experiences, you learned some patterns, and you also have a linear regression model that assigns weights to each hypothesis plus a bias term. The regression model outputs a suggested argument that is more persuasive, which should be treated as a reference, not a guaranteed truth.
+    Review the weighted hypotheses, consider how the bias interacts with them, and use the regression model's suggested argument only as a reference. Give your final answer in the format {Final answer: the _ argument uses more persuasive language}.
+  user: |-
+    Weighted hypotheses from linear regression (weight indicates contribution toward "the first argument" when positive):
+    ${weighted_hypotheses}
+    Bias term: ${bias}
+
+    Argument 1: ${argument_1}
+    Argument 2: ${argument_2}
+
+    The regression model suggested argument: ${model_prediction}
+
+    Think step by step.
+    Step 1: Examine how each weighted hypothesis and the bias relate to this argument pair; highlight which hypotheses activate and whether their signs support the first or second argument being more persuasive.
+    Step 2: Refer to the weighted hypotheses and bias (they may be incomplete or imperfect) and use your professional judgment to decide which argument is more persuasive; if you are confident, you may override the suggested argument.
+    Step 3: give your final answer in the format of {Final answer: answer} (first or second).

@@ -1,0 +1,217 @@
+# JS (Jansen-Rit) task - refactored
+#
+# Architecture: cfnet
+# Data: Real EEG-like neural mass model data
+
+name: "js"
+num_samples: 50000
+rescale: "none"
+generation: "independent"
+num_cal: [10, 50, 200, 1000]
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "js"
+  params:
+    theta_dim: 3
+    obs_dim: 33
+    noise: 1e-3
+    fs: 1000
+    nbins: 32
+
+# Task-level hidden dims for easy modification
+hidden_dims_x: [32, 64, 128, 256, 256, 128, 64, 32]
+hidden_dims_theta: [32, 64, 128, 256, 128, 64, 32]
+
+# =============================================================================
+# Method configurations
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 256
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      bins: 8
+
+fmcpe_fm:
+  config:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'data_eps'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {"eps": 1e-2}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: ${task.simulator.params.obs_dim}
+          dropout: 0.0
+          batch_norm: False
+          context_dim: ${task.simulator.params.obs_dim}
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: ${task.hidden_dims_x}
+  training_params:
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 10
+    train_size: 0.8
+
+fm_post_transform:
+  config:
+    npe: "fmpe"
+    flow_x:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'uniform'
+      base_dist: 'data_eps'
+      params:
+        probability_path_params: {"sigma_min": 1e-4}
+        base_dist_params: {"eps": 5e-2}
+        drift:
+          architecture: "cfnet"
+          posterior_kwargs:
+            input_dim: ${task.simulator.params.obs_dim}
+            dropout: 0.2
+            batch_norm: True
+            context_dim: ${task.simulator.params.obs_dim}
+            theta_with_glu: True
+            context_with_glu: False
+            activation: "gelu"
+            hidden_dims: [32, 64, 128, 256, 512, 256, 128, 64, 32]
+    flow_theta:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'uniform'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {"sigma_min": 1e-4}
+        base_dist_params: {}
+        drift:
+          architecture: "cfnet"
+          posterior_kwargs:
+            input_dim: ${task.simulator.params.theta_dim}
+            dropout: 0.0
+            batch_norm: False
+            context_dim: ${task.simulator.params.obs_dim}
+            theta_with_glu: True
+            context_with_glu: False
+            activation: "gelu"
+            hidden_dims: [32, 64, 128, 256, 128, 64, 32]
+  training_params:
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: null  # No early stopping, return model at last epoch
+    train_size: 0.8
+
+fm_post_transform_only_ut:
+  config:
+    npe: "fmpe"
+    flow_x:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'uniform'
+      base_dist: 'data_eps'
+      params:
+        probability_path_params: {"sigma_min": 1e-4}
+        base_dist_params: {'eps': 5e-2}
+        drift:
+          architecture: "cfnet"
+          posterior_kwargs:
+            input_dim: ${task.simulator.params.obs_dim}
+            dropout: 0.2
+            batch_norm: True
+            context_dim: ${task.simulator.params.obs_dim}
+            theta_with_glu: True
+            context_with_glu: False
+            activation: "gelu"
+            hidden_dims: [32, 64, 128, 256, 512, 256, 128, 64, 32]
+    flow_theta:
+      space: "data"
+      conditional: True
+      probability_path: "ot2"
+      prior: 'uniform'
+      base_dist: 'gaussian'
+      params:
+        probability_path_params: {"sigma_min": 1e-4}
+        base_dist_params: {}
+        drift:
+          architecture: "cfnet"
+          posterior_kwargs:
+            input_dim: ${task.simulator.params.theta_dim}
+            dropout: 0.0
+            batch_norm: False
+            context_dim: ${task.simulator.params.obs_dim}
+            theta_with_glu: True
+            context_with_glu: False
+            activation: "gelu"
+            hidden_dims: [32, 64, 128, 256, 128, 64, 32]
+  training_params:
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 10
+    train_size: 0.8
+
+# =============================================================================
+# Baselines
+# =============================================================================
+
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+fmpe:
+  config:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'uniform'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {"sigma_min": 1e-4}
+      base_dist_params: {}
+      drift:
+        architecture: "cfnet"
+        posterior_kwargs:
+          input_dim: ${task.simulator.params.theta_dim}
+          dropout: 0.0
+          batch_norm: False
+          context_dim: ${task.simulator.params.obs_dim}
+          theta_with_glu: True
+          context_with_glu: False
+          activation: "gelu"
+          hidden_dims: ${task.hidden_dims_theta}
+  training_params:
+    lr: 1e-3
+    epochs: 200
+    batch_size: 256
+    max_patience: 20

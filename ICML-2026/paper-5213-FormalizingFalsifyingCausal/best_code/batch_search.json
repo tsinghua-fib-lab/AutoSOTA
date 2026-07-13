@@ -1,0 +1,51 @@
+[
+  {
+    "pathway": {"nodes": ["A", "E"], "description": "Bivariate: schizophrenia -> chronic homelessness directly", "edges": [["A", "E"]]},
+    "probabilities": {"P_E_given_A": 0.012},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "P(E|A)=0.012 via Bayes: P(A|E)=0.10*P(E)/P(A)=0.10*0.000457/0.004=0.0114. Bivariate abstraction from paper Example 4.6."
+  },
+  {
+    "pathway": {"nodes": ["A", "D", "E"], "edges": [["A", "D"], ["D", "E"]]},
+    "probabilities": {"P_D_given_A": 0.75, "P_E_given_D": 0.20},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "P(D|A)=0.75: conservative estimate (Rosenheck 2006 VA study)."
+  },
+  {
+    "pathway": {"nodes": ["A", "D", "E"], "edges": [["A", "D"], ["D", "E"]]},
+    "probabilities": {"P_D_given_A": 0.85, "P_E_given_D": 0.20},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "P(D|A)=0.85: upper-range estimate (Marwaha & Johnson 2004 meta-analysis)."
+  },
+  {
+    "pathway": {"nodes": ["A", "D", "E"], "edges": [["A", "D"], ["D", "E"]]},
+    "probabilities": {"P_D_given_A": 0.80, "P_E_given_D": 0.22},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "P(E|D)=0.22: slightly elevated homelessness risk for long-term unemployed."
+  },
+  {
+    "pathway": {"nodes": ["A", "D", "E"], "edges": [["A", "D"], ["D", "E"]]},
+    "probabilities": {"P_D_given_A": 0.85, "P_E_given_D": 0.22},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "Best-case within literature-supported ranges: P(D|A)=0.85, P(E|D)=0.22."
+  },
+  {
+    "pathway": {"nodes": ["A", "B", "D", "E"], "edges": [["A", "B"], ["B", "D"], ["D", "E"]]},
+    "probabilities": {"P_B_given_A": 0.55, "P_D_given_B": 0.25, "P_E_given_D": 0.20},
+    "target": {"node": "E", "marginal_prob": 0.000457},
+    "root_cause": ["A"],
+    "_rationale": "P(D|B)=0.25: upper range for SUD unemployment."
+  },
+  {
+    "pathway": {"nodes": ["A", "D", "E"], "edges": [["A", "D"], ["D", "E"]]},
+    "probabilities": {"P_D_given_A": 0.80, "P_E_given_D": 0.20},
+    "target": {"node": "E", "marginal_prob": 0.0004},
+    "root_cause": ["A"],
+    "_rationale": "P(E)=0.0004: alternative estimate (unsheltered chronic homelessness only=~128,000 / 335M)."
+  }
+]

@@ -1,0 +1,98 @@
+# Ornstein-Uhlenbeck Process task - refactored to use modular config system
+#
+# Architecture: resmlp
+# Method configs inherited from configs/method/
+
+name: "ou_process"
+num_samples: 50000
+rescale: "z_score"
+generation: "independent"
+num_cal: [10, 50, 100, 500, 1000]
+use_sbi: False
+naugment: 1
+
+# Task-specific simulator configuration
+simulator:
+  name: "ou_process"
+  params:
+    theta_dim: 4
+    obs_dim: 10
+    length_total_trace: 101
+    subsample_rate: 10
+    first_n_samples: 100
+
+# =============================================================================
+# Method configurations - only overrides from defaults
+# =============================================================================
+
+npe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    max_patience: 20
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8
+
+fmpe:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 20
+
+# Calibration methods
+flow_matching_calibrated:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: 5
+
+fmcpe_fm:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_on_theta_cond:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_post_transform:
+  training_params:
+    rescale: ${task.rescale}
+    max_patience: null  # No early stopping, return model at last epoch
+
+fm_post_transform_only_ut:
+  training_params:
+    rescale: ${task.rescale}
+
+fm_post_transform_plug_y:
+  training_params:
+    rescale: ${task.rescale}
+
+fmcpe_nf:
+  training_params:
+    rescale: ${task.rescale}
+
+mf_fmpe:
+  training_params:
+    rescale: ${task.rescale}
+
+# Baselines
+dpe:
+  training:
+    lr: 1e-4
+    batch_size: 512
+    epochs: 2000
+    train_size: 0.8
+    rescale: ${task.rescale}
+  density_estimator: 'nsf'
+  params:
+    embedding_net: {}
+    npe_params:
+      transforms: 5
+      hidden_features: [64, 64]
+      bins: 8

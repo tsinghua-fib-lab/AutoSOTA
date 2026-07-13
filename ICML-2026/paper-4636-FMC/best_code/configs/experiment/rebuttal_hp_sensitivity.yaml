@@ -1,0 +1,75 @@
+# @package _global_
+# Rebuttal Experiment 5: Hyperparameter Sensitivity
+#
+# Sweeps over learning rates and gradient clipping values on one task
+# to demonstrate robustness of FMCPE training.
+# Addresses Reviewer xKrR (Q2, Point 6).
+#
+# Usage:
+#   # Train foundation models first (shared across sweep)
+#   python run_benchmark.py command=train_foundation +experiment=rebuttal_hp_sensitivity
+#
+#   # Then train each variant
+#   python run_benchmark.py command=train_variant variant_name=hp_lr1e4_gc05 +experiment=rebuttal_hp_sensitivity
+#   python run_benchmark.py command=train_variant variant_name=hp_lr5e4_gc05 +experiment=rebuttal_hp_sensitivity
+#   ... (see variant configs)
+#
+#   # Evaluate all
+#   python run_benchmark.py command=evaluate +experiment=rebuttal_hp_sensitivity
+#
+#   # Generate sensitivity table
+#   python scripts/generate_hp_sensitivity_table.py --experiment rebuttal_hp_sensitivity
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "rebuttal_hp_sensitivity"
+  description: "Hyperparameter sensitivity: LR and gradient clipping sweep"
+  tags: ["rebuttal", "sensitivity", "hyperparameters"]
+  author: "pruhlman"
+
+data:
+  n_pool: 2000
+  n_test: 3000
+  calibration_sizes: [200]
+  n_sim: 50000
+  seed: 42
+
+tasks:
+  - pendulum
+
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: []
+
+seeds: [33, 43, 53]
+
+skip_existing: true
+
+evaluation:
+  enabled: true
+  metrics: ["joint_wasserstein", "joint_mmd"]
+  conditional_metrics: ["cond_c2st"]
+  conditional_tasks: []
+  num_joint_samples: 3000
+  num_conditional_obs: 5
+  num_posterior_samples: 2000
+  batch_size: 1000
+  skip_existing: true
+
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    max_patience: null
+
+task_overrides:
+  rescale: "z_score"

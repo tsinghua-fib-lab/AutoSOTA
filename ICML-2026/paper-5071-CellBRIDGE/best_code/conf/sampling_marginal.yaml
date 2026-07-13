@@ -1,0 +1,33 @@
+defaults:
+  - inputs: cancer
+  - geopath: null
+  - _self_
+
+folder_artifacts: /mnt/data/nvth2.data/experiments/align_sweep/2025-08-26/11-19-19/artifacts/alpha_0.000
+
+sigma_bridge: 0.0
+
+seed: 42
+
+coupling:
+  topk: 10
+  tau: 0
+  keep_marginals: true
+
+rep:
+  obsm_key: X_pca_whiten
+
+metrics:
+  _target_: cellbridge.utils.metrics.MetricCollection
+  metrics:
+    - _target_: cellbridge.utils.metrics.Wasserstein2
+      numItermax: 500000
+    - _target_: cellbridge.utils.metrics.Wasserstein1
+      numItermax: 500000
+  include_baselines: false
+
+evaluate_start_end: false
+
+hydra:
+  run:
+    dir: ${folder_artifacts}/sample_marginal/

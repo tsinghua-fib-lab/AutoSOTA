@@ -1,0 +1,69 @@
+# CFNet with 2D convolution embeddings
+# For tasks with 2D image observations (light_tunnel)
+#
+# Use: defaults: [architecture: cfnet_conv2d]
+# Requires task to define: simulator.params.theta_dim, simulator.params.obs_dim
+
+name: cfnet_conv2d
+
+# Task-level hidden dims (can be overridden per task)
+hidden_dims_x: [32, 64, 128, 128, 64, 32]
+hidden_dims_theta: [32, 64, 128, 256, 256, 128, 64, 32]
+
+# Flow for theta|y
+flow_theta:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'gaussian'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ???  # Must be overridden: ${task.simulator.params.theta_dim}
+        dropout: 0.0
+        batch_norm: False
+        context_dim: 10
+        theta_with_glu: True
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: ${architecture.hidden_dims_theta}
+      embedding_kwargs:
+        name: "conv2d"
+        output_dim: 10
+        image_size: ???  # Must be overridden: ${task.simulator.params.obs_dim}
+
+# Flow for x|y
+flow_x:
+  space: "data"
+  conditional: True
+  probability_path: "ot2"
+  prior: 'uniform'
+  base_dist: 'data_eps'
+  params:
+    probability_path_params: {"sigma_min": 1e-4}
+    base_dist_params: {"eps": 5e-2}
+    drift:
+      architecture: "cfnet"
+      posterior_kwargs:
+        input_dim: ???  # Must be overridden: ${task.simulator.params.obs_dim}
+        dropout: 0.0
+        batch_norm: True
+        context_dim: 10
+        theta_with_glu: True
+        context_with_glu: False
+        activation: "gelu"
+        hidden_dims: ${architecture.hidden_dims_x}
+      theta_embedding_kwargs:
+        name: "conv2d"
+        time_embedding: True
+        output_dim: 10
+        image_size: ???  # Must be overridden: ${task.simulator.params.obs_dim}
+        n_freqs: 3
+      embedding_kwargs:
+        name: "conv2d"
+        output_dim: 10
+        image_size: ???  # Must be overridden: ${task.simulator.params.obs_dim}

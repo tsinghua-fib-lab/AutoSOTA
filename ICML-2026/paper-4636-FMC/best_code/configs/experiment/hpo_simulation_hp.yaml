@@ -1,0 +1,94 @@
+# HPO for NPE and FMPE simulation models - Hyperparameter tuning
+# Focus on learning rate, batch size, and early stopping patience
+# No z-scoring (rescale: none)
+#
+# Usage:
+#   # Start with high-dim tasks only
+#   python run_experiment.py +experiment=hpo_simulation_hp +profile=sanity
+#
+#   # Full production HPO
+#   python run_experiment.py +experiment=hpo_simulation_hp +profile=production
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "hpo_simulation_hp"
+  description: "HPO for NPE/FMPE - learning rate, batch size, patience tuning (no z-score)"
+  tags: ["hpo", "simulation", "npe", "fmpe", "hyperparameters"]
+  author: "pruhlman"
+
+# Tasks to run HPO on
+# Start with high_dim_gaussian, then add others
+tasks:
+  - high_dim_gaussian
+  - pure_gaussian
+  - pendulum
+  - ou_process
+  - wind_tunnel
+
+# What to train
+run:
+  simulation_models: ["npe", "fmpe"]
+  calibration_methods: []   # Skip calibration for this experiment
+  baselines: []
+  # seeds and num_cal set by profile
+
+# Optuna HPO configuration
+hpo:
+  enabled: true
+  backend: optuna
+  per_task: true              # Separate study per task
+  objective: val_loss         # Minimize validation loss
+  n_trials: 30
+  pruning: true
+
+  # Study persistence
+  storage: "sqlite:///hpo_simulation_hp.db"
+
+  # Search space for NPE
+  npe:
+    training_params.lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    training_params.batch_size:
+      type: categorical
+      choices: [128, 256, 512]
+    training_params.max_patience:
+      type: categorical
+      choices: [10, 20, 50]
+
+  # Search space for FMPE
+  fmpe:
+    training_params.lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    training_params.batch_size:
+      type: categorical
+      choices: [128, 256, 512]
+    training_params.max_patience:
+      type: categorical
+      choices: [10, 20, 50]
+
+# Method-specific overrides - no z-scoring
+method_overrides:
+  npe:
+    training_params:
+      rescale: "none"
+      epochs: 1000
+  fmpe:
+    training_params:
+      rescale: "none"
+      epochs: 1000
+
+# Task-specific overrides (if needed)
+task_overrides: {}
+
+# Evaluation after HPO completes
+evaluation:
+  enabled: true
+  metrics: ["sbc_rank", "coverage"]
+  custom_script: null

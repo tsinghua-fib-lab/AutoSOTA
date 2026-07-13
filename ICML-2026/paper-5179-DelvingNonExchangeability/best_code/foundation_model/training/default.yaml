@@ -1,0 +1,30 @@
+defaults:
+  - optimizer: lr_default
+  - dataset: la
+  - model: stgnn
+  - _self_
+
+hydra:
+  run:
+      dir: logs/base/${dataset.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+workers: 0
+num_threads: 1
+
+#### Training params ##########################################################
+epochs: 200
+train_batches: 100
+patience: 50
+batch_size: 32
+
+grad_clip_val: 5
+apply_scaler: true
+scale_axis: graph
+
+dataset:
+  splitting:
+    method: temporal
+    val_len: 0.4
+    test_len: 0.2
+
+save_outputs: true

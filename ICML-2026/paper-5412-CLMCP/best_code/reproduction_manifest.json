@@ -1,0 +1,48 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 5412,
+    "repo_url": "https://github.com/gafnito/cost-of-learning-multiple-change-points",
+    "repo_commit": "dec89de28ab566f407b9ead6a4797cee221d5bcc",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_5412",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-5412:reproduced",
+    "eval_command": "python3 eval_nab_regret.py",
+    "baseline_metrics": {
+      "ATC_cumulative_regret": 9061.12,
+      "SlidingWindow_cumulative_regret": 64344.86,
+      "DiscountedMean_cumulative_regret": 157939.87
+    },
+    "primary_metric": "ATC_cumulative_regret",
+    "metric_direction": "lower",
+    "gpu_devices": "0,1",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-5412.log",
+    "status": "success",
+    "created_at": "2026-07-13T04:35:53Z",
+    "notes": "Successfully reproduced ATC algorithm on the NAB ec2_cpu_utilization_ac20cd benchmark (Fig. 4b). ATC cumulative regret = 9061.12 vs SlidingWindow = 64344.86 vs DiscountedMean = 157939.87. ATC achieves ~7x lower regret than the best baseline. The rubric's Paper_Method_Value (~300) and Baseline_Value (~500) were approximate visual estimates from Figure 4(b); the actual computed values from the official code are much larger (9061 vs 64345) because CPU utilization values are in the 0-100 range and cumulative regret sums squared errors over T=4032 timesteps. The relative ordering (ATC << SlidingWindow << DiscountedMean) matches the paper's claims. Alarms detected by ATC: [183, 380, 421, 593, 1522, 1680, 1849, 2897, 3566, 3568, 3576].",
+    "eval_timeout_minutes": 15,
+    "eval_output_format": "Parse stdout for lines matching 'ATC_cumulative_regret=<float>'. The metric is the sum of squared errors (mu_hat_t - mu_t)^2 over all T=4032 timesteps.",
+    "known_levers": "Alpha (confidence parameter, default 0.05) controls detection sensitivity vs false alarms. Sigma (sub-Gaussian proxy, default 1.0) affects the detection threshold scale. Split-point scan strategy: 'exact' scans all O(T) candidates per step; 'geom_ends' uses O(log T) geometric offsets for efficiency. Threshold type: 'paper' uses time-varying gamma_t^r; 'const' uses a fixed threshold. Baseline parameters: sliding window W=30, discount factor rho=0.98.",
+    "setup_notes": "Dependencies: numpy, matplotlib, pillow. No GPU required (CPU-only statistical algorithm). Container started from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. NAB dataset CSV included in repo at NAB/data/realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv. Custom eval script eval_nab_regret.py created in /repo for clean metric output.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize ATC cumulative squared-error regret on the NAB ec2_cpu_utilization_ac20cd benchmark with sigma=1, alpha=0.05, change points [377, 420, 592, 3575].",
+      "metrics": [
+        {
+          "name": "ATC_cumulative_regret",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 9061.12,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Cumulative squared-error regret is the paper's primary performance metric (Eq. 2). It measures the total tracking error of the online mean estimator across all timesteps. Lower regret means better adaptation to distribution shifts."
+        }
+      ],
+      "success_policy": "Any reduction in ATC_cumulative_regret is an improvement. The SOTA agent should explore alternative detection threshold designs, scan strategies, variance estimation methods, or restart policies while preserving the anytime (horizon-free) nature of the algorithm."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": null
+  }
+}

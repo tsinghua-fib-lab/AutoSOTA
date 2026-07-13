@@ -1,0 +1,69 @@
+defaults:
+  - /wandb: default
+  - /trainer: default
+  - _self_
+
+seed: 42
+
+outputs:
+  out_dir: ./artifacts
+
+coupling_folder: null
+
+trainer:
+  max_epochs: 100
+  logger:
+    _target_: pytorch_lightning.loggers.WandbLogger
+    log_model: ${wandb.log_model}
+    save_dir: ${hydra:runtime.output_dir}
+    project: mfm
+    name: ${now:%Y-%m-%d}_${now:%H-%M-%S}_mfm
+    offline: ${wandb.offline}
+
+dataset:
+  topk: 10
+  val_frac: 0.1
+
+dataloader:
+  num_workers: 0
+  batch_size: 128
+
+metric:
+  type: land
+  land:
+    gamma: 0.2
+    rho: 1e-3
+    alpha: 1.0
+    max_samples: 4096
+  rbf:
+    n_centers: 100
+    kappa: 1.0
+    alpha: 1.0
+    epsilon: 1e-2
+    max_samples: 10000
+    train_steps: 50
+    batch_size: 2048
+    lr: 1e-2
+    min_weight: 1e-4
+
+pretrained_ckpt: null
+enabled: true
+alpha: 1.0
+t_sampler: uniform
+beta_a: 2.0
+beta_b: 2.0
+
+model:
+  _target_: cellbridge.dynamics.geopath.GeoPathMLP
+  _partial_: true
+  hidden_dim: 128
+  depth: 3
+  time_embed_dim: 16
+  use_time: true
+  dropout: 0.0
+
+optimizer:
+  type: adam
+  lr: 1e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]

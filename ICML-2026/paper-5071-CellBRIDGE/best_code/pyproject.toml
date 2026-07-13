@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cellbridge"
+version = "0.1.0"
+description = "CellBRIDGE: Learning Cellular Trajectories via Interaction-Aware Alignment"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate>=1.10.1",
+    "adata-query>=0.1.0",
+    "anndata>=0.12.2",
+    "autodevice>=0.1.0",
+    "distinctipy>=1.3.4",
+    "gdown>=5.2.0",
+    "geomloss>=0.2.6",
+    "hydra-core>=1.3.2",
+    "igraph>=0.11.9",
+    "leidenalg>=0.10.2",
+    "liana>=1.5.1",
+    "nbformat>=5.10.4",
+    "omnipath>=1.0.12",
+    "phate>=1.0.11",
+    "plotly>=6.3.0",
+    "pot>=0.9.5",
+    "pydk>=0.0.54",
+    "pypath-omnipath>=0.16.20",
+    "pytorch-lightning>=2.5.3",
+    "scanpy>=1.11.4",
+    "scienceplots>=2.1.1",
+    "scikit-misc>=0.5.1",
+    "scvelo>=0.3.3",
+    "torch>=2.8.0",
+    "torch-adata>=0.1.1",
+    "torchsde>=0.2.6",
+    "torchvision>=0.23.0",
+    "tqdm>=4.67.1",
+    "wandb>=0.21.1",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "pre-commit>=4.3.0",
+    "pyright>=1.1.403",
+    "pytest>=8.4.1",
+    "ruff>=0.12.9",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "basic"
+extraPaths = ["src"]
+venvPath = "."
+venv = ".venv"
+reportMissingImports = false
+reportMissingTypeStubs = "none"

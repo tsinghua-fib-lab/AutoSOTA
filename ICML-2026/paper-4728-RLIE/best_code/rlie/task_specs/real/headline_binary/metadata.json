@@ -1,0 +1,43 @@
+{
+    "task_name": "Headline Classification",
+    "task_type": "classification",
+    "task_description": "Given a pair of news headlines, predict which one gets more clicks by user. Note that the headlines are about the same news and only differs in their linguistic styles.",
+    
+    "features": {
+        "headline_1": {
+            "type": "text",
+            "description": "First headline"
+        },
+        "headline_2": {
+            "type": "text",
+            "description": "Second headline"
+        }
+    },
+    
+    "labels": {
+        "label": {
+            "type": "binary",
+            "values": ["Headline 1", "Headline 2"],
+            "description": "Label of which headline ended up getting more clicks"
+        }
+    },
+    
+    "dataset_sizes": {
+        "train": 200,
+        "test": 500,
+        "ood": 453
+    },
+    
+    "known_hypotheses": [
+        "Headlines that evoke negative emotions or emotional intensity are more likely to attract clicks, while positive emotions have less impact.",
+        "Longer and more complex headlines tend to perform better, providing context and engaging readers through cognitive effort.",
+        "Concrete language that evokes vivid imagery and sensory cues enhances engagement, comprehension, and recall.",
+        "Surprising or unexpected phrasing, including cliffhangers, increases curiosity and encourages clicks.",
+        "Headlines mentioning prominent figures, trending topics, or social proof (e.g., popularity metrics) attract more attention.",
+        "Using numbers in headlines (e.g., '5 Ways to...') boosts engagement by implying structured and digestible content.",
+        "Unique and distinctive phrasing, especially when different from recent similar headlines, tends to perform better.",
+        "Headlines that pose intriguing questions or suggest an information gap prompt readers to click for answers.",
+        "Incorporating action-oriented language with verbs and adverbs makes headlines more dynamic and engaging.",
+        "Clear and unambiguous headlines perform well, but some complexity or disfluency can also boost engagement by intriguing readers."
+    ]
+}

@@ -1,0 +1,18 @@
+{
+  "pathway": {
+    "nodes": ["A", "C", "D", "E"],
+    "description": "A: schizophrenia, C: loss of social support, D: unemployment, E: chronic homelessness. Collapsing B (substance abuse) into A->C edge.",
+    "edges": [["A", "C"], ["C", "D"], ["D", "E"]]
+  },
+  "probabilities": {
+    "P_C_given_A": 0.50,
+    "P_D_given_C": 0.05,
+    "P_E_given_D": 0.20
+  },
+  "target": {
+    "node": "E",
+    "marginal_prob": 0.000457
+  },
+  "root_cause": ["A"],
+  "_rationale": "P(C|A)=0.50: schizophrenia frequently leads to social support deterioration (Buchanan 1995, social disability in schizophrenia). Product = 0.50*0.05*0.20 = 0.005."
+}

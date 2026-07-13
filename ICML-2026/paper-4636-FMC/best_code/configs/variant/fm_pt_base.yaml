@@ -1,0 +1,40 @@
+# Base fm_post_transform variant configuration
+#
+# This is the default configuration for fm_post_transform method.
+# Use as a starting point for custom variants.
+#
+# Usage:
+#   python run_benchmark.py train_variant \\
+#       +experiment=comparison_benchmark \\
+#       variant_name=fm_pt_base \\
+#       +variant=fm_pt_base
+
+variant_name: fm_pt_base
+method: fm_post_transform
+
+# Base distribution to build on
+base_dist: fmpe  # "npe" or "fmpe"
+
+# Training parameters
+training_params:
+  lr: 1e-3
+  batch_size: 256
+  train_size: 0.8
+
+# Model configuration (passed to trainer)
+config:
+  # NPE type for base distribution
+  npe: ${variant.base_dist}
+
+# HPO search space (used when --hpo flag is passed)
+hpo:
+  enabled: false  # Set via CLI --hpo flag or override
+  n_trials: 50
+  search_space:
+    lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-2
+    batch_size:
+      type: categorical
+      choices: [64, 128, 256, 512]

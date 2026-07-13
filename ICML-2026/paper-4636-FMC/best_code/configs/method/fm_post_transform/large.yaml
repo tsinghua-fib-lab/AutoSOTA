@@ -1,0 +1,30 @@
+# fm_post_transform with larger architecture
+# Use for hyperparameter search comparison
+#
+# Usage: python train_calibration.py method/fm_post_transform=large
+
+# @package _global_
+defaults:
+  - /architecture: attention_mlp
+
+method_name: fm_post_transform
+
+npe_type: "fmpe"
+
+training_params:
+  lr: 1e-3
+  epochs: 300
+  batch_size: 256
+  max_patience: 15
+  train_size: 0.8
+
+# Override architecture with larger hidden dims
+architecture:
+  flow_theta:
+    params:
+      drift:
+        hidden_dim: [128, 128, 128, 128, 128]
+  flow_x:
+    params:
+      drift:
+        hidden_dim: [128, 128, 128, 128, 128]

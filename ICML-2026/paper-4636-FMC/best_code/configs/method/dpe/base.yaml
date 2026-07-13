@@ -1,0 +1,22 @@
+# DPE (Direct Posterior Estimation) base config
+# sbi-based neural spline flow baseline
+#
+# Usage: defaults: [method/dpe: base]
+
+# @package _global_
+
+method_name: dpe
+
+training_params:
+  lr: 1e-4
+  batch_size: 512
+  epochs: 2000
+  train_size: 0.8
+
+density_estimator: 'nsf'
+
+params:
+  embedding_net: {}
+  npe_params:
+    transforms: 5
+    hidden_features: [64, 64]

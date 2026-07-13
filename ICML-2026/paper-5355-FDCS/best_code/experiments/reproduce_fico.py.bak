@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Reproduce FICO experiment from paper 5355.
+
+Fair Decisions from Calibrated Scores: Achieving Optimal Classification
+While Satisfying Sufficiency.
+Etam Benger and Katrina Ligett, ICML 2026.
+"""
+
+import os
+import sys
+import numpy as np
+import pandas as pd
+import json
+
+# Add experiments directory to path
+sys.path.insert(0, '/repo/experiments')
+
+from boundary_trace import GroupScoreDistribution, trace_intersection
+
+# ---------------------------------------------------------------------------
+# 1. Download FICO data
+# ---------------------------------------------------------------------------
+fico_base = 'https://raw.githubusercontent.com/fairmlbook/fairmlbook.github.io/master/code/creditscore/data'
+cache_dir = '/datasets/fico'
+
+os.makedirs(cache_dir, exist_ok=True)
+
+for fname in ['totals.csv', 'transrisk_cdf_by_race_ssa.csv', 'transrisk_performance_by_race_ssa.csv']:
+    local_path = os.path.join(cache_dir, fname)
+    if not os.path.exists(local_path):
+        print(f'Downloading {fname}...')
+        df = pd.read_csv(f'{fico_base}/{fname}')
+        df.to_csv(local_path, index=False)
+    else:
+        print(f'Using cached {fname}')
+
+fico_totals = pd.read_csv(os.path.join(cache_dir, 'totals.csv'))
+fico_cdf = pd.read_csv(os.path.join(cache_dir, 'transrisk_cdf_by_race_ssa.csv'))
+fico_perf = pd.read_csv(os.path.join(cache_dir, 'transrisk_performance_by_race_ssa.csv'))
+
+for df in [fico_totals, fico_cdf, fico_perf]:
+    df.rename(columns={'Non- Hispanic white': 'White'}, inplace=True)
+
+# ---------------------------------------------------------------------------
+# 2. Construct score distributions
+# ---------------------------------------------------------------------------
+races = ['White', 'Black', 'Hispanic', 'Asian']
+
+fico_scores = {}
+fico_weights = {}
+fico_totals_dict = {}
+
+for race in races:
+    fico_scores[race] = 1 - fico_perf[race].to_numpy() / 100
+    fico_weights[race] = np.diff(fico_cdf[race].to_numpy(), prepend=0) / 100
+    fico_totals_dict[race] = fico_totals[race].iloc[0]
+
+race01 = ('White', 'Black')
+
+dist0 = GroupScoreDistribution(
+    fico_scores[race01[0]],
+    fico_weights[race01[0]],
+    name=race01[0])
+
+dist1 = GroupScoreDistribution(
+    fico_scores[race01[1]],
+    fico_weights[race01[1]],
+    name=race01[1])
+
+prob_a1 = fico_totals_dict[race01[1]] / (
+    fico_totals_dict[race01[0]] + fico_totals_dict[race01[1]])
+
+# ---------------------------------------------------------------------------
+# 3. Unconstrained baseline
+# ---------------------------------------------------------------------------
+acc_unconstrained = (
+    (1 - prob_a1) * np.maximum(dist0.s, 1 - dist0.s).dot(dist0.w)
+    + prob_a1 * np.maximum(dist1.s, 1 - dist1.s).dot(dist1.w))
+print(f'Unconstrained accuracy: {acc_unconstrained:.4f}')
+
+baseline_ppv = {}
+baseline_for = {}
+for dist in [dist0, dist1]:
+    accept = dist.s >= 0.5
+    reject = ~accept
+    p_unconstrained = dist.s[accept].dot(dist.w[accept]) / dist.w[accept].sum()
+    q_unconstrained = dist.s[reject].dot(dist.w[reject]) / dist.w[reject].sum()
+    baseline_ppv[dist.name] = p_unconstrained
+    baseline_for[dist.name] = q_unconstrained
+    print(f'Group: {dist.name}\n  p = {p_unconstrained:.4f}, q = {q_unconstrained:.4f}')
+
+# ---------------------------------------------------------------------------
+# 4. Our method: sufficient classifier via boundary trace
+# ---------------------------------------------------------------------------
+result = trace_intersection(dist0, dist1, prob_a1)
+print(result)
+
+# Accuracy at min_dsep
+mu_dsep = (result.pi_agg - result.min_dsep.q) / (
+    result.min_dsep.p - result.min_dsep.q)
+acc_dsep = 1 - result.pi_agg + mu_dsep * (2 * result.min_dsep.p - 1)
+print(f'Accuracy at min_dsep: {acc_dsep:.4f}')
+
+# Which boundaries are the optima on?
+for dist in result.dists:
+    print(f'Group: {dist.name}\n'
+          f'  max_acc on boundary =  {dist.is_on_boundary(result.max_acc.p, result.max_acc.q)}\n'
+          f'  min_dsep on boundary = {dist.is_on_boundary(result.min_dsep.p, result.min_dsep.q)}')
+
+# ---------------------------------------------------------------------------
+# 5. Report metrics matching rubric
+# ---------------------------------------------------------------------------
+print('\n' + '='*60)
+print('RUBRIC METRICS')
+print('='*60)
+print(f'Accuracy (our method, max_acc): {result.max_acc.value:.4f}')
+print(f'Accuracy (unconstrained baseline): {acc_unconstrained:.4f}')
+print(f'PPV (our method, common p): {result.max_acc.p:.4f}')
+print(f'PPV (baseline, White): {baseline_ppv["White"]:.4f}')
+print(f'PPV (baseline, Black): {baseline_ppv["Black"]:.4f}')
+print(f'FOR (our method, common q): {result.max_acc.q:.4f}')
+print(f'FOR (baseline, White): {baseline_for["White"]:.4f}')
+print(f'FOR (baseline, Black): {baseline_for["Black"]:.4f}')
+
+# Save results to JSON for downstream consumers
+results = {
+    'accuracy_our_method': round(result.max_acc.value, 4),
+    'accuracy_baseline': round(acc_unconstrained, 4),
+    'ppv_our_method': round(result.max_acc.p, 4),
+    'ppv_baseline_white': round(baseline_ppv['White'], 4),
+    'ppv_baseline_black': round(baseline_ppv['Black'], 4),
+    'for_our_method': round(result.max_acc.q, 4),
+    'for_baseline_white': round(baseline_for['White'], 4),
+    'for_baseline_black': round(baseline_for['Black'], 4),
+    'min_dsep_value': round(result.min_dsep.value, 4),
+    'min_dsep_p': round(result.min_dsep.p, 4),
+    'min_dsep_q': round(result.min_dsep.q, 4),
+    'accuracy_at_min_dsep': round(acc_dsep, 4),
+}
+
+with open('/repo/experiments/fico_results.json', 'w') as f:
+    json.dump(results, f, indent=2)
+
+print(f'\nResults saved to /repo/experiments/fico_results.json')

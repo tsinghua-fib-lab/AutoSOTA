@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jaxcld"
+version = "0.2.4"
+description = "CLD: language detection heads for ASR models (Whisper / MMS)"
+readme = "README_pypi.md"
+requires-python = ">=3.9"
+authors = [{ name = "CLD contributors" }]
+license = { text = "MIT" }
+
+# Keep runtime deps minimal for the import/use case shown in the README.
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.0.0",
+  "torchaudio>=2.0.0",
+  "transformers==4.56.2",
+  "scikit-learn>=1.3.0",
+  "jax>=0.4.1",          # CPU by default; use jaxcld[cuda12] for GPU
+  "datasets[audio]==3.6.0",
+  "accelerate>=0.20.0",
+  "librosa>=0.10.1",
+  "soundfile>=0.12.1"
+]
+
+[project.optional-dependencies]
+# GPU variants — installs the matching CUDA-enabled jaxlib in place of the CPU one.
+cuda12 = ["jax[cuda12]>=0.4.1"]
+cuda11 = ["jax[cuda11_pip]>=0.4.1"]
+# Extras used by training/benchmark scripts in this repo.
+train = [
+  "scipy>=1.10",
+  "tqdm>=4.66",
+  "pandas>=1.5.0",
+  "noisereduce>=3.0.0",
+  "pydub>=0.25.1",
+  "evaluate>=0.4.0",
+  "jiwer>=3.0.0",
+  "torchcodec==0.10.0",
+  "wandb>=0.15.0",
+  "tensorboard>=2.13.0",
+  "huggingface_hub>=0.17.0",
+  "gradio>=3.0.0",
+  "audiomentations==0.43.1",
+  "optax==0.2.6",
+  "flax==0.11.2",
+  "python-dotenv==1.1.1",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jaxcld*"]
+
+

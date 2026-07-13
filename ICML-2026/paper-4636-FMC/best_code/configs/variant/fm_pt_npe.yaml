@@ -1,0 +1,40 @@
+# fm_post_transform variant using NPE as base distribution
+#
+# Uses NPE (normalizing flow) as the base distribution instead of FMPE.
+#
+# Usage:
+#   python run_benchmark.py train_variant \\
+#       +experiment=comparison_benchmark \\
+#       variant_name=fm_pt_npe \\
+#       +variant=fm_pt_npe
+
+variant_name: fm_pt_npe
+method: fm_post_transform
+
+# Base distribution
+base_dist: npe  # Use NPE instead of FMPE
+
+# Training parameters
+training_params:
+  lr: 1e-3
+  epochs: 200
+  batch_size: 256
+  max_patience: 10
+  train_size: 0.8
+
+# Model configuration
+config:
+  npe: npe
+
+# HPO configuration
+hpo:
+  enabled: false
+  n_trials: 50
+  search_space:
+    lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-2
+    batch_size:
+      type: categorical
+      choices: [64, 128, 256, 512]

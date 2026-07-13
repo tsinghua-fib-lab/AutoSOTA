@@ -1,0 +1,40 @@
+# Large fm_post_transform variant with more training
+#
+# Uses larger training budget (more epochs, lower learning rate).
+#
+# Usage:
+#   python run_benchmark.py train_variant \\
+#       +experiment=comparison_benchmark \\
+#       variant_name=fm_pt_large \\
+#       +variant=fm_pt_large
+
+variant_name: fm_pt_large
+method: fm_post_transform
+
+# Base distribution
+base_dist: fmpe
+
+# Training parameters - larger budget
+training_params:
+  lr: 5e-4           # Lower learning rate
+  epochs: 500        # More epochs
+  batch_size: 256
+  train_size: 0.8
+
+# Model configuration
+config:
+  npe: fmpe
+
+# HPO configuration
+hpo:
+  enabled: false
+  n_trials: 50
+  search_space:
+    lr:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    epochs:
+      type: int
+      low: 200
+      high: 1000

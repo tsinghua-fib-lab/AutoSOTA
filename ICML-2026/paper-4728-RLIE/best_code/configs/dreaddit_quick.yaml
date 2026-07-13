@@ -1,0 +1,64 @@
+data_roots:
+  - real/dreaddit
+
+generation:
+  sample_size: 5
+  rules_per_call: 3
+
+num_train_samples: 20
+num_valid_samples: 20
+num_test_samples: 20
+data_seed: 42
+repeat: 1
+
+max_rules: 5
+rule_prune_metric: acc
+rule_coverage_threshold: 0.2
+model_selection_metric: acc
+best_model_metric: acc
+
+evaluation:
+  modes: regression_only
+
+llms:
+  generation:
+    rule_learning_model: deepseek-v4-pro
+    rule_scoring_model: deepseek-v4-flash
+    evaluation_models:
+      - deepseek-v4-flash
+    temperature: 0.0
+    max_tokens: 4000
+    max_retries: 2
+  evaluation:
+    temperature: 0.0
+    request_timeout: 300
+    num_predict: 4000
+    max_concurrent_per_key: 16
+    max_retries: 3
+    disable_thinking_models:
+      - deepseek-v4-flash
+    reasoning_effort_models: {}
+    chat_template_kwargs_models: {}
+  client:
+    base_url: ${RLIE_BASE_URL}
+    api_key: ${RLIE_API_KEY}
+
+convergence:
+  min_improvement: 0.001
+  max_rounds: 2
+  patience: 1
+
+elastic_net:
+  max_iter: 20000
+  tol: 0.001
+  fit_intercept: true
+  warm_start: false
+  class_weight: balanced
+  random_state: 42
+  cv_folds: 3
+  n_jobs: -1
+
+logging:
+  output_dir: outputs
+  save_features: true
+  print_generation_prompts: false

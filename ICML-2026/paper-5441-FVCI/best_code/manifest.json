@@ -1,0 +1,44 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 5441,
+    "repo_url": "https://github.com/vkuskova/ICML2026-28194",
+    "repo_commit": "2938fc2558e69a0a9318ecce8fa51ef3f1db73ab",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_5441",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-5441:reproduced",
+    "eval_command": "python3 reproduce_threshold.py",
+    "baseline_metrics": {"Pearson_r": 0.9685},
+    "primary_metric": "Pearson_r",
+    "metric_direction": "higher",
+    "gpu_devices": "6,7",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-5441.log",
+    "status": "success",
+    "created_at": "2026-07-13T07:01:07Z",
+    "notes": "Successfully reproduced the Appendix H Table 5 threshold mechanism ICE recovery metric. Using notebook Cell 5 NAVAR_CONFIG settings (maxlags=1, hidden_nodes=16, epochs=2000, weight_decay=0.001, normalize=False) which match the paper's code implementation. Reproduced Pearson r mean=0.9685 (paper: 0.968), std=0.0031 (paper: 0.003), min=0.9608 (paper: 0.961), max=0.9731 (paper: 0.973) across 15 independent runs with an 81-point evaluation grid. Result falls within the rubric CI bounds [0.965, 0.971]. Note: Paper Table 2 lists maxlags=8, hidden_nodes=32, epochs=1000 for 'all experiments' but the notebook code uses different settings for synthetic experiments; the notebook settings reproduce the reported numbers.",
+    "eval_timeout_minutes": 45,
+    "eval_output_format": "Parse stdout for line matching 'Mean r: <value>'. The script prints a header with hyperparameters, per-run lines with format '[threshold] run=NN seed=NNNN r=X.XXXX score_XtoY=X.XXXXXX val_loss=X.XXXXXX', then a summary block with 'RESULTS' header containing Mean/Std/Min/Max r values.",
+    "known_levers": "Hyperparameters: maxlags (1), hidden_nodes (16), hidden_layers (1), epochs (2000), dropout (0.10), weight_decay (0.001), lambda1/L1 penalty (0.15), learning_rate (3e-4), batch_size (128). Architecture: can switch to NAVARLSTM variant. Data: T (2000), noise_std (0.5), jump process probability (0.15). Evaluation: grid resolution (81-point), grid quantile range (0.02-0.98). Training: val_proportion (0.10), normalize (False).",
+    "setup_notes": "Container started from pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime (via docker.1ms.run mirror). Installed pandas and scikit-learn via pip with Tsinghua mirror. No external datasets or model weights required — synthetic data is generated on-the-fly. Two NVIDIA A100-SXM4-80GB GPUs available. Python 3.10.13. The reproduction script reproduce_threshold.py is self-contained and does not depend on Google Colab or Google Drive (unlike the original notebook). Dependencies: torch>=1.3.0, numpy>=1.18.0, pandas>=0.24.1, scikit-learn>=0.23.1.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Maximize Pearson r between the true threshold causal function g(x) and the lag-aggregated ICE estimate, measured across 15 independent runs on an 81-point grid. Higher Pearson r indicates better recovery of the nonlinear causal mechanism's functional form.",
+      "metrics": [
+        {
+          "name": "Pearson_r",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.9685,
+          "regression_tolerance_pct": 1.0,
+          "rationale": "Pearson r measures ICE recovery quality — how faithfully the estimated causal response curve captures the shape of the true threshold mechanism. This is the paper's primary quantitative evaluation metric (Appendix H Table 5). The threshold mechanism is the hardest to recover (lowest r among the four mechanisms) and best represents the paper's core claim of recovering nonlinear causal functions."
+        }
+      ],
+      "success_policy": "Improve Pearson r as much as possible within the SOTA iteration budget. Do not sacrifice the 15-run protocol or the 81-point grid resolution — these define the metric. Accept any improvement over baseline 0.9685 as progress. A score above 0.975 (the paper's sign-changing mechanism level) would demonstrate meaningful advance. Monitor per-run variance (std) to ensure gains are robust, not driven by a single outlier run."
+    },
+    "metric_upper_bound": 1.0,
+    "metric_lower_bound": 0.95
+  }
+}

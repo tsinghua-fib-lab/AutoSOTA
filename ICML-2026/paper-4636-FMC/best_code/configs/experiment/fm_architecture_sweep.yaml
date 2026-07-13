@@ -1,0 +1,87 @@
+# FM Architecture Sweep - compare flow matching architectures
+# Grid sweep over attention_mlp, resmlp, cfnet
+#
+# Usage:
+#   # Quick test on pure_gaussian
+#   python run_experiment.py +experiment=fm_architecture_sweep profile=sanity
+#
+#   # Full production sweep
+#   python run_experiment.py +experiment=fm_architecture_sweep profile=production
+#
+#   # Run only specific architecture
+#   python run_experiment.py +experiment=fm_architecture_sweep sweep.values=[resmlp]
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "fm_architecture_sweep"
+  description: "Compare attention_mlp, resmlp, cfnet architectures for flow matching"
+  tags: ["architecture", "ablation", "fmpe"]
+  author: "pruhlman"
+
+# Tasks to run
+tasks:
+  - pure_gaussian
+  - pendulum
+  - ou_process
+  - wind_tunnel
+
+# What to train (only FMPE needed for this study)
+run:
+  simulation_models: ["fmpe"]
+  calibration_methods: ["fm_post_transform"]
+  baselines: []
+  # seeds and num_cal are set by profile in Python
+
+# No Optuna - use grid sweep
+hpo:
+  enabled: false
+
+# Grid sweep over architectures
+sweep:
+  enabled: true
+  type: grid
+  parameter: architecture
+  values:
+    - attention_mlp
+    - resmlp
+    - cfnet
+
+# Method-specific overrides (same HP across architectures for fair comparison)
+method_overrides:
+  fmpe:
+    training_params:
+      epochs: 500
+      lr: 1e-3
+      max_patience: 20
+  fm_post_transform:
+    training_params:
+      epochs: 500
+      lr: 1e-3
+      max_patience: 20
+
+# Task-specific overrides (architecture dimensions vary by task complexity)
+task_overrides:
+  wind_tunnel:
+    method_overrides:
+      fmpe:
+        config:
+          params:
+            drift:
+              hidden_dim: [128, 128, 128, 128, 128]
+      fm_post_transform:
+        config:
+          flow_theta:
+            params:
+              drift:
+                hidden_dim: [128, 128, 128, 128, 128]
+
+# Evaluation settings
+evaluation:
+  enabled: true
+  metrics: ["joint_mmd", "joint_c2st"]
+  # num_test_samples is set by profile in Python
+  compare_across: "architecture"
+  custom_script: null

@@ -1,0 +1,41 @@
+# Task-specific "small" variant for high_dim_gaussian
+#
+# Uses smaller resmlp architecture (2 layers x 32 units instead of 5 x 64)
+# to reduce overfitting on low-data calibration scenarios.
+#
+# Resolution: When training with variant_name=fm_pt_small on high_dim_gaussian,
+# this config is used instead of the global fm_pt_small.yaml
+
+_base: fm_pt_small  # Inherit training params from global variant
+
+# Override model architecture for this task
+config:
+  npe: fmpe
+  flow_theta:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [32, 32]  # Small: 2 layers x 32 (vs 5 x 64 default)
+        mlp_params: {}
+  flow_x:
+    space: "data"
+    conditional: True
+    probability_path: "ot2"
+    prior: 'power'
+    base_dist: 'gaussian'
+    params:
+      probability_path_params: {}
+      prior_params: {"rate": 2.0}
+      base_dist_params: {}
+      drift:
+        architecture: "resmlp"
+        hidden_dim: [32, 32]  # Small: 2 layers x 32 (vs 5 x 64 default)
+        mlp_params: {}

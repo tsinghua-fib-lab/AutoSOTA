@@ -1,0 +1,66 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 5011,
+    "repo_url": "https://github.com/UCF-ML-Research/R2-Router",
+    "repo_commit": "b0b2291aeee08feb4bedbd199ab014ec60d0004f",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_5011",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-5011:reproduced",
+    "eval_command": "python3 run_eval_v2.py --training-data /datasets/training_data.pkl --output-dir /repo/results --k-neighbors 128 --train-frac 0.8 --seed 42",
+    "baseline_metrics": {
+      "AUDC": 0.7225,
+      "QNC": 0.5427,
+      "Peak Acc.": 0.7432
+    },
+    "primary_metric": "AUDC",
+    "metric_direction": "higher",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-3/logs/reproduction/paper-5011.log",
+    "status": "success",
+    "created_at": "2026-07-13T04:31:29Z",
+    "notes": "AUDC=0.7225 reproduced within CI [0.72,0.80] using KNN predictors (k=128) on RouterArena data (8400 queries, Qwen3-0.6B embeddings, 16 models). QNC=0.5427 and Peak Acc=0.7432 are outside paper CI bounds due to different model pool (RouterArena vs R2-BENCH) and predictor architecture (KNN vs 3-layer MLP). 5 independent runs with different seeds. The paper's default embedding is Qwen3-0.6B; MiniLM-L6-v2 (384d) is used only in Table 2 ablation. The public repo ships with online routing code (Ridge+Qwen3-0.6B) and RouterArena evaluation scripts; the paper's experiment code for MiniLM-L6-v2 + MLP training is not in the public repo.",
+    "eval_timeout_minutes": 30,
+    "eval_output_format": "stdout prints Peak Accuracy, AUDC (norm cost), QNC; also saved to --output-dir/metrics.json with keys peak_accuracy, AUDC, QNC",
+    "known_levers": "KNN neighbors (k: 16-256), train fraction (0.5-0.9), cost normalization method, model pool subset selection, embedding standardization. Moving to MLP predictor (paper architecture: 3-layer [256,128,64], Adam lr=1e-4, 100 epochs, MSE) may improve results but requires fixing the training data/model pool mismatch.",
+    "setup_notes": "Container was started from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime (manual fallback image). Dependencies installed: scikit-learn==1.7.2, pandas, matplotlib, joblib, sentence-transformers, huggingface_hub, tqdm. numpy downgraded to 1.26.4 for PyTorch 2.1.0 compatibility. RouterArena training data downloaded from huggingface.co/datasets/JiaqiXue/R2-Bench-RouterArena to /datasets/: training_data.pkl (40MB), routerarena_embeddings.pkl (34MB), router_data_10.json (860KB). The training_data.pkl contains Qwen3-0.6B embeddings (8400 queries, 1024d) with per-model per-budget accuracy and token counts for 16 LLMs. The repo's r2_router/checkpoints/ contain pre-trained Ridge regression checkpoints for 11 R2-BENCH models but were NOT used here because they target a different model pool. The evaluation script (run_eval_v2.py) is self-contained and uses sklearn KNeighborsRegressor with cosine distance and distance-weighted averaging.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Improve AUDC (higher=better overall quality-cost tradeoff) while monitoring QNC (lower=better cost at quality target) and Peak Acc (higher=better maximum quality). QNC and Peak Acc are antagonistic per the rubric — improving cost-efficiency may reduce peak quality and vice versa.",
+      "metrics": [
+        {
+          "name": "AUDC",
+          "direction": "higher",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.7225,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "Area Under Deferral Curve measures the overall quality-cost tradeoff. This is the primary summary metric for routing performance. Paper reports 0.76 with MiniLM-L6-v2 + MLP on R2-BENCH."
+        },
+        {
+          "name": "QNC",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "improve",
+          "baseline": 0.5427,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Query-Normalized Cost measures the minimum relative cost to match the best single LLM's quality. Lower is better. Antagonistic with Peak Acc — reducing QNC may reduce peak accuracy. Paper reports 0.32."
+        },
+        {
+          "name": "Peak Acc.",
+          "direction": "higher",
+          "role": "guardrail",
+          "goal": "maintain_or_improve",
+          "baseline": 0.7432,
+          "regression_tolerance_pct": 2.0,
+          "rationale": "Peak Accuracy is the maximum quality achieved by the routing system. Antagonistic with QNC — pursuing peak accuracy alone may increase cost. Paper reports 0.79."
+        }
+      ],
+      "success_policy": "Primary goal: maximize AUDC. Accept QNC and Peak Acc changes as long as AUDC improves and neither guardrail degrades beyond its regression tolerance. If AUDC improves but a guardrail regresses beyond tolerance, the improvement is valid only if the Pareto frontier shows net gain."
+    },
+    "metric_upper_bound": 0.9263,
+    "metric_lower_bound": 0.0
+  }
+}

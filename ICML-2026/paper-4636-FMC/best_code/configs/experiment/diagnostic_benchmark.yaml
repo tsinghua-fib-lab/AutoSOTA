@@ -1,0 +1,67 @@
+# @package _global_
+# Diagnostic Benchmark - Component analysis of fm_post_transform
+#
+# Full-scale run with z_score rescaling to validate rescaling fix.
+#
+# Usage:
+#   python run_benchmark.py command=train_foundation +experiment=diagnostic_benchmark
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_base +experiment=diagnostic_benchmark
+#   python run_benchmark.py command=train_variant variant_name=fm_pt_plug_y +experiment=diagnostic_benchmark
+#   python scripts/run_diagnostics.py --experiment diagnostic_benchmark
+
+defaults:
+  - /experiment/_profiles/development
+  - _self_
+
+experiment:
+  name: "diagnostic_benchmark"
+  description: "Diagnostic experiment for fm_post_transform with z_score rescaling"
+  tags: ["diagnostic", "ablation", "z_score"]
+  author: "pruhlman"
+
+data:
+  n_pool: 2000
+  n_test: 2000
+  calibration_sizes: [10, 50, 200, 1000]
+  n_sim: 50000
+  seed: 42
+
+tasks:
+  - pendulum
+
+foundation:
+  simulation_models: ["npe", "fmpe"]
+  baselines: ["dpe", "mf_npe"]
+
+seeds: [33]
+
+evaluation:
+  enabled: true
+  metrics: ["joint_coverage", "joint_mmd"]
+  conditional_metrics: ["cond_c2st"]
+  conditional_tasks: ["pendulum"]
+  num_joint_samples: 2000
+  num_conditional_obs: 10
+  num_posterior_samples: 2000
+  batch_size: 100
+  skip_existing: false
+
+skip_existing: false
+results_dir: "results"
+
+hpo:
+  enabled: false
+
+sweep:
+  enabled: false
+
+method_overrides:
+  fm_post_transform:
+    rescale: "z_score"
+    max_patience: null
+  fm_post_transform_plug_y:
+    rescale: "z_score"
+    max_patience: null
+
+task_overrides:
+  rescale: "z_score"

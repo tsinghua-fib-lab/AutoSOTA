@@ -1,0 +1,32 @@
+# High-dimensional tasks profile
+# Use for testing on high-dim gaussian tasks before running on all tasks
+#
+# Usage:
+#   python run_experiment.py +experiment=hpo_simulation_hp +profile=high_dim
+
+# @package profile
+name: "high_dim"
+description: "High-dimensional tasks only (gaussian variants)"
+
+# Override tasks to high-dim only
+tasks_override:
+  - high_dim_gaussian
+
+# Moderate scale for initial testing
+seeds: [0, 1]
+num_cal: [50, 200]
+num_test_samples: 50
+
+# Training scale factors
+training:
+  epochs_scale: 0.5
+  max_patience: 20
+
+# Data scale factors
+data:
+  num_samples_scale: 0.2
+
+# HPO settings
+hpo:
+  n_trials_override: 20
+  pruning: true

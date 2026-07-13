@@ -1,0 +1,39 @@
+defaults:
+  - inputs: cancer
+  - _self_
+
+flow:
+  folder: ${inputs.folder_artifacts}/alpha_${alpha}/fm/seed_${seed}
+  use_best_checkpoint: true
+
+t_final: ${inputs.t_eval}
+steps: 100
+method: rk4
+sampling_mode: ode
+sigma_sample: 1.0
+
+alpha: "0.000"
+seed: 42
+
+rep:
+  obsm_key: X_pca_whiten
+
+rep_transform: ${inputs.rep_transform}
+
+metrics:
+  _target_: cellbridge.utils.metrics.MetricCollection
+  metrics:
+    - _target_: cellbridge.utils.metrics.Wasserstein2
+      numItermax: 500000
+    - _target_: cellbridge.utils.metrics.Wasserstein1
+      numItermax: 500000
+  include_baselines: False
+
+outputs:
+  dir: ${flow.folder}/sample_velocity/
+
+device: auto
+
+hydra:
+  run:
+    dir: ${outputs.dir}
