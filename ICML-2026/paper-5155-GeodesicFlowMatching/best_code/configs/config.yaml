@@ -1,0 +1,64 @@
+project:
+  name: cleanup-ssp
+  seed: 42
+
+wandb:
+  enabled: false
+  project: Clean_Up
+  tags: ["repro"]
+
+paths:
+  data_root: /autosota_cache/data
+  checkpoint_dir: /autosota_cache/checkpoints
+  figures_dir: /autosota_cache/figures
+
+experiment:
+  name: repro_geo_det
+  tags: ["repro"]
+
+ssp:
+  bundle_type: hexagonal
+  n_rotates: 13
+  n_scales: 13
+  length_scale: 0.2
+  domain_dim: 2
+  domain_bounds: [[-1, 1], [-1, 1]]
+
+data:
+  train_samples: 20000
+  test_samples: 5000
+  dataset_sampling_method: sobol
+  target_dataset_type: coordinate_ssps
+  train_subdir: train
+  test_subdir: test
+
+trainer:
+  sampling_modes:
+    - geo_det
+    - euc_det
+  device: cuda
+  batch_size: 256
+  epochs: 100
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  val_split: 0.1
+  noise_type: uniform_hypersphere
+  target_type: coordinate
+  signal_strength: 0.0
+  sigma_min: 0.1
+  beta_min: 0.1
+  beta_max: 20.0
+  ot_method: sinkhorn
+  ot_reg: 0.005
+  ot_reg_sb: 0.05
+  train_feedforward: false
+  dataloader_num_workers: 0
+  dataloader_prefetch_factor: 2
+
+eval:
+  signal_strengths: [0.0]
+  num_steps: [1, 2, 5, 10]
+  repeats: 5
+
+schedule:
+  eval_every_epochs: null

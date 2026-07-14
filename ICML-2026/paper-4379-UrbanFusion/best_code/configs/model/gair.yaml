@@ -1,0 +1,19 @@
+_target_: srl.baselines.GAIR.train.trainer.GAIRLightningModule
+precomputed_features: False
+lr: 1.5e-6
+weight_decay: 0.01
+queue_size: 4096
+plot_representation_space:
+  save_representations_val: false
+  save_representations_test: True
+  save_plots: False
+  show_plots: false
+  plot_val: False
+  val_n_epochs: 5
+  plot_test: true
+  token_index: 0
+  title: "Image is Masked, CLS"
+  save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory
+
+
+

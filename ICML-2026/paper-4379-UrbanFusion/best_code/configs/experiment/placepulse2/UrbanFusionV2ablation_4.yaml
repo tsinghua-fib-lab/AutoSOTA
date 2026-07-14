@@ -1,0 +1,116 @@
+# @package _global_
+
+# ====================================================
+# Final experiments of UrbanFusion on PP2-M dataset.
+# Ablation study "Rec. only".
+# ====================================================
+
+defaults:
+  - override /data: place_pulse2
+  - override /model: mm_encoder_only_cls
+  - override /encoder: placepulse2/encoders_placepulse2rff768_1
+  - override /callbacks: default
+
+data:
+  batch_size: 2560
+  num_workers: 4
+  persistent_workers: true
+  pin_memory: true
+  out_region_cities:
+    [
+      "Cape Town",
+      "Singapore",
+      "Rio De Janeiro",
+      "Paris",
+      "Milan",
+      "New York",
+      "Sydney",
+    ]
+  in_region_split: 0.2
+  return_filename: false
+  return_coords: false
+  filter_available_images: False
+  precomputed_h5_path: "${paths.h5_dir}/svi_data/place-pulse-2.0/01_06_2025_legendre_polys_10_bge-small-en-v1.5.h5"
+  coordinate_predictions:
+    [
+      "${paths.data_dir}/svi_data/place-pulse-2.0/downstreamtask_data/London_Energy_Usage/London_Energy_Usage_locations.csv",
+      "${paths.data_dir}/svi_data/place-pulse-2.0/downstreamtask_data/London_Housing_Prices/London_Housing_Prices_locations.csv",
+    ]
+
+trainer:
+  max_epochs: 400 # 20
+  precision: "16-mixed"
+  check_val_every_n_epoch: 10
+  #limit_train_batches: 0.1
+  #limit_val_batches: 0.2
+  #limit_test_batches: 0.2
+
+model:
+  optimizer:
+    lr: 0.0001
+    weight_decay: 0.00001
+
+  model:
+    transformer_type: "single"
+    embed_dim: 768
+    head_hidden_dim: 330
+    hourglass_dim: 330
+    head_contrastive_dim: 512
+    num_heads: 8
+    only_cls: True
+    avg_pool: True
+    head: "hourglass_tiny"
+    reconstruction_head_dim: 3842
+    depth: 1
+
+  scheduler:
+    steps_total: 11600 # 29 iterations per epoch with batch size 2560 (73028 samples for train)
+    steps_warmup: 580 # 5% of total steps
+
+  plot_representation_space:
+    save_representations_val: false
+    save_representations_test: True
+    save_plots: true
+    show_plots: false
+    plot_val: true
+    val_n_epochs: 10
+    plot_test: true
+    token_index: 0
+    title: "Image is Masked (only coordinate), CLS"
+    save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory
+    mask_indices:
+      - 0
+
+  loss:
+    _target_: scripts.loss.clip_loss.CLIPLoss
+    initial_temperature: 0.07
+    max_logit_scale: 100
+    fixed_temperature: null
+    normalize: True
+    reduction: "mean"
+    label_smoothing_type: null
+    label_smoothing_epsilon: 0.1
+    temperature_label_smoothing: 0.07
+    use_js_divergence: False
+    lmbd: 0
+    u: 1
+    v: 0
+    epsilon: 1e-3
+    variance_covariance_reg_bool: False
+    reconstruction_loss_weight: 1.0
+    mean_vector_path: "${paths.data_dir}/svi_data/place-pulse-2.0/mean_vector.npy"
+    std_vector_path: "${paths.data_dir}/svi_data/place-pulse-2.0/std_vector.npy"
+    scaling_vector_path: "${paths.data_dir}/svi_data/place-pulse-2.0/scaling_vector.npy"
+  modality_reconstruction: True
+  cartesian_p_final: 0.2
+
+callbacks:
+  early_stopping:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+  model_checkpoint:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+
+task_name: "UrbanFusionV2ablation_4"
+
+seed: 42
+# python scripts/train.py experiment=milan/milanall_1

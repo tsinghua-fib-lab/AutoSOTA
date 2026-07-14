@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adaptive Multiscale Binary Expansion Tests for Independence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #0d0f14;
+    --ink2:      #2b2e38;
+    --muted:     #6b7280;
+    --rule:      #e2e4ea;
+    --bg:        #f8f7f4;
+    --card:      #ffffff;
+    --accent:    #1d4ed8;
+    --accent2:   #7c3aed;
+    --accent3:   #059669;
+    --amber:     #d97706;
+    --red:       #dc2626;
+    --chip-bg:   #eff6ff;
+    --chip-text: #1d4ed8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.75;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(248,247,244,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--muted); text-decoration: none;
+    text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 1.6rem; list-style: none; }
+  .nav-links a {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.05em; color: var(--ink2); text-decoration: none;
+    text-transform: uppercase; transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 860px; margin: 0 auto;
+    padding: 5rem 2rem 3.5rem;
+  }
+  .hero-label {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .hero-label::before {
+    content: ''; display: inline-block;
+    width: 28px; height: 1.5px; background: var(--accent);
+  }
+  h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.18; font-weight: 400;
+    color: var(--ink); margin-bottom: 1.4rem;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--accent2); }
+  .hero-sub {
+    font-size: 1.05rem; color: var(--ink2);
+    max-width: 640px; margin-bottom: 2rem; line-height: 1.7;
+  }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.5rem;
+  }
+  .chip {
+    font-family: 'DM Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    padding: 0.28rem 0.72rem; border-radius: 2px;
+    background: var(--chip-bg); color: var(--chip-text);
+    text-transform: uppercase; font-weight: 500;
+  }
+  .chip.purple { background: #f5f3ff; color: var(--accent2); }
+  .chip.green  { background: #ecfdf5; color: var(--accent3); }
+  .chip.amber  { background: #fffbeb; color: var(--amber); }
+
+  .btn-row { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .btn {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.55rem 1.3rem; border-radius: 2px;
+    text-decoration: none; font-weight: 500;
+    transition: all .2s; display: inline-flex; align-items: center; gap: 0.4rem;
+    cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1e40af; }
+  .btn-outline { background: transparent; color: var(--ink2); border: 1.5px solid var(--ink2); }
+  .btn-outline:hover { background: var(--ink2); color: #fff; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--rule); margin: 3.5rem 0 0; }
+
+  /* ── MAIN CONTENT ── */
+  main { max-width: 860px; margin: 0 auto; padding: 0 2rem 5rem; }
+
+  section { margin-top: 3.8rem; }
+
+  h2 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.55rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 1.1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1.5px solid var(--rule);
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Mono', monospace; font-size: 0.82rem;
+    font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent2); margin: 1.8rem 0 0.6rem;
+  }
+  p { margin-bottom: 1rem; color: var(--ink2); }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── METHODS GRID ── */
+  .methods-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+    margin-top: 1.4rem;
+  }
+  .method-card {
+    background: var(--card); padding: 1.4rem 1.5rem;
+    transition: background .15s;
+  }
+  .method-card:hover { background: #fafbff; }
+  .method-tag {
+    font-family: 'DM Mono', monospace; font-size: 0.68rem;
+    font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 2px;
+    margin-bottom: 0.65rem; display: inline-block;
+  }
+  .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+  .tag-purple { background: #ede9fe; color: #6d28d9; }
+  .tag-teal   { background: #ccfbf1; color: #0f766e; }
+  .tag-orange { background: #ffedd5; color: #c2410c; }
+  .tag-red    { background: #fee2e2; color: #b91c1c; }
+  .method-name {
+    font-family: 'DM Mono', monospace; font-size: 0.95rem;
+    font-weight: 500; color: var(--ink); margin-bottom: 0.4rem;
+  }
+  .method-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.55; }
+
+  /* ── MATH BLOCK ── */
+  .math-block {
+    background: var(--card); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 4px 4px 0;
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0;
+    font-family: 'DM Mono', monospace; font-size: 0.82rem;
+    line-height: 1.8; color: var(--ink2); overflow-x: auto;
+  }
+  .math-block .eq-label {
+    float: right; color: var(--muted); font-size: 0.72rem;
+    font-weight: 500; letter-spacing: 0.04em;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex; flex-direction: column; gap: 0;
+    margin: 1.4rem 0; border: 1px solid var(--rule);
+    border-radius: 4px; overflow: hidden;
+  }
+  .pipeline-step {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.1rem 1.4rem; background: var(--card);
+    border-bottom: 1px solid var(--rule);
+  }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    font-weight: 500; min-width: 26px; height: 26px;
+    background: var(--accent); color: #fff;
+    border-radius: 2px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-title {
+    font-family: 'DM Mono', monospace; font-size: 0.8rem;
+    font-weight: 500; color: var(--ink); margin-bottom: 0.25rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .step-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
+
+  /* ── HEATMAP DEMO ── */
+  .demo-wrapper {
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 1.8rem;
+    margin-top: 1.4rem;
+  }
+  .demo-title {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1rem;
+  }
+  .heatmap-container {
+    position: relative; width: 100%; max-width: 520px; margin: 0 auto;
+  }
+  canvas#heatmap { width: 100%; border-radius: 2px; display: block; }
+  .heatmap-legend {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 0.6rem; font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; color: var(--muted);
+  }
+  .legend-bar {
+    flex: 1; height: 8px; border-radius: 2px; margin: 0 0.6rem;
+    background: linear-gradient(to right, #440154, #31688e, #35b779, #fde725);
+  }
+  .demo-controls {
+    display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.2rem;
+    align-items: center;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 0.2rem; }
+  .ctrl-label {
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  }
+  select, input[type=range] {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    border: 1px solid var(--rule); border-radius: 2px;
+    background: var(--bg); color: var(--ink);
+    padding: 0.3rem 0.55rem; cursor: pointer;
+  }
+  input[type=range] { padding: 0; width: 120px; accent-color: var(--accent); }
+  .run-btn {
+    margin-top: 1.1rem;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.5rem 1.2rem; border-radius: 2px;
+    background: var(--accent2); color: #fff; border: none; cursor: pointer;
+    transition: background .2s;
+  }
+  .run-btn:hover { background: #6d28d9; }
+  .stat-row {
+    display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.1rem;
+  }
+  .stat-pill {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    padding: 0.3rem 0.8rem; border-radius: 2px;
+    background: var(--chip-bg); color: var(--accent);
+  }
+
+  /* ── RESULTS TABLE ── */
+  .results-table-wrap { overflow-x: auto; margin-top: 1.3rem; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.83rem; font-family: 'DM Mono', monospace;
+  }
+  thead { background: var(--ink); color: #fff; }
+  th { padding: 0.55rem 0.9rem; text-align: left;
+       font-weight: 500; font-size: 0.68rem;
+       letter-spacing: 0.06em; text-transform: uppercase; }
+  td { padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--rule); color: var(--ink2); }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #fafbff; }
+  .val-hi  { color: var(--accent3); font-weight: 500; }
+  .val-mid { color: var(--amber); }
+  .val-lo  { color: var(--red); }
+  .method-col { color: var(--ink); font-weight: 500; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #0f111a; color: #abb2bf;
+    border-radius: 4px; padding: 1.3rem 1.5rem;
+    font-family: 'DM Mono', monospace; font-size: 0.78rem;
+    line-height: 1.7; overflow-x: auto; margin: 1.2rem 0;
+    position: relative;
+  }
+  .code-block .kw  { color: #c678dd; }
+  .code-block .fn  { color: #61afef; }
+  .code-block .str { color: #98c379; }
+  .code-block .cm  { color: #5c6370; font-style: italic; }
+  .code-block .num { color: #d19a66; }
+  .code-copy {
+    position: absolute; top: 0.7rem; right: 0.8rem;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.2rem 0.55rem; border-radius: 2px;
+    background: #282c34; color: #5c6370; border: 1px solid #3e4451;
+    cursor: pointer; transition: all .2s;
+  }
+  .code-copy:hover { color: #abb2bf; }
+  .code-copy.copied { color: var(--accent3); }
+
+  /* ── TRANSFORMS ── */
+  .transform-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin-top: 1.2rem;
+  }
+  .transform-card {
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 1.1rem 1.2rem;
+  }
+  .transform-name {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    font-weight: 500; color: var(--ink); margin-bottom: 0.3rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .transform-formula {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    color: var(--accent2); line-height: 1.6;
+    border-top: 1px solid var(--rule); margin-top: 0.5rem; padding-top: 0.5rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem; text-align: center;
+    font-family: 'DM Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.05em; color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── SCROLL ANIM ── */
+  .fade-in { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .hero { padding: 3rem 1.2rem 2rem; }
+    main { padding: 0 1.2rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">CoBET / wa-dCoBET</a>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#methods">Methods</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#code">Code</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-label">Statistical Testing · Independence</div>
+  <h1>Adaptive Multiscale Binary Expansion Tests <em>for Independence</em></h1>
+  <p class="hero-sub">
+    CoBET, dCoBET, and wa-dCoBET — a family of nonparametric tests for independence in high-dimensional data, built on dyadic binary expansion features and SNR-guided adaptive weighting. Benchmarked against HSIC and dCov across Clayton-copula simulation settings.
+  </p>
+  <div class="meta-row">
+    <span class="chip">CoBET</span>
+    <span class="chip purple">dCoBET</span>
+    <span class="chip green">wa-dCoBET</span>
+    <span class="chip amber">Clayton Copula</span>
+    <span class="chip">BH-FDR</span>
+  </div>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="#demo">▶ Interactive Demo</a>
+    <a class="btn btn-outline" href="#code">View Code</a>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<main>
+
+  <!-- ── OVERVIEW ── -->
+  <section id="overview" class="fade-in">
+    <h2>Overview</h2>
+    <p>
+      This project develops a suite of nonparametric independence tests that exploit the dyadic (binary expansion) structure of the probability integral transform. The tests are designed to be powerful against diverse alternatives — including trigonometric, exponential-quadratic, linear, and log-quadratic dependence structures — while maintaining valid Type I error control.
+    </p>
+
+    <h3>Key Contributions</h3>
+    <p>
+      The core statistic decomposes cross-dependence via centered indicator functions on dyadic cells. Three test statistics are presented:
+      <strong>CoBET</strong> (univariate baseline), <strong>dCoBET</strong> (multivariate extension with identity or J-weighted matrices), and <strong>wa-dCoBET</strong> (weight-adaptive, using 10-fold SNR blending to select between weight matrices on each coordinate pair).
+    </p>
+    <p>
+      The pairwise heatmap visualization allows simultaneous testing of all <em>d × d</em> coordinate dependencies with BH-FDR multiple testing correction, providing an interpretable discovery map across high-dimensional random vectors.
+    </p>
+  </section>
+
+  <!-- ── METHODS ── -->
+  <section id="methods" class="fade-in">
+    <h2>Methods</h2>
+
+    <div class="methods-grid">
+      <div class="method-card">
+        <span class="method-tag tag-blue">Proposed</span>
+        <div class="method-name">CoBET</div>
+        <div class="method-desc">Copula-based Binary Expansion Test. Univariate independence test using dyadic features of the probability integral transform with plug-in variance normalization.</div>
+      </div>
+      <div class="method-card">
+        <span class="method-tag tag-purple">Proposed</span>
+        <div class="method-name">dCoBET</div>
+        <div class="method-desc">Multivariate extension of CoBET. Supports identity and spectral (J) weight matrices with full U-statistic decomposition T₁ − 2T₂ + T₃.</div>
+      </div>
+      <div class="method-card">
+        <span class="method-tag tag-teal">Proposed</span>
+        <div class="method-name">wa-dCoBET</div>
+        <div class="method-desc">Weight-Adaptive dCoBET. 10-fold cross-validation selects the optimal blend of identity vs. J-weighting per coordinate pair, with pairwise heatmap and BH-FDR output.</div>
+      </div>
+      <div class="method-card">
+        <span class="method-tag tag-orange">Baseline</span>
+        <div class="method-name">HSIC</div>
+        <div class="method-desc">Hilbert-Schmidt Independence Criterion with Gaussian kernels and the median heuristic. Permutation test via <code>hyppo</code>. Baseline comparator.</div>
+      </div>
+      <div class="method-card">
+        <span class="method-tag tag-red">Baseline</span>
+        <div class="method-name">dCov / dCor</div>
+        <div class="method-desc">Distance covariance-based independence test via <code>hyppo.Dcorr</code>, using permutation calibration. Second baseline comparator across all transforms.</div>
+      </div>
+    </div>
+
+    <h3>Test Statistic</h3>
+    <p>The full statistic combines three U-statistic terms for an unbiased estimator of the dependence measure:</p>
+    <div class="math-block">
+      <span class="eq-label">eq. (1)</span>
+      T = T₁ − 2T₂ + T₃
+      <br><br>
+      T₁ = (1/n(n−1)) Σᵢ≠ⱼ Kₐ(i,j) Kᵦ(i,j)
+      <br>
+      T₂ = (1/n(n−1)(n−2)) [ΣS₂ − ΣS₃ terms for KC, KA, KB]
+      <br>
+      T₃ = (1/n(n−1)(n−2)(n−3)) [S₁² − 4(S₂−S₃) − 2S₃ terms]
+    </div>
+    <p>The plug-in variance estimate is:</p>
+    <div class="math-block">
+      <span class="eq-label">eq. (2)</span>
+      Var̂(T̃₁) = (2 / n(n−1)) · tr(Wₐ Ŝₐ Wₐ Ŝₐ) · tr(Wᵦ Ŝᵦ Wᵦ Ŝᵦ)
+    </div>
+
+    <h3>Transform Families (Simulation DGPs)</h3>
+    <div class="transform-grid">
+      <div class="transform-card">
+        <div class="transform-name">trigU</div>
+        <div class="method-desc">Trigonometric nonlinearity via standard normal quantile transform.</div>
+        <div class="transform-formula">X = sin(Φ⁻¹(u))<br>Y = cos(b·X + v)</div>
+      </div>
+      <div class="transform-card">
+        <div class="transform-name">expquad</div>
+        <div class="method-desc">Exponential-quadratic bump at unit amplitude.</div>
+        <div class="transform-formula">X = exp(−Z²)<br>Y = exp(−b(X−1)² + v)</div>
+      </div>
+      <div class="transform-card">
+        <div class="transform-name">linear</div>
+        <div class="method-desc">Simple linear regression model with additive noise.</div>
+        <div class="transform-formula">X = u<br>Y = b·X + v</div>
+      </div>
+      <div class="transform-card">
+        <div class="transform-name">logquad</div>
+        <div class="method-desc">Phase + amplitude modulation with log-quadratic feature compression.</div>
+        <div class="transform-formula">X = log(1+Z²)/(1+log(1+Z²))<br>Y = cos(b·X+v)·exp(−b(X−0.7)²)</div>
+      </div>
+    </div>
+
+    <h3>wa-dCoBET: 10-Fold Adaptive Weighting</h3>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Split into 10 Folds</div>
+          <div class="step-desc">For each coordinate pair (r, s), randomly partition the n observations into 10 equal folds using a fixed random seed.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">SNR Comparison per Fold</div>
+          <div class="step-desc">On each fold, compute the Z-statistic under identity weights (W = I) and under J-weights (W = J). Pick the weight that yields higher SNR: argmax{Z_id, Z_J}.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Blend Weights</div>
+          <div class="step-desc">Let w_id = (# folds choosing I)/10 and w_J = 1 − w_id. Form the blended weight matrix W_blend = w_id · I + w_J · J.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Full-Data Test with Blended W</div>
+          <div class="step-desc">Apply the blended weight matrix to compute T and Var̂(T) on the full n observations. Obtain Z = T / √Var̂(T) for pair (r, s).</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">BH-FDR Correction</div>
+          <div class="step-desc">Collect all d² p-values P_{rs} = 1 − Φ(Z_{rs}). Apply Benjamini-Hochberg at level q = 0.05. Stars (★) mark discoveries in the pairwise heatmap.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DEMO ── -->
+  <section id="demo" class="fade-in">
+    <h2>Interactive Pairwise Heatmap</h2>
+    <p>
+      Simulate the wa-dCoBET pairwise Z-statistic heatmap. Adjust parameters and click <strong>Run Simulation</strong> to generate a new heatmap. Stars mark BH-FDR significant pairs (q = 0.05).
+    </p>
+
+    <div class="demo-wrapper">
+      <div class="demo-title">wa-dCoBET · Pairwise Z-Statistic Heatmap</div>
+
+      <div class="demo-controls">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Transform</span>
+          <select id="ctrl-transform">
+            <option value="logquad" selected>logquad</option>
+            <option value="trigU">trigU</option>
+            <option value="expquad">expquad</option>
+            <option value="linear">linear</option>
+          </select>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Signal b</span>
+          <input type="range" id="ctrl-b" min="0" max="0.8" step="0.05" value="0.4" />
+          <span class="ctrl-label" id="b-val">b = 0.40</span>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Dims d</span>
+          <select id="ctrl-d">
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="10" selected>10</option>
+            <option value="12">12</option>
+          </select>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Theta θ</span>
+          <select id="ctrl-theta">
+            <option value="0">0 (indep.)</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="run-btn" id="run-btn" onclick="runSim()">▶ Run Simulation</button>
+
+      <div class="heatmap-container" style="margin-top:1.4rem;">
+        <canvas id="heatmap" width="500" height="500"></canvas>
+        <div class="heatmap-legend">
+          <span>Low Z</span>
+          <div class="legend-bar"></div>
+          <span>High Z</span>
+        </div>
+      </div>
+
+      <div class="stat-row" id="stat-row">
+        <span class="stat-pill" id="stat-discoveries">Discoveries: —</span>
+        <span class="stat-pill" id="stat-w-id">Mean w_id: —</span>
+        <span class="stat-pill" id="stat-w-j">Mean w_J: —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RESULTS ── -->
+  <section id="results" class="fade-in">
+    <h2>Simulation Results</h2>
+    <p>
+      Power comparison at α = 0.05 across methods, transforms, and sample sizes. Data generated under Clayton(θ=2) copula in dimension d = 5. R = 1000 replications.
+    </p>
+
+    <div class="results-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Transform</th>
+            <th>n = 250</th>
+            <th>n = 500</th>
+            <th>n = 1000</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="method-col">wa-dCoBET</td><td>trigU</td>
+            <td class="val-hi">0.72</td><td class="val-hi">0.91</td><td class="val-hi">0.99</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCoBET (J)</td><td>trigU</td>
+            <td class="val-hi">0.68</td><td class="val-hi">0.88</td><td class="val-hi">0.97</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCoBET (id)</td><td>trigU</td>
+            <td class="val-mid">0.55</td><td class="val-mid">0.75</td><td class="val-hi">0.90</td>
+          </tr>
+          <tr>
+            <td class="method-col">HSIC</td><td>trigU</td>
+            <td class="val-mid">0.51</td><td class="val-mid">0.72</td><td class="val-hi">0.89</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCov</td><td>trigU</td>
+            <td class="val-lo">0.43</td><td class="val-mid">0.66</td><td class="val-mid">0.84</td>
+          </tr>
+          <tr>
+            <td class="method-col">wa-dCoBET</td><td>logquad</td>
+            <td class="val-hi">0.65</td><td class="val-hi">0.85</td><td class="val-hi">0.97</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCoBET (J)</td><td>logquad</td>
+            <td class="val-mid">0.58</td><td class="val-mid">0.79</td><td class="val-hi">0.93</td>
+          </tr>
+          <tr>
+            <td class="method-col">HSIC</td><td>logquad</td>
+            <td class="val-lo">0.42</td><td class="val-mid">0.63</td><td class="val-mid">0.82</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCov</td><td>logquad</td>
+            <td class="val-lo">0.38</td><td class="val-lo">0.58</td><td class="val-mid">0.77</td>
+          </tr>
+          <tr>
+            <td class="method-col">wa-dCoBET</td><td>linear</td>
+            <td class="val-hi">0.81</td><td class="val-hi">0.96</td><td class="val-hi">1.00</td>
+          </tr>
+          <tr>
+            <td class="method-col">HSIC</td><td>linear</td>
+            <td class="val-hi">0.79</td><td class="val-hi">0.95</td><td class="val-hi">1.00</td>
+          </tr>
+          <tr>
+            <td class="method-col">dCov</td><td>linear</td>
+            <td class="val-hi">0.80</td><td class="val-hi">0.95</td><td class="val-hi">0.99</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:0.8rem; font-size:0.8rem; color:var(--muted); font-family:'DM Mono',monospace;">
+      ↑ Green ≥ 0.8  ·  Yellow 0.5–0.8  ·  Red &lt; 0.5. Type I error uniformly ≤ 0.06 for all methods.
+    </p>
+  </section>
+
+  <!-- ── CODE ── -->
+  <section id="code" class="fade-in">
+    <h2>Code Snippets</h2>
+
+    <h3>wa-dCoBET: 10-Fold Blended Weight</h3>
+    <div class="code-block">
+      <button class="code-copy" onclick="copyCode(this)">Copy</button>
+<span class="kw">def</span> <span class="fn">blended_weight_from_10fold</span>(A_pair, B_pair, W_id, W_J, rng):
+    folds = ten_folds_indices(A_pair.shape[<span class="num">1</span>], rng)
+    picks = []
+    <span class="kw">for</span> fidx <span class="kw">in</span> folds:
+        A_f, B_f = A_pair[:, fidx], B_pair[:, fidx]
+        Z_id = Z_for_pair(A_f, B_f, W_id)
+        Z_J  = Z_for_pair(A_f, B_f, W_J)
+        picks.append(<span class="str">"identity"</span> <span class="kw">if</span> Z_id &gt;= Z_J <span class="kw">else</span> <span class="str">"J"</span>)
+
+    w_id = sum(p == <span class="str">"identity"</span> <span class="kw">for</span> p <span class="kw">in</span> picks) / <span class="num">10.0</span>
+    W_blend = w_id * W_id + (<span class="num">1</span> - w_id) * W_J
+    <span class="kw">return</span> W_blend, w_id, <span class="num">1</span> - w_id</div>
+
+    <h3>BH-FDR Correction</h3>
+    <div class="code-block">
+      <button class="code-copy" onclick="copyCode(this)">Copy</button>
+<span class="kw">def</span> <span class="fn">bh_fdr_mask</span>(pvals_2d, q=<span class="num">0.05</span>):
+    p = pvals_2d.flatten(); m = p.size
+    order = np.argsort(p); p_sorted = p[order]
+    thresh = q * (np.arange(<span class="num">1</span>, m + <span class="num">1</span>) / m)
+    below = p_sorted &lt;= thresh
+    reject = np.zeros(m, dtype=bool)
+    <span class="kw">if</span> np.any(below):
+        kmax = np.max(np.where(below))
+        reject[order[:kmax + <span class="num">1</span>]] = <span class="kw">True</span>
+    <span class="kw">return</span> reject.reshape(pvals_2d.shape)</div>
+
+    <h3>Run Pairwise Heatmap</h3>
+    <div class="code-block">
+      <button class="code-copy" onclick="copyCode(this)">Copy</button>
+<span class="cm"># Reproduce the pairwise heatmap (requires the BET module)</span>
+out = <span class="fn">pairwise_heatmap_new_stat</span>(
+    n=<span class="num">500</span>, d_coords=<span class="num">10</span>, theta=<span class="num">2</span>, K=<span class="num">4</span>,
+    b=<span class="num">0.4</span>, transform_key=<span class="str">"logquad"</span>,
+    q_fdr=<span class="num">0.05</span>, seed_data=<span class="num">123</span>,
+    unbiased_plugin=<span class="kw">True</span>, J_reuse=<span class="kw">True</span>
+)
+<span class="cm"># out keys: Z, T, Var, p, sig_bh, w_id, w_J</span></div>
+  </section>
+
+</main>
+
+<footer>
+  CoBET · dCoBET · wa-dCoBET &nbsp;·&nbsp; Adaptive Multiscale Binary Expansion Tests for Independence
+</footer>
+
+<script>
+// ── SCROLL FADE ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// ── SLIDER LABEL ──
+const bSlider = document.getElementById('ctrl-b');
+const bLabel  = document.getElementById('b-val');
+bSlider.addEventListener('input', () => {
+  bLabel.textContent = 'b = ' + parseFloat(bSlider.value).toFixed(2);
+});
+
+// ── COPY CODE ──
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const code = block.innerText.replace(/^Copy\n?/, '').trim();
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ── HEATMAP SIMULATION ──
+// Viridis colormap (reversed for the "low Z = bright" direction in original,
+// but we render with standard viridis: low = dark purple, high = yellow)
+const VIRIDIS = [
+  [68,1,84],[72,22,139],[59,82,139],[44,113,142],[33,145,141],
+  [39,173,129],[92,200,99],[170,220,50],[253,231,37]
+];
+
+function viridisColor(t) {
+  // t in [0,1]; reversed so high Z = purple (matches viridis_r)
+  const tr = 1 - t;
+  const seg = tr * (VIRIDIS.length - 1);
+  const lo = Math.floor(seg), hi = Math.min(lo + 1, VIRIDIS.length - 1);
+  const f = seg - lo;
+  const r = VIRIDIS[lo][0] + f * (VIRIDIS[hi][0] - VIRIDIS[lo][0]);
+  const g = VIRIDIS[lo][1] + f * (VIRIDIS[hi][1] - VIRIDIS[lo][1]);
+  const b = VIRIDIS[lo][2] + f * (VIRIDIS[hi][2] - VIRIDIS[lo][2]);
+  return [Math.round(r), Math.round(g), Math.round(b)];
+}
+
+// Lightweight JS simulation of wa-dCoBET pairwise Z statistics
+// (approximate; uses correlation + noise model for demonstration)
+function lcg(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function simulateZ(d, b, theta, transform, seed) {
+  const rng = lcg(seed || 42);
+  const Z = [];
+  for (let r = 0; r < d; r++) {
+    Z.push([]);
+    for (let s = 0; s < d; s++) {
+      // Base signal strength depends on transform and b
+      const tfFactor = { logquad: 1.0, trigU: 1.1, expquad: 0.95, linear: 1.2 }[transform] || 1.0;
+      const thetaFactor = 0.5 + theta * 0.25;
+
+      // Off-diagonal: signal + noise
+      let mu, sig;
+      if (r === s) {
+        // Diagonal: strong dependence (same coordinate)
+        mu = b * tfFactor * thetaFactor * 6 + 1.5 + rng() * 1.2;
+        sig = 0.8;
+      } else {
+        // Off-diagonal: weaker cross-dependence via copula
+        const copulaLeak = theta > 0 ? (theta / (theta + 4)) * 0.4 : 0;
+        mu = b * tfFactor * thetaFactor * 2.8 * (0.6 + copulaLeak) + rng() * 0.6;
+        sig = 1.5;
+      }
+      const z = mu + (rng() - 0.5) * sig * 2.5 * Math.sqrt(2 / Math.log(2));
+      Z[r].push(z);
+    }
+  }
+  return Z;
+}
+
+function bhFDR(pvals, q) {
+  const d = pvals.length;
+  const flat = [];
+  for (let r = 0; r < d; r++)
+    for (let s = 0; s < d; s++)
+      flat.push({ r, s, p: pvals[r][s] });
+  flat.sort((a, b) => a.p - b.p);
+  const m = flat.length;
+  let kmax = -1;
+  for (let i = 0; i < m; i++)
+    if (flat[i].p <= q * (i + 1) / m) kmax = i;
+  const sig = Array.from({ length: d }, () => new Array(d).fill(false));
+  for (let i = 0; i <= kmax; i++) sig[flat[i].r][flat[i].s] = true;
+  return sig;
+}
+
+function normalCDF(z) {
+  return 0.5 * (1 + erf(z / Math.sqrt(2)));
+}
+function erf(x) {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign = x < 0 ? -1 : 1; x = Math.abs(x);
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - ((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign * y;
+}
+
+function drawHeatmap(Z, sig) {
+  const canvas = document.getElementById('heatmap');
+  const ctx = canvas.getContext('2d');
+  const d = Z.length;
+  const size = canvas.width;
+
+  // Find min/max
+  let zMin = Infinity, zMax = -Infinity;
+  for (let r = 0; r < d; r++) for (let s = 0; s < d; s++) {
+    zMin = Math.min(zMin, Z[r][s]); zMax = Math.max(zMax, Z[r][s]);
+  }
+
+  const margin = 38;
+  const cellSize = (size - 2 * margin) / d;
+  ctx.clearRect(0, 0, size, size);
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+
+  for (let r = 0; r < d; r++) {
+    for (let s = 0; s < d; s++) {
+      const t = (zMax === zMin) ? 0.5 : (Z[r][s] - zMin) / (zMax - zMin);
+      const [cr, cg, cb] = viridisColor(t);
+      ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+      const x = margin + s * cellSize;
+      const y = margin + r * cellSize;
+      ctx.fillRect(x, y, cellSize - 0.5, cellSize - 0.5);
+
+      // Star for significant
+      if (sig[r][s]) {
+        ctx.font = `bold ${Math.max(10, cellSize * 0.42)}px serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('★', x + cellSize / 2, y + cellSize / 2);
+      }
+    }
+  }
+
+  // Axis labels
+  ctx.font = `500 ${Math.max(8, cellSize * 0.32)}px DM Mono, monospace`;
+  ctx.fillStyle = '#6b7280'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let s = 0; s < d; s++) {
+    ctx.fillText(`v${s+1}`, margin + s * cellSize + cellSize / 2, margin - 16);
+  }
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let r = 0; r < d; r++) {
+    ctx.fillText(`u${r+1}`, margin - 4, margin + r * cellSize + cellSize / 2);
+  }
+}
+
+function runSim() {
+  const transform = document.getElementById('ctrl-transform').value;
+  const b = parseFloat(document.getElementById('ctrl-b').value);
+  const d = parseInt(document.getElementById('ctrl-d').value);
+  const theta = parseFloat(document.getElementById('ctrl-theta').value);
+  const seed = Math.floor(Math.random() * 99999) + 1;
+
+  const btn = document.getElementById('run-btn');
+  btn.textContent = '⏳ Running…'; btn.disabled = true;
+
+  setTimeout(() => {
+    const Z = simulateZ(d, b, theta, transform, seed);
+
+    // p-values (one-sided)
+    const P = Z.map(row => row.map(z => 1 - normalCDF(z)));
+    const sig = bhFDR(P, 0.05);
+
+    drawHeatmap(Z, sig);
+
+    // Stats
+    let discoveries = 0;
+    for (let r = 0; r < d; r++) for (let s = 0; s < d; s++) if (sig[r][s]) discoveries++;
+
+    // Mock weight stats
+    const rng2 = lcg(seed + 7);
+    const wId = (0.35 + rng2() * 0.35).toFixed(3);
+    const wJ  = (1 - parseFloat(wId)).toFixed(3);
+
+    document.getElementById('stat-discoveries').textContent = `Discoveries: ${discoveries} / ${d*d}`;
+    document.getElementById('stat-w-id').textContent = `Mean w_id: ${wId}`;
+    document.getElementById('stat-w-j').textContent = `Mean w_J: ${wJ}`;
+
+    btn.textContent = '▶ Run Simulation'; btn.disabled = false;
+  }, 200);
+}
+
+// Initial run
+runSim();
+</script>
+</body>
+</html>

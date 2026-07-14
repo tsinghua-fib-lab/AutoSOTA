@@ -1,0 +1,47 @@
+# @package _global_
+
+# ====================================================
+# Final experiments of GeoCLIP on synthetic data for
+# analyzing partial information decomposition (PID)
+# ====================================================
+
+defaults:
+  #- OSM_MAE/default
+  - override /encoder: placepulse2/encoders_placepulse2_2
+  - override /data: syntheticIPD
+  - override /model: geoclip
+  - override /callbacks: default
+
+data:
+  batch_size: 256
+  num_workers: 0
+  persistent_workers: False
+  pin_memory: True
+  modalities: ["coords", "mod1"]
+
+trainer:
+  max_epochs: 250 # 20
+  precision: "16-mixed"
+  check_val_every_n_epoch: 250
+
+model:
+  from_pretrained: False
+  precomputed_features: False
+  queue_size: 0
+  synthetic_experiment: True
+
+callbacks:
+  early_stopping:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+  model_checkpoint:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+
+task_name: "GeoCLIPSyntheticPID_1"
+
+# set False to skip model training
+train: True
+
+# evaluate on test set, using best model weights achieved during training
+# lightning chooses best weights based on the metric specified in checkpoint callback
+test: True
+# python scripts/train.py experiment=syntheticPID/GeoCLIPSyntheticPID_1

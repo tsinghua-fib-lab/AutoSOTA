@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm[toml]"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[project]
+name = "cycloreps"
+description = "Universal representations through cycle-consistent alignment."
+dynamic = ["version"]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "rich",
+    "dvc",
+    "python-dotenv",
+    "GitPython",
+    "pre-commit", # Add the current package name as a fixed dependency
+    "cycloreps",
+    "ipykernel>=6.29.5",
+    "seaborn>=0.13.2",
+    "opencv-python>=4.11.0.86",
+    "latentis",
+    "torchvision>=0.23.0",
+    "graphlearning>=1.7.4",
+    "annoy>=1.17.3",
+    "umap-learn>=0.5.9.post2",
+    "diffusers>=0.35.1",
+    "peft>=0.17.1",
+    "fugashi>=1.5.2",
+    "unidic-lite>=1.0.8",
+]
+
+[tool.uv.sources]
+cycloreps = { workspace = true }
+latentis = { path = "../latentis", editable = true }
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-ra"
+testpaths = ["src/tests"]
+
+[tool.mypy]
+files = ["src/**/*.py", "src/tests/**/*.py"]
+ignore_missing_imports = true
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+    "node_modules",
+]
+line-length = 88
+indent-width = 4
+target-version = "py38"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+
+[dependency-groups]
+dev = [
+    "latentis",
+]

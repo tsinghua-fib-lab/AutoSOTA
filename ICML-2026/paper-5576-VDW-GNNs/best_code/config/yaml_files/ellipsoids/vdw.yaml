@@ -1,0 +1,95 @@
+training:
+# 2nd-order wavelets don't seem to matter on diameter task,
+# but do help on the node-level vector target task
+  ablate_second_order_wavelets: false
+
+dataset:
+  compute_edge_distances: true
+
+model:
+  model_key: vdw_modular
+  equivar_pred: true
+  use_dirac_nodes: true
+  equal_degree: true
+  k_neighbors: 5
+
+  # Scattering
+  column_normalize_P: false
+  use_scalar_wavelet_batch_norm: false
+  num_scattering_layers_scalar: 2
+  num_scattering_layers_vector: 2
+  wavelet_scales_type: custom
+  scalar_diffusion_scales: [0, 1, 2, 4, 6, 8, 16]
+  # vector_diffusion_scales: [ 0,  1,  2,  5,  8, 11, 17, 32] # T=32, quantiles=1/5
+  vector_diffusion_scales: [0, 1, 2, 4, 6, 9, 16]  # T=16, quantiles=1/4
+  # vector_diffusion_scales: [0, 1, 2, 4, 8, 16]  # T=16, dyadic
+  # J_scalar: 4  # only used if wavelet_scales_type is 'dyadic'
+  # J_vector: 4  # only used if wavelet_scales_type is 'dyadic'
+
+  # Nonlinearity/alignment knobs for 2nd-order scattering
+  apply_scalar_first_order_nonlin: true
+  scalar_scatter_first_order_nonlin: abs
+  apply_vector_first_order_align_gating: true
+  vector_first_order_align_gating_mode: norm_only # norm_only, ref_align, simple_affine
+  vector_first_order_align_gating_nonlinearity: softplus # sigmoid, softplus, tanh, identity
+  
+  # neighbor_use_padding: false
+  # for cosine similarities pooling:
+  # mean and max are sufficient for node-level vector target task
+  use_neighbor_cosines: true  # helps performance slightly
+  neighbor_pool_stats:  
+  # - min
+  - max
+  - mean
+  # - var
+
+  # Scalar track scattering paths mixer
+  W_out_scalar: 16
+  scalar_wavelet_mlp_hidden:
+  - 64
+  - 64
+  scalar_wavelet_mlp_nonlin: silu
+  scalar_wavelet_mlp_dropout: 0.0  # dropout here degrades performance
+
+  # Vector track scattering paths mixer
+  # vector_nonlin: silu-gate  # legacy [for previous VDW-GNN models]
+  W_out_vector: [128, 64, 32] # [128, 64, 32]
+  # Single-linear vector mixer output dim(s) (replaces vector_wavelet_mlp_hidden)
+  vector_wavelet_mixer_linear_dim: [128, 128, 128]
+  vector_wavelet_mixer_gate_nonlinearity: sigmoid # sigmoid, softplus, tanh, identity
+  # Including norms in gates here (e.g., norm_only, simple_affine) doesn't seem to help,
+  # vs. simple learnable parameters (e.g., param_only)
+  vector_wavelet_mixing_gate_mode: param_only  # param_only, norm_only, no_norm, simple_affine, param_norm
+
+  # Node-level scalar head
+  node_scalar_head_hidden:
+  - 64
+  - 64
+  node_scalar_head_nonlin: silu
+  node_scalar_head_dropout: 0.1
+
+  # Vector output gating head
+  use_scalar_in_vector_gate: true
+  vector_gate_hidden: # output vector gate MLP widths
+  - 128 # 64
+  - 128 # 64
+  vector_gate_mlp_nonlin: silu
+  vector_gate_use_sigmoid: true
+  normalize_final_vector_gates: true  # l1 normalizes MLP gates (stabilizes training)
+  vec_target_use_final_rotation_layer: false # doesn't help much on node-level vector target task
+
+  # General (e.g., graph-level) output head
+  pooling_type:
+  - sum
+  - max
+  # moments:  # only used if pooling_type has 'statistical_moments'
+  # - 1
+  # - 2
+  scalar_nonlin: silu  # legacy
+  mlp_hidden_dim:
+  - 128
+  - 64
+  - 32
+  - 16
+  mlp_nonlin: silu
+  mlp_dropout_p: 0.7

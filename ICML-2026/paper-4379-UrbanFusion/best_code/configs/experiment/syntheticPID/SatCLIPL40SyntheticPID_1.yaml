@@ -1,0 +1,43 @@
+# @package _global_
+
+# ====================================================
+# Final experiments of SatCLIP on synthetic data for
+# analyzing partial information decomposition (PID)
+# ====================================================
+
+defaults:
+  #- OSM_MAE/default
+  - override /encoder: placepulse2/encoders_placepulse2_2
+  - override /data: syntheticIPD
+  - override /model: satclip
+  - override /callbacks: default
+
+data:
+  batch_size: 256
+  num_workers: 0
+  persistent_workers: False
+  pin_memory: true
+  modalities: ["coords", "mod1"]
+
+trainer:
+  max_epochs: 400 # 20
+  precision: "16-mixed"
+  check_val_every_n_epoch: 100
+
+model:
+  embed_dim: 8
+  capacity: 128
+  legendre_polys: 40
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  synthetic_experiment: True
+  precomputed_features: True
+
+callbacks:
+  early_stopping:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+  model_checkpoint:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+
+task_name: "SatCLIPL40SyntheticPID_1"
+# python scripts/train.py experiment=syntheticPID/SatCLIPL40SyntheticPID_1

@@ -1,0 +1,17 @@
+name: rcaeval-py38
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - graphviz
+  # Needed for PyRCA (JPype1) methods like `ht` / `e_diagnosis`
+  - openjdk=11
+  - pip:
+      # Install RCAEval with the "rcd" extra (pinned/locked deps in `requirements_rcd.lock`)
+      - -e .[rcd]
+      # This repo vendors PyRCA under ./PyRCA; needed for `ht` / `e_diagnosis`.
+      - -e ./PyRCA
+
+

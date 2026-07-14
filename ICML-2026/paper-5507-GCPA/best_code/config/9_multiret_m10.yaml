@@ -1,0 +1,57 @@
+dataset_name: neulab/ted_multi
+data_dir: ${oc.env:DATA_PATH}
+pca_enabled: true
+encoder_to_lang:
+  roberta-base: en
+  aubmindlab/bert-base-arabertv02: ar
+  avichr/heBERT: he
+  DeepPavlov/rubert-base-cased: ru
+  kykim/bert-kor-base: ko
+  dbmdz/bert-base-italian-uncased: it
+  cl-tohoku/bert-base-japanese: ja
+  dccuchile/bert-base-spanish-wwm-uncased: es
+  google-bert/bert-base-chinese: zh-cn
+  camembert-base: fr
+full_to_short_names:
+  roberta-base: ROBER
+  aubmindlab/bert-base-arabertv02: ARABE
+  avichr/heBERT: HEBER
+  DeepPavlov/rubert-base-cased: RUBER
+  kykim/bert-kor-base: KOBER
+  dbmdz/bert-base-italian-uncased: ITBER
+  cl-tohoku/bert-base-japanese: JABER
+  dccuchile/bert-base-spanish-wwm-uncased: SPBER
+  google-bert/bert-base-chinese: GCHROB
+  camembert-base: CAMEM
+short_to_full_names:
+  ROBER: roberta-base
+  ARABE: aubmindlab/bert-base-arabertv02
+  HEBER: avichr/heBERT
+  RUBER: DeepPavlov/rubert-base-cased
+  KOBER: kykim/bert-kor-base
+  ITBER: dbmdz/bert-base-italian-uncased
+  JABER: cl-tohoku/bert-base-japanese
+  SPBER: dccuchile/bert-base-spanish-wwm-uncased
+  GCHROB: google-bert/bert-base-chinese
+  CAMEM: camembert-base
+encoder_map:
+  en: roberta-base
+  ar: aubmindlab/bert-base-arabertv02
+  he: avichr/heBERT
+  ru: DeepPavlov/rubert-base-cased
+  ko: kykim/bert-kor-base
+  it: dbmdz/bert-base-italian-uncased
+  ja: cl-tohoku/bert-base-japanese
+  es: dccuchile/bert-base-spanish-wwm-uncased
+  zh-cn: google-bert/bert-base-chinese
+  fr: camembert-base
+splits:
+- train
+- test
+run_name: 9_multiret_m10
+permute_views_sets:
+- [ROBER, CAMEM, SPBER]
+- [ARABE, HEBER, RUBER]
+- [KOBER, JABER, GCHROB]
+permute_fraction: 0.75
+permute_seed: 0

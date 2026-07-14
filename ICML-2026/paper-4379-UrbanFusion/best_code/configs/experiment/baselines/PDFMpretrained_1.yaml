@@ -1,0 +1,63 @@
+# @package _global_
+
+# ====================================================
+# PDFM baseline, pretrained on Google data. This
+# config evaluates the model's performance on the PP2-M
+# dataset. The model is not trained on PP2-M data.
+# ====================================================
+
+defaults:
+  - override /encoder: placepulse2/encoders_placepulse2_2
+  - override /data: place_pulse2
+  - override /model: pdfm
+  - override /callbacks: default
+
+data:
+  batch_size: 256
+  num_workers: 4
+  persistent_workers: True
+  pin_memory: True
+  out_region_cities:
+    [
+      "Cape Town",
+      "Singapore",
+      "Rio De Janeiro",
+      "Paris",
+      "Milan",
+      "New York",
+      "Sydney",
+    ]
+  in_region_split: 0.2
+  return_filename: false
+  return_coords: false
+  filter_available_images: False
+  modalities: ["coords"]
+  precomputed_h5_path: "${paths.h5_dir}/svi_data/place-pulse-2.0/01_06_2025_legendre_polys_10_bge-small-en-v1.5.h5"
+  coordinate_predictions:
+    [
+      "${paths.data_dir}/svi_data/place-pulse-2.0/downstreamtask_data/London_Energy_Usage/London_Energy_Usage_locations.csv",
+      "${paths.data_dir}/svi_data/place-pulse-2.0/downstreamtask_data/London_Housing_Prices/London_Housing_Prices_locations.csv",
+    ]
+
+trainer:
+  max_epochs: 3 # 20
+  precision: "16-mixed"
+  check_val_every_n_epoch: 1
+
+model:
+  precomputed_features: True
+
+callbacks:
+  early_stopping:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+  model_checkpoint:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+
+task_name: "PDFMpretrained_1"
+
+# set False to skip model training
+train: False
+
+# evaluate on test set, using best model weights achieved during training
+# lightning chooses best weights based on the metric specified in checkpoint callback
+test: True

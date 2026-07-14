@@ -1,0 +1,66 @@
+VM2
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "front-end";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 500M" k8s_front-end_front-end-6fc8dff6ff-754cl_sock-shop_bdcf7267-b66f-4972-bf79-ec5a4be4fd1b_0;
+
+echo "************"
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "user";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_user_user-69c75f5cd5-bj2d5_sock-shop_9693d93a-cbde-4cfa-9c9f-afce7a6209af_0;
+
+echo "************"
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "catalogue";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_catalogue_catalogue-57684ccb8d-p2hl4_sock-shop_e71f2395-aaca-4c9d-bf5a-12687a3b2140_0;
+
+echo "************"
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "orders";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_orders_orders-98b4dc5bf-vqkhw_sock-shop_07e977f0-ed32-4d83-b524-9debcbfc7128_0;
+
+echo "************"
+
+----------------------------------------------------------------------------
+
+VM3
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "carts";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_carts_carts-6958597bcf-nqm4m_sock-shop_a615e9fb-4214-48b1-a187-8eec921675ed_0;
+
+echo "************"
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "shipping";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_shipping_shipping-6b88db4b4c-dtxvw_sock-shop_f55880e3-03dc-4125-8d38-d675c05f5264_0;
+
+echo "************"
+
+
+----------------------------------------------------------------------------
+VM1
+
+sleep 3m;
+
+echo $(date +%Y-%m-%d" "%H:%M:%S);
+echo "payment";
+pumba stress --duration=5m --stressors="-m 1 --vm-bytes 100M" k8s_payment_payment-6c59577559-xnsdh_sock-shop_ce23595c-e4e7-4e82-b8e6-f348aa3dbf88_0;
+
+echo "************"
+

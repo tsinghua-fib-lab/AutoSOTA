@@ -1,0 +1,35 @@
+_target_: srl.baselines.satclip.main.SatCLIPLightningModule
+embed_dim: 256
+image_resolution: 224,
+vision_layers: "moco_vit16"
+vision_width: Null
+vision_patch_size: Null
+in_channels: Null
+le_type: "sphericalharmonics"
+pe_type: "siren"
+frequency_num: Null
+max_radius: Null
+min_radius: Null
+legendre_polys: 10
+harmonics_calculation: "analytic"
+sh_embedding_dims: 32
+learning_rate: 0.0001
+weight_decay: 0.01
+num_hidden_layers: 2
+capacity: 512
+pretrained_weights_path: Null
+precomputed_features: False
+plot_representation_space:
+  save_representations_val: false
+  save_representations_test: True
+  save_plots: False
+  show_plots: false
+  plot_val: False
+  val_n_epochs: 5
+  plot_test: true
+  token_index: 0
+  title: "Image is Masked, CLS"
+  save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory
+
+
+

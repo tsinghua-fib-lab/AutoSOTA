@@ -1,0 +1,56 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 5167,
+    "repo_url": "https://github.com/deeplearningmethods/PISD",
+    "repo_commit": "0589a3d0b51e0c593731a75cdadbfda4d889795f",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_5167",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-5167:reproduced",
+    "eval_command": "bash eval.sh",
+    "baseline_metrics": {
+      "Rel. err": 18.78,
+      "PDE res.": 0.446
+    },
+    "primary_metric": "Rel. err",
+    "metric_direction": "lower",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-1/logs/reproduction/paper-5167.log",
+    "status": "success",
+    "created_at": "2026-07-13T19:39:00+08:00",
+    "notes": "PISD Poisson inverse problem (500 obs on u, hyperbolic_44) successfully reproduced on 100 test samples. Rel. err(a)=18.78±4.22% vs paper 13.81±3.11% (within ~1.2σ, slightly higher). PDE residual (finite-difference) matches paper: 0.446 vs 0.45 target. Fourier-space PDE residual: 0.0365. Pre-trained model 'pretrained-poisson_hyperbolic_44-fourier.pkl' used directly. Test dataset from DiffusionPDE (testing.zip). Code patch applied to handle zero observations of coefficient a (obs_a=0). Guidance coefficients: λu=20, λa=0, λPDE=0.00005. Frequency-aware Adam optimizer: β1=0.985, β2=0.98, lr_low=0.2, lr_high=0.01.",
+    "eval_timeout_minutes": 120,
+    "eval_output_format": "stdout: 'RESULTS: Rel.err(a)=MEAN±STD%, PDE res.=MEAN, PDE res.(FD)=MEAN'. Full stats in eval_results_100.json.",
+    "known_levers": "Guidance weights (λu, λPDE) can trade off Rel. err vs PDE residual (Table 14 in paper shows Rel. err varies 11-19% across λu=[1,10000]). Frequency-aware Adam hyperparameters (β1, β2, lr_low, lr_high) affect convergence. Truncation strategy (hyperbolic vs square, 32/44/64 modes) changes accuracy/cost trade-off. Number of diffusion steps (currently 2000). Observation count and type (u, a, or both).",
+    "setup_notes": "Container: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime with Python 3.10. Added packages: einops, gdown. Test dataset downloaded from Google Drive (DiffusionPDE testing.zip, 7.8GB) into /autosota_cache/tmp, extracted poisson.mat to /repo/data/test/poisson/. Patched generate_poisson_f.py to handle obs_a=0 (division by zero fix). Pre-trained model from repo's trained_models/ directory. pip cache: /autosota_cache/pip. Hugging Face not used.",
+    "optimization_objective": {
+      "objective_type": "representative_primary_metric",
+      "summary": "Minimize relative L2 error on reconstructed coefficient a for the Poisson inverse problem (500 sparse observations on solution u, 128×128 grid, hyperbolic_44 spectral truncation). PDE residual is a coupled guardrail that should remain low (current 0.446, paper target 0.45).",
+      "metrics": [
+        {
+          "name": "Rel. err",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 18.78,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Primary paper metric: relative L2 error of reconstructed coefficient a. Paper reports 13.81% with CI [10.70%, 16.92%]. Lower values indicate better PDE parameter reconstruction from sparse solution observations."
+        },
+        {
+          "name": "PDE res.",
+          "direction": "lower",
+          "role": "guardrail",
+          "goal": "maintain",
+          "baseline": 0.446,
+          "regression_tolerance_pct": 50.0,
+          "rationale": "Coupled guardrail metric: finite-difference PDE residual measures how well the reconstructed fields satisfy the Poisson equation. Paper reports 0.45. Should not degrade significantly while improving Rel. err. Fourier-space residual (L_pde=0.0365) is much lower due to spectral derivative accuracy."
+        }
+      ],
+      "success_policy": "Primary goal: reduce Rel. err toward paper's 13.81% (or below). PDE residual should stay below ~0.67 (50% regression tolerance from 0.446). If both metrics improve simultaneously, that is ideal. If Rel. err improves but PDE residual degrades moderately, improvement is still valuable. If PDE residual degrades severely (>2x baseline), treat as failure."
+    },
+    "metric_upper_bound": 16.92,
+    "metric_lower_bound": 10.70
+  }
+}

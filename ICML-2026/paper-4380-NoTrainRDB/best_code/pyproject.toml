@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rdblearn"
+version = "0.1.2"
+description = "Relational Database Learning with Foundation Models"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "HKU Shanghai X-Lab"}
+]
+maintainers = [
+    {name = "HKU Shanghai X-Lab"}
+]
+keywords = ["machine learning", "feature engineering", "autogluon", "multi-table", "tabular data", "relational learning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.12,<3.13"
+
+# Core dependencies
+dependencies = [
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "torchaudio==2.7.1",
+    "pandas",
+    "pyarrow",
+    "pydantic",
+    "numpy",
+    "loguru",
+    "scikit-learn",
+    "einops",
+    "huggingface-hub",
+    "matplotlib",
+    "networkx",
+    "scipy",
+    "tqdm",
+    "typing_extensions",
+    "xgboost",
+    "kditransform",
+    "hyperopt",
+    "autogluon.tabular>=1.5.0",
+    "tabpfn>=6.3.0",
+    "relbench==2.1.2",
+    "wandb>=0.24.0",
+    "fastdfs==0.2.1",
+]
+
+[project.optional-dependencies]
+# Development dependencies
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/HKUSHXLab/rdblearn"
+Repository = "https://github.com/HKUSHXLab/rdblearn"
+Documentation = "https://github.com/HKUSHXLab/rdblearn/blob/main/rdblearn/README.md"
+"Bug Tracker" = "https://github.com/HKUSHXLab/rdblearn/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rdblearn*"]
+
+[tool.setuptools.package-data]
+rdblearn = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=rdblearn --cov-report=term-missing --cov-report=html"

@@ -1,0 +1,36 @@
+dataset_name: neulab/ted_multi
+data_dir: ${oc.env:DATA_PATH}
+pca_enabled: true
+encoder_to_lang:
+  roberta-base: en
+  DeepPavlov/rubert-base-cased: ru
+  dbmdz/bert-base-italian-uncased: it
+  dccuchile/bert-base-spanish-wwm-uncased: es
+  camembert-base: fr
+full_to_short_names:
+  roberta-base: ROBER
+  DeepPavlov/rubert-base-cased: RUBER
+  dbmdz/bert-base-italian-uncased: ITBER
+  dccuchile/bert-base-spanish-wwm-uncased: SPBER
+  camembert-base: CAMEM
+short_to_full_names:
+  ROBER: roberta-base
+  RUBER: DeepPavlov/rubert-base-cased
+  ITBER: dbmdz/bert-base-italian-uncased
+  SPBER: dccuchile/bert-base-spanish-wwm-uncased
+  CAMEM: camembert-base
+encoder_map:
+  en: roberta-base
+  ar: aubmindlab/bert-base-arabertv02
+  he: avichr/heBERT
+  ru: DeepPavlov/rubert-base-cased
+  ko: kykim/bert-kor-base
+  it: dbmdz/bert-base-italian-uncased
+  ja: cl-tohoku/bert-base-japanese
+  es: dccuchile/bert-base-spanish-wwm-uncased
+  zh-cn: google-bert/bert-base-chinese
+  fr: camembert-base
+splits:
+- train
+- test
+run_name: 9_multiret_m5

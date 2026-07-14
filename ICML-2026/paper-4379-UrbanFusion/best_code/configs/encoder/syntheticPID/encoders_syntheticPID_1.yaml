@@ -1,0 +1,35 @@
+# ====================================================
+# Encoders used for final experiments on synthetic data
+# to show capturing of redundancy, uniqueness, and
+# synergy according to partial information decomposition
+# theory.
+# ====================================================
+
+- _target_: srl.encoders.coordinate_encoder.coordinate_encoder.CoordinateEncoder
+  positional_encoding_name: "direct_no_rad"
+  neural_network_name: "rff"
+  embed_dim: 9
+  seq_len: 1
+  dim_hidden: 9
+  num_layers: 2
+  dropout: 0.0
+  legendre_polys: 10
+  harmonics_calculation: "analytic"
+  min_radius: null
+  max_radius: null
+  frequency_num: null
+  return_encoding: false
+  precomputed_features: true
+  cartesian_3d_branch: false
+  cartesian_3d_input_dropout: 1.0
+  synthetic: true
+
+- _target_: srl.encoders.synthetic_RGB_encoder.rgb_encoder.RGBEncoder
+  dim_out: 9
+  dim_hidden: 4
+  as_tokens: True
+
+- _target_: srl.encoders.synthetic_RGB_encoder.rgb_encoder.RGBEncoder
+  dim_out: 9
+  dim_hidden: 4
+  as_tokens: True

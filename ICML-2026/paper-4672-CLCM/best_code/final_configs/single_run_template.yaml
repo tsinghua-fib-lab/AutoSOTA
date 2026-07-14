@@ -1,0 +1,184 @@
+# =============================================================================
+# SINGLE RUN TEMPLATE
+# =============================================================================
+# This template allows you to run a single experiment with your chosen method
+# and dataset. Modify the values below to configure your experiment.
+#
+# Usage: python train.py --config final_configs/single_run_template.yaml
+# =============================================================================
+
+name: my_experiment
+<<<<<<< HEAD
+method: csqn
+=======
+>>>>>>> 29ba8659820f0a9fad2b85f82848e76b405c951f
+project: my-project
+metric:
+  goal: maximize
+  name: final_avg_accuracy
+
+parameters:
+  # =========================================================================
+  # DATASET / SETTING
+  # =========================================================================
+  # Choose one of the following settings:
+  #   TaskIL (Task-Incremental Learning):
+  #     - TaskILMNIST              : Split MNIST (5 tasks, 2 classes each)
+  #     - TaskILMNIST5Task_Encoded : Split MNIST with pretrained encoder
+  #     - TaskILCIFAR10            : Split CIFAR-10 (5 tasks, 2 classes each)
+  #     - TaskILTinyImageNet       : Split TinyImageNet (10 tasks)
+  #
+  #   ClassIL (Class-Incremental Learning):
+  #     - ClassILMNIST5Task          : Split MNIST (5 tasks)
+  #     - ClassILMNIST5Task_Encoded  : Split MNIST with pretrained encoder
+  #     - ClassILCIFAR5Task          : Split CIFAR-10 (5 tasks)
+  #     - ClassILTinyImageNet10Task  : Split TinyImageNet (10 tasks)
+  setting:
+<<<<<<< HEAD
+    value: ClassILMNIST5Task
+=======
+    value: TaskILTinyImageNet
+>>>>>>> 29ba8659820f0a9fad2b85f82848e76b405c951f
+
+  # =========================================================================
+  # METHOD
+  # =========================================================================
+  # Choose one of the following continual learning methods:
+  #   - bp   : Backpropagation (baseline, no regularization)
+  #   - ewc  : Elastic Weight Consolidation
+  #   - oewc : Online EWC
+  #   - si   : Synaptic Intelligence
+  #   - efc  : Equilibrium Fisher Control (ours)
+  method:
+    value: derpp
+
+  # =========================================================================
+  # NETWORK ARCHITECTURE
+  # =========================================================================
+  # Hidden layer size for the MLP
+  #   - Use 100 for MNIST/CIFAR experiments
+  #   - Use 1000 for TinyImageNet experiments
+  layer_size:
+    value: 1000
+  output_dim:
+    value: 200
+
+  # Use pretrained CNN features (recommended for image datasets)
+  cnn_pretrained:
+    value: True
+
+  # =========================================================================
+  # TRAINING PARAMETERS
+  # =========================================================================
+  batch_size:
+    value: 256
+
+  num_workers:
+    value: 0
+
+  epochs:
+    value: 20
+
+  optimizer:
+    value: Adam
+
+  # Learning rate (method-specific optimal values provided in comments)
+  # BP:   0.003 (MNIST/CIFAR), 0.0001 (TinyImageNet)
+  # EWC:  0.0001-0.003 depending on setting
+  # oEWC: 0.001-0.003 depending on setting
+  # SI:   0.0001-0.003 depending on setting
+  # EFC:  0.0001
+  lr:
+    value: 0.01
+
+  # =========================================================================
+  # RANDOM SEED
+  # =========================================================================
+  seed:
+    value: 0
+
+  # =========================================================================
+  # EWC / oEWC / SI PARAMETERS
+  # =========================================================================
+  # Importance weight for regularization (lambda)
+  # Higher values = stronger regularization = less forgetting but less plasticity
+  # Typical range: 0.1 - 10.0
+  importance_ewc:
+    value: 10.0
+
+  # oEWC-specific: decay factor for online Fisher updates
+  gamma_oewc:
+    value: 0.95
+
+  # oEWC-specific: normalize Fisher information
+  normalize_fisher:
+    value: True
+
+  # SI-specific: damping factor (xi)
+  # Typical range: 0.01 - 1.0
+  si_damping:
+    value: 0.1
+
+  csqn_M:
+    value: 20
+
+  csqn_method:
+    value: sr1
+
+  csqn_reduce:
+    value: null
+
+  csqn_epsilon:
+    value: 1e-4
+
+  csqn_kappa:
+    value: 1e-12
+
+  # =========================================================================
+  # EFC PARAMETERS (Equilibrium Fisher Control)
+  # =========================================================================
+  # These parameters only affect EFC runs
+
+  # Beta: controls strength of Fisher regularization
+  beta_efc:
+    value: 0.1
+
+  # Target learning rate for equilibrium dynamics
+  target_lr:
+    value: 0.1
+
+  # Alpha parameters for diagonal approximation
+  alpha_di:
+    value: 0.0017
+  alpha_I:
+    value: 0.0017
+
+  # Time constant for dynamics
+  tau:
+    value: 0.032
+
+  # Small epsilon for numerical stability
+  eps:
+    value: 0.0001
+
+  # Time step for integration
+  dt_di:
+    value: 0.02
+
+  # Ratio of time constants
+  time_constant_ratio:
+    value: 0.2
+
+  # Maximum integration steps
+  tmax_di:
+    value: 500
+
+  # Proportional gain
+  k_p:
+    value: 2.0
+
+  # EFC mode: 'di' for dynamical inversion, 'ndi' for non-dynamical inversion
+  mode:
+    value: di
+
+program: train.py

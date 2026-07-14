@@ -1,0 +1,15 @@
+_target_: srl.baselines.gps2vec.trainer.GPS2VecLightningModule
+basedir: "${paths.data_dir}/svi_data/place-pulse-2.0/encoder_weights/"
+model_type: "tag"
+precomputed_features: False
+plot_representation_space:
+  save_representations_val: false
+  save_representations_test: True
+  save_plots: False
+  show_plots: false
+  plot_val: False
+  val_n_epochs: 5
+  plot_test: true
+  token_index: 0
+  title: "Image is Masked, CLS"
+  save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory

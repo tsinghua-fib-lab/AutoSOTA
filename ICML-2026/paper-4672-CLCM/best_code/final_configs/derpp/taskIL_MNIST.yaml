@@ -1,0 +1,48 @@
+name: derpp_taskIL_MNIST
+method: grid
+project: paper-sweeps
+metric:
+  goal: maximize
+  name: final_avg_accuracy
+
+parameters:
+  setting:
+    value: TaskILMNIST
+
+  method:
+    value: derpp
+
+  layer_size:
+    value: 100
+
+  # Fixed parameters
+  batch_size:
+    value: 256
+  num_workers:
+    value: 0
+  epochs:
+    value: 20
+  optimizer:
+    value: Adam
+  lr:
+    value: 0.0001
+
+  cnn_pretrained:
+    value: True
+
+  # Seeds for reproducibility
+  seed:
+    values:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+
+  # DER++ parameters
+  der_alpha:
+    value: 0.5
+  der_beta:
+    value: 0.5
+
+program: train.py

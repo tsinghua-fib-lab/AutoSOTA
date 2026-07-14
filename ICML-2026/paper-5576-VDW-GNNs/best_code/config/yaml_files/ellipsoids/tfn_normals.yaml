@@ -1,0 +1,26 @@
+model:
+  model_key: tfn
+  equivar_pred: true
+  comparison_model_num_layers: 2
+  node_embedding_dim: 64 # learnable bias if no scalar node features; 128 can create OOM when tfn_max_ell=2
+  # TFN-specific
+  tfn_max_ell: 2
+  tfn_mlp_dim: 128
+  tfn_unbiased_vector_pred_head: true
+  tfn_radial_mode: gaussian  # 'bessel_cutoff', 'mlp_gates', 'gaussian', 'cosine_cutoff', 'epanechnikov'
+  # tfn_radial_mlp_hidden: [64, 64]
+  # tfn_radial_mlp_activation: swish
+  # tfn_r_max: 3.0  # 5.0
+  # tfn_num_bessel: 8 # 8
+  # tfn_num_polynomial_cutoff: 5
+
+dataset:
+  compute_edge_distances: true
+  task: vector_node_regression
+  target_key: y_random_harmonic_normals
+  target_dim: 3
+
+training:
+  batch_size: 16
+  valid_batch_size: 12
+

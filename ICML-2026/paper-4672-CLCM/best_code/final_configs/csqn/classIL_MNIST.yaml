@@ -1,0 +1,61 @@
+name: csqn_classIL_MNIST
+method: grid
+project: paper-sweeps
+metric:
+  goal: maximize
+  name: final_avg_accuracy
+
+parameters:
+  setting:
+    value: ClassILMNIST5Task
+
+  method:
+    value: csqn
+
+  layer_size:
+    value: 100
+
+  # Fixed parameters
+  batch_size:
+    value: 256
+  num_workers:
+    value: 0
+  epochs:
+    value: 20
+  optimizer:
+    value: Adam
+  lr:
+    value: 0.003
+
+  cnn_pretrained:
+    value: True
+
+  # Seeds for reproducibility
+  seed:
+    values:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+
+  # CSQN parameters
+  importance_ewc:
+    value: 1e3
+
+  csqn_M:
+    value: 20
+
+  csqn_method:
+    value: sr1
+
+  csqn_reduce:
+    value: null
+
+  csqn_epsilon:
+    value: 1e-4
+
+  csqn_kappa:
+    value: 1e-12
+
+program: train.py

@@ -1,0 +1,37 @@
+version: 2.1
+orbs:
+  python: circleci/python@1.2
+
+executors:
+  my-executor:
+    docker:
+      - image: cimg/python:3.10
+    environment:
+      TZ: "Australia/Melbourne"
+
+jobs:
+  build-and-test:
+    executor: my-executor
+    steps:
+      - checkout
+      - run:
+          name: "Build BARO"
+          command: pip install -e .
+      - run:
+          name: "Run test"
+          command: pytest tests/test.py
+          no_output_timeout: 3h
+
+workflows:
+  main-flow:
+    jobs:
+      - build-and-test
+  daily-build:
+    triggers:
+      - schedule:
+          cron: "49 15 * * *"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - build-and-test

@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+"""MILCCI Wikipedia Full Experiment - Corrected with proper multilingual support."""
+import os, sys, time, json
+import numpy as np
+import requests
+from datetime import datetime
+
+sys.path.insert(0, "/repo")
+import milcci
+from milcci import per_trial_r2, global_r2
+
+CACHE_DIR = "/datasets/milcci_wikipedia"
+os.makedirs(CACHE_DIR, exist_ok=True)
+CACHE_FULL = os.path.join(CACHE_DIR, "wiki_full_v2.npz")
+
+START, END = "20201009", "20241029"
+TDAYS = 1482
+SEP = "=" * 60
+
+# 32 pages verified to have Wikipedia articles in all 7 target languages
+# Spanning CS, ML, Psychology, and college topics per paper description
+PAGES = [
+    # CS / Programming
+    "Computer", "Internet", "Software", "Algorithm", "Database",
+    "Programming_language", "Operating_system", "Computer_science",
+    # ML / AI
+    "Artificial_intelligence", "Machine_learning", "Deep_learning",
+    "Neural_network_(machine_learning)", "Big_data", "Data_science",
+    "Data_mining", "Natural_language_processing",
+    # Math / Stats
+    "Statistics", "Mathematics",
+    # Science / Biology
+    "Physics", "Biology", "Genetics", "Neuroscience",
+    # Psychology
+    "Psychology", "Cognition", "Memory", "Learning",
+    "Intelligence", "Motivation", "Perception", "Attention",
+    "Cognitive_psychology",
+    # College / Education
+    "University",
+]
+
+assert len(PAGES) == 32, f"Expected 32 pages, got {len(PAGES)}"
+
+LANGS = {"en":"en.wikipedia.org","ar":"ar.wikipedia.org","es":"es.wikipedia.org",
+         "fr":"fr.wikipedia.org","he":"he.wikipedia.org","hi":"hi.wikipedia.org",
+         "zh":"zh.wikipedia.org"}
+
+AGENTS = ["user","spider"]
+PLAT_USER = ["desktop","mobile-web","mobile-app"]
+PLAT_SPIDER = ["desktop","mobile-web"]
+HEADERS = {"User-Agent": "MILCCI-Reproduction/1.0 (academic@example.com)"}
+
+SD = datetime.strptime(START, "%Y%m%d")
+
+def get_langlinks_with_continue(page):
+    """Get all interlanguage links for a page, handling API continuation."""
+    titles = {"en": page}
+    params = {
+        "action": "query", "titles": page,
+        "prop": "langlinks", "lllimit": 500, "format": "json"
+    }
+    while True:
+        try:
+            r = requests.get("https://en.wikipedia.org/w/api.php",
+                           params=params, headers=HEADERS, timeout=30)
+            if r.status_code != 200:
+                break
+            data = r.json()
+            for pid, info in data.get("query", {}).get("pages", {}).items():
+                if "missing" in info:
+                    return {"en": page}
+                for ll in info.get("langlinks", []):
+                    if ll["lang"] in LANGS:
+                        titles[ll["lang"]] = ll["*"]
+            if "continue" in data:
+                params["llcontinue"] = data["continue"]["llcontinue"]
+            else:
+                break
+        except Exception as e:
+            print(f"  langlink error for {page}: {e}", flush=True)
+            break
+    return titles
+
+def fetch_pageviews(project, access, agent, article):
+    url = (f"https://wikimedia.org/api/rest_v1/metrics/pageviews/"
+           f"per-article/{project}/{access}/{agent}/{article}/"
+           f"daily/{START}/{END}")
+    for attempt in range(4):
+        try:
+            r = requests.get(url, headers=HEADERS, timeout=120)
+            if r.status_code == 200:
+                views = np.zeros(TDAYS, dtype=np.float64)
+                for item in r.json().get("items", []):
+                    try:
+                        d = datetime.strptime(item["timestamp"][:8], "%Y%m%d")
+                        idx = (d - SD).days
+                        if 0 <= idx < TDAYS:
+                            views[idx] = item["views"]
+                    except:
+                        pass
+                return views
+            elif r.status_code == 404:
+                return None
+            elif r.status_code == 429:
+                time.sleep(int(r.headers.get("Retry-After", 5)) + 1)
+            else:
+                time.sleep(2 ** attempt)
+        except Exception as e:
+            time.sleep(2 ** attempt)
+    return None
+
+def main():
+    print(SEP, flush=True)
+    print("MILCCI Wikipedia Full Experiment v2", flush=True)
+    print(f"  {TDAYS} days, {len(PAGES)} pages, 7 languages", flush=True)
+    print(SEP, flush=True)
+
+    if os.path.exists(CACHE_FULL):
+        print("Loading cached full data...", flush=True)
+        data = dict(np.load(CACHE_FULL, allow_pickle=True))
+        Y = data["Y"]
+        labels = data["labels"].tolist()
+        nt = data["numbers2tuples"].item()
+        numbers2tuples = {int(k): tuple(v) for k, v in nt.items()}
+        N = Y.shape[0]
+        print(f"  Y: {Y.shape}, trials: {len(labels)}", flush=True)
+        print(f"  Non-zero: {np.count_nonzero(Y)}/{Y.size} ({100*np.count_nonzero(Y)/Y.size:.1f}%)", flush=True)
+    else:
+        # Build trials
+        trials_list = []
+        for agent in AGENTS:
+            plats = PLAT_USER if agent == "user" else PLAT_SPIDER
+            for plat in plats:
+                for lc in LANGS:
+                    trials_list.append((agent, plat, lc))
+        M = len(trials_list)
+        N = len(PAGES)
+
+        # Get language links with continuation handling
+        print("Fetching language links (with continuation)...", flush=True)
+        lang_titles = {}
+        for pi, page in enumerate(PAGES):
+            titles = get_langlinks_with_continue(page)
+            lang_titles[page] = titles
+            n_langs = len(titles)
+            print(f"  [{pi+1:2d}/{N}] {page}: {n_langs} languages: {sorted(titles.keys())}", flush=True)
+            time.sleep(0.1)
+
+        # Download pageview data
+        Y = np.zeros((N, TDAYS, M), dtype=np.float64)
+        total_ok = 0
+        t_start = time.time()
+
+        for pi, page in enumerate(PAGES):
+            t_p0 = time.time()
+            titles = lang_titles[page]
+            n_ok = 0
+            for m, (agent, plat, lc) in enumerate(trials_list):
+                if lc not in titles:
+                    continue
+                proj = LANGS[lc]
+                art = titles[lc]
+                views = fetch_pageviews(proj, plat, agent, art)
+                if views is not None and views.sum() > 0:
+                    Y[pi, :, m] = views
+                    n_ok += 1
+                time.sleep(0.02)
+
+            total_ok += n_ok
+            dt = time.time() - t_p0
+            elapsed = time.time() - t_start
+            eta = (elapsed / (pi + 1)) * (N - pi - 1) if pi < N - 1 else 0
+            print(f"[{pi+1:2d}/{N}] {page}: {n_ok}/{M} ok, {dt:.1f}s, total={total_ok}, ETA={eta:.0f}s", flush=True)
+
+        print(f"\nTotal ok: {total_ok}/{N*M} ({100*total_ok/(N*M):.1f}%)", flush=True)
+
+        # Preprocess: 99th percentile normalization
+        print("Preprocessing...", flush=True)
+        for m in range(M):
+            trial = Y[:, :, m]
+            pos = trial[trial > 0]
+            if len(pos) > 0:
+                p99 = np.percentile(pos, 99)
+                if p99 > 0:
+                    Y[:, :, m] = np.clip(trial / p99, 0, 1)
+            Y[:, :, m] -= Y[:, :, m].min()
+        for n in range(N):
+            td = Y[n, :, :]
+            pos = td[td > 0]
+            if len(pos) > 0:
+                p99 = np.percentile(pos, 99)
+                if p99 > 0:
+                    Y[n, :, :] = np.clip(td / p99, 0, 1)
+
+        # Labels
+        ag_map = {"user": 0, "spider": 1}
+        pl_map = {"desktop": 0, "mobile-web": 1, "mobile-app": 2}
+        lg_map = {lc: i for i, lc in enumerate(LANGS.keys())}
+        labels = list(range(M))
+        numbers2tuples = {m: (ag_map[a], pl_map[p], lg_map[l])
+                         for m, (a, p, l) in enumerate(trials_list)}
+
+        nt_save = {str(k): list(v) for k, v in numbers2tuples.items()}
+        np.savez_compressed(CACHE_FULL, Y=Y, labels=np.array(labels),
+                           numbers2tuples=nt_save)
+        print(f"Data cached to {CACHE_FULL}", flush=True)
+
+    # Run MILCCI
+    print(f"\n--- MILCCI (Y: {Y.shape}, P=12) ---", flush=True)
+    print(f"Non-zero: {np.count_nonzero(Y)}/{Y.size} ({100*np.count_nonzero(Y)/Y.size:.1f}%)", flush=True)
+
+    t0 = time.time()
+    result = milcci.fit(
+        data=Y, labels=labels, numbers2tuples=numbers2tuples,
+        n_ensembles=12, n_ensembles_each=[3, 4, 5],
+        nu=[0.01] * 12, lambda_similarity=100, factor_A=10,
+        decor_A=2, num_repeats=20,
+        cont_axis_list=[], split_A=True,
+        params_init_A={"ensemble_positive": True},
+        verbose=True, seed=42,
+    )
+    runtime = time.time() - t0
+
+    Phi = result["Phi"]
+    A_full = result["A_full"]
+    r2_vec = per_trial_r2(Y, A_full, Phi)
+    r2_mean = float(np.mean(r2_vec))
+    r2_std = float(np.std(r2_vec))
+    r2_global = float(global_r2(Y, A_full, Phi))
+
+    print("", flush=True)
+    print(SEP, flush=True)
+    print("FULL EXPERIMENT RESULTS", flush=True)
+    print(SEP, flush=True)
+    print(f"Per-trial R2:  mean={r2_mean:.4f}  std={r2_std:.4f}", flush=True)
+    print(f"               min={np.min(r2_vec):.4f}  max={np.max(r2_vec):.4f}", flush=True)
+    print(f"Global R2:     {r2_global:.4f}", flush=True)
+    print(f"Runtime:       {runtime:.2f}s", flush=True)
+    print("", flush=True)
+    print(f"Paper target:  R2=0.69, Runtime=31.12s", flush=True)
+    print(f"Reproduced:    R2={r2_mean:.4f}, Runtime={runtime:.2f}s", flush=True)
+
+    # Check against rubric bounds
+    lb, ub = 0.63, 0.696
+    in_bounds = lb <= r2_mean <= ub
+    qual = "WITHIN BOUNDS" if in_bounds else "OUTSIDE BOUNDS"
+    print(f"Rubric CI:     [{lb}, {ub}] - {qual}", flush=True)
+
+    results = {
+        "r2_per_trial_mean": r2_mean,
+        "r2_per_trial_std": r2_std,
+        "r2_global": r2_global,
+        "runtime_seconds": runtime,
+        "Y_shape": list(Y.shape),
+        "n_pages": N, "n_timepoints": TDAYS, "n_trials": int(Y.shape[2]),
+        "paper_r2": 0.69, "paper_runtime": 31.12,
+        "rubric_bounds": [lb, ub],
+        "pages_used": PAGES,
+    }
+    with open(os.path.join(CACHE_DIR, "full_v2_results.json"), "w") as f:
+        json.dump(results, f, indent=2)
+    print("\nResults saved.", flush=True)
+
+    return r2_mean, runtime
+
+if __name__ == "__main__":
+    main()

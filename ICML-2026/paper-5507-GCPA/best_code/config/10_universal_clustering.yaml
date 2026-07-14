@@ -1,0 +1,58 @@
+dataset:
+  name: massive
+  splits: [train, test]
+  eval_split: test
+  n_clusters: null
+  embed_feature: null
+  embed_dataset: true
+  embed_batch_size: 512
+
+runtime:
+  device: cuda
+  global_seed: 42
+  n_seeds: 5
+
+paths:
+  data_dir: ${oc.env:DATA_PATH}
+  results_dir: results
+
+encoders:
+  names:
+    - sentence-transformers/gtr-t5-base
+    - thenlper/gte-base
+    - intfloat/e5-base-v2
+    - infgrad/stella-base-en-v2
+    - bert-base-uncased
+    - xlm-roberta-base
+
+massive:
+  use_massive: true
+  dataset_id: AmazonScience/massive
+  langs:
+    - en-US
+    - ar-SA
+    - he-IL
+    - ru-RU
+    - ko-KR
+    - it-IT
+    - ja-JP
+    - es-ES
+    - zh-CN
+    - fr-FR
+  lang_encoders:
+    - roberta-base
+    - aubmindlab/bert-base-arabertv02
+    - avichr/heBERT
+    - DeepPavlov/rubert-base-cased
+    - kykim/bert-kor-base
+    - dbmdz/bert-base-italian-uncased
+    - cl-tohoku/bert-base-japanese
+    - dccuchile/bert-base-spanish-wwm-uncased
+    - google-bert/bert-base-chinese
+    - camembert-base
+
+plots:
+  method_order: [NA, GCPA, GPA, GCCA]
+  umap:
+    enabled: true
+    random_state: 42

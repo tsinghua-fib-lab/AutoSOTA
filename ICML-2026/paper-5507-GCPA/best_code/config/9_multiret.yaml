@@ -1,0 +1,58 @@
+dataset_name: "neulab/ted_multi" 
+data_dir: ${oc.env:DATA_PATH}
+encodings_path: ${oc.env:DATA_PATH}/ted_multi_instance_ids.pkl
+pca_enabled: true
+run_pairwise: true
+run_gpa: true
+run_gcpa: true
+run_gcca: true
+
+encoder_to_lang:
+  "roberta-base": "en"
+  "aubmindlab/bert-base-arabertv02": "ar"
+  "avichr/heBERT": "he"
+  "DeepPavlov/rubert-base-cased": "ru"
+  "kykim/bert-kor-base": "ko"
+  "dbmdz/bert-base-italian-uncased": "it"
+  "cl-tohoku/bert-base-japanese": "ja"
+  "dccuchile/bert-base-spanish-wwm-uncased": "es"
+  "google-bert/bert-base-chinese": "zh-cn"
+  "camembert-base": "fr"
+
+full_to_short_names:
+  "roberta-base": "ROBER"
+  "aubmindlab/bert-base-arabertv02": "ARABE"
+  "avichr/heBERT": "HEBER"
+  "DeepPavlov/rubert-base-cased": "RUBER"
+  "kykim/bert-kor-base": "KOBER"
+  "dbmdz/bert-base-italian-uncased": "ITBER"
+  "cl-tohoku/bert-base-japanese": "JABER"
+  "dccuchile/bert-base-spanish-wwm-uncased": "SPBER"
+  "google-bert/bert-base-chinese": "GCHROB"
+  "camembert-base": "CAMEM"
+
+short_to_full_names:
+    "ROBER": "roberta-base"
+    "ARABE": "aubmindlab/bert-base-arabertv02"
+    "HEBER": "avichr/heBERT"
+    "RUBER": "DeepPavlov/rubert-base-cased"
+    "KOBER": "kykim/bert-kor-base"
+    "ITBER": "dbmdz/bert-base-italian-uncased"
+    "JABER": "cl-tohoku/bert-base-japanese"
+    "SPBER": "dccuchile/bert-base-spanish-wwm-uncased"
+    "GCHROB": "google-bert/bert-base-chinese"
+    "CAMEM": "camembert-base"
+
+encoder_map:
+    "en": "roberta-base"         # English
+    "ar": "aubmindlab/bert-base-arabertv02"               # Arabic
+    "he": "avichr/heBERT"                                 # Hebrew
+    "ru": "DeepPavlov/rubert-base-cased"                  # Russian
+    "ko": "kykim/bert-kor-base"                           # Korean
+    "it": "dbmdz/bert-base-italian-uncased"               # Italian
+    "ja": "cl-tohoku/bert-base-japanese"                  # Japanese
+    "es": "dccuchile/bert-base-spanish-wwm-uncased"       # Spanish
+    "zh-cn": "google-bert/bert-base-chinese"          # Simplified Chinese
+    "fr": "camembert-base"                                # French
+
+splits: [train, test]

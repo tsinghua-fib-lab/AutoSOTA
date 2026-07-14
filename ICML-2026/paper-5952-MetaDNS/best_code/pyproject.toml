@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metadns"
+version = "1.0.0"
+description = "MetaDNS: Enhancing Exploration in Discrete Neural Samplers via Metadynamics (ICML 2026)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Xiaochen Du", email = "dux@outlook.sg" },
+]
+dependencies = [
+    "torch<=2.5.1",
+    "torchvision<=0.20.1",
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    "tqdm",
+    "einops",
+    "timm",
+    "huggingface_hub",
+    "hydra-core",
+    "omegaconf",
+    "pyyaml",
+    "wandb",
+    "ase==3.24.0",
+    "clease==1.1.0",
+    "icet==3.1",
+    "igraph",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "notebook",
+]
+
+[project.urls]
+Repository = "https://github.com/xiaochendu/metadns"
+
+# The repository uses a flat layout (top-level modules + a few package dirs)
+# rather than a single src package, so modules and packages are listed explicitly.
+[tool.setuptools]
+py-modules = [
+    "bias",
+    "bias_clease",
+    "energy_cuau",
+    "potts",
+    "utils",
+    "utils_cuau",
+    "utils_ising",
+    "utils_potts",
+    "utils_train",
+]
+packages = ["model", "baselines", "baselines.energy"]

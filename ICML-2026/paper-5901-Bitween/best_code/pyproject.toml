@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "bitween"
+version = "0.1.0"
+description = "Learning Randomized Reductions: discovery of randomized self-reductions (RSRs) via regression on correlated samples and symbolic verification, with an LLM-agent variant that proposes novel query functions."
+authors = [
+    "Ferhat Erata <ferhat.erata@yale.edu>",
+    "Timos Antonopoulos <timos.antonopoulos@yale.edu>",
+]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/ferhaterata/learning-randomized-reductions"
+repository = "https://github.com/ferhaterata/learning-randomized-reductions"
+keywords = [
+    "randomized self-reduction",
+    "self-correcting programs",
+    "symbolic verification",
+    "instance hiding",
+    "verifiable computation",
+    "LLM agents",
+]
+packages = [{ include = "bitween", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11.5,<3.13"
+numpy = "^2.3.0"
+sympy = "^1.14.0"
+scipy = "^1.16.3"
+pandas = "^2.3.3"
+scikit-learn = "^1.8.0"
+tqdm = "^4.67.1"
+z3-solver = "^4.15.4.0"
+pulp = "^3.3.0"
+pycparser = "^2.23"
+gplearn = "^0.4.3"
+pysr = "^1.5.9"
+configparser = "^7.2.0"
+strands-agents = { extras = ["openai"], version = "^1.20.0" }
+strands-agents-tools = "^0.2.18"
+mcp = "^1.25.0"
+func-timeout = "^4.3.5"
+joblib = "^1.4.2"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+ruff = "^0.4.0"
+
+[tool.poetry.extras]
+# Optional symbolic-MILP backend; requires a local Gurobi license.
+gurobi = ["gurobipy"]
+
+[build-system]
+requires = ["poetry-core>=1.6.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,21 @@
+include README.md
+include LICENSE
+include CONTRIBUTING.md
+include requirements.txt
+include pyproject.toml
+include setup.cfg
+
+recursive-include proeval *.py
+recursive-include proeval *.md
+
+# Exclude bulky research artifacts and experiment-only directories from sdist/wheel
+prune data
+prune experiment
+prune utils
+prune tests
+global-exclude *.npy
+global-exclude *.csv
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store

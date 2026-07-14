@@ -1,0 +1,193 @@
+import click
+import importlib
+import numpy as np
+import seaborn as sns
+from jax import random, vmap
+from jax.example_libraries import optimizers
+import matplotlib.pyplot as plt
+import os
+import sys
+import scipy
+import jax.numpy as jnp
+import json
+import time
+
+@click.command()
+@click.option('--model', default='Golf', help='The model name')
+@click.option('--objective', default='VIBasic', help='The loss')
+@click.option('--regularizer', default='VIBasic', help='The regularizer')
+@click.option('--posterior', default='Basic', help='The parametric family')
+@click.option('--seed', default=0, help='The random seed')
+@click.option('--lamb', default=0.0, help='Regularization strength')
+@click.option('--alpha', default=0.0, help='Interval score parameter')
+@click.option('--n', default=100, help='Number of observations')
+@click.option('--s', default=1, help='Number of draws for theta')
+@click.option('--iterations', default=1000, help='Number of training iterations')
+@click.option('--prediction_sample', default=10000, help='Number of samples for evaluation')
+@click.option('--learning_rate', default=0.001, help='Learning rate')
+@click.option('--optimizer', default='sgd', help='Optimizer')
+def main(model, objective, regularizer, posterior, seed, lamb, alpha, n, s, iterations, prediction_sample, learning_rate, optimizer):
+    t_start = time.time()
+    print("Loading model...", flush=True)
+    module1 = importlib.import_module('jax_posteriordb.model')
+    m = getattr(module1, model)()
+    rng_key = random.PRNGKey(seed)
+
+    module2 = importlib.import_module('posterior')
+    p = getattr(module2, posterior)(m.n)
+    params = p.gen_params()
+
+    module3 = importlib.import_module('objective')
+    o = getattr(module3, objective)(m, p, s=s, alpha=alpha)
+    r = getattr(module3, regularizer)(m, p, s=s)
+
+    def scheduler(step):
+        if step < iterations // 2:
+            return learning_rate
+        return learning_rate / 10
+
+    if optimizer == 'sgd':
+        opt_init, opt_update, get_params = optimizers.sgd(scheduler,)
+    elif optimizer == 'nesterov':
+        opt_init, opt_update, get_params = optimizers.nesterov(scheduler, 0.9)
+    elif optimizer == 'rmsprop':
+        opt_init, opt_update, get_params = optimizers.rmsprop_momentum(scheduler, )
+    else:
+        raise ValueError(optimizer)
+    opt_state = opt_init(params), rng_key
+
+    if lamb != 0:
+        def regularized_objective(key, params):
+            key1, key2 = random.split(key)
+            v1, g1 = o.value_and_grad(key1, params)
+            v2, g2 = r.value_and_grad(key2, params)
+            return v1 + lamb * v2, g1 + lamb * g2
+    else:
+        def regularized_objective(key, params):
+            key1, key2 = random.split(key)
+            v1, g1 = o.value_and_grad(key1, params)
+            return v1, g1
+
+    def step(step, opt_state):
+        param, rng_key = opt_state
+        data_key, rng_key = random.split(rng_key)
+        value, grads = regularized_objective(data_key, get_params(param))
+        norm = jnp.linalg.norm(grads)
+        grads = grads / n
+        if norm > 100:
+            grads = grads / norm * 100
+        if jnp.sum(jnp.isnan(grads)):
+            updated_state = param
+        else:
+            updated_state = opt_update(step, -grads, param)
+        return value, (updated_state, rng_key)
+
+    losses = []
+    best_pred = -np.inf
+    best_param = params
+    log_interval = 1000
+
+    print("Training %d iterations..." % iterations, flush=True)
+    for i in range(iterations):
+        value, opt_state = step(i, opt_state)
+        param, rng_key = opt_state
+        losses.append(float(value))
+
+        if i % log_interval == 0:
+            theta_sample = p.sample(rng_key, get_params(param), prediction_sample)
+            log_likelihoods = vmap(m.valid_log_likelihoods)(theta_sample)
+            predictive_ll = np.sum(np.array(scipy.special.logsumexp(log_likelihoods, axis=0)) - np.log(prediction_sample))
+            if predictive_ll > best_pred:
+                best_pred = predictive_ll
+                best_param = get_params(param)
+            elapsed = time.time() - t_start
+            print("Step %d/%d (%.1f%%), loss=%.1f, valid_ll=%.4f, elapsed=%.0fs" % (
+                i, iterations, 100.0*i/iterations, value, predictive_ll, elapsed), flush=True)
+
+    # Final evaluation on test set
+    param_list = best_param
+    eval_key = random.PRNGKey(seed + 10000)
+    theta_sample = p.sample(eval_key, param_list, prediction_sample)
+
+    # 1. Log predictive score on test set
+    log_likelihoods_test = vmap(m.test_log_likelihoods)(theta_sample)
+    test_log_score = np.sum(np.array(scipy.special.logsumexp(log_likelihoods_test, axis=0)) - np.log(prediction_sample))
+    log_likelihoods_valid = vmap(m.valid_log_likelihoods)(theta_sample)
+    valid_log_score = np.sum(np.array(scipy.special.logsumexp(log_likelihoods_valid, axis=0)) - np.log(prediction_sample))
+
+    # 2. CRPS on test set
+    test_y = m.test_data()
+    n_test = len(test_y)
+    keys_y1 = random.split(random.PRNGKey(seed + 20000), prediction_sample)
+    keys_y2 = random.split(random.PRNGKey(seed + 30000), prediction_sample)
+
+    def sample_y(key, theta):
+        return m.sample_test_datapoint(key, theta)
+
+    y_pred1 = np.array(vmap(sample_y)(keys_y1, theta_sample))
+    y_pred2 = np.array(vmap(sample_y)(keys_y2, theta_sample))
+    if y_pred1.ndim == 1:
+        y_pred1 = y_pred1[:, None]
+    if y_pred2.ndim == 1:
+        y_pred2 = y_pred2[:, None]
+    test_y_arr = np.array(test_y)
+    if test_y_arr.ndim == 0:
+        test_y_arr = np.array([test_y_arr])
+
+    crps_per_point = []
+    for j in range(n_test):
+        abs_y_y1 = np.abs(test_y_arr[j] - y_pred1[:, j])
+        abs_y_y2 = np.abs(test_y_arr[j] - y_pred2[:, j])
+        abs_y1_y2 = np.abs(y_pred1[:, j] - y_pred2[:, j])
+        crps_j = np.mean(abs_y_y1) / 2 + np.mean(abs_y_y2) / 2 - np.mean(abs_y1_y2) / 2
+        crps_per_point.append(crps_j)
+    test_crps = float(np.sum(crps_per_point))
+
+    # 3. Interval Score (alpha=0.1)
+    is_alpha = 0.1
+    keys_y_is = random.split(random.PRNGKey(seed + 40000), prediction_sample)
+    y_pred_is = np.array(vmap(sample_y)(keys_y_is, theta_sample))
+    if y_pred_is.ndim == 1:
+        y_pred_is = y_pred_is[:, None]
+
+    is_per_point = []
+    for j in range(n_test):
+        preds = y_pred_is[:, j]
+        l = np.quantile(preds, is_alpha / 2)
+        u = np.quantile(preds, 1 - is_alpha / 2)
+        y_j = test_y_arr[j]
+        is_j = (u - l) + (2 / is_alpha) * (l - y_j) * (y_j < l) + (2 / is_alpha) * (y_j - u) * (y_j > u)
+        is_per_point.append(is_j)
+    test_is = float(np.sum(is_per_point))
+
+    total_elapsed = time.time() - t_start
+    print("\n=== FINAL RESULTS (seed=%d, elapsed=%.0fs) ===" % (seed, total_elapsed), flush=True)
+    print("Test Log Score: %.6f" % test_log_score)
+    print("Test CRPS: %.6f" % test_crps)
+    print("Test IS (alpha=%.1f): %.6f" % (is_alpha, test_is))
+    print("Valid Log Score: %.6f" % valid_log_score)
+    print("Best params:", best_param, flush=True)
+
+    # Save results
+    os.makedirs("pdb_result/%s_%s_%s_%s_%s/" % (model, alpha, n, posterior, objective), exist_ok=True)
+    result_file = 'pdb_result/%s_%s_%s_%s_%s/%s_%s_%s_%s_eval' % (model, alpha, n, posterior, objective, regularizer, lamb, seed, s)
+
+    metrics = {
+        'seed': seed,
+        'test_log_score': float(test_log_score),
+        'test_crps': float(test_crps),
+        'test_is': float(test_is),
+        'valid_log_score': float(valid_log_score),
+        'best_params': [float(x) for x in best_param],
+        'n_test': int(n_test),
+        'prediction_sample': int(prediction_sample),
+        'elapsed_seconds': float(total_elapsed),
+        'command': 'python -m run.run_pdb_eval --model %s --objective %s --regularizer %s --posterior %s --seed %d --learning_rate %s --optimizer %s --iterations %d --s %d --n %d --prediction_sample %d' % (
+            model, objective, regularizer, posterior, seed, learning_rate, optimizer, iterations, s, n, prediction_sample),
+    }
+    with open(result_file + '.json', 'w') as f:
+        json.dump(metrics, f, indent=2)
+    print('Results saved to %s.json' % result_file, flush=True)
+
+if __name__ == '__main__':
+    main()

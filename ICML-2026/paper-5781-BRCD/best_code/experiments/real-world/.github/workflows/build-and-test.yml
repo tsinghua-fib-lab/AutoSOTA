@@ -1,0 +1,67 @@
+name: Build and test
+
+on:
+  push:
+    branches: [ "main", "dev", "v2"]
+  pull_request:
+    branches: [ "main", "dev", "v2"]
+
+jobs:
+  build-and-test-default:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y build-essential libxml2 libxml2-dev zlib1g-dev python3-tk graphviz libjpeg-dev zlib1g-dev
+        python -m pip install .[default]
+
+    - name: Test
+      run: python -m pytest tests/test.py tests/test_parser*
+      
+
+  build-and-test-rcd:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.8"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y build-essential libxml2 libxml2-dev zlib1g-dev python3-tk graphviz libjpeg-dev zlib1g-dev
+        python -m venv env-rcd
+        . env-rcd/bin/activate
+        python -m pip install pip==20.0.2
+        python -m pip install wheel pytest
+        python -m pip install .[rcd]
+
+        # install for ht
+        sudo apt install openjdk-11-jre-headless
+        git clone https://github.com/salesforce/PyRCA.git
+        cd PyRCA; pip install -e .; cd ..
+        
+        bash script/link.sh
+
+    - name: Test
+      run: |
+        . env-rcd/bin/activate
+        python -m pytest tests/test_rcd.py

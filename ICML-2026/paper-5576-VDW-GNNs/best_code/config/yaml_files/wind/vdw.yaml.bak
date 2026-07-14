@@ -1,0 +1,27 @@
+training:
+  ablate_scalar_track: true
+  main_metric: mse_valid
+  loss_fn: mse
+
+dataset:
+  graph_construction: k-nn
+
+model:
+  model_key: vdw_layer
+  vector_operator_key: Q
+  wavelet_scales_type: custom
+  num_scattering_layers_vector: 1
+  J_vector: 3
+  include_lowpass_wavelet: true
+  vector_diffusion_scales: [0, 1, 2, 3]
+  k_neighbors: 3
+  # ScatterMLP settings
+  scatter_mlp_layers: 1
+  scatter_mlp_hidden: [128, 128]
+  scatter_mlp_dropout: 0.0
+  scatter_mlp_use_batch_norm: false
+  scatter_mlp_activation: silu
+  scatter_include_zero_order: false
+  scatter_use_residual: true
+  scatter_use_neighbor_concat: true
+  scatter_neighbor_include_edge_weight: true

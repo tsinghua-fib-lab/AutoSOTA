@@ -1,0 +1,1 @@
+Please download the file named "coordinates_100K.csv" from https://github.com/VicenteVivan/geo-clip/tree/main/geoclip/model/gps_gallery and upload it here.
