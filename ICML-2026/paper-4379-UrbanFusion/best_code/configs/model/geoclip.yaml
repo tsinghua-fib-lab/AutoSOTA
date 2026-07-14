@@ -1,0 +1,22 @@
+_target_: srl.baselines.geoclip.train.trainer.GeoCLIPLightningModule
+from_pretrained: True
+precomputed_features: False
+lr: 3e-5
+weight_decay: 1e-6
+scheduler_step_size: 1
+scheduler_gamma: 0.87
+queue_size: 4096
+plot_representation_space:
+  save_representations_val: false
+  save_representations_test: True
+  save_plots: False
+  show_plots: false
+  plot_val: False
+  val_n_epochs: 5
+  plot_test: true
+  token_index: 0
+  title: "Image is Masked, CLS"
+  save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory
+
+
+

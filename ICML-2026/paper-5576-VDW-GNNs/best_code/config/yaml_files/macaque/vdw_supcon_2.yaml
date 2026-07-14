@@ -1,0 +1,87 @@
+# Configuration for VDW SupCon v2 (inductive node-level embeddings)
+
+training:
+  return_which_model: best
+  loss_fn: supcon
+  main_metric: svm_val_accuracy
+  main_metric_is_better: higher
+  n_epochs: 128
+  batch_size: 128
+  validate_every: 1
+  pin_memory: false  # doesn't work with sparse tensors in CUDA 12.4
+
+optimizer:
+  learn_rate: 0.005  # best: 0.005
+
+dataset:
+  task: node_multi_classification
+  target_key: condition_idx
+  target_dim: 7
+  scalar_feat_key: v_state
+  vector_feat_key: v_vel
+
+model:
+  model_key: vdw_supcon_2
+
+  # Graph construction settings
+  k_neighbors: 30  # MARBLE: 30  # used when estimating valid/test set embeddings
+  # Note: for O-frames/Q, we want a min k >= d neighbors, so the local PCA isn't degenerate
+  # (that is, check against MANIFOLD_INTRINSIC_DIM in macaque_reaching.py)
+  cknn_delta: 1.0  # 0.7  # MARBLE: 1.5 -> ~1000 nbrs per node
+  # Optional: enforce a minimum neighbor count by adding k-NN edges if deg < min
+  # Can be int, or True to match the manifold intrinsic dimension (to prevent singular O-frames)
+  cknn_min_nbrs: true
+
+  # Learnable P settings
+  learnable_P: true
+  learnable_p_num_views: 1  # best: 1
+  learnable_p_view_aggregation: mean
+  learnable_p_fix_alpha: false  # uses learnable_p_laziness_inits alpha values if True
+  learnable_p_laziness_inits: [0.5, 0.75, 0.3] # [0.75, 0.6, 0.4]
+  learnable_p_use_softmax: false  # best: false 
+  learnable_p_softmax_temps: [0.5, 0.3, 1.0] # [0.1, 0.3, 1.0]
+  learnable_p_use_attention: false  # best: false
+  learnable_p_attention_kwargs:
+    num_heads: 1
+    dropout: 0.0
+
+  # Learnable Mahalanobis top-k settings (upstream of LearnableP)
+  use_learnable_topk: false
+  learnable_topk_k: null        # defaults to scattering_k when null
+  learnable_topk_proj_dim: null # defaults to scalar feature dim when null
+  learnable_topk_temperature: 1.0
+  learnable_topk_eps: 1.0e-8
+
+  # Diffusion / scattering settings
+  # scattering_k: number of nearest neighbors for O-frames/Q (scattering_k <= k_neighbors)
+  scattering_k: 2  # best: 2; attention tolerates 3
+  wavelet_scales_type: custom
+  include_lowpass_wavelet: true  # best: true
+  num_scattering_layers_vector: 1  # best: 1
+  J_vector: 3  # only used if wavelet_scales_type is 'dyadic'
+  vector_diffusion_scales: [0, 1, 2, 3]  # best: [0, 1, 2, 3]
+  vector_bn_enabled: false  # best: false
+
+  # Projection head
+  projection_hidden_dim: [256, 256, 256] # best: [128, 128, 128]; day 37: [256, 256, 256]
+  projection_embedding_dim: 3
+  projection_activation: relu
+  projection_residual_style: false
+  projection_dropout_p: 0.05
+
+  # SupCon settings
+  temperature: 0.05  # best: 0.1 # lower -> sharper boundaries, tighter clusters, focus on hard negatives
+  supcon_neighbor_k: 0  # best: 0
+  supcon_sampling_max_nodes: 128
+  pos_pairs_per_anchor: 1  # best: 1
+  neg_topk_per_positive: 8  # best: 8
+  random_negatives_per_anchor: 8  # best: 8
+
+  # SVM classifier settings
+  # NOTE: the valid/test set embeddings fed to the SVM classifier are estimated as 
+  # a Gaussian-kernel-weighted sum of their k_neighbors nearest training set neighbors' 
+  # embeddings (hence weights decay quadratically with distance).
+  svm_kernel: rbf  # best: rbf
+  svm_c: 1.0  # best: 1.0
+  svm_gamma: scale  # best: scale
+

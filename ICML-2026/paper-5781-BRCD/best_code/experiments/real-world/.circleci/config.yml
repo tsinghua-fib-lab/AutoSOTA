@@ -1,0 +1,78 @@
+version: 2.1
+orbs:
+  python: circleci/python@1.2
+
+executors:
+  my-executor:
+    docker:
+      - image: cimg/python:3.12
+    environment:
+      TZ: "Australia/Melbourne"
+      
+jobs:
+  build-and-test:
+    executor: my-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - rcaeval-data-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - run: 
+          name: "Install packages"
+          command: | 
+              sudo apt update -y 
+              sudo apt install -y build-essential libxml2 libxml2-dev zlib1g-dev python3-tk graphviz libjpeg-dev zlib1g-dev
+      - run:
+          name: "Build "
+          command: pip install -e .[default]
+      - run:
+          name: "Run test"
+          command: pytest tests/test.py
+          no_output_timeout: 3h
+      - run: 
+          name: "Reproduce BARO performance on the RE2 dataset, Sock Shop system"
+          command: python main.py --method baro --dataset re2-ss
+          no_output_timeout: 3h
+      - save_cache:
+          key: rcaeval-data-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - data
+
+  test-download-datasets:
+    executor: my-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - rcaeval-data-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - run: 
+          name: "Install packages"
+          command: | 
+              sudo apt update -y 
+              sudo apt install -y build-essential libxml2 libxml2-dev zlib1g-dev python3-tk graphviz libjpeg-dev zlib1g-dev
+      - run:
+          name: "Build "
+          command: pip install -e .[default]
+      - run:
+          name: "Run test"
+          command: pytest tests/test_datasets.py
+          no_output_timeout: 3h
+      - save_cache:
+          key: rcaeval-data-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - data
+
+workflows:
+  main-flow:
+    jobs:
+      - build-and-test
+      #- test-download-datasets
+  daily-build:
+    triggers:
+      - schedule:
+          cron: "49 15 * * *"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - build-and-test

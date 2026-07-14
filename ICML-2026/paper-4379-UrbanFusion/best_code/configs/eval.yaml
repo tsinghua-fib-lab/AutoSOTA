@@ -1,0 +1,29 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: synthetic # choose datamodule with `test_dataloader()` for evaluation
+  - model: mm_encoder_only_cls
+  - logger: many_loggers
+  - trainer: default
+  - paths: default
+  - extras: default
+  - hydra: default
+  - encoder: synthetic/encoders_synthetic_1
+  - callbacks: default
+
+  # experiment configs allow for version control of specific hyperparameters
+  # e.g. best hyperparameters for given model and datamodule
+  - experiment: null
+  # optional local config for machine/user specific settings
+  # it's optional since it doesn't need to exist and is excluded from version control
+  - optional local: paths_local
+
+save_attention: False
+
+task_name: "eval"
+
+tags: ["dev"]
+
+# passing checkpoint path is necessary for evaluation
+ckpt_path: ???

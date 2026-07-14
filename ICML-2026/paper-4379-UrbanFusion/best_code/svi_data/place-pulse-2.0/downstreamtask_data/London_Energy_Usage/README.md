@@ -1,0 +1,2 @@
+Place here the files London_Energy_Usage_locations.csv (preprocessed in scripts/downstream_tasks/preprocessing_housing_energy.ipynb) and Postcode_level_all_meters_electricity_2023.csv from: https://www.gov.uk/government/statistics/postcode-level-electricity-statistics-2023
+and ukpostcodes.csv from: https://www.freemaptools.com/download-uk-postcode-lat-lng.htm

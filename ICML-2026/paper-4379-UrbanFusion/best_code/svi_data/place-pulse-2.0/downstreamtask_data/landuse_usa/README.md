@@ -1,0 +1,1 @@
+Place here the file Annual_NLCD_LndCov_2023_CU_C1V0.tif from: https://www.usgs.gov/centers/eros/science/annual-national-land-cover-database

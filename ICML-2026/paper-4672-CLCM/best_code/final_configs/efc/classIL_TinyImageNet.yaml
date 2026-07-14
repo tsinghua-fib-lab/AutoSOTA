@@ -1,0 +1,68 @@
+name: ClassIL_EFC_TinyImageNet
+method: grid
+project: paper-sweeps
+metric:
+  goal: maximize
+  name: final_avg_accuracy
+
+parameters:
+  setting:
+    value: ClassILTinyImageNet10Task
+
+  # Training methods
+  method:
+    value: efc
+    
+  layer_size:
+    value: 1000
+
+  # Fixed parameters
+  batch_size:
+    value: 256
+  num_workers:
+    value: 0
+  epochs:
+    value: 20
+  optimizer:
+    value: Adam
+  lr:
+    value: 1e-5
+  beta_efc:
+    value: 1
+  target_lr:
+    value: 0.1
+
+  cnn_pretrained:
+    value: True
+
+  # Seeds for reproducibility
+  seed:
+    values:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+
+  # EFC-specific parameters (only affect EFC runs)
+  
+  alpha_di:
+    value: 0.0017
+  alpha_I:
+    value: 0.0017
+  tau:
+    value: 0.032
+  eps:
+    value: 1e-4
+  dt_di:
+    value: 0.02
+  time_constant_ratio:
+    value: 0.2
+  tmax_di:
+    value: 500
+  k_p:
+    value: 2.0
+  mode:
+    value: di
+
+program: train.py

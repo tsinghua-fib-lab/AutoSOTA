@@ -1,0 +1,27 @@
+data:
+  name: 'NS-NonBounded_fourier'
+  datapath: 'data/test/ns-nonbounded/ns-nonbounded.mat'
+  offset: 1
+
+test:
+  pre-trained: 'trained_models/pretrained-ns-nonbounded-fourier.pkl' 
+  iterations: 1000
+
+generate:
+  seed: 0
+  device: 'cuda'
+  batch_size: 1
+  sigma_min: 0.002
+  sigma_max: 70
+  rho: 7
+  zeta_obs: 0.5
+  zeta_pde: 0.0001
+  lr_low: 0.1
+  lr_high: 0.01
+  freq_transition: 10
+  beta1: 0.97
+  beta2: 0.98
+  obs_steps: [0,9]
+  obs: 500
+
+

@@ -1,0 +1,53 @@
+# @package _global_
+
+# ====================================================
+# Final config of MAE on PP2-M dataset for
+# pretraining on OSM basemaps.
+# ====================================================
+
+defaults:
+  - OSM_MAE/default
+  - override /data: OSM_map_pretraining
+  - override /model: OSM_MAE
+  - override /callbacks: default
+
+data:
+  batch_size: 256
+  num_workers: 4
+  persistent_workers: True
+  pin_memory: True
+
+trainer:
+  max_epochs: 100 # 20
+  precision: "16-mixed"
+  check_val_every_n_epoch: 5
+
+model:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 3e-4
+    weight_decay: 0.05
+    betas:
+      - 0.9
+      - 0.95
+    eps: 1e-8
+    amsgrad: False
+    _partial_: true
+
+  scheduler:
+    steps_total: 42800
+    steps_warmup: 2140
+    cycles: 0.5
+    last_epoch: -1
+    _partial_: true
+
+  model:
+    mask_ratio: 0.6
+
+callbacks:
+  early_stopping:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+  model_checkpoint:
+    monitor: "val_loss_dataloader_0/dataloader_idx_0"
+
+task_name: "MAE_2"

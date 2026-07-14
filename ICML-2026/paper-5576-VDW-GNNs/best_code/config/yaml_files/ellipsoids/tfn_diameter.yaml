@@ -1,0 +1,29 @@
+model:
+  model_key: tfn
+  # if equivar_pred=false, we mirror original TFN l=0 + sum pooling
+  # however, this does not work for the ellipsoid diameter task,
+  # where the test set is in an unseen rotation!
+  equivar_pred: true  
+  comparison_model_num_layers: 4
+  node_embedding_dim: 64 # 128
+  # TFN-specific
+  tfn_max_ell: 2 # original TFN used only l=0 and l=1 paths for Tetris task
+  tfn_mlp_dim: 128
+  # Use original TFN MLP-gated radial embedding (but swish instead of relu, for regression)
+  tfn_radial_mode: gaussian # original TFN used mlp_gates instead (with ReLU)
+  tfn_radial_mlp_hidden: [64, 64]
+  tfn_radial_mlp_activation: swish
+  # tfn_r_max: 3.0  # 5.0
+  # tfn_num_bessel: 8 # 8
+  # tfn_num_polynomial_cutoff: 5
+
+dataset:
+  compute_edge_distances: true
+  task: graph_regression
+  target_key: y_graph_diameter
+  target_dim: 1
+
+training:
+  batch_size: 16
+  valid_batch_size: 12
+

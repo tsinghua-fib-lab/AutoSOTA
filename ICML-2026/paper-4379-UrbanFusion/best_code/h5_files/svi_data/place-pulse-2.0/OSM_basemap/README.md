@@ -1,0 +1,1 @@
+Place here OSM_basemap files of PP2-M: https://huggingface.co/datasets/DominikM198/PP2-M/tree/main

@@ -1,0 +1,51 @@
+# ====================================================
+# Encoders used for final UrbanFusion model on PP2-M
+# ====================================================
+
+- _target_: srl.encoders.coordinate_encoder.coordinate_encoder.CoordinateEncoder
+  positional_encoding_name: "direct_no_rad"
+  neural_network_name: "rff"
+  embed_dim: 768
+  seq_len: 1
+  dim_hidden: 512
+  num_layers: 2
+  dropout: 0.0
+  legendre_polys: 10
+  harmonics_calculation: "analytic"
+  min_radius: null
+  max_radius: null
+  frequency_num: null
+  return_encoding: false
+  precomputed_features: true
+  cartesian_3d_branch: false
+  cartesian_3d_input_dropout: 1.0
+
+- _target_: srl.encoders.SVI_encoder.svi_encoder.SVIEncoder
+  embed_dim: 768
+  seq_len: 1
+  return_encoding: false
+  precomputed_features: true
+
+- _target_: srl.encoders.RS_encoder.RS_encoder.RSEncoder
+  embed_dim: 768
+  seq_len: 1
+  return_encoding: false
+  precomputed_features: true
+
+- _target_: srl.encoders.OSM_encoder.OSM_encoder.OSMEncoder
+  pretrained_model_name: "facebook/vit-mae-base"
+  checkpoint_path: "${paths.data_dir}/svi_data/place-pulse-2.0/encoder_weights/OSM_MAE2.ckpt"
+  embed_dim: 768
+  seq_len: 1
+  return_encoding: false
+  precomputed_features: true
+
+- _target_: srl.encoders.POI_encoder.text_encoders.TextTransformer
+  model_name: "BAAI/bge-small-en-v1.5"
+  embed_dim: 768
+  head: "linear"
+  head_hidden_dim: 512
+  seq_len: 1
+  trainable_layers: 0
+  return_encoding: false
+  precomputed_features: true

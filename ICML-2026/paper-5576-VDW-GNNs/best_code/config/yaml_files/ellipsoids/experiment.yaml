@@ -1,0 +1,103 @@
+training:
+  root_dir: /root/
+  save_dir: experiments
+  experiment_id: ellipsoids
+  experiment_type: kfold
+  use_cv_test_set: true
+  k_folds: 5
+  ablate_vector_track: false
+  ablate_scalar_track: false
+  # ablate_second_order_wavelets: false  # deprecated
+  verbosity: 0
+  checkpoint_every: 0
+  save_best_model_state: true  # required for reloading best weights during training
+  save_final_model_state: false
+  loss_fn: mse
+  batch_size: 32
+  valid_batch_size: 25
+  n_epochs: 500
+  burnin_n_epochs: 50
+  main_metric: mse_valid
+  validate_every: 5
+  no_valid_metric_improve_patience: 50
+  main_metric_is_better: lower
+  stop_rule: no_improv
+  using_pytorch_geo: true
+  device: cuda
+  dataloader_num_workers: 0
+  mixed_precision: none
+
+dataset:
+  dataset: ellipsoids
+  data_dir: data/ellipsoids/
+  dataset_filename: ellipsoid_dataset_512.pkl
+  h5_path: data/ellipsoids/pq_tensor_data_512.h5
+  use_mean_recentering: false
+  sing_vect_align_method: column_dot
+  local_pca_distance_kernel: gaussian
+  local_pca_distance_kernel_scale: 0.21651438008449803
+  rotate_test_set: true
+  vector_attribs_to_rotate:
+  - pos
+  - y_base_normals
+  - y_global_harmonic_normals
+  - y_multiscale_harmonic_normals
+  - y_random_harmonic_normals
+  - y_spectral_vector_field
+  scalar_feat_key: pos
+  vector_feat_key: pos
+  vector_feat_dim: 3
+  split_seed: 738450
+  train_prop: 0.8
+  valid_prop: 0.2
+  target_preprocessing_type: null
+  num_atom_types: 0  # triggers learnable bias instead of embedding table
+
+  # for diameter (graph-level) targets
+  task: graph_regression
+  target_key: y_graph_diameter
+  target_dim: 1
+  
+  # for modulated normal vector (node-level) targets
+  # task: vector_node_regression
+  # target_key: y_random_harmonic_normals
+  # target_dim: 3
+
+optimizer:
+  optimizer_key: AdamW
+  learn_rate: 0.001
+  weight_decay: 1e-6
+  betas:
+  - 0.9
+  - 0.999
+  eps: 1e-8
+
+scheduler:
+  reload_best_on_plateau: true
+  plateau_max_restarts: 2
+  scheduler_key: ReduceLROnPlateau
+  mode: min
+  factor: 0.5
+  patience: 50
+  threshold: 0.0001
+  threshold_mode: rel
+  min_lr: 1.0e-05
+
+model:
+  dirac_types:
+  - max
+  - min
+  pooling_type:
+  - sum
+  - max
+  column_normalize_P: false
+
+  # VDW, LEGS, GIN, GAT, GCN
+  mlp_hidden_dim:
+  - 128
+  - 64
+  - 32
+  - 16
+  mlp_dropout_p: 0.0 # 0.7 only helps VDW
+  mlp_nonlin: silu
+

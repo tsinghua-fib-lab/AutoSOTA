@@ -1,0 +1,14 @@
+_target_: srl.baselines.CSP.trainer_hydra.CSPLightningModule
+model_path: "${paths.data_dir}/svi_data/place-pulse-2.0/encoder_weights/model_fmow_gridcell_0.0010_32_0.1000000_1_512_gelu_UNSUPER-contsoftmax_0.000050_1.000_1_0.100_TMP1.0000_1.0000_1.0000.pth.tar"
+precomputed_features: False
+plot_representation_space:
+  save_representations_val: false
+  save_representations_test: True
+  save_plots: False
+  show_plots: false
+  plot_val: False
+  val_n_epochs: 5
+  plot_test: true
+  token_index: 0
+  title: "Image is Masked, CLS"
+  save_dir: ${hydra:run.dir}/plots # Uses Hydra's run directory

@@ -1,0 +1,25 @@
+#training parameters
+epochs : 100 # optimisation epochs
+batch_size : 64 # batch size
+lr: 0.01 # learning rate
+momentum: 0.9
+dropout: 0. # dropout in the MLP
+batch_norm: True # batch normalisation
+hidden_channels: [100] # number of hidden channels: 32 general; 100 for macaque
+bias: True # learn bias parameters in MLP
+
+#manifold/signal parameters
+order: 2 # order to which to compute the directional derivatives
+inner_product_features: False
+diffusion: True
+frac_sampled_nb: -1 # fraction of neighbours to sample for gradient computation (if -1 then all neighbours)
+include_positions: False # include positions as features
+include_self: True # include vector at the center of feature
+
+# embedding parameters
+out_channels: 3 # number of output channels (if null, then =hidden_channels)
+vec_norm: False # normalise features at each order of derivatives
+emb_norm: False # spherical output
+
+# other params
+seed: 0 # seed for reproducibility

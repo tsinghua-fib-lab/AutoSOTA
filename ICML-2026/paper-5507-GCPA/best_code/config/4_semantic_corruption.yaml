@@ -1,0 +1,107 @@
+experiment:
+  seed: 42
+  dataset: cifar100
+  output_dir: ./results/semanticity
+  data_dir: ${oc.env:DATA_PATH}/cifar100/
+  pca_enabled: false
+  stratified: false
+  sample_counts: [45000]
+  add_model: false
+
+splits: [train, validation, test]
+
+data:
+  validation_size: 5000
+  stratify_column: fine_label
+
+transforms:
+  canny:
+    auto_k: 0.5
+    thicken: 1
+    p_corruption: 0.85
+    p_complete: 1.0
+  scharr:
+    thicken: 1
+    p_corruption: 0.85
+    p_complete: 1.0
+  dog:
+    sigma1: 1.0
+    sigma2: 2.5
+    p_corruption: 0.85
+    p_complete: 1.0
+  gaussian:
+    blur_sigma: 10
+    noise_std: 25.0
+    p_corruption: 0.85
+    p_complete: 1.0
+
+
+experiments:
+  init:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: WinKawaks/vit-tiny-patch16-224
+
+  smaldeit:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: facebook/deit-small-patch16-224
+  
+  swintiny:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: microsoft/swin-tiny-patch4-window7-224
+
+  clipvitbase:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224, openai/clip-vit-base-patch32]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: openai/clip-vit-base-patch32
+  
+  largeconvnext:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224, openai/clip-vit-base-patch32, facebook/convnext-large-224]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: facebook/convnext-large-224
+  
+  largedino:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224, openai/clip-vit-base-patch32, facebook/convnext-large-224, facebook/dinov2-large]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: facebook/dinov2-large
+  
+  largevit:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224, openai/clip-vit-base-patch32, facebook/convnext-large-224, facebook/dinov2-large, google/vit-large-patch16-224]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: google/vit-large-patch16-224
+  
+  giantdino:
+    modes: [corruption]
+    kinds: [colour, canny]
+    encoders:
+      - [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224, facebook/deit-small-patch16-224, microsoft/swin-tiny-patch4-window7-224, openai/clip-vit-base-patch32, facebook/convnext-large-224, facebook/dinov2-large, google/vit-large-patch16-224, facebook/dinov2-giant]
+    corrupt_encoders: [microsoft/resnet-18, WinKawaks/vit-tiny-patch16-224]
+    added_model: facebook/dinov2-giant
+
+classifier:
+  epochs: 100
+  patience: 10
+  lr: 0.001

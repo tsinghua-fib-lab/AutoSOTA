@@ -1,0 +1,1 @@
+Embeddings from PDFM can be requested from https://github.com/google-research/population-dynamics. Please upload here the files "county_embeddings.csv", county.geojson", "zcta_embeddings.csv", and "zcta.geojson".

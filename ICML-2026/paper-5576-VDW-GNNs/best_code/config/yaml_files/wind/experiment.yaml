@@ -1,0 +1,65 @@
+training:
+  root_dir: /root/
+  save_dir: experiments/wind_rot  # child directory set automatically to 'dataset' value in this config, in downstream scripts
+  experiment_id: wind
+  experiment_type: kfold # uses reps, but 'kfold' works with the existing training pipeline
+  use_cv_test_set: false
+  k_folds: 5
+  checkpoint_every: 0
+  save_best_model_state: true
+  save_final_model_state: false
+  ablate_scalar_track: true
+  ablate_vector_track: false
+  loss_fn: mse
+  batch_size: 512
+  valid_batch_size: 512
+  n_epochs: 1000
+  burnin_n_epochs: 100
+  main_metric: mse_valid
+  validate_every: 1
+  no_valid_metric_improve_patience: 100
+  main_metric_is_better: lower
+  stop_rule: no_improv
+  using_pytorch_geo: true
+  device: cuda
+  dataloader_num_workers: 0
+  mixed_precision: none
+  rotation_seed: 298357
+
+dataset:
+  dataset: wind
+  data_dir: data/wind/
+  task: vector_node_regression
+  target_key: y
+  target_dim: 3  # 2
+  scalar_feat_key: wind_local_3d # v for 2D
+  vector_feat_key: wind_local_3d  # v for 2D
+  geom_feat_key: pos
+  vector_feat_dim: 3  # 2 for v/2D
+  split_seed: 547892
+  k_folds: 5
+  train_prop: 0.7
+  valid_prop: 0.1
+  graph_construction: k-nn
+  max_num_neighbors: 16
+  pin_memory: false
+
+optimizer:
+  optimizer_key: AdamW
+  learn_rate: 0.001 # 0.01
+  weight_decay: 1.0e-6
+  betas:
+  - 0.9
+  - 0.999
+  eps: 1.0e-8
+
+scheduler:
+  reload_best_on_plateau: true
+  plateau_max_restarts: 1
+  scheduler_key: ReduceLROnPlateau
+  mode: min
+  factor: 0.5
+  patience: 100
+  threshold: 0.0001
+  threshold_mode: rel
+  min_lr: 1.0e-05

@@ -1,0 +1,61 @@
+name: sweep_si_tinyimagenet
+method: grid
+project: paper-sweeps
+metric:
+  goal: maximize
+  name: final_avg_accuracy
+
+parameters:
+  method:
+    value: si
+
+  setting:
+    values:
+      - TaskILTinyImageNet
+      - ClassILTinyImageNet10Task
+
+  layer_size:
+    value: 1000
+
+  # Hyperparameters to sweep
+  lr:
+    values:
+      - 1e-5
+      - 3e-5
+      - 1e-4
+      - 3e-4
+
+  importance_ewc:
+    values:
+      - 0.1
+      - 1
+      - 10
+      - 100
+      - 1000
+
+  si_damping:
+    values:
+      - 0.01
+      - 0.1
+      - 1.0
+
+  # Fixed parameters
+  batch_size:
+    value: 256
+  num_workers:
+    value: 0
+  epochs:
+    value: 20
+  optimizer:
+    value: Adam
+  cnn_pretrained:
+    value: True
+
+  # Seeds for reproducibility
+  seed:
+    values:
+      - 0
+      - 1
+      - 2
+
+program: train.py

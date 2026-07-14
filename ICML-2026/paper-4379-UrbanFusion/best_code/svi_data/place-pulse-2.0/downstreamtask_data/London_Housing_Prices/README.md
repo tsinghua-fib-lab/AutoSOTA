@@ -1,0 +1,1 @@
+Place here the files London_Housing_Prices_locations.csv (preprocessed in scripts/downstream_tasks/preprocessing_housing_energy.ipynb) and kaggle_london_house_price_data.csv from: https://www.kaggle.com/datasets/jakewright/house-price-data

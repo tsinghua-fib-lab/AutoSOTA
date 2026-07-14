@@ -1,0 +1,26 @@
+experiment:
+  seed: 42
+  dataset_root: ${oc.env:DATA_PATH}/flickr8k
+  data_dir: ${oc.env:DATA_PATH}/flickr_logml
+  output_dir: results/flickr8k
+  dataset: flickr8k_logml
+  pca_enabled: true
+
+splits: [train, validation, test]
+
+experiments:
+  audio_text_image:
+    encoders: [facebook/hubert-base-ls960, bert-base-uncased, openai/clip-vit-base-patch16, facebook/dinov2-base]
+    modes: [audio, text, image, image]
+
+  audio_text_image_1:
+    encoders: [facebook/hubert-base-ls960, bert-base-uncased, openai/clip-vit-base-patch16]
+    modes: [audio, text, image]
+  
+  audio_text_image_2:
+    encoders: [facebook/hubert-base-ls960, bert-base-uncased, facebook/dinov2-base]
+    modes: [audio, text, image]
+  
+  audio_text_image_3:
+    encoders: [facebook/hubert-large-ls960-ft, bert-base-uncased, openai/clip-vit-base-patch16]
+    modes: [audio, text, image]

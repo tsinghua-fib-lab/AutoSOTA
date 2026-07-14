@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proeval"
+version = "0.1.0"
+description = "ProEval — Proactive failure discovery and efficient performance estimation for Generative AI evaluation."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Yizheng Huang" },
+    { name = "Wenjun Zeng" },
+    { name = "Aditi Kumaresan" },
+    { name = "Zi Wang" },
+]
+maintainers = [
+    { name = "ProEval Authors", email = "proeval@google.com" },
+]
+keywords = [
+    "llm",
+    "evaluation",
+    "active-learning",
+    "bayesian-quadrature",
+    "gaussian-process",
+    "generative-ai",
+    "benchmarking",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "scikit-learn>=1.3.0",
+    "requests>=2.31.0",
+    "tqdm>=4.65.0",
+]
+
+[project.optional-dependencies]
+# Neural-encoder training + BQ-TPF sampler.
+encoder = [
+    "torch>=2.0.0",
+]
+# Topic-aware test-case generation (BERTopic + HDBSCAN).
+topics = [
+    "bertopic>=0.16.0",
+    "hdbscan>=0.8.33",
+]
+# HuggingFace dataset loading helpers (for evaluator.load_dataset_data).
+datasets = [
+    "datasets>=2.14.0",
+]
+# Plotting utilities (utils/plotting.py).
+plotting = [
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+]
+# Everything required to run the full experiment suite.
+all = [
+    "torch>=2.0.0",
+    "bertopic>=0.16.0",
+    "hdbscan>=0.8.33",
+    "datasets>=2.14.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+]
+# Developer tooling.
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "build>=1.0",
+    "twine>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/google-deepmind/proeval"
+Documentation = "https://github.com/google-deepmind/proeval#readme"
+Repository = "https://github.com/google-deepmind/proeval"
+Issues = "https://github.com/google-deepmind/proeval/issues"
+Paper = "https://arxiv.org/abs/2604.23099"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["proeval*"]
+exclude = ["data*", "experiment*", "utils*", "tests*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"

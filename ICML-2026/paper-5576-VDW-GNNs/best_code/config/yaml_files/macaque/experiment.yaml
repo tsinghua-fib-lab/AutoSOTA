@@ -1,0 +1,87 @@
+training:
+  root_dir: /path/to/file
+  save_dir: experiments
+  experiment_id: macaque_reaching
+  experiment_type: kfold
+  experiment_inference_type: inductive  # inductive | transductive
+  use_cv_test_set: true
+  k_folds: 5
+  ablate_vector_track: false
+  ablate_scalar_track: true
+  verbosity: 0
+  checkpoint_every: 0
+  save_best_model_state: true
+  save_final_model_state: false
+  batch_size: 64
+  valid_batch_size: 64
+  n_epochs: 128
+  burnin_n_epochs: 32
+  validate_every: 1
+  no_valid_metric_improve_patience: 32
+  stop_rule: no_improv
+  using_pytorch_geo: true
+  device: cuda
+  dataloader_num_workers: 0
+  max_grad_norm: 2.0
+  mixed_precision: none
+
+  # For regression
+  # loss_fn: euclidean_distance_loss
+  # main_metric: mse_valid
+  # main_metric_is_better: lower
+
+  # For classification
+  loss_fn: cross_entropy  # can be overridden by specific models
+  main_metric: accuracy_valid
+  main_metric_is_better: higher
+
+model:
+  cknn_dist_metric: euclidean  # cosine
+  eval_mode: distill  # weighted_average | forward_insert | distill
+  use_distill_inference: true
+
+dataset:
+  dataset: macaque
+  data_dir: data/macaque/
+  macaque_day_index: 3
+
+  diffusion_tensor_data_dir: Qs
+  save_processed_dataset: false
+  # Optional: HDF5 with Q per (day, trial)
+  h5_path: null  # not needed for kfolds experiments
+  # Provide operator keys for HDF5-based attachment if used downstream
+  scalar_feat_key: x
+  vector_feat_key: v_vel
+  # vector_feat_dim: 6  # not currently used by VDW_macaque model
+  split_seed: 758492
+  # train_prop: 0.8  # overridden if experiment_type: kfold
+  # valid_prop: 0.1  # overridden if experiment_type: kfold
+
+  # For regression
+  # task: graph_regression  # graph_regression | node_regression
+  # target_key: final_pos_xy  # final_pos_xy | pos_xy | vel_xy | vel_xy+pos_xy
+  # target_dim: 2  # 2+2
+
+  # For classification
+  task: graph_multi_classification
+  target_key: condition_idx 
+  target_dim: 7
+
+optimizer:
+  optimizer_key: AdamW
+  learn_rate: 0.005  # best: 0.005
+  weight_decay: 1e-5  # Increased from 1e-6 (slight regularization)
+  betas: [0.9, 0.999]
+  eps: 1e-8
+
+scheduler:
+  reload_best_on_plateau: true
+  plateau_max_restarts: 1
+  scheduler_key: ReduceLROnPlateau
+  mode: min
+  factor: 0.5
+  patience: 32
+  threshold: 0.0001
+  threshold_mode: rel
+  min_lr: 1.0e-05
+

@@ -1,0 +1,61 @@
+[build-system]
+requires = [
+         "setuptools>=42",
+         "setuptools_scm[toml]",
+         "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fse-baro"
+description = "BARO: Robust Root Cause Analysis for Microservices via Multivariate Bayesian Online Change Point Detection"
+authors = [{name = "Luan Pham", email = "phamquiluan@gmail.com"}]
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "pytest",
+    "tqdm",
+    "requests",
+    "matplotlib",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/phamquiluan/baro/"
+Issues = "https://github.com/phamquiluan/baro/issues"
+
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+baro = "baro"
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''

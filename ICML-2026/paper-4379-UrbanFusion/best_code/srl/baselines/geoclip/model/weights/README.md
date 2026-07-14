@@ -1,0 +1,1 @@
+Please download the model weights from https://github.com/VicenteVivan/geo-clip/tree/main/geoclip/model/weights and place them in this directory.

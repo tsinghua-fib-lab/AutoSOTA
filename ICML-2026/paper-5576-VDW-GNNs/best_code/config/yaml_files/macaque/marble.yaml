@@ -1,0 +1,32 @@
+# MARBLE-specific overrides to eliminate repetitive CLI flags.
+
+training:
+  # Enforce MARBLE run length and early-stop settings
+  n_epochs: 100            # --max_epochs
+  no_valid_metric_improve_patience: 32 # 10  # --patience
+  batch_size: 512
+  valid_batch_size: 512
+
+model:
+  # Graph construction defaults that were previously passed via CLI
+  k_neighbors: 30
+  cknn_delta: 1.0
+  cknn_min_nbrs_match_pca: true
+  cknn_dist_metric: euclidean
+
+  # Custom plateau/early-stop knobs used by the MARBLE runner
+  plateau_max_restarts: 1
+  plateau_factor: 0.1
+  patience: 32 # 10
+  max_epochs: 100
+
+scheduler:
+  # Match scheduler to MARBLE’s intended plateau behavior
+  scheduler_key: ReduceLROnPlateau
+  mode: min
+  factor: 0.1
+  patience: 10
+  threshold: 0.0001
+  threshold_mode: rel
+  min_lr: 1.0e-05
+

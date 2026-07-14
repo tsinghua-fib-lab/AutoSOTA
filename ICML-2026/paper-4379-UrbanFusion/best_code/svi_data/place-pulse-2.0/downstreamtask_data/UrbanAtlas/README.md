@@ -1,0 +1,1 @@
+Place here the folders for the cities: Praha, Berlin, München, København, Madrid, Barcelona, Helsinki, Paris, Grad Zagreb, Dublin, Roma, Milano, Amsterdam, Warszawa, Lisboa, Bucuresti, Stockholm, Bratislava, London, Glasgow, downloaded from: https://land.copernicus.eu/en/products/urban-atlas/urban-atlas-2018
