@@ -1,0 +1,54 @@
+[project]
+name = "tensorsl"
+dynamic = ["version"]
+description = "Tensor Separation Learning: interpretable regression via sums of rank-1 separable components."
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Jinyang Liu", email = "jl@math.ku.dk"}]
+keywords = ["machine-learning", "interpretable-ml", "boosting", "rust"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "numpy",
+    "scikit-learn>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/jyliuu/TSL"
+Repository = "https://github.com/jyliuu/TSL"
+Issues = "https://github.com/jyliuu/TSL/issues"
+
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+python-source = "python"
+module-name = "tensorsl._tensorsl"
+features = ["use-rayon", "pyo3/extension-module"]
+
+[project.optional-dependencies]
+plots = [
+  "matplotlib>=3.8,<4"
+]
+test = [
+  "pytest>=8.0.0",
+  "openml>=0.15,<1"
+]
+examples = [
+  "xgboost>=2.0,<3",
+  "lightgbm>=4,<5",
+  "interpret",
+  "matplotlib>=3.8,<4",
+  "pandas>=2,<3",
+]
+dev = [
+  "tensorsl[test,examples]",
+]

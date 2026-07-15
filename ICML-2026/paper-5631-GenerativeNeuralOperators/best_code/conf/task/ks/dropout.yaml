@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - /task/dropout
+  - override /optimizer: adamw
+  - override /model: fno1d
+  - _self_
+
+evaluation:
+  mode: rollout
+
+training:
+  batch_size: 128
+
+model:
+  channel_mlp_dropout: 0.2
+
+dropout:
+  test_samples_per_example: 32
+
+

@@ -1,0 +1,63 @@
+client_configs:
+  train_configs:
+    trainer: "DIMATTrainer"
+    mode: "epoch"
+    num_local_epochs: 2
+    optim: "Adam"
+    optim_args:
+      lr: 0.001
+    loss_fn_path: "./resources/loss/celoss.py"
+    loss_fn_name: "CELoss"
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric/acc.py"
+    metric_name: "accuracy"
+    use_dp: False
+    epsilon: 1
+    clip_grad: False
+    clip_value: 1
+    clip_norm: 1
+    train_batch_size: 100
+    val_batch_size: 100
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/resnet20_dimat.py"
+    model_name: "ResNet20"
+    model_kwargs:
+      num_classes: 100
+
+  comm_configs:
+    compressor_configs:
+      enable_compression: False
+      lossy_compressor: "SZ2Compressor"
+      lossless_compressor: "blosc"
+      error_bounding_mode: "REL"
+      error_bound: 1e-3
+      param_cutoff: 1024
+
+server_configs:
+  num_clients: 5
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "DIMATaggregator"
+  aggregator_kwargs:
+    graph_func: "resnet20"
+    match_func: "match_tensors_permute"
+    transform_kwargs:
+      a: 0.0001
+      b: 0.075
+    proxy_dataset_path: "./resources/dataset/cifar100_proxy_norm.py"
+    proxy_dataset_name: "get_cifar100_proxy"
+    proxy_batch_size: 100
+    device: "cuda"
+  num_global_epochs: 100
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 1048576
+      use_ssl: False

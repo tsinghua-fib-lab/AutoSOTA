@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - /task/regression  # Base Regression task config
+  - override /optimizer: adamw
+  - override /model: fno1d
+  - _self_
+
+evaluation:
+  mode: rollout
+
+training:
+  batch_size: 128
+
+
+

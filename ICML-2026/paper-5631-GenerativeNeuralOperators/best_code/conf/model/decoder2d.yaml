@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+# Decoder2d (explicit params, including defaults)
+# -----------------------------------------------------------------------------
+# Used by:
+# - Autoencoder training (read by `src/train/autoencoder.py`)
+# - Any Hydra instantiation that targets `models.autoencoder.decoder2d.Decoder2d`
+
+_target_: "models.autoencoder.decoder2d.Decoder2d"
+model_name: "Decoder2d"
+
+out_channels: 1
+hidden_channels: 32
+z_channels: 4
+ch_mult: [1, 2, 4, 8]
+num_res_blocks: 2
+resolution: 128
+attn_resolutions: [16]
+
+# Optional/legacy kwargs (defaults explicit)
+dropout: 0.0
+double_z: true
+cond_channels: 0
+tanh_out: false
+padding_mode: "circular"
+use_attn: false
+

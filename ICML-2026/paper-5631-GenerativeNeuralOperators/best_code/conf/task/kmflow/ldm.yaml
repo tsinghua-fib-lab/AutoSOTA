@@ -1,0 +1,36 @@
+# @package _global_
+defaults:
+  - /task/ldm  # Base LDM task config
+
+  # 2D diffusion backbone + 2D autoencoder for KMFlow (2D fields)
+  - override /model@ldm.model: cond_unet2d
+  - override /optimizer@ldm.optimizer: adamw
+  - override /optimizer@autoencoder.optimizer: adamw
+  - override /model@autoencoder.encoder: encoder2d
+  - override /model@autoencoder.decoder: decoder2d
+  - _self_
+
+evaluation:
+  mode: rollout
+
+ae_model_name: AE2d
+
+training_ldm:
+  batch_size: 32
+training_ae:
+  batch_size: 32
+
+cond:
+  mode: shared_ae
+
+ldm:
+  T: 10
+  model:
+    # KMFlow uses 2D grids; default dataset config is 128x128.
+    resolution: 128
+  # Chunk size for autoregressive rollout evaluation (over flattened K*N_traj).
+  test_samples_per_example: 32
+  rollout_k_chunk: 8
+  rollout_traj_chunk: 16
+
+

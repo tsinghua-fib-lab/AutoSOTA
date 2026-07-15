@@ -1,0 +1,66 @@
+{
+  "input": "evidence/bbob_noisy_probe_decision_accuracy_noisefree_i1-15_B200_d20/decision_points.csv",
+  "loss": {
+    "eps": 1e-12,
+    "name": "log10"
+  },
+  "probe_key": "misranking_rd",
+  "selected_threshold": 0.06,
+  "selection": {
+    "criterion": "maximize train_accuracy, tie-break by |pred_berw_rate-label_berw_rate| then smaller threshold",
+    "train_label_berw_rate": 0.3933333333333333
+  },
+  "split": {
+    "test_instances": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "train_instances": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "test": {
+    "confusion": {
+      "accuracy": 0.58,
+      "n": 300,
+      "pred_cma_label_cma": 94,
+      "pred_cma_label_berw": 27,
+      "pred_berw_label_cma": 99,
+      "pred_berw_label_berw": 80,
+      "pred_berw_rate": 0.5966666666666667
+    },
+    "regret": {
+      "mean": 0.1275354347954755,
+      "median": 0.0,
+      "q90": 0.3453671831188031
+    }
+  },
+  "train": {
+    "confusion": {
+      "accuracy": 0.6066666666666667,
+      "n": 150,
+      "pred_cma_label_cma": 45,
+      "pred_cma_label_berw": 13,
+      "pred_berw_label_cma": 46,
+      "pred_berw_label_berw": 46,
+      "pred_berw_rate": 0.6133333333333333
+    },
+    "regret": {
+      "mean": 0.1198459145330554,
+      "median": 0.0,
+      "q90": 0.33078631467538444
+    }
+  }
+}

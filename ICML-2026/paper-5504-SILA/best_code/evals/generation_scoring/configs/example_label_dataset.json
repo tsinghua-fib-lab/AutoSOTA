@@ -1,0 +1,45 @@
+{
+  "run_id": null,
+  "evaluation_mode": "label_dataset",
+  
+  "model_config": {
+    "name": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "sae_release": "goodfire-llama-3.1-8b-instruct",
+    "sae_id": "layer_19",
+    "sae_layer_number": 19,
+    "device": "cuda",
+    "dtype": "bfloat16"
+  },
+  
+  "reward_config": {
+    "conversation_prompt_template": "Produce a VERY SHORT conversation which exhibits '_'\nDo not include any other text in your response. Start immediately with the conversation.",
+    "use_chat_template": true,
+    "conversation_system_message": "You are a helpful AI assistant who generates EXTREMELY SHORT example conversations. The conversations are between a user and an assistant, and have the following format:\n[USER] I'm a user.\n[ASSISTANT] I'm the assistant.",
+    "max_new_tokens": 100,
+    "temperature": 0.7,
+    "do_sample": true,
+    "top_p": 0.9,
+    "aggressive_memory_cleanup": true,
+    "num_debug_samples": 4,
+    "full_debug_mode": false
+  },
+  
+  "master_json_path": "data/goodfire_8b_sae_labels.json",
+  "master_json_dataset_name": "Goodfire/Llama-3.1-8B-Instruct-SAE-l19",
+  "master_json_layer": 19,
+  "master_json_split": "val",
+  "data_volume_path": "./",
+  
+  "max_latents": 100,
+  "specific_latent_indices": null,
+  
+  "num_reward_samples": 10,
+  
+  "label_generation_batch_size": 32,
+  "reward_evaluation_batch_size": 16,
+  
+  "num_parallel_instances": 1,
+  "checkpoint_every_n_latents": 100,
+  
+  "output_volume_path": "./results"
+}

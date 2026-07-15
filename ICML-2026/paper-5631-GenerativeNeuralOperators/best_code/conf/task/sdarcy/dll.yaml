@@ -1,0 +1,44 @@
+# @package _global_
+defaults:
+  - /task/dll  # Base DLL task config
+  - override /optimizer@operatorencoder.optimizer: adamw
+  - override /optimizer@dll.optimizer: adamw
+  - override /model@dll.model: cond_mlp
+  - override /model@dll.model.c_embedder: fno2d_emb
+
+  # Use the shared FNO2d config as the OperatorEncoder backbone
+  - override /model@operatorencoder.model: fno2d
+  - override /model@operatorencoder.output_embedder: fno2d_emb
+  - _self_
+
+evaluation:
+  mode: stochastic
+
+training_oe:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+training_dll:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+
+operatorencoder:
+  model:
+    out_channels: ${dll.model.x_dim}
+    # n_modes: [16, 16]
+  output_embedder:
+    input_dim: 1
+    # n_modes: [16, 16]
+
+dll:
+  samples_per_example: 32
+  test_samples_per_example: 32
+  # Keep stochastic evaluation memory bounded (2D fields can be large).
+  stochastic_n_chunk: 8
+  stochastic_k_chunk: 4
+  # model:
+  #   c_embedder:
+      # n_modes: [16, 16]
+

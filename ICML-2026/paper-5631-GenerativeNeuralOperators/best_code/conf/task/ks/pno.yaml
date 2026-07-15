@@ -1,0 +1,19 @@
+# @package _global_
+defaults:
+  - /task/pno
+  - override /optimizer: adamw
+  - override /model: fno1d
+  - _self_
+
+evaluation:
+  mode: rollout
+
+training:
+  batch_size: 128
+
+# IMPORTANT: model must output (mu, rho) or 2*C channels for (mu, rho)
+model:
+  out_channels: 2
+
+pno:
+  test_samples_per_example: 32

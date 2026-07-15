@@ -1,0 +1,55 @@
+{
+  "dataset_name": "AutoVSR_public_test_10",
+  "version": "1.0",
+  "description": "Small public smoke-test set: 5 symbolic transfer-function cases covering type1-type5 and 5 transient-response cases covering the available transient types.",
+  "samples": [
+    {
+      "id": "synthetic_level0_q1155",
+      "data_id": "q1155",
+      "folder": "q1155",
+      "source": "synthetic",
+      "level": "level0",
+      "category": null,
+      "label": "5",
+      "question": "What is the transfer function from V1 to R1 in this circuit?",
+      "choices": null,
+      "answer": "-R1/(R1 + R2)*1",
+      "netlist": "R1 0 1 R1\nR2 2 0 R2\nV1 1 2 V1",
+      "image_path": "examples/images/type1/q1155/q1155_image.png",
+      "task": "transfer_function",
+      "type": "type1"
+    },
+    {
+      "id": "synthetic_level1_q465",
+      "data_id": "q465",
+      "folder": "q465",
+      "source": "synthetic",
+      "level": "level1",
+      "category": null,
+      "label": "5",
+      "question": "What is the transfer function from V1 to C1 in this circuit?",
+      "choices": null,
+      "answer": "((1/(C1*R1))/(s + 1/(C1*R1)))*1",
+      "netlist": "V1 2 0 step\nC1 3 0 C1\nR1 3 2 R1",
+      "image_path": "examples/images/type2/q465/q465_image.png",
+      "task": "transfer_function",
+      "type": "type2"
+    },
+    {
+      "id": "synthetic_level2_q23",
+      "data_id": "q23",
+      "folder": "q23",
+      "source": "synthetic",
+      "level": "level2",
+      "category": null,
+      "label": "5",
+      "question": "What is the transfer function from V1 to C1 in this circuit?",
+      "choices": null,
+      "answer": "((-y_1/C1)/s)*1",
+      "netlist": "C1 2 1 C1\nG1 1 4 2 0 y_1\nV1 2 0 step\nR1 2 0 R1\nR2 2 4 R2",
+      "image_path": "examples/images/type3/q23/q23_image.png",
+      "task": "transfer_function",
+      "type": "type3"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "input": "evidence/bbob_noisy_probe_decision_accuracy_noisefree_i1-15_B200/decision_points.csv",
+  "loss": {
+    "eps": 1e-12,
+    "name": "log10"
+  },
+  "probe_key": "variance_rel_sd",
+  "selected_threshold": 0.13,
+  "selection": {
+    "criterion": "minimize train_regret_mean, tie-break by smaller threshold",
+    "train_label_berw_rate": 0.5466666666666666
+  },
+  "split": {
+    "test_instances": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "train_instances": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "test": {
+    "confusion": {
+      "accuracy": 0.6866666666666666,
+      "n": 300,
+      "pred_cma_label_cma": 101,
+      "pred_cma_label_berw": 49,
+      "pred_berw_label_cma": 45,
+      "pred_berw_label_berw": 105,
+      "pred_berw_rate": 0.5
+    },
+    "regret": {
+      "mean": 0.07355019468344517,
+      "median": 0.0,
+      "q90": 0.1360161537111901
+    }
+  },
+  "train": {
+    "confusion": {
+      "accuracy": 0.6933333333333334,
+      "n": 150,
+      "pred_cma_label_cma": 49,
+      "pred_cma_label_berw": 27,
+      "pred_berw_label_cma": 19,
+      "pred_berw_label_berw": 55,
+      "pred_berw_rate": 0.49333333333333335
+    },
+    "regret": {
+      "mean": 0.06134227836466612,
+      "median": 0.0,
+      "q90": 0.2559131715972913
+    }
+  }
+}

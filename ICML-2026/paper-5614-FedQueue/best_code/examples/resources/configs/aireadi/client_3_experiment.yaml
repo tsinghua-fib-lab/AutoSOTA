@@ -1,0 +1,28 @@
+client_id: "Client3"
+
+train_configs:
+  # Device
+  device: "cuda"
+  # Logging and outputs
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# Local dataset
+data_configs:
+  dataset_path: "./resources/dataset/ai_readi_dataset.py"
+  dataset_name: "get_ai_readi"
+  dataset_kwargs:
+    num_clients: 4
+    client_id: 2
+    label_col: "dm_severity"
+    partition_col: "device"
+    partition_strategy: "column_based"
+    visualization: True
+    output_dirname: "./output"
+    output_filename: "visualization.pdf"
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

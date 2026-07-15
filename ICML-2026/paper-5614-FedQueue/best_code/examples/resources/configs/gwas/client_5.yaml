@@ -1,0 +1,18 @@
+client_id: Site5
+train_configs:
+  trainer_output_dirname: ./GA4GH_Demo/sites/Site5/output
+  logging_output_dirname: ./GA4GH_Demo/sites/Site5/output/logs
+  logging_output_filename: appfl_site5
+data_configs:
+  dataset_path: ./resources/configs/gwas/site_data.py
+  dataset_name: get_site_gwas_dataset
+  dataset_kwargs:
+    data_dir: ./resources/configs/gwas/sites-data/Site5/data
+    site_id: Site5
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1073741824
+    use_ssl: false
+    use_model_chunking: false
+    optimize_memory: true

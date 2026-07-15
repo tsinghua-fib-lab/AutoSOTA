@@ -1,0 +1,1 @@
+[`run_simulations.R`](run_simulations.R) contains scripts to run toy experiments under Setting A, Setting B, or Setting C as described in the paper. [`simulation_results/`](simulation_results) contains the simulation summary statistics used to create the paper figures.

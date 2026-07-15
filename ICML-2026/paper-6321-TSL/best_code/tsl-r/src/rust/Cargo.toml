@@ -1,0 +1,29 @@
+[package]
+name = 'tensorsl'
+publish = false
+version = '0.1.0'
+edition = '2021'
+rust-version = '1.80'
+license = 'MIT'
+
+[lib]
+crate-type = [ 'rlib', 'staticlib' ]
+name = 'tensorsl'
+
+[[bin]]
+name = 'document'
+path = 'document.rs'
+
+[dependencies]
+extendr-api = { version = '0.9', features = ['ndarray'] }
+ndarray = '0.16'
+tsl_rust = { git = 'https://github.com/jyliuu/TSL', branch = 'main', default-features = false, features = ['use-rayon'] }
+
+# Detach from the parent cargo workspace so `cargo build --manifest-path` treats
+# this as a standalone crate (the R package ships only this subtree, not the
+# repo-root workspace).
+[workspace]
+
+[profile.release]
+lto = true
+codegen-units = 1

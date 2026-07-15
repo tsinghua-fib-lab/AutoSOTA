@@ -1,0 +1,30 @@
+Package: tensorsl
+Title: R Bindings for Tensor Separation Learning
+Version: 0.3.0
+Author: Jinyang Liu [aut, cph]
+Maintainer: Jinyang Liu <jl@math.ku.dk>
+Authors@R:
+    person("Jinyang", "Liu", email = "jl@math.ku.dk", role = c("aut", "cre", "cph"))
+Description: R bindings for TSL (Tensor Separation Learning), a glass-box
+    regression model implemented in Rust. Provides a simple fit/predict
+    interface backed by the high-performance 'tsl' Rust crate.
+License: MIT + file LICENSE
+URL: https://github.com/jyliuu/TSL
+BugReports: https://github.com/jyliuu/TSL/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE, load = "source")
+RoxygenNote: 7.3.3
+Config/rextendr/version: 0.5.0
+SystemRequirements: Cargo (Rust's package manager), rustc >= 1.80.0
+Imports:
+    ggplot2,
+    scales
+Suggests:
+    knitr,
+    patchwork,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Depends:
+    R (>= 4.2)

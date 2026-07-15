@@ -1,0 +1,31 @@
+client_configs:
+  train_configs:
+    trainer_path: ./resources/configs/gwas/site_gwas_trainer.py
+    trainer: SiteGWASTrainer
+    gwas_chunk_size: 512
+    qq_max_points: 250000
+  comm_configs:
+    compressor_configs:
+      enable_compression: false
+
+server_configs:
+  num_clients: 5
+  scheduler: SyncScheduler
+  scheduler_kwargs:
+    same_init_model: true
+  aggregator_path: ./resources/configs/gwas/meta_analysis_aggregator.py
+  aggregator: MetaAnalysisAggregator
+  aggregator_kwargs:
+    output_dir: ./GA4GH_Demo/server/output
+    variant_bim_path: ./resources/configs/gwas/sites-data/EUR.synthetic.100k.ld.maf.bim
+    qq_max_points: 250000
+  num_global_epochs: 4
+  logging_output_dirname: ./GA4GH_Demo/server/output/logs
+  logging_output_filename: appfl_meta_server
+  comm_configs:
+    tes_configs:
+      file_storage: "s3"
+      file_storage_kwargs:
+        s3_bucket: "appfl-test-demo-bkt"
+        s3_region: "us-east-1"
+        presigned_url_expiry: 3600

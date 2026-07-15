@@ -1,0 +1,105 @@
+name: Release
+
+# Build and publish the tensorsl distribution to PyPI. Triggered by a `vX.Y.Z`
+# tag, which scripts/release.sh creates after bumping the version and changelog.
+# A maintainer-pushed tag is the only trigger; `workflow_dispatch` builds the
+# artifacts for inspection but never publishes.
+#
+# The build is pure Rust (nalgebra, no system BLAS), so the wheels are
+# self-contained: one abi3 wheel per platform covers Python 3.9+.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  wheels:
+    name: Wheel ${{ matrix.platform.os }}-${{ matrix.platform.target }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { runner: ubuntu-latest,  target: x86_64,  os: linux }
+          - { runner: ubuntu-latest,  target: aarch64, os: linux }
+          # Both macOS wheels build on the arm64 runner (plentiful); the x86_64
+          # one cross-compiles, avoiding the scarce/queued Intel runners.
+          - { runner: macos-14,       target: x86_64,  os: macos }
+          - { runner: macos-14,       target: aarch64, os: macos }
+          - { runner: windows-latest, target: x64,     os: windows }
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --out dist -m tsl-py/Cargo.toml
+          target: ${{ matrix.platform.target }}
+          manylinux: auto
+          sccache: "true"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-${{ matrix.platform.os }}-${{ matrix.platform.target }}
+          path: dist/
+
+  sdist:
+    name: sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist -m tsl-py/Cargo.toml
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-sdist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: [wheels, sdist]
+    # Publish only for real tags, never for manual dispatch builds.
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # PyPI Trusted Publishing (OIDC) — no stored token
+      contents: write   # create the GitHub Release
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      # Guard against a forgotten bump: the built version must equal the tag.
+      - name: Check version matches tag
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          # sdist is <normalized-name>-<version>.tar.gz; strip the name prefix.
+          built="$(basename dist/*.tar.gz .tar.gz | sed -E 's/^[^-]+-//')"
+          echo "tag=$tag built=$built"
+          [ "$tag" = "$built" ] || { echo "::error::tag $tag != built $built"; exit 1; }
+
+      # skip-existing keeps a re-pushed or moved tag idempotent: already-uploaded
+      # files are left in place instead of failing the job on a duplicate version.
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: dist/*

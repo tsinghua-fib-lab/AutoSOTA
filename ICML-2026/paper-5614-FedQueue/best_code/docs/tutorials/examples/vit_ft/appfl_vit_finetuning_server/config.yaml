@@ -1,0 +1,46 @@
+# General client configurations
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "ViTFineTuningTrainer"
+    trainer_path: "./resources/vit_ft_trainer.py"
+    mode: "step"
+    num_local_steps: 10
+    optim: "Adam"
+    optim_args:
+      lr: 0.001
+      weight_decay: 0.0
+    # Loss function
+    loss_fn: "CrossEntropyLoss"
+    # Client validation
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric.py"
+    metric_name: "accuracy"
+    # Data loader
+    train_batch_size: 1
+    val_batch_size: 1
+    train_data_shuffle: True
+    val_data_shuffle: False
+  model_configs:
+    model_path: "./resources/vit.py"
+    model_name: "get_vit"
+
+# Server specific configurations
+server_configs:
+  num_clients: 1
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  device: "cpu"
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 1048576
+      use_ssl: False

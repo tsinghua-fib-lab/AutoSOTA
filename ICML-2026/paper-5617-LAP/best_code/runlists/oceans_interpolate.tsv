@@ -1,0 +1,7 @@
+# Oceans (small vortex, N=111) interpolation: 3 seeds, holdouts at indices 1, 3, 5, 7.
+# RUNS_DIR=oceans_interpolate sbatch --array=0-2 scripts/sbatch_run.sbatch runlists/oceans_interpolate.tsv
+# All hyperparameters live in configs/models/oceans_interpolate.yaml.
+
+oceans_interp	configs/data/oceans.yaml	configs/models/oceans_interpolate.yaml	repro_s0	0	--holdout-marginals 1 3 5 7	--set wandb_tags=oceans_interpolate,s0
+oceans_interp	configs/data/oceans.yaml	configs/models/oceans_interpolate.yaml	repro_s1	1	--holdout-marginals 1 3 5 7	--set wandb_tags=oceans_interpolate,s1
+oceans_interp	configs/data/oceans.yaml	configs/models/oceans_interpolate.yaml	repro_s2	2	--holdout-marginals 1 3 5 7	--set wandb_tags=oceans_interpolate,s2

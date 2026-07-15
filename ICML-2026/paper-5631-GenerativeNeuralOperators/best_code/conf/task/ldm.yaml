@@ -1,0 +1,97 @@
+# @package _global_
+# Base latent diffusion model task configuration
+# Can be overridden by dataset-specific configs (e.g., darcy/ldm.yaml, ks/ldm.yaml)
+defaults:
+  # Diffusion model selection: override in dataset-specific configs
+  # Options: cond_unet1d, cond_unet2d
+  - /model@ldm.model: ???
+  - /optimizer@ldm.optimizer: adamw
+  - /optimizer@autoencoder.optimizer: adamw
+  # Autoencoder selection: override in dataset-specific configs
+  # Options: encoder1d/decoder1d for 1D, encoder2d/decoder2d for 2D
+  - /model@autoencoder.encoder: ???
+  - /model@autoencoder.decoder: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: ldm
+
+evaluation:
+  mode: ???
+
+# Model name (override in dataset-specific configs)
+ae_model_name: ???
+
+# Stage: LDM training loop (latent diffusion model)
+training_ldm:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+# Stage: Autoencoder training (y-space)
+training_ae:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+# Autoencoder stage config (train if missing, or load from checkpoint)
+autoencoder:
+  # If set, the AE is loaded from this checkpoint (and NOT trained).
+  # Conditioning in `cond.mode: shared_ae` uses this same (possibly pretrained) AE encoder.
+  pretrained_ckpt: null
+
+  # VAE parameters
+  double_z: true
+  kl_weight: 1e-6
+
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${training_ae.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+
+# Conditioning path for LDM (x -> z_x).
+# Choose one:
+# - shared_ae: use the (possibly pretrained) target AE encoder (frozen) for conditioning
+# - learned_embedder: learn an encoder-only condition embedder jointly with LDM
+cond:
+  mode: shared_ae  # shared_ae | learned_encoder
+
+  # Used only when mode=learned_encoder
+  encoder: null  # must include encoder.z_channels
+  pretrained_ckpt: null  # optional warm-start for the encoder weights only
+  double_z: ${autoencoder.double_z}
+
+ldm:
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${training_ldm.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+  # model/optimizer are selected via defaults and placed under `ldm.*`
+  # The diffusion backbone runs on AE latents, so set its resolution to latent H/W.
+  T: 10
+  samples_per_example: 8
+  ema_decay: 0.999
+  test_samples_per_example: null
+  rollout_k_chunk: 8
+  rollout_traj_chunk: null
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+

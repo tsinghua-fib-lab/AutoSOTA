@@ -1,0 +1,134 @@
+# Disagreement-Aware Human Evaluation for AI Agents
+
+A Python implementation of a disagreement-aware evaluation pipeline for AI agents that properly handles annotator disagreement and uncertainty.
+
+## Overview
+
+Human evaluation of AI agents is challenging because annotators disagree. This project implements three scoring methods:
+
+1. **Majority Vote (Baseline)**: Simple majority vote, ignoring disagreement
+2. **Dawid-Skene (Hard)**: EM algorithm initialized with majority vote labels
+3. **Posterior Expected Credit (PEC)**: Probabilistic scoring using learned annotator models
+
+The key insight is that instead of discarding disagreement through majority voting, we can model it to:
+- Learn which annotators are reliable
+- Identify which items are inherently ambiguous
+- Compute probabilistic scores that reflect uncertainty
+
+## Data Format
+
+Your annotation data should be in CSV format with these columns:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `item_id` | string | Unique identifier for each (task, agent, output) triple |
+| `agent_id` | string | Which agent produced this output |
+| `annotator_id` | string | Which annotator provided the label |
+| `label` | integer | Numeric label (e.g., 0=incorrect, 1=correct for binary; 0,1,2 for ternary) |
+
+Example:
+```csv
+item_id,agent_id,annotator_id,label
+task1_agent1_out1,agent1,ann_A,1
+task1_agent1_out1,agent1,ann_B,1
+task1_agent1_out1,agent1,ann_C,0
+```
+
+Place your CSV files in `data/processed/`.
+
+## How to Run
+
+### 1. Create virtual environment
+
+```bash
+cd disagreement-eval
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Place your CSV files in `data/processed/`
+
+### 4. Run the pipeline
+
+```bash
+python run_evaluation.py --data-dir data/processed --output-dir results
+```
+
+## Scoring Methods Explained
+
+### Majority Vote
+
+The simplest baseline: for each item, take the most common label.
+
+### Dawid-Skene (Hard)
+
+The Dawid-Skene model uses EM to learn:
+- A confusion matrix π_r for each annotator r
+- The distribution over true labels for each item
+
+"Hard" initialization means starting from majority vote labels.
+
+### Posterior Expected Credit (PEC)
+
+Similar to Dawid-Skene but:
+- Uses uniform/soft initialization
+- Computes expected credit using posterior probabilities
+
+For each item i, the credit is:
+```
+credit(i) = Σ_c γ_ic × value(c)
+```
+
+Where γ_ic is P(true label = c | observations) and value(c) is the numeric value for class c (e.g., 0.0, 0.5, 1.0 for incorrect/partial/correct).
+
+## Outputs
+
+### Agent Scores Comparison
+
+| Agent | MV Score | DS Score | PEC Score | Δ(PEC-MV) |
+|-------|----------|----------|-----------|-----------|
+| agent_A | 0.82 | 0.85 | 0.84 | +0.02 |
+| agent_B | 0.65 | 0.61 | 0.62 | -0.03 |
+
+### Annotator Quality
+
+| Annotator | Accuracy | Leniency | Strictness |
+|-----------|----------|----------|------------|
+| ann_1 | 0.92 | 0.15 | 0.08 |
+| ann_3 | 0.71 | 0.45 | 0.12 |
+
+### Item Ambiguity
+
+Items where annotators genuinely disagree:
+
+| Item ID | Ambiguity | Confidence |
+|---------|-----------|------------|
+| item_42 | 0.45 | 0.55 |
+| item_17 | 0.38 | 0.62 |
+
+## Mathematical Details
+
+### EM Algorithm
+
+**E-step**: For each item i, compute posterior over true labels:
+```
+γ_ic = P(z_i = c | {y_ir}) ∝ μ_c × Π_r π_r[c, y_ir]
+```
+
+**M-step**: Update parameters:
+```
+μ_c = (1/N) × Σ_i γ_ic
+π_r[c, o] = (Σ_{i: y_ir = o} γ_ic + β - 1) / Σ_o' (Σ_{i: y_ir = o'} γ_ic + β - 1)
+```
+
+### Class Values
+
+For scoring, we map labels to numeric values:
+- Binary (2 classes): 0 → 0.0, 1 → 1.0
+- Ternary (3 classes): 0 → 0.0, 1 → 0.5, 2 → 1.0

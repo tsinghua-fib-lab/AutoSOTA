@@ -1,0 +1,59 @@
+# configs/models/oceans_forecast.yaml
+# WLM training config for forecasting the big ocean vortex (N=400, T=11).
+
+device: cuda
+
+# Eval mode: forecast on the last marginal
+eval_mode: forecast
+train_fraction: 0.91     # trains on indices 0..9, evals on 10
+
+# Training
+num_epochs: 50000
+substeps_per_dt: 1
+dt_eval: 0.2
+integrator: v
+loss_type: geom_sinkhorn
+geom_p: 2
+vel: bundle
+
+# Optimizer
+lr: 1.0e-4
+weight_decay: 1.0e-3
+
+# Friction
+friction: 1.0
+learnable_friction: true
+friction_lr: 1.0e-3
+
+# Data features
+use_com: false
+
+# Logging / outputs
+gif_frame_skip: 1
+gif_fps: 1
+ckpt_every: 0
+eval_every: 1000
+gif_every: 0
+
+# Model architecture
+arch: attn_flow
+dropout: 0.0
+attn_heads: 1
+attn_hidden_dim: 256
+attn_layers: 4
+ff_dim: 64
+use_time: false
+
+# Eval / GIF particle counts
+particles_per_batch: null
+particles_eval: null
+particles_gif: 400
+gif_p0_idx: 0
+
+# EMA —
+use_ema: true
+ema_decay: 0.9999
+ema_friction: false
+
+# W&B
+wandb_project: oceans_forecast

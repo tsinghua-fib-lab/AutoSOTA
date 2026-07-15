@@ -1,0 +1,32 @@
+[project]
+name = "curegot"
+version = "0.1.0"
+description = "CUDA-Accelerated Regularized Optimal Transport"
+authors = [
+    {name = "Yixuan Qiu", email = "yixuanq@gmail.com"},
+]
+maintainers = [
+    {name = "Yixuan Qiu", email = "yixuanq@gmail.com"},
+]
+license = "MIT"
+license-files = ["LICENSE.md"]
+readme = "README.md"
+requires-python = ">= 3.11"
+dependencies = [
+    "numpy >= 1.23.0",
+    "cuda-pathfinder >= 1.5.0",
+    "nvidia-cuda-runtime >= 13.0.0",
+    "nvidia-cudss-cu13 >= 0.7.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/yixuan/regot-cuda"
+Issues = "https://github.com/yixuan/regot-cuda/issues"
+
+[build-system]
+requires = ["torch >= 2.10", "pybind11 ~= 3.0.0", "requests ~= 2.32.0", "setuptools >= 80.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel]
+# Only build on CPython
+build = "cp*"

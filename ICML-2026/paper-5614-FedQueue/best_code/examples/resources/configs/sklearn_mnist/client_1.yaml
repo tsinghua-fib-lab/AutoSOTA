@@ -1,0 +1,22 @@
+client_id: "Client1"
+
+train_configs:
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# model_configs is omitted — the server sends the model source via get_configuration(),
+# and the client recreates the model from it automatically in load_config().
+
+data_configs:
+  dataset_path: "./resources/dataset/mnist_dataset_flat.py"
+  dataset_name: "get_mnist_flat"
+  dataset_kwargs:
+    num_clients: 2
+    client_id: 0
+    partition_strategy: "iid"
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

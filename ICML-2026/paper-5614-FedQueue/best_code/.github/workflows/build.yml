@@ -1,0 +1,109 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.11"]
+        mpi: ['openmpi']
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Free up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        df -h
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up MPI ${{ matrix.mpi }}
+      uses: mpi4py/setup-mpi@v1
+      with:
+          mpi: ${{ matrix.mpi }}
+    - name: Install package and dependencies
+      run: |
+        sudo apt install libopenmpi-dev
+        python -m pip install --upgrade pip
+        python -m pip install --no-cache-dir flake8
+        python -m pip install --no-cache-dir -e ".[dev,examples,mpi]"
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors
+        flake8 . --count --select=E9,F63,F7 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test pytest with MPI
+      run: |
+        mpirun -n 2 python3 -m pytest --with-mpi
+
+  # polaris:
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #   - name: Trigger GitLab pipeline and monitor status
+  #     run: |
+  #       # Trigger the GitLab pipeline
+  #       echo "Triggering GitLab pipeline..."
+  #       if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+  #         COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+  #       else
+  #         COMMIT_SHA="${{ github.sha }}"
+  #       fi
+  #       response=$(curl -s -X POST --fail \
+  #         -F token=${{ secrets.ALCF_GITLAB_CI_TOKEN }} \
+  #         -F ref=main \
+  #         -F variables[TRIGGER_GITHUB_SHA]=$COMMIT_SHA \
+  #         https://gitlab-ci.alcf.anl.gov/api/v4/projects/171/trigger/pipeline)
+
+  #       echo "Trigger response: $response"
+
+  #       # Extract the pipeline ID from the response
+  #       pipeline_id=$(echo "$response" | jq -r '.id')
+  #       if [ -z "$pipeline_id" ] || [ "$pipeline_id" == "null" ]; then
+  #         echo "Failed to get pipeline ID."
+  #         exit 1
+  #       fi
+
+  #       echo "Pipeline ID: $pipeline_id"
+
+  #       # Poll GitLab until pipeline completes
+  #       while true; do
+  #         echo "Checking pipeline status..."
+  #         status_response=$(curl -s --header "PRIVATE-TOKEN: ${{ secrets.ALCF_GITLAB_CI_STATUS_TOKEN }}" \
+  #           https://gitlab-ci.alcf.anl.gov/api/v4/projects/171/pipelines/$pipeline_id)
+  #         STATUS=$(echo "$status_response" | jq -r '.status')
+  #         echo "Current status: $STATUS"
+
+  #         # Break loop if terminal state reached
+  #         if [[ "$STATUS" == "success" || "$STATUS" == "failed" || "$STATUS" == *cancel* ]]; then
+  #           break
+  #         fi
+
+  #         echo "Pipeline still in progress... waiting 60 seconds"
+  #         sleep 60
+  #       done
+
+  #       # Final status check
+  #       if [ "$STATUS" == "success" ]; then
+  #         echo "✅ GitLab pipeline succeeded."
+  #         exit 0
+  #       else
+  #         echo "❌ GitLab pipeline failed or was canceled (status: $STATUS)."
+  #         exit 1
+  #       fi

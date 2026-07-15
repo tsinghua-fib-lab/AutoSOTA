@@ -1,0 +1,17 @@
+client_id: "Client2"
+train_configs:
+  device: "cpu"
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+data_configs:
+  dataset_path: "./resources/dataset/mnist_dataset.py"
+  dataset_name: "get_mnist"
+  dataset_kwargs:
+    num_clients: 2
+    client_id: 1
+    partition_strategy: "class_noniid"
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

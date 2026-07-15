@@ -1,0 +1,66 @@
+{
+  "input": "evidence/bbob_noisy_probe_decision_accuracy_noisefree_i1-15_B500/decision_points.csv",
+  "loss": {
+    "eps": 1e-12,
+    "name": "raw"
+  },
+  "probe_key": "variance_rel_sd",
+  "selected_threshold": 0.01,
+  "selection": {
+    "criterion": "maximize train_accuracy, tie-break by |pred_berw_rate-label_berw_rate| then smaller threshold",
+    "train_label_berw_rate": 0.4825174825174825
+  },
+  "split": {
+    "test_instances": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "train_instances": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "test": {
+    "confusion": {
+      "accuracy": 0.7017543859649122,
+      "n": 285,
+      "pred_cma_label_cma": 87,
+      "pred_cma_label_berw": 29,
+      "pred_berw_label_cma": 56,
+      "pred_berw_label_berw": 113,
+      "pred_berw_rate": 0.5929824561403508
+    },
+    "regret": {
+      "mean": 385.64264742323115,
+      "median": 0.0,
+      "q90": 6.597002192000004
+    }
+  },
+  "train": {
+    "confusion": {
+      "accuracy": 0.7342657342657343,
+      "n": 143,
+      "pred_cma_label_cma": 45,
+      "pred_cma_label_berw": 9,
+      "pred_berw_label_cma": 29,
+      "pred_berw_label_berw": 60,
+      "pred_berw_rate": 0.6223776223776224
+    },
+    "regret": {
+      "mean": 473.53937446113497,
+      "median": 0.0,
+      "q90": 7.1702352054
+    }
+  }
+}

@@ -1,0 +1,30 @@
+display_name: NCSA Delta CPU
+engine:
+    type: HighThroughputEngine
+    max_workers_per_node: 2
+    worker_debug: False
+
+    address:
+        type: address_by_interface
+        ifname: eth6.560
+
+    provider:
+        type: SlurmProvider
+        partition: cpu
+        account: bbvf-delta-cpu
+
+        launcher:
+            type: SrunLauncher
+
+        # Command to be run before starting a worker
+        # e.g., "module load anaconda3; source activate gce_env"
+        worker_init: "conda activate globus-compute"
+        exclusive: False
+
+        scheduler_options: "#SBATCH --constraint='projects'"
+
+        init_blocks: 1
+        min_blocks: 1
+        max_blocks: 1
+
+        walltime: 00:30:00

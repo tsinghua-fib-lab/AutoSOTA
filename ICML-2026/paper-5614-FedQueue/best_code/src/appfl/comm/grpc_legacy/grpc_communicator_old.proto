@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+service GRPCCommunicatorV0 {
+    rpc GetJob(JobRequest) returns (JobResponse) {}
+    rpc GetTensorRecord(TensorRequest) returns (stream DataBufferV0) {}
+    rpc GetWeight(WeightRequest) returns (WeightResponse) {}
+    rpc SendLearningResults(stream DataBufferV0) returns (Acknowledgment) {}
+}
+
+message Header {
+    uint32 server_id = 1;
+    uint32 client_id = 2;
+}
+
+// Binary data encoding messages such as LearningResults.
+message DataBufferV0 {
+    uint32 size       = 1; // size of this buffer
+    bytes  data_bytes = 2; // data
+}
+
+enum Job {
+    INIT   = 0;
+    WEIGHT = 1;
+    TRAIN  = 2;
+    QUIT   = 3;
+}
+
+enum MessageStatus {
+    OK    = 0;
+    EMPTY = 1;
+}
+
+message Acknowledgment {
+    Header        header = 1;
+    MessageStatus status = 2;
+}
+
+message JobRequest {
+    Header header   = 1;
+    Job    job_done = 3;
+}
+
+message JobResponse {
+    Header header       = 1;
+    uint32 round_number = 2;
+    Job    job_todo     = 3;
+}
+
+message LearningResults {
+    Header                header       = 1;
+    uint32                round_number = 2;
+    float                 penalty      = 3;
+    repeated TensorRecord primal       = 4;
+    repeated TensorRecord dual         = 5;
+}
+
+message TensorRequest {
+    Header header       = 1;
+    string name         = 2;
+    uint32 round_number = 3;
+}
+
+message TensorRecord {
+    string         name       = 1;
+    repeated int32 data_shape = 2;
+    bytes          data_bytes = 3;
+    string         data_dtype = 4;
+}
+
+message WeightRequest {
+    Header header = 1;
+    uint32 size   = 2;
+}
+
+message WeightResponse {
+    Header header = 1;
+    float  weight = 2;
+}

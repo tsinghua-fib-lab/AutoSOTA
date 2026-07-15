@@ -1,0 +1,46 @@
+# configs/models/boids.yaml
+
+seed: 0
+device: cuda
+
+num-epochs: 30000
+
+eval_mode: forecast
+train_fraction: 0.5
+dt_eval: 0.1
+
+substeps_per_dt: 1
+integrator: v
+
+loss_type: geom_sinkhorn
+geom_p: 1
+vel: bundle
+
+lr: 1.0e-4
+
+
+# friction
+friction: 0.00
+learnable_friction: false
+
+# data features
+use_ema: true
+
+# logging / outputs
+gif_frame_skip: 1
+gif_fps: 5
+ckpt_every: 0
+gif_every: 5000
+eval_every: 1000
+
+# model
+arch: attn_flow
+dropout: 0.0
+attn_heads: 4
+attn_hidden_dim: 64
+attn_layers: 4
+ff_dim: 512
+use_time: false
+
+wandb_project: boids
+

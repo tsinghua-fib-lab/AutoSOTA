@@ -1,0 +1,78 @@
+# AutoVSR Configuration
+# Keep this file public-safe: do not commit real API keys.
+# Prefer environment variables such as ZHIPUAI_API_KEY, GOOGLE_API_KEY,
+# OPENROUTER_API_KEY, DASHSCOPE_API_KEY, OPENAI_API_KEY, and ANTHROPIC_API_KEY.
+
+llm:
+  # Default public test configuration.
+  # Provider options: google, openai, azure, openrouter, qwen, anthropic, glm
+  provider: "glm"
+  model: "glm-4.6v-flashx"
+  temperature: 1
+  max_tokens: 4096
+  base_url: "https://open.bigmodel.cn/api/paas/v4/"
+  api_key: "624cbf55af4d410da595ec0f008feae7.KXSI4QpyCAM41zRK"
+
+  # Google Gemini example
+  # provider: "google"
+  # model: "gemini-3-flash-preview"
+  # temperature: 1
+  # max_tokens: 4096
+  # thinking_level: "minimal"
+  # media_resolution: "low"
+  # google_api_key: ""
+
+  # OpenAI or OpenAI-compatible endpoint example
+  # provider: "openai"
+  # model: "gpt-5-mini"
+  # temperature: 1
+  # max_tokens: 4096
+  # base_url: ""
+  # api_key: ""
+
+  # OpenRouter example
+  # provider: "openrouter"
+  # model: "openai/gpt-5-mini"
+  # temperature: 1
+  # max_tokens: 4096
+  # base_url: "https://openrouter.ai/api/v1"
+  # api_key: ""
+
+  # Alibaba Qwen / DashScope compatible endpoint example
+  # provider: "qwen"
+  # model: "qwen3-vl-plus"
+  # temperature: 1
+  # max_tokens: 4096
+  # base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  # api_key: ""
+
+  # Anthropic-compatible endpoint example
+  # provider: "anthropic"
+  # model: "claude-haiku-4-5-20251001"
+  # temperature: 1
+  # max_tokens: 4096
+  # base_url: ""
+  # api_key: ""
+
+pipeline:
+  max_retries: 3
+
+solver:
+  max_steps: 10
+  simplify_result: true
+
+ir:
+  netlist:
+    require_ground: true
+    require_source: true
+    # Public examples include netlists so tests are reproducible.
+    # Set false to force visual netlist extraction from the image.
+    use_provided_netlist: false
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+data:
+  base_path: "data"
+  output_path: "output"

@@ -1,0 +1,22 @@
+real_data_params:
+  model_name: 'cqr'
+  dataset_path: './data/meps/models/quantile_regression/alpha_0.1/meps_21/ages_0_20/'
+  dataset_maj_path: './data/meps/models/quantile_regression/alpha_0.1/meps_20/ages_0_20/'
+
+run_params:
+  # data and model args
+  dataset: 'MEPS_alpha_0.1'
+  age_range: '0-20'
+  # run parameters
+  alpha: []  # This parameter is automatically set when running an experiment with CQR, based on the dataset name.
+  seed: 42
+  n_seeds: 100
+  methods: ['SC', 'SC (synth)', 'SPI']  
+  
+  # size of minority and majority
+  n_cal: 15
+  n_test: 500
+  n_cal_maj: 1000
+  
+  # SPI parameters
+  beta: 0.4

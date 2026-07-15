@@ -1,0 +1,39 @@
+clients:
+  - endpoint_id: "894d635a-f64a-4502-9e42-c6c864672289"  # Replace with your Globus Compute endpoint ID
+    client_id: "Client1"
+    train_configs:
+      # Device [Optional]: default is "cpu"
+      device: "cpu"
+      # Logging [Optional]
+      logging_output_dirname: "./output"
+      logging_output_filename: "client_1_result"
+
+    # Local dataset
+    data_configs:
+      dataset_path: "./resources/dataset/cora_dataset.py"
+      dataset_name: "get_cora"
+      dataset_kwargs:
+        num_clients: 2
+        client_id: 0
+        partition_strategy: "random"  # Options: "random", "label_skew"
+        # alpha: 0.5  # For label_skew strategy (lower = more non-IID)
+        visualization: True
+
+  - endpoint_id: "8c9d7483-b65e-4dd4-a53e-34f93588706e"  # Replace with your Globus Compute endpoint ID
+    client_id: "Client2"
+    train_configs:
+      # Device [Optional]: default is "cpu"
+      device: "cpu"
+      # Logging [Optional]
+      logging_output_dirname: "./output"
+      logging_output_filename: "client_2_result"
+
+    # Local dataset
+    data_configs:
+      dataset_path: "./resources/dataset/cora_dataset.py"
+      dataset_name: "get_cora"
+      dataset_kwargs:
+        num_clients: 2
+        client_id: 1
+        partition_strategy: "random"
+        visualization: False

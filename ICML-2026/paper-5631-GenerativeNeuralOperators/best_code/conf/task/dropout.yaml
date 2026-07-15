@@ -1,0 +1,54 @@
+# @package _global_
+# Base MC-dropout regression task configuration
+# Mirrors conf/task/regression.yaml, but uses run: dropout and adds a `dropout:` block for ensemble settings.
+defaults:
+  - /optimizer: adamw
+  # Model selection: override in dataset-specific configs
+  # Options: fno1d, fno2d, unet1d, unet2d (any regressor that has dropout layers)
+  - /model: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: dropout
+
+evaluation:
+  mode: ???
+
+training:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+# Default dropout rate for FNO (neuralop) models.
+# If you use a non-FNO model, you may need to override/remove this field.
+model:
+  channel_mlp_dropout: 0.2
+
+# MC-dropout ensemble settings (used during evaluation/inference)
+dropout:
+  samples_per_example: 8
+  test_samples_per_example: null
+  rollout_k_chunk: 8
+  rollout_traj_chunk: 16
+  viz_num_trajectories: 3
+  viz_horizon_percentiles: [1, 20, 40, 60, 80, 100]
+
+# Cosine annealing learning rate scheduler
+scheduler:
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${training.epochs}
+    eta_min: 0.0
+  interval: epoch
+  frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+
+
+

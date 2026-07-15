@@ -1,0 +1,52 @@
+appflx_configs:
+  compute_token: <compute_token>
+  experiment_name: APPFLx-Local-Test
+  openid_token: <openid_token>
+  upload_folder: ./data/uploads
+client_configs:
+  model_configs:
+    model_path: model.py
+  train_configs:
+    clip_grad: false
+    clip_norm: N/A
+    clip_value: N/A
+    do_pre_validation: true
+    do_validation: true
+    epsilon: N/A
+    loss_fn_path: loss.py
+    metric_path: metric.py
+    mode: epoch
+    num_local_epochs: 10
+    num_local_steps: N/A
+    optim: SGD
+    optim_args:
+      lr: 0.01
+    send_gradient: false
+    train_batch_size: 1
+    train_data_shuffle: true
+    trainer: VanillaTrainer
+    use_dp: false
+    val_batch_size: 1
+    val_data_shuffle: false
+server_configs:
+  aggregator: FedAvgAggregator
+  aggregator_kwargs:
+    alpha: 0.9
+    client_weights_mode: sample_size
+    gradient_based: false
+    num_clients: 0
+    server_adapt_param: 0.001
+    server_learning_rate: 0.01
+    server_momentum_param_1: 0.9
+    server_momentum_param_2: 0.99
+    staleness_fn: constant
+    staleness_fn_kwargs:
+      a: 0.5
+      b: 0.0
+  device: cpu
+  logging_output_dirname: ./data/uploads/test-id/experiment/logs
+  logging_output_filename: result
+  num_global_epochs: 2
+  scheduler: SyncScheduler
+  scheduler_kwargs:
+    num_clients: 0

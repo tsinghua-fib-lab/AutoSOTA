@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - /task/regression  # Base Regression task config
+  - override /optimizer: adamw
+  - override /model: fno1d
+  - _self_
+
+evaluation:
+  mode: stochastic
+
+training:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+
+

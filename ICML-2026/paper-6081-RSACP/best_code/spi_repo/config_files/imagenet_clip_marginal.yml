@@ -1,0 +1,25 @@
+real_data_params:
+  model_name: 'CLIP-ViT-B-32-laion2B-s34B-b79K'
+  dataset_path: './data/imagenet/models/CLIP-ViT-B-32-laion2B-s34B-b79K/imagenet_train/'
+  dataset_maj_path: './data/imagenet/models/CLIP-ViT-B-32-laion2B-s34B-b79K/sdv5/'
+
+run_params:
+  # data and model args
+  dataset: 'ImageNet_min_subset_maj_gen'
+  # run parameters
+  alpha: [0.02, 0.03, 0.05, 0.1, 0.15, 0.2]
+  seed: 42
+  n_seeds: 100
+ 
+  # methods to run and compare
+  methods: ['SC', 'SC (synth)', 'SPI']
+  class_conditional: false
+ 
+  # size of minority and majority
+  n_cal: 15
+  n_test: 15000  # 500 * 30
+  n_cal_maj: 1000
+  
+  # SPI parameters
+  beta: 0.4
+

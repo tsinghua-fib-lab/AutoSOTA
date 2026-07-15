@@ -1,0 +1,36 @@
+client_configs:
+  train_configs:
+    trainer: "SklearnTrainer"
+    mode: "partial_fit"
+    num_local_epochs: 5
+    partial_fit_classes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    do_validation: True
+    do_pre_validation: True
+
+  model_configs:
+    model_path: "./resources/model/sgd_classifier.py"
+    model_name: "get_sgd_classifier"
+    model_kwargs:
+      n_features: 784   # flat MNIST: 28×28
+      n_classes: 10
+      loss: "log_loss"
+      alpha: 0.0001
+      random_state: 42
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  device: "cpu"
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 1048576
+      use_ssl: False

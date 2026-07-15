@@ -1,0 +1,92 @@
+# ------------------------------
+# Python
+# ------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ------------------------------
+# Virtual environments / env files
+# ------------------------------
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# ------------------------------
+# Jupyter / notebooks
+# ------------------------------
+.ipynb_checkpoints/
+
+# ------------------------------
+# Hydra / experiment outputs
+# ------------------------------
+outputs/
+multirun/
+.hydra/
+
+# Some runs appear under src/ as well
+src/outputs/
+
+# ------------------------------
+# ML training artifacts / logs
+# ------------------------------
+checkpoints/
+datasets/
+wandb/
+wandb_logs/
+*.log
+
+# Local model checkpoints / artifacts (GitHub blocks >100MB)
+src/artifacts/**/model.ckpt
+src/artifacts_param_count/
+
+# ------------------------------
+# Editor / IDE / OS
+# ------------------------------
+.vscode/
+.vscode-server
+.vscode-server/
+.cursor/
+.cursor-server
+.cursor-server/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Cloud IDE / studio state
+.lightning_studio/
+.windsurf-server
+.windsurf-server/
+
+# Auth secrets (never commit)
+.netrc
+
+# ------------------------------
+# Workspace-local dotfiles accidentally in repo root
+# (common in cloud dev environments)
+# ------------------------------
+.bash_history
+.bashrc
+.cache/
+.config/
+.claude/
+.condarc
+
+src/ablation_outputs/

@@ -1,0 +1,66 @@
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "VanillaTrainer"
+    mode: "step"
+    num_local_steps: 100
+    optim: "Adam"
+    optim_args:
+      lr: 0.001
+    # Loss function
+    loss_fn_path: "./resources/loss/celoss.py"
+    loss_fn_name: "CELoss"
+    # Client validation
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric/acc.py"
+    metric_name: "accuracy"
+    # Differential privacy
+    use_dp: False
+    epsilon: 1
+    clip_grad: False
+    clip_value: 1
+    clip_norm: 1
+    # Data loader
+    train_batch_size: 64
+    val_batch_size: 64
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/cnn.py"
+    model_name: "CNN"
+    model_kwargs:
+      num_channel: 1
+      num_classes: 10
+      num_pixel: 28
+
+  comm_configs:
+    compressor_configs:
+      enable_compression: False
+      # Used if enable_compression is True
+      lossy_compressor:  "SZ2Compressor"
+      lossless_compressor: "blosc"
+      error_bounding_mode: "REL"
+      error_bound: 1e-3
+      param_cutoff: 1024
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+    use_secure_agg: True
+    secure_agg_client_weights_mode: "equal" # or "num_examples"
+  device: "cpu"
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 1048576
+      use_ssl: False

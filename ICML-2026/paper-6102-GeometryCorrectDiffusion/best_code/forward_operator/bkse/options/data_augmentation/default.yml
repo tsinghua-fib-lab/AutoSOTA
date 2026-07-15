@@ -1,0 +1,22 @@
+#### general settings
+gpu_ids: [0]
+
+#### network structures
+KernelWizard:
+  pretrained: experiments/pretrained/GOPRO_woVAE.pth
+  input_nc: 3
+  nf: 64
+  front_RBs: 10
+  back_RBs: 20
+  N_frames: 1
+  kernel_dim: 512
+  use_vae: false
+  KernelExtractor:
+    norm: none
+    use_sharp: true
+    n_blocks: 4
+    padding_type: reflect
+    use_dropout: false
+  Adapter:
+    norm: none
+    use_dropout: false

@@ -1,0 +1,71 @@
+# An unique identifier for the head node and workers of this cluster.
+cluster_name: appfl-ray
+
+# Cloud-provider specific configuration.
+provider:
+    type: aws
+    region: us-east-1
+    cache_stopped_nodes: False # if set False terminates the instance when ray down is executed, True: instance stopped not terminated
+    security_group:
+        GroupName: ray_client_security_group
+        IpPermissions:
+            - FromPort: 8265
+              ToPort: 8265
+              IpProtocol: TCP
+              IpRanges:
+                  # Allow traffic only from your local IP address.
+                  - CidrIp: 0.0.0.0/0
+
+# The maximum number of workers nodes to launch in addition to the head node.
+max_workers: 2
+
+available_node_types:
+    ray.head.default:
+        resources: { }
+        # Provider-specific config for this node type, e.g., instance type.
+        # By default Ray auto-configures unspecified fields such as SubnetId and KeyName.
+        # For more documentation on available fields, see
+        # http://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.ServiceResource.create_instances
+        node_config:
+            InstanceType: t3.medium
+            ImageId: 'ami-0dd6adfad4ad37eec' # Deep Learning Base Neuron AMI (Ubuntu 20.04) 20240216
+    ray.worker.worker_1:
+        # The minimum number of worker nodes of this type to launch.
+        # This number should be >= 0. For FL experiment 1 is sufficient.
+        min_workers: 1
+        # The maximum number of worker nodes of this type to launch.
+        # This parameter takes precedence over min_workers. For FL experiment 1 is sufficient.
+        max_workers: 1
+        # Set this to {${client_id} : 1}, client_id from examples/resources/config_ray/mnist/clients.yaml config file
+        # Set it to empty if client task can be assigned randomly to any worker node
+        resources: {Client1: 1}
+        node_config:
+            InstanceType: t3.medium
+            ImageId: 'ami-0dd6adfad4ad37eec' # Deep Learning Base Neuron AMI (Ubuntu 20.04) 20240216
+            InstanceMarketOptions:
+                MarketType: spot  # Configure worker nodes to use Spot Instances
+                SpotOptions:
+                    MaxPrice: '0.05'
+    ray.worker.worker_2:
+        min_workers: 1
+        max_workers: 1
+        resources: {Client2: 1}
+        node_config:
+            InstanceType: t3.medium
+            ImageId: 'ami-0dd6adfad4ad37eec' # Deep Learning Base Neuron AMI (Ubuntu 20.04) 20240216
+            InstanceMarketOptions:
+                MarketType: spot  # Configure worker nodes to use Spot Instances
+                SpotOptions:
+                    MaxPrice: '0.05'
+
+file_mounts: {
+    "/home/ubuntu/APPFL": "../../../APPFL",
+    "/home/ubuntu/resources": "../resources",
+    "/home/ubuntu/run.py": "run.py"
+}
+
+setup_commands:
+    ["conda config --remove channels intel || true",
+     "conda create -n APPFL python=3.10 -y ",
+     'conda activate APPFL && pip install uv && uv pip install ray["default"] && pip install confluent-kafka --prefer-binary && cd APPFL && uv pip install -e ".[examples]"',
+     "(stat $HOME/anaconda3/envs/APPFL/ &> /dev/null && echo 'export PATH=\"$HOME/anaconda3/envs/APPFL/bin:$PATH\"' >> ~/.bashrc) || true"]

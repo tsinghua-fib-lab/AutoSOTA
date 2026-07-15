@@ -1,0 +1,62 @@
+{
+  "run_id": null,
+  "evaluation_mode": "label_generation_only",
+  
+  "model_config": {
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "sae_release": "qwen25-14b-fifty-thousand-things",
+    "sae_id": "combined_val",
+    "sae_layer_number": 0,
+    "device": "auto",
+    "dtype": "bfloat16"
+  },
+  
+  "reward_config": {
+    "conversation_prompt_template": "",
+    "use_chat_template": false,
+    "conversation_system_message": null,
+    "max_new_tokens": 100,
+    "temperature": 0.0,
+    "do_sample": false,
+    "top_p": 1.0,
+    "aggressive_memory_cleanup": true,
+    "num_debug_samples": 4,
+    "full_debug_mode": false
+  },
+  
+  "label_generator_config": {
+    "num_soft_tokens": 1,
+    "template": "<|im_start|>user\nWhat is the meaning of \"<|fim_pad|>\"?<|im_end|>\n<|im_start|>assistant\nThe meaning of \"<|fim_pad|>\" is \"",
+    "max_generation_length": 30,
+    "which_vector": "decoder",
+    "adapter_checkpoint_path": null,
+    "normalize_vectors": true,
+    "temperature": 0.0,
+    "do_sample": false,
+    "top_p": 1.0,
+    "repetition_penalty": 1.0,
+    "strip_last_quote": true,
+    "reserved_token": "<|fim_pad|>"
+  },
+  
+  "master_json_path": "outputs/qwen_scaling/qwen25_14b_combined_val_119136_master.json",
+  "master_json_dataset_name": "qwen25-14b-fifty-thousand-things-combined-val",
+  "master_json_layer": 0,
+  "master_json_split": "val",
+  "data_volume_path": "./",
+  
+  "max_latents": null,
+  "specific_latent_indices": null,
+  
+  "scale_values": [0.5, 1.0, 2.0, 4.0, 8.0, 16.0],
+  "num_labels_per_scale": 1,
+  "num_reward_samples": 1,
+  
+  "label_generation_batch_size": 256,
+  "reward_evaluation_batch_size": 16,
+  
+  "num_parallel_instances": 1,
+  "checkpoint_every_n_latents": 1000000,
+  
+  "output_volume_path": "./results/qwen_scaling"
+}

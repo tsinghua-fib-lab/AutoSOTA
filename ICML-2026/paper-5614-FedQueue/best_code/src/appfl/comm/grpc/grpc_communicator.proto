@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+service GRPCCommunicator {
+  rpc GetConfiguration (ConfigurationRequest) returns (ConfigurationResponse) {}
+  rpc GetGlobalModel (GetGlobalModelRequest) returns (stream DataBuffer) {}
+  rpc UpdateGlobalModel (stream DataBuffer) returns (stream DataBuffer) {}
+  rpc InvokeCustomAction (stream DataBuffer) returns (stream DataBuffer) {}
+}
+
+// Binary data buffer for transmitted data with larger size
+// i.e., data that may exceed the maximum message size
+message DataBuffer {
+  bytes  data_bytes = 1; // data
+}
+
+// Header to include for all client requests for server to identify the client
+message ClientHeader {
+  string client_id = 1;
+}
+
+// Header to include for all server responses for client to know the server status
+message ServerHeader {
+  ServerStatus status = 1;
+}
+
+// Status code for the server
+enum ServerStatus {
+  RUN = 0;
+  DONE = 1;
+  ERROR = 2;
+}
+
+message ConfigurationRequest {
+  ClientHeader header = 1;
+  string meta_data = 2;
+}
+
+message ConfigurationResponse {
+  ServerHeader header = 1;
+  string configuration = 2;
+}
+
+message GetGlobalModelRequest {
+  ClientHeader header = 1;
+  string meta_data = 2;
+}
+
+message GetGlobalModelRespone {
+  ServerHeader header = 1;
+  bytes global_model = 2;
+  string meta_data = 3;
+}
+
+message UpdateGlobalModelRequest {
+  ClientHeader header = 1;
+  bytes local_model = 2;
+  string meta_data = 3;
+}
+
+message UpdateGlobalModelResponse {
+  ServerHeader header = 1;
+  bytes global_model = 2;
+  string meta_data = 3;
+}
+
+message CustomActionRequest {
+  ClientHeader header = 1;
+  string action = 2;
+  string meta_data = 3;
+}
+
+message CustomActionResponse {
+  ServerHeader header = 1;
+  string results = 2;
+}

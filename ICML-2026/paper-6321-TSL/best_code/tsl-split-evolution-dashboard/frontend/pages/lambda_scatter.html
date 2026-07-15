@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Lambda scatter · tslviz</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link">Combined products</a>
+            <a href="/pages/components.html" class="nav-link">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link active">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>&lambda;<sup>+</sup> vs &lambda;<sup>-</sup> per product</h2>
+            <p class="plot-desc">For each rank-1 product in a stage, plot its positive
+                and negative scaling factors &lambda;<sup>+</sup> and &lambda;<sup>-</sup>.
+                Useful for spotting outliers and comparing the relative weight of products.</p>
+
+            <div class="controls">
+                <div class="control"><label>Run</label><select id="runSelect"></select></div>
+                <div class="control"><label>Stage</label><select id="epochSelect"></select></div>
+                <div class="control"><label>Max products</label><input type="number" id="maxTrees" value="500" min="1"
+                        max="2000" /></div>
+                <div class="control"><label>Log axes</label><input type="checkbox" id="logScaleToggle" /></div>
+            </div>
+
+            <div class="chart" id="lambdaScatter"></div>
+            <div class="chart" id="lambdaHistogram"></div>
+        </section>
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/component_page_shared.js"></script>
+    <script src="/js/pages/lambda_scatter_helpers.js"></script>
+    <script src="/js/pages/lambda_scatter.js"></script>
+</body>
+
+</html>

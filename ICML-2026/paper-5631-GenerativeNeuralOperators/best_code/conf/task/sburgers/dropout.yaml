@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - /task/dropout
+  - override /optimizer: adamw
+  - override /model: fno1d
+  - _self_
+
+# SBurgers provides set-valued targets via `return_stochastic: true`
+evaluation:
+  mode: stochastic
+
+training:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+
+# Enable dropout inside neuralop's FNO channel-MLP.
+# This is what MC-dropout will sample at inference time.
+model:
+  channel_mlp_dropout: 0.2
+
+dropout:
+  samples_per_example: 32
+  test_samples_per_example: 32
+
+

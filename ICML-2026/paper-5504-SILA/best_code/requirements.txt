@@ -1,0 +1,37 @@
+# Full dependency list (for development).
+# For lighter installs, use: pip install -e .          (core only)
+#                         or: pip install -e ".[sae]"   (+ sae-lens)
+#                         or: pip install -e ".[all]"   (everything)
+#
+# Core dependencies
+torch>=2.0.0
+transformers>=4.44.0
+accelerate>=0.20.0
+numpy>=1.24.0
+huggingface-hub>=0.20.0
+datasets>=2.0.0
+safetensors>=0.3.0
+pyyaml>=6.0
+tqdm>=4.65.0
+requests>=2.31.0
+
+# For SAE loading and management
+sae-lens>=4.0.0
+nnsight>=0.4.0,<0.5.0  # For SAE activation tracing in generation scoring eval
+
+# Logging and experiment tracking (choose one)
+wandb>=0.16.0
+# mlflow>=2.0.0  # Alternative to wandb
+
+# For evaluation scripts
+matplotlib>=3.5.0
+seaborn>=0.12.0
+sentence-transformers>=2.0.0  # For embedding retrieval eval
+httpx>=0.24.0  # For async HTTP requests in TwoHopFact filtering
+
+# For dataset generation (Wikipedia topics)
+anthropic>=0.39.0  # For Anthropic Batch API
+python-dotenv>=1.0.0  # For loading API keys from .env
+
+# Optional: Modal for cloud execution
+# modal  # Uncomment to enable Modal support

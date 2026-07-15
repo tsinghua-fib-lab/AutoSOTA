@@ -1,0 +1,47 @@
+# configs/models/gf_sde_learnable_friction.yaml
+# WLM with learnable friction, started from rest (v0=0). Models the Langevin/
+# overdamped regime where v0 is unknown and friction is fit from data.
+
+eval_mode: forecast
+train_fraction: 0.5
+
+# Training
+num_epochs: 100000
+substeps_per_dt: 1
+dt_eval: 0.002
+integrator: v
+loss_type: geom_sinkhorn
+geom_p: 2
+vel: zero
+
+# Optimizer
+lr: 1.0e-4
+
+# Friction: learnable
+friction: 1.0
+learnable_friction: true
+friction_lr: 1.0e-2
+
+# Model architecture
+arch: attn_flow
+dropout: 0.0
+attn_heads: 4
+attn_hidden_dim: 64
+attn_layers: 4
+ff_dim: 512
+use_time: false
+
+# EMA
+use_ema: true
+ema_decay: 0.999
+ema_friction: false
+
+# Logging
+gif_frame_skip: 1
+gif_fps: 1
+ckpt_every: 10000
+gif_every: 10000
+eval_every: 2000
+
+# W&B
+wandb_project: gf_sde

@@ -1,0 +1,71 @@
+{
+  "baselines": {
+    "always_berw": {
+      "accuracy": 0.56,
+      "n_non_ties": 50,
+      "pred_berw_label_berw": 28,
+      "pred_berw_label_cma": 22,
+      "pred_berw_rate": 1.0,
+      "pred_cma_label_berw": 0,
+      "pred_cma_label_cma": 0
+    },
+    "always_cma": {
+      "accuracy": 0.44,
+      "n_non_ties": 50,
+      "pred_berw_label_berw": 0,
+      "pred_berw_label_cma": 0,
+      "pred_berw_rate": 0.0,
+      "pred_cma_label_berw": 28,
+      "pred_cma_label_cma": 22
+    }
+  },
+  "counts": {
+    "n_missing_misranking_probe": 0,
+    "n_missing_variance_probe": 0,
+    "n_ties_outcome": 0,
+    "n_total": 50
+  },
+  "misranking_probe": {
+    "accuracy": 0.56,
+    "n_non_ties": 50,
+    "pred_berw_label_berw": 28,
+    "pred_berw_label_cma": 22,
+    "pred_berw_rate": 1.0,
+    "pred_cma_label_berw": 0,
+    "pred_cma_label_cma": 0
+  },
+  "outputs": {
+    "decision_points_csv": "evidence\\application_rl_pendulum_gaussian_decision\\decision_points.csv"
+  },
+  "setup": {
+    "algo_berw": "BERW-HeteroRobust",
+    "algo_cma": "CMA-ES-sep",
+    "higher_is_better": false,
+    "instance_col": "seed",
+    "key_cols": [
+      "seed"
+    ],
+    "metric": "post_true",
+    "probe_thresholds": {
+      "misranking_rd": 0.12,
+      "variance_rel_sd": 0.05
+    },
+    "probe_values_csv": "evidence\\application_rl_pendulum_gaussian\\probe_values.csv",
+    "runs_csv": [
+      "evidence\\application_rl_pendulum_gaussian\\runs.csv"
+    ],
+    "tie_tolerance": {
+      "atol": 0.0,
+      "rtol": 0.0
+    }
+  },
+  "variance_probe": {
+    "accuracy": 0.56,
+    "n_non_ties": 50,
+    "pred_berw_label_berw": 28,
+    "pred_berw_label_cma": 22,
+    "pred_berw_rate": 1.0,
+    "pred_cma_label_berw": 0,
+    "pred_cma_label_cma": 0
+  }
+}

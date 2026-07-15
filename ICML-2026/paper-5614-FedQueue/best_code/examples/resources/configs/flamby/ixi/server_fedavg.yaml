@@ -1,0 +1,45 @@
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "VanillaTrainer"
+    mode: "step"
+    num_local_steps: 50
+    optim: "AdamW"
+    optim_args:
+      lr: 0.001
+    # Loss function
+    loss_fn_path: "./resources/loss/flamby_ixi.py"
+    loss_fn_name: "BaselineLoss"
+    # Client validation
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric/flamby_ixi.py"
+    metric_name: "metric"
+    # Differential privacy
+    use_dp: False
+    # Data loader
+    train_batch_size: 2
+    val_batch_size: 2
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/unet.py"
+    model_name: "Baseline"
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: 0.0.0.0:50051
+      max_message_size: 1048576
+      use_ssl: False

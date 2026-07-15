@@ -1,0 +1,45 @@
+[project]
+name = "oc-verification"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "dtai-veritas==0.2.3",
+    "fsspec[sftp]>=2025.10.0",
+    "gurobipy>=12.0.3",
+    "numba>=0.60.0",
+    "numcodecs>=0.12.1",
+    "numpy<2.0.0",
+    "pandas>=2.3.3",
+    "prada",
+    "scipy>=1.13.1",
+    "tqdm>=4.67.3",
+    "zarr>=2.18.2",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv.sources]
+prada = { git = "https://github.com/laudv/prada.git" }
+
+[dependency-groups]
+dev = [
+    "deptry>=0.23.1",
+    "paramiko>=4.0.0",
+]
+experiments = [
+    "click>=8.1.8",
+    "dotenv>=0.9.9",
+]
+notebooks = [
+    "ipykernel>=6.31.0",
+    "jinja2>=3.1.6",
+    "matplotlib>=3.9.4",
+    "seaborn>=0.13.2",
+]

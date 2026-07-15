@@ -1,0 +1,71 @@
+name: Benchmarks
+
+# Criterion micro-benchmarks for the core grid-tensor fit. This does NOT gate
+# the build — it measures the PR and its merge base on the SAME runner and
+# reports the delta, so cross-runner hardware/neighbour noise cancels out.
+on:
+  pull_request:
+  workflow_dispatch:
+
+# A perf run on a superseded commit is wasted; drop it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    name: Criterion (PR vs base)
+    runs-on: ubuntu-latest
+    # Pin rayon width so timings are reproducible: it does the real parallel
+    # work at a fixed width on both PR and base.
+    env:
+      RAYON_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # need the merge-base commit, not just HEAD
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install critcmp
+        run: cargo install critcmp --locked
+
+      # 1. Measure the PR head, saved as baseline "pr".
+      - name: Benchmark PR head
+        run: cargo bench -p tsl_rust --bench fit -- --save-baseline pr
+
+      # 2. Measure the merge base, saved as baseline "base", on this same
+      #    runner. The bench harness (benches/fit.rs + the [[bench]] entry) is
+      #    grafted from the PR head so this still works when the base commit
+      #    predates the benchmark — that first run just won't have a "base" to
+      #    compare against, which the next step handles.
+      - name: Benchmark merge base
+        continue-on-error: true
+        run: |
+          git checkout --detach "${{ github.event.pull_request.base.sha }}"
+          git checkout "${{ github.event.pull_request.head.sha }}" -- benches Cargo.toml
+          cargo bench -p tsl_rust --bench fit -- --save-baseline base
+          git checkout --force -
+
+      # 3. Diff the two baselines into the run's job summary (always visible,
+      #    no PR-write permission needed, works for fork PRs).
+      - name: Compare
+        run: |
+          {
+            echo '## Criterion: PR vs base'
+            echo
+            echo '```'
+            if critcmp base pr 2>/dev/null; then
+              :
+            else
+              echo 'No "base" baseline (the merge base predates this benchmark).'
+              echo 'Showing PR-head numbers only:'
+              echo
+              critcmp pr
+            fi
+            echo '```'
+            echo
+            echo '_Same-runner comparison; comment-only, does not gate. Treat <~10% moves as noise._'
+          } >> "$GITHUB_STEP_SUMMARY"

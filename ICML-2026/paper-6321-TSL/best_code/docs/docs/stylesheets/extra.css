@@ -1,0 +1,133 @@
+/* Custom header color: dark slate (slate-900), so the blue logo stands out
+   instead of blending into a blue/indigo bar. Activated by `primary: custom`
+   in mkdocs.yml. Links/accents stay indigo. */
+:root {
+  --md-primary-fg-color: #0f172a;        /* header background — slate-900 */
+  --md-primary-fg-color--light: #1e293b; /* slate-800 */
+  --md-primary-fg-color--dark: #0b1120;
+  --md-primary-bg-color: #ffffff;        /* text/icons on the header */
+  --md-primary-bg-color--light: rgba(255, 255, 255, 0.7);
+}
+
+/* In-content links: light blue so hyperlinks are clearly distinguishable
+   (the slate-900 primary override would otherwise make them render as body text).
+   Material sets --md-typeset-a-color on <body> via the color-scheme selectors, so the
+   override has to live there too — a :root rule is shadowed by the nearer <body> value. */
+[data-md-color-scheme="default"] {
+  --md-typeset-a-color: #2f81f7;
+}
+[data-md-color-scheme="slate"] {
+  --md-typeset-a-color: #58a6ff;
+}
+.md-typeset a:hover {
+  text-decoration: underline;
+}
+
+/* White rounded badge behind the logo so it reads on the dark header. */
+.md-header__button.md-logo {
+  padding: 0.2rem;
+}
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  background: #fff;
+  border-radius: 50%;
+  padding: 0.22rem;
+  box-sizing: content-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* ---- API reference: kind pills ----
+   Rendered via ::before keyed on the heading id / TOC href prefix, so the tag
+   shows as a rounded pill in BOTH the page heading and the right-hand table of
+   contents (the toc strips inline HTML, so a <span> would not survive there). */
+
+/* shared pill chrome */
+:is(h2, h3)[id^="cls-"]::before,
+:is(h2, h3)[id^="meth-"]::before,
+:is(h2, h3)[id^="cmeth-"]::before,
+:is(h2, h3)[id^="fn-"]::before,
+:is(h2, h3)[id^="dc-"]::before,
+.md-nav__link[href^="#cls-"]::before,
+.md-nav__link[href^="#meth-"]::before,
+.md-nav__link[href^="#cmeth-"]::before,
+.md-nav__link[href^="#fn-"]::before,
+.md-nav__link[href^="#dc-"]::before {
+  display: inline-block;
+  font-family: var(--md-code-font-family);
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  border-radius: 0.7em;
+  vertical-align: middle;
+}
+
+/* size: scales with the heading; fixed-small in the toc */
+:is(h2, h3)[id^="cls-"]::before,
+:is(h2, h3)[id^="meth-"]::before,
+:is(h2, h3)[id^="cmeth-"]::before,
+:is(h2, h3)[id^="fn-"]::before,
+:is(h2, h3)[id^="dc-"]::before {
+  font-size: 0.56em;
+  padding: 0.1em 0.55em;
+  margin-right: 0.5em;
+  position: relative;
+  top: -0.12em;
+}
+.md-nav__link[href^="#cls-"]::before,
+.md-nav__link[href^="#meth-"]::before,
+.md-nav__link[href^="#cmeth-"]::before,
+.md-nav__link[href^="#fn-"]::before,
+.md-nav__link[href^="#dc-"]::before {
+  font-size: 0.58rem;
+  padding: 0.04rem 0.4rem;
+  margin-right: 0.4rem;
+}
+
+/* per-kind label + colors */
+:is(h2, h3)[id^="cls-"]::before,
+.md-nav__link[href^="#cls-"]::before   { content: "class";       background: rgba(99, 102, 241, 0.18); color: #6366f1; }
+:is(h2, h3)[id^="meth-"]::before,
+.md-nav__link[href^="#meth-"]::before  { content: "method";      background: rgba(59, 130, 246, 0.18); color: #3b82f6; }
+:is(h2, h3)[id^="cmeth-"]::before,
+.md-nav__link[href^="#cmeth-"]::before { content: "classmethod"; background: rgba(13, 148, 136, 0.18); color: #0d9488; }
+:is(h2, h3)[id^="fn-"]::before,
+.md-nav__link[href^="#fn-"]::before    { content: "function";    background: rgba(34, 197, 94, 0.18);  color: #16a34a; }
+:is(h2, h3)[id^="dc-"]::before,
+.md-nav__link[href^="#dc-"]::before    { content: "dataclass";   background: rgba(168, 85, 247, 0.18); color: #9333ea; }
+
+/* Inline kind chip (used outside headings, e.g. the dataclasses note). */
+.api-tag {
+  display: inline-block;
+  font-family: var(--md-code-font-family);
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  padding: 0.1em 0.5em;
+  margin-right: 0.4em;
+  border-radius: 0.6em;
+  vertical-align: middle;
+}
+.api-tag-dataclass { background: rgba(168, 85, 247, 0.18); color: #9333ea; }
+
+/* Figure captions: slightly inset on both sides relative to the figure.
+   Material sets max-width: 24rem by default; override to let captions
+   span nearly the full image width. */
+.md-typeset figure figcaption {
+  max-width: none;
+  width: 96%;
+  margin: 0.5em auto 0;
+}
+
+/* ---- Wider main column ----
+   The content + table-of-contents area is laid out inside `.md-grid`, capped at
+   61rem by default. The two sidebars stay a fixed 12.1rem each, so raising the
+   grid cap pours all the extra width into `.md-content` — the main column ends
+   up several times wider than either sidebar, giving the figures and wide tables
+   room on large screens. Below this width the layout is still fluid, so narrow
+   viewports are unaffected. */
+.md-grid {
+  max-width: 88rem;
+}

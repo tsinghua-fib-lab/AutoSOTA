@@ -1,0 +1,71 @@
+{
+  "baselines": {
+    "always_cma": {
+      "accuracy": 0.46,
+      "n_non_ties": 50,
+      "pred_cma_label_cma": 23,
+      "pred_cma_label_berw": 27,
+      "pred_berw_label_cma": 0,
+      "pred_berw_label_berw": 0,
+      "pred_berw_rate": 0.0
+    },
+    "always_berw": {
+      "accuracy": 0.54,
+      "n_non_ties": 50,
+      "pred_cma_label_cma": 0,
+      "pred_cma_label_berw": 0,
+      "pred_berw_label_cma": 23,
+      "pred_berw_label_berw": 27,
+      "pred_berw_rate": 1.0
+    }
+  },
+  "counts": {
+    "n_missing_misranking_probe": 0,
+    "n_missing_variance_probe": 0,
+    "n_ties_outcome": 0,
+    "n_total": 50
+  },
+  "misranking_probe": {
+    "accuracy": 0.48,
+    "n_non_ties": 50,
+    "pred_cma_label_cma": 4,
+    "pred_cma_label_berw": 7,
+    "pred_berw_label_cma": 19,
+    "pred_berw_label_berw": 20,
+    "pred_berw_rate": 0.78
+  },
+  "outputs": {
+    "decision_points_csv": "evidence/application_lqr_heavytail_control_decision_accuracy/decision_points.csv"
+  },
+  "setup": {
+    "algo_cma": "CMA-ES-sep",
+    "algo_berw": "BERW-HeteroRobust",
+    "higher_is_better": false,
+    "instance_col": "seed",
+    "key_cols": [
+      "seed"
+    ],
+    "metric": "post_mean",
+    "probe_thresholds": {
+      "misranking_rd": 0.12,
+      "variance_rel_sd": 0.05
+    },
+    "probe_values_csv": "evidence/application_lqr_heavytail_control_fixed_budget_resample/probe_values.csv",
+    "runs_csv": [
+      "evidence/application_lqr_heavytail_control_fixed_budget_resample/runs.csv"
+    ],
+    "tie_tolerance": {
+      "atol": 0.0,
+      "rtol": 0.0
+    }
+  },
+  "variance_probe": {
+    "accuracy": 0.54,
+    "n_non_ties": 50,
+    "pred_cma_label_cma": 0,
+    "pred_cma_label_berw": 0,
+    "pred_berw_label_cma": 23,
+    "pred_berw_label_berw": 27,
+    "pred_berw_rate": 1.0
+  }
+}

@@ -1,0 +1,95 @@
+name: Build and upload to PyPI
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+jobs:
+  build_wheels:
+    name: Build wheels and source distribution on Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Used to host cibuildwheel
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.1
+        env:
+          CIBW_BUILD_VERBOSITY: "1"
+
+          # Only build for CPython 3.11~3.13
+          CIBW_BUILD: "cp311-* cp312-* cp313-*"
+
+          # CUDA project -- Linux x86_64
+          CIBW_ARCHS_LINUX: "x86_64"
+
+          # No musllinux / PyPy
+          CIBW_SKIP: "pp* *-musllinux_*"
+
+          # Image that contains manylinux + CUDA Toolkit
+          CIBW_MANYLINUX_X86_64_IMAGE: "ghcr.io/yixuan/regot-cuda-manylinux-cu132:latest"
+
+          # Exclude CUDA libraries in repairing wheels
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >-
+            echo '=== auditwheel show before repair ===' &&
+            auditwheel show {wheel} &&
+            echo '=== auditwheel repair ===' &&
+            auditwheel repair -w {dest_dir} {wheel}
+            --exclude 'libcuda.so*'
+            --exclude 'libcudart.so*'
+            --exclude 'libcublas.so*'
+            --exclude 'libcublasLt.so*'
+            --exclude 'libcudss.so*'
+            --exclude 'libc10*.so*'
+            --exclude 'libtorch*.so*'
+        with:
+          package-dir: .
+          output-dir: wheelhouse
+
+      - name: Build sdist
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --sdist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: curegot-wheels
+          path: wheelhouse/*.whl
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: curegot-sdist
+          path: dist/*.tar.gz
+
+  upload_pypi:
+    name: Upload to PyPI
+    needs:
+      - build_wheels
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    environment: pypi
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: curegot-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist

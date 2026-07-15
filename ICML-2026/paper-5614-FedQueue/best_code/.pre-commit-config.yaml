@@ -1,0 +1,31 @@
+exclude: ^.*_pb2(_grpc)?\.py$  # Global exclude for all hooks
+repos:
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: v6.0.0
+    hooks:
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-yaml
+      - id: check-merge-conflict
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+      - id: pyupgrade
+        args: ["--py38-plus"]
+  - repo: 'https://github.com/codespell-project/codespell'
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        exclude: 'examples/notebook_tutorials/.*\.ipynb|examples/memory_profiling/batch_submission_large\.sh'
+  - repo: 'https://github.com/charliermarsh/ruff-pre-commit'
+    rev: v0.15.21
+    hooks:
+      - id: ruff
+        args:
+          - '--fix'
+          - '--per-file-ignores=examples/notebook_tutorials/**/*.ipynb:F821'
+      - id: ruff-format

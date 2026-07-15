@@ -1,0 +1,57 @@
+# configs/models/oceans_interpolate.yaml
+# WLM training config for interpolating the small ocean vortex (N=111, T=9).
+
+device: cuda
+
+eval_mode: interpolate
+
+# Training
+num_epochs: 50000
+substeps_per_dt: 1
+dt_eval: 0.2
+integrator: v
+loss_type: geom_sinkhorn
+geom_p: 2          
+vel: bundle
+
+# Optimizer
+lr: 1.0e-4
+weight_decay: 1.0e-2
+
+# Friction
+friction: 0.1
+learnable_friction: true
+friction_lr: 1.0e-3
+
+
+# Data features
+use_com: false
+
+# Logging / outputs
+gif_frame_skip: 1
+gif_fps: 1
+ckpt_every: 0
+eval_every: 1000
+gif_every: 0
+
+# Model architecture 
+arch: attn_flow
+dropout: 0.0
+attn_heads: 1
+attn_hidden_dim: 256
+attn_layers: 4
+ff_dim: 64
+use_time: true    
+d_time: 16
+
+particles_per_batch: null
+particles_eval: null
+particles_gif: 111
+
+# EMA 
+use_ema: true
+ema_decay: 0.9999
+ema_friction: false
+
+# W&B
+wandb_project: oceans_interpolate

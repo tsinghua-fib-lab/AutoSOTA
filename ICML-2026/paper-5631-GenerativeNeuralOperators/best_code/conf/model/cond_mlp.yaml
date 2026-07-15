@@ -1,0 +1,27 @@
+_target_: "models.diffusion.cond_mlp.CondMLP"
+model_name: "CondMLP"
+
+# Condition embedder:
+# - Set this from task YAMLs via a defaults entry like:
+#     - /model@dll.model.c_embedder: fno2d_emb
+# - Or disable it entirely via:
+#     dll:
+#       model:
+#         c_embedder: null
+c_embedder: ???
+
+# -----------------------------------------------------------------------------
+# Constructor args (explicit, including defaults)
+# -----------------------------------------------------------------------------
+# NOTE:
+# - `c_dim` is always forced to equal `x_dim` inside the module.
+# - The MLP input is concatenation: [x, c_emb] (so input dim = 2 * x_dim).
+# - FiLM conditioning uses only the time embedding.
+
+# Optional (defaults explicit)
+x_dim: 64
+c_dim: null
+hidden_dims: [512, 512, 512]
+time_emb_dim: 32
+activation: "SiLU"
+dropout: 0.2

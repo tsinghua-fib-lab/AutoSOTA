@@ -1,0 +1,50 @@
+# @package _global_
+# Base PNO (reparameterization + Energy Score) task configuration
+defaults:
+  - /optimizer: adamw
+  # Model selection: override in dataset-specific configs
+  # IMPORTANT: model must output (mu, rho) or 2*C channels for (mu, rho)
+  - /model: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: pno
+
+evaluation:
+  mode: ???
+
+training:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+# PNO settings (reparameterization + Energy Score)
+pno:
+  samples_per_example: 8
+  train_samples_per_example: null
+  test_samples_per_example: null
+  rollout_k_chunk: 8
+  rollout_traj_chunk: 16
+  stochastic_n_chunk: 32
+  stochastic_k_chunk: 4
+  energy_k_chunk: 4
+  energy_s_chunk: 4
+  viz_num_trajectories: 3
+  viz_horizon_percentiles: [1, 20, 40, 60, 80, 100]
+
+# Cosine annealing learning rate scheduler
+scheduler:
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${training.epochs}
+    eta_min: 0.0
+  interval: epoch
+  frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true

@@ -1,0 +1,23 @@
+sample_every: 1000
+name: "sed"
+trainer:
+  accelerator: "auto"
+  benchmark: true
+  max_steps: 500000
+  logger: 
+    class_path: lightning.pytorch.loggers.WandbLogger
+    init_args:
+      project: "sed"  # TODO: check project
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        filename: "{step:06}"
+        verbose: true
+        save_last: true
+        every_n_train_steps: 50000
+        save_top_k: -1
+model:
+  class_path: sed.models.diffusion.sed.SED
+  init_args:
+    diffusion_model_config:
+      use_ddim: True

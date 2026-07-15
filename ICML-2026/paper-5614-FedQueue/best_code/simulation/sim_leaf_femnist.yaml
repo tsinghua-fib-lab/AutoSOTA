@@ -1,0 +1,62 @@
+log_configs:
+  logging_output_dirname: "./log"
+  logging_output_filename: "result"
+  client_logging_output_filename: ""
+
+data_configs:
+  dataset_name: "femnist"
+  dataset_backend: "leaf"
+  data_dir: "./data"
+  download: True
+  partition: "pre"
+  partition_kwargs:
+    data_seed: 42
+    test_size: 0.1
+    pre_infer_num_clients: True
+    pre_min_samples_per_client: 2
+    pre_raw_data_fraction: 1.0
+
+model_configs:
+  model_path: "./cnn.py"
+  model_name: "CNN"
+  model_kwargs:
+    num_channel: 1
+    num_pixel: 80
+    num_classes: 80
+
+algorithm_configs:
+  device: "cpu"
+  num_global_epochs: 5
+
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+    num_clients: 3597
+    num_clients_per_round: 5
+
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+
+  trainer: "VanillaTrainer"
+  trainer_kwargs:
+    mode: "step"
+    num_local_steps: 100
+    optim: "SGD"
+    optim_args:
+      lr: 0.01
+      momentum: 0.9
+      weight_decay: 5e-4
+
+    train_batch_size: 64
+    val_batch_size: 64
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./acc.py"
+    metric_name: "accuracy"
+
+    loss_fn_path: "./celoss.py"
+    loss_fn_name: "CELoss"

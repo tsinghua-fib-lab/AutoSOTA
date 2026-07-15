@@ -1,0 +1,74 @@
+{
+  "baselines": {
+    "always_cma": {
+      "accuracy": 0.45454545454545453,
+      "n_non_ties": 110,
+      "pred_cma_label_cma": 50,
+      "pred_cma_label_berw": 60,
+      "pred_berw_label_cma": 0,
+      "pred_berw_label_berw": 0,
+      "pred_berw_rate": 0.0
+    },
+    "always_berw": {
+      "accuracy": 0.5454545454545454,
+      "n_non_ties": 110,
+      "pred_cma_label_cma": 0,
+      "pred_cma_label_berw": 0,
+      "pred_berw_label_cma": 50,
+      "pred_berw_label_berw": 60,
+      "pred_berw_rate": 1.0
+    }
+  },
+  "counts": {
+    "n_missing_misranking_probe": 0,
+    "n_missing_variance_probe": 0,
+    "n_ties_outcome": 40,
+    "n_total": 150
+  },
+  "misranking_probe": {
+    "accuracy": 0.6363636363636364,
+    "n_non_ties": 110,
+    "pred_cma_label_cma": 10,
+    "pred_cma_label_berw": 0,
+    "pred_berw_label_cma": 40,
+    "pred_berw_label_berw": 60,
+    "pred_berw_rate": 0.9090909090909091
+  },
+  "outputs": {
+    "decision_points_csv": "evidence/application_mlp_minibatch_digits0_heavytail_sigma1p0_decision_accuracy_vs_noise_switch/decision_points.csv"
+  },
+  "setup": {
+    "algo_cma": "CMA-ES",
+    "algo_berw": "ProbeSwitch-Noise",
+    "higher_is_better": false,
+    "instance_col": "seed",
+    "key_cols": [
+      "seed",
+      "batch_size"
+    ],
+    "metric": "post_true",
+    "probe_thresholds": {
+      "misranking_rd": 0.12,
+      "variance_rel_sd": 0.05
+    },
+    "probe_values_csv": "evidence/application_mlp_minibatch_digits0_heavytail_sigma1p0/probe_values.csv",
+    "runs_csv": [
+      "Results/exp_mlp_digits0_heavytail_sigma1p0_h4_N256_B40_seeds1_50/batch_4/runs.csv",
+      "Results/exp_mlp_digits0_heavytail_sigma1p0_h4_N256_B40_seeds1_50/batch_16/runs.csv",
+      "Results/exp_mlp_digits0_heavytail_sigma1p0_h4_N256_B40_seeds1_50/batch_256/runs.csv"
+    ],
+    "tie_tolerance": {
+      "atol": 0.0,
+      "rtol": 0.0
+    }
+  },
+  "variance_probe": {
+    "accuracy": 0.6363636363636364,
+    "n_non_ties": 110,
+    "pred_cma_label_cma": 10,
+    "pred_cma_label_berw": 0,
+    "pred_berw_label_cma": 40,
+    "pred_berw_label_berw": 60,
+    "pred_berw_rate": 0.9090909090909091
+  }
+}
