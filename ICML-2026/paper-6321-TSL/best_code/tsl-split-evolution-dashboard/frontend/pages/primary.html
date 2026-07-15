@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Combined products · tslviz</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link active">Combined products</a>
+            <a href="/pages/components.html" class="nav-link">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Combined products across runs</h2>
+            <p class="plot-desc">Overlay the per-stage combined product
+                (sum of all rank-1 products in that stage) for any selection of runs.
+                Use this to compare how stages line up across seeds or settings.</p>
+            <div class="control-row">
+                <label for="combinedStage">Stage</label>
+                <select id="combinedStage"></select>
+                <label for="combinedRuns">Runs</label>
+                <select id="combinedRuns" multiple style="min-width: 200px; min-height: 100px;"></select>
+            </div>
+            <div id="scalingInfo"
+                style="margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 4px; font-family: monospace; font-size: 0.9rem;">
+            </div>
+            <div id="combinedList" class="charts-grid"></div>
+        </section>
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/primary.js"></script>
+</body>
+
+</html>

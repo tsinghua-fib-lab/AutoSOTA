@@ -1,0 +1,36 @@
+client_configs:
+  train_configs:
+    trainer: "MonaiTrainer"
+    num_local_epochs: 1
+    do_validation: True
+    do_pre_validation: True
+
+  comm_configs:
+    compressor_configs:
+      enable_compression: False
+      # Used if enable_compression is True
+      lossy_compressor:  "SZ2Compressor"
+      lossless_compressor: "blosc"
+      error_bounding_mode: "REL"
+      error_bound: 1e-3
+      param_cutoff: 1024
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  aggregator: "FedAdamAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+    server_learning_rate: 0.1
+    server_adapt_param: 1e-3
+    server_momentum_param_1: 0.9
+    server_momentum_param_2: 0.99
+  device: "cpu"
+  num_global_epochs: 5
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 10485760
+      use_ssl: False

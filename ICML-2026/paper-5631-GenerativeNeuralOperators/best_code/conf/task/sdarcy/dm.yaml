@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - /task/dm  # Base DM task config
+  - override /optimizer: adamw
+  - override /model: cond_unet2d
+  - _self_
+
+evaluation:
+  mode: stochastic
+
+training:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+
+# UNet-family padding: use zero padding (not circular)
+model:
+  padding_mode: "zeros"
+
+dm:
+  samples_per_example: 32
+  test_samples_per_example: 32
+  # Keep stochastic evaluation memory bounded (2D fields can be large).
+  stochastic_n_chunk: 8
+  stochastic_k_chunk: 4
+

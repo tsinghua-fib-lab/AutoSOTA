@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "depth-over-fidelity"
+version = "0.1.0"
+description = "Reproducibility package: Depth over Fidelity in Fixed-Budget Noisy Evolution Strategies"
+readme = "README.md"
+authors = [{ name = "Sichen Wang", email = "scwang.cs@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+  "cma>=3.3.0",
+  "matplotlib>=3.7",
+  "numpy>=1.23",
+  "pandas>=1.5",
+  "scikit-learn>=1.2",
+  "scipy>=1.9",
+  "tqdm>=4.66",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

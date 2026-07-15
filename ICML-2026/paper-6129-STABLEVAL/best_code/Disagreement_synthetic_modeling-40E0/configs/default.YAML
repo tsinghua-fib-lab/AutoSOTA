@@ -1,0 +1,48 @@
+# Default Configuration for Synthetic Disagreement Study
+
+# Agent Configuration
+n_agents: 6
+n_items: 500
+
+# Default agent qualities (wide gaps)
+# For tight gaps, use: [0.75, 0.70, 0.65, 0.60, 0.55, 0.50]
+agent_qualities: [0.85, 0.80, 0.70, 0.55, 0.35, 0.20]
+
+# Annotator Configuration
+n_annotators: 30
+labels_per_item: 5
+
+# Annotator type distribution (must sum to n_annotators)
+annotator_distribution:
+  normal: 18
+  strict: 6
+  lenient: 4
+  adversarial: 2
+
+# Item ambiguity
+hard_item_prob: 0.2
+easy_beta_params: [2, 12]   # Beta(2, 12) for easy items
+hard_beta_params: [6, 3]    # Beta(6, 3) for hard items
+
+# Label Configuration
+class_labels: [0, 1, 2]  # incorrect, partial, correct
+credit_mapping: [0.0, 0.5, 1.0]
+
+# Label generation model (per the protocol):
+#   P(z=2) = q_a                           (correct)
+#   P(z=1) = partial_correct_prob * (1-q_a) (partial)  
+#   P(z=0) = (1 - partial_correct_prob) * (1-q_a) (incorrect)
+#
+
+partial_correct_prob: 0.35 
+
+# Simulation
+n_repetitions: 100
+n_stability_subsamples: 10
+subsample_labels: 3  # For stability computation
+
+# Output
+save_raw_data: true
+save_confusion_matrices: true
+save_posteriors: true
+output_dir: "results"

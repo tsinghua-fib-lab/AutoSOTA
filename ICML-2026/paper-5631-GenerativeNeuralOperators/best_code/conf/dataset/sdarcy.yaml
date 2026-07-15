@@ -1,0 +1,55 @@
+_target_: data.build_sdarcy_dataset
+
+data_name: SDarcy
+
+dataset_dir: "datasets"
+filename: "sdarcy.pt"
+save_data: true
+verbose: true
+overwrite: false
+
+# Enable stochastic payloads for evaluation.mode: stochastic
+return_stochastic: true
+
+# Grid / resolution
+N: 128
+out_N: null
+downsample_mode_a: "area"
+downsample_mode_u: "bilinear"
+downsample_antialias: true
+
+# Dataset sizes
+n_train_inputs: 10000
+n_val_inputs: 32
+n_test_inputs: 32
+n_outputs_per_input_train: 1
+n_outputs_per_input_eval: 64
+
+# Solver batching
+solve_batch_size: 256
+
+# Permeability hyperparams
+tau_a: 9.0
+alpha_a: 2.0
+
+# Forcing hyperparams (sum of log-normal GP + mean-zero GP)
+mu_f: 0.0
+
+# Log-normal GP component
+sigma_f_ln: 1.0
+ell_f_ln: 0.2
+sigma_gp_f_ln: 1.0
+jitter_f_ln: 1.0e-5
+
+# Mean-zero GP component
+sigma_f_gp: 9.0
+ell_f_gp: 0.5
+sigma_gp_f_gp: 1.0
+jitter_f_gp: 1.0e-5
+
+# CG
+tol: 1.0e-6
+maxiter: 5000
+
+# Seed
+seed: 42

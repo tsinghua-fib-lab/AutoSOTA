@@ -1,0 +1,43 @@
+name: Bug Report
+description: Report errors or unexpected results.
+labels: ["bug"]
+assignees:
+  - Zilinghan
+body:
+  - type: textarea
+    id: install
+    attributes:
+      label: How did you install appfl?
+      description: >
+        E.g., install via pip, or install from source, etc. **Note:** this will
+        be rendered as console text automatically.
+      placeholder: |
+        $ pip install appfl
+        # OR
+        $ git clone https://github.com/APPFL/APPFL.git
+        $ cd APPFL
+        $ pip install -e ".[mpi,dev,examples]"
+      render: console
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: What version of appfl are you using?
+      description: >
+        Package version if installed via Pip or commit ID if installed
+        from source.
+      placeholder: v1.10.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: freeform
+    attributes:
+      label: Describe the problem.
+      description: >
+        Please provide sample code and directions for reproducing
+        your problem and what you expected to happen.
+    validations:
+      required: true

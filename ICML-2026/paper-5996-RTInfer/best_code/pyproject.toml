@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rtinfer-reproduction"
+version = "0.1.0"
+description = "Reproduction layer for RTInfer real-time DNN inference scheduling on edge GPUs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "RTInfer contributors" }
+]
+keywords = [
+  "edge-ai",
+  "real-time-inference",
+  "gpu-scheduling",
+  "early-exit",
+  "model-pruning",
+  "memory-layout"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+  "numpy>=1.23"
+]
+
+[project.optional-dependencies]
+figures = [
+  "cairosvg>=2.7"
+]
+dev = [
+  "pytest>=7.0",
+  "cairosvg>=2.7"
+]
+
+[project.scripts]
+rtinfer-sim = "rtinfer.simulate:main"
+
+[tool.setuptools.packages.find]
+include = ["rtinfer*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

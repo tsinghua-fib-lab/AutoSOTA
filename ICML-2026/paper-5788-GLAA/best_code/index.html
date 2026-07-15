@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>xFedAlign · Explainable Federated Learning via Global-Local Attribution Alignment</title>
+<meta name="description" content="ICML 2026: a model-agnostic framework for explainable federated learning that decouples task optimization from explanation coordination." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    processEscapes: true,
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+<style>
+:root {
+  /* Background tones */
+  --bg:           #07091A;
+  --bg-elevated:  #0E1230;
+  --bg-card:      rgba(255, 255, 255, 0.04);
+  --bg-card-hi:   rgba(255, 255, 255, 0.07);
+
+  /* Text */
+  --text-1:       #F8FAFC;
+  --text-2:       #C7D2E0;
+  --text-3:       #8B96A8;
+  --text-4:       #5B647A;
+  --text-on-light:#0A0E27;
+
+  /* Vibrant accents */
+  --cyan:         #22D3EE;
+  --cyan-deep:    #0891B2;
+  --magenta:      #EC4899;
+  --magenta-deep: #BE185D;
+  --violet:       #A855F7;
+  --violet-deep:  #7C3AED;
+  --amber:        #F59E0B;
+  --lime:         #A3E635;
+  --coral:        #FB7185;
+
+  /* Rules */
+  --rule:         rgba(255, 255, 255, 0.08);
+  --rule-hi:      rgba(255, 255, 255, 0.14);
+
+  /* Typography */
+  --display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --sans:    "Space Grotesk", -apple-system, sans-serif;
+  --serif:   "Instrument Serif", Georgia, serif;
+  --mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Signature gradients */
+  --grad-1:  linear-gradient(120deg, #22D3EE 0%, #A855F7 50%, #EC4899 100%);
+  --grad-2:  linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
+  --grad-3:  linear-gradient(135deg, #22D3EE 0%, #A855F7 100%);
+  --grad-4:  linear-gradient(135deg, #F59E0B 0%, #EC4899 100%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 16.5px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Site-wide atmospheric background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 800px 600px at 15% 10%, rgba(168, 85, 247, 0.18), transparent 60%),
+    radial-gradient(ellipse 600px 500px at 85% 25%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 50% 80%, rgba(236, 72, 153, 0.14), transparent 60%);
+  pointer-events: none;
+}
+
+/* Grain texture */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+::selection { background: var(--magenta); color: #fff; }
+img { max-width: 100%; display: block; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+/* ============ TOP BAR ============ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(7, 9, 26, 0.7);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  border-bottom: 1px solid var(--rule);
+}
+.topbar .inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-2);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.brand .logo {
+  width: 30px; height: 30px;
+  background: var(--grad-1);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  color: #fff;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 400;
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.45);
+}
+.topbar nav { display: flex; gap: 26px; }
+.topbar nav a {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.topbar nav a:hover { color: var(--cyan); }
+@media (max-width: 720px) { .topbar nav { display: none; } }
+
+/* ============ HERO ============ */
+.hero {
+  position: relative;
+  padding: 110px 0 130px;
+  overflow: hidden;
+}
+.hero .mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero .mesh .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+}
+.hero .mesh .b1 {
+  width: 600px; height: 600px;
+  background: var(--cyan);
+  top: -150px; left: -200px;
+  opacity: 0.32;
+  animation: drift1 18s ease-in-out infinite;
+}
+.hero .mesh .b2 {
+  width: 520px; height: 520px;
+  background: var(--magenta);
+  top: 100px; right: -150px;
+  opacity: 0.28;
+  animation: drift2 22s ease-in-out infinite;
+}
+.hero .mesh .b3 {
+  width: 460px; height: 460px;
+  background: var(--violet);
+  bottom: -120px; left: 25%;
+  opacity: 0.36;
+  animation: drift3 26s ease-in-out infinite;
+}
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(80px, 40px); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-60px, 60px); }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(60px, -50px); }
+}
+
+.hero .inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.venue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--rule-hi);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  font-weight: 500;
+  margin-bottom: 40px;
+  backdrop-filter: blur(8px);
+}
+.venue-badge .pulse {
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 12px var(--cyan);
+}
+.venue-badge .pulse::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--cyan);
+  opacity: 0.4;
+  animation: pulse 2s ease-out infinite;
+}
+@keyframes pulse {
+  0%   { transform: scale(0.7); opacity: 0.5; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+h1.title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(46px, 7.2vw, 92px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin-bottom: 28px;
+  max-width: 980px;
+}
+h1.title .gline {
+  display: block;
+  color: var(--text-1);
+}
+h1.title .accent {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-right: 0.05em;
+  letter-spacing: -0.015em;
+}
+.hero .subtitle {
+  font-family: var(--sans);
+  font-size: clamp(18px, 1.7vw, 22px);
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 720px;
+  margin-top: 24px;
+  font-weight: 400;
+}
+
+.authors {
+  margin-top: 60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px 36px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.authors .author {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.authors .author sup {
+  color: var(--cyan);
+  font-weight: 600;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+.affiliations {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--text-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  align-items: center;
+}
+.affiliations span sup {
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 10px;
+  margin-right: 4px;
+}
+.affiliations .dot {
+  width: 3px; height: 3px;
+  background: var(--text-4);
+  border-radius: 50%;
+}
+
+.actions {
+  margin-top: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  position: relative;
+}
+.btn.primary {
+  background: var(--grad-2);
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 6px 20px rgba(236, 72, 153, 0.4),
+    0 0 50px rgba(168, 85, 247, 0.25);
+}
+.btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+    0 14px 36px rgba(236, 72, 153, 0.5),
+    0 0 60px rgba(168, 85, 247, 0.35);
+}
+.btn.outline {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-1);
+  border-color: var(--rule-hi);
+  backdrop-filter: blur(8px);
+}
+.btn.outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-2px);
+}
+.btn svg {
+  width: 15px; height: 15px;
+  stroke-width: 2;
+}
+
+.tldr {
+  margin-top: 72px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 26px 30px;
+  max-width: 760px;
+  position: relative;
+  overflow: hidden;
+}
+.tldr::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--grad-1);
+}
+.tldr .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 10px;
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tldr p {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  margin: 0;
+}
+.tldr p strong {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* ============ SECTIONS ============ */
+section {
+  padding: 110px 0;
+  position: relative;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 32px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: var(--text-3);
+}
+.section-label .num {
+  display: inline-grid;
+  place-items: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--rule-hi);
+  color: var(--cyan);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.2);
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 22px;
+  color: var(--text-1);
+}
+h2 em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: var(--text-1);
+}
+
+p {
+  margin-bottom: 18px;
+  color: var(--text-2);
+  max-width: 720px;
+}
+.lead {
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* ============ ABSTRACT ============ */
+.abstract-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 60px;
+}
+@media (max-width: 880px) {
+  .abstract-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+.abstract-aside { position: sticky; top: 100px; align-self: start; }
+.abstract-aside .pill {
+  display: inline-block;
+  padding: 5px 12px;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  color: var(--cyan);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.abstract-aside h3 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.2;
+  color: var(--text-1);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.abstract-body p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-2);
+  max-width: none;
+}
+.abstract-body p:first-child::first-letter {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 80px;
+  line-height: 0.85;
+  float: left;
+  padding: 8px 14px 0 0;
+  font-style: italic;
+  background: var(--grad-2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.abstract-body strong {
+  color: var(--text-1);
+  font-weight: 600;
+  background: linear-gradient(180deg, transparent 65%, rgba(168, 85, 247, 0.25) 65%);
+}
+
+/* ============ METHOD ============ */
+.figure-frame {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 56px 0 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 30px 80px -20px rgba(168, 85, 247, 0.35),
+    0 0 100px rgba(34, 211, 238, 0.15);
+}
+.figure-frame::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 22px;
+  padding: 2px;
+  background: var(--grad-1);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+.figure-frame .frame-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-4);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+.figure-frame .frame-head .tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--grad-1);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+.figure-frame .frame-head .meta {
+  margin-left: auto;
+  color: #94A3B8;
+  letter-spacing: 0.08em;
+}
+.figure-frame img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.figure-caption {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-3);
+  margin-top: 18px;
+  max-width: 900px;
+}
+.figure-caption strong { color: var(--text-1); font-weight: 600; }
+.figure-caption em { color: var(--cyan); font-family: var(--serif); font-style: italic; font-weight: 400; }
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 60px;
+}
+.mcard {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mcard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--grad);
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+.mcard:hover {
+  transform: translateY(-4px);
+  border-color: var(--rule-hi);
+  background: var(--bg-card-hi);
+}
+.mcard.c1 { --grad: linear-gradient(135deg, rgba(34, 211, 238, 0.08), transparent 60%); }
+.mcard.c2 { --grad: linear-gradient(135deg, rgba(168, 85, 247, 0.08), transparent 60%); }
+.mcard.c3 { --grad: linear-gradient(135deg, rgba(236, 72, 153, 0.08), transparent 60%); }
+.mcard.c4 { --grad: linear-gradient(135deg, rgba(245, 158, 11, 0.08), transparent 60%); }
+.mcard:hover::before { opacity: 1; }
+.mcard .ico {
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: grid; place-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.mcard.c1 .ico { background: rgba(34, 211, 238, 0.12); color: var(--cyan); box-shadow: 0 0 24px rgba(34, 211, 238, 0.25); }
+.mcard.c2 .ico { background: rgba(168, 85, 247, 0.12); color: var(--violet); box-shadow: 0 0 24px rgba(168, 85, 247, 0.25); }
+.mcard.c3 .ico { background: rgba(236, 72, 153, 0.12); color: var(--magenta); box-shadow: 0 0 24px rgba(236, 72, 153, 0.25); }
+.mcard.c4 .ico { background: rgba(245, 158, 11, 0.12); color: var(--amber); box-shadow: 0 0 24px rgba(245, 158, 11, 0.25); }
+.mcard .ico svg { width: 20px; height: 20px; stroke-width: 1.8; }
+.mcard .step {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+}
+.mcard.c1 .step { color: var(--cyan); }
+.mcard.c2 .step { color: var(--violet); }
+.mcard.c3 .step { color: var(--magenta); }
+.mcard.c4 .step { color: var(--amber); }
+.mcard h3 {
+  font-size: 17px;
+  margin-bottom: 10px;
+  position: relative; z-index: 1;
+}
+.mcard p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-3);
+  margin: 0;
+  position: relative; z-index: 1;
+}
+.mcard p em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--text-2);
+}
+
+/* ============ HEADLINE NUMBERS ============ */
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 48px;
+}
+.metric {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 60px; height: 60px;
+  border-radius: 0 0 80px 0;
+  opacity: 0.5;
+  filter: blur(20px);
+}
+.metric.m1::before { background: var(--cyan); }
+.metric.m2::before { background: var(--violet); }
+.metric.m3::before { background: var(--magenta); }
+.metric.m4::before { background: var(--amber); }
+
+.metric .top {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.metric .top .glyph {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.metric.m1 .top .glyph { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.metric.m2 .top .glyph { background: var(--violet); box-shadow: 0 0 12px var(--violet); }
+.metric.m3 .top .glyph { background: var(--magenta); box-shadow: 0 0 12px var(--magenta); }
+.metric.m4 .top .glyph { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+.metric .top .name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.metric .val {
+  font-family: var(--display);
+  font-size: 46px;
+  line-height: 1;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.035em;
+  position: relative;
+  z-index: 1;
+}
+.metric.m1 .val { background: linear-gradient(135deg, #22D3EE 0%, #67E8F9 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.metric.m2 .val { background: linear-gradient(135deg, #A855F7 0%, #C084FC 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.metric.m3 .val { background: linear-gradient(135deg, #EC4899 0%, #F472B6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.metric.m4 .val { background: linear-gradient(135deg, #F59E0B 0%, #FCD34D 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.metric .val .sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-4);
+  margin-left: 6px;
+  font-weight: 500;
+  -webkit-text-fill-color: var(--text-4);
+}
+.metric .label {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.45;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============ QUALITATIVE ============ */
+.qual-intro { max-width: 720px; margin-bottom: 56px; }
+
+.mnist-stage {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+.mnist-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 50%),
+    radial-gradient(circle at 15% 85%, rgba(236, 72, 153, 0.12), transparent 50%);
+  pointer-events: none;
+}
+.mnist-stage .stage-head {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.mnist-stage .stage-head .left {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 24px;
+  color: var(--text-1);
+  font-weight: 400;
+}
+.mnist-stage .stage-head .right {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.mnist-stage .row-label {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mnist-stage .row-label::before {
+  content: "";
+  width: 16px; height: 1px;
+  background: var(--rule-hi);
+}
+.mnist-cells {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.mnist-cells:last-child { margin-bottom: 0; }
+@media (max-width: 640px) {
+  .mnist-cells { grid-template-columns: repeat(2, 1fr); }
+}
+.mcell {
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  position: relative;
+  transition: all 240ms ease;
+}
+.mcell.best {
+  border-color: transparent;
+  background: linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
+              var(--grad-1) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.25);
+}
+.mcell.best::after {
+  content: "ours";
+  position: absolute;
+  top: -9px; right: 12px;
+  background: var(--grad-2);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.5);
+}
+.mcell .method-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.mcell.best .method-name {
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+.mcell img {
+  width: 100%;
+  border-radius: 6px;
+  image-rendering: pixelated;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+}
+
+/* UCI Adult comparison */
+.uci-stage {
+  margin-top: 64px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+.uci-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08), transparent 60%);
+  pointer-events: none;
+}
+.uci-stage .stage-head {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.uci-stage .stage-head .left {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text-1);
+  font-weight: 400;
+}
+.uci-stage .stage-head .right {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.uci-cells {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+@media (max-width: 880px) {
+  .uci-cells { grid-template-columns: repeat(1, 1fr); }
+}
+.uci-cell {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  border: 1px solid var(--rule-hi);
+}
+.uci-cell.best {
+  border-color: transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    var(--grad-1) border-box;
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.3);
+}
+.uci-cell.best::after {
+  content: "ours";
+  position: absolute;
+  top: -9px; right: 12px;
+  background: var(--grad-2);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.5);
+  z-index: 2;
+}
+.uci-cell .label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #475569;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.uci-cell.best .label {
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+.uci-cell img {
+  width: 100%;
+  border-radius: 6px;
+  aspect-ratio: 4/3;
+  object-fit: contain;
+}
+.uci-takeaway {
+  position: relative;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 820px;
+}
+.uci-takeaway strong { color: var(--text-1); font-weight: 600; }
+.uci-takeaway em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============ TABLE ============ */
+.table-wrap {
+  overflow-x: auto;
+  margin: 28px 0 14px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+thead th {
+  text-align: left;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--rule);
+}
+thead th.num-col, tbody td.num-col {
+  text-align: right;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+tbody td {
+  padding: 15px 22px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text-2);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.group td {
+  background: rgba(168, 85, 247, 0.08);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 12px 22px;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.15) 0%, transparent 100%);
+  color: var(--violet);
+}
+tbody tr.highlight td {
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.08) 0%, rgba(168, 85, 247, 0.06) 50%, transparent 100%);
+  color: var(--text-1);
+  font-weight: 600;
+}
+tbody tr.highlight td:first-child {
+  position: relative;
+  padding-left: 26px;
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.12) 0%, rgba(168, 85, 247, 0.06) 50%, transparent 100%);
+}
+tbody tr.highlight td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 10px; top: 50%;
+  width: 6px; height: 6px;
+  background: var(--magenta);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 12px var(--magenta);
+}
+tbody tr.highlight td:first-child {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: var(--grad-2);
+}
+.table-note {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 14px;
+}
+.table-note .leg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 22px;
+}
+.table-note .leg .sw {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ============ ROBUSTNESS ============ */
+.robust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 48px;
+}
+@media (max-width: 800px) { .robust-grid { grid-template-columns: 1fr; } }
+.rfig {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.rfig.r1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 100% 0%, rgba(34, 211, 238, 0.1), transparent 50%);
+  pointer-events: none;
+}
+.rfig.r2::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.1), transparent 50%);
+  pointer-events: none;
+}
+.rfig .rh {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.rfig .rh .ttl {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--text-1);
+  font-weight: 400;
+}
+.rfig.r1 .rh .tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-weight: 600;
+  padding: 4px 8px;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  border-radius: 999px;
+}
+.rfig.r2 .rh .tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  font-weight: 600;
+  padding: 4px 8px;
+  background: rgba(236, 72, 153, 0.1);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: 999px;
+}
+.rfig img {
+  position: relative;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+}
+.rfig p {
+  position: relative;
+  font-size: 13.5px;
+  color: var(--text-3);
+  margin-top: 14px;
+  margin-bottom: 0;
+  line-height: 1.55;
+  max-width: none;
+}
+.rfig p strong { color: var(--text-1); font-weight: 600; }
+
+.robust-callout {
+  margin-top: 56px;
+  padding: 40px 44px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 36px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.robust-callout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(34, 211, 238, 0.12), transparent 50%),
+    radial-gradient(circle at 100% 50%, rgba(168, 85, 247, 0.12), transparent 50%);
+  pointer-events: none;
+}
+@media (max-width: 720px) {
+  .robust-callout { grid-template-columns: 1fr; padding: 32px; gap: 20px; }
+}
+.robust-callout .bignum {
+  position: relative;
+  font-family: var(--display);
+  font-size: 110px;
+  line-height: 0.9;
+  background: var(--grad-1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+.robust-callout p {
+  position: relative;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-2);
+  max-width: none;
+}
+.robust-callout p strong { color: var(--text-1); font-weight: 600; }
+
+/* ============ CITE ============ */
+.bibtex-block {
+  background: var(--bg-elevated);
+  color: var(--text-1);
+  padding: 36px 40px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.8;
+  border-radius: 16px;
+  position: relative;
+  overflow-x: auto;
+  white-space: pre;
+  border: 1px solid var(--rule);
+  margin-top: 32px;
+}
+.bibtex-block::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad-1);
+  border-radius: 16px 16px 0 0;
+}
+.bibtex-block .copy-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-1);
+  border: 1px solid var(--rule-hi);
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 200ms ease;
+  font-weight: 500;
+}
+.bibtex-block .copy-btn:hover {
+  background: var(--grad-2);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+}
+.bibtex-block #bibtex { color: var(--text-2); }
+
+.ack {
+  margin-top: 56px;
+  padding: 26px 30px;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.ack::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--grad-4);
+}
+.ack .lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+  background: var(--grad-4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.ack p {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--text-2);
+}
+
+/* ============ FOOTER ============ */
+footer {
+  padding: 56px 0 72px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--text-3);
+}
+footer .foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+footer .foot .left {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--text-2);
+}
+footer .foot .right {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 800ms cubic-bezier(0.2, 0.6, 0.2, 1),
+              transform 800ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+  .wrap { padding: 0 22px; }
+  section { padding: 80px 0; }
+  .hero { padding: 80px 0 100px; }
+  .figure-frame { padding: 20px; }
+  .mnist-stage, .uci-stage { padding: 24px; }
+  .bibtex-block { font-size: 11px; padding: 28px 20px 22px; padding-top: 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">x</div>
+      <span>xFedAlign · ICML 2026</span>
+    </div>
+    <nav>
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#robustness">Robustness</a>
+      <a href="#cite">Cite</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="mesh">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+  <div class="inner">
+    <div class="venue-badge">
+      <span class="pulse"></span>
+      <span>ICML 2026 · Seoul, South Korea</span>
+    </div>
+
+    <h1 class="title">
+      <span class="gline">Explainable</span>
+      <span class="gline">Federated Learning</span>
+      <span class="gline">via <span class="accent">Global-Local</span></span>
+      <span class="gline">Attribution Alignment</span>
+    </h1>
+
+    <p class="subtitle">
+      A model-agnostic framework that decouples task optimization from explanation
+      coordination. Faithful, consistent explanations across heterogeneous clients
+      with kilobytes of communication and zero exposure of raw data or gradients.
+    </p>
+
+    <div class="authors">
+      <span class="author">Dawood Wasif<sup>1</sup></span>
+      <span class="author">Terrence J. Moore<sup>2</sup></span>
+      <span class="author">Chang-Tien Lu<sup>1</sup></span>
+      <span class="author">Jin-Hee Cho<sup>1</sup></span>
+    </div>
+
+    <div class="affiliations">
+      <span><sup>1</sup>Virginia Tech</span>
+      <span class="dot"></span>
+      <span><sup>2</sup>DEVCOM Army Research Laboratory</span>
+    </div>
+
+    <div class="actions">
+      <a href="#" class="btn primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Read the Paper
+      </a>
+      <a href="https://github.com/dawoodwasif/xFedAlign" class="btn outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        Code
+      </a>
+      <a href="#cite" class="btn outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+        BibTeX
+      </a>
+    </div>
+
+    <div class="tldr">
+      <div class="label">In one line</div>
+      <p>
+        Train task models normally. Coordinate explanations separately in a tiny
+        probability space, using <strong>secure aggregation</strong>, <strong>differential
+        privacy</strong>, and a robust global prior that <strong>never touches the task
+        gradient</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABSTRACT ============ -->
+<section id="abstract">
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">i</span> Abstract</div>
+
+    <div class="abstract-grid">
+      <aside class="abstract-aside">
+        <div class="pill">Paper · 2026</div>
+        <h3>Aligning explanations without sharing data.</h3>
+      </aside>
+      <div class="abstract-body">
+        <p>
+          Federated learning enables on-device training without centralizing data, yet
+          existing systems still struggle to provide explanations that are both
+          <strong>locally faithful</strong> and <strong>globally consistent</strong> under
+          strict privacy and bandwidth constraints. Prior approaches either keep
+          explanations siloed across clients, transmit heavy or sensitive artifacts, or
+          replace expressive task models with interpretable surrogates that sacrifice
+          accuracy.
+        </p>
+        <p>
+          We propose <strong>xFedAlign</strong>, a model-agnostic framework that decouples
+          task optimization in parameter space from explanation coordination in a compact
+          group space. Each client distills a lightweight surrogate that produces private,
+          per-class top-<em>k</em> attribution artifacts, which are robustly aggregated by
+          the server into a <strong>Global Explanation Prior</strong> that softly aligns
+          client explanations without constraining task learning. Across image, text, and
+          tabular benchmarks with IID and non-IID partitions, xFedAlign matches FedAvg
+          accuracy while consistently reducing explanation drift and improving deletion
+          and insertion AUC, with only a few kilobytes of additional communication per
+          round.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section id="method">
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">ii</span> Method</div>
+    <h2>Two pipelines, one round. <em>Decoupled by design.</em></h2>
+    <p class="lead" style="max-width: 780px;">
+      Task optimization lives in parameter space. Explanation coordination lives in a
+      low-dimensional probability simplex over a shared group space. The two run in
+      parallel, communicate only through a soft alignment penalty, and exchange just
+      kilobytes per round.
+    </p>
+
+    <div class="figure-frame">
+      <div class="frame-head">
+        <span class="tag">Figure 1</span>
+        <span>xFedAlign framework</span>
+        <span class="meta">client &middot; server</span>
+      </div>
+      <img src="./figures/framework.png" alt="xFedAlign framework: client-side surrogate distillation produces top-k attribution artifacts that the server robustly aggregates into a Global Explanation Prior">
+    </div>
+
+    <div class="figure-caption">
+      <strong>Each client \(i\)</strong> trains a lightweight surrogate \(g_i\)
+      that mimics the task model \(f_\theta\), maps per-example attributions into a
+      shared group space \(\mathcal{G}\), and transmits a sparse top-\(k\) artifact
+      \(S_i\) after \(\ell_2\) clipping, 8-bit quantization, and DP noise.
+      <strong>The server</strong> robustly aggregates the artifacts (coordinate-wise median)
+      into a Global Explanation Prior \(\Pi\), normalizes it on the simplex, and
+      broadcasts both the updated task parameters and the prior back to clients. Alignment
+      acts <strong>only</strong> on normalized explanation distributions, so task gradients
+      flow undisturbed.
+    </div>
+
+    <div class="method-grid">
+      <div class="mcard c1">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="step">Step A</div>
+        <h3>Surrogate distillation</h3>
+        <p>A compact \(g_i\) mimics \(f_\theta\) via temperature-based KL distillation and produces calibrated, group-level attributions on the simplex.</p>
+      </div>
+      <div class="mcard c2">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="step">Step B</div>
+        <h3>Privacy-hardened artifacts</h3>
+        <p>Dense summaries become top-\(k\), clipped, 8-bit quantized, and Gaussian-noised. Secure aggregation completes the per-round \((\varepsilon, \delta)\)-DP guarantee.</p>
+      </div>
+      <div class="mcard c3">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><line x1="12" y1="12" x2="5" y2="6"/><line x1="12" y1="12" x2="19" y2="6"/><line x1="12" y1="12" x2="5" y2="18"/><line x1="12" y1="12" x2="19" y2="18"/></svg>
+        </div>
+        <div class="step">Step C</div>
+        <h3>Robust global prior</h3>
+        <p>The server forms \(\Pi^{(c)}\) by coordinate-wise median over reported artifacts. Outliers and malicious contributions are absorbed; minority structure is preserved.</p>
+      </div>
+      <div class="mcard c4">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-3-3"/><path d="M19 14V4"/></svg>
+        </div>
+        <div class="step">Step D</div>
+        <h3>Soft JSD alignment</h3>
+        <p>Clients minimize \(\mathcal{L}_{\text{task}} + \alpha\,\mathcal{L}_{\text{sur}} + \beta\,\mathrm{JSD}(\bar{E}_i \parallel \Pi)\). Alignment lives in the simplex and never reaches \(\theta\), so accuracy is preserved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HEADLINE NUMBERS ============ -->
+<section>
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">iii</span> Headline numbers</div>
+    <h2>FedAvg accuracy. <em>Lower drift, higher fidelity.</em></h2>
+    <p class="lead" style="max-width: 720px;">
+      A snapshot of the tradeoff. xFedAlign tracks FedAvg on accuracy while cutting
+      cross-client explanation drift and adding only kilobytes of communication.
+    </p>
+    <div class="metric-cards">
+      <div class="metric m1">
+        <div class="top"><span class="glyph"></span><span class="name">Accuracy</span></div>
+        <div class="val">0.930<span class="sub">parity</span></div>
+        <div class="label">MNIST non-IID, matching FedAvg exactly</div>
+      </div>
+      <div class="metric m2">
+        <div class="top"><span class="glyph"></span><span class="name">EDI ↓</span></div>
+        <div class="val">0.076<span class="sub">drift</span></div>
+        <div class="label">31% lower than the best baseline</div>
+      </div>
+      <div class="metric m3">
+        <div class="top"><span class="glyph"></span><span class="name">Comms</span></div>
+        <div class="val">~2.9<span class="sub">KB/rd</span></div>
+        <div class="label">Total explanation payload per client</div>
+      </div>
+      <div class="metric m4">
+        <div class="top"><span class="glyph"></span><span class="name">Scale</span></div>
+        <div class="val">128<span class="sub">clients</span></div>
+        <div class="label">EDI stays flat at \(\approx 2\times 10^{-4}\) as we scale</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUALITATIVE ============ -->
+<section id="results">
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">iv</span> Qualitative results</div>
+    <h2>What the explanations <em>actually look like</em>.</h2>
+    <p class="lead qual-intro">
+      On MNIST under non-IID heterogeneity, baselines spread attribution mass off the
+      digit support, smear it across broad blobs, or hallucinate unrelated activations.
+      xFedAlign produces sparse, well-localized saliency that traces the actual
+      stroke geometry.
+    </p>
+
+    <div class="mnist-stage">
+      <div class="stage-head">
+        <div class="left">MNIST attributions under non-IID heterogeneity</div>
+        <div class="right">4 methods × 2 digits</div>
+      </div>
+
+      <div class="row-label">Digit 4</div>
+      <div class="mnist-cells">
+        <div class="mcell">
+          <div class="method-name">Local-XAI</div>
+          <img src="./figures/BL-B_overlay-4.png" alt="Local-XAI attribution for digit 4">
+        </div>
+        <div class="mcell">
+          <div class="method-name">FedAttr-Agg</div>
+          <img src="./figures/BL-C_overlay-4.png" alt="FedAttr-Agg attribution for digit 4">
+        </div>
+        <div class="mcell">
+          <div class="method-name">Fed-XAI</div>
+          <img src="./figures/BL-D_overlay-4.png" alt="Fed-XAI attribution for digit 4">
+        </div>
+        <div class="mcell best">
+          <div class="method-name">xFedAlign</div>
+          <img src="./figures/xFL_overlay-4.png" alt="xFedAlign attribution for digit 4">
+        </div>
+      </div>
+
+      <div class="row-label">Digit 7</div>
+      <div class="mnist-cells">
+        <div class="mcell">
+          <div class="method-name">Local-XAI</div>
+          <img src="./figures/BL-B_overlay-7.png" alt="Local-XAI attribution for digit 7">
+        </div>
+        <div class="mcell">
+          <div class="method-name">FedAttr-Agg</div>
+          <img src="./figures/BL-C_overlay-7.png" alt="FedAttr-Agg attribution for digit 7">
+        </div>
+        <div class="mcell">
+          <div class="method-name">Fed-XAI</div>
+          <img src="./figures/BL-D_overlay-7.png" alt="Fed-XAI attribution for digit 7">
+        </div>
+        <div class="mcell best">
+          <div class="method-name">xFedAlign</div>
+          <img src="./figures/xFL_overlay-7.png" alt="xFedAlign attribution for digit 7">
+        </div>
+      </div>
+    </div>
+
+    <div class="uci-stage">
+      <div class="stage-head">
+        <div class="left">UCI Adult feature attribution, all four methods</div>
+        <div class="right">Test point i=12 · top-10 features</div>
+      </div>
+      <div class="uci-cells">
+        <div class="uci-cell">
+          <div class="label">Local-XAI</div>
+          <img src="./figures/uci_adult_bl-b_12.png" alt="Local-XAI feature attribution bar chart for UCI Adult example">
+        </div>
+        <div class="uci-cell">
+          <div class="label">FedAttr-Agg</div>
+          <img src="./figures/uci_adult_bl-c_12.png" alt="FedAttr-Agg feature attribution bar chart for UCI Adult example">
+        </div>
+        <div class="uci-cell">
+          <div class="label">Fed-XAI</div>
+          <img src="./figures/uci_adult_bl-d_12.png" alt="Fed-XAI feature attribution bar chart for UCI Adult example">
+        </div>
+        <div class="uci-cell best">
+          <div class="label">xFedAlign</div>
+          <img src="./figures/uci_adult_xfl_12.png" alt="xFedAlign feature attribution bar chart for UCI Adult example">
+        </div>
+      </div>
+      <p class="uci-takeaway">
+        On a representative UCI Adult test point, baselines spread mass across loosely
+        related attributes or under-weight the actual income signals. xFedAlign
+        concentrates on a <em>compact set</em> of socio-economic indicators:
+        <strong>capital gain</strong> and <strong>education-num</strong> clearly dominant,
+        followed by <strong>hours-per-week</strong>, <strong>occupation</strong>, and
+        <strong>age</strong>. Sex and country fall to the tail, aligning with domain
+        knowledge for income prediction.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUANT TABLE ============ -->
+<section>
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">v</span> Across modalities</div>
+    <h2>Six benchmarks. <em>Image, text, tabular.</em></h2>
+    <p class="lead" style="max-width: 760px;">
+      Across modalities and partitions, xFedAlign tracks FedAvg on accuracy while
+      consistently reducing explanation drift and improving perturbation-based fidelity.
+      Selected results under non-IID Dirichlet \((\alpha = 0.1)\) heterogeneity, five seeds.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th class="num-col">Accuracy ↑</th>
+            <th class="num-col">EDI ↓</th>
+            <th class="num-col">Del AUC ↓</th>
+            <th class="num-col">Ins AUC ↑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="5">MNIST · non-IID</td></tr>
+          <tr><td>FedAvg</td><td class="num-col">0.930</td><td class="num-col">·</td><td class="num-col">·</td><td class="num-col">·</td></tr>
+          <tr><td>Local-XAI</td><td class="num-col">0.927</td><td class="num-col">0.110</td><td class="num-col">0.337</td><td class="num-col">0.737</td></tr>
+          <tr><td>FedAttr-Agg</td><td class="num-col">0.930</td><td class="num-col">0.159</td><td class="num-col">0.288</td><td class="num-col">0.747</td></tr>
+          <tr><td>Fed-XAI</td><td class="num-col">0.449</td><td class="num-col">0.300</td><td class="num-col">0.126</td><td class="num-col">0.425</td></tr>
+          <tr class="highlight"><td>xFedAlign</td><td class="num-col">0.930</td><td class="num-col">0.076</td><td class="num-col">0.170</td><td class="num-col">0.843</td></tr>
+
+          <tr class="group"><td colspan="5">AG News · non-IID</td></tr>
+          <tr><td>FedAvg</td><td class="num-col">0.707</td><td class="num-col">·</td><td class="num-col">·</td><td class="num-col">·</td></tr>
+          <tr><td>Local-XAI</td><td class="num-col">0.706</td><td class="num-col">0.263</td><td class="num-col">0.282</td><td class="num-col">0.748</td></tr>
+          <tr><td>FedAttr-Agg</td><td class="num-col">0.706</td><td class="num-col">0.416</td><td class="num-col">0.280</td><td class="num-col">0.743</td></tr>
+          <tr><td>Fed-XAI</td><td class="num-col">0.593</td><td class="num-col">0.211</td><td class="num-col">0.268</td><td class="num-col">0.552</td></tr>
+          <tr class="highlight"><td>xFedAlign</td><td class="num-col">0.710</td><td class="num-col">0.166</td><td class="num-col">0.263</td><td class="num-col">0.735</td></tr>
+
+          <tr class="group"><td colspan="5">MRI Alzheimer&apos;s · non-IID (real-world)</td></tr>
+          <tr><td>FedAvg</td><td class="num-col">0.464</td><td class="num-col">·</td><td class="num-col">·</td><td class="num-col">·</td></tr>
+          <tr><td>Local-XAI</td><td class="num-col">0.696</td><td class="num-col">0.048</td><td class="num-col">0.356</td><td class="num-col">0.481</td></tr>
+          <tr><td>Fed-XAI</td><td class="num-col">0.357</td><td class="num-col">0.134</td><td class="num-col">0.154</td><td class="num-col">0.443</td></tr>
+          <tr class="highlight"><td>xFedAlign</td><td class="num-col">0.779</td><td class="num-col">0.002</td><td class="num-col">0.336</td><td class="num-col">0.686</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">
+      <span class="leg"><span class="sw" style="background:var(--magenta);"></span> xFedAlign (ours)</span>
+      Lower is better for EDI and Deletion AUC. Higher is better for Accuracy and Insertion AUC. Full results across six benchmarks and IID settings are in the paper.
+    </p>
+  </div>
+</section>
+
+<!-- ============ ROBUSTNESS ============ -->
+<section id="robustness">
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">vi</span> Privacy &amp; robustness</div>
+    <h2>Hardened against <em>poisoning</em> and <em>inference</em>.</h2>
+    <p class="lead" style="max-width: 760px;">
+      Transmitting only lightly noised top-<em>k</em> artifacts under secure aggregation,
+      then median-fusing them into the prior, yields the lowest membership inference
+      accuracy across all methods and the smallest degradation under attribution
+      poisoning.
+    </p>
+
+    <div class="robust-grid">
+      <div class="rfig r1">
+        <div class="rh">
+          <span class="ttl">Top-128 overlap shift, IID</span>
+          <span class="tag">poisoning</span>
+        </div>
+        <img src="./figures/iid_atk_topk_drop.png" alt="Top-128 overlap shift under poisoning, IID partition">
+        <p>
+          At a 20% poisoning ratio every baseline jumps to a 0.38 shift, while
+          xFedAlign stays near <strong>zero</strong>. The crossover happens almost a
+          full ρ later.
+        </p>
+      </div>
+      <div class="rfig r2">
+        <div class="rh">
+          <span class="ttl">Explanation drift, non-IID</span>
+          <span class="tag">ΔJSD</span>
+        </div>
+        <img src="./figures/non_iid_atk_delta_edi.png" alt="Change in explanation drift index under poisoning, non-IID partition">
+        <p>
+          Drift induced by malicious clients rises <strong>sub-linearly</strong> for
+          xFedAlign and remains strictly below every baseline across all attack
+          strengths.
+        </p>
+      </div>
+    </div>
+
+    <div class="robust-callout">
+      <div class="bignum">0.434</div>
+      <p>
+        <strong>Membership inference accuracy</strong> on MNIST IID, the lowest among
+        all evaluated methods. The advantage over a random guesser is just
+        <strong>0.004</strong>, validating that explanation alignment can be both
+        useful and private.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CITE ============ -->
+<section id="cite">
+  <div class="wrap reveal">
+    <div class="section-label"><span class="num">vii</span> Cite</div>
+    <h2>If this work is useful, <em>cite it.</em></h2>
+    <p style="max-width: 720px;">
+      Paper to appear in the <em>Proceedings of the 43rd International Conference on
+      Machine Learning</em>, Seoul, South Korea, 2026.
+    </p>
+
+    <div class="bibtex-block">
+      <button class="copy-btn" id="copyBibtex">Copy</button><span id="bibtex">@inproceedings{wasif2026xfedalign,
+  title     = {Explainable Federated Learning via Global-Local Attribution Alignment},
+  author    = {Wasif, Dawood and Moore, Terrence J. and Lu, Chang-Tien and Cho, Jin-Hee},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning},
+  series    = {PMLR 306},
+  year      = {2026},
+  address   = {Seoul, South Korea},
+}</span>
+    </div>
+
+    <div class="ack">
+      <div class="lbl">Acknowledgements</div>
+      <p>
+        This work was supported in part by the National Science Foundation under Award
+        No. 2107450 and by the Army Research Office under Grant No. W911NF-24-2-0241.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="left">Dawood Wasif · Virginia Tech · 2026</div>
+      <div class="right">xFedAlign · ICML 2026</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+  reveals.forEach((el) => io.observe(el));
+
+  document.getElementById('copyBibtex').addEventListener('click', () => {
+    const text = document.getElementById('bibtex').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBibtex');
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = orig; }, 1600);
+    });
+  });
+</script>
+
+</body>
+</html>

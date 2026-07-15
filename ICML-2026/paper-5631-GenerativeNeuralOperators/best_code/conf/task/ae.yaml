@@ -1,0 +1,46 @@
+# @package _global_
+# Base autoencoder task configuration
+# Can be overridden by dataset-specific configs (e.g., darcy/ae.yaml, ks/ae.yaml)
+defaults:
+  - /optimizer@autoencoder.optimizer: adamw
+  # Model selection: override in dataset-specific configs
+  # Options: encoder1d/decoder1d for 1D, encoder2d/decoder2d for 2D
+  - /model@autoencoder.encoder: ???
+  - /model@autoencoder.decoder: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: ae
+
+# Model name (override in dataset-specific configs)
+ae_model_name: ???
+
+autoencoder:
+  pretrained_ckpt: null
+
+  training:
+    epochs: 500
+    batch_size: 128
+    num_workers: 4
+    normalization_mode: gaussian
+    check_val_every_n_epoch: 25
+    gradient_clip_val: 1.0
+    gradient_clip_algorithm: norm
+
+  # VAE parameters
+  double_z: true
+  kl_weight: 1e-6
+
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${autoencoder.training.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+

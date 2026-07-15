@@ -1,0 +1,36 @@
+clients:
+  - endpoint_id: "4f53131b-e59d-465f-9153-efe9b02d9f3e"
+    client_id: "Client1"
+    train_configs:
+      # Device
+      device: "cpu"
+      # Logging and outputs
+      logging_output_dirname: "./output"
+      logging_output_filename: "result"
+
+    # Local dataset
+    data_configs:
+      dataset_path: "./resources/dataset/flamby_dataset.py"
+      dataset_name: "get_flamby"
+      dataset_kwargs:
+        dataset: "HeartDisease"
+        num_clients: 4
+        client_id: 0
+
+  - endpoint_id: "98b30895-3677-432b-8e8c-da72b093c565"
+    client_id: "Client2"
+    train_configs:
+      # Device
+      device: "cpu"
+      # Logging and outputs
+      logging_output_dirname: "./output"
+      logging_output_filename: "result"
+
+    # Local dataset
+    data_configs:
+      dataset_path: "./resources/dataset/flamby_dataset.py"
+      dataset_name: "get_flamby"
+      dataset_kwargs:
+        dataset: "HeartDisease"
+        num_clients: 4
+        client_id: 1

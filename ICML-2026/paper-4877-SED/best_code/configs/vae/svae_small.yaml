@@ -1,0 +1,26 @@
+sample_every: 1000
+name: "svae_small"
+trainer:
+  accelerator: "auto"
+  benchmark: true
+  max_steps: 100000
+  logger: 
+    class_path: lightning.pytorch.loggers.WandbLogger
+    init_args:
+      project: "sed"  # TODO: check project
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        filename: "{step:06}"
+        verbose: true
+        save_last: true
+        save_top_k: 1
+        monitor: "val/loss"
+model:
+  class_path: sed.models.vae.svae.SVAE
+  init_args:
+    num_layers: 3
+    d_model: 128
+    d_ff: 512
+    h: 2
+    lr: null

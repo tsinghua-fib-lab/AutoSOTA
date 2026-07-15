@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Backbone / tilt · tslviz</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link">Combined products</a>
+            <a href="/pages/components.html" class="nav-link">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link active">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Backbone and tilt per axis</h2>
+            <p class="plot-desc">Decomposition of each one-dimensional component
+                into a symmetric <em>backbone</em> b<sub>j</sub> and an asymmetric
+                <em>tilt</em> d<sub>j</sub> at a chosen iteration.</p>
+
+            <div class="controls">
+                <div class="control"><label>Run</label><select id="runSelect"></select></div>
+                <div class="control"><label>Stage</label><select id="epochSelect"></select></div>
+                <div class="control"><label>Product</label><select id="treeSelect" multiple></select></div>
+                <div class="control"><label>Iteration</label><input type="range" id="iterationRange" min="0" max="10"
+                        value="0" step="1" /><span id="iterationValue">0</span></div>
+                <div class="control"><label>Merged:</label><input type="checkbox" id="mergedToggle" /></div>
+                <div class="control"><label>Combined:</label><input type="checkbox" id="combinedToggle" /></div>
+                <div class="control"><label>Log Y scale:</label><input type="checkbox" id="logScaleToggle" /></div>
+                <div class="control"><label>Color by &lambda; gradient:</label><input type="checkbox"
+                        id="lambdaGradientToggle" checked /></div>
+                <div class="control"><label>Highlight combination choices:</label><input type="checkbox"
+                        id="highlightChoiceToggle" /></div>
+            </div>
+
+            <div id="axesGrid" class="charts-grid"></div>
+        </section>
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/component_page_shared.js"></script>
+    <script src="/js/pages/backbone_tilt.js"></script>
+</body>
+
+</html>

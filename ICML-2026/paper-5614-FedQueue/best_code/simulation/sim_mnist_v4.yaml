@@ -1,0 +1,44 @@
+# FedQueue V4 config
+data_configs:
+  dataset_name: "MNIST"
+  dataset_backend: "torchvision"
+  data_dir: "/datasets"
+  download: False
+  partition: "dirichlet"
+  partition_kwargs:
+    data_seed: 42
+    test_size: 0.2
+    dirichlet_alpha: 0.5
+    dirichlet_min_size: 2
+
+model_configs:
+  model_path: "./cnn.py"
+  model_name: "CNN"
+  model_kwargs:
+    num_channel: 1
+    num_pixel: 28
+    num_classes: 10
+
+loss_fn_path: "./celoss.py"
+loss_fn_name: "CELoss"
+metric_path: "./acc.py"
+metric_name: "accuracy"
+
+num_clients: 4
+n_rounds: 50
+batch_size: 64
+base_lr: 0.003
+device: "cuda:0"
+
+# FedQueue paper parameters
+Tsync: 10.0
+delta: 2.0
+ewma_alpha: 0.5
+queue_rho: 0.9
+queue_sigma: 0.4
+queue_seed: 42
+staleness_beta: 0.5
+warmup_steps: 10
+alpha_admission: 0.2
+target_accuracy: 95.0
+compute_rate: 0.25

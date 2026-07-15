@@ -1,0 +1,39 @@
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "GridFMTrainer" # customizable trainer class
+    trainer_path: "./resources/trainer/gridfm_graphkit_trainer.py"
+    mode: "epoch"
+    num_local_epochs: 1
+    optim: "Adam"
+    optim_args:
+      lr: 0.0001
+    # Client validation
+    do_validation: True
+    do_pre_validation: False
+    # Differential privacy
+    use_dp: False
+    train_batch_size: 16
+    eval_batch_size: 16
+
+  model_configs:
+    model_path: "./resources/model/gridfm_graphkit_model.py"
+    model_name: "get_gridfm_graphkit_model"
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  device: "cpu"
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: 0.0.0.0:50051
+      max_message_size: 1048576
+      use_ssl: False

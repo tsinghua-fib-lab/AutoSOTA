@@ -1,0 +1,25 @@
+_target_: "models.diffusion.cond_unet1d.CondUnet1d"
+model_name: "CondUnet1d"
+
+# -----------------------------------------------------------------------------
+# Constructor args (explicit, including defaults)
+# -----------------------------------------------------------------------------
+# NOTE: Order matches `CondUnet1d.__init__` in `src/models/diffusion/cond_unet1d.py`.
+
+# (1) Optional (defaults explicit)
+input_channels: 1
+# null = use default behavior (output_channels := input_channels)
+output_channels: null
+
+# Condition channels (expects `c` to be passed in as [B, c_dim, L] or [B, c_dim]).
+c_dim: 1
+
+dim: 32
+dim_mults: [1, 2, 4, 8]
+time_emb_dim: 32
+num_res_blocks: 2
+attn_resolutions: [32]
+resolution: 256
+activation: "SiLU"
+dropout: 0.0
+padding_mode: "circular"

@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Fast evaluation script for optimization iterations. Runs point estimates + stability without bootstrap."""
+import sys, json, argparse
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+import pandas as pd, numpy as np
+from src.data_loader import load_single_csv
+from src.scoring import compute_all_scores, create_comparison_table, compute_ranking_stability
+from src.majority_vote import get_class_values
+
+def extract_metrics(results, stability_df, dataset_name):
+    """Extract key metrics for optimization tracking."""
+    metrics = {}
+    comparison = create_comparison_table(results)
+    for _, row in comparison.iterrows():
+        agent = row['agent_id']
+        metrics[f'Agent_Score_MV_{agent}'] = round(float(row['score_mv']), 6)
+        metrics[f'Agent_Score_DS_{agent}'] = round(float(row['score_ds']), 6)
+        metrics[f'Agent_Score_PEC_{agent}'] = round(float(row['score_pec']), 6)
+    if stability_df is not None:
+        for _, row in stability_df.iterrows():
+            method_short = {'Majority Vote': 'MV', 'Dawid-Skene (Hard)': 'DS', 'Posterior Expected Credit': 'PEC'}[row['method']]
+            metrics[f'Ranking_Stability_{method_short}_MeanRankStd'] = round(float(row['mean_rank_std']), 6)
+            metrics[f'Ranking_Stability_{method_short}_MeanRankRange'] = round(float(row['mean_rank_range']), 6)
+    return metrics
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-dir', default='data/processed')
+    parser.add_argument('--output-dir', default='results')
+    parser.add_argument('--stability', type=int, default=50)
+    parser.add_argument('--pec-temperature', type=float, default=1.0, help='Temperature for PEC gamma scaling (>1=softer)')
+    parser.add_argument('--dirichlet-adaptive', type=float, default=0.0, help='IDEA-11: adaptive Dirichlet prior strength C (0=disabled)')
+    parser.add_argument('--pec-consistency-weight', type=float, default=0.0, help='IDEA-02: consistency weight alpha for PEC (0=disabled)')
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--dataset', default=None, help='Process only this dataset (stem name)')
+    parser.add_argument('--json-out', default=None, help='Write metrics as JSON to this file')
+    args = parser.parse_args()
+    np.random.seed(args.seed)
+    data_dir = Path(args.data_dir)
+    csv_files = sorted(data_dir.glob('*.csv'))
+    if args.dataset:
+        csv_files = [f for f in csv_files if f.stem == args.dataset]
+        if not csv_files:
+            print(f'Error: dataset {args.dataset} not found')
+            sys.exit(1)
+    all_metrics = {}
+    for csv_file in csv_files:
+        dataset_name = csv_file.stem
+        print(f'\n===== {dataset_name} =====')
+        df = load_single_csv(csv_file)
+        n_classes = df['label'].nunique()
+        class_values = get_class_values(n_classes)
+        results = compute_all_scores(df, n_classes=n_classes, class_values=class_values, verbose=True, pec_temperature=args.pec_temperature, adaptive_c=args.dirichlet_adaptive, consistency_alpha=args.pec_consistency_weight)
+        stability_df = None
+        if args.stability > 0:
+            print('\n--- Stability ---')
+            stability_df = compute_ranking_stability(df, n_subsets=args.stability, n_classes=n_classes, class_values=class_values, random_state=args.seed, verbose=True)
+            print(stability_df.to_string(index=False))
+        comparison = create_comparison_table(results)
+        print(f'\n--- Scores ---')
+        print(comparison[['agent_id','score_mv','score_ds','score_pec']].to_string(index=False))
+        metrics = extract_metrics(results, stability_df, dataset_name)
+        all_metrics[dataset_name] = metrics
+        output_dir = Path(args.output_dir) / dataset_name
+        output_dir.mkdir(parents=True, exist_ok=True)
+        comparison.to_csv(output_dir / 'agent_scores_comparison.csv', index=False)
+        if stability_df is not None:
+            stability_df.to_csv(output_dir / 'ranking_stability.csv', index=False)
+        results.majority_vote.to_csv(output_dir / 'scores_majority_vote.csv', index=False)
+        results.dawid_skene_hard.to_csv(output_dir / 'scores_dawid_skene.csv', index=False)
+        results.posterior_expected_credit.to_csv(output_dir / 'scores_pec.csv', index=False)
+    print(f'\n===== ALL METRICS =====')
+    print(json.dumps(all_metrics, indent=2))
+    if args.json_out:
+        with open(args.json_out, 'w') as f:
+            json.dump(all_metrics, f, indent=2)
+        print(f'Metrics written to {args.json_out}')
+
+if __name__ == '__main__':
+    main()

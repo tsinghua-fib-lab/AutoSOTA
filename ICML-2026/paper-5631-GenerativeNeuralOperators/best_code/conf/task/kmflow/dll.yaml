@@ -1,0 +1,34 @@
+# @package _global_
+defaults:
+  - /task/dll  # Base DLL task config
+  - override /optimizer@operatorencoder.optimizer: adamw
+  - override /optimizer@dll.optimizer: adamw
+  - override /model@dll.model: cond_mlp
+  - override /model@dll.model.c_embedder: fno2d_emb
+
+  # Use the shared FNO2d config as the OperatorEncoder backbone
+  - override /model@operatorencoder.model: fno2d
+  - override /model@operatorencoder.output_embedder: fno2d_emb
+  - _self_
+
+evaluation:
+  mode: rollout
+
+training_oe:
+  batch_size: 32
+training_dll:
+  batch_size: 32
+
+operatorencoder:
+  model:
+    out_channels: ${dll.model.x_dim}
+  output_embedder:
+    input_dim: 1
+
+dll:
+  T: 10
+  test_samples_per_example: 32
+  rollout_k_chunk: 8
+  rollout_traj_chunk: 16
+
+

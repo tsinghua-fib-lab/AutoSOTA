@@ -1,0 +1,50 @@
+# configs/models/eb.yaml
+# WLM training config for EB dataset (interpolate / leave-one-out).
+
+device: cuda
+
+# Training
+num_epochs: 10000
+substeps_per_dt: 1
+dt_eval: 0.2
+integrator: v
+loss_type: geom_sinkhorn
+geom_p: 1
+vel: bundle  # estimated RNA velocity
+
+eval_mode: interpolate
+
+# Optimizer
+lr: 1.0e-4
+weight_decay: 1.0e-3
+
+# Friction
+friction: 1.00
+learnable_friction: true
+friction_lr: 1.0e-2
+
+# Fixed kernel blur (learned from EB dataset)
+kernel_blur: 1.25
+
+# Logging / outputs
+gif_frame_skip: 1
+gif_fps: 1
+ckpt_every: 0
+eval_every: 500
+gif_every: 0
+
+# Model architecture
+arch: attn_flow
+dropout: 0.1
+attn_heads: 4
+attn_hidden_dim: 64
+attn_layers: 4
+ff_dim: 256
+use_time: false
+
+use_ema: true
+ema_decay: 0.999
+ema_friction: false
+
+# W&B
+wandb_project: eb_wlm

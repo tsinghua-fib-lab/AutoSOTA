@@ -1,0 +1,87 @@
+# @package _global_
+# Base probabilistic diffusion model task configuration
+# Can be overridden by dataset-specific configs (e.g., darcy/dll.yaml, ks/dll.yaml)
+defaults:
+  - /optimizer@operatorencoder.optimizer: adamw
+  - /optimizer@dll.optimizer: adamw
+  # DLL model selection: override in dataset-specific configs
+  # Options: cond_mlp
+  - /model@dll.model: cond_mlp
+  # Condition embedder selection: override in dataset-specific configs
+  # Options: fno1d_emb, fno2d_emb, cnn1d_emb, cnn2d_emb
+  - /model@dll.model.c_embedder: ???
+  # OperatorEncoder backbone selection: override in dataset-specific configs
+  # Options: fno1d, fno2d
+  - /model@operatorencoder.model: ???
+  # Used by OperatorEncoder to predict last-layer weights from targets (y)
+  # Override in dataset-specific configs based on dimensionality (1d vs 2d)
+  - /model@operatorencoder.output_embedder: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: dll
+
+evaluation:
+  mode: ???
+
+# Stage 1: OperatorEncoder training (if no pretrained checkpoint is provided)
+training_oe:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+operatorencoder:
+  pretrained_ckpt: null
+
+  # Base config comes from model config (e.g., fno1d.yaml, fno2d.yaml).
+  # Override to make the backbone emit a feature field with channels matching flow target dim.
+  model:
+    out_channels: ${dll.model.x_dim}
+
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${training_oe.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+
+# Stage 2: DLL training
+training_dll:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+dll:
+  pretrained_ckpt: null
+  # model/optimizer are selected via defaults and placed under `dll.*`
+  T: 10
+  samples_per_example: 8
+  ema_decay: 0.999
+  test_samples_per_example: null
+  eval_solver: heun
+  rollout_k_chunk: 8
+  rollout_traj_chunk: null
+
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${training_dll.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+

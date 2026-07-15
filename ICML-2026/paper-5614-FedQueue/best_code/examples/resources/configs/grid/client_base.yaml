@@ -1,0 +1,21 @@
+client_id: "Client1"
+train_configs:
+  # Device
+  device: "cpu"
+  # Logging and outputs
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# Local dataset
+data_configs:
+  dataset_path: "./resources/dataset/gridfm_graphkit_dataset.py"
+  dataset_name: "get_gridfm_graphkit_dataset"
+  dataset_kwargs:
+    num_clients: 2
+    client_id: 0
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

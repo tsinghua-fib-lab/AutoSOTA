@@ -1,0 +1,89 @@
+site_name: TSL — Tensor Separation Learning
+site_description: >-
+  Mathematical reference and codebase documentation for TSL, a glass-box
+  regression model whose fitted form is a sum of ordered-difference rank-1
+  separable stages.
+site_author: Jinyang Liu
+site_url: https://jyliuu.github.io/TSL/
+repo_url: https://github.com/jyliuu/TSL
+repo_name: jyliuu/TSL
+edit_uri: edit/main/docs/docs/
+
+# Content lives in docs/docs/ (this config sits inside the self-contained docs/ folder).
+docs_dir: docs
+
+theme:
+  name: material
+  logo: assets/img/logo.svg
+  favicon: assets/img/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    # Collapsible (drop-down) sidebar groups: omit navigation.sections so each
+    # top-level group expands/collapses on click.
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting started: guides/getting-started.md
+  - Guide:
+      - Python API: code/python-api.md
+      - Plotting API: code/plotting.md
+      - R API: code/r-api.md
+      - Hyperparameters: guides/hyperparameters.md
+      - Visualization dashboard (WIP): guides/visualizing.md
+  - Rust backend:
+      - Architecture: code/architecture.md
+      - GridTensor: code/grid-tensor.md
+      - StagePredictor: code/stage-predictor.md
+      - TSL: code/forest.md
+      - Logging: code/logging.md
+  - Under the hood:
+      - Notation: math/index.md
+      - The model: math/model.md
+      - Fitting: math/fitting.md
+      - Bagging & aggregation: math/bagging-aggregation.md
+      - Partial dependence: math/partial-dependence.md

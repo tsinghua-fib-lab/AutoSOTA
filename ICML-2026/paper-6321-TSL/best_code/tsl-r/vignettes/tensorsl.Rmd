@@ -1,0 +1,110 @@
+---
+title: "Getting started with tensorsl"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with tensorsl}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(tensorsl)
+```
+
+## What is TSL
+
+TSL (Tensor Separation Learning) is a glass-box regression model. A fitted model
+is a sum of *stages*; each stage is the ordered difference of two non-negative
+rank-1 products of univariate functions. Concretely, a stage predicts
+$f = \lambda_+ \prod_j b_j e^{d_j} - \lambda_- \prod_j b_j e^{-d_j}$, where the
+per-feature backbone $b_j \ge 0$ is a shared magnitude (a gate) and the tilt
+$d_j \in \mathbb{R}$ is the signed direction. Because every piece is univariate
+and separable, you can read off what the model learned feature by feature.
+
+## Fit and predict
+
+We build a synthetic, mostly-separable regression problem on a `400 x 3` matrix
+with named columns. The true response is roughly additive in three features, so
+the glass-box story is easy to check.
+
+```{r data}
+set.seed(1)
+n <- 400
+x <- matrix(runif(n * 3, -2, 2), ncol = 3,
+            dimnames = list(NULL, c("a", "b", "c")))
+y <- 2 * x[, "a"] - x[, "b"] + 0.5 * x[, "c"] + rnorm(n, sd = 0.1)
+```
+
+Split into train and test sets, fit a small boosted model, and predict.
+
+```{r fit}
+train <- 1:300
+test  <- 301:400
+
+model <- tsl(x[train, ], y[train],
+             epochs = 8L, n_trees = 6L, seed = 1L, verbosity = 0L)
+print(model)
+
+pred <- predict(model, x[test, ])
+rmse <- sqrt(mean((y[test] - pred)^2))
+rmse
+```
+
+## Inspecting the glass box
+
+`tsl_components()` returns the fitted structure in two-tensor form, with one
+entry per boosting stage.
+
+```{r components}
+comp <- tsl_components(model)
+length(comp)            # one entry per stage
+str(comp[[1]], max.level = 1)
+```
+
+Per stage, `scaling_plus` and `scaling_minus` are the OLS coefficients on the
+$+$ and $-$ branches -- the only place scaling is applied. `combined_grid_tensor`
+is the aggregated representative component for the stage, and `grid_tensors` is
+the per-tree bag it was aggregated from.
+
+Each grid tensor stores, per feature, the interval `splits`, the non-negative
+gate magnitude `backbone_values` ($b \ge 0$), the signed direction
+`tilt_values` ($d$), and the `observation_counts` per interval, plus the branch
+scalars `lambda_plus` and `lambda_minus`.
+
+```{r grid-tensor}
+str(comp[[1]]$grid_tensors[[1]], max.level = 1)
+```
+
+## Marginal effect plot
+
+To see what the model learned about a single feature, sweep that feature across
+a grid while holding the others at their medians, then predict along the sweep.
+Here we recover the (roughly linear) effect of feature `a`.
+
+```{r marginal, fig.width = 6, fig.height = 4}
+grid_a <- seq(-2, 2, length.out = 100)
+medians <- apply(x[train, ], 2, median)
+
+newx <- matrix(rep(medians, each = length(grid_a)), ncol = 3,
+               dimnames = list(NULL, c("a", "b", "c")))
+newx[, "a"] <- grid_a
+
+plot(grid_a, predict(model, newx), type = "l",
+     xlab = "a", ylab = "predicted f",
+     main = "Marginal effect of feature a")
+```
+
+The response rises monotonically with `a`, matching the true `2 * a` term.
+
+## Reproducibility and Python parity
+
+The hyperparameters mirror the Python `TSLRegressor`, so a fit with the same
+data and `seed` reproduces the Python results. Within R, two fits with the same
+seed are identical down to the fitted components.
+
+```{r reproducibility}
+m1 <- tsl(x[train, ], y[train], epochs = 8L, n_trees = 6L, seed = 1L, verbosity = 0L)
+m2 <- tsl(x[train, ], y[train], epochs = 8L, n_trees = 6L, seed = 1L, verbosity = 0L)
+identical(tsl_components(m1), tsl_components(m2))
+```

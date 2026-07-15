@@ -1,0 +1,44 @@
+# Identity baseline - for comparison purposes
+# This uses scale_only with scale=1.0, which is equivalent to identity
+# Run with --eval-only flag since there are no meaningful parameters to train
+
+experiment_name: "identity_baseline"
+seed: 42
+
+model:
+  name: "meta-llama/Meta-Llama-3.1-8B-Instruct"
+  device_map: "auto"
+  dtype: "bfloat16"
+  enable_gradient_checkpointing: true
+
+data:
+  labels_file: "data/goodfire_8b_sae_labels.json"  # gunzip data/goodfire_8b_sae_labels.json.gz first
+  batch_size: 80
+  shuffle: false  # No need to shuffle for eval-only
+  num_workers: 4
+  eos_token: "<|eot_id|>"
+  strip_labels: True
+
+projection:
+  type: "scale_only"  # f(x) = scale * x, with scale=1.0 this is identity
+  normalize_input: true
+  init_scale: 1.0  # Identity: don't scale
+
+soft_prompt:
+  template: |-
+    <|begin_of_text|><|start_header_id|>user<|end_header_id|>
+
+    What is the meaning of "<|reserved_special_token_0|>"?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+    The meaning of "<|reserved_special_token_0|>" is "
+
+# Minimal training config (won't actually train if using --eval-only)
+training:
+  learning_rate: 0.0  # No training
+  num_epochs: 1
+  validation_every_n_steps: 9999999  # Don't validate during "training"
+  val_fraction: 1.0  # Use full validation set for final eval
+  checkpoint_dir: "./checkpoints"
+
+logging:
+  use_wandb: false  # Disable for simple baseline eval

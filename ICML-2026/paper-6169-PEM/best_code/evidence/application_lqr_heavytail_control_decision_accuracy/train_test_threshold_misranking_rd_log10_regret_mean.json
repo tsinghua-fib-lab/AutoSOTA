@@ -1,0 +1,101 @@
+{
+  "input": "evidence/application_lqr_heavytail_control_decision_accuracy/decision_points.csv",
+  "loss": {
+    "eps": 1e-12,
+    "name": "log10"
+  },
+  "probe_key": "misranking_rd",
+  "selected_threshold": 0.09,
+  "selection": {
+    "criterion": "minimize train_regret_mean, tie-break by smaller threshold",
+    "train_label_berw_rate": 0.68
+  },
+  "split": {
+    "test_instances": [
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "train_instances": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ]
+  },
+  "test": {
+    "confusion": {
+      "accuracy": 0.4,
+      "n": 25,
+      "pred_cma_label_cma": 2,
+      "pred_cma_label_berw": 2,
+      "pred_berw_label_cma": 13,
+      "pred_berw_label_berw": 8,
+      "pred_berw_rate": 0.84
+    },
+    "regret": {
+      "mean": 0.0643436307708335,
+      "median": 0.024231880441330844,
+      "q90": 0.17471972690362345
+    }
+  },
+  "train": {
+    "confusion": {
+      "accuracy": 0.72,
+      "n": 25,
+      "pred_cma_label_cma": 1,
+      "pred_cma_label_berw": 0,
+      "pred_berw_label_cma": 7,
+      "pred_berw_label_berw": 17,
+      "pred_berw_rate": 0.96
+    },
+    "regret": {
+      "mean": 0.007392087133208225,
+      "median": 0.0,
+      "q90": 0.019577045124574893
+    }
+  }
+}

@@ -1,0 +1,29 @@
+client_configs:
+  train_configs:
+    trainer: "LLMDummyTrainer"
+
+  model_configs:
+    model_path: "./resources/model/hf_llm.py"
+    model_name: "load_hf_llm"
+    model_kwargs:
+      model_name: "meta-llama/Llama-3.1-8B"
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  device: "cpu"
+  num_global_epochs: 3
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 104857600  # 100MB for LLM parameters
+      use_ssl: False
+      use_model_chunking: True
+      model_chunk_size: 4294967296  # 4GB

@@ -1,0 +1,52 @@
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "VanillaTrainer"
+    mode: "step"
+    num_local_steps: 10  # Reduced for faster profiling
+    optim: "Adam"
+    optim_args:
+      lr: 0.01
+    # Loss function
+    loss_fn_path: "./resources/loss/celoss.py"
+    loss_fn_name: "CELoss"
+    # Client validation
+    do_validation: True
+    do_pre_validation: False  # Disable to focus on training memory
+    metric_path: "./resources/metric/acc.py"
+    metric_name: "accuracy"
+    # Differential privacy (disabled)
+    use_dp: False
+    # Data loader
+    train_batch_size: 16  # Small batch size for memory profiling
+    val_batch_size: 16
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/resnet.py"
+    model_name: "ResNet18"  # ~11M parameters - good for memory testing
+
+  comm_configs:
+    compressor_configs:
+      enable_compression: False  # Disable compression for pure memory testing
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+  device: "cpu"
+  num_global_epochs: 5  # Reduced for faster profiling
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 10485760  # 10MB for ResNet parameters
+      use_ssl: False
+      use_model_chunking: True
+      model_chunk_size: 10485760 # 10MB chunk size for ResNet parameters

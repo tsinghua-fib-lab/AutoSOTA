@@ -1,0 +1,39 @@
+# @package _global_
+# Base regression task configuration
+# Can be overridden by dataset-specific configs (e.g., darcy/regression.yaml, ks/regression.yaml)
+defaults:
+  - /optimizer: adamw
+  # Model selection: override in dataset-specific configs
+  # Options: fno1d, fno2d, unet1d, unet2d
+  - /model: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: regression
+
+evaluation:
+  mode: ???
+
+# Train loop settings
+training:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+# Cosine annealing learning rate scheduler
+scheduler:
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${training.epochs}
+    eta_min: 0.0
+  interval: epoch
+  frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+

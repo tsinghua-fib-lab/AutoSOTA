@@ -1,0 +1,59 @@
+stylegan_ver: 2
+img_size: &HQ_SIZE [256, 256]
+output_size: 256
+verbose: true
+num_epochs: 25
+num_warmup_iters: 150
+num_x_iters: 300
+num_k_iters: 200
+x_lr: !!float 0.2
+k_lr: !!float 5e-4
+warmup_k_path: experiments/pretrained/kernel.pth
+reg_noise_std: !!float 0.001
+duplicates: 1
+batch_size: 1
+loss_str: '100*L2+0.1*GEOCROSS'
+eps: !!float 1e-15
+noise_type: trainable
+num_trainable_noise_layers: 5
+bad_noise_layers: '17'
+optimizer_name: adam
+lr_schedule: linear1cycledrop
+save_intermediate: true
+tile_latent: ~
+seed: ~
+
+ImageDIP:
+    input_nc: 8
+    output_nc: 3
+    nf: 64
+    norm: none
+    padding_type: reflect
+
+KernelDIP:
+    nf: 64
+    n_blocks: 6
+    padding_type: reflect
+    use_dropout: false
+    kernel_dim: 512
+    norm: none
+
+KernelWizard:
+  pretrained: experiments/pretrained/GOPRO_woVAE.pth
+  input_nc: 3
+  nf: 64
+  front_RBs: 10
+  back_RBs: 20
+  N_frames: 1
+  kernel_dim: 512
+  img_size: *HQ_SIZE
+  use_vae: false
+  KernelExtractor:
+    norm: none
+    use_sharp: true
+    n_blocks: 4
+    padding_type: reflect
+    use_dropout: false
+  Adapter:
+    norm: none
+    use_dropout: false

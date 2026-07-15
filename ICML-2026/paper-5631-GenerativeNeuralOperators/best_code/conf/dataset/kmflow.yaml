@@ -1,0 +1,31 @@
+_target_: data.build_kmflow_dataset
+
+data_name: KMFlow
+
+dataset_dir: "datasets"
+filename: "kmflow.pt"
+save_data: true
+verbose: true
+overwrite: false
+return_trajectories: true
+
+# apebench KolmogorovFlow (2D)
+num_spatial_dims: 2
+num_points: 128
+
+# "Saved" timestep
+dt: 0.25
+# Internal substepping: dt_sim = dt / num_substeps
+num_substeps: 25
+
+# Dataset sizes / horizons (same idea as your KS code)
+num_train_samples: 256
+train_temporal_horizon: 50
+
+# NOTE: this will be split into half val + half test inside `build_kmflow_dataset`
+num_test_samples: 32
+test_temporal_horizon: 100
+
+num_warmup_steps: 400
+train_seed: 0
+test_seed: 773

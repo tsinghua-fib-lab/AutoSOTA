@@ -1,0 +1,26 @@
+# @package _global_
+defaults:
+  - /task/dropout
+  - override /optimizer: adamw
+  - override /model: fno2d
+  - _self_
+
+evaluation:
+  mode: stochastic
+
+training:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+
+model:
+  channel_mlp_dropout: 0.2
+
+dropout:
+  samples_per_example: 32
+  test_samples_per_example: 32
+  # Keep stochastic evaluation memory bounded (MC-dropout expands batch by K internally).
+  stochastic_n_chunk: 8
+  stochastic_k_chunk: 4
+

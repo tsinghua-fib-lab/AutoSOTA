@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "${ROOT}"
+
+duration_us="${1:-1000000}"
+PANTHEON_ROOT="${PANTHEON_ROOT:-../Pantheon}"
+PROFILE_ROOT="${PROFILE_ROOT:-../Pantheon_Datasets_Models/3_Exported_JIT_Models}"
+
+for app in indoor_smart_traffic robot uav; do
+  echo "== ${app} / jetson_xavier_nx preset =="
+  python3 -m rtinfer.simulate \
+    --device-preset jetson_xavier_nx \
+    --deploy-json "${PANTHEON_ROOT}/experiments/settings/deploy/${app}.json" \
+    --workload-json "${PANTHEON_ROOT}/experiments/settings/workload/${app}.json" \
+    --profile-root "${PROFILE_ROOT}" \
+    --pantheon-repo "${PANTHEON_ROOT}" \
+    --duration-us "${duration_us}"
+done

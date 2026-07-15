@@ -1,0 +1,20 @@
+# EB single-cell leave-one-out interpolation: 3 holdouts × 5 seeds = 15 runs.
+# Reproduce: RUNS_DIR=eb sbatch --array=0-14 scripts/sbatch_run.sbatch runlists/eb.tsv
+# Architecture/method hyperparameters live in configs/models/eb.yaml.
+# Experimental knobs (num_epochs, particles_per_batch) are surfaced here for visibility.
+
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h1_s0	0	--holdout-marginals 1	--set particles_per_batch=1024	--set wandb_tags=eb,h1,s0
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h1_s1	1	--holdout-marginals 1	--set particles_per_batch=1024	--set wandb_tags=eb,h1,s1
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h1_s10	10	--holdout-marginals 1	--set particles_per_batch=1024	--set wandb_tags=eb,h1,s10
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h1_s11	11	--holdout-marginals 1	--set particles_per_batch=1024	--set wandb_tags=eb,h1,s11
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h1_s100	100	--holdout-marginals 1	--set particles_per_batch=1024	--set wandb_tags=eb,h1,s100
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h2_s0	0	--holdout-marginals 2	--set particles_per_batch=1024	--set wandb_tags=eb,h2,s0
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h2_s1	1	--holdout-marginals 2	--set particles_per_batch=1024	--set wandb_tags=eb,h2,s1
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h2_s10	10	--holdout-marginals 2	--set particles_per_batch=1024	--set wandb_tags=eb,h2,s10
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h2_s11	11	--holdout-marginals 2	--set particles_per_batch=1024	--set wandb_tags=eb,h2,s11
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h2_s100	100	--holdout-marginals 2	--set particles_per_batch=1024	--set wandb_tags=eb,h2,s100
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h3_s0	0	--holdout-marginals 3	--set particles_per_batch=1024	--set wandb_tags=eb,h3,s0
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h3_s1	1	--holdout-marginals 3	--set particles_per_batch=1024	--set wandb_tags=eb,h3,s1
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h3_s10	10	--holdout-marginals 3	--set particles_per_batch=1024	--set wandb_tags=eb,h3,s10
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h3_s11	11	--holdout-marginals 3	--set particles_per_batch=1024	--set wandb_tags=eb,h3,s11
+eb	configs/data/eb.yaml	configs/models/eb.yaml	h3_s100	100	--holdout-marginals 3	--set particles_per_batch=1024	--set wandb_tags=eb,h3,s100

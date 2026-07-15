@@ -1,0 +1,11 @@
+# Client-specific Docker image with pre-loaded data
+FROM appfl/client:latest
+
+# Copy client 2's data into the image (requires data to be in build context)
+COPY ./tes-data/client_1/ /data/
+
+# Set data directory environment variable
+ENV DATA_DIR=/data
+
+# Verify data was copied correctly
+RUN ls -la /data && echo "Client 2 data loaded successfully"

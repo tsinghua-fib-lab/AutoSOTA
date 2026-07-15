@@ -1,0 +1,46 @@
+# @package _global_
+defaults:
+  - /task/ldm  # Base LDM task config
+
+  # 2D diffusion backbone + 2D autoencoder for SDarcy (2D fields)
+  - override /model@ldm.model: cond_unet2d
+  - override /optimizer@ldm.optimizer: adamw
+  - override /optimizer@autoencoder.optimizer: adamw
+  - override /model@autoencoder.encoder: encoder2d
+  - override /model@autoencoder.decoder: decoder2d
+  - _self_
+
+evaluation:
+  mode: stochastic
+
+ae_model_name: AE2d
+
+training_ldm:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+  share_xy_normalizer: false
+training_ae:
+  epochs: 100
+  batch_size: 64
+  check_val_every_n_epoch: 1
+
+cond:
+  mode: shared_ae
+
+# UNet/AE padding: use zero padding (not circular)
+ldm:
+  model:
+    padding_mode: "zeros"
+  samples_per_example: 32
+  test_samples_per_example: 32
+  # Keep stochastic evaluation memory bounded (2D fields can be large).
+  stochastic_n_chunk: 8
+  stochastic_k_chunk: 4
+
+autoencoder:
+  encoder:
+    padding_mode: "zeros"
+  decoder:
+    padding_mode: "zeros"
+

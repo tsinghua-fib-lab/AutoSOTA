@@ -1,0 +1,66 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 6078,
+    "repo_url": "https://github.com/ricardojnf/CLASP",
+    "repo_commit": "47fefeacf526eb7f852384a8ccca2392565bdeb3",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_6078",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-6078:reproduced",
+    "eval_command": "python3 evaluate.py",
+    "baseline_metrics": {
+      "cumulative_loss": 658.03,
+      "CCVT_1": 50.99,
+      "CCVT_2": 82.95
+    },
+    "primary_metric": "CCVT_2",
+    "metric_direction": "lower",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/litianxing/autosota-v2.5-3/logs/reproduction/paper-6078.log",
+    "status": "success",
+    "created_at": "2026-07-14T00:00:00Z",
+    "notes": "Reproduced Online Linear Regression experiment from Section 6 / Figure 1. Ran 50 trials with CLASP-I at n=10, k=4, T=100. CCVT,1=50.99 (paper ~63, within CI bounds [32.0, 66.1]) and CCVT,2=82.95 (paper ~126, within CI bounds [40.0, 134.6]) both pass CI bounds. Cumulative loss=658.03 (paper ~608, marginally above CI upper bound 648.4 by 1.5%). Paper values are visual estimates from Figure 1 log-scale plots; experiment is inherently stochastic with no seed specification. Qualitative algorithm ranking matches Figure 1. Dependencies: numpy, scipy, cvxpy, matplotlib, tqdm — all pure Python, no GPU required for computation.",
+    "eval_timeout_minutes": 60,
+    "eval_output_format": "stdout prints mean±2std for cumulative_loss, CCVT_1, CCVT_2 per algorithm. Final values at T=100 stored in CLASP_I key. Also saved to /repo/results.json.",
+    "known_levers": "The experiment uses synthetic data generated on the fly. No external datasets or checkpoints needed. Step-size ηt=1/sqrt(t+1) is hardcoded in CLASP-I. The F, G, D assumption parameters control algorithm behavior. The dataset generation parameters (n=10, k=4, T=100) control problem difficulty. No seed control — results vary between runs. Possible optimization levers: tune step-size schedule, adjust algorithm parameters (alpha, beta, lambda in AdaGrad and Switch), modify projection strategy.",
+    "setup_notes": "Container started from docker.1ms.run/pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime. Dependencies installed: pip install scipy matplotlib cvxpy (via Tsinghua mirror). No external data downloads required — experiment generates synthetic data on the fly (n=10, k=4, T=100). evaluate.py created from OLR-Small-Experiment.ipynb multi-experiment section. No GPU needed; computation is CPU-only CVXPY optimization.",
+    "optimization_objective": {
+      "objective_type": "multi_metric_tradeoff",
+      "summary": "Minimize cumulative loss while controlling squared constraint violations CCVT,2 and linear violations CCVT,1. CLASP algorithms trade off loss against constraint safety. AdaGrad achieves lowest loss but worst violations; Switch achieves lowest violations but highest loss. CLASP-I occupies a middle ground.",
+      "metrics": [
+        {
+          "name": "cumulative_loss",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 658.03,
+          "regression_tolerance_pct": 10.0,
+          "rationale": "Primary performance metric — cumulative loss over T=100 rounds. Lower is better. Current value 658 is above AdaGrad baseline (78) but CLASP trades loss for constraint safety."
+        },
+        {
+          "name": "CCVT_1",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 50.99,
+          "regression_tolerance_pct": 15.0,
+          "rationale": "Linear constraint violation metric (hard). Current value 51 is between AdaGrad (1001, worst) and Switch (6.7, best). Lower means safer operation."
+        },
+        {
+          "name": "CCVT_2",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 82.95,
+          "regression_tolerance_pct": 20.0,
+          "rationale": "Squared constraint violation metric — the paper's main theoretical contribution. Current value 83 is between AdaGrad (10224, worst) and Switch (33, best). Penalizes large violations disproportionately, making it the key safety metric."
+        }
+      ],
+      "success_policy": "Pareto dominance: an optimization is successful if it improves at least one metric without significantly degrading others (within regression tolerances). Ideal outcome: reduce cumulative loss toward AdaGrad levels while maintaining or improving CCVT,1 and CCVT,2. The CLASP-F algorithm achieves lower loss (397) but much higher CCVT, so any improvement should not sacrifice constraint safety. Prioritize improving cumulative_loss and CCVT_2 simultaneously; CCVT_1 typically tracks CCVT_2."
+    },
+    "metric_upper_bound": null,
+    "metric_lower_bound": null
+  }
+}

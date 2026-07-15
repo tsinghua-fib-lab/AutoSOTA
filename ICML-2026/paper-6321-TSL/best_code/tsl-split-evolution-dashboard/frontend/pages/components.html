@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Component evolution · tslviz</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link">Combined products</a>
+            <a href="/pages/components.html" class="nav-link active">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Component evolution across stages</h2>
+            <p class="plot-desc">For the combined product of each stage, plot every
+                one-dimensional component <code>m<sub>j,k</sub>(x<sub>j</sub>)</code>.
+                Toggle backbone/tilt to view the symmetric / asymmetric decomposition.</p>
+            <div class="controls">
+                <div class="control"><label>Run</label><select id="componentRun"></select></div>
+                <div class="control"><label>Log Y Scale:</label><input type="checkbox" id="logScaleToggle" checked />
+                </div>
+                <div class="control"><label>Backbone / tilt:</label><input type="checkbox" id="backboneTiltToggle" />
+                </div>
+            </div>
+            <div id="componentGridContainer" style="overflow-x: auto; overflow-y: hidden; width: 100%;">
+                <div id="componentGrid" style="display: grid; gap: 8px; padding: 8px;"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/components.js"></script>
+</body>
+
+</html>

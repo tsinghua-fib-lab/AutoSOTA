@@ -1,0 +1,324 @@
+:root {
+    --bg: #ffffff;
+    --panel: #f7f9fb;
+    --panel2: #ffffff;
+    --grid: #e2e8f0;
+    --grid2: #e6edf4;
+    --text: #0f172a;
+    --text2: #0b1220;
+    --muted: #65748b;
+    --brand: #2b6cb0;
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: linear-gradient(90deg, #ffffff, #f7f9fb);
+    border-bottom: 1px solid var(--grid);
+}
+
+.brand {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--text)
+}
+
+.nav-link {
+    color: var(--brand);
+    text-decoration: none;
+    margin-left: 14px;
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    text-decoration: underline
+}
+
+.nav-link.active {
+    color: var(--text2);
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 24px;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.control {
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.control label {
+    display: block;
+    font-size: 12px;
+    color: #8aa4b7;
+    margin-bottom: 6px
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25)
+}
+
+.card h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: var(--text2)
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px
+}
+
+.charts-grid-multi-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 16px
+}
+
+.chart {
+    background: var(--panel2);
+    border: 1px solid var(--grid2);
+    border-radius: 10px;
+    padding: 8px;
+    min-height: 160px
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap
+}
+
+.metric {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #0f172a
+}
+
+select,
+input[type=number],
+input[type=range] {
+    width: 100%;
+    background: var(--panel2);
+    color: var(--text);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px
+}
+
+/* Multiple select styling */
+select[multiple] {
+    min-height: 80px;
+    max-height: 120px;
+}
+
+select[multiple] option {
+    padding: 4px 8px;
+    margin: 1px 0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+select[multiple] option:checked {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+select[multiple] option:hover {
+    background: #f1f5f9;
+}
+
+/* Make disabled controls clearly greyed out */
+select:disabled,
+input:disabled,
+.control select:disabled {
+    opacity: 0.4 !important;
+    filter: grayscale(0.6);
+    cursor: not-allowed;
+    background: #f1f5f9 !important;
+    /* light slate */
+    color: #64748b !important;
+    /* slate-500 */
+    border-color: #e2e8f0 !important;
+}
+
+input[type=range] {
+    padding: 0
+}
+
+.footer {
+    text-align: center;
+    padding: 20px 0 40px;
+    color: var(--muted)
+}
+
+svg text {
+    fill: var(--text)
+}
+
+svg .tick text {
+    fill: #617186;
+    font-size: clamp(9px, 1.6vh, 13px)
+}
+
+svg .domain,
+svg .tick line {
+    stroke: #d6dee8
+}
+
+/* Selection info container styles */
+.selection-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    font-size: 13px;
+    min-height: 60px;
+    transition: all 0.2s ease;
+}
+
+.selection-info:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Event metrics container styles */
+.event-metrics {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.metric-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.metric-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.metric-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.metric-label {
+    color: #64748b;
+    font-weight: 500;
+    min-width: 45px;
+}
+
+.metric-value {
+    color: #0f172a;
+    font-weight: 600;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.selection-content {
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.selection-content div {
+    margin-bottom: 4px;
+    padding: 2px 0;
+}
+
+.selection-content div:last-child {
+    margin-bottom: 0;
+}
+
+/* Selection rectangle styles */
+.selection-rect {
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Improve chart container spacing for selection info */
+.chart {
+    background: var(--panel2);
+    border: 1px solid var(--grid2);
+    border-radius: 10px;
+    padding: 8px;
+    min-height: 160px;
+    margin-bottom: 16px;
+}
+
+/* Selection info container positioning */
+.chart .selection-info {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+/* Navigation message styling */
+.nav-message {
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.nav-message:hover {
+    background: #fde68a !important;
+    border-color: #d97706 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,28 @@
+client_id: "Client2"
+
+train_configs:
+  # Device
+  device: "cpu"
+  # Logging and outputs
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# Local dataloader
+data_configs:
+  dataset_path: "./resources/dataset/mnist_dataset.py"
+  dataset_name: "get_mnist"
+  dataset_kwargs:
+    num_clients: 2
+    client_id: 1
+    partition_strategy: "class_noniid"
+    visualization: True
+    output_dirname: "./output"
+    output_filename: "visualization.pdf"
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False
+    use_model_chunking: True
+    model_chunk_size: 1048576 # 1 MB

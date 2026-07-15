@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+# Encoder2d (explicit params, including defaults)
+# -----------------------------------------------------------------------------
+# Used by:
+# - Autoencoder training (read by `src/train/autoencoder.py`)
+# - Any Hydra instantiation that targets `models.autoencoder.encoder2d.Encoder2d`
+
+_target_: "models.autoencoder.encoder2d.Encoder2d"
+model_name: "Encoder2d"
+
+in_channels: 1
+hidden_channels: 32
+z_channels: 4
+ch_mult: [1, 2, 4, 8]
+num_res_blocks: 2
+attn_resolutions: [16]
+
+resolution: 128
+double_z: true  # Set to true for VAE mode (outputs mean and logvar: [B, 2*z_channels, H_z, W_z])
+
+# Optional/legacy kwargs (defaults explicit)
+dropout: 0.0
+cond_channels: 0
+tanh_out: false
+padding_mode: "circular"
+use_attn: false
+

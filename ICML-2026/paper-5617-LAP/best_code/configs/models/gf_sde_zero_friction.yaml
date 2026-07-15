@@ -1,0 +1,46 @@
+# configs/models/gf_sde_zero_friction.yaml
+# WLM trained as a conservative Hamiltonian system on a gradient-flow SDE.
+# Initial velocity = bundle (the gradient of free energy at t=0). Friction fixed at 0.
+
+eval_mode: forecast
+train_fraction: 0.5
+
+# Training
+num_epochs: 100000
+substeps_per_dt: 1
+dt_eval: 0.002
+integrator: v
+loss_type: geom_sinkhorn
+geom_p: 2
+vel: bundle
+
+# Optimizer
+lr: 1.0e-4
+
+# Friction: fixed at zero (no friction → conservative)
+friction: 0.0
+learnable_friction: false
+
+# Model architecture
+arch: attn_flow
+dropout: 0.0
+attn_heads: 4
+attn_hidden_dim: 64
+attn_layers: 4
+ff_dim: 512
+use_time: false
+
+# EMA
+use_ema: true
+ema_decay: 0.999
+ema_friction: false
+
+# Logging
+gif_frame_skip: 1
+gif_fps: 1
+ckpt_every: 10000
+gif_every: 10000
+eval_every: 2000
+
+# W&B
+wandb_project: gf_sde

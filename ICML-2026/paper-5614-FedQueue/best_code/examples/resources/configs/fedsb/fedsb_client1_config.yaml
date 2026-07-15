@@ -1,0 +1,21 @@
+client_id: "Client1"
+
+train_configs:
+  client_idx: 0
+  num_splits: 25
+  device: cuda
+  data_path: meta-math/MetaMathQA
+  dataset_split: "train[:20000]"
+  dataset_field: ["query", "response"]
+  run_dir: experiments_log/instruction_tuning
+  wandb_configs:
+    enable_wandb: True
+    entity: zl52-university-of-illinois-urbana-champaign
+    project: appfl
+    exp_name: fed-sb-arithmetic-2
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

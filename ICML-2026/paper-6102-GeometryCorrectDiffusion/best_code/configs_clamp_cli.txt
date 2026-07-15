@@ -1,0 +1,54 @@
+# ----------------------------------------------------------------------------
+# Pixel-space CLAMP (DDPM prior)
+#
+# For ImageNet, replace:
+#   --data test-ffhq --model ffhq256ddpm -> --data test-imagenet --model imagenet256ddpm
+# ----------------------------------------------------------------------------
+
+# Linear tasks 
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task down_sampling --name sr4 --anneal_num_steps 50 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task inpainting --name inp_box --anneal_num_steps 50 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task inpainting_rand --name inp_rand --anneal_num_steps 50 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task gaussian_blur --name gb --anneal_num_steps 50 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task motion_blur --name mb --anneal_num_steps 50 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+# Nonlinear tasks 
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task phase_retrieval --name pr --anneal_num_steps 250 --clamp_gmres_iter 4 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01 --num_runs 4
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task nonlinear_blur --name nb --anneal_num_steps 50 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01 
+
+python main.py --method clamp --task_group pixel --data test-ffhq --model ffhq256ddpm --sampler edm_daps --batch_size 1 --task hdr --name hdr --anneal_num_steps 250 --clamp_gmres_iter 4 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+
+# ----------------------------------------------------------------------------
+# Latent-CLAMP (LDM prior)
+#
+# For ImageNet, replace:
+#   --data test-ffhq --model ffhq256ldm  -> --data test-imagenet --model imagenet256ldm
+# ----------------------------------------------------------------------------
+
+# Linear tasks 
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task down_sampling --name latent_sr4 --anneal_num_steps 25 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task inpainting --name latent_inp_box --anneal_num_steps 25 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task inpainting_rand --name latent inp_rand --anneal_num_steps 25 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task gaussian_blur --name latenet_gb --anneal_num_steps 25 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task motion_blur --name latent_mb --anneal_num_steps 25 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+# Nonlinear tasks 
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task phase_retrieval --name latent_pr --anneal_num_steps 250 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01 --num_runs 4
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task nonlinear_blur --name latent_nb --anneal_num_steps 75 --clamp_gmres_iter 20 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01
+
+python main.py --method clamp --task_group ldm --data test-ffhq --model ffhq256ldm --sampler latent_edm_daps --batch_size 1 --task hdr --name latent_hdr --anneal_num_steps 250 --clamp_gmres_iter 5 --clamp_lambda_id 2.0 --clamp_sigma_n 0.01

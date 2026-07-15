@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - _self_
+
+# Dataset-only entrypoint (no training).
+run: generate_dataset
+
+# For generation we always want the dataset saved to disk.
+dataset:
+  save_data: true
+  # If true, regenerate even if the file already exists.
+  overwrite: false
+
+# Optional: allow controlling verbosity from task
+generate_dataset:
+  verbose: true
+

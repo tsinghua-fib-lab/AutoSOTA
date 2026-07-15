@@ -1,0 +1,18 @@
+client_id: "Client1"
+train_configs:
+  device: "cuda"
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+data_configs:
+  dataset_path: "./resources/dataset/coronahack_dataset.py"
+  dataset_name: "get_corona"
+  dataset_kwargs:
+    num_clients: 4
+    client_id: 0
+    processed: False
+    num_pixel: 32
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

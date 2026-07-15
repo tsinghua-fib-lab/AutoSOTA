@@ -1,0 +1,22 @@
+_target_: "models.diffusion.cond_unet2d.CondUnet2d"
+model_name: "CondUnet2d"
+
+# -----------------------------------------------------------------------------
+# Constructor args (explicit, including defaults)
+# -----------------------------------------------------------------------------
+input_channels: 1
+output_channels: 1
+c_dim: 1
+
+dim: 64
+dim_mults: [1, 2, 4, 8]
+time_emb_dim: 32
+num_res_blocks: 2
+attn_resolutions: [16]
+
+# Spatial resolution (H==W) used to decide at what stage attention triggers.
+resolution: 128
+
+activation: "SiLU"
+dropout: 0.0
+padding_mode: "circular"

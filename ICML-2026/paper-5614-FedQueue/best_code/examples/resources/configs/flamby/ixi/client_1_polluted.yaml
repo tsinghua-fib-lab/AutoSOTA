@@ -1,0 +1,22 @@
+client_id: "Client1"
+train_configs:
+  # Device
+  device: "cuda"
+  # Logging and outputs
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# Local dataset
+data_configs:
+  dataset_path: "./resources/dataset/flamby_ixi_polluted.py"
+  dataset_name: "get_flamby_ixi_polluted"
+  dataset_kwargs:
+    dataset: "IXI"
+    num_clients: 3
+    client_id: 1
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 1048576
+    use_ssl: False

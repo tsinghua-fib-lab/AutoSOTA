@@ -1,0 +1,51 @@
+client_configs:
+  train_configs:
+    local_debug: False
+    trainer: FedSBTrainer
+    seed: 42
+    agg_type: fed-sb
+    lr: 0.0001
+    batch_size: 1
+    scheduler: cosine
+    warmup_ratio: 0.02
+    num_samples: 50
+    epochs: 1
+    eg_bs: 3
+    lora_r: 200
+    lora_alpha: 200
+    max_seq_length: 512
+    model: meta-llama/Llama-3.2-3B
+    reconstruction_configs:
+      reconstruction_type: "svd"
+      reconstr_mode: "separated"
+      half_init_dec: False
+      replacement_module_random_init: False
+      r_squared: True
+      svd:
+        n_iter: 10
+        random_state: 42
+
+server_configs:
+  num_clients: 2
+  scheduler: "SyncScheduler"
+  aggregator: "FedSBAggregator"
+  aggregator_kwargs:
+    global_model_dir: experiments_log/instruction_tuning/final_model
+    device: "cpu" # "cuda" or "cpu"
+    reconstruction_configs:
+      reconstruction_type: "svd"
+      reconstr_mode: "separated"
+      half_init_dec: False
+      replacement_module_random_init: False
+      r_squared: True
+      svd:
+        n_iter: 10
+        random_state: 42
+  num_global_epochs: 1
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+  comm_configs:
+    grpc_configs:
+      server_uri: localhost:50051
+      max_message_size: 1048576
+      use_ssl: False

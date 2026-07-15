@@ -1,0 +1,45 @@
+# @package _global_
+# Base operator encoder task configuration
+# Can be overridden by dataset-specific configs (e.g., darcy/oe.yaml, ks/oe.yaml)
+defaults:
+  - /optimizer@operatorencoder.optimizer: adamw
+  # Model selection: override in dataset-specific configs
+  # Options: fno1d, fno2d
+  - /model@operatorencoder.model: ???
+  - /model@operatorencoder.output_embedder: ???
+  - _self_
+
+# Which training routine to run from `src/main.py`
+run: oe
+
+# Train loop settings
+training_oe:
+  epochs: 500
+  batch_size: 128
+  num_workers: 4
+  normalization_mode: gaussian
+  check_val_every_n_epoch: 25
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+operatorencoder:
+  pretrained_ckpt: null
+
+  # Base config comes from model config (e.g., fno1d.yaml, fno2d.yaml).
+  # Override to make the backbone emit a feature field with C_feat channels.
+  model:
+    out_channels: ???
+
+  # Cosine annealing learning rate scheduler
+  scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: ${training_oe.epochs}
+      eta_min: 0.0
+    interval: epoch
+    frequency: 1
+
+logging:
+  save_dir: "wandb_logs"
+  log_model: true
+

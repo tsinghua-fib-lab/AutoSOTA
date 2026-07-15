@@ -1,0 +1,52 @@
+clients:
+  - client_id: "TESClient1"
+    train_configs:
+      device: "cpu"
+      logging_output_dirname: "./output"
+      logging_output_filename: "result"
+
+    data_configs:
+      dataset_path: "./resources/dataset/mnist_dataset.py"
+      dataset_name: "get_mnist"
+      dataset_kwargs:
+        num_clients: 2
+        client_id: 0
+        partition_strategy: "iid"
+        visualization: True
+
+    comm_configs:
+      tes_configs:
+        tes_endpoint: "http://localhost:8000"
+        auth_token: ""
+        docker_image: "appfl/client:latest"
+        resource_requirements:
+          cpu_cores: 4
+          ram_gb: 8.0
+          disk_gb: 20.0
+          preemptible: false
+
+  - client_id: "TESClient2"
+    train_configs:
+      device: "cpu"
+      logging_output_dirname: "./output"
+      logging_output_filename: "result"
+
+    data_configs:
+      dataset_path: "./resources/dataset/mnist_dataset.py"
+      dataset_name: "get_mnist"
+      dataset_kwargs:
+        num_clients: 2
+        client_id: 1
+        partition_strategy: "iid"
+        visualization: False
+
+    comm_configs:
+      tes_configs:
+        tes_endpoint: "http://localhost:8000"
+        auth_token: ""
+        docker_image: "appfl/client:latest"
+        resource_requirements:
+          cpu_cores: 4
+          ram_gb: 8.0
+          disk_gb: 20.0
+          preemptible: true

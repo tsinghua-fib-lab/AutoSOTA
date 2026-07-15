@@ -1,0 +1,24 @@
+# Gradient-Flow SDEs: 5 potentials × {kill, nokill} × {zero_friction, learnable_friction} = 20 runs (1 seed each).
+# Reproduce: RUNS_DIR=gf_sde sbatch --array=0-19 scripts/sbatch_run.sbatch runlists/gf_sde.tsv
+# Per-row overrides: pot, kill_condition. The model config (zero/learnable friction) is the third column.
+
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	bohachevsky_nokill_zerofric_s0	0	--set pot=bohachevsky	--set kill_condition=false	--set wandb_tags=gf_sde,bohachevsky,nokill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	bohachevsky_nokill_learnfric_s0	0	--set pot=bohachevsky	--set kill_condition=false	--set wandb_tags=gf_sde,bohachevsky,nokill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	bohachevsky_kill_zerofric_s0	0	--set pot=bohachevsky	--set kill_condition=true	--set wandb_tags=gf_sde,bohachevsky,kill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	bohachevsky_kill_learnfric_s0	0	--set pot=bohachevsky	--set kill_condition=true	--set wandb_tags=gf_sde,bohachevsky,kill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	poly_nokill_zerofric_s0	0	--set pot=poly	--set kill_condition=false	--set wandb_tags=gf_sde,poly,nokill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	poly_nokill_learnfric_s0	0	--set pot=poly	--set kill_condition=false  --set wandb_tags=gf_sde,poly,nokill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	poly_kill_zerofric_s0	0	--set pot=poly	--set kill_condition=true	--set wandb_tags=gf_sde,poly,kill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	poly_kill_learnfric_s0	0	--set pot=poly	--set kill_condition=true	--set wandb_tags=gf_sde,poly,kill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	styblinski_tang_nokill_zerofric_s0	0	--set pot=styblinski_tang	--set kill_condition=false	--set wandb_tags=gf_sde,styblinski_tang,nokill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	styblinski_tang_nokill_learnfric_s0	0	--set pot=styblinski_tang	--set kill_condition=false	--set wandb_tags=gf_sde,styblinski_tang,nokill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	styblinski_tang_kill_zerofric_s0	0	--set pot=styblinski_tang	--set kill_condition=true	--set wandb_tags=gf_sde,styblinski_tang,kill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	styblinski_tang_kill_learnfric_s0	0	--set pot=styblinski_tang	--set kill_condition=true	--set wandb_tags=gf_sde,styblinski_tang,kill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	oakley_ohagan_nokill_zerofric_s0	0	--set pot=oakley_ohagan	--set kill_condition=false	--set wandb_tags=gf_sde,oakley_ohagan,nokill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	oakley_ohagan_nokill_learnfric_s0	0	--set pot=oakley_ohagan	--set kill_condition=false	--set wandb_tags=gf_sde,oakley_ohagan,nokill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	oakley_ohagan_kill_zerofric_s0	0	--set pot=oakley_ohagan	--set kill_condition=true	--set wandb_tags=gf_sde,oakley_ohagan,kill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	oakley_ohagan_kill_learnfric_s0	0	--set pot=oakley_ohagan	--set kill_condition=true	--set wandb_tags=gf_sde,oakley_ohagan,kill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	wavy_plateau_nokill_zerofric_s0	0	--set pot=wavy_plateau	--set kill_condition=false	--set wandb_tags=gf_sde,wavy_plateau,nokill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	wavy_plateau_nokill_learnfric_s0	0	--set pot=wavy_plateau	--set kill_condition=false	--set wandb_tags=gf_sde,wavy_plateau,nokill,learnfric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_zero_friction.yaml	wavy_plateau_kill_zerofric_s0	0	--set pot=wavy_plateau	--set kill_condition=true	--set wandb_tags=gf_sde,wavy_plateau,kill,zerofric,s0
+gf_sde	configs/data/gf_sde.yaml	configs/models/gf_sde_learnable_friction.yaml	wavy_plateau_kill_learnfric_s0	0	--set pot=wavy_plateau	--set kill_condition=true	--set wandb_tags=gf_sde,wavy_plateau,kill,learnfric,s0

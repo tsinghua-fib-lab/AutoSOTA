@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>tslviz · TSL split-event visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link active">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link">Combined products</a>
+            <a href="/pages/components.html" class="nav-link">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="summary" class="card">
+            <h2>Run summary</h2>
+            <div class="control-row" style="margin-bottom:12px">
+                <label for="runSelectSummary">Select run</label>
+                <select id="runSelectSummary" style="max-width:420px"></select>
+            </div>
+            <div id="runStats" class="control-row" style="margin: 8px 0 14px"></div>
+
+        </section>
+
+        <section id="learning" class="card">
+            <h2>Learning progress by stage</h2>
+            <p class="plot-desc">Train and test error at each stage. The line shows the combined-product
+                error; points show per-product error within that stage; violins show the distribution.</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                <label style="font-size:13px;color:#65748b;"><input id="logScaleToggle" type="checkbox"
+                        style="margin-right:6px"> Log scale (Y)</label>
+            </div>
+            <div class="charts-grid">
+                <div id="trainErrTrain" class="chart chart-tall"></div>
+                <div id="trainErrTest" class="chart chart-tall"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin:12px 0 8px;">
+                <label style="font-size:13px;color:#65748b;"><input id="sortEnergyScalingToggle" type="checkbox"
+                        style="margin-right:6px"> Sort Energy × Scaling²</label>
+            </div>
+            <div class="charts-grid" style="margin-top: 0;">
+                <div id="energyChart" class="chart"></div>
+                <div id="energyScalingSquaredChart" class="chart"></div>
+                <div id="scalingsChart" class="chart"></div>
+            </div>
+        </section>
+
+
+
+        <section id="columns" class="card">
+            <h2>Column analysis</h2>
+            <p class="plot-desc">Per-feature statistics for the selected run: split counts, average gain, average
+                samples affected, and average cells added.</p>
+            <div id="columnsGrid" class="charts-grid">
+                <div id="colEvents" class="chart"></div>
+                <div id="colAvgGain" class="chart"></div>
+                <div id="colSamples" class="chart"></div>
+            </div>
+        </section>
+
+        <section id="convergence" class="card">
+            <h2>Convergence</h2>
+            <p class="plot-desc">Per-stage view for the selected run: total and average gain, split types
+                per stage, and model complexity (number of cells).</p>
+            <div id="convergenceGrid" class="charts-grid">
+                <div id="convTotal" class="chart"></div>
+                <div id="convAvg" class="chart"></div>
+                <div id="convSplitKinds" class="chart"></div>
+                <div id="convComplexity" class="chart"></div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/summary.js"></script>
+</body>
+<style>
+    /* Minimal inline fallback if styles.css fails to load (light theme) */
+    body {
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        background: #ffffff;
+        color: #0f172a;
+    }
+
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        background: linear-gradient(90deg, #ffffff, #f7f9fb);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .brand {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: #0f172a;
+    }
+
+    .nav-link {
+        color: #2b6cb0;
+        text-decoration: none;
+        margin-left: 14px;
+        font-weight: 600;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 16px 24px;
+    }
+
+    .card {
+        background: #f7f9fb;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 20px rgba(12, 30, 66, 0.08);
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+    }
+
+    .chart {
+        background: #ffffff;
+        border: 1px solid #e6edf4;
+        border-radius: 10px;
+        padding: 8px;
+        min-height: 160px;
+    }
+
+    .chart-tall {
+        min-height: 320px;
+    }
+
+    .plot-desc {
+        color: #65748b;
+        font-size: 12px;
+        margin: 4px 0 12px;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 20px 0 40px;
+        color: #65748b;
+    }
+
+    .control-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    select,
+    input[type=number],
+    input[type=range] {
+        width: 100%;
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 8px;
+    }
+</style>
+
+</html>

@@ -1,0 +1,51 @@
+TARGET_DIR = ./rust/target
+LIBDIR = $(TARGET_DIR)/@LIBDIR@
+STATLIB = $(LIBDIR)/libtensorsl.a
+
+# The Rust static library bundles the TSL core. The core is pure Rust and links
+# no system numerical libraries, so the package needs only the staticlib itself.
+PKG_LIBS = -L$(LIBDIR) -ltensorsl
+
+all: $(SHLIB) rust_clean
+
+.PHONY: $(STATLIB)
+
+$(SHLIB): $(STATLIB)
+
+CARGOTMP = $(CURDIR)/.cargo
+VENDOR_DIR = $(CURDIR)/vendor
+
+
+# RUSTFLAGS appends --print=native-static-libs to ensure that
+# the correct linkers are used. Use this for debugging if need.
+#
+# CRAN note: Cargo and Rustc versions are reported during
+# configure via tools/msrv.R.
+#
+# If a vendor directory exists, it is used for offline compilation. Otherwise if
+# vendor.tar.xz exists, it is unzipped and used for offline compilation.
+$(STATLIB):
+
+	if [ -d ./vendor ]; then \
+		echo "=== Using offline vendor directory ==="; \
+		mkdir -p $(CARGOTMP) && \
+		cp rust/vendor-config.toml $(CARGOTMP)/config.toml; \
+	elif [ -f ./rust/vendor.tar.xz ]; then \
+		echo "=== Using offline vendor tarball ==="; \
+		tar xf rust/vendor.tar.xz && \
+		mkdir -p $(CARGOTMP) && \
+		cp rust/vendor-config.toml $(CARGOTMP)/config.toml; \
+	fi
+
+	export CARGO_HOME=$(CARGOTMP) && \
+	export PATH="$(PATH):$(HOME)/.cargo/bin" && \
+	@PANIC_EXPORTS@RUSTFLAGS="$(RUSTFLAGS) --print=native-static-libs" cargo build @CRAN_FLAGS@ --lib @PROFILE@ --manifest-path=./rust/Cargo.toml --target-dir $(TARGET_DIR) @TARGET@
+
+	# Always clean up CARGOTMP
+	rm -Rf $(CARGOTMP);
+
+rust_clean: $(SHLIB)
+	rm -Rf $(CARGOTMP) $(VENDOR_DIR) @CLEAN_TARGET@
+
+clean:
+	rm -Rf $(SHLIB) $(STATLIB) $(OBJECTS) $(TARGET_DIR) $(VENDOR_DIR)

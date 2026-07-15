@@ -1,0 +1,76 @@
+{
+  "baselines": {
+    "always_cma": {
+      "accuracy": 0.6311111111111111,
+      "confusion": {
+        "pred_cma_label_cma": 284,
+        "pred_cma_label_berw": 166,
+        "pred_berw_label_cma": 0,
+        "pred_berw_label_berw": 0
+      },
+      "correct": 284,
+      "n_non_ties": 450
+    },
+    "always_berw": {
+      "accuracy": 0.3688888888888889,
+      "confusion": {
+        "pred_cma_label_cma": 0,
+        "pred_cma_label_berw": 0,
+        "pred_berw_label_cma": 284,
+        "pred_berw_label_berw": 166
+      },
+      "correct": 166,
+      "n_non_ties": 450
+    }
+  },
+  "counts": {
+    "n_missing_misranking_probe": 0,
+    "n_missing_variance_probe": 0,
+    "n_ties_outcome": 0,
+    "n_total": 450
+  },
+  "misranking_probe": {
+    "accuracy": 0.5888888888888889,
+    "confusion": {
+      "pred_cma_label_cma": 147,
+      "pred_cma_label_berw": 48,
+      "pred_berw_label_cma": 137,
+      "pred_berw_label_berw": 118
+    },
+    "correct": 265,
+    "n_non_ties": 450
+  },
+  "outputs": {
+    "decision_points_csv": "evidence/bbob_noisy_probe_decision_accuracy_noisefree_i1-15_B200_d20/decision_points.csv"
+  },
+  "setup": {
+    "algo_cma": "CMA-ES-sep",
+    "algo_berw": "BERW-Hetero",
+    "budget_multiplier": 200,
+    "dimension": 20,
+    "functions": "1-30",
+    "instances": "1-15",
+    "outcome_results_dir": "Results/bbob_noisy_d20_i1-15_probe_labels_B200/noisefree",
+    "probe_thresholds": {
+      "misranking_rd": 0.12,
+      "variance_rel_sd": 0.05,
+      "variance_reps": 10
+    },
+    "suite": "bbob-noisy",
+    "tie_tolerance": {
+      "atol": 0.0,
+      "rtol": 0.0
+    }
+  },
+  "variance_probe": {
+    "accuracy": 0.5688888888888889,
+    "confusion": {
+      "pred_cma_label_cma": 155,
+      "pred_cma_label_berw": 65,
+      "pred_berw_label_cma": 129,
+      "pred_berw_label_berw": 101
+    },
+    "correct": 256,
+    "n_non_ties": 450
+  }
+}

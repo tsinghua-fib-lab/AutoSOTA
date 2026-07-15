@@ -1,0 +1,65 @@
+server:
+  device: cpu
+  data_dir  : "./log_globus_compute_appfl/fedasync_server_stepoptim_client"
+  output_dir: "./log_globus_compute_appfl/fedasync_server_stepoptim_client"
+  s3_bucket: "appflx-models"
+  s3_creds: "globus_compute/creds/credential.csv"
+
+algorithm:
+  servername: 'ServerFedAsynchronous'
+  clientname: 'GlobusComputeClientStepOptim'
+  args:
+    ## Clients optimizer
+    optim: "Adam"
+    num_local_steps: 100
+    optim_args:
+      lr: 0.003
+    ## Differential Privacy
+    use_dp: False
+    epsilon: 1
+    ##  epsilon: 1      (stronger privacy as the value decreases)
+    ##  epsilon: 0.05
+    ## Gradient Clipping
+    ## clip_value: False (no-clipping)
+    ## clip_value: 10    (clipping)
+    ## clip_value: 1
+    server_lr_decay_exp_gamma : 0.975
+    client_weights: "equal"
+    clip_grad: False
+    clip_value: 1
+    clip_norm: 1
+    ## Asynchronous settings
+    K: 3
+    alpha: 0.9
+    staleness_func:
+      name: "constant"
+      args:
+        a: 0.5
+        b: 4
+    send_gradient: True
+
+model:
+  num_channel: 1
+  num_classes: 10
+  num_pixel:   28
+
+training:
+  num_epochs: 15
+  save_model_filename: "MNIST_CNN_FedAsync"
+  save_model_dirname: "./save_models"
+
+dataset:
+  name: MNIST
+
+func:
+  get_model:
+    script_file: "./globus_compute/models/cnn.py"
+    call: "get_model"
+
+  get_loss:
+    script_file: "./globus_compute/losses/celoss.py"
+    call: "get_loss"
+
+  val_metric:
+    script_file: "./globus_compute/metrics/acc.py"
+    call: "accuracy"

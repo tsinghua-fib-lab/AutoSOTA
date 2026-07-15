@@ -1,0 +1,77 @@
+#### general settings
+name: GOPRO_VAE
+use_tb_logger: true
+model: image_base
+distortion: deblur
+scale: 1
+gpu_ids: [0]
+
+#### datasets
+datasets:
+  train:
+    name: GOPRO
+    mode: GOPRO
+    interval_list: [1]
+    dataroot_HQ: datasets/GOPRO/train_sharp.lmdb
+    dataroot_LQ: datasets/GOPRO/train_blur_linear.lmdb
+    cache_keys: ~
+
+    use_shuffle: true
+    n_workers: 4  # per GPU
+    batch_size: 8
+    HQ_size: &HQ_SIZE 256
+    LQ_size: 256
+    use_flip: true
+    use_rot: true
+    color: RGB
+
+#### network structures
+KernelWizard:
+  input_nc: 3
+  nf: 64
+  front_RBs: 10
+  back_RBs: 20
+  N_frames: 1
+  kernel_dim: 512
+  img_size: *HQ_SIZE
+  use_vae: true
+  KernelExtractor:
+    norm: none
+    use_sharp: true
+    n_blocks: 4
+    padding_type: reflect
+    use_dropout: false
+  Adapter:
+    norm: none
+    use_dropout: false
+
+#### path
+path:
+  pretrain_model_G: experiments/pretrained/GOPRO_wsharp_woVAE.pth
+  strict_load: false
+  resume_state: ~
+
+#### training settings: learning rate scheme, loss
+train:
+  lr_G: !!float 1e-4
+  lr_scheme: CosineAnnealingLR_Restart
+  beta1: 0.9
+  beta2: 0.99
+  niter: 600000
+  warmup_iter: -1  # -1: no warm up
+  T_period: [50000, 100000, 150000, 150000, 150000]
+  restarts: [50000, 150000, 300000, 450000]
+  restart_weights: [1, 1, 1, 1]
+  eta_min: !!float 1e-8
+
+  pixel_criterion: cb
+  pixel_weight: !!float 1.0
+  kl_weight: !!float 10.0
+  val_freq: !!float 5e3
+
+  manual_seed: 0
+
+#### logger
+logger:
+  print_freq: 10
+  save_checkpoint_freq: !!float 5e3

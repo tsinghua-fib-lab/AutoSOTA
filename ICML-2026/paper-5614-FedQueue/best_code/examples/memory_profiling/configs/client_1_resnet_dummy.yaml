@@ -1,0 +1,24 @@
+client_id: "Client1"
+train_configs:
+  # Device
+  device: "cpu"  # Use CPU for consistent memory profiling
+  # Logging and outputs
+  logging_output_dirname: "./output"
+  logging_output_filename: "result"
+
+# Dummy dataset configuration
+data_configs:
+  dataset_path: "./memory_profiling/dummy_cifar10_dataset.py"
+  dataset_name: "get_dummy_cifar10"
+  dataset_kwargs:
+    num_clients: 2
+    client_id: 0
+    samples_per_client: 64  # Very small dataset to isolate training memory
+
+comm_configs:
+  grpc_configs:
+    server_uri: localhost:50051
+    max_message_size: 10485760  # 10MB for ResNet parameters
+    use_ssl: False
+    use_model_chunking: True
+    model_chunk_size: 10485760  # 10MB chunk size for ResNet parameters

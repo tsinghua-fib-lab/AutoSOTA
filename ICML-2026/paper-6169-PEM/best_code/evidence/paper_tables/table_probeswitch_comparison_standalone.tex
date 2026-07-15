@@ -1,0 +1,45 @@
+\documentclass[11pt]{article}
+
+% Required packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\begin{document}
+
+\begin{table}[t]
+\centering
+\caption{Probe-and-Switch vs competitors: pairwise comparison across COCO and external tasks.}
+\label{tab:probeswitch_comparison}
+\small
+\begin{tabular}{l c c c c c}
+\toprule
+                    & vs Res.(10) & vs Res.(5) & vs UH-CMA-ES & vs CMA-ES & vs RB \\
+\midrule
+\multicolumn{6}{l}{\textit{COCO benchmark (225 instances, B = 200d)}} \\
+\quad d = 10        & \textbf{187/38} & \textbf{155/70} & \textbf{194/31} & 111/114 & \textbf{133/92} \\
+\quad d = 20        & \textbf{182/43} & \textbf{149/76} & \textbf{200/25} & 111/114 & 107/118 \\
+\quad d = 40        & \textbf{179/46} & \textbf{170/55} & \textbf{211/14} & \textbf{166/59} & 110/114 \\
+\midrule
+\multicolumn{6}{l}{\textit{External tasks (50 seeds each)}} \\
+\quad LQR           & \textbf{50/0} & \textbf{46/4} & \textbf{46/4} & \textbf{31/19} & 23/27 \\
+\quad Breast Cancer & \textbf{50/0} & \textbf{37/13} & 25/25 & 20/29 & 22/28 \\
+\quad Digits        & \textbf{49/1} & \textbf{40/10} & \textbf{31/19} & 17/33 & 17/33 \\
+\quad CartPole-HT   & \textbf{48/2} & \textbf{43/6} & \textbf{30/19} & 21/23 & 20/24 \\
+\quad CartPole      & \textbf{44/6} & \textbf{36/14} & \textbf{26/24} & 19/30 & 21/27 \\
+\quad Pendulum      & \textbf{46/4} & \textbf{38/11} & \textbf{32/18} & \textbf{31/19} & \textbf{31/19} \\
+\midrule
+\textbf{Total W/L}  & \textbf{835/140} & \textbf{714/259} & \textbf{795/179} & \textbf{527/440} & \textbf{484/482} \\
+\textbf{Win Rate}   & \textbf{85.6\%} & \textbf{73.4\%} & \textbf{81.6\%} & \textbf{54.5\%} & \textbf{50.1\%} \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{\linewidth}
+\footnotesize
+W/L = wins/losses for Probe-and-Switch. Bold = win (W $>$ L).
+\end{minipage}
+\end{table}
+
+\end{document}

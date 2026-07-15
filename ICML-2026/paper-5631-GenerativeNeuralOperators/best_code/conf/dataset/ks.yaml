@@ -1,0 +1,27 @@
+  _target_: data.build_ks_dataset
+
+  data_name: KS
+
+  dataset_dir: "datasets"
+  filename: "ks.pt"
+  save_data: true
+  verbose: true
+  overwrite: false
+  return_trajectories: true
+
+  # apebench Physical KS (1D by default)
+  spatial_resolution: 256
+  # NOTE: apebench uses `dt` as the OUTPUT spacing, and integrates with an internal step dt/num_substeps.
+  dt: 1.0
+  num_substeps: 100
+
+  num_train_samples: 1024
+  train_temporal_horizon: 50
+
+  # NOTE: this will be split into half val + half test inside `build_ks_dataset`
+  num_test_samples: 128
+  test_temporal_horizon: 100
+
+  num_warmup_steps: 100
+  train_seed: 0
+  test_seed: 773

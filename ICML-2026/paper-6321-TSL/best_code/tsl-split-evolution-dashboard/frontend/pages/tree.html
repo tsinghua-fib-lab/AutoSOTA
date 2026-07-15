@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Product evolution · tslviz</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="brand">tslviz</div>
+        <nav class="nav">
+            <a href="/" class="nav-link">Run summary</a>
+            <a href="/pages/tree.html" class="nav-link active">Product evolution</a>
+            <a href="/pages/primary.html" class="nav-link">Combined products</a>
+            <a href="/pages/components.html" class="nav-link">Component evolution</a>
+            <a href="/pages/backbone_tilt.html" class="nav-link">Backbone / tilt</a>
+            <a href="/pages/f_components.html" class="nav-link">f+ / f-</a>
+            <a href="/pages/lambda_scatter.html" class="nav-link">Lambda scatter</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Product evolution</h2>
+            <p class="plot-desc">Step through each rank-1 product
+                <code>&lambda;<sub>k</sub>&prod;<sub>j</sub> m<sub>j,k</sub>(x<sub>j</sub>)</code>
+                across fit iterations. Each axis subplot shows that product's
+                one-dimensional components.</p>
+            <div class="controls">
+                <div class="control"><label>Run</label><select id="runSelect"></select></div>
+                <div class="control"><label>Stage</label><select id="epochSelect"></select></div>
+                <div class="control"><label>Product</label><select id="treeSelect" multiple></select></div>
+                <div class="control"><label>Iteration</label><input type="range" id="iterationRange" min="0" max="10"
+                        value="0" step="1" /><span id="iterationValue">0</span></div>
+                <div class="control"><label>Merged:</label><input type="checkbox" id="mergedToggle" /></div>
+                <div class="control"><label>Log:</label><input type="checkbox" id="logToggle" /></div>
+                <div class="control"><label>Identified:</label><input type="checkbox" id="identifiedToggle" /></div>
+                <div class="control"><label>Show combined:</label><input type="checkbox" id="combinedOverlayToggle" /></div>
+            </div>
+            <div class="control-row" style="margin:6px 0 10px">
+                <div id="selectionInfo" class="metric"
+                    style="display: none; background: #dbeafe; border-color: #3b82f6; color: #1e40af;"></div>
+                <div id="eventMetrics" class="event-metrics" style="display: none;">
+                    <div class="metric-item">
+                        <span class="metric-icon">🎯</span>
+                        <span class="metric-label">Action:</span>
+                        <span id="actionValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">📊</span>
+                        <span class="metric-label">Column:</span>
+                        <span id="colValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">✂️</span>
+                        <span class="metric-label">Split:</span>
+                        <span id="splitValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">📈</span>
+                        <span class="metric-label">Gain:</span>
+                        <span id="gainValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">⬅️</span>
+                        <span class="metric-label">Left:</span>
+                        <span id="leftValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">➡️</span>
+                        <span class="metric-label">Right:</span>
+                        <span id="rightValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">🔄</span>
+                        <span class="metric-label">Iter:</span>
+                        <span id="iterValue" class="metric-value">—</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-icon">📊</span>
+                        <span class="metric-label">Error:</span>
+                        <span id="errorValue" class="metric-value">—</span>
+                    </div>
+                </div>
+            </div>
+            <div id="productList" class="charts-grid"></div>
+        </section>
+    </main>
+
+    <footer class="footer">tslviz · TSL split-event visualizer</footer>
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/pages/tree.js"></script>
+</body>
+
+</html>

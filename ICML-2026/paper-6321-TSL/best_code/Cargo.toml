@@ -1,0 +1,62 @@
+[package]
+name = "tsl_rust"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "Tensor Separation Learning: interpretable regression via sums of rank-1 separable components."
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lib]
+name = "tsl"
+crate-type = ["lib"]
+
+
+[dependencies]
+rayon = { version = "1.12.0", optional = true }
+itertools = "0.14.0"
+ndarray = "0.16.1"
+rand = "0.8.5"
+log = "0.4.30"
+enum_dispatch = "0.3.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+once_cell = "1.21.4"
+rusqlite = { version = "0.40", optional = true, features = ["bundled"] }
+time = { version = "0.3", optional = true, features = ["formatting"] }
+bytemuck = { version = "1.25", optional = true }
+nalgebra = "0.33"
+
+
+[features]
+default = ["use-rayon", "evo-logging"]
+use-rayon = ["rayon"]
+evo-logging = ["rusqlite", "time", "bytemuck"]
+
+[dev-dependencies]
+csv = "1.4.0"
+criterion = "0.8.2"
+bincode = "1.3"
+
+# Criterion drives its own harness; see benches/fit.rs.
+[[bench]]
+name = "fit"
+harness = false
+
+[profile.profiling]
+inherits = "release"
+debug = true
+
+[workspace]
+members = [
+    ".",
+    "tsl-py"
+]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2021"
+authors = ["Jinyang Liu <jl@math.ku.dk>"]
+license = "MIT"
+repository = "https://github.com/jyliuu/TSL"

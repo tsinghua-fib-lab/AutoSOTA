@@ -1,0 +1,12 @@
+# Override config for SEDP on scRNA
+model:
+  init_args:
+    diffusion_model_config:
+      use_ddim: False  # DDPM sampling = SEDP
+      noise_schedule: cosine
+      timesteps: 1000
+data:
+  init_args:
+    batch_size: 128
+trainer:
+  max_steps: 500000

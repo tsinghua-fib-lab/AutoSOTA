@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - /task/dll  # Base DLL task config
+  - override /optimizer@operatorencoder.optimizer: adamw
+  - override /optimizer@dll.optimizer: adamw
+  - override /model@dll.model: cond_mlp
+  - override /model@dll.model.c_embedder: fno1d_emb
+  # Use the shared FNO config as the OperatorEncoder backbone
+  - override /model@operatorencoder.model: fno1d
+  - override /model@operatorencoder.output_embedder: fno1d_emb
+  - _self_
+
+evaluation:
+  mode: rollout
+
+operatorencoder:
+  model:
+    out_channels: ${dll.model.x_dim}
+  output_embedder:
+    input_dim: 1
+
+dll:
+  T: 10
+  # Chunk size for autoregressive rollout evaluation (over flattened K*N_traj).
+  test_samples_per_example: 32
+  rollout_k_chunk: 8
+  rollout_traj_chunk: 64

@@ -1,0 +1,82 @@
+client_configs:
+  train_configs:
+    # Local trainer - use custom PyG trainer for graph neural networks
+    trainer: "PyGTrainer"
+    trainer_path: "./resources/trainer/pyg_trainer.py"
+    mode: "epoch"
+    num_local_epochs: 3
+    optim: "Adam"
+    optim_args:
+      lr: 0.01
+      weight_decay: 5.0e-4
+
+    # Loss function
+    loss_fn_path: "./resources/loss/nllloss.py"
+    loss_fn_name: "NLLLoss"
+
+    # Client validation
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric/accuracy.py"
+    metric_name: "accuracy"
+
+    # Differential privacy
+    use_dp: False
+    epsilon: 1
+    clip_grad: False
+    clip_value: 1
+    clip_norm: 1
+
+    # Data format
+    send_gradient: False
+
+    # Data loader
+    train_batch_size: 140  # Full-batch training on Cora: 140 labeled training nodes in the standard split
+    val_batch_size: 1000   # Full test set
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/gcn.py"
+    model_name: "GCN"
+    model_kwargs:
+      input_dim: 1433    # Cora feature dimension
+      hidden_dim: 64     # Hidden layer size
+      output_dim: 7      # Number of classes in Cora
+      dropout: 0.5
+
+  # comm_configs will be copied to server_configs as well
+  comm_configs:
+    compressor_configs:
+      enable_compression: False
+      # Used if enable_compression is True
+      lossy_compressor: "SZ2Compressor"
+      lossless_compressor: "blosc"
+      error_bounding_mode: "REL"
+      error_bound: 1e-3
+      param_cutoff: 1024
+    s3_configs:
+      enable_s3: False
+      s3_bucket: "appflx-models"
+      s3_creds_file: "./resources/config_gc/creds/credential.csv"
+
+server_configs:
+  num_clients: 2
+  scheduler: "CompassScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+    max_local_steps: 100
+    min_local_steps: 20
+    speed_momentum: 0.9
+    latest_time_factor: 1.5
+  aggregator: "FedCompassAggregator"
+  aggregator_kwargs:
+    weights: "equal"
+    staleness_fn: "polynomial"
+    staleness_fn_kwargs:
+      a: 0.5
+    alpha: 0.9
+  device: "cpu"
+  num_global_epochs: 20
+  logging_output_dirname: "./output"
+  logging_output_filename: "gcn_cora_fedcompass"

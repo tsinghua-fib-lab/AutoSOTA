@@ -1,0 +1,60 @@
+server:
+  device: cpu
+  data_dir  : "./log_globus_compute_appfl/fedadagrad_server"
+  output_dir: "./log_globus_compute_appfl/fedadagrad_server"
+  s3_bucket: "appflx-models"
+  s3_creds: "globus_compute/creds/credential.csv"
+
+algorithm:
+  servername: 'ServerFedAdagrad'
+  clientname: 'GlobusComputeClientOptim'
+  args:
+    ## Server optimizer
+    server_momentum_param_1: 0.9
+    server_learning_rate: 0.01
+    server_adapt_param: 0.001
+    ## Clients optimizer
+    optim: "Adam"
+    num_local_epochs: 1
+    optim_args:
+      lr: 0.003
+    ## Differential Privacy
+    use_dp: False
+    epsilon: 1
+    ##  epsilon: 1      (stronger privacy as the value decreases)
+    ##  epsilon: 0.05
+    ## Gradient Clipping
+    ## clip_value: False (no-clipping)
+    ## clip_value: 10    (clipping)
+    ## clip_value: 1
+    server_lr_decay_exp_gamma : 0.975
+    client_weights: "equal"
+    clip_grad: False
+    clip_value: 1
+    clip_norm: 1
+
+model:
+  num_channel: 1
+  num_classes: 10
+  num_pixel:   28
+
+training:
+  num_epochs: 1
+  save_model_filename: "MNIST_CNN_FedAdagrad"
+  save_model_dirname: "./save_models"
+
+dataset:
+  name: MNIST
+
+func:
+  get_model:
+    script_file: "./globus_compute/models/cnn.py"
+    call: "get_model"
+
+  get_loss:
+    script_file: "./globus_compute/losses/celoss.py"
+    call: "get_loss"
+
+  val_metric:
+    script_file: "./globus_compute/metrics/acc.py"
+    call: "accuracy"
