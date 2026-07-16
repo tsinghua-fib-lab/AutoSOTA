@@ -1,0 +1,69 @@
+A group of n friends enjoys playing popular video game Toda 2. There is a rating system describing skill level of each player, initially the rating of the i-th friend is r_{i}.
+
+The friends decided to take part in the championship as a team. But they should have equal ratings to be allowed to compose a single team consisting of all n friends. So the friends are faced with the problem: how to make all their ratings equal.
+
+One way to change ratings is to willingly lose in some matches. Friends can form a party consisting of two to five (but not more than n) friends and play a match in the game. When the party loses, the rating of each of its members decreases by 1. A rating can't become negative, so r_{i} = 0 doesn't change after losing.
+
+The friends can take part in multiple matches, each time making a party from any subset of friends (but remember about constraints on party size: from 2 to 5 members).
+
+The friends want to make their ratings equal but as high as possible.
+
+Help the friends develop a strategy of losing the matches so that all their ratings become equal and the resulting rating is maximum possible.
+
+
+-----Input-----
+
+The first line contains a single integer n (2 ≤ n ≤ 100) — the number of friends.
+
+The second line contains n non-negative integers r_1, r_2, ..., r_{n} (0 ≤ r_{i} ≤ 100), where r_{i} is the initial rating of the i-th friend.
+
+
+-----Output-----
+
+In the first line, print a single integer R — the final rating of each of the friends.
+
+In the second line, print integer t — the number of matches the friends have to play. Each of the following t lines should contain n characters '0' or '1', where the j-th character of the i-th line is equal to:
+
+  '0', if friend j should not play in match i,  '1', if friend j should play in match i. 
+
+Each line should contain between two and five characters '1', inclusive.
+
+The value t should not exceed 10^4, it is guaranteed that such solution exists. 
+
+Remember that you shouldn't minimize the value t, but you should maximize R. If there are multiple solutions, print any of them.
+
+
+-----Examples-----
+Input
+5
+4 5 1 7 4
+
+Output
+1
+8
+01010
+00011
+01010
+10010
+00011
+11000
+00011
+11000
+
+Input
+2
+1 2
+
+Output
+0
+2
+11
+11
+
+Input
+3
+1 1 1
+
+Output
+1
+0

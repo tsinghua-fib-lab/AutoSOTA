@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ChaosNexus"
+description = "A Foundation Model for Universal Chaotic System Forecasting with Multi-scale Representations"
+version = "0.1.0"
+readme = "README.md"
+license = { text = "MIT" }  # SPDX license identifier
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "hydra-core", 
+    "numpy", 
+    "torch", 
+    "transformers", 
+    "accelerate", 
+    "dysts", 
+    "gluonts[arrow]", 
+    "scipy", 
+    "scikit-learn", 
+    "tqdm", 
+    "wandb", 
+    "matplotlib",
+    "statsmodels",
+    "orjson",
+    "tensorboardX",
+    "seaborn"
+]
+
+# Optional dependencies
+[project.optional-dependencies]
+numba = ["numba"]
+chronos = ["datasets"] # huggingface datasets
+rocm = ["torch==2.2.2"]
+profile = ["memory_profiler", "psutil"]
+
+# Package data
+[tool.setuptools]
+packages = ["scaleformer", "scaleformer.utils"] 

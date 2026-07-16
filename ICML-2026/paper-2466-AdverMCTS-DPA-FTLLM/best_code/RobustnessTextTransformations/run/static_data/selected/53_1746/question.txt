@@ -1,0 +1,118 @@
+# Let's play some games!
+
+A new RPG called **_Demon Wars_** just came out! Imagine the surprise when you buy it after work, go home, start you _GameStation X_ and it happens to be too difficult for you. Fortunately, you consider yourself a computer connoisseur, so you want to build an AI that tells you every step you have to make to **defeat the evil Demon Lord** and win the game. For now, let's program a simulator.
+
+This game features procedurally generated stages like this one:
+
+
+  Health: ♥️ ♥️ ♥️   Atk: 1   Def: 1   Bag: []  
+K   E     |    X#        C      E   S#  D  
+    E     #######               ###### E E 
+##### #####                          ###-##
+     M                                 EEE 
+                     ###   ###             
+                     #       ##E##E##      
+     ^               #          C  K#      
+               C      #   H   ##E##E##       
+
+
+
+As you can see in the upper status bar, your player starts with **three Health Points**, **1 Attack**, **1 Defense** and an empty **Bag**. These are the only stats that you have to care about for the game. As for the map, we can see many different things, so let's explain every tile one by one:
+* `^` or `v` or `<` or `>` => **Player** (you). It can face any of four directions.
+* `#` => **Wall**. You cannot pass through here.
+* `C` => **Coin _[object]_**.
+* `M` => **Merchant**. They will go away if you give them **three coins**.
+* `K` => **Key _[object]_**. They can open a door, after which they break _(yes, like in horror games)_.
+* `-` and `|` => **Doors** _(there are two doors in the map above)_.
+* `H` => **Health Potion _[object]_**. It refuels your life to three hearts.
+* `S` => **Shield**. It gives **+1 defense** permanently.
+* `X` => **Dual Swords**. It gives **+1 attack** permanently.
+* `E` => **Enemy**. Has **1 Health Point** and **2 Attack**.
+* `D` => **Demon Lord**. Has **10 Health Points** and **3 Attack**. You win the game if you kill him.
+
+Now, _Demon Wars_ is a turn based game with tank controls. Each turn you can either:
+* Move forward.
+* Change direction.
+* Use an item.
+* Attack the enemy you have in front of you.
+
+
+Will you be able to defeat your foe and save us all?
+
+---------------------
+
+# Attack mechanics and enemies
+
+When you use the attack command, you will attack the enemy right in front of you and deal **the same amount of damage as your attack stat**:
+
+
+ E                         E
+>E    === [Attack] ==>    > 
+ E                         E
+
+
+
+**However**, an enemy can attack you (whatever your orientation is), as long as you are on an adjacent cell to the enemy (vertically or horizontally, not diagonally) and if one of those conditions is fullfilled:
+
+* If you turn your character during the turn.
+* If you move away from them (_D&D's opportunity attack_ :D).
+* If you use a potion. You will still recover your life points, but then you will be attacked.
+
+The damage formula is `max(0, (Enemy's attack stat) - (Your defense stat))`. Just remember that you attack and use objects **before** the enemies besides you attack. Here is an example where two enemies would attack you:
+
+
+EEE                        EEE
+ >E    === [Attack] ==>     > 
+EEE                        EEE
+
+
+But enemies are more than obstacles, each time you defeat three of them (demon lord not included), you level up! This level increase will give you **+1 attack** permanently.
+
+# Object usage mechanics
+
+There are only three cases where it is acceptable to use objects:
+* When you use a key in front of a closed door.
+
+
+ #                          #
+>|    === [Use Key] ==>    > 
+ #                          #
+
+
+
+* When you use a coin in front of a merchant (repeat three times for them to go away).
+
+
+
+>M  === [Use Coin] ==>  >M  === [Use Coin] ==>  >M  === [Use Coin] ==> > 
+
+
+
+
+* When you refuel your life using a potion (you must have suffered some damage).
+
+Any other object usage is considered **invalid**. Also, this is more or less standard, but you have to walk over an object to pick it up automatically.
+
+---------------------
+
+# Your task
+
+Write a function `rpg(field: List[List[str]], actions: List[str]) -> Tuple[List[List[str]], int, int, int, List[str]]` that takes the initial state of the game map and a list of actions and returns the new state of the map and the player after executing them in order. All these actions must be valid (no using objects in invalid spots, attacking thin air, going out of bounds, etc), so if any of them turns out not to be valid, return `None`. **Dying counts as an invalid state**.
+
+The order of the elements of the output tuple is: (`new map state`, `health`, `attack`, `defense`, `sorted bag`)
+
+The syntax of the actions is as follows:
+* `F` to move forward.
+* `^`, `>`, `v` and `<`to rotate the player.
+* `A` to attack the enemy you have in front of you.
+* `C`, `K` and `H` to use a coin, a key and a health potion, respectively.
+
+**Technical notes:** 
+* You **can** mutate the input (and probably should), but it is not necessary.
+* There will only be one Demon Lord per map, but every other tile may be repeated two or even more times.
+* Only the tiles marked as **[object]** will be stored in your bag (i.e. keys, coins and potions).
+* Only valid inputs will be given.
+
+----------------
+
+As always, I hope you have fun with this kata :)

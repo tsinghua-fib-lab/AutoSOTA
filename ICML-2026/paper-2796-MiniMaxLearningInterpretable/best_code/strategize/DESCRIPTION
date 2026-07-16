@@ -1,0 +1,47 @@
+Package: strategize
+Type: Package
+Title: Tools for Learning Adversarial or Non-Adversarial Optimal Distributions in High-Dimensional Conjoint Experiments
+Version: 0.0.1
+Date: 2025-12-25
+Authors@R: c(person("Connor T.", "Jerzak", email = "connor.jerzak@austin.utexas.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9858-2050")), person("Priyanshi", "Chandra", email = "i19ma012@amhd.svnit.ac.in", role = "aut", comment = c(ORCID = "0009-0003-1625-8823")), person("Rishi", "Hazra", email = "rishihazra@college.harvard.edu", role = "aut", comment = c(ORCID = "0000-0001-5018-4440")))
+Author: Connor T. Jerzak [aut, cre] (ORCID: <https://orcid.org/0000-0001-9858-2050>),
+    Priyanshi Chandra [aut] (ORCID: <https://orcid.org/0009-0003-1625-8823>),
+    Rishi Hazra [aut] (ORCID: <https://orcid.org/0000-0001-5018-4440>)
+Maintainer: Connor T. Jerzak <connor.jerzak@austin.utexas.edu>
+Description: The 'strategize' package implements methods for learning an optimal or adversarial probability distribution over high-dimensional factors in conjoint (or factorial) experiments. It supports both single-agent (non-adversarial) optimization and adversarial two-player settings, such as multi-stage electoral contexts. Users can estimate the distribution of factor levels that best achieves a chosen objective, optionally under institutional constraints (e.g., two-stage primaries). The package offers a variety of estimation routines, including closed-form solutions for some linear models, gradient-based optimizers for more complex outcome models, and built-in support for inference (via the delta method). It is particularly suitable for exploring and comparing candidate strategies in forced-choice conjoint studies, but is general enough for broader use in high-dimensional policy learning.
+URL: https://github.com/cjerzak/strategize-software
+BugReports: https://github.com/cjerzak/strategize-software/issues
+Depends: R (>= 4.1)
+License: GPL-3
+Encoding: UTF-8
+Imports:
+    digest,
+    jsonlite,
+    stats,
+    compositions,
+    FactorHet,
+    ggplot2,
+    glinternet,
+    graphics,
+    gridExtra,
+    gtools,
+    Matrix,
+    matrixStats,
+    ps,
+    reticulate,
+    rlang,
+    rrapply,
+    sandwich,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    withr,
+    Rcpp,
+    devtools,
+    knitr,
+    rmarkdown,
+    tgp
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+NeedsCompilation: no
+Config/roxygen2/version: 8.0.0

@@ -1,0 +1,101 @@
+# @package _global_
+defaults:
+  - /trajectory: cps_monthly
+  - /transport: pot
+  - /surrogate: linearized_gp
+  - /oracle: trajectory_sample
+  - /reference: barycenter
+  - /baseline@baselines.random: random
+  - /baseline@baselines.uniform: uniform
+  - /strategy@strategies.active_w2_matern5_2_variance: active_w2_fit_reference_matern5_2_variance
+  - /strategy@strategies.uniform_w2_matern5_2: uniform_w2_fit_reference_matern5_2
+  - /strategy@strategies.random_w2_matern5_2: random_w2_fit_reference_matern5_2
+  - override /kernel@surrogate.kernel_spec: matern5_2
+  - _self_
+
+seed: 0
+num_steps: 20
+initial_times: []
+sample_size: null
+
+log_level: INFO
+
+active_loop:
+  recompute_reference_as_barycenter: true
+  barycenter_size: ${reference.barycenter_size}
+  barycenter_num_iter: ${reference.num_iter}
+
+reference:
+  barycenter_size: 1014
+  num_iter: 20
+
+transport:
+  n_support: 1014
+  max_iter: 100000
+
+surrogate:
+  basis_rank: 20
+  prior_variance: 1.0
+  base_variance: 0.05
+  kernel_spec:
+    lengthscale: 0.2
+  regressor_kwargs:
+    training_iter: 50
+    lr: 0.05
+    jitter: 1e-5
+    input_scaling: true
+    output_scaling: true
+    init_lengthscale_median: true
+    init_outputscale_from_data: true
+    noise_prior_from_data_scale: 0.1
+    noise_initializer:
+      _target_: active_wasserstein.inference.variance_scaled_noise_initializer
+      scale: 0.01
+
+evaluation:
+  times: null
+  num_eval: 100
+  t_start: null
+  t_end: null
+  sample_size: null
+  n_support: 1014
+  sample_method: sample_eval
+  velocity_source: eval
+  checkpoints: null
+
+oracle:
+  sample_method: sample_train
+  sample_size: null
+
+common_reference:
+  enabled: false
+  source: eval_barycenter
+  times: null
+  barycenter_size: ${reference.barycenter_size}
+  num_iter: ${reference.num_iter}
+  sample_method: ${evaluation.sample_method}
+  sample_size: ${evaluation.sample_size}
+  fixed: null
+
+candidate_pool:
+  num_candidates: 200
+  times: null
+  t_start: null
+  t_end: null
+
+uniform_schedule:
+  num_steps: ${num_steps}
+  exclude_initial: true
+  t_start: null
+  t_end: null
+
+strategy_order:
+  - active_w2_matern5_2_variance
+  - uniform_w2_matern5_2
+  - random_w2_matern5_2
+
+strategy_overrides: {}
+
+hydra:
+  run:
+    dir: ${oc.env:OUTPUT_ROOT,outputs}/${oc.env:EXPERIMENT_NAME,${hydra:job.name}}/${now:%Y-%m-%d}/${now:%H-%M-%S}

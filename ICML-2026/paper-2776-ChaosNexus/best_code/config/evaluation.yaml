@@ -1,0 +1,84 @@
+eval:
+  # for evaluating saved checkpoint
+  mode: predict
+  data_paths_lst: null
+    # - data_dir1
+    # - data_dir2
+
+  checkpoint_path: null
+  device: cuda:7
+  torch_dtype: float32 # bfloat16?
+  batch_size: 32
+  num_subdirs: null
+  num_samples_per_subdir: null
+
+  # inference mode for scaleformer
+  sliding_context: true
+
+  save_contexts: false
+  save_labels: false
+  save_predictions: false  # for forecasting model eval
+  save_completions: false  # for mlm model eval
+  save_masks: false  # for mlm model eval
+
+  num_processes: 10 # for multiprocessing
+
+  metric_names:
+    - mse
+    - mae
+    - smape
+#    - spearman
+#    - ME-APE
+    - ME-LRw
+    - max_lyap_gt
+    - max_lyap_pred
+    - kld11
+    - gd_rmse
+
+  forecast_save_dir: null
+  labels_save_dir: null
+  completions_save_dir: null
+  patch_input_save_dir: null
+  timestep_masks_save_dir: null
+
+  metrics_save_dir: null
+  metrics_fname: metrics
+  overwrite: false
+  seed: 1
+
+  # for generating forecasts and getting test split
+  num_samples: 1 # NOTE: this is only used in chronos/evaluate.py
+  parallel_sample_reduction: mean
+  limit_prediction_length: true
+  context_length: 512
+  prediction_length: 64
+
+  # window style can be either sampled or rolling
+  # sampled: randomly samples windows from each timeseries (of length context_length) 
+  # rolling: takes consecutive windows of context_length with a stride of
+  #   window_stride from each timeseries
+  # (in this case, num_test_instances need not be specified - always number of sliding windows
+  #  conditioned on window stride, namely (T - context_length - prediction_length) // window_stride + 1)
+  # single: takes single window of length context_length from the beginning of each timeseries
+  # (in this case, num_test_instances need not be specified - always 1)
+  num_test_instances: 1 # number of context windows to use for evaluation
+  window_style: sampled
+  window_stride: 1024
+  split_coords: false
+  verbose: false
+
+  baselines:
+    baseline_model: fourier_arima
+    order: [4, 1, 4]  # (p, d, q) for ARIMA
+    num_fourier_terms: 5
+
+  chronos:
+    zero_shot: false
+    deterministic: true
+
+# wandb run metrics, not to be confused with dysts eval metrics
+run_metrics:
+  wandb_run_id: null
+  plot_dir: figures
+  save_dir: null
+  save_fname: metrics.json

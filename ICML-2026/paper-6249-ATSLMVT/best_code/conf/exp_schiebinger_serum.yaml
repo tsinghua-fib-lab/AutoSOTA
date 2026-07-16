@@ -1,0 +1,99 @@
+# @package _global_
+defaults:
+  - /trajectory: schiebinger_serum
+  - /transport: pot
+  - /surrogate: linearized_gp
+  - /oracle: trajectory_sample
+  - /reference: barycenter
+  - /baseline@baselines.random: random
+  - /baseline@baselines.uniform: uniform
+  - /strategy@strategies.active_w2_matern5_2_variance: active_w2_fit_reference_matern5_2_variance
+  - /strategy@strategies.active_no_warp_matern5_2_variance: active_no_warp_fit_reference_matern5_2_variance
+  - /strategy@strategies.active_w2_rbf_variance: active_w2_fit_reference_rbf_variance
+  - /strategy@strategies.uniform_w2_matern5_2: uniform_w2_fit_reference_matern5_2
+  - /strategy@strategies.random_w2_matern5_2: random_w2_fit_reference_matern5_2
+  - _self_
+
+seed: 0
+num_steps: 5
+initial_times: []
+sample_size: null
+
+# Logging level: DEBUG, INFO, WARNING, ERROR
+log_level: INFO
+
+active_loop:
+  recompute_reference_as_barycenter: true
+  barycenter_size: ${reference.barycenter_size}
+  barycenter_num_iter: ${reference.num_iter}
+
+oracle:
+  sample_method: sample_train
+
+reference:
+  barycenter_size: 1024
+
+trajectory:
+  train_batch_index: 0
+  eval_batch_index: 0
+  split_within_batch: true
+  n_pcs: 20
+
+transport:
+  max_iter: 100000
+
+surrogate:
+  basis_rank: 10
+  regressor_kwargs:
+    output_scaling: true
+    noise_initializer:
+      scale: 0.01
+
+
+evaluation:
+  # Explicit evaluation times (takes precedence if provided)
+  times: null
+  # Alternatively, generate uniform grid with these parameters
+  num_eval: 50
+  t_start: null
+  t_end: null
+  # Sampling parameters for evaluation (null => use all cells)
+  sample_size: null
+  n_support: 1024
+  sample_method: sample_eval
+  velocity_source: eval
+  checkpoints: null
+
+common_reference:
+  enabled: true
+  source: eval_barycenter
+  times: 9.0
+  barycenter_size: ${reference.barycenter_size}
+  num_iter: ${reference.num_iter}
+  sample_method: ${evaluation.sample_method}
+  sample_size: ${evaluation.sample_size}
+  fixed: null
+
+candidate_pool:
+  # Ignored when the trajectory exposes candidate_times (e.g. dataset time points).
+  num_candidates: 200
+  times: null
+  t_start: null
+  t_end: null
+
+uniform_schedule:
+  num_steps: ${num_steps}
+  exclude_initial: true
+  t_start: null
+  t_end: null
+
+strategy_order:
+  - active_w2_matern5_2_variance
+  - uniform_w2_matern5_2
+  - random_w2_matern5_2
+
+strategy_overrides: {}
+
+hydra:
+  run:
+    dir: ${oc.env:OUTPUT_ROOT,results}/${oc.env:EXPERIMENT_NAME,${hydra:job.name}}/${now:%Y-%m-%d}/${now:%H-%M-%S}

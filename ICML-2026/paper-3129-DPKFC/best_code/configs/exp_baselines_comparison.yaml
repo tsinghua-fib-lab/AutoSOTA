@@ -1,0 +1,47 @@
+experiment:
+  name: "baselines_comparison"
+  seeds: [42, 43, 44, 45, 46]
+  device: "cuda"
+
+data:
+  private_dataset: "mnist"
+  public_dataset: "fashionmnist"
+  batch_size: 256
+  num_workers: 4
+
+model:
+  type: "cnn"
+  num_classes: 10
+  pretrained: false
+
+training:
+  epochs: 5
+  learning_rate: 1e-3
+  optimizer: "sgd"
+
+privacy:
+  epsilons: [0.5, 1.0, 2.0, 3.0, 5.0, 8.0, 10.0]
+  delta: 1e-5
+  max_grad_norm: 1.0
+
+kfac:
+  damping: 1e-3
+  update_frequency: 1
+
+baselines:
+  adam_bc_lr: 1e-3
+  adam_bc_eps_root: 1e-2
+  adam_bc_betas: [0.9, 0.999]
+  disk_kappa: 0.1
+
+methods:
+  - "baseline"
+  - "dp_sgd"
+  - "dp_adam_bc"
+  - "dp_disk"
+  - "dp_kfac_pink"
+  - "dp_kfac_public"
+
+output:
+  experiments_dir: "experiments"
+  save_metrics: true

@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+
+def calculate_mae_sd(filename,BM):
+    df = pd.read_csv(filename)
+    theta_whole_df=pd.read_csv(f"{BM}/irt_person_scores_WLE_SE_test.csv")
+
+    abs_error = abs(df["theta"].values - theta_whole_df["Theta_WLE"].values)
+
+    mae = np.mean(abs_error)
+    sd = np.std(abs_error)
+    se = sd / np.sqrt(len(abs_error))
+    n_sub_item=np.mean( df["n_subset_items"].values)
+    n_all_item=np.mean(df["n_all_items"].values)
+    return {
+        "filename": filename,
+        "mae":mae,
+        "sd": sd,
+        "se": se,
+        "n": len(abs_error),
+        "n_subset_items":n_sub_item,
+        "n_all_items": n_all_item
+
+    }
+
+def process_all_files(BM):
+    files = [
+        f"experiments/baseline_compare/pirt_random_100_{BM}.csv",
+        f"experiments/baseline_compare/pirt_tiny{BM}_vs_actual.csv",
+        f"experiments/baseline_compare/pirt_metabench_{BM}_primary.csv",
+        f"experiments/baseline_compare/pirt_metabench_{BM}_secondary.csv",
+        f"{BM}/pirt_accuracy_se_0.1.csv",
+        f"{BM}/pirt_accuracy_se_0.2.csv",
+        f"{BM}/pirt_accuracy_se_0.3.csv",
+    ]
+
+    rows = []
+    for f in files:
+        row = calculate_mae_sd(f, BM)
+        row["benchmark"] = BM  # add BM column
+        rows.append(row)
+
+    return pd.DataFrame(rows)
+
+def main():
+    BM_list = ["winogrande", "truthfulqa", 
+    "hellaswag", 
+    "gsm8k", "arc"]
+
+    all_results = []
+
+    for bm in BM_list:
+        df = process_all_files(bm)
+        all_results.append(df)
+
+    # concatenate all results
+    out_df = pd.concat(all_results, ignore_index=True)
+
+    out_path = "summary_theta_mae_sd_se.csv"
+    out_df.to_csv(out_path, index=False)
+
+    print(f"Saved summary: {out_path}")
+
+main()

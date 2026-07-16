@@ -1,0 +1,91 @@
+multiprocess_kwargs:
+  processes: null
+  maxtasksperchild: null
+
+restart_sampling:
+  params_json_path: null
+  systems_batch_size: 128
+  batch_idx_low: null
+  batch_idx_high: null
+  starting_sample_idx: 0
+  save_first_sample: true
+
+sampling:
+  data_dir: null
+  sys_class: continuous_no_delay
+  test_split: 0.3
+  split_prefix: null
+  rseed: 999 # rseed for param perturbations, and DynSysSampler's pp_rng_stream and choice of num_periods
+  ic_rseed: 888 # rseed for initial condition sampler
+  num_points: 4096
+  num_periods: 40 # default/fallback number of periods, need to specify for traj cache in skew system generation
+  num_periods_min: 40
+  num_periods_max: 40
+  num_ics: 1
+  num_param_perturbations: 4
+  param_scale: 0.5
+  split_coords: false
+  standardize: false
+  verbose: false
+  multiprocessing: true
+  debug_system: null
+  silence_integration_errors: false
+  save_params: true
+  save_traj_stats: false
+  ignore_probability: 0.0
+  sign_match_probability: 0.5
+  atol: 1e-10
+  rtol: 1e-9
+
+  reference_traj:
+    length: 4096
+    transient: 0.5
+    n_periods: 40
+    atol: 1e-7
+    rtol: 1e-6
+
+validator:
+  enable: true
+  verbose: false
+  transient_time_frac: 0.05
+  plot_save_dir: null
+  save_failed_trajs: false
+  attractor_tests:
+    - check_not_linear
+    - check_boundedness
+    - check_not_fixed_point
+    - check_zero_one_test
+    # - check_not_limit_cycle
+    # - check_lyapunov_exponent
+    - check_power_spectrum
+    - check_stationarity
+
+events:
+  max_duration: 300
+  instability_threshold: 1e4
+  min_step: 1e-10
+  verbose: true
+
+skew:
+  num_pairs: 5000
+  pairs_rseed: 123 # rseed for sampling skew system pairs
+  sys_idx_low: 0
+  sys_idx_high: null
+  normalization_strategy: flow_rms
+  randomize_driver_indices: true
+  transform_scales: true
+
+  # paths to train and test sets of non-skew systems for filtering
+  # skew system samples into train/test sets
+  train_nonskew_path: null
+  test_nonskew_path: null
+
+  coupling_map_type: additive
+  coupling_map:
+
+    # for the additive map
+    transform_scales: true
+    randomize_driver_indices: true
+    normalization_strategy: flow_rms
+
+    random_seed: 0

@@ -1,0 +1,45 @@
+train:
+  seed: 99
+  # train, checkpoint, log steps
+  max_steps: 100_000
+  save_steps: 10_000
+  log_steps: 100
+  resume_from_checkpoint: null
+
+  per_device_train_batch_size: 512
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  dataloader_num_workers: 16
+  dataloader_prefetch_factor: 2
+
+  tf32: false # NOTE: tf32 requires Ampere or a newer GPU arch, cuda>=11 and torch>=1.7
+  torch_compile: false
+
+  # optimizer
+  optim: adamw_torch_fused
+  learning_rate: 1e-3
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  output_dir: null
+
+  # distributed training
+  ddp_backend: nccl
+  ddp_find_unused_parameters: false
+  remove_unused_columns: false
+
+scheduler:
+  enabled: false
+  schedule_value_name: noise_scale
+  schedule_name: cosine
+
+  # for all schedules
+  epoch_stop: 0.5
+
+  # for cosine schedule
+  init_value: 1.0
+  final_value: 0.0
+  eps: 0.008
+
+  num_steps: 4      # For step schedule
+  decay_rate: 8.0   # For exponential schedule

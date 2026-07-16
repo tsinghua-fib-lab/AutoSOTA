@@ -1,0 +1,189 @@
+---
+title: "Quick Start: Your First strategize Analysis in 5 Minutes"
+author: "strategize package authors"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quick Start: Your First strategize Analysis in 5 Minutes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## What is strategize?
+
+`strategize` finds the **optimal probability distribution** over treatment factors
+in conjoint experiments. Instead of asking "what is the average effect of each
+factor level?", it asks **"what mix of factor levels would maximize my outcome?"**
+
+For example, in a candidate conjoint experiment, instead of learning that
+"female candidates are preferred by 5%", strategize tells you the optimal
+probability of fielding male vs female candidates to maximize vote share.
+
+## Step 1: Install and Setup (One-time)
+
+```{r install}
+# Install package from GitHub
+devtools::install_github("cjerzak/strategize-software/strategize")
+
+# Load the package
+library(strategize)
+
+# Set up the JAX-backed computational environment (required once)
+# This environment is used by strategize(), cv_strategize(), and the neural APIs
+build_backend(conda_env = "strategize_env")
+```
+
+**Note:** You only need to run `build_backend()` once. After that, the package
+can reuse the created environment for optimization and neural modeling.
+
+## Step 2: Prepare Your Data
+
+You need 3 things:
+
+1. **Y**: Outcome vector (e.g., 1 if candidate was chosen, 0 otherwise)
+2. **W**: Factor matrix (data.frame with columns for each conjoint attribute)
+3. **p_list**: Baseline probabilities for each factor level (usually uniform)
+
+```{r data-prep}
+library(strategize)
+
+# Load your conjoint data
+# Example structure:
+# - Y: binary outcome (0/1 for forced-choice)
+# - W: data.frame with factor columns
+
+# Create baseline probability list (if using uniform randomization)
+p_list <- list(
+  Gender = c(Male = 0.5, Female = 0.5),
+  Age = c(Young = 0.33, Middle = 0.33, Old = 0.34),
+  Party = c(Dem = 0.5, Rep = 0.5)
+)
+
+# Or auto-generate from your data:
+# p_list <- create_p_list(W, uniform = TRUE)
+```
+
+## Step 3: Run the Analysis
+
+```{r run-analysis}
+# Run strategize to find optimal distribution
+result <- strategize(
+  Y = Y,
+  W = W,
+  lambda = 0.1,         # Regularization (higher = closer to baseline)
+  p_list = p_list,
+  pair_id = pair_id,    # Identifies forced-choice pairs
+  diff = TRUE,          # For forced-choice designs
+  nSGD = 100,           # Gradient descent iterations
+  compute_se = TRUE     # Compute standard errors
+)
+```
+
+**Tip:** Use `cv_strategize()` to automatically select the best `lambda`:
+
+```{r cv}
+cv_result <- cv_strategize(
+  Y = Y,
+  W = W,
+  lambda_seq = c(0.01, 0.1, 0.5, 1.0),
+  p_list = p_list,
+  pair_id = pair_id,
+  diff = TRUE,
+  folds = 3
+)
+
+# Best lambda is automatically selected
+print(cv_result$lambda)
+```
+
+## Step 4: Interpret Results
+
+```{r interpret}
+# View optimal distribution
+result$pi_star_point
+# $k1
+# $k1$Gender
+#   Male Female
+#   0.35   0.65   <- Female candidates preferred (65% vs 50% baseline)
+# $k1$Age
+#   Young Middle    Old
+#    0.40   0.35   0.25   <- Younger candidates preferred
+
+# Expected outcome under optimal strategy
+result$Q_point
+# [1] 0.58  <- 58% expected win rate (compared to ~50% under baseline)
+
+# Standard error for the optimized outcome
+result$Q_se
+
+# View confidence intervals (if compute_se = TRUE)
+result$pi_star_lb  # Lower bounds
+result$pi_star_ub  # Upper bounds
+```
+
+## Step 5: Visualize Results
+
+```{r visualize}
+# Plot optimal vs baseline distributions
+strategize.plot(
+  pi_star_list = result$pi_star_point,
+  pi_star_se_list = result$pi_star_se,
+  p_list = p_list,
+  main_title = "Optimal vs Baseline Distribution"
+)
+```
+
+## Key Concepts
+
+| Term | Meaning |
+|------|---------|
+| **pi*** (optimal) | Learned probability distribution that maximizes outcome |
+| **p_list** (baseline) | Original assignment probabilities from your experiment |
+| **Q*** | Expected outcome under the optimal distribution |
+| **lambda** | Regularization - keeps optimal distribution close to baseline |
+
+## Common Parameter Settings
+
+```{r presets}
+# Quick test (not for inference)
+result <- strategize(Y = Y, W = W, lambda = 0.1, nSGD = 20, compute_se = FALSE)
+
+# Standard analysis
+result <- strategize(Y = Y, W = W, lambda = 0.1, nSGD = 100, compute_se = TRUE)
+
+# Publication quality
+result <- strategize(Y = Y, W = W, lambda = 0.1, nSGD = 500,
+                     nMonte_Qglm = 500, compute_se = TRUE)
+```
+
+## Next Steps
+
+- **Cross-validation**: Use `cv_strategize()` to select optimal lambda
+- **Adversarial mode**: Set `adversarial = TRUE` for two-player games
+- **Prediction-only API**: Use `strategic_prediction()` when you want the fitted
+  outcome model without the optimization step
+- **Foundation models**: Train pooled models with `preference.fm`; use
+  `strategize` to load, adapt, extract embeddings, and predict from trained
+  checkpoints. See `vignette("FoundationModels")`
+- **Full tutorial**: See `vignette("MainVignette")`
+- **Troubleshooting**: See `vignette("Troubleshooting")`
+
+## Getting Help
+
+```{r help}
+# Function documentation
+?strategize
+?cv_strategize
+?strategize.plot
+
+# Report issues
+# https://github.com/cjerzak/strategize-software/issues
+```

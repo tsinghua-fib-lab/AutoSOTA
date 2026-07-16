@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DP-KFC, Data-Free Preconditioning for Privacy-Preserving Deep Learning</title>
+<meta name="description" content="DP-KFC builds KFAC preconditioners for differentially private deep learning by probing networks with structured synthetic noise, no private data, no public proxies, no privacy budget. ICML 2026." />
+<meta name="color-scheme" content="dark light" />
+<!-- set theme before paint to avoid a flash -->
+<script>
+  (function(){
+    try{
+      var t = localStorage.getItem('dpkfc-theme');
+      if(t!=='light' && t!=='dark'){
+        t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    }catch(e){ document.documentElement.setAttribute('data-theme','dark'); }
+  })();
+</script>
+
+<!-- Open Graph / Twitter -->
+<meta property="og:title" content="DP-KFC: Data-Free Preconditioning for Privacy-Preserving Deep Learning" />
+<meta property="og:description" content="Curvature for DP-SGD, recovered from synthetic noise. ICML 2026." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="static/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0b12'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' fill='%23ff5fa2' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<!-- scroll progress bar -->
+<div class="progress" id="progress"></div>
+
+<!-- sticky nav -->
+<header class="nav" id="nav">
+  <a class="nav-brand" href="#top">DP&#8209;KFC</a>
+  <nav class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#idea">Key idea</a>
+    <a href="#method">Method</a>
+    <a href="#results">Results</a>
+    <a href="#why">Why it works</a>
+    <a href="#bibtex">BibTeX</a>
+  </nav>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light / dark theme" title="Toggle theme">
+    <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/></g></svg>
+    <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/></svg>
+  </button>
+  <a class="nav-cta" href="https://github.com/molinamarcvdb/DP-KFC" target="_blank" rel="noopener">Code ↗</a>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true">
+    <canvas id="noiseField" class="noise-field"></canvas>
+    <div class="grain"></div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="venue-pill">ICML 2026 &nbsp;·&nbsp; accepted (regular)</div>
+    <h1 class="title">
+      <span class="mono accent">DP&#8209;KFC</span><br/>
+      Data&#8209;Free Preconditioning for<br/>
+      <span class="grad">Privacy&#8209;Preserving Deep Learning</span>
+    </h1>
+
+    <p class="authors">
+      <a href="https://scholar.google.com/citations?user=2941bysAAAAJ&amp;hl=en" target="_blank" rel="noopener">Marc Molina&nbsp;Van&nbsp;den&nbsp;Bosch</a><sup>1,2</sup>,
+      <a href="https://scholar.google.com/citations?user=DkHZcZAAAAAJ&amp;hl=en" target="_blank" rel="noopener">Riccardo Taiello</a><sup>1</sup>,
+      <a href="https://scholar.google.com/citations?user=BzFKRGYAAAAJ&amp;hl=en" target="_blank" rel="noopener">Albert Sund&nbsp;Aillet</a><sup>1</sup>,
+      <a href="https://scholar.google.com/citations?user=uzjy878AAAAJ&amp;hl=en" target="_blank" rel="noopener">Andrea Protani</a><sup>1,2</sup>,
+      <a href="https://scholar.google.com/citations?user=FmU4pM0AAAAJ&amp;hl=en" target="_blank" rel="noopener">Miguel&nbsp;Angel Gonzalez&nbsp;Ballester</a><sup>2,3</sup>,
+      <a href="https://scholar.google.com/citations?user=DEB3zgMAAAAJ&amp;hl=en" target="_blank" rel="noopener">Luigi Serio</a><sup>1</sup>
+    </p>
+    <p class="affils">
+      <sup>1</sup>CERN, Geneva &nbsp;&nbsp; <sup>2</sup>BCN&nbsp;MedTech, Universitat&nbsp;Pompeu&nbsp;Fabra &nbsp;&nbsp; <sup>3</sup>ICREA
+    </p>
+
+    <div class="partners">
+      <a href="https://home.cern/" target="_blank" rel="noopener" aria-label="CERN">
+        <img class="logo-color" src="static/logos/cern.svg" alt="CERN" />
+        <img class="logo-white" src="static/logos/cern-logo-white.svg" alt="CERN" />
+      </a>
+      <a href="https://www.upf.edu/" target="_blank" rel="noopener" aria-label="Universitat Pompeu Fabra">
+        <img class="logo-color" src="static/logos/upf.png" alt="Universitat Pompeu Fabra" />
+        <img class="logo-white" src="static/logos/upf-white.png" alt="Universitat Pompeu Fabra" />
+      </a>
+      <a href="https://cafein.web.cern.ch/" target="_blank" rel="noopener" aria-label="CAFEIN, federated-learning platform at CERN">
+        <img class="logo-color" src="static/logos/cafein.svg" alt="CAFEIN" />
+        <img class="logo-white" src="static/logos/cafein-logo-white.svg" alt="CAFEIN" />
+      </a>
+    </div>
+
+    <div class="badges">
+      <a class="badge primary" href="static/dp_kfc.pdf" target="_blank" rel="noopener"><span>📄</span> Paper (PDF)</a>
+      <a class="badge" href="#" target="_blank" rel="noopener"><span>📚</span> arXiv</a>
+      <a class="badge" href="https://github.com/molinamarcvdb/DP-KFC" target="_blank" rel="noopener"><span>⌥</span> Code</a>
+      <a class="badge" href="#bibtex"><span>❝</span> BibTeX</a>
+    </div>
+
+    <p class="tldr">
+      <strong>TL;DR.</strong> DP&#8209;SGD injects <em>isotropic</em> noise into an <em>anisotropic</em> loss
+      landscape. We fix the mismatch with a KFAC preconditioner, but instead of estimating curvature from
+      private data (costs privacy budget) or public data (causes distribution shift), we <strong>probe the
+      network with structured synthetic noise</strong> and recover it for free.
+    </p>
+
+    <a class="scroll-hint" href="#problem">scroll ↓</a>
+  </div>
+</section>
+
+<main>
+
+<!-- ============ PROBLEM ============ -->
+<section class="block" id="problem">
+  <div class="wrap reveal">
+    <span class="kicker">The problem</span>
+    <h2>An isotropy mismatch</h2>
+    <p class="lead">
+      Deep networks have wildly ill-conditioned loss landscapes, curvature eigenvalues span orders of
+      magnitude across directions. DP&#8209;SGD, on the other hand, enforces a <em>sphere</em>: global
+      \(L_2\) clipping and isotropic Gaussian noise treat every direction the same.
+    </p>
+    <p>
+      The result: low-sensitivity parameters drown in noise while high-sensitivity directions get
+      over-clipped, heterogeneous signal-to-noise ratios that slow convergence and leave deep models
+      barely beating linear baselines. Second-order preconditioning could rotate and rescale gradients so
+      the sphere finally <em>fits</em> the geometry, but estimating curvature under DP has always cost
+      either privacy budget or a public proxy you may not have (think medical imaging).
+    </p>
+    <figure class="figcard">
+      <img src="static/images/snr_motivation.png" alt="Layer-wise signal-to-noise ratio: DP-SGD collapses while DP-KFC reaches an optimal profile across CNN and Transformer architectures." loading="lazy" />
+      <figcaption><span class="figtag">Fig. 1</span> Layer-wise SNR on a CNN (left) and CrossViT (right), CIFAR&#8209;100. DP&#8209;SGD suffers signal collapse; DP&#8209;KFC reaches a flat, optimal profile, matching data-dependent proxies <em>without any external data</em>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ KEY IDEA ============ -->
+<section class="block alt" id="idea">
+  <div class="wrap reveal">
+    <span class="kicker">Key idea</span>
+    <h2>Curvature is mostly <span class="accent">architecture</span>, not data</h2>
+    <p class="lead">
+      The KFAC Fisher block of a layer factorizes into an activation covariance and a gradient covariance:
+    </p>
+    <div class="eqn">
+      \( F_\ell \;\approx\; \underbrace{A_{\ell-1}}_{\text{input correlations}} \;\otimes\; \underbrace{G_\ell}_{\text{architectural sensitivity}} \)
+    </div>
+    <p>
+      Mean-field signal-propagation theory says the <em>scale</em> of these factors (and of the resulting
+      preconditioner) is fixed by the architecture, widths, init variances, nonlinearities, and contracts
+      to an architectural fixed point regardless of the inputs. So we can recover it by feeding the network
+      <strong>unstructured noise with random labels</strong>. The only data-dependent piece is the
+      eigenvector <em>directions</em> of \(A_{\ell-1}\), i.e. the correlation structure of the inputs, and
+      natural data has a universal one: images follow \(1/f^{\alpha}\) power spectra, text follows
+      heavy-tailed token statistics. We bake those priors into the probes (<strong>pink noise</strong> for
+      vision, <strong>structural token sequences</strong> for language).
+    </p>
+    <div class="callout">
+      <strong>So:</strong> generate synthetic probes → forward/backward pass through the current model →
+      assemble KFAC factors → invert. Zero touches of the private dataset ⇒ <strong>zero privacy cost</strong>,
+      and no domain bias to inherit.
+    </div>
+    <figure class="figcard">
+      <img src="static/images/spectrum_ablation_simple_full.png" alt="Sorted KFAC eigenvalues for MLP, CNN and attention layers: synthetic noise recovers the same architecture-determined decay as the private oracle." loading="lazy" />
+      <figcaption><span class="figtag">Fig. 2</span> Sorted KFAC eigenvalues for (a) an MLP layer, (b) a CNN conv layer, (c) an attention QKV projection. Synthetic noise (orange) recovers the same architecture-determined decay as the private oracle (black, dashed); domain-matched public data (FashionMNIST) tracks it too, while domain-mismatched data (CIFAR&#8209;10, purple) drifts.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section class="block" id="method">
+  <div class="wrap reveal">
+    <span class="kicker">Method</span>
+    <h2>DP&#8209;KFC, in three moves</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <h3>Probe with synthetic noise</h3>
+        <p>Build a batch of modality-shaped noise (pink noise / structural tokens) with random labels. Forward + backward through the <em>current</em> parameters \(\theta_t\) to get activations \(\tilde a_{\ell-1}\) and error signals \(\tilde\delta_\ell\).</p>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <h3>Build the preconditioner</h3>
+        <p>Aggregate Kronecker factors \(\hat A_{\ell-1},\hat G_\ell\), eigendecompose, and form the regularized inverse square roots \(U_{A,\ell},U_{G,\ell}\). The implicit preconditioner is \(\tilde F^{-1/2}=U_A\otimes U_G\), never materialized in full.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <h3>Scale, <em>then</em> privatize</h3>
+        <p>Transform each per-sample gradient \(\tilde g_\ell = U_{G,\ell}\, g_\ell\, U_{A,\ell}\) <em>before</em> clipping and noise. In the preconditioned space \(\mathrm{Cov}(\tilde g)\!\approx\! I\): the fixed clip threshold applies uniformly and the DP noise is never amplified by the preconditioner.</p>
+      </div>
+    </div>
+
+    <div class="twocol">
+      <div class="panel">
+        <h3>Privacy: free, by construction</h3>
+        <p>The preconditioner depends only on the architecture and the synthetic batch, both public, and on \(\theta_t\), which depends only on <em>past</em> privatized releases. So the \(L_2\) sensitivity of the clipped, preconditioned gradient sum is still \(C\): DP&#8209;KFC inherits the <em>exact</em> RDP accounting of plain DP&#8209;SGD. It behaves like implicit adaptive clipping, but the adaptation comes entirely from non-sensitive architectural facts.</p>
+      </div>
+      <div class="panel">
+        <h3>Convergence</h3>
+        <p>For non-convex objectives, DP&#8209;KFC converges at the optimal \(\mathcal{O}(T^{-1/2})\) rate, with the privacy term \(d\sigma^2C^2/B^2\) <em>not</em> multiplied by the preconditioner's \(\lambda_{\max}^2\) (the failure mode of post-noise preconditioning). And because synthetic and private curvature share their eigenspectrum (Spectral Scaling Invariance), preconditioning collapses the effective condition number toward 1.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section class="block alt" id="results">
+  <div class="wrap reveal">
+    <span class="kicker">Results</span>
+    <h2>Better SNR ⇒ better accuracy, across modalities</h2>
+    <p class="lead">
+      DP&#8209;KFC with synthetic preconditioning consistently beats DP&#8209;SGD and adaptive baselines, and
+      <strong>matches public-data preconditioning</strong> on vision, at zero privacy cost.
+    </p>
+
+    <div class="figgrid">
+      <figure class="figcard">
+        <img src="static/images/vision_combined_results.png" alt="Privacy-utility trade-off on MNIST and CIFAR-100." loading="lazy" />
+        <figcaption><span class="figtag">Fig. 4</span> <strong>Vision.</strong> Test accuracy vs. \(\epsilon\) on MNIST (CNN) and CIFAR&#8209;100 (CrossViT). Synthetic DP&#8209;KFC tracks Public DP&#8209;KFC and clears DP&#8209;SGD across all budgets.</figcaption>
+      </figure>
+      <figure class="figcard">
+        <img src="static/images/nlp_combined_results.png" alt="Privacy-utility trade-off on StackOverflow and IMDB." loading="lazy" />
+        <figcaption><span class="figtag">Fig. 5</span> <strong>Language.</strong> StackOverflow (BERT) and IMDB (logistic regression). DP&#8209;KFC improves over DP&#8209;Adam everywhere; a residual gap to public proxies remains on StackOverflow, see <a href="#why">limitations</a>.</figcaption>
+      </figure>
+    </div>
+
+    <h3 class="mt">Robust to negative transfer</h3>
+    <p>When a public proxy is <em>mismatched</em>, public-data preconditioning degrades, synthetic noise doesn't, because it carries task-agnostic geometry only. Under a texture-disjoint shift (PathMNIST ← MNIST), synthetic DP&#8209;KFC <strong>matches the private oracle</strong> while public DP&#8209;KFC drops 4.8 points.</p>
+
+    <h3 class="mt">Standalone &amp; complementary</h3>
+    <p>DP&#8209;KFC instantiates the <em>scale-then-privatize</em> principle (acting <em>before</em> the noise). It beats the prior STP baseline (AdaDPS) and post-privatization methods (DP&#8209;AdamBC, DiSK) among data-free methods, and the two families <strong>stack</strong>: <em>DP&#8209;KFC + DP&#8209;AdamBC</em> is the strongest configuration overall.</p>
+
+    <div class="tablewrap">
+      <table>
+        <caption>MNIST (CNN), test accuracy %, 5 seeds, hyperparameters tuned per method. Best per column in <strong>bold</strong>.</caption>
+        <thead>
+          <tr><th>Method</th><th>ε = 1</th><th>ε = 2</th><th>ε = 5</th><th>ε = 8</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DP-SGD</td><td>91.7 ±0.2</td><td>92.5 ±0.3</td><td>93.4 ±0.3</td><td>93.7 ±0.3</td></tr>
+          <tr><td>AdaDPS <span class="dim">(STP, public)</span></td><td>91.3 ±0.8</td><td>93.2 ±1.0</td><td>93.6 ±1.3</td><td>93.3 ±1.4</td></tr>
+          <tr><td>DiSK <span class="dim">(post-priv.)</span></td><td>93.7 ±0.4</td><td>94.1 ±0.3</td><td>94.3 ±0.2</td><td>94.3 ±0.2</td></tr>
+          <tr><td>DP-AdamBC <span class="dim">(post-priv.)</span></td><td>94.0 ±0.3</td><td>94.8 ±0.2</td><td>95.2 ±0.2</td><td>95.3 ±0.1</td></tr>
+          <tr><td>Public DP-KFC</td><td>95.3 ±0.4</td><td>95.7 ±0.3</td><td>96.2 ±0.3</td><td>96.4 ±0.3</td></tr>
+          <tr class="hl"><td>Synthetic DP-KFC <span class="dim">(ours, data-free)</span></td><td>94.2 ±0.5</td><td>95.0 ±0.4</td><td>95.7 ±0.3</td><td>95.9 ±0.3</td></tr>
+          <tr class="best"><td>Synthetic DP-KFC + DP-AdamBC</td><td><strong>95.5 ±0.3</strong></td><td><strong>96.1 ±0.2</strong></td><td><strong>96.4 ±0.3</strong></td><td><strong>96.4 ±0.3</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY IT WORKS ============ -->
+<section class="block" id="why">
+  <div class="wrap reveal">
+    <span class="kicker">Why it works</span>
+    <h2>Synthetic curvature is provably aligned</h2>
+    <p>
+      Mean-field variance contraction makes the eigenspectra of private and synthetic KFAC factors
+      <em>proportional</em> in deep networks (Spectral Scaling Invariance). Preconditioning with
+      \(\tilde F^{-1/2}\) therefore collapses the effective curvature \(\tilde F^{-1/2} F\, \tilde F^{-1/2}\)
+      toward a near-identity scalar map, the leftover constant just gets absorbed by the clip norm and
+      learning rate. We verify this empirically: synthetic and oracle spectra stay parallel across 8+
+      orders of magnitude, on MLP, CNN <em>and</em> attention layers.
+    </p>
+    <ul class="bullets">
+      <li><strong>Scale</strong> alignment (what the clip norm depends on) stays accurate at every depth.</li>
+      <li><strong>Direction</strong> alignment is excellent in early layers but degrades in deep layers, where eigenvectors become label-dependent, a limitation for very deep nets.</li>
+      <li><strong>Language gap.</strong> Random token probes hit the right architectural factors but land off the low-dimensional manifold of real text, closing this (token-frequency priors, embedding-space probes) is open work.</li>
+    </ul>
+
+    <figure class="figcard">
+      <img src="static/images/cov_tracking_synthetic_pink_eps1.0_summary.png" alt="Tracking the private oracle through training: cosine similarity and relative Frobenius error for the first and deepest layers." loading="lazy" />
+      <figcaption><span class="figtag">Fig. 3</span> Tracking the private oracle through training (MNIST CNN, \(\epsilon{=}1\)): (a) cosine similarity, direction, (b) relative Frobenius error, scale. <strong>Top:</strong> first conv layer. <strong>Bottom:</strong> deepest layer. Synthetic noise (orange) holds direction in early layers and <em>scale</em> at every depth, beating mismatched public data (CIFAR&#8209;10, purple); deep-layer directions become label-dependent for every method.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ BIBTEX ============ -->
+<section class="block alt" id="bibtex">
+  <div class="wrap reveal">
+    <span class="kicker">Cite</span>
+    <h2>BibTeX</h2>
+    <div class="codebox">
+      <button class="copybtn" data-target="bib">Copy</button>
+      <pre id="bib">@inproceedings{molina2026dpkfc,
+  title     = {{DP-KFC}: Data-Free Preconditioning for Privacy-Preserving Deep Learning},
+  author    = {Molina Van den Bosch, Marc and Taiello, Riccardo and
+               Sund Aillet, Albert and Protani, Andrea and
+               Gonzalez Ballester, Miguel Angel and Serio, Luigi},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning (ICML)},
+  year      = {2026}
+}</pre>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="https://github.com/molinamarcvdb/DP-KFC" target="_blank" rel="noopener">Code</a> ·
+      <a href="static/dp_kfc.pdf" target="_blank" rel="noopener">Paper</a> ·
+      <a href="#top">Top</a>
+    </p>
+    <p class="dim small">
+      Built at CERN · supported by the CERN Quantum Technology Initiative, the IHI&nbsp;JU (101172825),
+      the ERC Synergy Grant <em>Zee-Zoom-Zap</em> (101224844), and the María de Maeztu programme (CEX2021-001195-M).
+      Page template: hand-rolled, MIT, fork freely.
+    </p>
+  </div>
+</footer>
+
+<!-- MathJax for the few inline equations -->
+<script>
+  window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+<script src="assets/main.js" defer></script>
+</body>
+</html>

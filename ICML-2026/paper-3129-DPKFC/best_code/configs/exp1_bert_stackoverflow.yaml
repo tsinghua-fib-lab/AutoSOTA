@@ -1,0 +1,46 @@
+experiment:
+  name: "exp1_bert_stackoverflow"
+  seed: 42
+  seeds: [42, 43, 44, 45, 46]
+  device: "cuda"
+
+data:
+  private_dataset: "stackoverflow"
+  public_dataset: "agnews"
+  batch_size: 64
+  num_workers: 4
+  max_length: 128
+  max_samples: 5000
+
+model:
+  type: "bert"
+  num_classes: 2
+  pretrained: true
+
+training:
+  epochs: 5
+  learning_rate: 2e-4
+  optimizer: "adam"
+
+privacy:
+  epsilons: [0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0]
+  delta: 1e-6
+  max_grad_norm: 1.0
+
+kfac:
+  enabled: true
+  damping: 1e-3
+  precond_steps: 1
+  update_frequency: 1
+  use_public_labels: true
+
+methods:
+  - "baseline"
+  - "dp_sgd"
+  - "dp_kfac_public"
+  - "dp_kfac_noise"
+
+output:
+  experiments_dir: "experiments"
+  save_checkpoints: false
+  save_metrics: true

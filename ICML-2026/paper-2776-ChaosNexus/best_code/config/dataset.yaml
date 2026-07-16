@@ -1,0 +1,29 @@
+# directory containing files used for training data
+train_data_dirs: null
+  # - data_dir1
+  # - data_dir2
+
+probability: null
+
+shuffle_buffer_length: 100_000
+
+# minimum number of past points to use for training
+min_past: 60
+max_missing_prop: 0.9
+
+fixed_dim: 3
+
+augmentations:
+  augmentation_rate: 0.2
+  probabilities: [1.0, 1.0, 1.0, 0.0, 0.0]
+
+  dim_range: [3, 8]
+  lag_range: [1, 10]
+
+  # 1.0 keeps all frequencies, 0.0 keeps only the DC component
+  phase_surrogate_cutoff: 1.0
+
+  # for the random fourier series augmentation
+  mode_range: [5, 15]
+  max_wavenumber: 10.0
+  max_amp: 10.0

@@ -1,0 +1,39 @@
+bridge:
+  base_drift: false
+  decay_coeff: false
+  guiding_type: brownian
+  sampler: heun
+model:
+  activation: gelu
+  dim_hidden:
+  - 128
+  - 128
+  emb_dim_hidden:
+  - 64
+  - 64
+  type: conservative
+plotting:
+  plot_fn: plot_trajectories_1d
+problem:
+  T: 1.0
+  a_sq: 1.0
+  d: 1
+  name: double_well
+  sigma: 1.0
+  v: 3.0
+train:
+  B_ratio: 0.9
+  STL_adjustments: false
+  beta_schedule: average
+  ckpt_freq: 200
+  ema_rate: 1.0
+  grad_ema_rate: 1.0
+  jacobian_method: euler
+  lr: 0.001
+  num_inner_iterations: 1
+  num_outer_iterations: 4000
+  num_steps: 500
+  seed: 0
+  self_consistency: nodrift
+  train_batch_size: 20000
+  traj_batch_size: 64

@@ -15,24 +15,24 @@ model:
 bridge:
   base_drift: false
   guiding_type: brownian
-  decay_coeff: true
+  decay_coeff: false
   sampler: euler
 
 train:
   self_consistency: nodrift
   num_steps: 500
-  num_outer_iterations: 8000
+  num_outer_iterations: 4000
   num_inner_iterations: 1
   traj_batch_size: 64
   train_batch_size: 20000 # 4096
   lr: 1.0e-3
-  ema_rate: 0.999
-  grad_ema_rate: 0.999
+  ema_rate: 1.0
+  grad_ema_rate: 1.0
   jacobian_method: euler
   beta_schedule: average
   B_ratio: 0.9
   ckpt_freq: 200
-  STL_adjustments: true
+  STL_adjustments: false
   seed: 0
 
 plotting:

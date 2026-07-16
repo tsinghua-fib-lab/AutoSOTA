@@ -1,0 +1,2 @@
+def transpose(amount, tab):
+	

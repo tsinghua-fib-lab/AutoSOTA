@@ -1,0 +1,29 @@
+The Chef has been kidnapped by aliens ( they want to utilize his excellent cooking skills :P ) and has been transported to the alien planet "ZX532". Interestingly, "ZX532" uses a different time scale which has Y AlienHours on the face of a clock (instead of the 12 hours that we have).  They also have 'X*Y' AlienMinutes (instead of the 60 that we have).  X is defined as the number of minute divisions between each hour (the earth clock has X=5).
+The Chef has been forced to cook a lot of dishes by the aliens. He is short of ingredients and hence needs to go out to the market to get them. However when he returns, he makes an interesting observation. The hands of AlienClock have exactly swapped position from the time he left (the big hand and the little hand have switched)!
+Given the times between which The Chef might have left and the times between which The Chef may have returned, you are supposed to find out the actual time when he left.  If there is more than one possibility, print the one that maximizes the amount of time that The Chef is out.Details of the Clock
+The AlienClock is circular and has exactly 2 hands : the hour hand and the minute hand. The whole circumference of the AlienClock is divided into Y divisions , each of which is further divided into X subdivisions [ X and Y are both positive integers ]. The clock is not discrete but continuous (the hands move continuously instead of moving at certain intervals such as every second, etc.... ).
+
+-----Input-----
+First line of input contains t (1≤ t ≤ 100) - the number of test cases. Each test case contains 2 lines each. The first line contains 2 space separated integers , X and Y (same as those specified in the problem statement; X ≤ 109 and Y ≤ 109 ).
+The next line contains 8 space separated integers (a,b,c,d,e,f,g,h; 0 ≤ a ≤ c < Y; 0 ≤ e ≤ g < Y; a ≤ e; 0 ≤ b,d,f,h < X*Y ): specifying the times between which The Chef might have left (a:b => a hours and b minutes TO c:d => c hours and d minutes) and the times between which The Chef may have returned (The Chef returns sometime between e:f and g:h).
+The interval at which The Chef re-enters the kitchen will never start prior to the interval at which he first leaves the kitchen to purchase the ingredients.
+
+-----Output-----
+The output should contain one line for each test case specifying the time when The Chef left the kitchen. This should be in the form (h:m => h hours and m minutes). h will be an integer, and m should be rounded to 2 decimal places. In case, there is no solution possible, output -1 for that test case.
+
+-----Example-----
+Input:
+3
+5 12
+1 0 2 0 4 0 5 0
+5 12
+3 30 4 0 5 0 6 0
+5 12
+3 0 4 0 5 0 6 0
+
+Output:
+1:20.56
+-1
+3:26.43
+
+Note: Be careful with precision.

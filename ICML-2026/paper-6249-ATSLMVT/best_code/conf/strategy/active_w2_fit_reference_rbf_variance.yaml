@@ -1,0 +1,11 @@
+defaults:
+  - /strategy: active_uncertainty
+  - /kernel@surrogate.kernel_spec: rbf
+  - /warper@surrogate.warper: wasserstein_arc_length
+  - _self_
+
+name: active:variance:warp:fit_reference:rbf
+base: active
+acquisition: ${.strategy.acquisition}
+active_loop:
+  recompute_reference_as_barycenter: true

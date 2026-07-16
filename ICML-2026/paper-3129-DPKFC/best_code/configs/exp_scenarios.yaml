@@ -1,0 +1,82 @@
+# Multi-Scenario Preconditioning Transfer Experiment
+# Scenarios 1, 2, and 4 from exp_3.py
+# Tests effect of A (Input Geometry) vs G (Output Geometry) alignment
+
+experiment:
+  name: "exp_scenarios"
+  seed: 42
+  seeds: [42, 43, 44]
+  device: "cuda"
+
+# Scenarios define private/public dataset pairs with different alignment properties
+scenarios:
+  - name: "1_IdealTransfer"
+    private_dataset: "fashionmnist"
+    public_dataset: "mnist"
+    num_classes: 10
+    img_size: 28
+    description: "MNIST → FashionMNIST: High A alignment (centered, sparse, grayscale), High G alignment (10 classes)"
+    prediction: "Public should win (Public ≈ Oracle)"
+
+  - name: "2_TextureMismatch"
+    private_dataset: "pathmnist"
+    public_dataset: "mnist"
+    num_classes: 9
+    img_size: 28
+    description: "MNIST → PathMNIST: Orthogonal A (object vs texture), Medium G"
+    prediction: "Noise should win (Public A actively hurts)"
+
+  - name: "4_TotalMismatch"
+    private_dataset: "cifar100"
+    public_dataset: "mnist"
+    num_classes: 100
+    img_size: 32
+    description: "MNIST → CIFAR-100: Partial A (spatial prior helps), Very Low G (easy vs hard)"
+    prediction: "Hybrid should win (A_pub helps spatially, G_pub hurts)"
+
+# Default data config (overridden by scenario)
+data:
+  batch_size: 1024
+  num_workers: 4
+
+model:
+  type: "cnn"
+  pretrained: false
+
+training:
+  epochs: 5
+  learning_rate: 1e-2
+  optimizer: "sgd"
+
+privacy:
+  epsilons: [2.0]
+  delta: 1e-5
+  max_grad_norm: 1.0
+
+kfac:
+  enabled: true
+  damping: 1e-3
+  precond_steps: 10
+  update_frequency: 1
+  use_public_labels: true
+
+# All 8 meaningful A ⊗ G combinations from exp_3.py
+methods:
+  # Baselines
+  - "baseline"
+  - "dp_sgd"
+
+  # A from Public data
+  - "dp_kfac_public"              # A_pub ⊗ G_pub_pub (full public)
+  - "dp_kfac_hybrid_pub_pub_noise"  # A_pub ⊗ G_pub_noise (public geometry, no task supervision)
+  - "dp_kfac_hybrid_pub_pink_noise" # A_pub ⊗ G_pink_noise (public A, noise G)
+
+  # A from Pink Noise (captures natural image statistics without dataset bias)
+  - "dp_kfac_hybrid_pink_pub_pub"   # A_pink ⊗ G_pub_pub (pink A, full public G)
+  - "dp_kfac_hybrid_pink_pub_noise" # A_pink ⊗ G_pub_noise (pink A, public geometry G)
+  - "dp_kfac_pink"                  # A_pink ⊗ G_pink_noise (full pink noise)
+
+output:
+  experiments_dir: "experiments"
+  save_checkpoints: false
+  save_metrics: true

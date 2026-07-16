@@ -1,0 +1,69 @@
+Ujan has a lot of numbers in his boxes. He likes order and balance, so he decided to reorder the numbers.
+
+There are $k$ boxes numbered from $1$ to $k$. The $i$-th box contains $n_i$ integer numbers. The integers can be negative. All of the integers are distinct. 
+
+Ujan is lazy, so he will do the following reordering of the numbers exactly once. He will pick a single integer from each of the boxes, $k$ integers in total. Then he will insert the chosen numbers — one integer in each of the boxes, so that the number of integers in each box is the same as in the beginning. Note that he may also insert an integer he picked from a box back into the same box.
+
+Ujan will be happy if the sum of the integers in each box is the same. Can he achieve this and make the boxes perfectly balanced, like all things should be?
+
+
+-----Input-----
+
+The first line contains a single integer $k$ ($1 \leq k \leq 15$), the number of boxes. 
+
+The $i$-th of the next $k$ lines first contains a single integer $n_i$ ($1 \leq n_i \leq 5\,000$), the number of integers in box $i$. Then the same line contains $n_i$ integers $a_{i,1}, \ldots, a_{i,n_i}$ ($|a_{i,j}| \leq 10^9$), the integers in the $i$-th box. 
+
+It is guaranteed that all $a_{i,j}$ are distinct.
+
+
+-----Output-----
+
+If Ujan cannot achieve his goal, output "No" in a single line. Otherwise in the first line output "Yes", and then output $k$ lines. The $i$-th of these lines should contain two integers $c_i$ and $p_i$. This means that Ujan should pick the integer $c_i$ from the $i$-th box and place it in the $p_i$-th box afterwards.
+
+If there are multiple solutions, output any of those.
+
+You can print each letter in any case (upper or lower).
+
+
+-----Examples-----
+Input
+4
+3 1 7 4
+2 3 2
+2 8 5
+1 10
+
+Output
+Yes
+7 2
+2 3
+5 1
+10 4
+
+Input
+2
+2 3 -2
+2 -1 5
+
+Output
+No
+
+Input
+2
+2 -10 10
+2 0 -20
+
+Output
+Yes
+-10 2
+-20 1
+
+
+
+-----Note-----
+
+In the first sample, Ujan can put the number $7$ in the $2$nd box, the number $2$ in the $3$rd box, the number $5$ in the $1$st box and keep the number $10$ in the same $4$th box. Then the boxes will contain numbers $\{1,5,4\}$, $\{3, 7\}$, $\{8,2\}$ and $\{10\}$. The sum in each box then is equal to $10$.
+
+In the second sample, it is not possible to pick and redistribute the numbers in the required way.
+
+In the third sample, one can swap the numbers $-20$ and $-10$, making the sum in each box equal to $-10$.

@@ -1,0 +1,150 @@
+This Kata is the first in the [Rubiks Cube collection](https://www.codewars.com/collections/rubiks-party).
+
+[This](https://ruwix.com/the-rubiks-cube/notation/) or [this](https://ruwix.com/the-rubiks-cube/notation/advanced/) websites will be very usefull for this kata, if there will be some lack of understanding after the description. There are plenty of examples and a 3D model that can perform all needed rotations.
+
+In this Kata you will give the cube the ability to rotate.
+
+The Rubik's Cube is made of six faces. F(ront), L(eft), R(ight), B(ack), U(p), D(own)
+
+Below a two dimensional representation of the cube.
+```
+      +-----+
+      |     |
+      |  U  |
+      |     |
++-----+-----+-----+-----+
+|     |     |     |     |
+|  L  |  F  |  R  |  B  |
+|     |     |     |     |
++-----+-----+-----+-----+
+      |     |
+      |  D  |
+      |     |
+      +-----+
+```
+
+On every face you can see nine stickers. Every sticker can be one of the six colors: Yellow, Blue, Red, Green, Orange, White. In this Kata they are represented with according small letters (y, b, r, g, o, w,).
+
+A solved cube has on every face only one color:
+```
+      +-----+
+      |y y y|
+      |y y y|
+      |y y y|
++-----+-----+-----+-----+
+|b b b|r r r|g g g|o o o|
+|b b b|r r r|g g g|o o o|
+|b b b|r r r|g g g|o o o|
++-----+-----+-----+-----+
+      |w w w|
+      |w w w|
+      |w w w|
+      +-----+
+```
+Every sticker on a face in this Kata has a positional number
+```
++-----+
+|1 2 3|
+|4 5 6|
+|7 8 9|
++-----+
+```
+So the state of the face could be represented in a 9 character string consisting of the possible colors.
+```
++-----+
+|y r b|
+|o o w|   state == "yrboowygb"
+|y g b|
++-----+
+```
+So a state of the cube is a 54 character long string consisting of the state of every face in this order: U L F R B D
+```
+      +-----+
+      |y y y|
+      |y y y|      state == "yyyyyyyyybbbbbbbbbrrrrrrrrrgggggggggooooooooowwwwwwwww"
+      |y y y|
++-----+-----+-----+-----+
+|b b b|r r r|g g g|o o o|
+|b b b|r r r|g g g|o o o|
+|b b b|r r r|g g g|o o o|
++-----+-----+-----+-----+
+      |w w w|
+      |w w w|
+      |w w w|
+      +-----+
+```
+
+# Rotations
+To make things easier I have preloded the `state_representation(state)` function that can visialise a state.
+
+## basic rotations
+Every face can rotate.
+
+- The direction of a rotation is always defined on your "axis of sight" when your looking at a face of the cube.
+- A rotation of a face is written with an uppercase letter: `F`, `B`, ...
+- Clockwise and counterclockwise rotations are distinguished by an apostroph, added to the letter for the counterclockwise rotations.
+
+Examples:
+- `F` rotates the front face clockwise.
+- `F'` rotates the front face conterclockwise.
+
+You can rotate a face twice with a `2` after the letter. E.g. `F2` rotates the front face clockwise twice.
+
+
+## slice rotations
+There is a possibility to rotate only a middle layer of the cube. These are called slice turns. There are three: `M, E, S`. There is no obvious clockwise or counterclockwise directions, so the are some special standarts:
+
+`M`(idle) the layer between `L` and `R`, turn direction as `L`
+
+`E`(quator) the layer between `D` and `U`, turn direction as `D`
+
+`S`(tanding) the layer between `F` and `B`, turn direction as `F`
+
+```
+After a "M" turn
+      +-----+
+      |y o y|
+      |y o y|      state == "yoyyoyyoybbbbbbbbbryrryrryrgggggggggowoowoowowrwwrwwrw"
+      |y o y|
++-----+-----+-----+-----+
+|b b b|r y r|g g g|o w o|
+|b b b|r y r|g g g|o w o|
+|b b b|r y r|g g g|o w o|
++-----+-----+-----+-----+
+      |w r w|
+      |w r w|
+      |w r w|
+      +-----+
+```
+
+## whole cube rotations
+
+There are three more letters you should consider: `X, Y, Z`. This are basically rotating the whole cube along one of the 3D axis.
+
+## double layer rotations
+
+This are some kind of combined rotations. There are 6: `f, r, u, l, d, b`. Yes, like the 'basic rotations' but lowercase. A `f` means that you rotate the `F` face and the next slice layer with it IN THE SAME DIRECTION (in the F case its `S`). 
+
+This is the whole list of possible rotations that the cube should perform:
+```
+F R U L D B F' R' U' L' D' B' F2 R2 U2 L2 D2 B2
+M E S M' E' S' M2 E2 S2
+f r u l d b f' r' u' l' d' b' f2 r2 u2 l2 d2 b2
+X Y Z X' Y' Z' X2 Y2 Z2
+```
+I have preloded a dictionary `single_rotations` that includes every single state to mentioned rotations.
+`single_rotations["F2"] == "yyyyyywwwbbgbbgbbgrrrrrrrrrbggbggbggoooooooooyyywwwwww"`
+
+# Task
+implement the `perform(sequence)` function that takes a string with space separeted values witha sequence of rotations. 
+E.g. `F R2 f X M2 L' U2 d' Z M' B`
+The cube always starts in a solved state ("yyyyyyyyybbbbbbbbbrrrrrrrrrgggggggggooooooooowwwwwwwww")
+
+The function should return the changed state of the cube after the sequence.
+```
+perform("F U") == "byybyybyyrrrbbwbbwyggrrrrrroooyggyggbbwoooooogggwwwwww"
+```
+
+
+
+Enjoy ^_^

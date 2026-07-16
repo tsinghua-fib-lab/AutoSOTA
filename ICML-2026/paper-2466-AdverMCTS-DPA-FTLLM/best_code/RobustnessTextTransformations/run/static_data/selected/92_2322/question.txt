@@ -1,0 +1,58 @@
+You are working for the Gryzzl company, headquartered in Pawnee, Indiana.
+
+The new national park has been opened near Pawnee recently and you are to implement a geolocation system, so people won't get lost. The concept you developed is innovative and minimalistic. There will be $n$ antennas located somewhere in the park. When someone would like to know their current location, their Gryzzl hologram phone will communicate with antennas and obtain distances from a user's current location to all antennas.
+
+Knowing those distances and antennas locations it should be easy to recover a user's location... Right? Well, almost. The only issue is that there is no way to distinguish antennas, so you don't know, which distance corresponds to each antenna. Your task is to find a user's location given as little as all antennas location and an unordered multiset of distances.
+
+
+-----Input-----
+
+The first line of input contains a single integer $n$ ($2 \leq n \leq 10^5$) which is the number of antennas.
+
+The following $n$ lines contain coordinates of antennas, $i$-th line contain two integers $x_i$ and $y_i$ ($0 \leq x_i,y_i \leq 10^8$). It is guaranteed that no two antennas coincide.
+
+The next line of input contains integer $m$ ($1 \leq n \cdot m \leq 10^5$), which is the number of queries to determine the location of the user.
+
+Following $m$ lines contain $n$ integers $0 \leq d_1 \leq d_2 \leq \dots \leq d_n \leq 2 \cdot 10^{16}$ each. These integers form a multiset of squared distances from unknown user's location $(x;y)$ to antennas.
+
+For all test cases except the examples it is guaranteed that all user's locations $(x;y)$ were chosen uniformly at random, independently from each other among all possible integer locations having $0 \leq x, y \leq 10^8$.
+
+
+-----Output-----
+
+For each query output $k$, the number of possible a user's locations matching the given input and then output the list of these locations in lexicographic order.
+
+It is guaranteed that the sum of all $k$ over all points does not exceed $10^6$.
+
+
+-----Examples-----
+Input
+3
+0 0
+0 1
+1 0
+1
+1 1 2
+
+Output
+1 1 1 
+
+Input
+4
+0 0
+0 1
+1 0
+1 1
+2
+0 1 1 2
+2 5 5 8
+
+Output
+4 0 0 0 1 1 0 1 1 
+4 -1 -1 -1 2 2 -1 2 2 
+
+
+
+-----Note-----
+
+As you see in the second example, although initially a user's location is picked to have non-negative coordinates, you have to output all possible integer locations.

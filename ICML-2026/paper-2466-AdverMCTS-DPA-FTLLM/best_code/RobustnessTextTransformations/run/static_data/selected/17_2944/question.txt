@@ -1,0 +1,57 @@
+## Introduction
+
+
+Each chemical element in its neutral state has a specific number of electrons associated with it. This is represented by the **atomic number** which is noted by an integer number next to or above each element of the periodic table (as highlighted in the image above).
+
+As we move from left to right, starting from the top row of the periodic table, each element differs from its predecessor by 1 unit (electron). Electrons fill in different orbitals sets according to a specific order. Each set of orbitals, when full, contains an even number of electrons.
+
+The orbital sets are:
+* The _**s** orbital_ - a single orbital that can hold a maximum of 2 electrons.
+* The _**p** orbital set_ - can hold 6 electrons.
+* The _**d** orbital set_ - can hold 10 electrons.
+* The _**f** orbital set_ - can hold 14 electrons.
+
+
+The order in which electrons are filling the different set of orbitals is shown in the picture above. First electrons will occupy the **1s** orbital, then the **2s**, then the **2p** set, **3s** and so on.
+
+Electron configurations show how the number of electrons of an element is distributed across each orbital set. Each orbital is written as a sequence that follows the order in the picture, joined by the number of electrons contained in that orbital set. The final electron configuration is a single string of orbital names and number of electrons per orbital set where the first 2 digits of each substring represent the orbital name followed by a number that states the number of electrons that the orbital set contains.
+
+For example, a string that demonstrates an electron configuration of a chemical element that contains 10 electrons is: `1s2 2s2 2p6`. This configuration shows that there are two electrons in the `1s` orbital set, two electrons in the `2s` orbital set, and six electrons in the `2p` orbital set. `2 + 2 + 6 = 10` electrons total.
+
+___
+
+# Task
+
+Your task is to write a function that displays the electron configuration built according to the Madelung rule of all chemical elements of the periodic table. The argument will be the symbol of a chemical element, as displayed in the periodic table.
+
+**Note**: There will be a preloaded array called `ELEMENTS` with chemical elements sorted by their atomic number.
+
+For example, when the element "O" is fed into the function the output should look like: 
+
+`"O -> 1s2 2s2 2p4"`
+
+However, there are some exceptions! The electron configurations of the elements below should end as:
+
+```
+Cr -> ...3d5 4s1
+Cu -> ...3d10 4s1
+Nb -> ...4d4 5s1
+Mo -> ...4d5 5s1
+Ru -> ...4d7 5s1
+Rh -> ...4d8 5s1
+Pd -> ...4d10 5s0
+Ag -> ...4d10 5s1
+La -> ...4f0 5d1
+Ce -> ...4f1 5d1
+Gd -> ...4f7 5d1 6s2
+Pt -> ...4f14 5d9 6s1
+Au -> ...4f14 5d10 6s1
+Ac -> ...5f0 6d1 7s2
+Th -> ...5f0 6d2 7s2
+Pa -> ...5f2 6d1 7s2
+U  -> ...5f3 6d1 7s2
+Np -> ...5f4 6d1 7s2
+Cm -> ...5f7 6d1 7s2
+```
+
+**Note**: for `Ni` the electron configuration should be `3d8 4s2` instead of `3d9 4s1`.

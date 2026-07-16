@@ -1,0 +1,32 @@
+You are given two integers N$N$ and M$M$. You have to construct a matrix with N$N$ rows and M$M$ columns. Consider a multiset S$S$ which contains N+M$N + M$ integers: for each row and each column of this matrix, the MEX of the elements of this row/column belongs to S$S$. Then, in the matrix you construct, the MEX of S$S$ must be maximum possible. 
+Note: The MEX of a multiset of integers is the smallest non-negative integer that is not present in this multiset. For example, MEX({4,9,0,1,1,5})=2$\mathrm{MEX}(\{4,9,0,1,1,5\}) = 2$ and MEX({1,2,3})=0$\mathrm{MEX}(\{1,2,3\}) = 0$.
+
+-----Input-----
+- The first line of the input contains a single integer T$T$ denoting the number of test cases. The description of T$T$ test cases follows.
+- The first and only line of each test case contains two space-separated integers N$N$ and M$M$.
+
+-----Output-----
+For each test case, print N$N$ lines. For each i$i$ (1≤i≤N$1 \le i \le N$), the i$i$-th of these lines should contain M$M$ space-separated integers ― the elements in the i$i$-th row of your matrix. Each element of the matrix must be non-negative and must not exceed 109$10^9$.
+If there are multiple solutions, you may find any one of them.
+
+-----Constraints-----
+- 1≤T≤400$1 \le T \le 400$
+- 1≤N,M≤100$1 \le N, M \le 100$
+- the sum of N⋅M$N \cdot M$ over all test cases does not exceed 105$10^5$
+
+-----Example Input-----
+2
+3 3
+4 2
+
+-----Example Output-----
+9 1 0
+1 0 2
+7 5 8
+2 2
+3 0
+1 1
+0 1
+
+-----Explanation-----
+Example case 1: The MEXs of the rows {9,1,0}$\{9, 1, 0\}$, {1,0,2}$\{1, 0, 2\}$ and {7,5,8}$\{7, 5, 8\}$ are 2$2$, 3$3$ and 0$0$ respectively. The MEXs of the columns {9,1,7}$\{9, 1, 7\}$, {1,0,5}$\{1, 0, 5\}$ and {0,2,8}$\{0, 2, 8\}$ are 0$0$, 2$2$ and 1$1$ respectively. Therefore, the multiset which contains the MEX of each row and each column is S={0,0,1,2,2,3}$S = \{0, 0, 1, 2, 2, 3\}$ and MEX(S)=4$\mathrm{MEX}(S) = 4$. We can show that this is the largest MEX that can be obtained for a 3×3$3 \times 3$ matrix.

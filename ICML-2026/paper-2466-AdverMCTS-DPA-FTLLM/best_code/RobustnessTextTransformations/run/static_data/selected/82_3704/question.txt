@@ -1,0 +1,78 @@
+Berkomnadzor — Federal Service for Supervision of Communications, Information Technology and Mass Media — is a Berland federal executive body that protects ordinary residents of Berland from the threats of modern internet.
+
+Berkomnadzor maintains a list of prohibited IPv4 subnets (blacklist) and a list of allowed IPv4 subnets (whitelist). All Internet Service Providers (ISPs) in Berland must configure the network equipment to block access to all IPv4 addresses matching the blacklist. Also ISPs must provide access (that is, do not block) to all IPv4 addresses matching the whitelist. If an IPv4 address does not match either of those lists, it's up to the ISP to decide whether to block it or not. An IPv4 address matches the blacklist (whitelist) if and only if it matches some subnet from the blacklist (whitelist). An IPv4 address can belong to a whitelist and to a blacklist at the same time, this situation leads to a contradiction (see no solution case in the output description).
+
+An IPv4 address is a 32-bit unsigned integer written in the form $a.b.c.d$, where each of the values $a,b,c,d$ is called an octet and is an integer from $0$ to $255$ written in decimal notation. For example, IPv4 address $192.168.0.1$ can be converted to a 32-bit number using the following expression $192 \cdot 2^{24} + 168 \cdot 2^{16} + 0 \cdot 2^8 + 1 \cdot 2^0$. First octet $a$ encodes the most significant (leftmost) $8$ bits, the octets $b$ and $c$ — the following blocks of $8$ bits (in this order), and the octet $d$ encodes the least significant (rightmost) $8$ bits.
+
+The IPv4 network in Berland is slightly different from the rest of the world. There are no reserved or internal addresses in Berland and use all $2^{32}$ possible values.
+
+An IPv4 subnet is represented either as $a.b.c.d$ or as $a.b.c.d/x$ (where $0 \le x \le 32$). A subnet $a.b.c.d$ contains a single address $a.b.c.d$. A subnet $a.b.c.d/x$ contains all IPv4 addresses with $x$ leftmost (most significant) bits equal to $x$ leftmost bits of the address $a.b.c.d$. It is required that $32 - x$ rightmost (least significant) bits of subnet $a.b.c.d/x$ are zeroes.
+
+Naturally it happens that all addresses matching subnet $a.b.c.d/x$ form a continuous range. The range starts with address $a.b.c.d$ (its rightmost $32 - x$ bits are zeroes). The range ends with address which $x$ leftmost bits equal to $x$ leftmost bits of address $a.b.c.d$, and its $32 - x$ rightmost bits are all ones. Subnet contains exactly $2^{32-x}$ addresses. Subnet $a.b.c.d/32$ contains exactly one address and can also be represented by just $a.b.c.d$.
+
+For example subnet $192.168.0.0/24$ contains range of 256 addresses. $192.168.0.0$ is the first address of the range, and $192.168.0.255$ is the last one.
+
+Berkomnadzor's engineers have devised a plan to improve performance of Berland's global network. Instead of maintaining both whitelist and blacklist they want to build only a single optimised blacklist containing minimal number of subnets. The idea is to block all IPv4 addresses matching the optimised blacklist and allow all the rest addresses. Of course, IPv4 addresses from the old blacklist must remain blocked and all IPv4 addresses from the old whitelist must still be allowed. Those IPv4 addresses which matched neither the old blacklist nor the old whitelist may be either blocked or allowed regardless of their accessibility before. 
+
+Please write a program which takes blacklist and whitelist as input and produces optimised blacklist. The optimised blacklist must contain the minimal possible number of subnets and satisfy all IPv4 addresses accessibility requirements mentioned above. 
+
+IPv4 subnets in the source lists may intersect arbitrarily. Please output a single number -1 if some IPv4 address matches both source whitelist and blacklist.
+
+
+-----Input-----
+
+The first line of the input contains single integer $n$ ($1 \le n \le 2\cdot10^5$) — total number of IPv4 subnets in the input.
+
+The following $n$ lines contain IPv4 subnets. Each line starts with either '-' or '+' sign, which indicates if the subnet belongs to the blacklist or to the whitelist correspondingly. It is followed, without any spaces, by the IPv4 subnet in $a.b.c.d$ or $a.b.c.d/x$ format ($0 \le x \le 32$). The blacklist always contains at least one subnet.
+
+All of the IPv4 subnets given in the input are valid. Integer numbers do not start with extra leading zeroes. The provided IPv4 subnets can intersect arbitrarily.
+
+
+-----Output-----
+
+Output -1, if there is an IPv4 address that matches both the whitelist and the blacklist. Otherwise output $t$ — the length of the optimised blacklist, followed by $t$ subnets, with each subnet on a new line. Subnets may be printed in arbitrary order. All addresses matching the source blacklist must match the optimised blacklist. All addresses matching the source whitelist must not match the optimised blacklist. You can print a subnet $a.b.c.d/32$ in any of two ways: as $a.b.c.d/32$ or as $a.b.c.d$.
+
+If there is more than one solution, output any.
+
+
+-----Examples-----
+Input
+1
+-149.154.167.99
+
+Output
+1
+0.0.0.0/0
+
+Input
+4
+-149.154.167.99
++149.154.167.100/30
++149.154.167.128/25
+-149.154.167.120/29
+
+Output
+2
+149.154.167.99
+149.154.167.120/29
+
+Input
+5
+-127.0.0.4/31
++127.0.0.8
++127.0.0.0/30
+-195.82.146.208/29
+-127.0.0.6/31
+
+Output
+2
+195.0.0.0/8
+127.0.0.4/30
+
+Input
+2
++127.0.0.1/32
+-127.0.0.1
+
+Output
+-1

@@ -27,7 +27,7 @@ from typing import Any, Callable
 from tqdm import trange
 import wandb
 
-from .samplers import euler_maruyama_sampler
+from .samplers import euler_maruyama_sampler, heun_sampler
 from .training import _outer_loop_body, _sample_sde_fn, _sample_controlled_sde_fn, _controlled_drift_fn, _control_fn
 from .train_utils import _get_sigma_fn
 
@@ -94,8 +94,10 @@ class ConsistencyBridge:
         else:
             self.coeff_fn = lambda t: 1.0
 
-        if bridge_config['sampler'] == 'euler':
+        if bridge_config["sampler"] == "euler":
             self.sampler_fn = euler_maruyama_sampler
+        elif bridge_config["sampler"] == "heun":
+            self.sampler_fn = heun_sampler
 
         self.sigma_fn, self.a_inv = _get_sigma_fn(sigma_fn, dim=shape[0])
 
@@ -119,7 +121,7 @@ class ConsistencyBridge:
         
         optimizer = optax.chain(
             optax.clip_by_global_norm(train_config.get('grad_clip', 1.0)),
-            optax.adam(learning_rate=optax.cosine_decay_schedule(init_value=train_config['lr'], decay_steps=train_config['num_outer_iterations'], alpha=0.01),
+            optax.adam(learning_rate=train_config['lr'],
                           b1=train_config.get('adam_b1', 0.9),
                           b2=train_config.get('adam_b2', 0.999),
             )

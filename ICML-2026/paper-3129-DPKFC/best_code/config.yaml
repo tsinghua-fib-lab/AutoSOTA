@@ -1,0 +1,42 @@
+experiment:
+  name: "dp_kfac_mnist"
+  seed: 42
+  seeds: [42, 43, 44, 45, 46]
+  device: "cuda"
+
+data:
+  private_dataset: "mnist"
+  public_dataset: "fashionmnist"
+  batch_size: 256
+  num_workers: 4
+
+model:
+  type: "cnn"
+  num_classes: 10
+
+training:
+  epochs: 5
+  learning_rate: 1e-3
+  optimizer: "adam"
+
+privacy:
+  epsilons: [0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0]
+  delta: 1e-5
+  max_grad_norm: 1.0
+
+kfac:
+  enabled: true
+  damping: 1e-3
+  precond_steps: 10
+  update_frequency: 1
+  use_public_labels: true
+
+methods:
+  - "dp_sgd"
+  - "dp_kfac_public"
+  - "dp_kfac_noise"
+
+output:
+  experiments_dir: "experiments"
+  save_checkpoints: false
+  save_metrics: true
