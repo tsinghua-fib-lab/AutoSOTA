@@ -1,0 +1,1 @@
+NOTE: some of the scripts generating some of the visualization used in the paper for the ks2d case are in the [visualization_update](https://github.com/Honghui-Zheng/Multi-Agent-DPC/tree/visualization_updates) branch and will be moved on the main branch in the future.

@@ -1,0 +1,69 @@
+This kata is inspired by Tower Defense (TD), a subgenre of strategy video games where the goal is to defend a player's territories or possessions by obstructing enemy attackers, usually by placing defensive structures on or along their path of attack.
+
+Objective
+It's the future, and hostile aliens are attacking our planet. We've set up a defense system in the planet's outer perimeter. You're tasked with calculating the severity of a breach.
+Input
+Your function will receive three arguments:
+
+Battle Area Map: An array/list of strings representing an n x n battle area.
+        Each string will consist of any of the following characters:
+
+0: entrance point (starting position on alien path)
+1: alien path
+" "(space character): not alien path
+A - Z: turret positions
+
+
+Turret Stats: An object/dict where keys are upper-case characters from the English alphabet (A - Z) and the values are subarrays in the following format:
+[n,m] - where n is the attack range of a turret, and m is its shot frequency per move
+Alien Wave Stats: An array of integers representing each individual alien in sequence. Each value is an integer representing the health points of each alien; health points are the number of turret shots required to take down a given alien. Integer zero (0) counts as a gap in sequence.
+
+Output
+Return the integer sum of total health points of all aliens that successfully penetrate our defense.
+
+
+
+The image above shows the game state for the test example (below) at the 11th move.
+The green square in the north-west quadrant represents the starting position of the alien wave, and the red square in the south-east quadrant represents the last position before breaching the defensive perimeter.
+The blue circles represent the turret positions and are labeled A,B,C, and D.
+The red alien is the first alien in the sequence.
+Technical Details
+
+There is only one path and it maintains a width of 1.
+Aliens move one square per turn
+Turrets only fire toward enemies in range.
+        In the image above, the turret labeled A has the value [3,2], meaning it can fire at aliens that occupy any position within 3 squares' length in Euclidean distance (the pink squares). Turret A will fire 2 times per move.
+        The turret labeled D with the value [1,3] can fire at targets that enter the square above it and the square to the right of it (the blue shaded squares) at a rate of 3 times per move.
+Turret target priority is toward the enemy within shooting range that is furthest along on the path.
+        In the image above, turret A will target the red alien because it is the alien furthest along the path that is also within shooting range. This reduces the alien's health from 8 to 6.
+        The next alien will die from damage taken from turret B, which reduced its health from 4 to 0.
+        
+Turret shooting timing: All turrets with a target will fire their first shot in alphabetical order. The remaining turrets that still have more shots available will fire their next shot in alphabetical order once again. This repeats until there are no more shots to fire. This marks the end of the move.
+Matrix size: n x n where 20 >= n >= 7
+Alien list max length: 80
+Full Test Suite: 10 Fixed Tests, 100 Random Tests
+Input will always be valid.
+
+Test Example
+
+```python
+battlefield = [
+        '0111111',
+        '  A  B1',
+        ' 111111',
+        ' 1     ',
+        ' 1C1111',
+        ' 111 D1',
+        '      1'
+]
+turrets = {'A':[3,2],'B':[1,4],'C':[2,2],'D':[1,3]}
+wave = [30,14,27,21,13,0,15,17,0,18,26]
+tower_defense(battlefield,turrets,wave); #10
+'''
+The aliens that survive are the alien at wave[7] with an ending health of 2
+and the alien at wave[8] with an ending health of 8.'''
+```
+For another Tower Defense-style challenge, check out Plants and Zombies
+
+
+If you enjoyed this kata, be sure to check out [my other katas](https://www.codewars.com/users/docgunthrop/authored).

@@ -1,0 +1,33 @@
+analysis:
+  data_dir: null
+  split: null
+  num_samples: null
+  one_dim_target: false
+  save_dir: outputs
+  plots_dir: figures
+  compute_quantile_limits: false
+  compute_max_lyapunov_exponents: false
+  filter_ensemble: true
+  filter_json_fname: failed_samples
+  verbose: true
+  attractor_tests:
+    - check_zero_one_test
+    # - check_boundedness
+    # - check_not_transient
+    # - check_stationarity
+  
+  check_not_transient:
+    max_transient_prop: 0.2
+    atol: 1e-3
+
+  check_stationarity:
+    p_value: 0.05
+
+  check_boundedness:
+    threshold: 1e4
+    max_zscore: 5
+    eps: 1e-10
+
+  check_zero_one_test:
+    threshold: 0.2
+    strategy: score

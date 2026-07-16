@@ -1,0 +1,27 @@
+# BIRA — runtime dependencies (Python 3.10).
+# Direct dependencies for the documented pipeline: watermarked-text generation,
+# the attacks (BIRA / vanilla_paraphrasing / dipper / SIRA), detectability, the
+# text-quality metrics (nli / self_bleu / s-bert / ppl / llm_judge), and beta calibration.
+# (Transitive dependencies are resolved by pip; only the direct ones are pinned here.)
+
+# --- Core: models, tensors, configs ---
+torch==2.9.0
+transformers==4.57.3
+accelerate==1.10.0            # device_map="auto" loading (e.g. dipper T5-XXL)
+numpy==2.2.6
+scipy==1.15.3                 # EXP / EXP-Gumbel watermarks
+tqdm==4.67.1
+PyYAML==6.0.2                 # model_config/*.yaml
+sentencepiece==0.2.1          # T5 (dipper) / other tokenizers
+protobuf==5.29.5              # tokenizer conversion backend
+
+# --- Text-quality evaluation ---
+sentence-transformers==5.1.0  # s-bert; NLI cross-encoder
+nltk==3.9.1                   # self-BLEU
+
+# --- SIR watermark ---
+jieba==0.42.1
+
+# --- OpenAI API (api backend + llm_judge) ---
+openai==1.99.9
+tiktoken==0.11.0

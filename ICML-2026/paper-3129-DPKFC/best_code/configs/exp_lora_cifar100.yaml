@@ -1,0 +1,37 @@
+experiment:
+  name: "lora_cifar100"
+  seeds: [42]
+  device: "cuda"
+
+data:
+  private_dataset: "cifar100"
+  public_dataset: "cifar10"
+  batch_size: 256
+  num_workers: 4
+
+model:
+  type: "crossvit_lora"
+  num_classes: 100
+  pretrained: true
+
+training:
+  epochs: 5
+  learning_rate: 1e-3
+  optimizer: "adam"
+
+privacy:
+  epsilons: [1.0]
+  delta: 1e-5
+  max_grad_norm: 1.0
+
+kfac:
+  damping: 1e-3
+  update_frequency: 1
+
+methods:
+  - "dp_sgd"
+  - "dp_kfac_lora"
+
+output:
+  experiments_dir: "experiments"
+  save_metrics: true

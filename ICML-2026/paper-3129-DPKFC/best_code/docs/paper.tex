@@ -1,0 +1,1454 @@
+
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs} % for professional tables
+\usepackage{xcolor}
+\usepackage{stfloats}
+\usepackage{hyperref}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+\definecolor{auburn}{rgb}{0.43, 0.21, 0.1}
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2026}
+
+% For preprint, use
+% \usepackage[preprint]{icml2026}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% 1. Create the style file automatically (saves you from creating a new file manually)
+\usepackage{filecontents}
+\begin{filecontents*}{indexstyle.ist}
+headings_flag 1
+heading_prefix "{\\bfseries\\sffamily "
+heading_suffix "}\\nopagebreak\n"
+symhead_positive "Symbols"
+numhead_positive "Numbers"
+item_0  "\n \\item "
+delim_0 "\\dotfill "
+delim_1 "\\dotfill "
+delim_2 "\\dotfill "
+\end{filecontents*}
+
+% 2. Load imakeidx with options (must be used INSTEAD of makeidx)
+\usepackage{imakeidx}
+\makeindex[intoc, columns=2, title=Index, options=-s indexstyle.ist]
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\usepackage{algorithm}
+% \usepackage{algpseudocode}
+\usepackage{xcolor} % For coloring comments
+% Optional: Change "Require/Ensure" to "Input/Output"
+\renewcommand{\algorithmicrequire}
+{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand{\RETURN}{\STATE \textbf{return}~}
+
+
+\setlength{\textfloatsep}{3pt plus 0pt minus 1pt}
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+
+% Todonotes is useful during development; simply uncomment the next line
+%    and comment out the line below the next line to turn off comments
+%\usepackage[disable,textsize=tiny]{todonotes}
+\usepackage[textsize=tiny]{todonotes}
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Data-Free Preconditioning for Private Deep Learning}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{DP-KFC: Data-Free Preconditioning for Privacy-Preserving Deep Learning}
+
+  % It is OKAY to include author information, even for blind submissions: the
+  % style file will automatically remove it for you unless you've provided
+  % the [accepted] option to the icml2026 package.
+
+  % List of affiliations: The first argument should be a (short) identifier you
+  % will use later to specify author affiliations Academic affiliations
+  % should list Department, University, City, Region, Country Industry
+  % affiliations should list Company, City, Region, Country
+
+  % You can specify symbols, otherwise they are numbered in order. Ideally, you
+  % should not use this facility. Affiliations will be numbered in order of
+  % appearance and this is the preferred way.
+  \icmlsetsymbol{equal}{*}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Firstname1 Lastname1}{equal,yyy}
+    \icmlauthor{Firstname2 Lastname2}{equal,yyy,comp}
+    \icmlauthor{Firstname3 Lastname3}{comp}
+    \icmlauthor{Firstname4 Lastname4}{sch}
+    \icmlauthor{Firstname5 Lastname5}{yyy}
+    \icmlauthor{Firstname6 Lastname6}{sch,yyy,comp}
+    \icmlauthor{Firstname7 Lastname7}{comp}
+    %\icmlauthor{}{sch}
+    \icmlauthor{Firstname8 Lastname8}{sch}
+    \icmlauthor{Firstname8 Lastname8}{yyy,comp}
+    %\icmlauthor{}{sch}
+    %\icmlauthor{}{sch}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{yyy}{Department of XXX, University of YYY, Location, Country}
+  \icmlaffiliation{comp}{Company Name, Location, Country}
+  \icmlaffiliation{sch}{School of ZZZ, Institute of WWW, Location, Country}
+
+  \icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
+  \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+
+  % You may provide any keywords that you find helpful for describing your
+  % paper; these are used to populate the "keywords" metadata in the PDF but
+  % will not be shown in the document
+  \icmlkeywords{Machine Learning, ICML}
+
+  \vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column listing the
+% affiliations and the copyright notice. The command takes one argument, which
+% is text to display at the start of the footnote. The \icmlEqualContribution
+% command is standard text for equal contribution. Remove it (just {}) if you
+% do not need this facility.
+
+% Use ONE of the following lines. DO NOT remove the command.
+% If you have no special notice, KEEP empty braces:
+\printAffiliationsAndNotice{}  % no special notice (required even if empty)
+% Or, if applicable, use the standard equal contribution text:
+% \printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract} 
+Differentially private optimization suffers from a fundamental geometric mismatch: deep networks have highly anisotropic loss landscapes, yet DP-SGD injects isotropic noise. Second-order preconditioning can resolve this, but estimating curvature typically requires private data (consuming privacy budget) or public data (introducing distribution shift). We show that the Fisher Information Matrix decouples into \textit{architectural sensitivity}, recoverable via synthetic noise, and \textit{input correlations}, approximable from modality-specific frequency statistics. We propose DP-KFC, which constructs KFAC preconditioners by probing networks with structured synthetic noise, requiring neither private nor public data. Empirically, DP-KFC consistently outperforms DP-SGD and adaptive baselines across diverse modalities in strong privacy regimes ($\varepsilon \leq 3$). DP-KFC matches private-data preconditioners while public-data variants degrade by up to $4.8\%$, showing that curvature can be estimated without consuming privacy budget or introducing distribution shift. This enables privacy-preserving learning in specialized domains (e.g., medical applications) where regulatory constraints make data scarce.
+\end{abstract}
+
+
+\section{Introduction}
+\label{sec:intro}
+Differential privacy has emerged as the gold standard for protecting sensitive data in machine learning, yet its practical adoption remains limited by a fundamental geometric conflict \cite{Abadi_2016}. Modern neural networks exhibit highly ill-conditioned loss landscapes where eigenvalues of the curvature matrix vary by orders of magnitude across parameter directions \cite{Dauphin2014}. Meanwhile, DP-SGD enforces spherical constraints via global $L_2$ clipping and isotropic noise injection \cite{Dwork2013}, treating all directions equally. This \textit{isotropy mismatch} causes low-sensitivity parameters to drown in noise while high-sensitivity directions are over-clipped \cite{chen2020understanding}, creating heterogeneous signal-to-noise ratios (SNR) (Fig. \ref{fig:snr_motivation}) that slow convergence and degrade performance \cite{tramèr2021differentiallyprivatelearningneeds}. Unlike non-private regimes where over-parameterization accelerates learning, private noise scales with model dimensionality $(\sqrt{d})$ \cite{bassily2014differentiallyprivateempiricalrisk}, often preventing deep networks from outperforming simple baselines.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{Figures/snr_motivation.pdf}
+\caption{\textbf{Architectural Preconditioning.}
+Comparison of Layer-wise Signal-to-Noise Ratio (SNR) on (a) Simple CNN and (b) CrossViT-240 (Transformer) trained on CIFAR-100. Standard DP-SGD (Blue) suffers from signal collapse. DP-KFC reaches an optimal SNR profile across both local convolution and global attention architectures, matching the geometry of data-dependent proxies (Green) without accessing external data.}
+\label{fig:snr_motivation}
+\end{figure}
+
+
+
+Resolving this conflict via adaptive optimization has proven suboptimal. Standard adaptive methods \cite{kingma2017adammethodstochasticoptimization, DBLP:journals/corr/MartensG15} attempt to estimate second-moment statistics from the training data. However, as recent work by \citet{ganesh2025designprinciplesprivateadaptive} demonstrates, aiming for unbiased estimates of these statistics in a private setting is fundamentally misguided; the noise required to privatize the preconditioner often destabilizes the update more than the preconditioning helps. Similarly, \citet{Krouka2025} note that while second-order information is vital for convergence, in federated setups communicating or computing it privately introduces prohibitive overheads. Consequently, the field has pivoted toward \textit{Precondition-then-Privatize} strategies that rely on public data to approximate the geometry \cite{Amid2022, Li2022}. Yet, this reliance is fragile: it introduces unquantified biases, fails in specialized domains where proxies do not exist (e.g., medical imaging), and complicates privacy auditing \cite{Tramer2024}.
+
+This work proposes a third option, challenging the prevailing assumption that accurate estimation of the curvature matrix requires private or public data at all. Leveraging the block-diagonal structure of KFAC \cite{dangel2025kroneckerfactoredapproximatecurvaturekfac} and deep signal propagation principles \cite{schoenholz2016deep, yang2017mean}, we posit that the essential optimization geometry is an intrinsic property of the model architecture, not the specific data manifold.
+
+\vspace{1em}
+% \footnote{Our approach differs from works using ``DP-KFAC'' to denote \textit{Distributed Preconditioning} rather than Differential Privacy \cite{zhang2022scalable}.
+\textbf{DP-KFC} recovers second order statistics required to precondition gradients without accessing private training data or public datasets. The network is probed with synthetic inputs, built with random noise constructed to follow modality-specific frequency statistics (e.g., $1/f$ spectrum), that carry no privacy cost: we employ colored noise for images to simulate local and global dependencies, and we use random token sequences for text. Synthetic probing reconstructs per-layer KFAC preconditioning matrices applied to the private gradients \textit{before} the privacy mechanism. This approach aligns with the \textit{scale-then-privatize} design principle of \citet{ganesh2025designprinciplesprivateadaptive} while removing the dependency on private gradient statistics entirely. Our contributions are:
+
+\begin{itemize}
+    \item \textbf{Decoupled Geometry:} The Fisher Information Matrix decouples into \textit{Architectural Scaling} (recoverable via synthetic noise) and \textit{Input Correlation} (recoverable via general frequency statistics of the modality), enabling preconditioner construction without spending privacy budget.
+    \item \textbf{Privacy-Free Preconditioning:} An algorithm estimates KFAC factors using synthetic noise, requiring no private or public data, which preconditions the loss landscape to match the isotropic privacy noise.
+    \item \textbf{Robustness to Negative Transfer:} Public data proxies fail under domain mismatch; our method strictly dominates these baselines, offering a domain-agnostic approach for private learning.
+\end{itemize}
+
+\section{Related Work}
+\label{sec:related_work}
+
+\textbf{The Geometry of Differentially Private Optimization.} The isotropy mismatch between anisotropic loss landscapes and isotropic DP-SGD noise has motivated various mitigation strategies: adaptive clipping \cite{DBLP:journals/corr/abs-1905-03871, andrew2021differentially} dynamically adjusts clipping thresholds, while Rényi DP \cite{Mironov_2017} provides tighter composition bounds. Yet, ill-conditioning remains a fundamental bottleneck, as the noise-to-signal ratio grows with model dimensionality, limiting the scalability of private deep learning.
+
+\textbf{Private First- and Second-Order Methods.} In non-private settings, optimization can be accelerated by transforming the gradient to mitigate the ill-conditioned parameter space. The majority of prior attempts in DP focus on \textit{first-order adaptive methods}, such as DP-Adam or DP-RMSProp. These algorithms attempt to capture local geometry by estimating diagonal second-moment statistics from private data. However, as shown in \citet{ganesh2025designprinciplesprivateadaptive}, creating a private preconditioner involves either estimating the statistics which consumes a significant portion of the privacy budget, or using a noisy preconditioner that introduces instability often yielding performance worse than non-adaptive DP-SGD \cite{chen2020understanding}.
+
+Translating \textit{true second-order methods} (like KFAC \citet{DBLP:journals/corr/MartensG15} or Newton's method \citet{ganesh2023faster}) to DP introduces a more severe \textit{dimensionality bottleneck}. Since the curvature matrix (Hessian) has dimensions $d \times d$, the number of sensitive entries scales quadratically with model size. Naive approaches that inject independent noise into the Hessian estimation suffer from a noise scale proportional to $d$ \cite{avellamedina2023differentiallyprivateinferencenoisy}. Injecting sufficient noise to privatize the curvature matrix compromises its accuracy and condition number, thus the inverse preconditioner becomes unstable, amplifying noise rather than correcting the loss landscape \cite{ganesh2023faster}.
+
+\textbf{Optimization with Side Information.}
+To bypass these problems in privacy-preserving estimation, recent methods leverage non-sensitive side information to approximate the loss geometry. A prevalent source of side information is public data.  Recent theoretical advances have established that access to unlabeled public data allows for computationally efficient private learning by reducing the problem to standard non-private optimization, even under bounded distribution shifts \cite{block2024oracle}. Methods like PDA-DPMD \cite{Amid2022} and AdaDPS \cite{Li2022} leverage this by estimating preconditioners or mirror maps on public proxies to transform private gradients prior to clipping and noise injection. However, this reliance on public data is increasingly being identified as a potential concern. \citet{Tramer2024} argue that large-scale web data often contains sensitive information, violating the initial privacy focus, and fails to generalize to the highly specialized domains (e.g., medical imaging) where DP is most critical.
+
+\textbf{Deep Signal Propagation and Architectural Priors.}
+Our approach builds on Mean Field Theory (MFT) for deep networks \cite{poole2016exponential, schoenholz2016deep}, which shows that activation and gradient variances evolve according to deterministic maps governed by architecture (depth, initialization, non-linearity) rather than data \cite{yang2017mean}. This perspective has enabled data-independent initialization schemes ensuring trainability of deep networks without skip connections \cite{xiao2018dynamicalisometrymeanfield}. We extend MFT applications to DP for data-independent preconditioning of private gradients.
+
+
+\section{Preliminaries \& Setup}
+\label{sec:prelim}
+
+We consider a deep neural network $f_\theta: \mathcal{X} \rightarrow \mathcal{Y}$ composed of $L$ layers and parameterized by $\theta = \{W_l, b_l\}_{l=1}^L$. For an input sample $x \in \mathcal{X}$, the forward propagation is defined recursively as:
+\[
+a_0 = x, \quad
+s_l = W_l a_{l-1} + b_l, \quad
+a_l = \phi_l(s_l), \quad l = 1, \dots, L,
+\]
+where $W_l \in \mathbb{R}^{d_l \times d_{l-1}}$ is the weight matrix, $b_l \in \mathbb{R}^{d_l}$ the bias vector, and $\phi_l$ a component-wise nonlinearity. Given a dataset $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$ and a loss $\ell(\cdot,\cdot)$, the empirical risk is
+$
+\mathcal{L}(\theta) = \frac{1}{N} \sum_{i=1}^N \ell(f_\theta(x_i), y_i).
+$
+We denote the error signal (gradient with respect to pre-activations) at layer $l$ for sample $i$ as
+$
+\delta_{l,i} = \nabla_{s_l} \ell(f_\theta(x_i), y_i),
+$
+so that the per-sample gradient with respect to $W_l$ is
+$
+\nabla_{W_l} \ell(f_\theta(x_i), y_i) = \delta_{l,i} a_{l-1,i}^\top.
+$ When the inputs are synthetic rather than drawn from the private dataset, the resulting activations, pre-activations, and error signals are denoted with a tilde, e.g., $\tilde{a}_l$, $\tilde{s}_l$, and $\tilde{\delta}_l$.
+
+
+\subsection{Differential Privacy Framework}
+A randomized mechanism $\mathcal{M}$ satisfies $(\epsilon,\delta)$-Differential Privacy \cite{Dwork2006} if for any two adjacent datasets $\mathcal{D}, \mathcal{D}'$ and measurable set $S$,
+\[
+\Pr[\mathcal{M}(\mathcal{D}) \in S] \le e^\epsilon \Pr[\mathcal{M}(\mathcal{D}') \in S] + \delta.
+\]
+This definition imposes a strict geometric constraint: the mechanism must obscure the contribution of any individual sample vector within a sphere of uncertainty.
+
+In deep learning, Differentially Private Stochastic Gradient Descent (DP-SGD) \cite{Abadi_2016} bounds influence via per-sample gradient clipping and injects Gaussian noise. For per-sample gradients $g^{(i)}$, clipping threshold $C$, and noise multiplier $\sigma$, the private gradient estimate is
+\[
+\tilde{g} = \frac{1}{|\mathcal{B}|} \left( \sum_{i \in \mathcal{B}} \text{Clip}_C(g^{(i)}) + \mathcal{N}(0, \sigma^2 C^2 I) \right),
+\]
+where $\text{Clip}_C(g) = g / \max(1, \|g\|_2/C)$. The $L_2$ sensitivity of the sum of clipped gradients is $C$, so the Gaussian mechanism with variance $\sigma^2 C^2$ provides $(\epsilon,\delta)$-DP guarantees under standard composition theorems. Privacy accounting is performed on the noisy sum; the subsequent averaging scales both signal and noise uniformly.
+
+\subsection{Gradient Preconditioning and KFAC}
+To address the anisotropic geometry of the loss landscape, Natural Gradient Descent (NGD) \cite{Amari1998} updates parameters using $\theta_{t+1} = \theta_t - \eta F^{-1} \nabla_\theta \mathcal{L}$, where $F$ is the Fisher Information Matrix (FIM). However, for differentially private optimization, we instead use \textit{gradient preconditioning} with $F^{-1/2}$:
+\[
+\theta_{t+1} = \theta_t - \eta F^{-1/2} \nabla_\theta \mathcal{L}(\theta_t).
+\]
+This transformation makes the preconditioned gradient $\tilde{g} = F^{-1/2} g$ approximately isotropic ($\mathbb{E}[\tilde{g}\tilde{g}^\top] \approx I$), which is essential for DP: the spherical clipping and isotropic noise addition of DP-SGD become geometrically matched in this transformed space (Appendix \ref{app:proof_isotropy}).
+
+To make preconditioning tractable, we use the KFAC approximation \cite{DBLP:journals/corr/MartensG15}, assuming independence between activations and errors. Each layer-wise FIM block is approximated as a Kronecker product
+\[
+F_l \approx A_{l-1} \otimes G_l, \quad
+A_{l-1} = \mathbb{E}[a_{l-1} a_{l-1}^\top], \quad
+G_l = \mathbb{E}[\delta_l \delta_l^\top],
+\]
+allowing efficient computation of $F_l^{-1/2} = A_{l-1}^{-1/2} \otimes G_l^{-1/2}$.
+
+\subsection{Mean-Field Signal Propagation}
+\label{subsec:mft_prelim}
+Following \citet{poole2016exponential, schoenholz2016deep}, in the infinite-width limit the pre-activations $s_l$ can be modeled as Gaussian with variance $q^l = \mathbb{E}[s_l^2]$. This variance evolves according to the deterministic map
+\[
+q^l = \mathcal{V}(q^{l-1} \mid \sigma_w, \sigma_b) = \sigma_w^2 \int \phi(\sqrt{q^{l-1}} z)^2 \mathcal{D}z + \sigma_b^2,
+\]
+where $\mathcal{D}z$ is the standard Gaussian measure. For standard initializations, $q^l$ converges exponentially to a stable fixed point $q^*$, making the deep layer variance independent of the input variance $q^0$ \cite{poole2016exponential}.
+
+Similarly, the backward error variance $\tilde{q}^l = \mathbb{E}[\|\delta_l\|^2]$ evolves according to a dual recursion governed by $\phi'$, determining whether gradients vanish or explode \cite{schoenholz2016deep}. As shown by \citet{karakida2019universal}, the trace of the layer-wise Fisher block is proportional to the product of these variances:
+\begin{equation}
+\label{eq:mft}
+\mathrm{Tr}(F_l) \propto d \cdot q^{l-1} \cdot \tilde{q}^l,    
+\end{equation}
+
+
+indicating that the overall magnitude of the preconditioner matrix (its trace) is determined by architecture ($\sigma_w, \sigma_b, \phi$) rather than data. While this result is derived in the infinite-width limit, we empirically validate in Section~\ref{subsec:spectral_validation} that the spectral alignment holds for practical finite-width architectures.
+
+\section{DP-KFC}
+
+We now introduce DP-KFC, a second-order private optimization method whose core components are:
+$\emph{(i)}$ a data-free KFAC preconditioner,
+$\emph{(ii)}$ synthetic inputs that recover the relevant architectural and data statistics, and
+$\emph{(iii)}$ integration of the preconditioner into a differentially private update following the scale-then-privatize principle.
+
+\subsection{Synthetic Preconditioning}
+\label{sec:noise_preconditioning}
+
+Since the overall magnitude of the preconditioner matrix is an intrinsic property of the architecture, the parameter sensitivities can be recovered without accessing private data. We therefore construct the KFAC preconditioning blocks probing the network with structurally coherent data but semantically independent to the private dataset (Algorithm~\ref{alg:data_free_precond}). 
+
+We first generate a synthetic batch $\mathcal{B}_{\text{syn}} = \{\tilde{x}^{(j)}, \tilde{y}^{(j)}\}_{j=1}^M $ using modality-specific noise distributions (see Section ~\ref{sec:signal_variance} and Appendix~\ref{app:probing}).
+A forward and backward pass is then performed with the current network parameters $\theta_t$ to obtain feature activations
+$\tilde{a}_{l-1}$ and error signals $\tilde{\delta}_l$ for each layer. Using the outer-product structure of per-sample gradients, we aggregate these quantities into layer-wise Kronecker
+covariance factors,
+$\hat{A}_{l-1} = \mathbb{E}[\tilde{a}_{l-1} \tilde{a}_{l-1}^\top]$ and
+$\hat{G}_l = \mathbb{E}[\tilde{\delta}_l \tilde{\delta}_l^\top]$,
+with an added damping term $\pi I$ to floor the low-variance directions \cite{DBLP:journals/corr/MartensG15}.
+
+To normalize the anisotropic parameter sensitivity induced by the network, we compute the regularized inverse square roots of
+$\hat{A}_{l-1}$ and $\hat{G}_l$ via eigendecomposition, yielding matrices $U_{A,l}$ and $U_{G,l}$, with a term $\gamma I$ for numerical stability. 
+The resulting preconditioner $\tilde{F}^{-1/2}$ is implicitly given by the Kronecker product $U_{A} \otimes U_{G}$. This formulation avoids materializing the full FIM, whose dimensionality would be prohibitive.
+
+% \footnote{We refer the reader to Appendix~\ref{app:whitening_derivation} to formalize the difference between step size preconditioning ($F^{-1}$) and gradient preconditioning ($F^{-1/2}$)}
+\begin{algorithm}[t]
+\caption{DP-KFC Preconditioner Construction (Synthetic Probing)}
+\label{alg:data_free_precond}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Neural Network $f_\theta$, batch size $M$, damping $\pi$, stability $\gamma$
+\STATE \textbf{Output:} Data-free preconditioner $\tilde{F} = \{\tilde{F}_l^{-1/2}\}_{l=1}^L$
+\STATE \textcolor{auburn}{// Synthetic input generation (independent of private data)}
+\STATE $\{\tilde{x}^{(j)}, \tilde{y}^{(j)}\}_{j=1}^M \gets \texttt{Generate\_Samples}(M)$ \hfill (App.~\ref{app:probing})
+\STATE \textcolor{auburn}{// Forward and backward passes (see Preliminaries)}
+\STATE Compute $\{\tilde{a}_{l-1}^{(j)}, \tilde{\delta}_l^{(j)}\}$ via forward and backward propagation
+\STATE \textcolor{auburn}{// Layer-wise KFAC factor estimation and normalization}
+\FOR{each layer $l \in [L]$}
+    \STATE \textcolor{auburn}{// Compute activation and gradients covariances} 
+    \STATE $\hat{A}_{l-1} = \frac{1}{M} \sum_{j=1}^M \tilde{a}_{l-1}^{(j)} (\tilde{a}_{l-1}^{(j)})^\top + \pi I$
+    \STATE $\hat{G}_l = \frac{1}{M} \sum_{j=1}^M \tilde{\delta}_l^{(j)} (\tilde{\delta}_l^{(j)})^\top + \pi I$
+    \STATE \textcolor{auburn}{// Eigen decomposition}
+    \STATE $[Q_A, \Lambda_A] \gets \text{EigDecomp}(\hat{A}_{l-1})$
+    \STATE $[Q_G, \Lambda_G] \gets \text{EigDecomp}(\hat{G}_l)$
+    \STATE \textcolor{auburn}{// Curvature normalization}
+    \STATE $U_{A,l} = Q_A (\Lambda_A + \gamma I)^{-1/2} Q_A^\top$
+    \STATE $U_{G,l} = Q_G (\Lambda_G + \gamma I)^{-1/2} Q_G^\top$
+    \STATE $\tilde{F}_l^{-1/2} \gets U_{A,l} \otimes U_{G,l}$
+\ENDFOR
+\STATE \textbf{return} $\tilde{F}^{-1/2} = \{\tilde{F}_l^{-1/2}\}_{l=1}^L$
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Synthetic Data Generation}
+\label{sec:signal_variance}
+
+Creating the synthetic probes involves generating an input batch that is capable of simulating the forward (layer activations) and backward (error gradients) pass of private data while remaining independent from it to ensure DP guarantees. 
+
+Let $A_{l-1} = Q_{A,l-1} \Lambda_{A,l-1} Q_{A,l-1}^\top$ denote the eigendecomposition of the activation covariance at layer $l$.
+The eigenvalues $\Lambda_{A,l-1}$ quantify the scale of each principal direction, while the eigenvectors $Q_{A,l-1}$ define correlation structures across features. Following Eq. \ref{eq:mft}, signal propagation magnitudes ($\mathrm{Tr}(A_{l-1})$ and $\mathrm{Tr}(G_{l-1})$) are fixed by weight variances rather than input statistics; hence, unstructured noise with random labels suffices to recover the scale of the KFAC factors. Synthetic labels $\tilde{y}$ are sampled uniformly from the label space; since KFAC factors depend on error signal magnitudes rather than label correctness, random labels suffice for estimating $G_l$.
+
+However, the eigenvectors $Q_{A,l-1}$ define the spatial or sequential relationships among features, which are entirely absent in uncorrelated (full-rank) white noise. Moreover, white noise distributes energy uniformly across all frequencies, whereas deep networks propagate low-frequency features while suppressing high-frequency ones \cite{rahaman2019spectralbiasneuralnetworks}. 
+To simulate these structural correlations, we exploit the statistical regularity of natural images, which universally exhibit $1/f^\alpha$ power spectra, where amplitude decays with spatial frequency \cite{field1987relations}. This statistical regularity means input correlations can be approximated without access to private data. We explicitly construct synthetic batches following this power-law distribution ($S(f) \propto 1/f^\alpha$). For image domains, we generate Pink Noise by modulating white noise $Z \in \mathbb{C}^{H \times W}$ in the frequency domain. Let $\mathbf{u} \in \mathbb{R}^2$ be the spatial frequency coordinate vector relative to the zero-frequency component (the center of the spectrum). We scale the spectrum as:
+\begin{equation}
+    \label{eq:pink_noise_gen}
+    \tilde{Z}_{\mathbf{u}} = Z_{\mathbf{u}} \cdot \frac{1}{\|\mathbf{u}\|_2^{\alpha/2} + \epsilon}, \quad x_{\text{syn}} = \text{Re}(\mathcal{F}^{-1}(\tilde{Z}))
+\end{equation}
+where $\|\mathbf{u}\|_2$ is the Euclidean distance from the spectral center, and $\epsilon$ prevents division by zero at the origin. Here, Pink Noise ($\alpha \approx 1$) concentrates probing energy into the low-frequency modes to match the ideal private preconditioner. For discrete domains (NLP), we employ a structural token sampling strategy detailed in Appendix~\ref{app:token_noise}.
+
+
+
+\subsection{Privatizing preconditioned gradients}
+\label{subsec:optdyn}
+
+Once the preconditioning matrices $U_{A,l}$ and $U_{G,l}$ are computed via the data-free procedure (Algorithm \ref{alg:data_free_precond}), they are frozen and broadcast to the private training loop. For the subsequent $T_{freq}$ steps, we replace the standard gradient computation with a preconditioned gradient oracle following Algorithm \ref{alg:dp_kfac_loop}. This operation transforms the per-sample gradients from the original parameter space, where parameter sensitivity varies by orders of magnitude, into a preconditioned coordinate system with homogeneous parameter sensitivity. Contrary to standard DP-SGD, where high-sensitivity directions are severely clipped and low-sensitivity directions are submerged by noise, in the preconditioned space, every parameter contributes equally to the norm ($Cov(\tilde g)= I$). Consequently, the fixed clipping threshold is applied uniformly across all parameters, preserving the update direction while upscaling low-sensitivity directions. 
+
+The transformation $\tilde{g}_l = U_{G,l} \cdot g_l \cdot U_{A,l}$ in Algorithm~\ref{alg:dp_kfac_loop} assumes the gradient is a matrix. For convolutional layers, we apply the standard im2col transformation, treating each spatial location as an independent sample \cite{DBLP:journals/corr/MartensG15}. For Transformers, all attention and MLP components are Linear layers, so standard KFAC applies directly. Following the K-FAC-reduce formulation of \citet{eschenhagen2023kfac}, we average covariances over the weight-sharing dimension (spatial locations for CNNs, sequence positions for attention), which is computationally efficient and empirically equivalent to the more expensive K-FAC-expand variant. Implementation details are provided in Appendix~\ref{app:kfac_architectures}.
+
+
+\begin{algorithm}[t]
+\caption{DP-KFC Training Loop}
+\label{alg:dp_kfac_loop}
+\begin{algorithmic}[1]
+\STATE {\bfseries Input:} Private Data $\mathcal{D}$, Learning rate $\eta$, Noise scale $\sigma$, Clip $C$, Freq $T_{freq}$
+\STATE {\bfseries Output:} Private Model Parameters $\theta_T$
+
+\FOR{$t = 0, \dots, T-1$}
+    \STATE \textcolor{auburn}{// Periodic Preconditioner Update}
+    \IF{$t \mod T_{freq} == 0$}
+        \STATE $\{U_{A,l}, U_{G,l}\} \gets \textbf{Alg. \ref{alg:data_free_precond}}(\theta_t, M, \pi, \gamma)$ 
+    \ENDIF
+
+    \STATE \textcolor{auburn}{// Private Gradient Step}
+    \STATE Sample private batch $\mathcal{B}_{\text{priv}} \subset \mathcal{D}$
+    \FOR{sample $i \in \mathcal{B}_{\text{priv}}$}
+        \FOR{layer $l \in L$}
+            \STATE Compute Gradient: $g_{l}^{(i)} = \nabla_{W_l} \ell(x_i)$
+            \STATE \textbf{Transform:} $\tilde{g}_{l}^{(i)} \leftarrow U_{G,l} \cdot g_{l}^{(i)} \cdot U_{A,l}$
+        \ENDFOR
+        \STATE Compute Norm: $\nu_i = \sqrt{\sum_l \|\tilde{g}_{l}^{(i)}\|_F^2}$
+        \STATE \textbf{Clip:} $\bar{g}^{(i)} \leftarrow \tilde{g}^{(i)} / \max(1, \nu_i/C)$
+    \ENDFOR
+    
+    \STATE \textcolor{auburn}{// 3. Noise Addition and Descent}
+    \STATE $\tilde{G} \leftarrow \frac{1}{|\mathcal{B}|} \left( \sum_i \bar{g}^{(i)} + \mathcal{N}(0, \sigma^2 C^2 I) \right)$ \hfill \textcolor{auburn}{// Averaging}
+    \STATE $\theta_{t+1} \leftarrow \theta_t - \eta \cdot \tilde{G}$ 
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\section{Convergence Analysis}
+\label{sec:convergence}
+
+This section provides a convergence analysis for DP-KFC on non-convex objectives, the standard setting for deep neural networks. In DP-KFC, private gradients are normalized, based on the inherent parameter sensitivity estimates, before injecting noise. Thus, reducing the condition number governing the convergence rate. We now analyze the proposed method following standard assumptions for stochastic non-convex optimization.
+
+\begin{assumption}[$L$-Smoothness]
+\label{ass:smooth}
+The loss function $\mathcal{L}(\theta)$ is differentiable and $L$-smooth, i.e., $\|\nabla \mathcal{L}(\theta_1) - \nabla \mathcal{L}(\theta_2)\| \le L \|\theta_1 - \theta_2\|$ for all $\theta_1, \theta_2 \in \mathbb{R}^d$.
+\end{assumption}
+
+\begin{assumption}[Bounded Variance]
+\label{ass:bounded}
+The stochastic gradient oracle is unbiased, $\mathbb{E}[\nabla \ell(x_i)] = \nabla \mathcal{L}(\theta)$, with bounded variance $\sigma_{sgd}^2$. Since preconditioning is applied before clipping (Algorithm~\ref{alg:dp_kfac_loop}), gradient norms are homogenized prior to the clipping operation. This reduces the fraction of gradients exceeding the threshold $C$, minimizing clipping-induced bias compared to standard DP-SGD.
+\end{assumption}
+
+\begin{assumption}[Bounded Preconditioner]
+\label{ass:bounded_pre}
+The noise-derived preconditioner $P_t$ (constructed via preconditioning matrices $U_G, U_A$) has bounded eigenvalues: $0 < \lambda_{min} I \preceq P_t \preceq \lambda_{max} I$. This is structurally guaranteed in our algorithm by the Tikhonov damping (regularization) terms $\pi I$ and $\gamma I$ added to the covariance matrices before inversion.
+\end{assumption}
+
+To establish the convergence guarantee, these structural properties are essential. Smoothness (Assumption \ref{ass:smooth}) bounds the loss reduction via a quadratic approximation. Assumption \ref{ass:bounded} separates the estimation variance from the privacy noise. Finally, the spectral bounds in Assumption \ref{ass:bounded_pre} are critical: the lower bound guarantees that the preconditioned update remains a valid descent direction, while the upper bound limits the amplification of stochastic variance.
+
+\subsection{Convergence Rate}
+
+The following theorem characterizes the convergence rate to a critical point. We separate the geometric scaling of the variance coming from the gradient stochastic noise and the additive nature of the privacy noise.
+
+\begin{theorem}[Non-Convex Convergence of DP-KFC]
+\label{thm:convergence}
+Let the learning rate be $\eta = \frac{1}{\sqrt{T}}$. After $T$ iterations with batch size $B$, the algorithm yields a solution sequence $\{\theta_t\}$ satisfying:
+\begin{multline}
+\label{eq:convergence_bound}
+    \min_{t \in [0, T-1]} \mathbb{E}[\|\nabla \mathcal{L}(\theta_t)\|^2] \le \frac{C_1}{\lambda_{min} \sqrt{T}} + \\
+    \frac{C_2}{\lambda_{min} \sqrt{T}} \left( \lambda_{max}^2 \sigma_{sgd}^2 + \frac{d \sigma^2 C^2}{B^2} \right)
+\end{multline}
+where $C_1$ depends on the initial loss gap $\mathcal{L}_0 - \mathcal{L}^*$, and $C_2$ depends on the smoothness constant $L$.
+\end{theorem}
+
+Eq. \eqref{eq:convergence_bound} shows the advantage over standard preconditioned DP-SGD. In methods that directly precondition noisy gradients ($P_t(\bar{g}_t + \xi_t)$), the privacy noise is multiplied by the preconditioner, amplifying the privacy error variance by $\lambda_{max}^2$. In contrast, our approach decouples these stages: because $P_t$ is batch-independent, we reshape the gradient before the privacy mechanism applies. Consequently, the privacy term $d \sigma^2 C^2 / B^2$ avoids being amplified by $\lambda_{max}^2$. The eigenvalue terms $\lambda_{min}^{-1}$ and $\lambda_{max}^2$ in the bound are controlled by the damping parameter $\gamma$ in Algorithm~\ref{alg:data_free_precond}: eigenvalues satisfy $\lambda_{min} \geq \sqrt{\gamma}$ and $\lambda_{max} \leq 1/\sqrt{\gamma}$ for normalized covariances. With typical $\gamma = 10^{-2}$, the effective condition number remains moderate. In high-privacy regimes where privacy noise dominates, avoiding its amplification by $\lambda_{max}^2$ yields the empirical gains. A full derivation is provided in Appendix~\ref{app:convergence_proof}, and complexity analysis in Appendix \ref{app:complexity}.
+
+\subsection{Privacy Analysis}
+\label{subsec:privacy_analysis}
+
+The privacy guarantee of DP-KFC relies on the preconditioner $P_t$ being batch-independent: it is computed from synthetic noise and the current model state $\theta_t$, which depends only on \textit{past} privatized releases, not the current batch $\mathcal{B}$. This ensures that the $L_2$ sensitivity of the preconditioned, clipped gradient sum remains bounded by $C$.
+
+\subsubsection{Formal Guarantee}
+The following proposition establishes that applying a batch-independent linear transformation prior to the Gaussian mechanism preserves the standard differential privacy bounds.
+
+\begin{proposition}[Privacy of Noise-Preconditioned Updates]
+\label{thm:sensitivity}
+Let $\mathcal{M}_{Gauss}(\mathbf{x}) = \sum \mathbf{x}_i + \mathcal{N}(0, \sigma^2 C^2 I)$ be the standard Gaussian mechanism with $L_2$ sensitivity $C$. Let $P_t$ be a linear operator that is independent of the current batch $\mathcal{B}$ (computed from synthetic noise and model parameters $\theta_t$ derived from past privatized updates). The composite mechanism:
+\begin{equation}
+    \mathcal{M}_{KFC}(\mathcal{B}) = \sum_{i \in \mathcal{B}} \text{Clip}_C(P_t \cdot \nabla \ell(x_i)) + \mathcal{N}(0, \sigma^2 C^2 I)
+\end{equation}
+satisfies the same $(\alpha, \epsilon)$-Rényi Differential Privacy (RDP) \cite{Mironov_2017} guarantees as $\mathcal{M}_{Gauss}$ (Appendix~\ref{app:privacy_proof}).
+\end{proposition}
+
+
+DP-KFC can be reduced to a form of implicit adaptive clipping. By transforming the gradient with $P_t$ prior to the fixed clipping operation, we dynamically align the clipping boundary with the local geometry of the loss landscape. This allows us to normalize gradient scales, ensuring significant updates are not disproportionately clipped, without the need to estimate gradient norms from private data. Consequently, we obtain the benefits of adaptive clipping \cite{andrew2021differentially} while retaining the simple, tight accounting of standard fixed-threshold mechanisms, as the adaptation is derived entirely from non-sensitive architectural properties.
+
+Having established the theoretical foundations for convergence and privacy preservation, we now validate these properties empirically across diverse tasks and privacy regimes.
+
+\section{Experiments}
+\label{sec:experiments}
+
+This section evaluates DP-KFC with Synthetic Preconditioning across computer vision and natural language processing tasks under varying privacy regimes. Three sets of experiments are shown. First, \emph{Validation of Architectural Dominance} (Section~\ref{subsec:spectral_validation}): parameter sensitivity and the eigenspectrum of the KFAC factors can be effectively extracted using only model architecture and synthetic noise. Second, \emph{Benchmark Performance across Modalities} (Section~\ref{subsec:main_benchmarks}): data-free preconditioning consistently outperforms standard DP-SGD. Third, \emph{Transfer and Domain Mismatch} (Section~\ref{subsec:hierarchy}): which scenarios benefit from public data versus synthetic noise, depending on domain alignment.  Ablation studies confirm robustness to hyperparameter variations and structured noise compositions (Appendix~\ref{app:sensitivity}).\footnote{Our code is publicly and anonymously available at \url{https://anonymous.4open.science/r/DP-KFC-8C66/}.}
+
+\subsection{Experimental Setup}
+\label{subsec:setup}
+
+\textbf{Implementation and Hardware.} All experiments were implemented in PyTorch using the Opacus library \cite{opacus} for differential privacy accounting. Training was conducted on NVIDIA A100 GPUs. All results are averaged over 10 independent seeds; shaded regions in figures and $\pm$ values in tables denote one standard deviation.
+
+\textbf{Models and Tasks.} We evaluate across four tasks: CNN on MNIST, CrossViT on CIFAR-100, BERT on StackOverflow, and logistic regression on IMDB. For Transformer architectures, we use AdamW as it outperforms SGD, making the DP-SGD baseline equivalent to DP-Adam. Full benchmark details in Appendix~\ref{app:table_centralized}. Importantly, hyperparameter analysis (Appendix~\ref{app:sensitivity}) shows that KFAC-specific parameters ($\gamma$, $\alpha$) have low importance and can use defaults without significant performance degradation.
+
+\subsection{Validation of Architectural Dominance}
+\label{subsec:spectral_validation}
+Architectural dominance is validated by comparing eigenspectra of the KFAC factors derived from three sources: private data (oracle), public data (proxies), and synthetic noise (ours). For each source, we estimate the covariance factors $\hat{A}_l$ and $\hat{G}_l$, then compute their eigendecompositions. Since the layer-wise preconditioner is the Kronecker product $F_l^{-1} \approx A_l^{-1} \otimes G_l^{-1}$, the full spectrum is reconstructed as $\lambda_F = \lambda_A \otimes \lambda_G$. To track alignment throughout training, we measure \emph{cosine similarity} $\text{CosSim}(C^*, \hat{C}) = \text{Tr}(C^{*\top} \hat{C}) / (\|C^*\|_F \|\hat{C}\|_F)$ for directional alignment and \emph{relative Frobenius error} $\text{RelErr} = \|C^* - \hat{C}\|_F / \|C^*\|_F$ for magnitude error \cite{kunstner2019limitations}.
+
+Fig.~\ref{fig:spectrum_alignment} confirms that Synthetic DP-KFC recovers the eigenvalue decay of representative MLP, CNN and Attention layers, matching public data baselines. The alignment extends to attention-based architectures, where the QKV projection layer, despite having millions of eigenvalues, exhibits the same architecture-determined spectral decay. In Appendix~\ref{app:spectral_analysis} we provide the complete layer-wise spectral analysis and validate these findings further using Stochastic Lanczos Quadrature \cite{DBLP:journals/corr/abs-1901-10159} to estimate the full Hessian density.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Figures/spectrum_ablation_simple_full.pdf} % 
+     \caption{\textbf{Eigenspectrum Alignment.} Sorted eigenvalues of KFAC factors
+      for distinct layers: (a) MLP fully-connected, (b) CNN convolutional, and
+      (c) Attention QKV projection. Domain-matched public data (FashionMNIST, blue) aligns closely with the private oracle (black, dashed). Domain-mismatched data (CIFAR-10, purple) shows larger deviation. Synthetic DP-KFC (orange) captures the eigenvalue decay across architecture types.}
+    \label{fig:spectrum_alignment}
+\end{figure}
+
+Beyond static alignment, the synthetic estimator tracks the private eigenspectrum throughout training, not merely at initialization. Fig.~\ref{fig:kfac_cov_track} shows that in early layers, Synthetic DP-KFC maintains cosine similarity above 0.8 with the oracle, comparable to matched public data, while mismatched data stagnates around 0.6. Scale error of Synthetic DP-KFC remains lower than public proxies throughout. In deeper layers, directional alignment degrades across all methods ($<0.6$), indicating eigenvector directions depend on private labels. However, Synthetic DP-KFC achieves superior scale stability with lower error magnitude than public proxies. Full per-layer metrics in Appendix~\ref{app:cov_tracking}. The same directional ranking extends to attention-based architectures (Appendix~\ref{app:cov_tracking_vit}), though the
+  scale advantage of synthetic noise is reduced by LayerNorm, which bounds activation magnitudes across sources.
+
+% Thus, DP-KFC achieves high directional alignment and low norm error using only random noise, decoupling preconditioning from the data distributio.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/cov_tracking_synthetic_pink_eps1.0_summary.pdf}
+    \caption{\textbf{Similarity of Public and Synthetic Preconditioning with Oracle.} (a) Cosine similarity (Direction) and (b) Relative Frobenius norm (Scale) comparing FashionMNIST (Blue), CIFAR-10 (Purple), and Synthetic DP-KFC (Orange) against the private oracle. Top row: First convolutional layer. Bottom row: Deepest layer where directional alignment is low and not properly recovered by any preconditioning method.}
+    \label{fig:kfac_cov_track}
+\end{figure}
+
+\subsection{Benchmark Performance across Modalities}
+\label{subsec:main_benchmarks}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/vision_combined_results.pdf}
+    \caption{\textbf{Privacy-Utility Trade-off.} Test accuracy comparison across varying privacy budgets $\epsilon$. We compare DP-SGD (Blue; DP-Adam for CrossViT) against Public DP-KFC (Purple) and Synthetic DP-KFC (Red). Our synthetic method consistently matches or exceeds public-data baselines without incurring distribution shift costs.}
+    \label{fig:dp_methods_dataset}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/nlp_combined_results.pdf}
+    \caption{\textbf{NLP Tasks: Privacy-Utility Trade-off.} Test accuracy vs.\ privacy budget $\epsilon$ on (a) StackOverflow next-word prediction and (b) IMDB sentiment classification. Baseline is DP-Adam for BERT, DP-SGD for logistic regression. Our synthetic DP-KFC (orange) closely matches public-data performance without requiring public datasets.}
+    \label{fig:dp_methods_dataset_stackov}
+    
+\end{figure}
+
+We compare Synthetic DP-KFC against two baselines: (i) standard DP-SGD, representing first-order private optimization, and (ii) Public DP-KFC, which constructs preconditioners from public proxy data. Results span four tasks across vision (MNIST, CIFAR-100) and language (StackOverflow, IMDB) modalities, with privacy budgets $\epsilon \in [0.5, 10.0]$, as shown in Figs.~\ref{fig:dp_methods_dataset}--\ref{fig:dp_methods_dataset_stackov}. Full experimental details and per-$\epsilon$ results are in Appendix~\ref{app:table_centralized}.
+
+\textbf{Computer Vision.} Both Public and Synthetic DP-KFC consistently outperform DP-SGD across privacy regimes. On MNIST at $\epsilon=1.0$, Synthetic DP-KFC achieves 94.2\% versus 91.7\% for DP-SGD (+2.5\%). On CIFAR-100 with CrossViT, Synthetic DP-KFC matches Public DP-KFC across all $\epsilon$ values, demonstrating that architecture alone can be used to estimate the preconditioning matrix even for attention-based models without public data.
+
+\textbf{Natural Language.} Fig.~\ref{fig:dp_methods_dataset_stackov} confirms the trend extends to NLP. On StackOverflow with BERT, Synthetic DP-KFC reaches 91.8\% at $\epsilon=1.0$ compared to 89.5\% for DP-SGD, despite using semantically meaningless token probes. On IMDB with logistic regression, both Public and Synthetic DP-KFC achieve 85.8\% versus 83.1\% for DP-SGD at $\epsilon=2.8$.
+
+
+\subsection{Transfer and Domain Mismatch}
+\label{subsec:hierarchy}
+
+To quantify robustness against distribution shift, we evaluate across two transfer regimes representing different levels of domain mismatch between the proxy (source) and the private task (target). We compare against AdaDPS \cite{Li2022}, which constructs adaptive preconditioners for DP optimization. We include two variants: \emph{(i)} AdaDPS (Public) using MNIST as proxy, and \emph{(ii)} AdaDPS (Pink) replacing public data with synthetic pink noise to isolate the preconditioning mechanism from the data source.
+
+\emph{(i) Ideal Alignment} (Fashion $\leftarrow$ MNIST): Source and target share high structural similarity, centered objects, black backgrounds, and equal resolution. Both datasets contain single-channel grayscale images with similar spatial statistics, making MNIST an informative geometric proxy for FashionMNIST. 
+
+\emph{(ii) Texture Disjoint} (Path $\leftarrow$ MNIST): A challenging scenario where object-centric priors (handwritten digits) conflict with texture-centric medical histology tasks. PathMNIST contains colorectal cancer tissue patches with fundamentally different visual statistics, evaluating susceptibility to \emph{Negative Transfer}.
+
+Table~\ref{tab:dynamic_summary} summarizes the results across these scenarios. The \emph{Oracle (Private)} baseline computes the KFAC preconditioner directly from private data, representing the upper bound achievable with unlimited privacy budget for curvature estimation.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Transfer Robustness.} Test accuracy (\%) under domain mismatch at $\epsilon=1.0$. Oracle uses private data.}
+\label{tab:dynamic_summary}
+\renewcommand{\arraystretch}{1.2}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Method} & \textbf{Ideal Align.} & \textbf{Texture Disj.} \\
+& (Fashion$\leftarrow$MNIST) & (Path$\leftarrow$MNIST) \\
+\midrule
+Oracle (Private) & 88.3{\scriptsize$\pm$0.2} & 78.4{\scriptsize$\pm$1.7} \\
+\midrule
+DP-SGD & 83.5{\scriptsize$\pm$0.7} & 68.5{\scriptsize$\pm$2.3} \\
+AdaDPS (Public) & 84.7{\scriptsize$\pm$0.3} & 70.5{\scriptsize$\pm$2.0} \\
+AdaDPS (Pink) & 84.2{\scriptsize$\pm$0.5} & 71.2{\scriptsize$\pm$1.9} \\
+Public DP-KFC & 87.6{\scriptsize$\pm$0.2} & 73.4{\scriptsize$\pm$1.3} \\
+\textbf{Synthetic DP-KFC} & \textbf{87.8}{\scriptsize$\pm$0.2} & \textbf{78.2}{\scriptsize$\pm$1.9} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Negative Transfer.} Synthetic DP-KFC emerges as a robust geometric prior across both transfer regimes. Under \textit{Ideal Alignment}, it nearly matches the Private Oracle ($87.8\%$ vs $88.3\%$), outperforming both DP-SGD ($83.5\%$) and AdaDPS variants ($84.7\%$, $84.2\%$). More importantly, under \textit{Texture Disjoint}, where the MNIST proxy's object-centric statistics conflict with PathMNIST's texture patterns, Synthetic DP-KFC achieves $78.2\%$, matching the Oracle while the Public DP-KFC degrades to $73.4\%$. This $4.8\%$ gap demonstrates that synthetic noise captures task-agnostic geometric structure (e.g., spatial correlations, layer-wise scaling) without inheriting domain-specific biases that cause negative transfer. The consistent performance suggests synthetic probing acts as implicit regularization, capturing global architectural properties while avoiding high-variance batch-specific estimates (Appendix~\ref{app:cov_tracking}).
+
+
+\section{Conclusion}
+This work challenges the assumption that estimating the Fisher Information Matrix requires semantic data. By demonstrating that gradient \textit{scale} is an intrinsic architectural property while eigenvector \textit{directions} are data-dependent, we enable private optimization without public data or privacy budget consumption. DP-KFC enables privacy-preserving model development in specialized domains (e.g., medical imaging) lacking suitable public proxies. The architectural prior acts as an implicit regularizer, preventing overfitting to batch-specific geometry, which can further inform into future methods on generalization-memorization tradeoff. In federated learning, clients can independently generate local preconditioners, eliminating costly communication of second-order statistics while maintaining user-level privacy guarantees. 
+
+Like all KFAC-based methods \cite{dangel2025kroneckerfactoredapproximatecurvaturekfac}, our approach incurs computational overhead from periodic eigendecomposition and per-layer gradient preconditioning, though this is typically offset by faster convergence. Directional alignment degrades in deep layers, a limitation for very deep networks. Future work includes reducing computational costs via low-rank approximations and developing task-agnostic synthetic generation strategies.  Moreover, the \textit{scale-the-privatize} paradigm combined with architectural probes to precondition gradients provides a path for privatizing other modern, high-performance optimizers such as Muon and Shampoo \cite{jordan2024muon, gupta2018shampoopreconditionedstochastictensor}.
+
+\clearpage 
+
+\section*{Impact Statement}
+
+This work aims to advance privacy-preserving machine learning by enabling second order optimization methods under differential privacy without requiring auxiliary public data. Removing the dependence on public proxies, our method expands the applicability of private deep learning to sensitive domains, such as medical imaging and financial data, where suitable public data is unavailable or itself contains private information, or labels are time consuming. We do not foresee specific negative societal consequences beyond those inherent to advances in machine learning broadly. The privacy guarantees provided by differential privacy remain formally intact under our method, thus pushing the privacy-utility frontier.
+
+
+\clearpage
+
+\bibliographystyle{icml2026}
+\bibliography{sample-base}
+
+
+%%
+\clearpage
+
+
+\onecolumn
+
+
+\appendix
+
+\section{Convergence Analysis}
+\label{app:convergence_proof}
+\index{Convergence Analysis}
+In this section, we provide the complete proof for the convergence of DP-KFC to a stationary point for non-convex objectives. We begin by defining the notation and probabilistic setup used throughout the analysis.
+
+\subsection{Notation and Problem Setup}
+\index{Notation}
+
+We consider the optimization of a differentiable, non-convex loss function $\mathcal{L}(\theta): \mathbb{R}^d \to \mathbb{R}$. We denote the optimal loss as $\mathcal{L}^* = \inf_\theta \mathcal{L}(\theta) > -\infty$.
+
+At each iteration $t$, the algorithm performs the following update:
+\begin{equation}
+    \theta_{t+1} = \theta_t - \eta_t \left( P_t \cdot \bar{g}_t + \xi_t \right)
+\end{equation}
+
+Table \ref{tab:notation} summarizes the random variables and constants involved in this process.
+
+\begin{table}[ht]
+    \centering
+    \caption{Summary of Notation for Convergence Analysis}
+    \label{tab:notation}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{c|l|l}
+        \hline
+        \textbf{Symbol} & \textbf{Description} & \textbf{Properties / Assumptions} \\
+        \hline
+        $\theta_t$ & Model parameters at step $t$ & $\theta_t \in \mathbb{R}^d$ \\
+        $\mathcal{L}(\theta)$ & Loss function & $L$-smooth (Assumption \ref{ass:smoothness}) \\
+        $\bar{g}_t$ & Stochastic gradient estimate & Unbiased: $\mathbb{E}[\bar{g}_t] = \nabla \mathcal{L}(\theta_t)$ \\
+         & & Bounded Variance: $\mathbb{E}[\|\bar{g}_t - \nabla \mathcal{L}(\theta_t)\|^2] \le \sigma_{sgd}^2$ \\
+        $P_t$ & Preconditioner Matrix & Symmetric Positive Definite ($S_{++}^d$) \\
+         & & Spectrum bounded: $\lambda_{min} I \preceq P_t \preceq \lambda_{max} I$ \\
+        $\xi_t$ & Privacy Noise Vector & $\xi_t \sim \mathcal{N}(0, \sigma^2 C^2 I)$ \\
+         & & $\mathbb{E}[\xi_t] = 0, \quad \mathbb{E}[\|\xi_t\|^2] = d \sigma^2 C^2$ \\
+        $\eta_t$ & Learning Rate & Decaying sequence, e.g., $\eta_t = 1/\sqrt{T}$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Formal Assumptions}
+\index{Formal Assumptions}
+
+We restate the assumptions required for the analysis.
+
+\begin{assumption}[$L$-Smoothness]
+\label{ass:smoothness}
+The objective function $\mathcal{L}$ is $L$-smooth, meaning its gradient is Lipschitz continuous. For all $x, y \in \mathbb{R}^d$:
+\begin{equation}
+    \|\nabla \mathcal{L}(x) - \nabla \mathcal{L}(y)\| \le L \|x - y\|
+\end{equation}
+This implies the standard quadratic upper bound (Descent Lemma):
+\begin{equation}
+    \mathcal{L}(y) \le \mathcal{L}(x) + \langle \nabla \mathcal{L}(x), y - x \rangle + \frac{L}{2} \|y - x\|^2
+\end{equation}
+\end{assumption}
+
+\begin{assumption}[Independence of Noise]
+\label{ass:independence}
+The privacy noise $\xi_t$ is drawn independently at each step and is independent of the stochastic gradient estimate $\bar{g}_t$. The preconditioner $P_t$ is computed using side information (public data or synthetic noise) and is therefore statistically independent of the current private batch gradients $\bar{g}_t$ and privacy noise $\xi_t$.
+\end{assumption}
+
+\subsection{Derivation}
+\index{Derivation}
+
+
+We proceed by analyzing the expected decrease in loss for a single iteration.
+
+\begin{lemma}[One-Step Descent Bound]
+\label{lemma:onestep}
+Under Assumptions \ref{ass:smoothness} and \ref{ass:independence}, the expected loss at iteration $t+1$, conditioned on the parameters $\theta_t$, satisfies:
+\begin{equation}
+    \mathbb{E}[\mathcal{L}(\theta_{t+1}) \mid \theta_t] \le \mathcal{L}(\theta_t) - \eta_t \lambda_{min} \|\nabla \mathcal{L}(\theta_t)\|^2 + \frac{L \eta_t^2}{2} \lambda_{max}^2 \left( \|\nabla \mathcal{L}(\theta_t)\|^2 + \sigma_{sgd}^2 \right) + \frac{L \eta_t^2}{2} d \sigma^2 C^2
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Let the update step be $\Delta_t = -\eta_t (P_t \bar{g}_t + \xi_t)$. Applying the $L$-smoothness inequality:
+\begin{equation}
+    \mathcal{L}(\theta_{t+1}) \le \mathcal{L}(\theta_t) + \langle \nabla \mathcal{L}(\theta_t), \Delta_t \rangle + \frac{L}{2} \|\Delta_t\|^2
+\end{equation}
+We take the expectation with respect to the stochasticity at step $t$ ($\bar{g}_t$ and $\xi_t$).
+
+\textbf{1. Linear Term (Descent):}
+\begin{align}
+    \mathbb{E}[\langle \nabla \mathcal{L}(\theta_t), \Delta_t \rangle] &= \mathbb{E}\left[ \langle \nabla \mathcal{L}(\theta_t), -\eta_t (P_t \bar{g}_t + \xi_t) \rangle \right] \\
+    &= -\eta_t \langle \nabla \mathcal{L}(\theta_t), P_t \mathbb{E}[\bar{g}_t] \rangle - \eta_t \langle \nabla \mathcal{L}(\theta_t), \mathbb{E}[\xi_t] \rangle \\
+    &= -\eta_t \nabla \mathcal{L}(\theta_t)^\top P_t \nabla \mathcal{L}(\theta_t) \quad \text{(Since } \mathbb{E}[\bar{g}_t] = \nabla \mathcal{L}, \mathbb{E}[\xi_t] = 0 \text{)}
+\end{align}
+
+We use the spectral property of positive definite matrices (Rayleigh quotient): for any vector $v$, $v^\top P_t v \ge \lambda_{min}(P_t) \|v\|^2$. Multiplying by $-\eta_t < 0$ reverses the inequality:
+\begin{equation}
+    -\eta_t \nabla \mathcal{L}(\theta_t)^\top P_t \nabla \mathcal{L}(\theta_t) \le -\eta_t \lambda_{min} \|\nabla \mathcal{L}(\theta_t)\|^2
+\end{equation}
+This term guarantees that the preconditioner provides a valid descent direction at least proportional to its smallest eigenvalue.
+
+\textbf{2. Quadratic Term (Penalty):}
+We expand the squared norm of the update $\Delta_t = -\eta_t (P_t \bar{g}_t + \xi_t)$:
+\begin{align}
+    \mathbb{E}[\|\Delta_t\|^2] &= \eta_t^2 \mathbb{E}\left[ \|P_t \bar{g}_t + \xi_t\|^2 \right] \\
+    &= \eta_t^2 \left( \mathbb{E}[\|P_t \bar{g}_t\|^2] + \mathbb{E}[\|\xi_t\|^2] + 2\mathbb{E}[\langle P_t \bar{g}_t, \xi_t \rangle] \right)
+\end{align}
+We analyze the cross-term $\mathbb{E}[\langle P_t \bar{g}_t, \xi_t \rangle]$. By Assumption \ref{ass:independence}, the privacy noise $\xi_t$ is statistically independent of the gradient estimate $\bar{g}_t$ and the fixed preconditioner $P_t$. Therefore, the expectation factorizes:
+\begin{equation}
+    \mathbb{E}[\langle P_t \bar{g}_t, \xi_t \rangle] = \langle \mathbb{E}[P_t \bar{g}_t], \mathbb{E}[\xi_t] \rangle = \langle \mathbb{E}[P_t \bar{g}_t], \mathbf{0} \rangle = 0
+\end{equation}
+With the cross-term eliminated, we bound the remaining terms.
+For the gradient term, we use the spectral upper bound $\|P_t\|_2 \le \lambda_{max}$ and the variance decomposition $\mathbb{E}[X^2] = (\mathbb{E}X)^2 + \text{Var}(X)$:
+\begin{align}
+    \mathbb{E}[\|P_t \bar{g}_t\|^2] &\le \lambda_{max}^2 \mathbb{E}[\|\bar{g}_t\|^2] \\
+    &= \lambda_{max}^2 \left( \|\mathbb{E}[\bar{g}_t]\|^2 + \mathbb{E}[\|\bar{g}_t - \mathbb{E}[\bar{g}_t]\|^2] \right) \\
+    &\le \lambda_{max}^2 \left( \|\nabla \mathcal{L}(\theta_t)\|^2 + \sigma_{sgd}^2 \right)
+\end{align}
+For the noise term, using the definition of the multivariate Gaussian variance:
+\begin{equation}
+    \mathbb{E}[\|\xi_t\|^2] = \text{Tr}(\text{Cov}(\xi_t)) + \|\mathbb{E}[\xi_t]\|^2 = \text{Tr}(\sigma^2 C^2 I_d) = d \sigma^2 C^2
+\end{equation}
+Substituting these back into the expansion yields the final quadratic bound.
+
+\end{proof}
+
+\subsection{Proof of Theorem \ref{thm:convergence}}
+
+We proceed by summing the result of Lemma \ref{lemma:onestep} over iterations $t = 0, \dots, T-1$. Let $\eta_t = \eta$ be constant for simplicity. Rearranging Lemma \ref{lemma:onestep} to isolate the gradient norm:
+\begin{equation}
+    \eta \lambda_{min} \|\nabla \mathcal{L}_t\|^2 \le \mathcal{L}(\theta_t) - \mathbb{E}[\mathcal{L}(\theta_{t+1})] + \frac{L \eta^2}{2} M
+\end{equation}
+where $M = \lambda_{max}^2 (\sigma_{sgd}^2 + \|\nabla \mathcal{L}_t\|^2) + d \sigma^2 C^2$ is the noise/penalty constant.
+
+Summing over $t$:
+\begin{equation}
+    \eta \lambda_{min} \sum_{t=0}^{T-1} \mathbb{E}[\|\nabla \mathcal{L}_t\|^2] \le \sum_{t=0}^{T-1} \left( \mathcal{L}(\theta_t) - \mathbb{E}[\mathcal{L}(\theta_{t+1})] \right) + \sum_{t=0}^{T-1} \frac{L \eta^2}{2} M
+\end{equation}
+
+The first term on the RHS is a \textbf{telescoping sum}. The intermediate terms cancel out:
+\begin{equation}
+    \sum_{t=0}^{T-1} (\mathcal{L}_t - \mathcal{L}_{t+1}) = \mathcal{L}_0 - \mathcal{L}_T \le \mathcal{L}_0 - \mathcal{L}^*
+\end{equation}
+where $\mathcal{L}^*$ is the global minimum. Substituting this back:
+\begin{equation}
+    \eta \lambda_{min} \sum_{t=0}^{T-1} \mathbb{E}[\|\nabla \mathcal{L}_t\|^2] \le (\mathcal{L}_0 - \mathcal{L}^*) + T \frac{L \eta^2}{2} M
+\end{equation}
+
+Dividing both sides by $T \eta \lambda_{min}$, we obtain a bound on the \textit{average} squared gradient norm:
+\begin{equation}
+    \frac{1}{T} \sum_{t=0}^{T-1} \mathbb{E}[\|\nabla \mathcal{L}_t\|^2] \le \frac{\mathcal{L}_0 - \mathcal{L}^*}{T \eta \lambda_{min}} + \frac{L \eta M}{2 \lambda_{min}}
+\end{equation}
+Since the minimum value in a sequence is always lower than or equal to the average ($\min_t x_t \le \frac{1}{T}\sum x_t$), we have:
+\begin{equation}
+    \min_{t \in [0, T-1]} \mathbb{E}[\|\nabla \mathcal{L}_t\|^2] \le \underbrace{\frac{\mathcal{L}_0 - \mathcal{L}^*}{T \eta \lambda_{min}}}_{\text{(A) Optimization Error}} + \underbrace{\frac{L \eta M}{2 \lambda_{min}}}_{\text{(B) Noise Variance}}
+\end{equation}
+To minimize the RHS, we must balance term (A), which decreases with $\eta$, and term (B), which increases with $\eta$. We choose the decaying step size schedule $\eta = \frac{1}{\sqrt{T}}$. Substituting this into the bound:
+
+\textbf{1. Optimization Term (A):}
+\begin{equation}
+    \frac{\mathcal{L}_0 - \mathcal{L}^*}{T (1/\sqrt{T}) \lambda_{min}} = \frac{\mathcal{L}_0 - \mathcal{L}^*}{\sqrt{T} \lambda_{min}} = \mathcal{O}\left(\frac{1}{\sqrt{T}}\right)
+\end{equation}
+
+\textbf{2. Noise Variance Term (B):}
+\begin{equation}
+    \frac{L (1/\sqrt{T}) M}{2 \lambda_{min}} = \frac{L M}{2 \lambda_{min} \sqrt{T}} = \mathcal{O}\left(\frac{1}{\sqrt{T}}\right)
+\end{equation}
+
+Since both terms decay at the same rate, the total convergence rate is $\mathcal{O}(1/\sqrt{T})$. This confirms that the algorithm converges to a stationary point despite the injected privacy noise.
+\qed
+
+% \section{Signal Propagation Dynamics}
+% \label{app:signal_prop}
+% \index{Signal Propagation Dynamics}
+% Our method leverages the deterministic nature of signal propagation in deep networks to estimate the preconditioner matrix without data. We rely on the standard MFT formulation \cite{yang2017mean}, which models the pre-activations of a layer $l$ as Gaussian random variables in the infinite-width limit.
+
+% \begin{definition}[Variance Recurrence Map]
+% Consider a fully connected layer with weight variance $\sigma_w^2$, bias variance $\sigma_b^2$, and non-linearity $\phi$. Let $q^{l-1}$ be the variance of the input signal. The variance of the pre-activations at the next layer, $q^l$, is given by the deterministic map $\mathcal{V}$:
+% \begin{equation}
+%     q^l = \mathcal{V}(q^{l-1}) = \sigma_w^2 \int_{-\infty}^{\infty} \phi\left(\sqrt{q^{l-1}} z\right)^2 \mathcal{D}z + \sigma_b^2
+% \end{equation}
+% where $\mathcal{D}z = \frac{1}{\sqrt{2\pi}}e^{-z^2/2}dz$ is the standard Gaussian measure.
+% \end{definition}
+
+% This integral creates a decoupling property: the scale of activations at depth $l$ depends only on the magnitude of the input $q^0$ and the network depth, not on the specific semantic content of the input data. Moreover, a similar recurrence map $\tilde{\mathcal{V}}$ governs the backward propagation of gradient variance $\tilde{q}^l = \mathbb{E}[\|\nabla_{pre} \mathcal{L}\|^2]$. As shown by \citet{karakida2019universal}, the trace of the Fisher Information Matrix block for layer $l$ is proportional to the product of these variances:
+% \begin{equation}
+%     \text{Tr}(F_l) \propto d \cdot q^{l-1} \cdot \tilde{q}^l
+% \end{equation}
+% This relationship implies that any isotropic input signal (such as Gaussian noise) that induces the correct forward variance $q^{l-1}$ allows us to recover the spectral scale of the curvature matrix $F_l$.
+
+
+\section{Theoretical Preconditioned Geometry}
+\label{app:proof_isotropy}
+\index{Proofs!Isotropy}
+
+In this section, we rigorously establish that the preconditioning transformation derived from the KFAC factors successfully standardizes the geometry of the gradient distribution. Our goal is to prove that if the preconditioner accurately captures the second-moment matrix of the gradients, the transformed gradients become isotropic.
+
+\begin{proposition}[Isotropy of Preconditioned Gradients]
+\label{prop:isotropy}
+Let $g \in \mathbb{R}^d$ be a stochastic gradient vector with second moment matrix $F = \mathbb{E}[g g^\top]$. Consider the preconditioning transformation $P = F^{-1/2}$. The transformed gradient $\tilde{g} = P g$ satisfies the isotropy condition $\mathbb{E}[\tilde{g} \tilde{g}^\top] = I_d$, and its expected squared norm is $\mathbb{E}[\|\tilde{g}\|^2] = d$.
+\end{proposition}
+
+\begin{proof}
+We first derive the covariance structure of the transformed gradient. By definition of the covariance matrix and substituting the linear transformation $\tilde{g} = F^{-1/2} g$, we have:
+\begin{equation}
+    \text{Cov}(\tilde{g}) = \mathbb{E}[\tilde{g} \tilde{g}^\top] = \mathbb{E}\left[ (F^{-1/2} g) (F^{-1/2} g)^\top \right].
+\end{equation}
+Using the property that the matrix transpose distributes over the product in reverse order, $(F^{-1/2} g)^\top = g^\top (F^{-1/2})^\top$. Since $F$ is a symmetric positive semi-definite matrix, its inverse square root $F^{-1/2}$ is also symmetric, implying $(F^{-1/2})^\top = F^{-1/2}$. Since $F^{-1/2}$ is a constant matrix with respect to the expectation over the data distribution, we can extract it from the expectation operator:
+\begin{equation}
+    \mathbb{E}[\tilde{g} \tilde{g}^\top] = F^{-1/2} \mathbb{E}[g g^\top] F^{-1/2}.
+\end{equation}
+Substituting the definition of the second moment matrix $F = \mathbb{E}[g g^\top]$ into the equation yields:
+\begin{equation}
+    \text{Cov}(\tilde{g}) = F^{-1/2} F F^{-1/2} = F^{-1/2} (F^{1/2} F^{1/2}) F^{-1/2} = I_d.
+\end{equation}
+This confirms that the covariance of the preconditioned gradient is the identity matrix $I_d$, satisfying the definition of isotropy.
+
+We now establish the scaling of the gradient norm. The expected squared $L_2$ norm is the trace of the second moment matrix. Using the linearity of the trace operator:
+\begin{equation}
+    \mathbb{E}[\|\tilde{g}\|^2] = \mathbb{E}[\text{Tr}(\tilde{g} \tilde{g}^\top)] = \text{Tr}(\mathbb{E}[\tilde{g} \tilde{g}^\top]).
+\end{equation}
+Substituting the result $\mathbb{E}[\tilde{g} \tilde{g}^\top] = I_d$ derived above:
+\begin{equation}
+    \mathbb{E}[\|\tilde{g}\|^2] = \text{Tr}(I_d) = d.
+\end{equation}
+Thus, preconditioning standardizes the gradient distribution such that the variance is uniformly distributed across all $d$ dimensions.
+\end{proof}
+
+\begin{remark}[Choice of Preconditioning Transformation]
+It is important to distinguish our gradient preconditioning ($P=F^{-1/2}$) from the full Natural Gradient update ($P=F^{-1}$). If we were to use the full inverse, the covariance of the transformed gradient would be:
+\begin{equation}
+    \text{Cov}(F^{-1}g) = F^{-1} F F^{-1} = F^{-1}.
+\end{equation}
+This would invert the geometry rather than normalizing it to the identity sphere. By using the inverse square root $F^{-1/2}$, we ensure the preconditioned gradients are isotropic, so the spherical privacy noise matches the geometry of the gradients.
+\end{remark}
+
+\clearpage
+
+\section{Privacy Guarantees of Data-Free Preconditioning}
+\label{app:privacy_proof}
+\index{Proofs!Privacy}
+
+A central claim of our work is that the introduction of the preconditioner $P_t$ does not degrade the privacy guarantees of the standard Gaussian mechanism. This relies on the independence of $P_t$ from the private dataset $\mathcal{D}$. Here, we formally prove that our mechanism satisfies differential privacy by demonstrating that the sensitivity of the update step remains bounded by the clipping norm $C$, regardless of the magnitude of the preconditioner.
+
+\begin{lemma}[Data-Independence of Synthetic Preconditioner]
+\label{lemma:data_independence}
+Let $\mathcal{A}$ be the model architecture and $\mathcal{S} \sim \mathcal{D}_{noise}$ be a batch of synthetic noise drawn from a public distribution. The preconditioner computation map $\Psi(\mathcal{A}, \mathcal{S}) \to P_t$ satisfies Differential Privacy with $\epsilon=0$ with respect to the private dataset $\mathcal{D}$.
+\end{lemma}
+
+\begin{proof}
+The function $\Psi$ depends exclusively on the model architecture definition $\mathcal{A}$ (which is public knowledge) and the synthetic batch $\mathcal{S}$ (which is generated computationally using a fixed random seed or public entropy). The private dataset $\mathcal{D}$ is not an input to $\Psi$. Therefore, for any two adjacent private datasets $\mathcal{D}, \mathcal{D}'$, the preconditioner remains identical: $P_t(\mathcal{D}) = P_t(\mathcal{D}')$. Consequently, the generation of $P_t$ incurs zero privacy loss.
+\end{proof}
+
+\begin{theorem}[Privacy of Preconditioned Updates]
+\label{thm:privacy_mechanism}
+Let $P_t$ be a fixed linear operator that is batch-independent (computed from synthetic noise and past privatized model states per Lemma \ref{lemma:data_independence}). The preconditioned update mechanism defined by:
+\begin{equation}
+    \mathcal{M}(\mathcal{B}) = \sum_{x_i \in \mathcal{B}} \text{Clip}_C(P_t \nabla \ell(x_i)) + \mathcal{N}(0, \sigma^2 C^2 I)
+\end{equation}
+satisfies the same $(\epsilon, \delta)$-Differential Privacy guarantees as the standard Gaussian mechanism with noise scale $\sigma$ and sensitivity $C$. Privacy accounting is performed on this noisy sum; subsequent averaging scales both signal and noise uniformly without affecting the privacy guarantee.
+\end{theorem}
+
+\begin{proof}
+The privacy guarantee of the Gaussian mechanism is determined entirely by the $L_2$-sensitivity of the query function it obfuscates. We define the query function $q$ over a batch $\mathcal{B}$ as the sum of clipped, preconditioned gradients:
+\begin{equation}
+    q(\mathcal{B}) = \sum_{x_i \in \mathcal{B}} \text{Clip}_C(P_t \nabla \ell(x_i)).
+\end{equation}
+We analyze the $L_2$-sensitivity $\Delta_2(q)$, which measures the maximum change in the query output resulting from replacing a single sample $x_k$ with $x'_k$ in the batch. Let $\tilde{g}_k = P_t \nabla \ell(x_k)$ be the preconditioned gradient. The sensitivity is given by:
+\begin{equation}
+    \Delta_2(q) = \max_{\mathcal{B}, \mathcal{B}'} \| q(\mathcal{B}) - q(\mathcal{B}') \|_2 = \max_{x_k, x'_k} \| \text{Clip}_C(\tilde{g}_k) - \text{Clip}_C(\tilde{g}'_k) \|_2.
+\end{equation}
+The clipping operator $\text{Clip}_C(v) = v \cdot \min(1, C/\|v\|_2)$ ensures that for any input vector $v$, the magnitude of the output is strictly bounded such that $\|\text{Clip}_C(v)\|_2 \le C$. By the triangle inequality, the maximum difference between two vectors, each with a norm bounded by $C$, is $2C$ (in the worst case of opposite directions). However, in the context of DP-SGD, sensitivity is defined regarding the \textit{addition} or \textit{removal} of a single record. For the replacement definition standard in batch-level accounting, the sensitivity is bounded by the maximum contribution of a single record:
+\begin{equation}
+    \sup_{x} \| \text{Clip}_C(P_t \nabla \ell(x)) \|_2 \le C.
+\end{equation}
+The magnitude of the preconditioner $P_t$ effectively scales the raw gradient $\nabla \ell(x_k)$, potentially resulting in a vector $\tilde{g}_k$ with a very large norm. However, the clipping operation is applied \textit{after} the matrix multiplication. The projection $\text{Clip}_C(\cdot)$ projects any vector, regardless of how large $\|P_t \nabla \ell\|_2$ becomes, onto the $L_2$ ball of radius $C$. 
+
+Therefore, the global sensitivity is bounded by $\Delta_2(q) \le C$. Since the noise added is $\mathcal{N}(0, \sigma^2 C^2 I)$, the signal-to-noise ratio is governed strictly by $\sigma$, preserving the standard privacy analysis.
+\end{proof}
+
+\clearpage
+
+\section{Computational Complexity and Resource Efficiency}
+\label{app:complexity}
+\index{Computational Complexity}
+
+We analyze the computational trade-offs of DP-KFC. We distinguish between the \textit{arithmetic complexity} (FLOPs per step) and the \textit{sample complexity} (steps to convergence), arguing that in privacy-constrained settings, the latter is the dominant factor.
+
+\subsection{Arithmetic Complexity Analysis}
+\index{Arithmetic Complexity}
+
+Let a neural network layer $l$ have input dimension $d_{in}$ and output dimension $d_{out}$. The parameter matrix is $W \in \mathbb{R}^{d_{out} \times d_{in}}$.
+
+\textbf{Standard DP-SGD Cost.}
+The dominant cost in standard DP-SGD is the per-sample gradient computation required for clipping. For a batch size $B$, this involves computing the outer product of error signals $\delta \in \mathbb{R}^{d_{out}}$ and activations $a \in \mathbb{R}^{d_{in}}$:
+\begin{equation}
+    g^{(i)} = \delta^{(i)} (a^{(i)})^\top.
+\end{equation}
+The cost is $\mathcal{O}(B \cdot d_{in} d_{out})$ per layer.
+
+\textbf{DP-KFC Cost (Per-Step).}
+Our method applies the preconditioning transformation $\tilde{g} = U_G g U_A^\top$. Naively implementing this as matrix-matrix multiplications would be prohibitively expensive ($\mathcal{O}(d_{out}^2 d_{in} + d_{in}^2 d_{out})$).
+However, exploiting the rank-1 structure of the gradient $g^{(i)}$, we apply the transformation directly to the activation and error vectors:
+\begin{equation}
+    \tilde{g}^{(i)} = (U_G \delta^{(i)}) (U_A a^{(i)})^\top.
+\end{equation}
+This reduces the operation to two matrix-vector products per sample. The additional cost is $\mathcal{O}(B(d_{in}^2 + d_{out}^2))$.
+Since $d_{in}^2 + d_{out}^2$ is typically comparable to $d_{in} d_{out}$ (the cost of the backward pass), the total FLOPs per iteration increase by a factor of $2\times$ to $3\times$ compared to DP-SGD, preserving the linear scaling with batch size $B$.
+
+\textbf{Preconditioner Update Cost (Amortized).}
+The eigendecomposition of the covariance matrices requires $\mathcal{O}(d_{in}^3 + d_{out}^3)$ operations. Since this is performed only every $T_{freq}$ steps using synthetic data, the amortized complexity is negligible for standard frequencies (e.g., $T_{freq}=50$):
+\begin{equation}
+    \mathcal{C}_{amortized} = \frac{1}{T_{freq}} \sum_{l=1}^L \left[ \underbrace{M(d_{in}^2 + d_{out}^2)}_{\text{Covariance Est.}} + \underbrace{(d_{in}^3 + d_{out}^3)}_{\text{Eigen-Decomp.}} \right] \approx 0.
+\end{equation}
+
+\subsection{The Privacy-Compute Trade-off}
+\label{subsec:privacy_wall}
+\index{Privacy-Compute Trade-off}
+
+Critiques of second-order methods often focus on wall-clock time. We argue that this metric is ill-posed for Differential Privacy, where the optimization horizon is bounded by the privacy budget $\epsilon$, not computational resources.
+
+\textbf{The Privacy Wall Hypothesis.}
+In non-private learning, one can trade time for accuracy: given infinite compute $T \to \infty$, the error approaches zero. In private learning, the noise scale $\sigma$ required for a fixed $\epsilon$ grows with $\sqrt{T}$ (using RDP accounting). This creates a \textit{Privacy Wall}:
+\begin{itemize}
+    \item \textbf{Non-Private Constraint:} $\min_{\theta} \mathcal{L}(\theta) \quad \text{s.t.} \quad \text{WallClockTime} \le T_{limit}$
+    \item \textbf{Private Constraint:} $\min_{\theta} \mathcal{L}(\theta) \quad \text{s.t.} \quad \text{PrivacyLoss}(T) \le \epsilon_{budget}$
+\end{itemize}
+Because the number of steps $T$ is strictly capped by $\epsilon_{budget}$, the only mechanism to improve final utility is to increase the \textit{information gain per gradient step}.
+As summarized in Table \ref{tab:complexity}, DP-KFC invests renewable resources (FLOPs) to conserve non-renewable resources (Privacy Budget). By improving the convergence rate per step $\kappa(\mathcal{L})$, we maximize the utility of the limited queries allowed before hitting the Privacy Wall.
+
+\begin{table}[h]
+    \centering
+    \caption{\textbf{Resource Consumption Analysis.} Comparison of costs for a fixed privacy budget $\epsilon$. $T_{conv}$ denotes steps to convergence. DP-KFC trades linear arithmetic overhead for a reduction in the required optimization steps.}
+    \label{tab:complexity}
+    \resizebox{0.7\columnwidth}{!}{
+    \begin{tabular}{l|ccc|c}
+        \toprule
+        \textbf{Method} & \textbf{FLOPs / Step} & \textbf{Memory} & \textbf{Steps to Conv.} & \textbf{Limiting Factor} \\
+        \midrule
+        DP-SGD & $1\times$ & $\mathcal{O}(d)$ & High ($T_{sgd}$) & Privacy Budget \\
+        Full KFAC & $\mathcal{O}(d^2)$ & $\mathcal{O}(d^2)$ & Low ($T_{kfac}$) & Compute / Memory \\
+        \textbf{DP-KFC (Ours)} & $\mathbf{2-3\times}$ & $\mathbf{\mathcal{O}(d)}$ & \textbf{Medium ($T_{small}$)} & \textbf{Compute} \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+\section{Synthetic Structural Probing}
+\label{app:probing}
+\index{Synthetic Structural Probing}
+
+In this section, we provide the implementation details for generating the synthetic structural probes used to estimate the KFAC factors $A$ and $G$ without private data.
+
+\subsection{Continuous Domain: Pink Noise Generation}
+\label{app:pink_noise}
+\index{Continuous Domain: Pink Noise Generation}
+
+For Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs) operating on continuous signals, we generate \textbf{Pink Noise} (also known as $1/f$ noise). Natural images exhibit a power-law spectral density $S(f) \propto 1/f^\alpha$, typically with $\alpha \in [1, 2]$. Probing with white noise ($\alpha=0$) creates a flat spectrum that disproportionately amplifies high-frequency spatial modes which are often dampened by the inductive bias of visual architectures (e.g., pooling layers, blur kernels).
+
+To construct a spatially correlated probe that matches the $1/f$ statistics of natural images, we operate in the frequency domain. Let $H, W$ be the spatial dimensions and $C$ be the number of channels.
+
+\textbf{Generation Procedure:}
+\begin{enumerate}
+    \item \textbf{White Noise Source:} We sample a standard Gaussian tensor in the frequency domain. To ensure the resulting spatial signal is real-valued, we sample complex values $Z \in \mathbb{C}^{H \times W}$ such that the Hermitian symmetry $Z(-u) = \overline{Z(u)}$ is preserved (or simply sample in the spatial domain and apply FFT).
+    \item \textbf{Spectral Modulation:} We compute the frequency grid $\mathbf{u} \in \mathbb{R}^{H \times W}$, where $\mathbf{u}_{ij}$ represents the Euclidean distance from the DC component (frequency zero). We scale the amplitude of the noise by the inverse frequency:
+    \begin{equation}
+        \tilde{Z}_{\mathbf{u}} = Z_{\mathbf{u}} \cdot \frac{1}{\|\mathbf{u}\|_2^{\alpha/2} + \epsilon}
+    \end{equation}
+    where $\epsilon$ prevents division by zero at the DC component.
+    \item \textbf{Inverse Transform:} We apply the Inverse Fast Fourier Transform (IFFT) to obtain the spatial signal $x_{\text{pink}} = \text{Re}(\mathcal{F}^{-1}(\tilde{Z}))$.
+    \item \textbf{Normalization:} Since KFAC factor estimation depends on the relative variance scale, we normalize the resulting batch to zero mean and unit variance to match the standard initialization statistics of the network weights.
+\end{enumerate}
+
+Algorithm \ref{alg:pink_noise} details the implementation.
+
+\begin{algorithm}[h]
+\caption{Synthetic Pink Noise Generator ($1/f^\alpha$)}
+\label{alg:pink_noise}
+\begin{algorithmic}[1]
+\REQUIRE Batch size $B$, Channels $C$, Height $H$, Width $W$, Decay $\alpha$ (default 1.0).
+\ENSURE Synthetic Batch $X \in \mathbb{R}^{B \times C \times H \times W}$.
+
+\STATE \textbf{1. Frequency Grid:}
+\STATE Create coordinate grid $(u, v)$ centered at zero.
+\STATE Compute radius $r = \sqrt{u^2 + v^2}$.
+\STATE Define Filter $S = 1 / (r^{\alpha} + \epsilon)$.
+
+\STATE \textbf{2. Generate White Noise:}
+\STATE $X_{\text{white}} \sim \mathcal{N}(0, 1)$ of shape $(B, C, H, W)$.
+\STATE $Z_{\text{white}} = \text{FFT2D}(X_{\text{white}})$.
+
+\STATE \textbf{3. Modulate Spectrum:}
+\STATE $Z_{\text{pink}} = Z_{\text{white}} \odot S$ \COMMENT{Element-wise scaling}
+
+\STATE \textbf{4. Spatial Reconstruction:}
+\STATE $X_{\text{pink}} = \text{Real}(\text{IFFT2D}(Z_{\text{pink}}))$.
+
+\STATE \textbf{5. Normalize:}
+\STATE $X \leftarrow \frac{X_{\text{pink}} - \text{mean}(X_{\text{pink}})}{\text{std}(X_{\text{pink}})}$ \COMMENT{Match standard init variance}
+\STATE \RETURN $X$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Discrete Domain: Structural Token Noise}
+\label{app:token_noise}
+\index{Discrete Domain: Structural Token Noise}
+
+For Large Language Models (LLMs) and Transformers, "white noise" in the embedding space is insufficient because it creates vectors that do not lie on the discrete manifold of valid token embeddings. Furthermore, Transformers possess strong architectural constraints—specifically \textbf{padding masks} and \textbf{special token anchors} (e.g., \texttt{[CLS]}, \texttt{[SEP]})—that dictate the sparsity pattern of the attention mechanism and the backward error flow.
+
+To recover the geometry of the self-attention blocks ($A_{l-1}$) and the feed-forward networks, we generate \textbf{Structural Token Noise}. Instead of sampling continuous vectors, we sample integer sequences that respect the model's structural requirements.
+
+\textbf{Generation Procedure:}
+\begin{enumerate}
+    \item \textbf{Variable Length Sampling:} To capture the Fisher dynamics across different context windows, we do not fix the sequence length. For each synthetic batch, we sample a random active length $L_{\text{act}} \sim \mathcal{U}(L_{\min}, L_{\max})$.
+    \item \textbf{Vocabulary Sampling:} For the active positions, we sample integers uniformly from the model's vocabulary $v \sim \mathcal{U}(0, V_{\text{vocab}})$. This ensures that when projected through the model's embedding layer, the inputs activate the lookup table with the correct variance $q^0 = \text{Var}(W_{\text{embed}})$.
+    \item \textbf{Structural Anchoring:} We enforce the insertion of special tokens (e.g., \texttt{[CLS]} at index 0) required by the architecture.
+    \item \textbf{Mask Construction:} We explicitly construct the binary \texttt{attention\_mask}. Positions $i > L_{\text{act}}$ are set to 0 (padded). This is critical for KFAC, as it ensures the estimated covariance matrices correctly reflect the sparsity induced by the masking operation in the backward pass.
+\end{enumerate}
+
+Algorithm \ref{alg:token_noise} details the implementation.
+
+\begin{algorithm}[h]
+\caption{Structural Token Noise Generator}
+\label{alg:token_noise}
+\begin{algorithmic}[1]
+\REQUIRE Batch size $B$, Max Length $L_{\max}$, Vocab Size $V$, Special Tokens (CLS, PAD).
+\ENSURE Input IDs $X \in \mathbb{Z}^{B \times L}$, Mask $M \in \{0,1\}^{B \times L}$.
+
+\STATE Initialize $X \leftarrow \text{fill}(B, L, \text{PAD})$.
+\STATE Initialize $M \leftarrow \text{zeros}(B, L)$.
+
+\FOR{sample $i = 1 \dots B$}
+    \STATE Sample length $\ell_i \sim \mathcal{U}(1, L_{\max})$.
+    
+    \STATE \textcolor{gray}{// 1. Generate Random Payload}
+    \STATE Sample tokens $t \sim \mathcal{U}(0, V)$ of size $\ell_i$.
+    \STATE $X[i, 0:\ell_i] \leftarrow t$.
+    
+    \STATE \textcolor{gray}{// 2. Enforce Structural Anchors}
+    \STATE $X[i, 0] \leftarrow \text{CLS}$.
+    \IF{$\text{uses\_separator}$}
+        \STATE $X[i, \ell_i] \leftarrow \text{SEP}$.
+    \ENDIF
+    
+    \STATE \textcolor{gray}{// 3. Generate Valid Mask}
+    \STATE $M[i, 0:\ell_i] \leftarrow 1$.
+    \STATE \textcolor{gray}{// Remaining positions stays 0 (PAD)}
+\ENDFOR
+
+\STATE \RETURN $X, M$ \COMMENT{Fed into model to get embeddings}
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{KFAC for Modern Architectures}
+\label{app:kfac_architectures}
+\index{KFAC for Modern Architectures}
+
+The Kronecker preconditioning $\tilde{g}_l = U_{G,l} \cdot g_l \cdot U_{A,l}$ assumes the gradient $g_l \in \mathbb{R}^{d_{out} \times d_{in}}$ is a matrix, which is natural for fully-connected layers. Here we detail how KFAC extends to convolutional and attention layers.
+
+\textbf{Convolutional Layers.} For a Conv2d layer with kernel size $k \times k$, input channels $C_{in}$, and output channels $C_{out}$, the gradient tensor has shape $(C_{out}, C_{in}, k, k)$. We apply the im2col transformation \cite{DBLP:journals/corr/MartensG15}: the input activation tensor $X \in \mathbb{R}^{B \times C_{in} \times H \times W}$ is unfolded into patches $\tilde{X} \in \mathbb{R}^{n \times (C_{in} \cdot k^2)}$, where $n = B \cdot H_{out} \cdot W_{out}$ treats each spatial location as an independent sample. The activation covariance becomes:
+\begin{equation}
+    \hat{A} = \frac{1}{n} \tilde{X}^\top \tilde{X} \in \mathbb{R}^{(C_{in} \cdot k^2) \times (C_{in} \cdot k^2)}
+\end{equation}
+Similarly, the gradient tensor is reshaped to $\tilde{G} \in \mathbb{R}^{n \times C_{out}}$, yielding $\hat{G} = \frac{1}{n}\tilde{G}^\top \tilde{G}$. This reduces convolutional preconditioning to the matrix case.
+
+\textbf{Transformer Architectures.} Vision Transformers (ViT) and language models (BERT) consist primarily of Linear layers: attention projections ($Q$, $K$, $V$, output) and MLP blocks. These apply standard KFAC directly. The weight-sharing across sequence positions (each token uses the same projection weights) is handled via the K-FAC-reduce formulation \cite{eschenhagen2023kfac}: activations from all sequence positions are pooled together when computing covariances. For an activation tensor $A \in \mathbb{R}^{B \times T \times d}$ (batch, sequence, features), we reshape to $(B \cdot T) \times d$ and compute:
+\begin{equation}
+    \hat{A} = \frac{1}{B \cdot T} A_{flat}^\top A_{flat}
+\end{equation}
+This averaging over the weight-sharing dimension is computationally efficient and empirically equivalent to the more expensive K-FAC-expand variant that maintains separate covariances per position.
+
+\textbf{Memory Considerations.} For architectures with large convolutional kernels (e.g., ConvNeXt with $7 \times 7$ depthwise convolutions), the covariance matrix size is $O((C_{in} \cdot k^2)^2)$, which can be prohibitive. In such cases, we apply KFAC only to the Linear layers (classifier head, MLP blocks) while leaving large convolutions unpreconditioned. This hybrid approach captures the dominant geometry while avoiding excessive memory costs.
+
+\section{Spectral Analysis and Theoretical Justification}
+\label{app:spectral_analysis}
+\index{Spectral Analysis and Theoretical Justification}
+
+In this section, we provide the theoretical formulations for the eigenspectrum alignment observed in Section~\ref{subsec:spectral_validation}. We connect results from Mean Field Theory (MFT) and Random Matrix Theory (RMT) to justify why synthetic noise probing recovers the essential eigenspectrum of the preconditioner matrix required for effective preconditioning. We then detail the empirical methodologies used to validate this theory.
+
+\subsection{Theoretical Foundations}
+\index{Theoretical Foundations}
+
+Our method relies on the insight that the spectral decay of layer-wise covariance matrices is an asymptotic property of the architecture depth and non-linearity, rather than a unique feature of the data manifold.
+
+\subsubsection{Mean Field Variance Dynamics}
+Consider a deep neural network with $L$ layers in the infinite-width limit. Let $q^l_{ab}$ denote the covariance between the pre-activations of two inputs $x_a, x_b$ at layer $l$. The propagation of this covariance is governed by a deterministic recurrence map $\mathcal{V}$ \cite{schoenholz2016deep}:
+\begin{equation}
+    q^l_{ab} = \sigma_w^2 \mathbb{E}_{z_1, z_2 \sim \mathcal{N}(0, \Sigma_{l-1})} [\phi(z_1)\phi(z_2)] + \sigma_b^2
+\end{equation}
+A key result in signal propagation theory is the existence of a stable fixed point $q^*$ for the variance map $\mathcal{V}$ under standard initializations.
+
+\begin{proposition}[Variance Contraction]
+\label{prop:variance_contraction}
+Assume a bounded activation function $\phi$ and initialization parameters in the ordered phase. For any two input distributions $\mathcal{D}_{priv}$ and $\mathcal{D}_{syn}$, the layer-wise variances $q^l$ converge exponentially to the same fixed point $q^*$ as depth $L \to \infty$:
+\begin{equation}
+    \lim_{l \to \infty} |q^l(\mathcal{D}_{priv}) - q^l(\mathcal{D}_{syn})| = 0
+\end{equation}
+\end{proposition}
+\textit{Proof Sketch.} The map $q^l = \mathcal{V}(q^{l-1})$ acts as a contraction mapping on the domain of variances. Initial differences in signal magnitude $q^0$ between private data and noise are attenuated exponentially with depth out by the depth, fixing the signal scale to the architectural fixed point $q^*$.
+
+\subsubsection{Spectral Shape}
+The KFAC preconditioner relies on the spectra of the factors $A_{l-1} = \mathbb{E}[a a^\top]$ and $G_l = \mathbb{E}[g g^\top]$. According to \citet{pmlr-v70-pennington17a}, the limiting spectral density $\rho(\lambda)$ of these matrices follows a power-law decay determined by the architectural parameters.
+
+\begin{theorem}[Spectral Scaling Invariance]
+Let $\lambda_k(A_l)$ be the $k$-th eigenvalue of the covariance at layer $l$. In the large depth limit, the spectral density converges to a form independent of the fine-grained input structure. Specifically, for private data and synthetic noise:
+\begin{equation}
+    \frac{\lambda_k(A_l^{priv})}{\lambda_k(A_l^{syn})} \approx \alpha \quad \forall k
+\end{equation}
+where $\alpha$ is a scalar scaling factor derived from the initial variance ratio.
+\end{theorem}
+Empirically, we observe this scaling in Fig.~\ref{fig:kfac_spectrum_unified} where curves maintain consistent relative ordering. Since our preconditioning transformation $U_A = Q \Lambda^{-1/2} Q^\top$ normalizes based on the relative spread of eigenvalues, the scalar factor $\alpha$ is absorbed into the global clipping norm. Thus, the noise-derived preconditioner correctly normalizes the geometry of the private data.
+
+\subsection{Empirical Verification Methodology}
+\index{Empirical Verification Methodology}
+
+We validate these theoretical claims using two complementary spectral analysis techniques.
+
+\subsubsection{Eigenvalue Reconstruction via KFAC Factors}
+Direct computation of the full Hessian spectrum is intractable. We approximate the spectrum of the Fisher block $F_l \approx A_{l-1} \otimes G_l$ analytically. Let the eigendecomposition of the empirical factors be $\hat{A}_{l-1} = Q_A \Lambda_A Q_A^\top$ and $\hat{G}_l = Q_G \Lambda_G Q_G^\top$. The spectrum of the approximated Fisher matrix is given by:
+\begin{equation}
+    \Lambda_{F_l} = \text{sort}(\{ \lambda_i^A \cdot \lambda_j^G \mid 1 \le i \le d_{in}, 1 \le j \le d_{out} \})
+\end{equation}
+This reconstruction allows us to visualize the spectral alignment across CNNs, MLPs and attention based architectures shown in Fig.~\ref{fig:kfac_spectrum_unified}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{Figures/spectrum_ablation_unified.pdf}
+    \caption{\textbf{KFAC Eigenspectrum Across Architectures and Data Sources.}
+      Comparison of KFAC eigenvalue spectra for (a) MLP, (b) CNN, and (c) Attention
+      architectures. Each panel shows the sorted eigenvalues of the Kronecker-factored
+      Fisher approximation computed using: Oracle (private MNIST data), Public DP-KFC
+      with FashionMNIST or CIFAR-10, and Synthetic DP-KFC (pink noise). The synthetic
+      preconditioner closely tracks the Oracle spectrum shape across all architectures,
+      confirming that network structure, not training data, primarily determines the
+      eigenvalue distribution. Domain-matched public data (FashionMNIST) provides
+      marginal improvement over synthetic noise.}
+      \label{fig:kfac_spectrum_unified}
+\end{figure}
+
+\subsubsection{Full Density Estimation via Stochastic Lanczos Quadrature}
+To verify that the alignment holds beyond the KFAC approximation, we employ Stochastic Lanczos Quadrature (SLQ) to estimate the spectral density of the full Hessian $H$. SLQ approximates the density by computing moments $\mu_k = v^\top H^k v$ via random probes $v \sim \mathcal{N}(0, I)$.
+
+The Hessian spectrum decomposes into a bulk (architecture-determined eigenvalues) and outliers (data-specific constraints) \cite{sagun2018empiricalanalysishessianoverparametrized}. Our noise probing method effectively captures the "bulk" geometry, which spans the orders of magnitude responsible for ill-conditioning. Fig.~\ref{fig:spectrum_grid} confirms that the support of the noise-estimated spectrum matches the true private spectrum across different architectures.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.65\linewidth]{Figures/model_decay_grid.pdf}
+      \caption{\textbf{Eigenvalue Decay via Stochastic Lanczos Quadrature.}
+      Sorted eigenvalue magnitudes at initialization (left) and after training (right)
+      for MLP, CNN, and ViT architectures. The Synthetic DP-KFC estimator (orange)
+      tracks the decay profile of the Oracle spectrum (black, dashed) across all
+      architectures, confirming that network structure primarily determines the
+      eigenvalue distribution. Public data sources (blue, purple) show similar alignment.}
+    \label{fig:spectrum_grid}
+\end{figure}
+
+\clearpage
+
+\section{Covariance Factor Decomposition}
+\label{app:cov_tracking}
+
+We analyze the approximation quality of the KFAC factors, decomposing the Fisher Information Matrix into activation covariance $A_{l-1} = \mathbb{E}[a_{l-1} a_{l-1}^\top]$ and gradient covariance $G_l = \mathbb{E}[\delta_l \delta_l^\top]$. We track the alignment of our data-free estimator against private oracle statistics throughout training on a 4-layer CNN (MNIST, $\epsilon = 1.0$), comparing it to a matched public proxy (FashionMNIST) and a mismatched proxy (CIFAR-10).
+
+\subsection{Metrics and Methodology}
+To characterize the preconditioner estimation quality, we utilize two complementary metrics. First, \textbf{Cosine Similarity} measures directional alignment: $\text{CosSim}(C^*, \hat{C}) = \text{Tr}(C^{*\top} \hat{C}) / (\|C^*\|_F \|\hat{C}\|_F)$. High similarity indicates that the estimator correctly identifies the principal eigenvector directions of the preconditioner matrix. Second, \textbf{Relative Frobenius Error} captures scale mismatch: $\text{RelFrob}(C^*, \hat{C}) = \|C^* - \hat{C}\|_F / \|C^*\|_F$. Since preconditioning inverses these matrices, scale errors directly impact step size. For the full Fisher block, similarity is multiplicative: $\text{CosSim}(F^*, \hat{F}) \approx \text{CosSim}(A^*, \hat{A}) \cdot \text{CosSim}(G^*, \hat{G})$, implying that misalignment in either factor degrades the overall update.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/cov_tracking_synthetic_pink_eps1.0_full.pdf}
+    \caption{\textbf{Component Stability Analysis.} Decomposition of KFAC estimation error into Activation ($A$) and Gradient ($G$) factors. While backward error scale ($G$) is similar across methods, public data proxies cause catastrophic instability in the forward activation scale ($A$) due to feature specialization. Synthetic DP-KFC (Green) effectively stabilizes $A$, driving overall robustness.}
+    \label{fig:cov_tracking_full}
+\end{figure*}
+
+\subsection{Results and Interpretation}
+Fig.~\ref{fig:cov_tracking_full} details the evolution of covariance alignment across network depth.
+
+\textbf{Activation Covariance ($A$): The Stability of Noise.} We observe a fundamental dichotomy in forward pass stability. Mismatched public proxies (CIFAR-10) exhibit high variance in activation statistics, with Frobenius errors spiking by orders of magnitude. We attribute this to \textit{Feature Specialization}: coherent features in natural images (e.g., textures) disproportionately activate filters optimized to the private manifold, causing activation explosions. In contrast, the Pink Noise estimator remains remarkably stable (error $< 0.5$). The phase incoherence of pink noise ensures energy is distributed across frequencies ($1/f$) without triggering semantic feature detectors, effectively probing the architecture to estimate scale of the activations without saturation.
+
+\textbf{Gradient Covariance ($G$): Architectural Dominance.} The backward error signal is largely method-agnostic. All methods exhibit synchronized error spikes correlated with hard batches in the private loop, as no data-free method can predict label-dependent supervision. However, despite these fluctuations, Pink Noise matches the directional alignment of the semantically related FashionMNIST proxy ($>0.8$ Cosine Sim). This validates that the \textit{architectural scaling} of the backward pass, governed by layer-wise Jacobians, dominates over task-specific label structure.
+
+\textbf{Decoupling in Deep Layers.} The combined metrics reveal that Fisher estimation decouples with depth. In early layers (conv1, conv2), Pink Noise maintains high directional alignment ($> 0.8$), proving that spatial correlation structure ($1/f$) suffices to recover feature extraction geometry in image tasks. In deep layers (fc1, fc2), directional alignment degrades across all methods ($< 0.5$), reflecting the dependency on private labels. However, Pink Noise strictly improves the \textit{scale stability}. While public proxies suffer from high variance due to input mismatch, noise-derived scaling remains robust. This confirms that while the \textit{eigenvector directions} of the Fisher matrix in deep layers are data-dependent, the \textit{eigenvalue magnitudes} are intrinsic architectural properties recoverable via synthetic probing.
+
+ These findings suggest that synthetic noise is strictly preferable to mismatched public data. It avoids negative transfer in the forward pass by preventing feature collisions while maintaining robust scaling in the backward pass. Even when public data is available, synthetic noise provides comparable alignment with greater stability against batch-specific outliers.
+
+  \subsection{Extension to Attention-Based Architectures}
+  \label{app:cov_tracking_vit}
+
+  We repeat the covariance tracking analysis on a simple Vision Transformer (2-block, 4-head, embed\_dim=64) trained on MNIST ($\epsilon = 1.0$, 30 epochs). To compress the 14 linear
+  layers into a readable comparison, we group them into three categories: Attention (8 Q/K/V/output projections), MLP (4 feed-forward layers), and Embedding/Head (patch projection and
+   classifier).
+
+  \begin{figure*}[t]
+      \centering
+      \includegraphics[width=\textwidth]{Figures/cov_tracking_vit_synthetic_pink_eps1.0_summary.pdf}
+      \caption{\textbf{Covariance Tracking in a Vision Transformer.} Cosine similarity (left) and relative Frobenius error (right) of the combined Fisher factor, averaged over layers
+  within each group: Attention projections (top), MLP blocks (middle), and Embedding/Head (bottom). The source ranking is consistent with the CNN analysis
+  (Fig.~\ref{fig:kfac_cov_track}): domain-matched FashionMNIST (blue) achieves the highest alignment, Synthetic DP-KFC (orange) provides a robust intermediate, and mismatched CIFAR-10
+   (purple) performs worst. Unlike in the CNN, the scale advantage of synthetic noise is reduced by LayerNorm (see text).}
+      \label{fig:cov_tracking_vit}
+  \end{figure*}
+
+  Fig.~\ref{fig:cov_tracking_vit} shows the evolution of Fisher factor alignment throughout training. The source ranking reproduces the CNN pattern (Fig.~\ref{fig:kfac_cov_track}):
+  domain-matched FashionMNIST achieves the highest directional alignment, Synthetic DP-KFC provides a robust intermediate, and domain-mismatched CIFAR-10 performs worst on both
+  metrics across all layer groups. Decomposing into activation and gradient factors confirms the same mechanism: gradient covariance alignment ($\cos_G$) is similar across all three
+  sources (${\sim}0.4$--$0.5$), indicating that backward-pass geometry is architecture-dominated even in multi-head attention projections, while activation covariance ($\cos_A$)
+  exhibits the largest gap between sources.
+
+  Absolute alignment is lower than in the CNN ($\cos_F$ of 0.3--0.4 vs.\ 0.6--0.8 in early convolutional layers), reflecting the increased modeling challenge of global self-attention
+  compared to local convolutions. The Embedding/Head group shows elevated Frobenius error for all methods, consistent with the depth-dependent degradation observed in fully-connected
+  layers of the CNN.
+
+  \textbf{LayerNorm and scale stability.}
+  One notable difference from the CNN analysis is the relative Frobenius error. In the CNN, synthetic noise achieved strictly lower scale error than all public proxies, because
+  mismatched natural images triggered feature-specific activation magnitudes that inflated $\|A_l\|_F$ (Section~\ref{app:cov_tracking}). In the ViT, the matched proxy (FashionMNIST)
+  achieves comparable or slightly lower Frobenius error than synthetic noise. We attribute this to LayerNorm, which is applied before every attention and MLP block. Since
+  $\mathrm{LN}(a) = \gamma \odot (a - \mu_a) / \sigma_a + \beta$, the pre-activation statistics are renormalized to zero mean and unit variance regardless of the input distribution.
+  This constrains the Frobenius norm of the activation covariance: $\|A_l\|_F \approx \|\mathbb{E}[\hat{a}_l \hat{a}_l^\top]\|_F$ where $\hat{a}_l$ has bounded second moments by
+  construction. The normalization suppresses the scale explosions that penalize mismatched public data in the CNN, compressing Frobenius errors across sources. As a result, the scale
+  advantage that synthetic noise derives from phase-incoherent activations is diminished, because LayerNorm already prevents any single source from producing anomalous activation
+  magnitudes. The directional ranking, however, is unaffected by this normalization and remains consistent with the CNN findings.
+
+
+\clearpage
+\section{Centralized Training Results}
+\index{Centralized training results}
+\label{app:table_centralized}
+
+\subsection{Experimental Details}
+We evaluate our method across four complexity regimes to demonstrate scalability and modality-agnostic generalization. All methods (DP-SGD, Public DP-KFC, Synthetic DP-KFC) share identical hyperparameters per task to ensure fair comparison. Privacy accounting uses Rényi Differential Privacy (RDP) with $\delta = 1/N$ where $N$ is the training set size.
+
+\textbf{Optimizer Selection.} For Transformer architectures (CrossViT, BERT), we use AdamW \cite{loshchilov2018decoupled} as it consistently outperforms SGD on these models. This makes the DP-SGD baseline equivalent to DP-Adam , a stronger adaptive baseline than vanilla DP-SGD since Adam's diagonal second-moment estimates already capture some local geometry. For CNNs and linear models, we use SGD with momentum.
+
+\textbf{(1) Simple Vision -- MNIST.} We train a 4-layer CNN from scratch with 2 convolutional layers (16 and 32 filters) followed by 2 fully-connected layers. Training uses 5 epochs, batch size 256, learning rate $10^{-3}$, and SGD with momentum 0.9. Public proxy data: FashionMNIST.
+
+\textbf{(2) Complex Vision -- CIFAR-100.} We fine-tune CrossViT-Tiny-240 pretrained on ImageNet-1k with the backbone unfrozen for end-to-end training. A 2-layer MLP serves as the classification head. Training uses 5 epochs, batch size 256, learning rate $10^{-3}$, and AdamW optimizer. Public proxy data: CIFAR-10.
+
+\textbf{(3) NLP -- StackOverflow.} We fine-tune \texttt{bert-base-uncased} on next-word prediction, training only the classifier head. Training uses 5 epochs, batch size 64, sequence length 128, learning rate $2{\times}10^{-4}$, and AdamW optimizer. Public proxy data: AG News.
+
+\textbf{(4) NLP -- IMDB.} We train logistic regression on binary sentiment classification using TF-IDF features (2000 dimensions). Training uses 20 epochs, batch size 256, learning rate $10^{-1}$, and SGD optimizer. Public proxy data: AG News.
+
+\begin{table*}[h!]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Test accuracy (\%). \underline{Underlined}: best (within 1 std). Syn.=Synthetic noise, Pub.=Public data preconditioner.}
+\label{tab:results_comparison}
+\begin{tabular}{ll c|c|cc}
+\toprule
+Dataset & Model & $\epsilon$ & Non-DP & DP-SGD & Syn. KFAC / Pub. KFAC \\
+\midrule
+StackOverflow & BERT & 0.5 & $\sim$99.0{\tiny$\pm$0.5} & 78.9{\tiny$\pm$7.3} & 81.3{\tiny$\pm$7.0} / \underline{89.8}{\tiny$\pm$4.2} \\
+ & & 1 & & 89.5{\tiny$\pm$1.8} & 91.8{\tiny$\pm$1.9} / \underline{96.1}{\tiny$\pm$1.0} \\
+ & & 2 & & 92.9{\tiny$\pm$0.7} & 95.4{\tiny$\pm$0.3} / \underline{97.5}{\tiny$\pm$0.3} \\
+ & & 3 & & 93.6{\tiny$\pm$0.7} & 95.9{\tiny$\pm$0.3} / \underline{97.9}{\tiny$\pm$0.3} \\
+ & & 5 & & 94.2{\tiny$\pm$0.7} & 96.4{\tiny$\pm$0.2} / \underline{98.1}{\tiny$\pm$0.3} \\
+ & & 8 & & 94.6{\tiny$\pm$0.6} & 96.5{\tiny$\pm$0.1} / \underline{98.2}{\tiny$\pm$0.2} \\
+ & & 10 & & 94.8{\tiny$\pm$0.6} & 96.6{\tiny$\pm$0.1} / \underline{98.3}{\tiny$\pm$0.2} \\
+\midrule
+MNIST & CNN & 0.5 & 98.8{\tiny$\pm$0.1} & 90.8{\tiny$\pm$0.2} & 93.3{\tiny$\pm$0.6} / \underline{94.7}{\tiny$\pm$0.4} \\
+ & & 1 & & 91.7{\tiny$\pm$0.2} & 94.2{\tiny$\pm$0.5} / \underline{95.3}{\tiny$\pm$0.4} \\
+ & & 2 & & 92.5{\tiny$\pm$0.3} & 95.0{\tiny$\pm$0.4} / \underline{95.7}{\tiny$\pm$0.3} \\
+ & & 3 & & 92.9{\tiny$\pm$0.3} & 95.3{\tiny$\pm$0.4} / \underline{96.0}{\tiny$\pm$0.3} \\
+ & & 5 & & 93.4{\tiny$\pm$0.3} & 95.7{\tiny$\pm$0.3} / \underline{96.2}{\tiny$\pm$0.3} \\
+ & & 8 & & 93.7{\tiny$\pm$0.3} & 95.9{\tiny$\pm$0.3} / \underline{96.4}{\tiny$\pm$0.3} \\
+ & & 10 & & 94.0{\tiny$\pm$0.3} & 96.0{\tiny$\pm$0.3} / \underline{96.5}{\tiny$\pm$0.2} \\
+\midrule
+CIFAR-100 & CrossViT & 0.5 & 68.3{\tiny$\pm$0.3} & 52.1{\tiny$\pm$0.5} & \underline{53.6}{\tiny$\pm$0.5} / \underline{53.1}{\tiny$\pm$0.5} \\
+ & & 1 & & 56.2{\tiny$\pm$0.4} & \underline{57.6}{\tiny$\pm$0.5} / \underline{57.3}{\tiny$\pm$0.4} \\
+ & & 2 & & 58.5{\tiny$\pm$0.3} & \underline{59.8}{\tiny$\pm$0.4} / \underline{59.6}{\tiny$\pm$0.5} \\
+ & & 3 & & 59.5{\tiny$\pm$0.3} & \underline{60.9}{\tiny$\pm$0.3} / \underline{60.6}{\tiny$\pm$0.4} \\
+ & & 5 & & 60.7{\tiny$\pm$0.3} & \underline{62.0}{\tiny$\pm$0.3} / \underline{61.6}{\tiny$\pm$0.4} \\
+ & & 8 & & 61.4{\tiny$\pm$0.4} & \underline{62.7}{\tiny$\pm$0.4} / \underline{62.4}{\tiny$\pm$0.3} \\
+ & & 10 & & 62.0{\tiny$\pm$0.4} & \underline{63.2}{\tiny$\pm$0.3} / \underline{62.9}{\tiny$\pm$0.3} \\
+\midrule
+IMDB & LogReg & 0.5 & $\sim$88.0{\tiny$\pm$0.5} & 82.1{\tiny$\pm$0.3} & \underline{83.5}{\tiny$\pm$0.1} / \underline{83.5}{\tiny$\pm$0.1} \\
+ & & 1 & & 82.9{\tiny$\pm$0.1} & \underline{85.1}{\tiny$\pm$0.0} / \underline{85.1}{\tiny$\pm$0.1} \\
+ & & 1.5 & & 83.1{\tiny$\pm$0.0} & \underline{85.5}{\tiny$\pm$0.1} / \underline{85.5}{\tiny$\pm$0.1} \\
+ & & 2.8 & & 83.1{\tiny$\pm$0.1} & \underline{85.9}{\tiny$\pm$0.1} / \underline{85.8}{\tiny$\pm$0.1} \\
+ & & 8 & & 83.2{\tiny$\pm$0.1} & \underline{86.0}{\tiny$\pm$0.0} / \underline{86.0}{\tiny$\pm$0.0} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+\clearpage
+
+\section{Hyperparameter Sensitivity \& Ablation Study}
+\label{app:sensitivity}
+\index{Hyperparameter Sensitivity and Ablation Study}
+
+  We conducted Bayesian hyperparameter optimization using Optuna's TPE sampler with 150 trials per method to ensure fair
+  comparison between DP-SGD and DP-KFC. Each trial independently samples learning rate $\eta \in [10^{-3}, 0.5]$, clipping norm
+  $C \in [0.1, 50]$, and for DP-KFC: damping $\pi \in [10^{-5}, 0.1]$, noise exponent $\alpha \in [0, 2]$, and preconditioner
+  steps $\in [1, 100]$.
+
+  \begin{figure*}[h]
+      \centering
+      \includegraphics[width=\textwidth]{Figures/optuna_ablation_final_eps2.0.pdf}
+      \caption{\textbf{Hyperparameter Optimization Analysis} (MNIST, $\epsilon=2.0$, 150 Optuna trials per method).
+      \textbf{(a, b)} Clip norm $\times$ learning rate interaction surfaces. DP-SGD exhibits a narrow diagonal ridge of
+  trainability, while DP-KFC creates a broad plateau spanning an order of magnitude in clip norm.
+      \textbf{(c)} Parameter importance ranking. Standard optimization parameters (blue) dominate; KFAC-specific parameters
+  (orange) have low importance, indicating minimal tuning burden.
+      \textbf{(d, e)} DP-KFC parameter interactions show high-accuracy configurations (yellow) across wide ranges of damping and
+   noise $\alpha$.
+      \textbf{(f)} Summary: DP-KFC achieves +3.0\% improvement with noise $\alpha \approx 1.8$ (pink/brown noise), validating
+  the spectral matching hypothesis.}
+      \label{fig:optuna_ablation}
+  \end{figure*}
+
+  \subsection{The Decoupling Effect}
+  \index{The Decoupling Effect}
+
+  Panels (a) and (b) of Fig.~\ref{fig:optuna_ablation} reveal the central practical advantage of DP-KFC. In standard DP-SGD,
+  the clipping norm $C$ and learning rate $\eta$ are tightly coupled: if $C$ is too small, gradients are highly biased, requiring a
+  large $\eta$ to compensate; if $C$ is too large, the injected noise $\sigma^2 C^2$ explodes, requiring a tiny $\eta$. This
+  creates a narrow diagonal relationship that makes hyperparameter tuning harder.
+
+  DP-KFC fundamentally breaks this coupling. The preconditioning step normalizes gradient magnitudes \textit{before} clipping, creating a broad rectangular region of near-optimal performance. As shown in Panel
+   (b), accuracy exceeds 90\% across clip norms spanning $[0.5, 50]$, a $100\times$ range, dramatically simplifying
+  hyperparameter search.
+
+  \subsection{Minimal Tuning Burden}
+  \index{Minimal tunning burden}
+
+  A common concern with second-order methods is that they introduce additional hyperparameters that require careful tuning. Panel
+   (c) directly addresses this concern by ranking parameter importance based on correlation with final accuracy.
+
+  Learning rate dominates (importance $= 0.50$), followed by clip norm ($0.28$) and batch size ($0.23$).  This demonstrates that DP-KFC does not introduce additional hyperparameter sensitivity compared to DP-SGD. The method-specific
+   parameters can be set to reasonable defaults ($\pi = 10^{-3}$, $\alpha = 1.0$, steps $= 10$) with minimal performance
+  degradation.
+
+  \subsection{Spectral Validation}
+  \index{Spectral Validation}
+
+  Panel (e) provides empirical validation of our theoretical motivation. The optimal noise exponent $\alpha$ consistently
+  clusters around $1.0$--$2.0$ across all datasets, corresponding to pink and brown noise. This confirms that synthetic inputs
+  with $1/f$ spectral decay better approximate natural image statistics, yielding superior curvature estimates compared to white
+  noise ($\alpha = 0$).
+
+  \subsection{Cross-Dataset Consistency}
+  
+
+  Table~\ref{tab:optuna_summary} summarizes the Bayesian optimization results across three vision benchmarks. DP-KFC
+  consistently outperforms DP-SGD, with gains ranging from +2.8\% to +8.6\%.
+
+  \begin{table}[h]
+  \centering
+  \caption{\textbf{Bayesian Optimization Results} ($\epsilon=2.0$, 150 trials per method). DP-KFC consistently outperforms
+  DP-SGD across all datasets, with the largest gains on the most challenging task (CIFAR-10).}
+  \label{tab:optuna_summary}
+  \begin{tabular}{lcccc}
+  \toprule
+  \textbf{Dataset} & \textbf{DP-SGD} & \textbf{DP-KFC} & $\mathbf{\Delta}$ & \textbf{Optimal $\alpha$} \\
+  \midrule
+  MNIST & 94.2\% & \textbf{97.1\%} & +2.9\% & 1.80 \\
+  FashionMNIST & 84.3\% & \textbf{87.1\%} & +2.8\% & 1.48 \\
+  CIFAR-10 & 50.5\% & \textbf{59.1\%} & +8.6\% & 1.78 \\
+  \bottomrule
+  \end{tabular}
+  \end{table}
+
+  Notably, the largest improvement occurs on CIFAR-10 (+8.6\%), the most challenging dataset with complex natural images. This
+  suggests that DP-KFC's benefits are amplified when the optimization landscape is more difficult, precisely when better
+  curvature information is most valuable.
+
+  The optimal noise exponent $\alpha$ ranges from 1.48 to 1.80 across datasets, consistently in the pink-to-brown noise regime.
+  This cross-dataset consistency further validates that matching the $1/f$ spectral statistics of natural images provides a
+  robust architectural prior for curvature estimation.
+
+  \subsection{Computational Overhead}
+  \index{Computational Overhead}
+
+  The matrix inversions required by DP-KFC introduce a $2.2\times$ slowdown in sample throughput compared to DP-SGD. However, in
+   differential privacy, the optimization horizon is strictly bounded by the privacy budget $\epsilon$, not wall-clock time.
+  Therefore, investing additional computation per step to maximize the utility of each privacy-consuming gradient query is the
+  theoretically optimal strategy.
+
+  Moreover, the preconditioner computation is embarrassingly parallel and can be amortized: Panel (c) shows that
+  \texttt{precond\_steps} has low importance ($0.21$), and our ablations confirm that 10--20 synthetic batches suffice for robust
+   curvature estimation. When the update frequency is reduced (e.g., recomputing every 5 epochs instead of every epoch), the
+  overhead becomes negligible.
+
+  \subsection{Parameter Interaction}
+  \label{app:interactions}
+  \index{Parameter Interaction}
+
+  To understand how DP-KFC's hyperparameters interact, we visualize pairwise relationships across all 150 Optuna trials
+  (Fig.~\ref{fig:interactions}). This analysis reveals which parameters require careful tuning and which can be safely set to
+  defaults.
+
+  \begin{figure*}[h]
+      \centering
+      \includegraphics[width=\textwidth]{Figures/optuna_interactions_mnist_eps2.0.pdf}
+      \caption{\textbf{DP-KFC Parameter Interactions} (MNIST, $\epsilon=2.0$). Each panel shows the accuracy landscape as a
+  function of two hyperparameters. Yellow indicates high accuracy ($>95\%$), purple indicates low accuracy. Stars mark the best
+  configuration found.}
+      \label{fig:interactions}
+  \end{figure*}
+
+  \subsubsection{The Clip-Learning Rate Coupling}
+
+  Panel (a) reveals that clipping norm and learning rate exhibit a diagonal coupling: larger clip norms require smaller learning
+  rates to maintain optimal performance. This is expected since the effective step size scales with both parameters. However,
+  compared to DP-SGD (Fig.~\ref{fig:optuna_ablation}a), this diagonal band is substantially \textit{wider}, indicating that
+  DP-KFC's gradient homogenization reduces sensitivity to this interaction.
+
+  \subsubsection{Damping: A Non-Critical Parameter}
+
+  Panels (b), (d), and (h) consistently show that damping $\pi$ has minimal impact on performance. In panel (b), the yellow
+  region extends vertically across three orders of magnitude ($10^{-4}$ to $10^{-1}$) for any reasonable clip norm. Panel (d)
+  shows horizontal bands indicating that optimal learning rate is independent of damping choice. This contradicts the common
+  belief that second-order methods require careful damping tuning. In practice, $\pi = 10^{-3}$ works well across all our
+  experiments.
+
+  \subsubsection{Spectral Matching Validation}
+
+  Panels (c), (e), (g), and (i) provide empirical validation of our spectral matching hypothesis. In each panel, the yellow
+  high-accuracy region concentrates at noise exponent $\alpha > 1.0$, corresponding to pink and brown noise. Panel (c) is
+  particularly striking: regardless of clip norm, $\alpha \approx 1.5$ consistently outperforms white noise ($\alpha = 0$) by
+  3--5\% accuracy. This confirms that synthetic inputs with $1/f$ spectral decay better approximate natural image statistics,
+  yielding superior curvature estimates without access to real data.
+
+  \subsubsection{Preconditioner Steps: Minimal Overhead}
+
+  Panels (f), (h), and (i) demonstrate that the number of preconditioner estimation steps has negligible impact on final
+  accuracy. The horizontal banding pattern in panel (f) shows that accuracy depends only on learning rate, not on whether 10 or
+  100 synthetic batches were used for curvature estimation. This has important practical implications: the architectural
+  curvature can be reliably estimated with minimal computational overhead, typically saturating after 10--20 batches.
+
+
+\end{document}
+\endinput
+
+% \section{Federated User-Level DP-KFC}
+
+% We present the algorithmic formulation for applying Noise Preconditioning in a Federated Learning setting with User-Level Differential Privacy.
+
+% \subsection*{Protocol Overview}
+% Unlike centralized training, User-Level DP requires bounding the contribution of an entire user (client) rather than a single data sample. Our protocol leverages the data-free nature of the curvature estimator to offload computational complexity from edge devices to the central server.
+
+% \begin{enumerate}
+%     \item \textbf{Server-Side Estimation:} The server generates synthetic noise to estimate the architectural curvature. It computes the inverse whitening factors ($U_A, U_G$) and broadcasts them to clients alongside the global model.
+%     \item \textbf{Client-Side Whitening:} Clients compute gradients on their private data. Crucially, they apply the whitening transformation locally $\tilde{g} = U_G g U_A$ \textit{before} aggregating their local update.
+%     \item \textbf{Spherical Clipping:} The client clips the \textit{whitened} aggregate update. Because the geometry has been sphered, the $L_2$ clip does not disproportionately penalize high-curvature directions.
+%     \item \textbf{Trusted Aggregation:} The server sums the whitened updates and adds noise calibrated to the user-level sensitivity.
+% \end{enumerate}
+
+% \begin{algorithm}[h]
+% \caption{Federated User-Level DP-KFC}
+% \label{alg:fed_dp_kfac}
+% \begin{algorithmic}[1]
+% \REQUIRE $N$ Clients, Fraction $q$, Clip Norm $C$, Noise Multiplier $\sigma$, Server Learning Rate $\eta_g$.
+% \STATE \textbf{Server:} Initialize global model $\theta_0$.
+% \FOR{round $t = 0, \dots, T-1$}
+%     \STATE \textcolor{blue}{\texttt{// Step 1: Server computes curvature (Zero Privacy Cost)}}
+%     \STATE Server samples noise batch $\mathcal{B}_{syn} \sim \mathcal{N}(0, I)$.
+%     \FOR{each layer $l$}
+%         \STATE Compute factors $\hat{A}_{l-1}, \hat{G}_l$ on $\mathcal{B}_{syn}$.
+%         \STATE Eigendecompose and invert: $U_{A,l}, U_{G,l}$.
+%     \ENDFOR
+%     \STATE \textcolor{blue}{\texttt{// Step 2: Broadcast to Clients}}
+%     \STATE Sample subset of clients $\mathcal{S}_t$ with prob $q$.
+%     \STATE Broadcast $\theta_t$ and set $\{U_{A,l}, U_{G,l}\}$ to $\mathcal{S}_t$.
+    
+%     \STATE \textcolor{blue}{\texttt{// Step 3: Local Client Update}}
+%     \FOR{each client $k \in \mathcal{S}_t$ in parallel}
+%         \STATE $\Delta_k \leftarrow 0$
+%         \FOR{local batch $b \in \mathcal{D}_k$}
+%             \STATE Compute gradients $g_b = \nabla \ell(x_b; \theta_t)$.
+%             \FOR{each layer $l$}
+%                 \STATE \COMMENT{Whitening applied locally}
+%                 \STATE $\tilde{g}_{b,l} \leftarrow U_{G,l} \cdot g_{b,l} \cdot U_{A,l}$.
+%             \ENDFOR
+%             \STATE $\Delta_k \leftarrow \Delta_k + \tilde{g}_b$ \COMMENT{Accumulate whitened grads}
+%         \ENDFOR
+%         \STATE \textcolor{blue}{\texttt{// Step 4: User-Level Clipping}}
+%         \STATE $\bar{\Delta}_k \leftarrow \Delta_k / \max(1, \frac{\|\Delta_k\|_F}{C})$.
+%         \STATE Send $\bar{\Delta}_k$ to Server.
+%     \ENDFOR
+    
+%     \STATE \textcolor{blue}{\texttt{// Step 5: Aggregation and Noise}}
+%     \STATE $\theta_{t+1} \leftarrow \theta_t - \eta_g \left( \frac{1}{|\mathcal{S}_t|} \sum_{k \in \mathcal{S}_t} \bar{\Delta}_k + \mathcal{N}(0, \frac{\sigma^2 C^2}{|\mathcal{S}_t|^2} I) \right)$.
+% \ENDFOR
+% \end{algorithmic}
+% \end{algorithm}
+
+% \subsection*{Efficiency Analysis}
+% \begin{itemize}
+%     \item \textbf{Computational Efficiency:} Clients do not perform matrix inversions. They only perform matrix multiplications ($\tilde{g} = U_G g U_A$), which are computationally inexpensive and hardware-optimized on mobile devices.
+%     \item \textbf{Communication Efficiency:} The server broadcasts the whitening matrices $U_A, U_G$. Since these are block-diagonal factors of size $d_{in} \times d_{in}$ and $d_{out} \times d_{out}$, the bandwidth overhead is negligible compared to the full model size ($\approx 1-5\%$ overhead depending on architecture), unlike methods that transmit full curvature information.
+% \end{itemize}
+
+%%
+%% End of file `sample-sigconf.tex'.
+

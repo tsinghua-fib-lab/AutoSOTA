@@ -1,0 +1,13 @@
+defaults:
+  - /baseline: random
+  - /kernel@surrogate.kernel_spec: matern5_2
+  - /warper@surrogate.warper: wasserstein_arc_length
+  - _self_
+
+name: random:warp:fit_reference:matern5/2
+base: random
+acquisition: ${.baseline.acquisition}
+reference: null
+active_loop: null
+reference_override: null
+one_shot: ${oc.select:.baseline.one_shot,false}

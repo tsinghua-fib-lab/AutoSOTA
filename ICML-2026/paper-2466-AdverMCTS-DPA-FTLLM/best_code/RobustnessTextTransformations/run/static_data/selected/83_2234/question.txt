@@ -1,0 +1,68 @@
+Meanwhile, the kingdom of K is getting ready for the marriage of the King's daughter. However, in order not to lose face in front of the relatives, the King should first finish reforms in his kingdom. As the King can not wait for his daughter's marriage, reforms must be finished as soon as possible.
+
+The kingdom currently consists of n cities. Cities are connected by n - 1 bidirectional road, such that one can get from any city to any other city. As the King had to save a lot, there is only one path between any two cities.
+
+What is the point of the reform? The key ministries of the state should be relocated to distinct cities (we call such cities important). However, due to the fact that there is a high risk of an attack by barbarians it must be done carefully. The King has made several plans, each of which is described by a set of important cities, and now wonders what is the best plan.
+
+Barbarians can capture some of the cities that are not important (the important ones will have enough protection for sure), after that the captured city becomes impassable. In particular, an interesting feature of the plan is the minimum number of cities that the barbarians need to capture in order to make all the important cities isolated, that is, from all important cities it would be impossible to reach any other important city.
+
+Help the King to calculate this characteristic for each of his plan.
+
+
+-----Input-----
+
+The first line of the input contains integer n (1 ≤ n ≤ 100 000) — the number of cities in the kingdom.
+
+Each of the next n - 1 lines contains two distinct integers u_{i}, v_{i} (1 ≤ u_{i}, v_{i} ≤ n) — the indices of the cities connected by the i-th road. It is guaranteed that you can get from any city to any other one moving only along the existing roads.
+
+The next line contains a single integer q (1 ≤ q ≤ 100 000) — the number of King's plans.
+
+Each of the next q lines looks as follows: first goes number k_{i} — the number of important cities in the King's plan, (1 ≤ k_{i} ≤ n), then follow exactly k_{i} space-separated pairwise distinct numbers from 1 to n — the numbers of important cities in this plan.
+
+The sum of all k_{i}'s does't exceed 100 000.
+
+
+-----Output-----
+
+For each plan print a single integer — the minimum number of cities that the barbarians need to capture, or print  - 1 if all the barbarians' attempts to isolate important cities will not be effective.
+
+
+-----Examples-----
+Input
+4
+1 3
+2 3
+4 3
+4
+2 1 2
+3 2 3 4
+3 1 2 4
+4 1 2 3 4
+
+Output
+1
+-1
+1
+-1
+
+Input
+7
+1 2
+2 3
+3 4
+1 5
+5 6
+5 7
+1
+4 2 4 6 7
+
+Output
+2
+
+
+
+-----Note-----
+
+In the first sample, in the first and the third King's plan barbarians can capture the city 3, and that will be enough. In the second and the fourth plans all their attempts will not be effective.
+
+In the second sample the cities to capture are 3 and 5.

@@ -1,0 +1,276 @@
+---
+title: "Strategize Package Tutorial"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Strategize Package Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+CONDA_AVAILABLE <- FALSE
+
+if (identical(Sys.getenv("STRATEGIZE_RUN_VIGNETTE"), "true")) {
+  CONDA_AVAILABLE <- tryCatch({
+    if (requireNamespace("reticulate", quietly = TRUE)) {
+      conda_list <- reticulate::conda_list()
+      "strategize_env" %in% conda_list$name
+    } else {
+      FALSE
+    }
+  }, error = function(e) FALSE)
+}
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = CONDA_AVAILABLE
+)
+
+if (!CONDA_AVAILABLE && interactive()) {
+  message(
+    "Note: vignette code chunks are not executed by default. ",
+    "To run them, set STRATEGIZE_RUN_VIGNETTE=true and make sure ",
+    "the 'strategize_env' conda environment exists."
+  )
+}
+```
+
+# Introduction
+
+`strategize` learns probability distributions over conjoint factor levels that optimize a chosen outcome. In the standard workflow, the package fits an outcome model from observed conjoint data and then searches for the factor-level distribution that performs best under that fitted model. In adversarial mode, the package learns a pair of distributions that respond strategically to one another.
+
+This vignette focuses on the core single-study workflow:
+
+- preparing pairwise conjoint data
+- fitting an average-case optimization with `cv_strategize()`
+- fitting an adversarial optimization with `strategize(adversarial = TRUE)`
+- inspecting the returned distributions and outcome summaries
+
+For prediction-only modeling, see `?strategic_prediction`. For foundation-model runtime use of trained `preference.fm` checkpoints, see `vignette("FoundationModels")`.
+
+## Installation and Backend Setup
+
+Install the package from GitHub and create the JAX-backed computational environment once:
+
+```r
+# remotes::install_github("cjerzak/strategize-software/strategize")
+library(strategize)
+strategize::build_backend(conda_env = "strategize_env")
+```
+
+The `strategize_env` backend is used by the optimization workflow in `strategize()` and `cv_strategize()`, and by the package's neural prediction and foundation-model APIs.
+
+# Constructing Example Data
+
+Most `strategize` analyses need:
+
+- `Y`: an observed outcome vector
+- `W`: a factor matrix or data frame
+- `p_list`: the baseline factor-level probabilities
+- pairwise identifiers such as `pair_id` and `profile_order` for forced-choice designs
+
+The example below simulates a simple pairwise conjoint with three factors and one observed winner per pair.
+
+```{r example-data}
+library(strategize)
+
+set.seed(123)
+n_pairs <- 500
+
+candidate_left <- data.frame(
+  Sex = sample(c("Male", "Female"), n_pairs, replace = TRUE),
+  Age = sample(c("36-51", "52-67", "68-76"), n_pairs, replace = TRUE),
+  Family = sample(
+    c(
+      "Single (divorced)",
+      "Single (never married)",
+      "Married (no child)",
+      "Married (two children)"
+    ),
+    n_pairs,
+    replace = TRUE
+  )
+)
+
+candidate_right <- data.frame(
+  Sex = sample(c("Male", "Female"), n_pairs, replace = TRUE),
+  Age = sample(c("36-51", "52-67", "68-76"), n_pairs, replace = TRUE),
+  Family = sample(
+    c(
+      "Single (divorced)",
+      "Single (never married)",
+      "Married (no child)",
+      "Married (two children)"
+    ),
+    n_pairs,
+    replace = TRUE
+  )
+)
+
+utility_left <- 0.20 * (candidate_left$Sex == "Female") +
+  0.10 * (candidate_left$Age == "36-51") +
+  0.05 * (candidate_left$Family == "Married (two children)")
+
+utility_right <- 0.20 * (candidate_right$Sex == "Female") +
+  0.10 * (candidate_right$Age == "36-51") +
+  0.05 * (candidate_right$Family == "Married (two children)")
+
+Y_left <- as.numeric(utility_left > utility_right)
+Yobs <- c(Y_left, 1 - Y_left)
+
+FACTOR_MAT_ <- rbind(candidate_left, candidate_right)
+pair_id <- c(seq_len(n_pairs), seq_len(n_pairs))
+respondent_id <- pair_id
+respondent_task_id <- pair_id
+profile_order <- c(rep(1L, n_pairs), rep(2L, n_pairs))
+
+p_list <- create_p_list(FACTOR_MAT_, uniform = TRUE)
+cluster_var <- respondent_id
+```
+
+# Average-Case Optimization
+
+Use `cv_strategize()` when you want cross-validation over `lambda`. The result object uses `pi_star_point`, `pi_star_se`, `Q_point`, and `Q_se` as the primary public outputs, and this vignette uses those canonical field names throughout.
+
+```{r average-case}
+res_avecase <- cv_strategize(
+  Y = Yobs,
+  W = FACTOR_MAT_,
+  lambda_seq = c(0.01, 0.1, 0.5),
+  penalty_type = "KL",
+  pair_id = pair_id,
+  respondent_id = respondent_id,
+  respondent_task_id = respondent_task_id,
+  profile_order = profile_order,
+  p_list = p_list,
+  varcov_cluster_variable = cluster_var,
+  diff = TRUE,
+  nSGD = 100,
+  compute_se = TRUE,
+  folds = 3,
+  conda_env = "strategize_env",
+  conda_env_required = TRUE
+)
+
+res_avecase$pi_star_point
+res_avecase$Q_point
+res_avecase$Q_se
+```
+
+### Plotting the Learned Distribution
+
+```{r plotting}
+strategize.plot(
+  pi_star_list = res_avecase$pi_star_point,
+  pi_star_se_list = res_avecase$pi_star_se,
+  p_list = p_list,
+  main_title = "Average-case optimal distribution"
+)
+```
+
+Interpret `pi_star_point` as the recommended reweighting of factor levels relative to the baseline design encoded in `p_list`. `Q_point` is the expected outcome under that learned distribution, and `Q_se` is its associated uncertainty when `compute_se = TRUE`.
+
+# Adversarial Optimization
+
+Set `adversarial = TRUE` when each side should optimize strategically against the other. The example below creates simple party labels for respondents and profiles and then fits the adversarial problem directly with `strategize()`.
+
+```{r adversarial}
+respondent_party <- ifelse(seq_len(n_pairs) %% 2L == 0L, "PartyA", "PartyB")
+competing_group_variable_respondent <- respondent_party[respondent_id]
+
+competing_group_variable_candidate <- ifelse(
+  profile_order == 1L,
+  "PartyA",
+  "PartyB"
+)
+
+competing_group_competition_variable_candidate <- rep("Different", length(Yobs))
+
+res_adversarial <- strategize(
+  Y = Yobs,
+  W = FACTOR_MAT_,
+  lambda = 0.1,
+  penalty_type = "KL",
+  pair_id = pair_id,
+  respondent_id = respondent_id,
+  respondent_task_id = respondent_task_id,
+  profile_order = profile_order,
+  p_list = p_list,
+  varcov_cluster_variable = cluster_var,
+  competing_group_variable_respondent = competing_group_variable_respondent,
+  competing_group_variable_candidate = competing_group_variable_candidate,
+  competing_group_competition_variable_candidate = competing_group_competition_variable_candidate,
+  diff = TRUE,
+  adversarial = TRUE,
+  nSGD = 100,
+  compute_se = TRUE,
+  conda_env = "strategize_env",
+  conda_env_required = TRUE
+)
+
+res_adversarial$pi_star_point$k1
+res_adversarial$pi_star_point$k2
+res_adversarial$Q_point
+res_adversarial$Q_se
+```
+
+In adversarial mode, `pi_star_point$k1` and `pi_star_point$k2` hold the two learned strategies. The corresponding `Q_point` value summarizes the equilibrium outcome under those strategies.
+
+# Multi-Cluster Extension
+
+If you want cluster-specific optimal distributions, provide respondent covariates in `X` and set `K > 1`. This asks the package to estimate multiple cluster-level solutions instead of a single pooled distribution.
+
+```{r cluster-based}
+set.seed(321)
+X <- cbind(
+  ideology = rnorm(length(unique(respondent_id))),
+  engagement = runif(length(unique(respondent_id)))
+)
+X <- X[respondent_id, , drop = FALSE]
+
+res_clust <- cv_strategize(
+  Y = Yobs,
+  W = FACTOR_MAT_,
+  X = X,
+  lambda_seq = c(0.01, 0.1),
+  p_list = p_list,
+  pair_id = pair_id,
+  respondent_id = respondent_id,
+  respondent_task_id = respondent_task_id,
+  profile_order = profile_order,
+  diff = TRUE,
+  K = 2L,
+  nSGD = 100,
+  compute_se = TRUE,
+  conda_env = "strategize_env",
+  conda_env_required = TRUE
+)
+
+res_clust$pi_star_point
+res_clust$Q_point
+res_clust$Q_se
+```
+
+# Other Public Workflows
+
+The package now exposes additional public workflows that are separate from the main optimization path:
+
+- `strategic_prediction()` fits the package outcome model without running intervention optimization.
+- `load_conjoint_foundation_bundle()`, `adapt_conjoint_foundation_model()`, and `extract_embeddings()` consume trained foundation-model checkpoints from `preference.fm`.
+
+Those workflows are documented separately so this tutorial can stay focused on the core single-study optimization path.
+
+## References
+
+Jerzak, Connor T., Priyanshi Chandra, and Rishi Hazra. 2026. "MiniMax Learning of Interpretable Factored Stochastic Policies from Conjoint Data, with Uncertainty Quantification." *International Conference on Machine Learning (ICML)*. [[ICML]](https://icml.cc/virtual/2026/poster/65152) [[PDF]](https://arxiv.org/pdf/2504.19043) [[bib]](https://connorjerzak.com/wp-content/uploads/2025/04/Strat.txt)
+
+```bibtex
+@inproceedings{jerzak2026minimax,
+  author    = {Jerzak, Connor T. and Chandra, Priyanshi and Hazra, Rishi},
+  title     = {MiniMax Learning of Interpretable Factored Stochastic Policies from Conjoint Data, with Uncertainty Quantification},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2026}
+}
+```

@@ -1,0 +1,67 @@
+BigData Inc. is a corporation that has n data centers indexed from 1 to n that are located all over the world. These data centers provide storage for client data (you can figure out that client data is really big!).
+
+Main feature of services offered by BigData Inc. is the access availability guarantee even under the circumstances of any data center having an outage. Such a guarantee is ensured by using the two-way replication. Two-way replication is such an approach for data storage that any piece of data is represented by two identical copies that are stored in two different data centers.
+
+For each of m company clients, let us denote indices of two different data centers storing this client data as c_{i}, 1 and c_{i}, 2.
+
+In order to keep data centers operational and safe, the software running on data center computers is being updated regularly. Release cycle of BigData Inc. is one day meaning that the new version of software is being deployed to the data center computers each day.
+
+Data center software update is a non-trivial long process, that is why there is a special hour-long time frame that is dedicated for data center maintenance. During the maintenance period, data center computers are installing software updates, and thus they may be unavailable. Consider the day to be exactly h hours long. For each data center there is an integer u_{j} (0 ≤ u_{j} ≤ h - 1) defining the index of an hour of day, such that during this hour data center j is unavailable due to maintenance.
+
+Summing up everything above, the condition u_{c}_{i}, 1 ≠ u_{c}_{i}, 2 should hold for each client, or otherwise his data may be unaccessible while data centers that store it are under maintenance.
+
+Due to occasional timezone change in different cities all over the world, the maintenance time in some of the data centers may change by one hour sometimes. Company should be prepared for such situation, that is why they decided to conduct an experiment, choosing some non-empty subset of data centers, and shifting the maintenance time for them by an hour later (i.e. if u_{j} = h - 1, then the new maintenance hour would become 0, otherwise it would become u_{j} + 1). Nonetheless, such an experiment should not break the accessibility guarantees, meaning that data of any client should be still available during any hour of a day after the data center maintenance times are changed.
+
+Such an experiment would provide useful insights, but changing update time is quite an expensive procedure, that is why the company asked you to find out the minimum number of data centers that have to be included in an experiment in order to keep the data accessibility guarantees.
+
+
+-----Input-----
+
+The first line of input contains three integers n, m and h (2 ≤ n ≤ 100 000, 1 ≤ m ≤ 100 000, 2 ≤ h ≤ 100 000), the number of company data centers, number of clients and the day length of day measured in hours. 
+
+The second line of input contains n integers u_1, u_2, ..., u_{n} (0 ≤ u_{j} < h), j-th of these numbers is an index of a maintenance hour for data center j. 
+
+Each of the next m lines contains two integers c_{i}, 1 and c_{i}, 2 (1 ≤ c_{i}, 1, c_{i}, 2 ≤ n, c_{i}, 1 ≠ c_{i}, 2), defining the data center indices containing the data of client i.
+
+It is guaranteed that the given maintenance schedule allows each client to access at least one copy of his data at any moment of day.
+
+
+-----Output-----
+
+In the first line print the minimum possible number of data centers k (1 ≤ k ≤ n) that have to be included in an experiment in order to keep the data available for any client.
+
+In the second line print k distinct integers x_1, x_2, ..., x_{k} (1 ≤ x_{i} ≤ n), the indices of data centers whose maintenance time will be shifted by one hour later. Data center indices may be printed in any order.
+
+If there are several possible answers, it is allowed to print any of them. It is guaranteed that at there is at least one valid choice of data centers.
+
+
+-----Examples-----
+Input
+3 3 5
+4 4 0
+1 3
+3 2
+3 1
+
+Output
+1
+3 
+Input
+4 5 4
+2 1 0 3
+4 3
+3 2
+1 2
+1 4
+1 3
+
+Output
+4
+1 2 3 4 
+
+
+-----Note-----
+
+Consider the first sample test. The given answer is the only way to conduct an experiment involving the only data center. In such a scenario the third data center has a maintenance during the hour 1, and no two data centers storing the information of the same client have maintenance at the same hour.
+
+On the other hand, for example, if we shift the maintenance time on hour later for the first data center, then the data of clients 1 and 3 will be unavailable during the hour 0.

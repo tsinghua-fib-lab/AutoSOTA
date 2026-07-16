@@ -1,0 +1,21 @@
+defaults:
+  - /kernel@kernel_spec: rbf
+  - /warper@warper: wasserstein_arc_length
+  - _self_
+
+_target_: active_wasserstein.active.surrogate.LinearizedWassersteinGPSurrogate
+basis_rank: 10
+prior_variance: 1.0
+base_variance: 0.05
+regressor_kwargs:
+  training_iter: 50
+  lr: 0.05
+  jitter: 1e-5
+  input_scaling: true
+  output_scaling: true
+  init_lengthscale_median: true
+  init_outputscale_from_data: true
+  noise_prior_from_data_scale: 0.1
+  noise_initializer:
+    _target_: active_wasserstein.inference.variance_scaled_noise_initializer
+    scale: 0.001

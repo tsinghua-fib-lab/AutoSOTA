@@ -1,0 +1,82 @@
+There are $n$ detachments on the surface, numbered from $1$ to $n$, the $i$-th detachment is placed in a point with coordinates $(x_i, y_i)$. All detachments are placed in different points.
+
+Brimstone should visit each detachment at least once. You can choose the detachment where Brimstone starts.
+
+To move from one detachment to another he should first choose one of four directions of movement (up, right, left or down) and then start moving with the constant speed of one unit interval in a second until he comes to a detachment. After he reaches an arbitrary detachment, he can repeat the same process.
+
+Each $t$ seconds an orbital strike covers the whole surface, so at that moment Brimstone should be in a point where some detachment is located. He can stay with any detachment as long as needed.
+
+Brimstone is a good commander, that's why he can create at most one detachment and place it in any empty point with integer coordinates he wants before his trip. Keep in mind that Brimstone will need to visit this detachment, too.
+
+Help Brimstone and find such minimal $t$ that it is possible to check each detachment. If there is no such $t$ report about it.
+
+
+-----Input-----
+
+The first line contains a single integer $n$ $(2 \le n \le 1000)$ — the number of detachments.
+
+In each of the next $n$ lines there is a pair of integers $x_i$, $y_i$ $(|x_i|, |y_i| \le 10^9)$ — the coordinates of $i$-th detachment.
+
+It is guaranteed that all points are different.
+
+
+-----Output-----
+
+Output such minimal integer $t$ that it is possible to check all the detachments adding at most one new detachment.
+
+If there is no such $t$, print $-1$.
+
+
+-----Examples-----
+Input
+4
+100 0
+0 100
+-100 0
+0 -100
+
+Output
+100
+Input
+7
+0 2
+1 0
+-3 0
+0 -2
+-1 -1
+-1 -3
+-2 -3
+
+Output
+-1
+Input
+5
+0 0
+0 -1
+3 0
+-2 0
+-2 1
+
+Output
+2
+Input
+5
+0 0
+2 0
+0 -1
+-2 0
+-2 1
+
+Output
+2
+
+
+-----Note-----
+
+In the first test it is possible to place a detachment in $(0, 0)$, so that it is possible to check all the detachments for $t = 100$. It can be proven that it is impossible to check all detachments for $t < 100$; thus the answer is $100$.
+
+In the second test, there is no such $t$ that it is possible to check all detachments, even with adding at most one new detachment, so the answer is $-1$.
+
+In the third test, it is possible to place a detachment in $(1, 0)$, so that Brimstone can check all the detachments for $t = 2$. It can be proven that it is the minimal such $t$.
+
+In the fourth test, there is no need to add any detachments, because the answer will not get better ($t = 2$). It can be proven that it is the minimal such $t$.

@@ -1,0 +1,34 @@
+defaults:
+  - _self_
+  - model
+  - train
+  - evaluation
+  - dataset
+  - dysts
+  - analysis
+  - plotting
+  # - override hydra/job_logging: disabled 
+  - override hydra/hydra_logging: disabled 
+
+# string identifier for wandb runs and generic I/O
+run_name: null
+
+hydra:
+  output_subdir: null
+  run:
+    dir: logs
+
+  job_logging:
+    handlers:
+      file:
+        mode: w
+
+# wandb parameters
+wandb:
+  log: false
+  project_name: scaleformer
+  entity: null
+  group_name: null
+  resume: false
+  resume_run_id: null
+  tags: null

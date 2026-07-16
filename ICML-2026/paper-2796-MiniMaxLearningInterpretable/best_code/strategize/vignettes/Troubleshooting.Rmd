@@ -1,0 +1,315 @@
+---
+title: "Troubleshooting Guide"
+author: "strategize package authors"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Troubleshooting Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+This guide covers common issues when using the `strategize` package and their solutions. The JAX-backed `strategize_env` environment is used by `strategize()`, `cv_strategize()`, the package's neural APIs, and foundation-model checkpoint loading.
+
+## Setup Issues
+
+### "Conda environment not found"
+
+**Symptom:** Error message about a missing conda environment when running `strategize()`, `cv_strategize()`, or a neural workflow.
+
+**Solution:**
+
+1. Create the environment:
+```{r}
+library(strategize)
+build_backend(conda_env = "strategize_env")
+```
+
+2. Verify it was created:
+```{r}
+reticulate::conda_list()
+# Should show "strategize_env" in the list
+```
+
+3. If conda itself is not found, install Miniconda:
+```{r}
+reticulate::install_miniconda()
+```
+
+### "JAX import error" or "Module not found"
+
+**Symptom:** Python import errors for JAX, Orbax, or related packages when the package initializes its computational backend.
+
+**Solutions:**
+
+1. Rebuild the environment:
+```{r}
+build_backend(conda_env = "strategize_env")
+```
+
+2. Check that JAX is properly installed:
+```{r}
+reticulate::use_condaenv("strategize_env")
+reticulate::py_module_available("jax")
+# Should return TRUE
+reticulate::py_module_available("orbax.checkpoint")
+# Should return TRUE for foundation checkpoint loading
+
+# strategize-specific check
+strategize::check_jax_available("strategize_env", required = FALSE)
+```
+
+3. On Mac with Apple Silicon, ensure you have XCode command line tools:
+```bash
+xcode-select --install
+```
+
+### "Python not found" or reticulate errors
+
+**Symptom:** reticulate cannot find Python.
+
+**Solution:**
+
+1. Set the Python path explicitly:
+```{r}
+Sys.setenv(RETICULATE_PYTHON = "/path/to/conda/envs/strategize_env/bin/python")
+```
+
+2. Or set in your `.Rprofile`:
+```{r}
+# Add to ~/.Rprofile
+Sys.setenv(RETICULATE_PYTHON = "~/miniconda3/envs/strategize_env/bin/python")
+```
+
+## Data Issues
+
+### "Dimension mismatch" errors
+
+**Symptom:** Error about Y having N elements but W having M rows.
+
+**Cause:** The outcome vector Y and factor matrix W must have the same length.
+
+**Solution:**
+
+For paired forced-choice conjoint data, ensure each profile is a separate row:
+
+```{r}
+# Wrong: One row per choice task
+# Y has 100 elements (100 tasks)
+# W has 100 rows
+
+# Correct: One row per profile
+# Y has 200 elements (100 tasks x 2 profiles)
+# W has 200 rows (each profile as separate row)
+
+# If your data is in wide format, convert to long:
+library(tidyr)
+data_long <- pivot_longer(data_wide, cols = starts_with("profile"))
+```
+
+### "p_list levels don't match W"
+
+**Symptom:** Error about factor levels not matching between p_list and W.
+
+**Solution:**
+
+Use `create_p_list()` to auto-generate matching p_list:
+
+```{r}
+# Auto-generate from data
+p_list <- create_p_list(W, uniform = TRUE)
+
+# Or manually ensure levels match:
+unique(W$Gender)  # Check what levels exist
+p_list$Gender <- c(Male = 0.5, Female = 0.5)  # Match exactly
+```
+
+### Missing or NA values
+
+**Symptom:** Warnings about NA values in Y or unexpected results.
+
+**Solution:**
+
+```{r}
+# Check for NAs
+sum(is.na(Y))
+sum(is.na(W))
+
+# Remove incomplete cases
+complete <- complete.cases(Y, W)
+Y <- Y[complete]
+W <- W[complete, ]
+```
+
+## Optimization Issues
+
+### Convergence problems
+
+**Symptom:** Q values fluctuate wildly, don't improve, or give unexpected results.
+
+**Solutions:**
+
+1. Increase iterations:
+```{r}
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  nSGD = 500  # Increase from default 100
+)
+```
+
+2. Decrease learning rate:
+```{r}
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  learning_rate_max = 0.0001  # Lower than default 0.001
+)
+```
+
+3. Increase Monte Carlo samples for stable gradients:
+```{r}
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  nMonte_Qglm = 500  # Increase from default 100
+)
+```
+
+### "Optimization stuck at baseline"
+
+**Symptom:** pi* is nearly identical to p_list (baseline).
+
+**Causes and solutions:**
+
+1. **Lambda too high:** Lower regularization allows more deviation from baseline
+```{r}
+result <- strategize(Y = Y, W = W, lambda = 0.01)  # Lower lambda
+```
+
+2. **Weak treatment effects:** The outcome may not strongly depend on factors
+```{r}
+# Check if factors actually predict Y
+summary(glm(Y ~ ., data = cbind(Y = Y, W), family = binomial))
+```
+
+3. **Use cross-validation:** Let the data choose optimal lambda
+```{r}
+cv_result <- cv_strategize(
+  Y = Y, W = W,
+  lambda_seq = c(0.001, 0.01, 0.1, 0.5, 1.0)
+)
+```
+
+### Memory errors
+
+**Symptom:** R crashes or reports out of memory.
+
+**Solutions:**
+
+1. Reduce Monte Carlo samples:
+```{r}
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  nMonte_adversarial = 10,  # Reduce from default
+  nMonte_Qglm = 50          # Reduce from default
+)
+```
+
+2. Reduce gradient iterations:
+```{r}
+result <- strategize(Y = Y, W = W, lambda = 0.1, nSGD = 50)
+```
+
+3. For initial exploration, subset your data:
+```{r}
+# Use subset for testing
+idx <- sample(nrow(W), 1000)
+result_test <- strategize(Y = Y[idx], W = W[idx, ], lambda = 0.1)
+```
+
+## Result Interpretation
+
+### Q values interpretation
+
+- **Q*** represents the expected outcome under the optimal distribution
+- For binary Y: Q* is expected probability of positive outcome (e.g., vote share)
+- Compare Q* to baseline: Under uniform p_list, expected value is typically ~0.5
+
+### Wide confidence intervals
+
+**Causes:**
+
+1. **Insufficient data:** Need more observations for precise estimates
+2. **High lambda:** Very regularized estimates have high uncertainty
+3. **Low Monte Carlo samples:** Increase `nMonte_Qglm`
+
+**Solutions:**
+
+```{r}
+# More Monte Carlo samples for tighter SEs
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  nMonte_Qglm = 500,
+  compute_se = TRUE
+)
+```
+
+### Unexpected pi* values
+
+**Checks to perform:**
+
+1. Verify p_list matches your experiment design
+2. Check that Y is coded correctly (1 = preferred outcome)
+3. Look at sample sizes per factor level:
+```{r}
+table(W$Gender)  # Ensure adequate sample in each level
+```
+
+## Adversarial Mode Issues
+
+### "adversarial=TRUE requires competing_group_variable"
+
+**Solution:** Provide party/group information for both respondents and candidates:
+
+```{r}
+result <- strategize(
+  Y = Y, W = W, lambda = 0.1,
+  adversarial = TRUE,
+  competing_group_variable_respondent = respondent_party,  # e.g., "Dem" or "Rep"
+  competing_group_variable_candidate = candidate_party     # Same for candidates
+)
+```
+
+### Adversarial equilibrium not at 0.5
+
+Q* in adversarial mode represents the equilibrium vote share. It deviates from 0.5 when:
+
+- Voter proportions are asymmetric (more R than D voters)
+- One party has structural advantage in factor preferences
+
+This is expected behavior, not an error.
+
+## Getting Help
+
+If you encounter issues not covered here:
+
+1. **Check function documentation:**
+```{r}
+?strategize
+?cv_strategize
+```
+
+2. **Report issues:**
+   https://github.com/cjerzak/strategize-software/issues
+
+3. **Include in bug reports:**
+   - R version: `R.version.string`
+   - Package version: `packageVersion("strategize")`
+   - Minimal reproducible example
+   - Full error message

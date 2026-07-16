@@ -1,0 +1,66 @@
+{
+    "config": {
+        "method": "random",
+        "metric": {
+            "goal": "minimize",
+            "name": "extraction score"
+        },
+        "parameters": {
+            "data_per_class_train": {
+                "value": 250
+            },
+            "extraction_data_amount_per_class": {
+                "value": 500
+            },
+            "extraction_epochs": {
+                "value": 50000
+            },
+            "extraction_evaluate_rate": {
+                "value": 1000
+            },
+            "extraction_init_scale": {
+                "distribution": "log_uniform_values",
+                "max": 0.1,
+                "min": "1e-06"
+            },
+            "extraction_lr": {
+                "distribution": "log_uniform_values",
+                "max": 1,
+                "min": "1e-05"
+            },
+            "extraction_min_lambda": {
+                "distribution": "uniform",
+                "max": 0.5,
+                "min": 0.01
+            },
+            "extraction_model_relu_alpha": {
+                "distribution": "uniform",
+                "max": 500,
+                "min": 10
+            },
+            "model_hidden_list": {
+                "value": "[1000,1000]"
+            },
+            "model_init_list": {
+                "value": "[0.001,0.001]"
+            },
+            "pretrained_model_path": {
+                "value": "weights-mnist_odd_even_d250_mnist_odd_even.pth"
+            },
+            "problem": {
+                "value": "mnist_odd_even"
+            },
+            "run_mode": {
+                "value": "reconstruct"
+            },
+            "wandb_active": {
+                "value": true
+            }
+        },
+        "program": "Main.py"
+    },
+    "full_name": "mnist_odd_even_uvl74ek9",
+    "id": "uvl74ek9",
+    "pretrained_model_path": "weights-mnist_odd_even_d250_mnist_odd_even.pth",
+    "problem": "mnist_odd_even"
+}

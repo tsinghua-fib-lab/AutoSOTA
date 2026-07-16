@@ -2,13 +2,13 @@
 
 - Title: Control Consistency Losses for Diffusion Bridges
 - Primary metric: `kl_to_solution` (lower)
-- Records: 10
-- Generated: 2026-07-09T14:27:21Z
+- Records: 7
+- Generated: 2026-07-15T13:41:59Z
 
 ## Best Result
 
-- Iteration: 9
-- Idea: PARAM-01 — Extended Training (8000 iterations) with Cosine LR
-- Primary metric: 0.002293
-- Commit: `5c363a8d1d023d668c5c8b8979616ea2be1ae77e`
-- Notes: Extended num_outer_iterations from 4000 to 8000 with cosine LR decay. kl_to_solution: 0.00386→0.00229 (-40% from iter4, -95.5% from baseline). Incredibly consistent: [0.00252, 0.00224, 0.00198, 0.00228, 0.00244], std=0.00019. kl_to_reference_learned=7.07 stays near true 7.02. Extended training with cosine LR enables full convergence — the model benefits from extended fine-tuning at low LR.
+- Iteration: 7
+- Idea: COMBO-001 — Combo: STL + EMA 0.999 + traj_batch 128
+- Primary metric: 0.019362
+- Commit: `877a814ef70b27bb31eb687bdde7443b50fc63ee`
+- Notes: Combining STL_adjustments + ema_rate=0.999 + traj_batch_size=128. BEST RESULT: KL 0.0194 vs baseline 0.0514 (62% improvement). 5 runs for statistical reliability.

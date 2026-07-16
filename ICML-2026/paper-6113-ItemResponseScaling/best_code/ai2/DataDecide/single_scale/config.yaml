@@ -1,0 +1,24 @@
+input_csv: "results_ladder_5xC_seeds_cleaned_correct_params.csv"
+out_dir: ./outputs2
+task_aggregation: "olmes" # options: "olmes" or one of the subtasks
+plots_dir: ./figures
+target_model: "1B"
+bad_mixes: ["redpajama",
+            # 'c4', 'pos_eli5_oh_neg_dclm_refinedweb_steps_2000_lr3e4_top10p', 'prox_fineweb_pro' # these are included for now because they dont have full steos on all 1B seeds # this is now handled in data cleaning
+            ]
+proportions: null #[0.01, 0.01242614464650808, 0.015440907077594141, 0.019187094481947508, 0.023842161137889673, 0.029626614298477075, 0.03681445946591805, 0.04574617984065062, 0.05684486477250966, 0.07063625120743966, 0.08777362747907264, 0.10906877912036723, 0.13553044257677235, 0.16841208834642304, 0.20927129700131494, 0.26004354069006924, 0.32313386510049097, 0.401530814792393, 0.49894799846405213, 0.62] #[0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1] # of target compute [0.05, 0.1, 0.15, 0.2, 0.25]
+# compute_bin_width_as_proportion: 0.01 # depricated
+target_filter:
+  method: null # Options: "log_fit", "seed", null
+data_methods:
+  primary: null # Target should not be changed
+  metric: null # Options: "exponential_smoothing", "scaling_law", null
+evaluator:
+  binary_accuracy: true
+  three_way_accuracy: false
+  magnitude_correlation: true
+  pearson_correlation: true
+  magnitude_ece: false
+  recall_at_k: false
+  weighted_pearson_correlation: True
+  NDCG: True

@@ -1,0 +1,48 @@
+You are given an integer m.
+
+Let M = 2^{m} - 1.
+
+You are also given a set of n integers denoted as the set T. The integers will be provided in base 2 as n binary strings of length m.
+
+A set of integers S is called "good" if the following hold.   If $a \in S$, then [Image].  If $a, b \in S$, then $a \text{AND} b \in S$  $T \subseteq S$  All elements of S are less than or equal to M. 
+
+Here, $XOR$ and $\text{AND}$ refer to the bitwise XOR and bitwise AND operators, respectively.
+
+Count the number of good sets S, modulo 10^9 + 7.
+
+
+-----Input-----
+
+The first line will contain two integers m and n (1 ≤ m ≤ 1 000, 1 ≤ n ≤ min(2^{m}, 50)).
+
+The next n lines will contain the elements of T. Each line will contain exactly m zeros and ones. Elements of T will be distinct.
+
+
+-----Output-----
+
+Print a single integer, the number of good sets modulo 10^9 + 7. 
+
+
+-----Examples-----
+Input
+5 3
+11010
+00101
+11000
+
+Output
+4
+
+Input
+30 2
+010101010101010010101010101010
+110110110110110011011011011011
+
+Output
+860616440
+
+
+
+-----Note-----
+
+An example of a valid set S is {00000, 00101, 00010, 00111, 11000, 11010, 11101, 11111}.

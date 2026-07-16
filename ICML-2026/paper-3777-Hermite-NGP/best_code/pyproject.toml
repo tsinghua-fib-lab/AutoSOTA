@@ -1,0 +1,37 @@
+[build-system]
+# We deliberately do NOT list `torch` here. PEP 517 build isolation would
+# fetch the latest torch wheel (which may use a newer CUDA than the system
+# toolkit), causing a CUDA-version mismatch at compile time. The
+# setup.py imports torch from the active environment instead — install with:
+#   pip install torch --index-url https://download.pytorch.org/whl/cuXYZ
+#   pip install --no-build-isolation -e .
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hermite-ngp"
+version = "1.0.0"
+description = "Hermite-NGP: Gradient-Augmented Hash Encoding for Learning PDEs (ICML 2026)"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Jinjin He", email = "jhe433@gatech.edu" },
+    { name = "Zhiqi Li" },
+    { name = "Sinan Wang" },
+    { name = "Bo Zhu" },
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["hermite_ngp*"]
+exclude = ["examples*", "configs*", "data*", "scripts*", "docs*"]

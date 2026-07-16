@@ -1,0 +1,133 @@
+---
+title: "Foundation Models for Multi-Study Conjoint Learning"
+author: "strategize package authors"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Foundation Models for Multi-Study Conjoint Learning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Overview
+
+Foundation-model ownership is split across two packages:
+
+- `preference.fm` trains pooled preference foundation models, writes checkpoint directories, and adapts current semantic zero-overlap models to target studies.
+- `strategize` extracts embeddings and runs saved adapted predictors from loaded artifacts.
+
+This keeps `strategize` focused on runtime use of trained representations. The
+old `strategize::fit_conjoint_foundation_model()` and
+`strategize::save_conjoint_foundation_bundle()` names are migration stubs.
+`strategize::load_conjoint_foundation_bundle()` is a migration shim.
+
+# Backend Setup
+
+Both packages use the same JAX backend. Run this once:
+
+```{r backend, eval=FALSE}
+strategize::build_backend(conda_env = "strategize_env")
+```
+
+The backend includes `orbax-checkpoint` for the Python module
+`orbax.checkpoint`, which is used for JAX-native PyTree checkpoints.
+
+# Train With preference.fm
+
+```{r train, eval=FALSE}
+library(preference.fm)
+
+foundation_fit <- preference.fm::fit_conjoint_foundation_model(
+  experiments = list(study_a, study_b),
+  foundation_control = list(
+    neural_mcmc_control = list(
+      ModelDims = 32L,
+      ModelDepth = 1L,
+      subsample_method = "batch_vi",
+      uncertainty_scope = "output",
+      svi_steps = 100L
+    )
+  ),
+  conda_env = "strategize_env"
+)
+
+preference.fm::save_conjoint_foundation_bundle(
+  file = "foundation_bundle",
+  foundation_model = foundation_fit,
+  overwrite = TRUE
+)
+```
+
+New artifacts are directories with `manifest.json` and an Orbax checkpoint under
+`arrays/`. Legacy `.rds` foundation bundles remain loadable through
+`preference.fm`, and new large pooled FM bundles should be written there too.
+
+# Load And Adapt With preference.fm
+
+```{r load-adapt, eval=FALSE}
+library(strategize)
+library(preference.fm)
+
+foundation_fit <- preference.fm::load_conjoint_foundation_bundle(
+  file = "foundation_bundle",
+  preload_params = FALSE
+)
+
+adapted_fit <- preference.fm::adapt_conjoint_foundation_model(
+  foundation_model = foundation_fit,
+  Y = target_y,
+  W = target_w,
+  X = target_x,
+  mode = "pairwise",
+  pair_id = target_pair_id,
+  profile_order = target_profile_order,
+  experiment_id = "target_study",
+  foundation_adaptation_control = list(text_embedding_fn = text_embedding_fn),
+  conda_env = "strategize_env"
+)
+
+predict(
+  adapted_fit,
+  newdata = list(
+    W = target_w,
+    X = target_x,
+    pair_id = target_pair_id,
+    profile_order = target_profile_order
+  )
+)
+```
+
+Adapted semantic foundation predictors record the target-study prediction
+schema, so prediction-time `X` can use the raw target covariate names.
+
+# Embeddings
+
+Raw loaded foundation objects can be used for embedding extraction:
+
+```{r embeddings, eval=FALSE}
+emb <- strategize::extract_embeddings(
+  foundation_fit,
+  newdata = list(
+    W = target_w,
+    pair_id = target_pair_id,
+    profile_order = target_profile_order
+  ),
+  p_list = strategize::create_p_list(target_w, uniform = TRUE)
+)
+```
+
+# Common Failure Modes
+
+- Calling `strategize::fit_conjoint_foundation_model()` for new pooled training.
+- Calling `strategize::save_conjoint_foundation_bundle()` or
+  `strategize::load_conjoint_foundation_bundle()` for new artifacts.
+- Loading a checkpoint directory before installing `orbax-checkpoint`.
+- Calling `strategize::adapt_conjoint_foundation_model()` on current semantic zero-overlap foundation models instead of `preference.fm::adapt_conjoint_foundation_model()`.
+- Attempting adaptation when the trained foundation object has no compatible group for the target study.
