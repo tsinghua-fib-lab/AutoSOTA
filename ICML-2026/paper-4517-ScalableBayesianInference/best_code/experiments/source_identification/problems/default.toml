@@ -1,0 +1,62 @@
+# Default source identification problem
+# Single Gaussian source with observations distributed across the domain
+
+[physics]
+vx = 1.0          # Advection velocity in x
+vy = 0.0          # Advection velocity in y
+D = 0.05          # Diffusion coefficient
+domain = [0.0, 1.0, 0.0, 1.0]  # [x_min, x_max, y_min, y_max]
+c_inflow = 0.0    # Dirichlet BC at left boundary
+
+[[sources]]
+x = 0.3
+y = 0.5
+strength = 5.0
+width = 0.08
+
+# Observations spread across the domain
+# Mix of upstream, downstream, and lateral positions
+
+[[observations]]
+x = 0.8
+y = 0.5
+
+[[observations]]
+x = 0.6
+y = 0.3
+
+[[observations]]
+x = 0.6
+y = 0.7
+
+[[observations]]
+x = 0.5
+y = 0.5
+
+[[observations]]
+x = 0.4
+y = 0.2
+
+[[observations]]
+x = 0.4
+y = 0.8
+
+[[observations]]
+x = 0.7
+y = 0.4
+
+[[observations]]
+x = 0.7
+y = 0.6
+
+[[observations]]
+x = 0.9
+y = 0.5
+
+[[observations]]
+x = 0.5
+y = 0.9
+
+[noise]
+std = 0.1
+seed = 42

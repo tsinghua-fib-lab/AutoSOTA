@@ -1,0 +1,96 @@
+# Well-observed problem for good source inference
+# Observations form a "net" downstream of the source at multiple y-positions
+# This configuration should yield a well-constrained source estimate
+
+[physics]
+vx = 1.0          # Advection velocity in x
+vy = 0.0          # Advection velocity in y
+D = 0.05          # Diffusion coefficient
+domain = [0.0, 1.0, 0.0, 1.0]  # [x_min, x_max, y_min, y_max]
+c_inflow = 0.0    # Dirichlet BC at left boundary
+
+[[sources]]
+x = 0.3
+y = 0.5
+strength = 5.0
+width = 0.08
+
+# Downstream "net" of observations at multiple x and y positions
+# Captures the plume spread and allows triangulation back to source
+
+[[observations]]
+x = 0.35
+y = 0.3
+
+[[observations]]
+x = 0.35
+y = 0.5
+
+[[observations]]
+x = 0.35
+y = 0.7
+
+# First vertical line at x=0.5 (just downstream of source)
+[[observations]]
+x = 0.5
+y = 0.3
+
+[[observations]]
+x = 0.5
+y = 0.5
+
+[[observations]]
+x = 0.5
+y = 0.7
+
+# Second vertical line at x=0.65
+[[observations]]
+x = 0.65
+y = 0.25
+
+[[observations]]
+x = 0.65
+y = 0.5
+
+[[observations]]
+x = 0.65
+y = 0.75
+
+# Third vertical line at x=0.8
+[[observations]]
+x = 0.8
+y = 0.3
+
+[[observations]]
+x = 0.8
+y = 0.5
+
+[[observations]]
+x = 0.8
+y = 0.7
+
+# Far downstream at x=0.95
+[[observations]]
+x = 0.95
+y = 0.4
+
+[[observations]]
+x = 0.95
+y = 0.6
+
+# A couple upstream to anchor the inflow region
+[[observations]]
+x = 0.15
+y = 0.5
+
+[[observations]]
+x = 0.15
+y = 0.3
+
+[[observations]]
+x = 0.15
+y = 0.7
+
+[noise]
+std = 0.01
+seed = 42

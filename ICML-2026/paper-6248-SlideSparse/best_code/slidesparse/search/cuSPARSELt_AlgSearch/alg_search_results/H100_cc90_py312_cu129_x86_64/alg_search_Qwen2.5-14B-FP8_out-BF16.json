@@ -1,0 +1,1256 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA H100 PCIe",
+    "gpu_short_name": "H100",
+    "compute_capability": "cc90",
+    "arch_name": "Hopper",
+    "model_name": "Qwen2.5-14B-FP8",
+    "layout": "TNCCcol_sparse24",
+    "dtype": "fp8e4m3",
+    "outdtype": "bf16",
+    "alg_count": 25,
+    "config_count": 25,
+    "warmup": 25,
+    "repeat": 50,
+    "verify": false,
+    "torch_version": "2.9.0+cu129",
+    "cuda_version_driver": "13.0",
+    "cuda_version_runtime": "12.9",
+    "time": "2026-01-26T07:10:22.533054",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536
+    ],
+    "NK_list": [
+      [
+        7168,
+        5120
+      ],
+      [
+        5120,
+        5120
+      ],
+      [
+        27648,
+        5120
+      ],
+      [
+        5120,
+        13824
+      ],
+      [
+        7168,
+        6848
+      ],
+      [
+        5120,
+        6848
+      ],
+      [
+        27648,
+        6848
+      ],
+      [
+        5120,
+        18432
+      ],
+      [
+        7168,
+        7680
+      ],
+      [
+        5120,
+        7680
+      ],
+      [
+        27648,
+        7680
+      ],
+      [
+        5120,
+        20736
+      ],
+      [
+        7168,
+        8192
+      ],
+      [
+        5120,
+        8192
+      ],
+      [
+        27648,
+        8192
+      ],
+      [
+        5120,
+        22144
+      ]
+    ],
+    "supports_segment_k": true,
+    "search_split_k": false
+  },
+  "nk_entries": {
+    "(7168,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 11,
+          "split_k": -1,
+          "workspace": 4587839
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": 1,
+          "workspace": 4587839
+        },
+        "256": {
+          "alg_id": 20,
+          "split_k": -1,
+          "workspace": 4587967
+        },
+        "512": {
+          "alg_id": 6,
+          "split_k": -1,
+          "workspace": 4587967
+        },
+        "1024": {
+          "alg_id": 6,
+          "split_k": 1,
+          "workspace": 4587839
+        },
+        "2048": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 4587967
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 4587967
+        },
+        "8192": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 4587967
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4587967
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 4719039
+        },
+        "65536": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 4587967
+        }
+      }
+    },
+    "(5120,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 11,
+          "split_k": 1,
+          "workspace": 3277119
+        },
+        "128": {
+          "alg_id": 15,
+          "split_k": -1,
+          "workspace": 4784703
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": 1,
+          "workspace": 3277119
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 3277247
+        },
+        "1024": {
+          "alg_id": 24,
+          "split_k": 1,
+          "workspace": 3277247
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 3277247
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 3277247
+        },
+        "8192": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 3277247
+        },
+        "16384": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 3277247
+        },
+        "32768": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 3277247
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 3277247
+        }
+      }
+    },
+    "(27648,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 10,
+          "split_k": -1,
+          "workspace": 17695167
+        },
+        "128": {
+          "alg_id": 13,
+          "split_k": 1,
+          "workspace": 17695039
+        },
+        "256": {
+          "alg_id": 6,
+          "split_k": 1,
+          "workspace": 17695039
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "16384": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 17695167
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 17695167
+        }
+      }
+    },
+    "(5120,13824)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8847679
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": 1,
+          "workspace": 8847679
+        },
+        "256": {
+          "alg_id": 21,
+          "split_k": -1,
+          "workspace": 8847679
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 8847679
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 22479423
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 8847807
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 8847807
+        },
+        "8192": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 8847807
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 8847807
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 10519359
+        },
+        "65536": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 8847807
+        }
+      }
+    },
+    "(7168,6848)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 10,
+          "split_k": 1,
+          "workspace": 6136127
+        },
+        "128": {
+          "alg_id": 13,
+          "split_k": 1,
+          "workspace": 6136127
+        },
+        "256": {
+          "alg_id": 7,
+          "split_k": 1,
+          "workspace": 6136127
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 6136255
+        },
+        "1024": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 6136127
+        },
+        "2048": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 7774783
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 6136255
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 6136255
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 6136255
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 16622143
+        },
+        "65536": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 6136255
+        }
+      }
+    },
+    "(5120,6848)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 23,
+          "split_k": 1,
+          "workspace": 4383039
+        },
+        "128": {
+          "alg_id": 14,
+          "split_k": -1,
+          "workspace": 5890623
+        },
+        "256": {
+          "alg_id": 24,
+          "split_k": 1,
+          "workspace": 4383039
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 4383167
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4383039
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4383167
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4383167
+        },
+        "8192": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 4383167
+        },
+        "16384": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 4383167
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4383167
+        },
+        "65536": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 4383167
+        }
+      }
+    },
+    "(27648,6848)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 22,
+          "split_k": 1,
+          "workspace": 23667135
+        },
+        "128": {
+          "alg_id": 7,
+          "split_k": 1,
+          "workspace": 23667007
+        },
+        "256": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 23667007
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 25436991
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 23667135
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 23667135
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 23667135
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 23667135
+        },
+        "16384": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 23667135
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 25240255
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 25240127
+        }
+      }
+    },
+    "(5120,18432)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 11,
+          "split_k": 1,
+          "workspace": 11796799
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": 1,
+          "workspace": 11796799
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": 1,
+          "workspace": 11796799
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 11796799
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 25428543
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 11796927
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 11796927
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 11796927
+        },
+        "16384": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 11796927
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 11796927
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 11796927
+        }
+      }
+    },
+    "(7168,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6881599
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": -1,
+          "workspace": 6881599
+        },
+        "256": {
+          "alg_id": 20,
+          "split_k": -1,
+          "workspace": 6881727
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 6881599
+        },
+        "1024": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 6881727
+        },
+        "2048": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 8520255
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 6881727
+        },
+        "8192": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 6881727
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 6881727
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 7143871
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 6881727
+        }
+      }
+    },
+    "(5120,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 11,
+          "split_k": 1,
+          "workspace": 4915519
+        },
+        "128": {
+          "alg_id": 15,
+          "split_k": 1,
+          "workspace": 4915519
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": -1,
+          "workspace": 4915647
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 4915647
+        },
+        "1024": {
+          "alg_id": 24,
+          "split_k": 1,
+          "workspace": 4915647
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 6619711
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4915647
+        },
+        "8192": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 4915647
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 4915647
+        },
+        "32768": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 15532863
+        },
+        "65536": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 4915647
+        }
+      }
+    },
+    "(27648,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 10,
+          "split_k": 1,
+          "workspace": 26542399
+        },
+        "128": {
+          "alg_id": 24,
+          "split_k": -1,
+          "workspace": 26542399
+        },
+        "256": {
+          "alg_id": 6,
+          "split_k": -1,
+          "workspace": 26542399
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 26542527
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 26542527
+        },
+        "2048": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 28017471
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 26542527
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 26542527
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 28115647
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 28115647
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 26542527
+        }
+      }
+    },
+    "(5120,20736)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 13271359
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": 1,
+          "workspace": 13271359
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": -1,
+          "workspace": 13271487
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 13271359
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 26903103
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 13271487
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 13271487
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 13271487
+        },
+        "16384": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 13271487
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 14943039
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 13271487
+        }
+      }
+    },
+    "(7168,8192)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 11,
+          "split_k": -1,
+          "workspace": 7340351
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": -1,
+          "workspace": 7340351
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": 1,
+          "workspace": 7340351
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 7340351
+        },
+        "1024": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 7340479
+        },
+        "2048": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 8979007
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 7340479
+        },
+        "8192": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 7340479
+        },
+        "16384": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 7340479
+        },
+        "32768": {
+          "alg_id": 17,
+          "split_k": -1,
+          "workspace": 7340479
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 7340479
+        }
+      }
+    },
+    "(5120,8192)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 23,
+          "split_k": 1,
+          "workspace": 5243199
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": 1,
+          "workspace": 5243199
+        },
+        "256": {
+          "alg_id": 13,
+          "split_k": -1,
+          "workspace": 5243327
+        },
+        "512": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 5243199
+        },
+        "1024": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 6947519
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 6947391
+        },
+        "4096": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 5243327
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 5243327
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 5243327
+        },
+        "32768": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 5243327
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 5243327
+        }
+      }
+    },
+    "(27648,8192)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 10,
+          "split_k": -1,
+          "workspace": 28311999
+        },
+        "128": {
+          "alg_id": 24,
+          "split_k": -1,
+          "workspace": 28311871
+        },
+        "256": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 28311871
+        },
+        "512": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "2048": {
+          "alg_id": 8,
+          "split_k": -1,
+          "workspace": 29786943
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "8192": {
+          "alg_id": 17,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "16384": {
+          "alg_id": 8,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 28311999
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 28311999
+        }
+      }
+    },
+    "(5120,22144)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 14172479
+        },
+        "128": {
+          "alg_id": 12,
+          "split_k": -1,
+          "workspace": 15680063
+        },
+        "256": {
+          "alg_id": 21,
+          "split_k": 1,
+          "workspace": 14172479
+        },
+        "512": {
+          "alg_id": 6,
+          "split_k": -1,
+          "workspace": 14172479
+        },
+        "1024": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 27804223
+        },
+        "2048": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 14172607
+        },
+        "4096": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 14172607
+        },
+        "8192": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 14172607
+        },
+        "16384": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 14172607
+        },
+        "32768": {
+          "alg_id": 19,
+          "split_k": 1,
+          "workspace": 14172607
+        },
+        "65536": {
+          "alg_id": 19,
+          "split_k": -1,
+          "workspace": 14172607
+        }
+      }
+    }
+  }
+}

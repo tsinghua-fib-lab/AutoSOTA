@@ -1,0 +1,1378 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GB10",
+    "compute_capability": "12.1",
+    "arch_name": "Blackwell",
+    "dtype": "int8",
+    "warmup": 10,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "cuda_version_driver": "13.0",
+    "cuda_version_runtime": "12.9",
+    "time": "2026-01-06T23:12:35.500506",
+    "m_list": [
+      16,
+      256,
+      2048,
+      16384
+    ],
+    "nk_list": [
+      [
+        3840,
+        2560,
+        "Wqkv"
+      ],
+      [
+        2560,
+        2560,
+        "Wo"
+      ],
+      [
+        13824,
+        2560,
+        "W13"
+      ],
+      [
+        2560,
+        6912,
+        "W2"
+      ]
+    ],
+    "layout_configs": [
+      "TN+CC",
+      "NT+RR",
+      "NN+RC",
+      "TT+CR"
+    ],
+    "output_orders": [
+      "Col",
+      "Row"
+    ]
+  },
+  "results": {
+    "(3840,2560)": {
+      "name": "Wqkv",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 30.570964813232422,
+          "best_lat_us": 10.289920806884766,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 37.90837860107422,
+          "best_lat_us": 8.298239707946777,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 30.546268463134766,
+          "best_lat_us": 10.298239707946777,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 37.6845817565918,
+          "best_lat_us": 8.347519874572754,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 30.4686336517334,
+          "best_lat_us": 10.324480056762695,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 37.9552116394043,
+          "best_lat_us": 8.288000106811523,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 30.462968826293945,
+          "best_lat_us": 10.326399803161621,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 37.4377326965332,
+          "best_lat_us": 8.402560234069824,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 174.41770935058594,
+          "best_lat_us": 28.85696029663086,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 166.9671630859375,
+          "best_lat_us": 30.144638061523438,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 175.20263671875,
+          "best_lat_us": 28.727678298950195,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 165.01226806640625,
+          "best_lat_us": 30.501760482788086,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 175.1051025390625,
+          "best_lat_us": 28.74367904663086,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 167.16236877441406,
+          "best_lat_us": 30.109437942504883,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 175.18312072753906,
+          "best_lat_us": 28.730878829956055,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 166.52874755859375,
+          "best_lat_us": 30.2239990234375,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 248.4571075439453,
+          "best_lat_us": 162.0614471435547,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 229.9525604248047,
+          "best_lat_us": 175.10272216796875,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 237.82266235351562,
+          "best_lat_us": 169.30816650390625,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 253.3659210205078,
+          "best_lat_us": 158.92160034179688,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 248.49636840820312,
+          "best_lat_us": 162.0358428955078,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 230.506103515625,
+          "best_lat_us": 174.68222045898438,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 249.03443908691406,
+          "best_lat_us": 161.6857452392578,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 251.99693298339844,
+          "best_lat_us": 159.7849578857422,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 222.5359649658203,
+          "best_lat_us": 1447.5078125,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 222.26365661621094,
+          "best_lat_us": 1449.28125,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 228.99411010742188,
+          "best_lat_us": 1406.684814453125,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 225.30618286132812,
+          "best_lat_us": 1429.710205078125,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 229.91294860839844,
+          "best_lat_us": 1401.0631103515625,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 225.8883514404297,
+          "best_lat_us": 1426.0255126953125,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 225.9552764892578,
+          "best_lat_us": 1425.6031494140625,
+          "best_id": 1,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 225.18685913085938,
+          "best_lat_us": 1430.4677734375,
+          "best_id": 0,
+          "best_ws": 1228800,
+          "best_split_k": 1
+        }
+      }
+    },
+    "(2560,2560)": {
+      "name": "Wo",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 20.351530075073242,
+          "best_lat_us": 10.304640769958496,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 25.142332077026367,
+          "best_lat_us": 8.341119766235352,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 20.389522552490234,
+          "best_lat_us": 10.285439491271973,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 25.33673667907715,
+          "best_lat_us": 8.277119636535645,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 20.247156143188477,
+          "best_lat_us": 10.357760429382324,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 25.285903930664062,
+          "best_lat_us": 8.2937593460083,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 20.36544418334961,
+          "best_lat_us": 10.297599792480469,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 25.307382583618164,
+          "best_lat_us": 8.286720275878906,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 202.23260498046875,
+          "best_lat_us": 16.591999053955078,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 203.55953979492188,
+          "best_lat_us": 16.483840942382812,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 203.8761749267578,
+          "best_lat_us": 16.458240509033203,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 203.33062744140625,
+          "best_lat_us": 16.502399444580078,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 204.16200256347656,
+          "best_lat_us": 16.435199737548828,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 204.0110321044922,
+          "best_lat_us": 16.44736099243164,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 202.81150817871094,
+          "best_lat_us": 16.544639587402344,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 202.70172119140625,
+          "best_lat_us": 16.553600311279297,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 250.63214111328125,
+          "best_lat_us": 107.10336303710938,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 249.15521240234375,
+          "best_lat_us": 107.73824310302734,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 254.68336486816406,
+          "best_lat_us": 105.3996810913086,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 247.97679138183594,
+          "best_lat_us": 108.25023651123047,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 254.10324096679688,
+          "best_lat_us": 105.64031219482422,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 250.4600372314453,
+          "best_lat_us": 107.17696380615234,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 220.42568969726562,
+          "best_lat_us": 121.78047943115234,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 248.4276885986328,
+          "best_lat_us": 108.05375671386719,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 232.64642333984375,
+          "best_lat_us": 923.0675659179688,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 225.31700134277344,
+          "best_lat_us": 953.0943603515625,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 229.33651733398438,
+          "best_lat_us": 936.3897705078125,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 223.35552978515625,
+          "best_lat_us": 961.4642944335938,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 228.69036865234375,
+          "best_lat_us": 939.0354614257812,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 231.30809020996094,
+          "best_lat_us": 928.4083862304688,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 227.07786560058594,
+          "best_lat_us": 945.7036743164062,
+          "best_id": 1,
+          "best_ws": 819200,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 222.55303955078125,
+          "best_lat_us": 964.93115234375,
+          "best_id": 0,
+          "best_ws": 819200,
+          "best_split_k": 1
+        }
+      }
+    },
+    "(13824,2560)": {
+      "name": "W13",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 42.68313980102539,
+          "best_lat_us": 26.531837463378906,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 45.89950942993164,
+          "best_lat_us": 24.672639846801758,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 42.13931655883789,
+          "best_lat_us": 26.874238967895508,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 45.93645095825195,
+          "best_lat_us": 24.652799606323242,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 34.465755462646484,
+          "best_lat_us": 32.857601165771484,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 43.28559494018555,
+          "best_lat_us": 26.162561416625977,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 42.43439865112305,
+          "best_lat_us": 26.687360763549805,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 46.6509895324707,
+          "best_lat_us": 24.27519989013672,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 200.44570922851562,
+          "best_lat_us": 90.39551544189453,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 213.69305419921875,
+          "best_lat_us": 84.79167938232422,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 194.36068725585938,
+          "best_lat_us": 93.2256088256836,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 199.73019409179688,
+          "best_lat_us": 90.71935272216797,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 210.30406188964844,
+          "best_lat_us": 86.15807342529297,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 206.35691833496094,
+          "best_lat_us": 87.80608367919922,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 210.9213409423828,
+          "best_lat_us": 85.90592956542969,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 205.46734619140625,
+          "best_lat_us": 88.18624114990234,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 234.6165008544922,
+          "best_lat_us": 617.8386840820312,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 244.0474853515625,
+          "best_lat_us": 593.962890625,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 236.29486083984375,
+          "best_lat_us": 613.4502563476562,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 238.61073303222656,
+          "best_lat_us": 607.496337890625,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 229.5028076171875,
+          "best_lat_us": 631.6051025390625,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 240.73167419433594,
+          "best_lat_us": 602.14404296875,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 243.01422119140625,
+          "best_lat_us": 596.4883422851562,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 245.1428985595703,
+          "best_lat_us": 591.3087768554688,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 236.6189727783203,
+          "best_lat_us": 4900.8798828125,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 239.27310180664062,
+          "best_lat_us": 4846.51708984375,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 236.4550018310547,
+          "best_lat_us": 4904.2783203125,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 239.25497436523438,
+          "best_lat_us": 4846.88427734375,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 237.22532653808594,
+          "best_lat_us": 4888.35302734375,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 237.03662109375,
+          "best_lat_us": 4892.24462890625,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 238.30328369140625,
+          "best_lat_us": 4866.24072265625,
+          "best_id": 1,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 236.53933715820312,
+          "best_lat_us": 4902.52978515625,
+          "best_id": 0,
+          "best_ws": 4423680,
+          "best_split_k": 1
+        }
+      }
+    },
+    "(2560,6912)": {
+      "name": "W2",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 28.64613914489746,
+          "best_lat_us": 19.766399383544922,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 31.0335693359375,
+          "best_lat_us": 18.245759963989258,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 28.71214485168457,
+          "best_lat_us": 19.720958709716797,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 31.036832809448242,
+          "best_lat_us": 18.24384117126465,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 28.731725692749023,
+          "best_lat_us": 19.70751953125,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 31.106674194335938,
+          "best_lat_us": 18.202878952026367,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 28.69352149963379,
+          "best_lat_us": 19.7337589263916,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 31.1033935546875,
+          "best_lat_us": 18.20479965209961,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 255.53326416015625,
+          "best_lat_us": 35.454078674316406,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 253.2475128173828,
+          "best_lat_us": 35.774078369140625,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 261.6401062011719,
+          "best_lat_us": 34.62656021118164,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 258.50103759765625,
+          "best_lat_us": 35.04704284667969,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 231.9136199951172,
+          "best_lat_us": 39.06496047973633,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 250.54026794433594,
+          "best_lat_us": 36.160640716552734,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 265.38763427734375,
+          "best_lat_us": 34.13759994506836,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 250.45603942871094,
+          "best_lat_us": 36.17280197143555,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 245.42127990722656,
+          "best_lat_us": 295.31903076171875,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 262.82720947265625,
+          "best_lat_us": 275.76129150390625,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 251.93817138671875,
+          "best_lat_us": 287.67999267578125,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 262.6516418457031,
+          "best_lat_us": 275.94561767578125,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 253.9459991455078,
+          "best_lat_us": 285.40545654296875,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 262.85955810546875,
+          "best_lat_us": 275.72735595703125,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 246.9082794189453,
+          "best_lat_us": 293.54046630859375,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 263.8929138183594,
+          "best_lat_us": 274.6476745605469,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 268.6667785644531,
+          "best_lat_us": 2158.14013671875,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 261.86419677734375,
+          "best_lat_us": 2214.203369140625,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 265.0328369140625,
+          "best_lat_us": 2187.731201171875,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 265.5096435546875,
+          "best_lat_us": 2183.80224609375,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 266.13970947265625,
+          "best_lat_us": 2178.63232421875,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 264.0054626464844,
+          "best_lat_us": 2196.24462890625,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 268.5888977050781,
+          "best_lat_us": 2158.76611328125,
+          "best_id": 1,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 2,
+          "config_count": 2,
+          "best_tops": 265.7730407714844,
+          "best_lat_us": 2181.63818359375,
+          "best_id": 0,
+          "best_ws": 2211840,
+          "best_split_k": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "gpu_short_name": "RTX5080",
+    "compute_capability": "cc120",
+    "arch_name": "Blackwell",
+    "model_name": "BitNet-2B4T-FP8E4M3",
+    "layout": "TNCCcol",
+    "dtype": "fp8e4m3",
+    "outdtype": "fp32",
+    "alg_count": 4,
+    "config_count": 23,
+    "warmup": 3,
+    "repeat": 10,
+    "verify": false,
+    "torch_version": "2.9.0+cu129",
+    "cuda_version_driver": "13.0",
+    "cuda_version_runtime": "12.9",
+    "time": "2026-01-13T03:11:48.901205",
+    "M_list": [
+      16,
+      128
+    ],
+    "NK_list": [
+      [
+        3840,
+        2560
+      ],
+      [
+        2560,
+        2560
+      ]
+    ]
+  },
+  "nk_entries": {
+    "(3840,2560)": {
+      "m_thresholds": [
+        16,
+        128
+      ],
+      "alg_by_m": {
+        "16": [
+          {
+            "alg_id": 0,
+            "split_k": -1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 2,
+            "workspace": 0
+          }
+        ],
+        "128": [
+          {
+            "alg_id": 0,
+            "split_k": 1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 2,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 4,
+            "workspace": 0
+          }
+        ]
+      }
+    },
+    "(2560,2560)": {
+      "m_thresholds": [
+        16,
+        128
+      ],
+      "alg_by_m": {
+        "16": [
+          {
+            "alg_id": 0,
+            "split_k": 1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": -1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 2,
+            "workspace": 0
+          }
+        ],
+        "128": [
+          {
+            "alg_id": 0,
+            "split_k": -1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 1,
+            "workspace": 0
+          },
+          {
+            "alg_id": 0,
+            "split_k": 2,
+            "workspace": 0
+          }
+        ]
+      }
+    }
+  }
+}

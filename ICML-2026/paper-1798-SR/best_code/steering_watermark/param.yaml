@@ -1,0 +1,126 @@
+###########################################################################
+## PARAM.YAML                                                               
+## Configuration file for watermarking experiments of a single run type. 
+###########################################################################
+
+
+
+hf_token: "" #The new token
+verbose: True
+run_name: "multi_pipe" #"sparcity_tradeoff_v1"
+
+# FOR LLMS
+model_arguments:
+    model_id: "meta-llama/Llama-3.1-8B" #"mistralai/Ministral-3-8B-Instruct-2512" #"meta-llama/Meta-Llama-3-8B-Instruct" 
+    #"meta-llama/Meta-Llama-3-8B"
+    # mistralai/Ministral-3-8B-Base-2512
+    load_in_8bit: False
+    torch_dtype: "torch.bfloat16"
+
+# FOR GENERATION
+generation_arguments: 
+    do_sample: True
+    temperature: 0.7
+    max_new_tokens: 512
+    top_p: 0.9
+    top_k: 50
+    # pad_token_id: null
+    # eos_token_id: null
+    repetition_penalty: 1.1       #1.15
+    generation_batch_size: 64
+
+
+# FOR TEXT DATA
+data_arguments:
+    input_version: "guardian_from_nov2025_articles_v2.10k" #"guardian_2026_articles_v1.800" #"guardian_from_nov2025_articles_v1.10k"  #"Hello-SimpleAI/HC3" #"metro_news_v3.254"  #"test_v1.10" #home_made_v1.210" # #"metro_news_v1.220", "metro_news_test_v1.10"    "metro_news_v2.255"
+    truncate_input_words: 6         # Only in case of text completion tasks
+    max_loaded_samples: 1000         #200# In case of large non-local datasets
+    
+
+# FOR STEERING
+steering_arguments:
+    noise_seed: 1
+    noise_offset: 0
+    steering_layers: [15]
+    noise_max: 5                       #4 #[5*10e-3, 1*10e-2, 2*10e-2, 5*10e-2, 1, 2, 5]
+    noise_type: "sparse_0.003" #"sparse_0.003"           # uniform, sparse_0.2, sparse_0.003
+
+
+# FOR ROBUSTNESS
+robustness_arguments:
+    paraphrasing:
+        enabled: False
+        with_prompt: True
+        model_id: "kalpeshk2011/dipper-paraphraser-xxl"    #"kalpeshk2011/dipper-paraphraser-xxl"              #"Ateeqq/Text-Rewriter-Paraphraser"
+        batch_size: 32
+        lexical_diversity: 60
+        order_diversity: 20
+        use_4bit: False
+        # num_beams: 4
+        # num_beam_groups: 4
+        # num_return_sequences: 1
+        # repetition_penalty: 10.0
+        # diversity_penalty: 3.0
+        # no_repeat_ngram_size: 2
+        max_length: 600
+        temperature: 0.75
+        # top_p: 0.9
+        # top_k: null
+
+# FOR GATHERING
+gathering_arguments:
+    gathering_truncation: null
+    gathering_layers: [15]
+    max_token_seq: 512
+    remove_prompt: False
+
+# FOR COMPARAISON
+comparison_arguments:
+    compared_text_type: "steered_bis"   # "human" or "vanilla" or "steered_bis"
+
+# FOR DETECTION
+detection_arguments:
+    seed: 1
+    number_of_bits: 3
+    number_prompts_truncation: null      # /!\ Removes part of the prompts for the detection Set as "null" to disable truncation
+    max_seq_length: 512
+    model_type: "mlp" #"mlp"   # "mlp" or "transformer"
+    token_aggregation: False            # Use mean token as sentence representation
+    sentence_array: False               # Use all tokens in a sentence for detection
+
+    lda_parameters:
+        shrinkage: null
+        solver: 'lsqr'
+
+    mlp_parameters:
+        hidden_dims: [2048, 64, 64, 32] #[32, 32] #
+        # output_dim: 2  # Binary classification
+        batch_size: 512
+        num_epochs: 1
+        learning_rate: 0.001 
+
+    transformer_parameters:
+        num_heads: 2
+        num_layers: 5
+        dim_feedforward: 32
+        dropout: 0.1
+        output_dim: 2
+        batch_size: 64
+        num_epochs: 5
+        learning_rate: 0.00001
+
+# FOR EVALUATION
+quality_evaluation_arguments:
+    log_diversity_calculation:
+        n_gram: 4
+    
+    perplexity_calculation:
+        model_id: "Qwen/Qwen3-4B" #"Qwen/Qwen2.5-7B"
+        batch_size: 4
+    
+    quality_classifier_calculation:
+        model_id: "nvidia/quality-classifier-deberta"
+
+
+evaluation_arguments:
+

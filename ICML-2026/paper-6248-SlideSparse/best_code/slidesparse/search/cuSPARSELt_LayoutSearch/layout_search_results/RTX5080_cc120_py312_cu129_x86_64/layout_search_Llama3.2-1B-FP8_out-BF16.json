@@ -1,0 +1,4779 @@
+{
+  "meta": {
+    "model": "Llama3.2-1B-FP8",
+    "dtype": "fp8e4m3",
+    "outdtype": "bf16",
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "gpu_short": "RTX5080",
+    "cc": "cc120",
+    "warmup": 5,
+    "repeat": 30,
+    "verify": true,
+    "m_list": [
+      16,
+      128,
+      1024,
+      4096,
+      16384
+    ],
+    "nk_list": [
+      [
+        3072,
+        2048
+      ],
+      [
+        2048,
+        2048
+      ],
+      [
+        16384,
+        2048
+      ],
+      [
+        2048,
+        8192
+      ],
+      [
+        3072,
+        2752
+      ],
+      [
+        2048,
+        2752
+      ],
+      [
+        16384,
+        2752
+      ],
+      [
+        2048,
+        10944
+      ],
+      [
+        3072,
+        3072
+      ],
+      [
+        2048,
+        3072
+      ],
+      [
+        16384,
+        3072
+      ],
+      [
+        2048,
+        12288
+      ],
+      [
+        3072,
+        3296
+      ],
+      [
+        2048,
+        3296
+      ],
+      [
+        16384,
+        3296
+      ],
+      [
+        2048,
+        13120
+      ]
+    ],
+    "layout_names": [
+      "TN_CC_Col",
+      "NT_RR_Col",
+      "NN_RC_Col",
+      "TT_CR_Col",
+      "TN_CC_Row",
+      "NT_RR_Row",
+      "NN_RC_Row",
+      "TT_CR_Row",
+      "TN_RR_Col",
+      "NT_CC_Col",
+      "NN_CR_Col",
+      "TT_RC_Col",
+      "TN_RR_Row",
+      "NT_CC_Row",
+      "NN_CR_Row",
+      "TT_RC_Row"
+    ],
+    "is_sparse": true
+  },
+  "results": {
+    "(3072,2048)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 19.6546573638916,
+          "lat_us": 10.243200302124023,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 19.71007537841797,
+          "lat_us": 10.214400291442871,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 19.71007537841797,
+          "lat_us": 10.214400291442871,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 19.65875244140625,
+          "lat_us": 10.241066932678223,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 19.70595932006836,
+          "lat_us": 10.216533660888672,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 19.699790954589844,
+          "lat_us": 10.219732284545898,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 19.71007537841797,
+          "lat_us": 10.214400291442871,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 19.70595932006836,
+          "lat_us": 10.216533660888672,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 157.48324584960938,
+          "lat_us": 10.227200508117676,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 156.87786865234375,
+          "lat_us": 10.266666412353516,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 157.2372589111328,
+          "lat_us": 10.243200302124023,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 157.25364685058594,
+          "lat_us": 10.242133140563965,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 157.28639221191406,
+          "lat_us": 10.24000072479248,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 156.9593963623047,
+          "lat_us": 10.261333465576172,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 157.27001953125,
+          "lat_us": 10.241066932678223,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 157.0247039794922,
+          "lat_us": 10.257065773010254,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 331.156494140625,
+          "lat_us": 38.9088020324707,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 331.1383361816406,
+          "lat_us": 38.91093444824219,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 331.02947998046875,
+          "lat_us": 38.923728942871094,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 331.06573486328125,
+          "lat_us": 38.91946792602539,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 331.201904296875,
+          "lat_us": 38.903465270996094,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 331.02947998046875,
+          "lat_us": 38.923728942871094,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 331.201904296875,
+          "lat_us": 38.903465270996094,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 331.1020202636719,
+          "lat_us": 38.91520309448242,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 386.9463806152344,
+          "lat_us": 133.19573974609375,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 386.55322265625,
+          "lat_us": 133.33120727539062,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 386.8534851074219,
+          "lat_us": 133.22772216796875,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 386.8008117675781,
+          "lat_us": 133.24586486816406,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 387.0889892578125,
+          "lat_us": 133.14666748046875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 387.11376953125,
+          "lat_us": 133.1381378173828,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 387.0920715332031,
+          "lat_us": 133.14559936523438,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 386.99908447265625,
+          "lat_us": 133.17759704589844,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 406.3697814941406,
+          "lat_us": 507.31732177734375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 405.1584167480469,
+          "lat_us": 508.8341369628906,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 405.31390380859375,
+          "lat_us": 508.6389465332031,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 405.5971374511719,
+          "lat_us": 508.28375244140625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 403.6496887207031,
+          "lat_us": 510.7359924316406,
+          "alg_id": 0,
+          "split_k": 32,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 403.5881652832031,
+          "lat_us": 510.8138732910156,
+          "alg_id": 0,
+          "split_k": 32,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 403.50390625,
+          "lat_us": 510.9205322265625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 405.0751953125,
+          "lat_us": 508.93865966796875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,2048)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 13.138678550720215,
+          "lat_us": 10.215466499328613,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 13.138678550720215,
+          "lat_us": 10.215466499328613,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 13.135933876037598,
+          "lat_us": 10.21760082244873,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 13.13182258605957,
+          "lat_us": 10.220799446105957,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 13.107198715209961,
+          "lat_us": 10.24000072479248,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 13.141422271728516,
+          "lat_us": 10.213333129882812,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 13.108565330505371,
+          "lat_us": 10.238933563232422,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 13.137306213378906,
+          "lat_us": 10.216533660888672,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 105.21928405761719,
+          "lat_us": 10.204800605773926,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 104.85758972167969,
+          "lat_us": 10.24000072479248,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 104.79210662841797,
+          "lat_us": 10.246399879455566,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 104.68313598632812,
+          "lat_us": 10.257065773010254,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 104.8139419555664,
+          "lat_us": 10.24426555633545,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 104.87945556640625,
+          "lat_us": 10.237866401672363,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 104.70490264892578,
+          "lat_us": 10.25493335723877,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 104.74848937988281,
+          "lat_us": 10.250666618347168,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 279.387451171875,
+          "lat_us": 30.7455997467041,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 279.65911865234375,
+          "lat_us": 30.71573257446289,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 279.6688232421875,
+          "lat_us": 30.71466636657715,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 279.1646728515625,
+          "lat_us": 30.77013397216797,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 279.4941101074219,
+          "lat_us": 30.733867645263672,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 279.11627197265625,
+          "lat_us": 30.775468826293945,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 279.53289794921875,
+          "lat_us": 30.72960090637207,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 279.5038146972656,
+          "lat_us": 30.732799530029297,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 372.8442687988281,
+          "lat_us": 92.1557388305664,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 372.7364501953125,
+          "lat_us": 92.1823959350586,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 372.6588439941406,
+          "lat_us": 92.20159149169922,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 372.8658752441406,
+          "lat_us": 92.15039825439453,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 372.8399353027344,
+          "lat_us": 92.15680694580078,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 372.6200256347656,
+          "lat_us": 92.21119689941406,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 372.52520751953125,
+          "lat_us": 92.23466491699219,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 372.7795715332031,
+          "lat_us": 92.1717300415039,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 399.8144836425781,
+          "lat_us": 343.7568054199219,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 398.5604553222656,
+          "lat_us": 344.8384094238281,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 398.89483642578125,
+          "lat_us": 344.5493469238281,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 398.80474853515625,
+          "lat_us": 344.6271667480469,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 397.01678466796875,
+          "lat_us": 346.17919921875,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 397.17218017578125,
+          "lat_us": 346.04376220703125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 401.95355224609375,
+          "lat_us": 341.9274597167969,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 401.5251159667969,
+          "lat_us": 342.29229736328125,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(16384,2048)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 47.70320510864258,
+          "lat_us": 22.508798599243164,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 47.65126419067383,
+          "lat_us": 22.53333282470703,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 47.70320510864258,
+          "lat_us": 22.508798599243164,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 47.649009704589844,
+          "lat_us": 22.534399032592773,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 47.6783447265625,
+          "lat_us": 22.52053451538086,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 47.65803527832031,
+          "lat_us": 22.530132293701172,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 47.66480255126953,
+          "lat_us": 22.526933670043945,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 47.662540435791016,
+          "lat_us": 22.52800178527832,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 279.4941101074219,
+          "lat_us": 30.733867645263672,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 279.6882629394531,
+          "lat_us": 30.71253204345703,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 279.55230712890625,
+          "lat_us": 30.727466583251953,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 279.6202697753906,
+          "lat_us": 30.719999313354492,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 279.55230712890625,
+          "lat_us": 30.727466583251953,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 279.1259765625,
+          "lat_us": 30.77440071105957,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 279.4747314453125,
+          "lat_us": 30.735998153686523,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 279.4747314453125,
+          "lat_us": 30.735998153686523,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 397.5545349121094,
+          "lat_us": 172.85546875,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 395.04852294921875,
+          "lat_us": 173.95199584960938,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 395.2375183105469,
+          "lat_us": 173.86880493164062,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 395.3370056152344,
+          "lat_us": 173.82505798339844,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 395.8665466308594,
+          "lat_us": 173.592529296875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 395.39276123046875,
+          "lat_us": 173.800537109375,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 395.8008728027344,
+          "lat_us": 173.621337890625,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 396.13433837890625,
+          "lat_us": 173.47518920898438,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 409.91314697265625,
+          "lat_us": 670.5759887695312,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 406.8237609863281,
+          "lat_us": 675.6682739257812,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 410.4132080078125,
+          "lat_us": 669.7589111328125,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 409.0068664550781,
+          "lat_us": 672.0618286132812,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 405.3296203613281,
+          "lat_us": 678.158935546875,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 404.0433044433594,
+          "lat_us": 680.3179321289062,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 404.9042053222656,
+          "lat_us": 678.8714599609375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 403.91668701171875,
+          "lat_us": 680.5311889648438,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 408.06195068359375,
+          "lat_us": 2694.472412109375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 403.37908935546875,
+          "lat_us": 2725.752685546875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 405.9544372558594,
+          "lat_us": 2708.460693359375,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 411.1119689941406,
+          "lat_us": 2674.482177734375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 400.6270446777344,
+          "lat_us": 2744.476806640625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 408.47637939453125,
+          "lat_us": 2691.738525390625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 400.3878479003906,
+          "lat_us": 2746.116455078125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 408.4802551269531,
+          "lat_us": 2691.713134765625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,8192)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 37.23856735229492,
+          "lat_us": 14.41706657409668,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2097344
+        },
+        "NT_RR_Col": {
+          "tops": 37.31587219238281,
+          "lat_us": 14.387200355529785,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2097344
+        },
+        "NN_RC_Col": {
+          "tops": 37.30757522583008,
+          "lat_us": 14.390399932861328,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2097344
+        },
+        "TT_CR_Col": {
+          "tops": 37.396278381347656,
+          "lat_us": 14.356266021728516,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 2097344
+        },
+        "TN_CC_Row": {
+          "tops": 37.3048095703125,
+          "lat_us": 14.391467094421387,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2097344
+        },
+        "NT_RR_Row": {
+          "tops": 37.32140350341797,
+          "lat_us": 14.385066986083984,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2097344
+        },
+        "NN_RC_Row": {
+          "tops": 37.3048095703125,
+          "lat_us": 14.391467094421387,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2097344
+        },
+        "TT_CR_Row": {
+          "tops": 37.3048095703125,
+          "lat_us": 14.391467094421387,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2097344
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 189.6534423828125,
+          "lat_us": 22.646398544311523,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NT_RR_Col": {
+          "tops": 190.038330078125,
+          "lat_us": 22.60053253173828,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "NN_RC_Col": {
+          "tops": 188.83514404296875,
+          "lat_us": 22.74453353881836,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "TT_CR_Col": {
+          "tops": 189.5106201171875,
+          "lat_us": 22.66346549987793,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "TN_CC_Row": {
+          "tops": 188.87057495117188,
+          "lat_us": 22.740266799926758,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NT_RR_Row": {
+          "tops": 189.51954650878906,
+          "lat_us": 22.662397384643555,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NN_RC_Row": {
+          "tops": 189.39471435546875,
+          "lat_us": 22.67733383178711,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "TT_CR_Row": {
+          "tops": 189.4749298095703,
+          "lat_us": 22.667734146118164,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 361.9557800292969,
+          "lat_us": 94.9280014038086,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        },
+        "NT_RR_Col": {
+          "tops": 360.57012939453125,
+          "lat_us": 95.29280090332031,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        },
+        "NN_RC_Col": {
+          "tops": 361.21710205078125,
+          "lat_us": 95.12212371826172,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2884416
+        },
+        "TT_CR_Col": {
+          "tops": 361.4278259277344,
+          "lat_us": 95.06666564941406,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        },
+        "TN_CC_Row": {
+          "tops": 361.9354553222656,
+          "lat_us": 94.93333435058594,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 2884416
+        },
+        "NT_RR_Row": {
+          "tops": 362.4078063964844,
+          "lat_us": 94.80960083007812,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 2884416
+        },
+        "NN_RC_Row": {
+          "tops": 362.1104431152344,
+          "lat_us": 94.88745880126953,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2884416
+        },
+        "TT_CR_Row": {
+          "tops": 360.59033203125,
+          "lat_us": 95.28746795654297,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 414.05792236328125,
+          "lat_us": 331.93170166015625,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        },
+        "NT_RR_Col": {
+          "tops": 414.6094665527344,
+          "lat_us": 331.4901428222656,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        },
+        "NN_RC_Col": {
+          "tops": 414.17498779296875,
+          "lat_us": 331.837890625,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        },
+        "TT_CR_Col": {
+          "tops": 413.63519287109375,
+          "lat_us": 332.27093505859375,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3277760
+        },
+        "TN_CC_Row": {
+          "tops": 416.387451171875,
+          "lat_us": 330.0746765136719,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3277760
+        },
+        "NT_RR_Row": {
+          "tops": 414.4081115722656,
+          "lat_us": 331.6512145996094,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        },
+        "NN_RC_Row": {
+          "tops": 414.8310546875,
+          "lat_us": 331.3130798339844,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3277760
+        },
+        "TT_CR_Row": {
+          "tops": 414.4934387207031,
+          "lat_us": 331.58294677734375,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 427.8857727050781,
+          "lat_us": 1284.819091796875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 418.2313232421875,
+          "lat_us": 1314.4779052734375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 418.15667724609375,
+          "lat_us": 1314.7125244140625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 428.95623779296875,
+          "lat_us": 1281.61279296875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 417.6392517089844,
+          "lat_us": 1316.34130859375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 416.21392822265625,
+          "lat_us": 1320.84912109375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 416.1484069824219,
+          "lat_us": 1321.05712890625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 426.7361145019531,
+          "lat_us": 1288.280517578125,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      }
+    },
+    "(3072,2752)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 22.02747344970703,
+          "lat_us": 12.281599998474121,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 21.964519500732422,
+          "lat_us": 12.316800117492676,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 22.006446838378906,
+          "lat_us": 12.293334007263184,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 22.025558471679688,
+          "lat_us": 12.28266716003418,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 22.01218032836914,
+          "lat_us": 12.290132522583008,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 21.96642303466797,
+          "lat_us": 12.315732955932617,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 21.97022819519043,
+          "lat_us": 12.313600540161133,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 22.016000747680664,
+          "lat_us": 12.288000106811523,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 175.9142303466797,
+          "lat_us": 12.302932739257812,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 175.8532257080078,
+          "lat_us": 12.30720043182373,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 175.8837127685547,
+          "lat_us": 12.30506706237793,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 176.2044677734375,
+          "lat_us": 12.28266716003418,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 175.9142303466797,
+          "lat_us": 12.302932739257812,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 175.92947387695312,
+          "lat_us": 12.30186653137207,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 176.1738739013672,
+          "lat_us": 12.28480052947998,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 176.18917846679688,
+          "lat_us": 12.283733367919922,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 325.198486328125,
+          "lat_us": 53.24159622192383,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 325.0747375488281,
+          "lat_us": 53.26186752319336,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 325.2310485839844,
+          "lat_us": 53.23626708984375,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 324.9836120605469,
+          "lat_us": 53.27680206298828,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 325.25714111328125,
+          "lat_us": 53.231998443603516,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 325.1268005371094,
+          "lat_us": 53.253334045410156,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 325.1658630371094,
+          "lat_us": 53.2469367980957,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 325.1268005371094,
+          "lat_us": 53.253334045410156,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 379.1782531738281,
+          "lat_us": 182.64852905273438,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 376.884765625,
+          "lat_us": 183.760009765625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 376.76885986328125,
+          "lat_us": 183.81654357910156,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 377.02484130859375,
+          "lat_us": 183.69174194335938,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 376.6836242675781,
+          "lat_us": 183.85813903808594,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 376.75360107421875,
+          "lat_us": 183.82398986816406,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 376.2034606933594,
+          "lat_us": 184.09280395507812,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 376.52197265625,
+          "lat_us": 183.93707275390625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 413.4279479980469,
+          "lat_us": 670.0693359375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 414.291259765625,
+          "lat_us": 668.6730346679688,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 406.3671569824219,
+          "lat_us": 681.7120361328125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 403.3930358886719,
+          "lat_us": 686.7381591796875,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 404.36468505859375,
+          "lat_us": 685.0880126953125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 404.0369567871094,
+          "lat_us": 685.6436767578125,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 403.5785827636719,
+          "lat_us": 686.4224243164062,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 403.8446960449219,
+          "lat_us": 685.9700927734375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,2752)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 14.691361427307129,
+          "lat_us": 12.276267051696777,
+          "alg_id": 2,
+          "split_k": 128,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 14.598764419555664,
+          "lat_us": 12.354132652282715,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 14.582396507263184,
+          "lat_us": 12.367999076843262,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 14.66841983795166,
+          "lat_us": 12.295467376708984,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 14.644282341003418,
+          "lat_us": 12.315732955932617,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 14.6824312210083,
+          "lat_us": 12.283733367919922,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 14.6824312210083,
+          "lat_us": 12.283733367919922,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 14.683706283569336,
+          "lat_us": 12.28266716003418,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 117.4594497680664,
+          "lat_us": 12.283733367919922,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 117.4084701538086,
+          "lat_us": 12.289067268371582,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 117.44924926757812,
+          "lat_us": 12.28480052947998,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 117.19486236572266,
+          "lat_us": 12.311466217041016,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 117.44924926757812,
+          "lat_us": 12.28480052947998,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 117.3779067993164,
+          "lat_us": 12.292266845703125,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 117.3779067993164,
+          "lat_us": 12.292266845703125,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 117.25580596923828,
+          "lat_us": 12.30506706237793,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 281.70208740234375,
+          "lat_us": 40.97493362426758,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 281.97369384765625,
+          "lat_us": 40.93546676635742,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 281.5921325683594,
+          "lat_us": 40.99093246459961,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 281.89288330078125,
+          "lat_us": 40.947200775146484,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 281.75341796875,
+          "lat_us": 40.96746826171875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 281.6800842285156,
+          "lat_us": 40.97813415527344,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 281.67279052734375,
+          "lat_us": 40.97919845581055,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 281.9590148925781,
+          "lat_us": 40.937599182128906,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 365.5969543457031,
+          "lat_us": 126.2890625,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 365.4056091308594,
+          "lat_us": 126.3552017211914,
+          "alg_id": 2,
+          "split_k": 16,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 363.814697265625,
+          "lat_us": 126.90773010253906,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 363.8055419921875,
+          "lat_us": 126.91092681884766,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 363.7474365234375,
+          "lat_us": 126.93119812011719,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 363.68939208984375,
+          "lat_us": 126.95146179199219,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 363.61297607421875,
+          "lat_us": 126.97813415527344,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 363.5763244628906,
+          "lat_us": 126.99093627929688,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 408.3299255371094,
+          "lat_us": 452.2901306152344,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 401.7152099609375,
+          "lat_us": 459.73760986328125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 400.5127868652344,
+          "lat_us": 461.11785888671875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 400.5405578613281,
+          "lat_us": 461.08587646484375,
+          "alg_id": 0,
+          "split_k": 32,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 405.0457458496094,
+          "lat_us": 455.9573669433594,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 408.96746826171875,
+          "lat_us": 451.5850524902344,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 402.3714904785156,
+          "lat_us": 458.9877624511719,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 400.3683166503906,
+          "lat_us": 461.28424072265625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      }
+    },
+    "(16384,2752)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 50.320411682128906,
+          "lat_us": 28.673067092895508,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 50.3372688293457,
+          "lat_us": 28.66346549987793,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 50.34101486206055,
+          "lat_us": 28.661333084106445,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 50.320411682128906,
+          "lat_us": 28.673067092895508,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 50.33352279663086,
+          "lat_us": 28.665599822998047,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 50.33539581298828,
+          "lat_us": 28.664531707763672,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 50.33913803100586,
+          "lat_us": 28.66240119934082,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 50.3485107421875,
+          "lat_us": 28.657066345214844,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 282.858154296875,
+          "lat_us": 40.80746841430664,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 282.4004821777344,
+          "lat_us": 40.873600006103516,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 282.86553955078125,
+          "lat_us": 40.806400299072266,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 282.858154296875,
+          "lat_us": 40.80746841430664,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 281.9295959472656,
+          "lat_us": 40.94186782836914,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 282.4152526855469,
+          "lat_us": 40.871463775634766,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 281.9590148925781,
+          "lat_us": 40.937599182128906,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 281.9957275390625,
+          "lat_us": 40.93226623535156,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 391.87750244140625,
+          "lat_us": 235.6394500732422,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 390.08868408203125,
+          "lat_us": 236.72000122070312,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 389.73046875,
+          "lat_us": 236.93759155273438,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 390.0254211425781,
+          "lat_us": 236.75840759277344,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 389.81292724609375,
+          "lat_us": 236.88746643066406,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 389.93585205078125,
+          "lat_us": 236.8127899169922,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 391.563720703125,
+          "lat_us": 235.82827758789062,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 391.9377746582031,
+          "lat_us": 235.60321044921875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 416.5113830566406,
+          "lat_us": 886.811767578125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 407.5816345214844,
+          "lat_us": 906.2410278320312,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 407.40228271484375,
+          "lat_us": 906.6399536132812,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 407.1713562011719,
+          "lat_us": 907.1541748046875,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 407.2029724121094,
+          "lat_us": 907.083740234375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 416.2800598144531,
+          "lat_us": 887.3045654296875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 407.8470458984375,
+          "lat_us": 905.6512451171875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 406.81353759765625,
+          "lat_us": 907.9520263671875,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 411.4696350097656,
+          "lat_us": 3590.71142578125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 400.65966796875,
+          "lat_us": 3687.59033203125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 408.8280334472656,
+          "lat_us": 3613.91259765625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 399.2570495605469,
+          "lat_us": 3700.545166015625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 399.9041748046875,
+          "lat_us": 3694.556884765625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 399.62939453125,
+          "lat_us": 3697.097412109375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 398.89959716796875,
+          "lat_us": 3703.861083984375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 400.9906921386719,
+          "lat_us": 3684.546142578125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,10944)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 35.02079772949219,
+          "lat_us": 20.48000144958496,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3670208
+        },
+        "NT_RR_Col": {
+          "tops": 35.022621154785156,
+          "lat_us": 20.47893524169922,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3670208
+        },
+        "NN_RC_Col": {
+          "tops": 35.01897430419922,
+          "lat_us": 20.481067657470703,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3670208
+        },
+        "TT_CR_Col": {
+          "tops": 35.02079772949219,
+          "lat_us": 20.48000144958496,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 3670208
+        },
+        "TN_CC_Row": {
+          "tops": 35.02079772949219,
+          "lat_us": 20.48000144958496,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3670208
+        },
+        "NT_RR_Row": {
+          "tops": 35.02444839477539,
+          "lat_us": 20.477867126464844,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NN_RC_Row": {
+          "tops": 35.02079772949219,
+          "lat_us": 20.48000144958496,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3670208
+        },
+        "TT_CR_Row": {
+          "tops": 35.022621154785156,
+          "lat_us": 20.47893524169922,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3670208
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 214.0036163330078,
+          "lat_us": 26.81173324584961,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NT_RR_Col": {
+          "tops": 211.87107849121094,
+          "lat_us": 27.081600189208984,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NN_RC_Col": {
+          "tops": 213.32467651367188,
+          "lat_us": 26.897066116333008,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "TT_CR_Col": {
+          "tops": 212.96151733398438,
+          "lat_us": 26.94293212890625,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "TN_CC_Row": {
+          "tops": 212.9025115966797,
+          "lat_us": 26.95039939880371,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "NT_RR_Row": {
+          "tops": 211.85440063476562,
+          "lat_us": 27.08373260498047,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NN_RC_Row": {
+          "tops": 211.5710906982422,
+          "lat_us": 27.119998931884766,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "TT_CR_Row": {
+          "tops": 212.34780883789062,
+          "lat_us": 27.020801544189453,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 373.4060974121094,
+          "lat_us": 122.92906188964844,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 8389696
+        },
+        "NT_RR_Col": {
+          "tops": 373.9544982910156,
+          "lat_us": 122.74879455566406,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        },
+        "NN_RC_Col": {
+          "tops": 373.4773864746094,
+          "lat_us": 122.90560150146484,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 8389696
+        },
+        "TT_CR_Col": {
+          "tops": 373.8602294921875,
+          "lat_us": 122.77973937988281,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 8389696
+        },
+        "TN_CC_Row": {
+          "tops": 372.9659729003906,
+          "lat_us": 123.07413482666016,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        },
+        "NT_RR_Row": {
+          "tops": 372.9627380371094,
+          "lat_us": 123.0751953125,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 8389696
+        },
+        "NN_RC_Row": {
+          "tops": 372.7688903808594,
+          "lat_us": 123.13919830322266,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 8389696
+        },
+        "TT_CR_Row": {
+          "tops": 372.778564453125,
+          "lat_us": 123.13600158691406,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 414.8662414550781,
+          "lat_us": 442.5760192871094,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NT_RR_Col": {
+          "tops": 414.7463073730469,
+          "lat_us": 442.7040100097656,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NN_RC_Col": {
+          "tops": 414.5904541015625,
+          "lat_us": 442.87042236328125,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TT_CR_Col": {
+          "tops": 415.0623474121094,
+          "lat_us": 442.3669128417969,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TN_CC_Row": {
+          "tops": 415.37481689453125,
+          "lat_us": 442.0341491699219,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        },
+        "NT_RR_Row": {
+          "tops": 415.49212646484375,
+          "lat_us": 441.9093322753906,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        },
+        "NN_RC_Row": {
+          "tops": 414.97528076171875,
+          "lat_us": 442.4597473144531,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TT_CR_Row": {
+          "tops": 415.9459228515625,
+          "lat_us": 441.4272155761719,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 434.6706237792969,
+          "lat_us": 1689.6458740234375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 418.09405517578125,
+          "lat_us": 1756.6368408203125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 418.647705078125,
+          "lat_us": 1754.313720703125,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 436.87725830078125,
+          "lat_us": 1681.111572265625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 416.4286804199219,
+          "lat_us": 1763.661865234375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 416.5838928222656,
+          "lat_us": 1763.0047607421875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 434.69610595703125,
+          "lat_us": 1689.5467529296875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 416.7442626953125,
+          "lat_us": 1762.326416015625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(3072,3072)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 24.512165069580078,
+          "lat_us": 12.320000648498535,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 24.51004409790039,
+          "lat_us": 12.321066856384277,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 24.51853370666504,
+          "lat_us": 12.316800117492676,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 24.484607696533203,
+          "lat_us": 12.333867073059082,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 24.55681800842285,
+          "lat_us": 12.297598838806152,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 24.431785583496094,
+          "lat_us": 12.360532760620117,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 24.438112258911133,
+          "lat_us": 12.357333183288574,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 24.48884391784668,
+          "lat_us": 12.331732749938965,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 189.9626007080078,
+          "lat_us": 12.717866897583008,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 186.0154571533203,
+          "lat_us": 12.987732887268066,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 185.0730743408203,
+          "lat_us": 13.053866386413574,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 186.4748992919922,
+          "lat_us": 12.955733299255371,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 194.94956970214844,
+          "lat_us": 12.392533302307129,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 190.85903930664062,
+          "lat_us": 12.658132553100586,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 192.21966552734375,
+          "lat_us": 12.568532943725586,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 193.07171630859375,
+          "lat_us": 12.513066291809082,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 349.1145324707031,
+          "lat_us": 55.36106872558594,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 348.0215148925781,
+          "lat_us": 55.534934997558594,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 348.14862060546875,
+          "lat_us": 55.51466369628906,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 347.3077697753906,
+          "lat_us": 55.64906311035156,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 348.2154846191406,
+          "lat_us": 55.50400161743164,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 348.5303039550781,
+          "lat_us": 55.45386505126953,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 348.4632568359375,
+          "lat_us": 55.464534759521484,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 348.3560791015625,
+          "lat_us": 55.48160171508789,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 393.036865234375,
+          "lat_us": 196.69760131835938,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 393.0006408691406,
+          "lat_us": 196.7157440185547,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 393.0240783691406,
+          "lat_us": 196.70401000976562,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 393.7821044921875,
+          "lat_us": 196.32534790039062,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 393.25653076171875,
+          "lat_us": 196.58773803710938,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 393.09869384765625,
+          "lat_us": 196.6666717529297,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 393.1434631347656,
+          "lat_us": 196.64427185058594,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 393.3120422363281,
+          "lat_us": 196.55999755859375,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 415.16522216796875,
+          "lat_us": 744.8544311523438,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 407.384521484375,
+          "lat_us": 759.0805053710938,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 407.1007385253906,
+          "lat_us": 759.609619140625,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 407.3083801269531,
+          "lat_us": 759.222412109375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 407.4303283691406,
+          "lat_us": 758.9951782226562,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 416.35174560546875,
+          "lat_us": 742.731689453125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 407.2837829589844,
+          "lat_us": 759.2682495117188,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 407.1590576171875,
+          "lat_us": 759.5008544921875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,3072)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 16.318838119506836,
+          "lat_us": 12.337066650390625,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 16.318838119506836,
+          "lat_us": 12.337066650390625,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 16.293481826782227,
+          "lat_us": 12.356266021728516,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 16.318838119506836,
+          "lat_us": 12.337066650390625,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 16.29488754272461,
+          "lat_us": 12.355199813842773,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 16.33861541748047,
+          "lat_us": 12.32213306427002,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 16.33861541748047,
+          "lat_us": 12.32213306427002,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 16.33013343811035,
+          "lat_us": 12.328533172607422,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 130.516845703125,
+          "lat_us": 12.340267181396484,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 130.52813720703125,
+          "lat_us": 12.339200019836426,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 130.607177734375,
+          "lat_us": 12.331732749938965,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 130.61846923828125,
+          "lat_us": 12.330666542053223,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 130.3478546142578,
+          "lat_us": 12.356266021728516,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 130.53941345214844,
+          "lat_us": 12.338133811950684,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 130.77685546875,
+          "lat_us": 12.315732955932617,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 130.73155212402344,
+          "lat_us": 12.320000648498535,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 297.1025390625,
+          "lat_us": 43.368534088134766,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 297.66632080078125,
+          "lat_us": 43.28639602661133,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 297.95263671875,
+          "lat_us": 43.24480056762695,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 298.6302795410156,
+          "lat_us": 43.14666748046875,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 297.97467041015625,
+          "lat_us": 43.241600036621094,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 294.6745910644531,
+          "lat_us": 43.725868225097656,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 295.0488586425781,
+          "lat_us": 43.67040252685547,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 295.7929992675781,
+          "lat_us": 43.5605354309082,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 382.24151611328125,
+          "lat_us": 134.83518981933594,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 382.21728515625,
+          "lat_us": 134.84373474121094,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 381.6527404785156,
+          "lat_us": 135.04319763183594,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 381.7009582519531,
+          "lat_us": 135.02613830566406,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 382.4290466308594,
+          "lat_us": 134.76907348632812,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 384.3822021484375,
+          "lat_us": 134.0842742919922,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 382.9807434082031,
+          "lat_us": 134.57493591308594,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 381.4749450683594,
+          "lat_us": 135.10614013671875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 410.73614501953125,
+          "lat_us": 501.92425537109375,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 404.7680969238281,
+          "lat_us": 509.3247985839844,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 403.9669189453125,
+          "lat_us": 510.3349304199219,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 403.7517395019531,
+          "lat_us": 510.60693359375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 402.18731689453125,
+          "lat_us": 512.5930786132812,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 402.18817138671875,
+          "lat_us": 512.5919799804688,
+          "alg_id": 0,
+          "split_k": 16,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 402.70941162109375,
+          "lat_us": 511.92852783203125,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 404.24658203125,
+          "lat_us": 509.98187255859375,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(16384,3072)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 52.37605667114258,
+          "lat_us": 30.750934600830078,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 52.43608474731445,
+          "lat_us": 30.71573257446289,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 52.448829650878906,
+          "lat_us": 30.708269119262695,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 52.42333984375,
+          "lat_us": 30.72319984436035,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 52.450653076171875,
+          "lat_us": 30.70720100402832,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 52.45429992675781,
+          "lat_us": 30.705066680908203,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 52.4470100402832,
+          "lat_us": 30.709333419799805,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 52.43608474731445,
+          "lat_us": 30.71573257446289,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 293.25811767578125,
+          "lat_us": 43.937068939208984,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 292.703857421875,
+          "lat_us": 44.020267486572266,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 293.2438659667969,
+          "lat_us": 43.93920135498047,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 290.8643493652344,
+          "lat_us": 44.29866409301758,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 292.2789306640625,
+          "lat_us": 44.084266662597656,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 293.3507080078125,
+          "lat_us": 43.92319869995117,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 291.4889831542969,
+          "lat_us": 44.2037353515625,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 293.5360412597656,
+          "lat_us": 43.89546585083008,
+          "alg_id": 2,
+          "split_k": 16,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 402.66998291015625,
+          "lat_us": 255.98931884765625,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 402.4821472167969,
+          "lat_us": 256.1087951660156,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 402.4754333496094,
+          "lat_us": 256.1130676269531,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 402.3765563964844,
+          "lat_us": 256.1759948730469,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 402.5928039550781,
+          "lat_us": 256.03839111328125,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 402.68505859375,
+          "lat_us": 255.979736328125,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 402.6934509277344,
+          "lat_us": 255.97439575195312,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 402.5609436035156,
+          "lat_us": 256.05865478515625,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 417.2234191894531,
+          "lat_us": 988.239990234375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 419.3648681640625,
+          "lat_us": 983.193603515625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 410.34063720703125,
+          "lat_us": 1004.8160400390625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 410.6680603027344,
+          "lat_us": 1004.014892578125,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 409.5060119628906,
+          "lat_us": 1006.864013671875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 409.602783203125,
+          "lat_us": 1006.6260986328125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 416.1293029785156,
+          "lat_us": 990.8383178710938,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 411.57098388671875,
+          "lat_us": 1001.812255859375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 411.6719055175781,
+          "lat_us": 4006.2666015625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 410.35162353515625,
+          "lat_us": 4019.156494140625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 404.0880126953125,
+          "lat_us": 4081.4560546875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 404.198486328125,
+          "lat_us": 4080.34033203125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 402.9574890136719,
+          "lat_us": 4092.90673828125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 404.59661865234375,
+          "lat_us": 4076.3251953125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 402.7355041503906,
+          "lat_us": 4095.162841796875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 402.7126770019531,
+          "lat_us": 4095.39501953125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,12288)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 39.199100494384766,
+          "lat_us": 20.54400062561035,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NT_RR_Col": {
+          "tops": 39.319549560546875,
+          "lat_us": 20.481067657470703,
+          "alg_id": 3,
+          "split_k": 8,
+          "workspace": 3670208
+        },
+        "NN_RC_Col": {
+          "tops": 39.32774353027344,
+          "lat_us": 20.4768009185791,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3670208
+        },
+        "TT_CR_Col": {
+          "tops": 39.3175048828125,
+          "lat_us": 20.482133865356445,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 3670208
+        },
+        "TN_CC_Row": {
+          "tops": 39.315460205078125,
+          "lat_us": 20.483198165893555,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3670208
+        },
+        "NT_RR_Row": {
+          "tops": 39.32774353027344,
+          "lat_us": 20.4768009185791,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NN_RC_Row": {
+          "tops": 39.32364273071289,
+          "lat_us": 20.47893524169922,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3670208
+        },
+        "TT_CR_Row": {
+          "tops": 39.321598052978516,
+          "lat_us": 20.48000144958496,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 241.89186096191406,
+          "lat_us": 26.63360023498535,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "NT_RR_Col": {
+          "tops": 241.48565673828125,
+          "lat_us": 26.67840003967285,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "NN_RC_Col": {
+          "tops": 241.5532684326172,
+          "lat_us": 26.67093276977539,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "TT_CR_Col": {
+          "tops": 241.49530029296875,
+          "lat_us": 26.67733383178711,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "TN_CC_Row": {
+          "tops": 241.5725860595703,
+          "lat_us": 26.668800354003906,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "NT_RR_Row": {
+          "tops": 240.68692016601562,
+          "lat_us": 26.76693344116211,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NN_RC_Row": {
+          "tops": 241.86279296875,
+          "lat_us": 26.63680076599121,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 1048896
+        },
+        "TT_CR_Row": {
+          "tops": 241.47601318359375,
+          "lat_us": 26.679466247558594,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 381.1529541015625,
+          "lat_us": 135.22027587890625,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        },
+        "NT_RR_Col": {
+          "tops": 380.59454345703125,
+          "lat_us": 135.41867065429688,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 2884416
+        },
+        "NN_RC_Col": {
+          "tops": 380.05572509765625,
+          "lat_us": 135.61065673828125,
+          "alg_id": 3,
+          "split_k": 8,
+          "workspace": 2884416
+        },
+        "TT_CR_Col": {
+          "tops": 380.5975341796875,
+          "lat_us": 135.4176025390625,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 2884416
+        },
+        "TN_CC_Row": {
+          "tops": 380.4327392578125,
+          "lat_us": 135.4762725830078,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 2884416
+        },
+        "NT_RR_Row": {
+          "tops": 380.5705871582031,
+          "lat_us": 135.4272003173828,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 2884416
+        },
+        "NN_RC_Row": {
+          "tops": 381.1860656738281,
+          "lat_us": 135.20852661132812,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 2884416
+        },
+        "TT_CR_Row": {
+          "tops": 381.1860656738281,
+          "lat_us": 135.20852661132812,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 2884416
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 404.78253173828125,
+          "lat_us": 509.306640625,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        },
+        "NT_RR_Col": {
+          "tops": 404.82574462890625,
+          "lat_us": 509.25225830078125,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NN_RC_Col": {
+          "tops": 413.3282470703125,
+          "lat_us": 498.7765197753906,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 3277760
+        },
+        "TT_CR_Col": {
+          "tops": 413.99755859375,
+          "lat_us": 497.97015380859375,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3277760
+        },
+        "TN_CC_Row": {
+          "tops": 406.7537841796875,
+          "lat_us": 506.83837890625,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 6030144
+        },
+        "NT_RR_Row": {
+          "tops": 406.29888916015625,
+          "lat_us": 507.4058532714844,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NN_RC_Row": {
+          "tops": 404.3912353515625,
+          "lat_us": 509.7994689941406,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TT_CR_Row": {
+          "tops": 404.6011657714844,
+          "lat_us": 509.5349426269531,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 6030144
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 427.22955322265625,
+          "lat_us": 1930.1888427734375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 420.8196716308594,
+          "lat_us": 1959.58935546875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 413.7398986816406,
+          "lat_us": 1993.12109375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 412.7811584472656,
+          "lat_us": 1997.7503662109375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 415.31085205078125,
+          "lat_us": 1985.5819091796875,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 7603264
+        },
+        "NT_RR_Row": {
+          "tops": 412.0737609863281,
+          "lat_us": 2001.1798095703125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 411.86370849609375,
+          "lat_us": 2002.2005615234375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 427.30889892578125,
+          "lat_us": 1929.8304443359375,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      }
+    },
+    "(3072,3296)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 22.589378356933594,
+          "lat_us": 14.343465805053711,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 22.617971420288086,
+          "lat_us": 14.325333595275879,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 22.616287231445312,
+          "lat_us": 14.326399803161621,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 22.61965560913086,
+          "lat_us": 14.32426643371582,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 22.617971420288086,
+          "lat_us": 14.325333595275879,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 22.6398868560791,
+          "lat_us": 14.311466217041016,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 22.617971420288086,
+          "lat_us": 14.325333595275879,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 22.61460304260254,
+          "lat_us": 14.32746696472168,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 181.0920867919922,
+          "lat_us": 14.313600540161133,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 180.79568481445312,
+          "lat_us": 14.337066650390625,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 181.07859802246094,
+          "lat_us": 14.314666748046875,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 181.1055908203125,
+          "lat_us": 14.312533378601074,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 181.06512451171875,
+          "lat_us": 14.315732955932617,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 180.768798828125,
+          "lat_us": 14.339200019836426,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 180.500244140625,
+          "lat_us": 14.360533714294434,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 180.43324279785156,
+          "lat_us": 14.365866661071777,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 306.92449951171875,
+          "lat_us": 67.56266784667969,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 306.9439392089844,
+          "lat_us": 67.55839538574219,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 306.8421630859375,
+          "lat_us": 67.58080291748047,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 306.9439392089844,
+          "lat_us": 67.55839538574219,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 306.7646789550781,
+          "lat_us": 67.59786987304688,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 306.7162780761719,
+          "lat_us": 67.60853576660156,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 306.7985534667969,
+          "lat_us": 67.59040832519531,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 306.8760681152344,
+          "lat_us": 67.57333374023438,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 386.6717529296875,
+          "lat_us": 214.51412963867188,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 386.0613098144531,
+          "lat_us": 214.85333251953125,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 385.2274475097656,
+          "lat_us": 215.31838989257812,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 385.5311279296875,
+          "lat_us": 215.14878845214844,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 385.76824951171875,
+          "lat_us": 215.01654052734375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 385.51580810546875,
+          "lat_us": 215.15733337402344,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 384.75665283203125,
+          "lat_us": 215.5818634033203,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 385.24462890625,
+          "lat_us": 215.3087921142578,
+          "alg_id": 0,
+          "split_k": 16,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 422.707275390625,
+          "lat_us": 784.9077758789062,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 405.2906188964844,
+          "lat_us": 818.6378173828125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 402.3739929199219,
+          "lat_us": 824.5717163085938,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 403.0429382324219,
+          "lat_us": 823.2031860351562,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 403.7035827636719,
+          "lat_us": 821.8560180664062,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 404.1909484863281,
+          "lat_us": 820.8650512695312,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 423.5678405761719,
+          "lat_us": 783.3130493164062,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 403.3381652832031,
+          "lat_us": 822.6005859375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,3296)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 15.065186500549316,
+          "lat_us": 14.338133811950684,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 15.079771041870117,
+          "lat_us": 14.32426643371582,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 15.061824798583984,
+          "lat_us": 14.341333389282227,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 15.07864761352539,
+          "lat_us": 14.325333595275879,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 15.053987503051758,
+          "lat_us": 14.348799705505371,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 15.056225776672363,
+          "lat_us": 14.346667289733887,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 15.079771041870117,
+          "lat_us": 14.32426643371582,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 15.07864761352539,
+          "lat_us": 14.325333595275879,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 120.65614318847656,
+          "lat_us": 14.322132110595703,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 120.70108032226562,
+          "lat_us": 14.316800117492676,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 120.70108032226562,
+          "lat_us": 14.316800117492676,
+          "alg_id": 2,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 120.71907043457031,
+          "lat_us": 14.314666748046875,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 120.53046417236328,
+          "lat_us": 14.337066650390625,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 120.51252746582031,
+          "lat_us": 14.339200019836426,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 120.52149200439453,
+          "lat_us": 14.338133811950684,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 120.71907043457031,
+          "lat_us": 14.314666748046875,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 293.5404968261719,
+          "lat_us": 47.09546661376953,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 293.600341796875,
+          "lat_us": 47.08586502075195,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 293.6402282714844,
+          "lat_us": 47.0794677734375,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 293.3677062988281,
+          "lat_us": 47.12320327758789,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 293.4607238769531,
+          "lat_us": 47.1082649230957,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 293.6269226074219,
+          "lat_us": 47.081600189208984,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 293.361083984375,
+          "lat_us": 47.124267578125,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 293.3876647949219,
+          "lat_us": 47.119998931884766,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 364.9326171875,
+          "lat_us": 151.52853393554688,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 365.3595275878906,
+          "lat_us": 151.35147094726562,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 365.1562194824219,
+          "lat_us": 151.4357452392578,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 364.9249267578125,
+          "lat_us": 151.53172302246094,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 364.95831298828125,
+          "lat_us": 151.5178680419922,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 365.0431213378906,
+          "lat_us": 151.482666015625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 365.4033508300781,
+          "lat_us": 151.3333282470703,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 366.1595153808594,
+          "lat_us": 151.0207977294922,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 415.2476806640625,
+          "lat_us": 532.6719970703125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 402.0224304199219,
+          "lat_us": 550.1951904296875,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 401.3151550292969,
+          "lat_us": 551.1648559570312,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 401.2748107910156,
+          "lat_us": 551.2202758789062,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 401.0164489746094,
+          "lat_us": 551.575439453125,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 400.2315979003906,
+          "lat_us": 552.6570434570312,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 400.12811279296875,
+          "lat_us": 552.7999877929688,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 414.6971435546875,
+          "lat_us": 533.379150390625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(16384,3296)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 52.46785354614258,
+          "lat_us": 32.93546676635742,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 52.667423248291016,
+          "lat_us": 32.810665130615234,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 52.61952209472656,
+          "lat_us": 32.84053421020508,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 52.47125244140625,
+          "lat_us": 32.93333435058594,
+          "alg_id": 2,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 52.57512664794922,
+          "lat_us": 32.86826705932617,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 52.50185775756836,
+          "lat_us": 32.91413497924805,
+          "alg_id": 2,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 52.628074645996094,
+          "lat_us": 32.83519744873047,
+          "alg_id": 2,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 52.63490676879883,
+          "lat_us": 32.830936431884766,
+          "alg_id": 2,
+          "split_k": 2,
+          "workspace": 0
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 293.6402282714844,
+          "lat_us": 47.0794677734375,
+          "alg_id": 0,
+          "split_k": 8,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 293.50726318359375,
+          "lat_us": 47.10079574584961,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 293.600341796875,
+          "lat_us": 47.08586502075195,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 293.4873046875,
+          "lat_us": 47.104000091552734,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 293.547119140625,
+          "lat_us": 47.09440231323242,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 293.5404968261719,
+          "lat_us": 47.09546661376953,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 293.2349853515625,
+          "lat_us": 47.14453125,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 293.7001037597656,
+          "lat_us": 47.06986999511719,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 397.794677734375,
+          "lat_us": 278.0213317871094,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 395.4129333496094,
+          "lat_us": 279.69598388671875,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 394.26263427734375,
+          "lat_us": 280.51202392578125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 394.55072021484375,
+          "lat_us": 280.30718994140625,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 395.4776916503906,
+          "lat_us": 279.6501770019531,
+          "alg_id": 0,
+          "split_k": 64,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 394.11578369140625,
+          "lat_us": 280.6165466308594,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 394.36761474609375,
+          "lat_us": 280.4373474121094,
+          "alg_id": 0,
+          "split_k": -1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 396.1244812011719,
+          "lat_us": 279.1935729980469,
+          "alg_id": 0,
+          "split_k": 256,
+          "workspace": 0
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 424.7409973144531,
+          "lat_us": 1041.53271484375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 405.68597412109375,
+          "lat_us": 1090.453369140625,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 406.2069091796875,
+          "lat_us": 1089.054931640625,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 405.650634765625,
+          "lat_us": 1090.54833984375,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 422.8519287109375,
+          "lat_us": 1046.1856689453125,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 406.4656982421875,
+          "lat_us": 1088.361572265625,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 406.00848388671875,
+          "lat_us": 1089.587158203125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 406.50909423828125,
+          "lat_us": 1088.245361328125,
+          "alg_id": 0,
+          "split_k": 4,
+          "workspace": 0
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 410.3904724121094,
+          "lat_us": 4311.81201171875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 402.4979248046875,
+          "lat_us": 4396.36181640625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 402.2763977050781,
+          "lat_us": 4398.78271484375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 402.19256591796875,
+          "lat_us": 4399.69970703125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 414.8303527832031,
+          "lat_us": 4265.6630859375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 400.4740295410156,
+          "lat_us": 4418.580078125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 401.2932434082031,
+          "lat_us": 4409.5595703125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Row": {
+          "tops": 401.43359375,
+          "lat_us": 4408.01806640625,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    },
+    "(2048,13120)": {
+      "16": {
+        "TN_CC_Col": {
+          "tops": 41.81196212768555,
+          "lat_us": 20.564266204833984,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NT_RR_Col": {
+          "tops": 41.67361831665039,
+          "lat_us": 20.63253402709961,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NN_RC_Col": {
+          "tops": 41.83149337768555,
+          "lat_us": 20.554664611816406,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 3670208
+        },
+        "TT_CR_Col": {
+          "tops": 41.798946380615234,
+          "lat_us": 20.570669174194336,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "TN_CC_Row": {
+          "tops": 41.85103225708008,
+          "lat_us": 20.545068740844727,
+          "alg_id": 3,
+          "split_k": 4,
+          "workspace": 3670208
+        },
+        "NT_RR_Row": {
+          "tops": 41.820640563964844,
+          "lat_us": 20.559999465942383,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "NN_RC_Row": {
+          "tops": 41.86842727661133,
+          "lat_us": 20.53653335571289,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        },
+        "TT_CR_Row": {
+          "tops": 41.827152252197266,
+          "lat_us": 20.556798934936523,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 3670208
+        }
+      },
+      "128": {
+        "TN_CC_Col": {
+          "tops": 234.849853515625,
+          "lat_us": 29.289600372314453,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "NT_RR_Col": {
+          "tops": 235.57911682128906,
+          "lat_us": 29.198932647705078,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "NN_RC_Col": {
+          "tops": 235.3727569580078,
+          "lat_us": 29.224531173706055,
+          "alg_id": 3,
+          "split_k": 2,
+          "workspace": 1048896
+        },
+        "TT_CR_Col": {
+          "tops": 235.51028442382812,
+          "lat_us": 29.20746612548828,
+          "alg_id": 3,
+          "split_k": 1,
+          "workspace": 1048896
+        },
+        "TN_CC_Row": {
+          "tops": 236.57296752929688,
+          "lat_us": 29.076265335083008,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "NT_RR_Row": {
+          "tops": 237.58399963378906,
+          "lat_us": 28.952533721923828,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "NN_RC_Row": {
+          "tops": 234.9611053466797,
+          "lat_us": 29.275732040405273,
+          "alg_id": 3,
+          "split_k": -1,
+          "workspace": 1048896
+        },
+        "TT_CR_Row": {
+          "tops": 237.10354614257812,
+          "lat_us": 29.011199951171875,
+          "alg_id": 3,
+          "split_k": 8,
+          "workspace": 1048896
+        }
+      },
+      "1024": {
+        "TN_CC_Col": {
+          "tops": 383.38018798828125,
+          "lat_us": 143.5370635986328,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 8389696
+        },
+        "NT_RR_Col": {
+          "tops": 382.91070556640625,
+          "lat_us": 143.7130584716797,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 8389696
+        },
+        "NN_RC_Col": {
+          "tops": 383.2919006347656,
+          "lat_us": 143.57012939453125,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        },
+        "TT_CR_Col": {
+          "tops": 383.3260803222656,
+          "lat_us": 143.5573272705078,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        },
+        "TN_CC_Row": {
+          "tops": 383.434326171875,
+          "lat_us": 143.5167999267578,
+          "alg_id": 1,
+          "split_k": 4,
+          "workspace": 8389696
+        },
+        "NT_RR_Row": {
+          "tops": 383.51983642578125,
+          "lat_us": 143.48480224609375,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 8389696
+        },
+        "NN_RC_Row": {
+          "tops": 383.451416015625,
+          "lat_us": 143.51040649414062,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 8389696
+        },
+        "TT_CR_Row": {
+          "tops": 383.4542541503906,
+          "lat_us": 143.50933837890625,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 8389696
+        }
+      },
+      "4096": {
+        "TN_CC_Col": {
+          "tops": 415.098876953125,
+          "lat_us": 530.2762451171875,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NT_RR_Col": {
+          "tops": 415.0579833984375,
+          "lat_us": 530.3284912109375,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "NN_RC_Col": {
+          "tops": 414.4735412597656,
+          "lat_us": 531.0762939453125,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TT_CR_Col": {
+          "tops": 416.6695251464844,
+          "lat_us": 528.27734375,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        },
+        "TN_CC_Row": {
+          "tops": 415.681640625,
+          "lat_us": 529.5328369140625,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        },
+        "NT_RR_Row": {
+          "tops": 416.7604064941406,
+          "lat_us": 528.1621704101562,
+          "alg_id": 1,
+          "split_k": 4,
+          "workspace": 6030144
+        },
+        "NN_RC_Row": {
+          "tops": 415.00701904296875,
+          "lat_us": 530.3936157226562,
+          "alg_id": 1,
+          "split_k": 1,
+          "workspace": 6030144
+        },
+        "TT_CR_Row": {
+          "tops": 415.35369873046875,
+          "lat_us": 529.950927734375,
+          "alg_id": 1,
+          "split_k": 2,
+          "workspace": 6030144
+        }
+      },
+      "16384": {
+        "TN_CC_Col": {
+          "tops": 427.3622131347656,
+          "lat_us": 2060.239013671875,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NT_RR_Col": {
+          "tops": 432.50872802734375,
+          "lat_us": 2035.7237548828125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Col": {
+          "tops": 412.6568298339844,
+          "lat_us": 2133.657470703125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TT_CR_Col": {
+          "tops": 412.7768859863281,
+          "lat_us": 2133.036865234375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "TN_CC_Row": {
+          "tops": 411.930908203125,
+          "lat_us": 2137.41748046875,
+          "alg_id": 0,
+          "split_k": 2,
+          "workspace": 0
+        },
+        "NT_RR_Row": {
+          "tops": 411.6443176269531,
+          "lat_us": 2138.905517578125,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        },
+        "NN_RC_Row": {
+          "tops": 423.6875305175781,
+          "lat_us": 2078.107666015625,
+          "alg_id": 1,
+          "split_k": -1,
+          "workspace": 7603264
+        },
+        "TT_CR_Row": {
+          "tops": 412.8301696777344,
+          "lat_us": 2132.761474609375,
+          "alg_id": 0,
+          "split_k": 1,
+          "workspace": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,147 @@
+import torch
+import numpy as np
+import random
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
+np.random.seed(42)
+random.seed(42)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
+import argparse
+import os
+import torch
+import torch.nn.functional as F
+from torch_geometric.data import Data
+from torch_geometric.datasets import Planetoid
+from torch_geometric.utils import subgraph, to_undirected
+from ogb.nodeproppred import PygNodePropPredDataset
+
+from Stretched_models import load_model
+
+# Sample a subgraph with n nodes sequentially
+def sample_subgraph(data, n):
+    num_nodes = data.num_nodes
+    
+    # Ensure n does not exceed the total number of nodes
+    n = min(n, num_nodes)
+    
+    # Randomly sample n nodes
+    sampled_nodes = torch.randperm(num_nodes)[:n]
+    
+    # Construct the subgraph (preserve node IDs but relabel for continuity)
+    edge_index_sub, _ = subgraph(
+        subset=sampled_nodes,
+        edge_index=data.edge_index,
+        relabel_nodes=True
+    )
+    edge_index_sub = to_undirected(edge_index_sub)
+
+    x_sub = data.x[sampled_nodes]
+    y_sub = data.y[sampled_nodes] if hasattr(data, 'y') else None
+
+    return Data(x=x_sub, edge_index=edge_index_sub, y=y_sub)
+
+# Split subgraph nodes into training and testing sets
+def split_subgraph_nodes(data, train_ratio=0.5):
+    num_nodes = data.num_nodes
+    perm = torch.randperm(num_nodes)  # Shuffle node order
+    train_size = int(train_ratio * num_nodes)
+    
+    train_mask = torch.zeros(num_nodes, dtype=torch.bool)
+    test_mask = torch.zeros(num_nodes, dtype=torch.bool)
+
+    train_mask[perm[:train_size]] = True
+    test_mask[perm[train_size:]] = True
+
+    data.train_mask = train_mask
+    data.test_mask = test_mask
+    return data
+
+def train(model, optimizer, data):
+    model.train()
+    optimizer.zero_grad()
+    out = model(data.x, data.edge_index)
+    
+    # Handle dimensionality for ogbn-arxiv (y shape is N x 1, requires squeeze)
+    y_true = data.y.squeeze() if data.y.dim() > 1 else data.y
+    
+    loss = F.cross_entropy(out[data.train_mask], y_true[data.train_mask])
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    optimizer.step()
+    return loss.item()
+
+def test(model, data):
+    model.eval()
+    with torch.no_grad():
+        logits = model(data.x, data.edge_index)
+        pred = logits.argmax(dim=1)
+        y_true = data.y.squeeze() if data.y.dim() > 1 else data.y
+        acc = (pred[data.test_mask] == y_true[data.test_mask]).float().mean().item()
+    return acc
+
+def main():
+    # === Configuration via Argparse ===
+    parser = argparse.ArgumentParser(description='Train GCN Models on Graph Datasets')
+    parser.add_argument('--dataset', type=str, default='Cora', choices=['Cora', 'Pubmed', 'ogbn-arxiv'], 
+                        help='Dataset to use (default: Cora)')
+    parser.add_argument('--num_layers', type=int, default=2, help='Number of GCN layers (default: 2)')
+    parser.add_argument('--hidden_channels', type=int, default=32, help='Hidden channel size (default: 256)')
+    parser.add_argument('--epochs', type=int, default=200, help='Number of training epochs (default: 200)')
+    parser.add_argument('--lr', type=float, default=0.05, help='Learning rate (default: 0.08)')
+    parser.add_argument('--graph_size', type=int, default=500, help='Size of the fixed subgraph (default: 500)')
+    args = parser.parse_args()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    print(f"=== Training {args.dataset} | Layers: {args.num_layers} | Channels: {args.hidden_channels} ===")
+
+    # === Intelligent Dataset Loading Strategy ===
+    if args.dataset in ['Cora', 'Pubmed']:
+        dataset = Planetoid(root="data", name=args.dataset)
+        out_channels = 7 if args.dataset == 'Cora' else 3
+    elif args.dataset == 'ogbn-arxiv':
+        # Safely load weights for ogbn-arxiv under PyTorch 2.0+
+        torch.serialization.add_safe_globals([Data])
+        _orig_torch_load = torch.load
+        def torch_load_with_weights_only_false(*load_args, **kwargs):
+            if "weights_only" not in kwargs:
+                kwargs["weights_only"] = False
+            return _orig_torch_load(*load_args, **kwargs)
+        torch.load = torch_load_with_weights_only_false
+        
+        dataset = PygNodePropPredDataset(name='ogbn-arxiv', root='data')
+        out_channels = 40
+    else:
+        raise ValueError(f"Unknown dataset: {args.dataset}")
+
+    data = dataset[0]
+    data.edge_index = to_undirected(data.edge_index, num_nodes=data.num_nodes)
+    data.x = data.x.float()
+
+    # === Construct Fixed Subgraph ===
+    fixed_subgraph = sample_subgraph(data, args.graph_size)
+    fixed_subgraph = split_subgraph_nodes(fixed_subgraph, train_ratio=0.5)
+    fixed_subgraph = fixed_subgraph.to(device)
+
+    # === Initialize Model ===
+    # Set model path dynamically based on dataset and architecture
+    model_path = f"{args.dataset}_model_{args.num_layers}_{args.hidden_channels}.pt"
+    model = load_model(args.num_layers, None, data.num_features, args.hidden_channels, out_channels, device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)
+
+    # === Training Loop ===
+    for epoch in range(1, args.epochs + 1):
+        loss = train(model, optimizer, fixed_subgraph)
+        acc = test(model, fixed_subgraph)
+
+        if epoch % 10 == 0:
+            print(f"Epoch {epoch:03d}, Loss = {loss:.4f}, Acc = {acc:.4f}")
+
+    # === Save Model ===
+    torch.save(model.state_dict(), model_path)
+    print(f"Model trained on fixed subgraph (n={args.graph_size}) successfully saved to {model_path}")
+
+if __name__ == "__main__":
+    main()

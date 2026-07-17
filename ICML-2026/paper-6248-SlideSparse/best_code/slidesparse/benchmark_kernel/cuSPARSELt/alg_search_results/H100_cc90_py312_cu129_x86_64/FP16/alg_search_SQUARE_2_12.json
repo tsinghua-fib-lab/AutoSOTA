@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA H100 PCIe",
+    "gpu_short_name": "H100",
+    "compute_capability": "cc90",
+    "model_name": "SQUARE",
+    "mode": "square",
+    "backend": "cuSPARSELt",
+    "dtype": "fp16",
+    "alg_count": 52,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-28T06:07:51.550443",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        64,
+        128
+      ],
+      [
+        128,
+        224
+      ],
+      [
+        256,
+        448
+      ],
+      [
+        512,
+        864
+      ],
+      [
+        1024,
+        1728
+      ],
+      [
+        2048,
+        3424
+      ],
+      [
+        4096,
+        6848
+      ],
+      [
+        8192,
+        13664
+      ],
+      [
+        16384,
+        27328
+      ]
+    ],
+    "search_stats": {
+      "total": 9,
+      "success": 1,
+      "failed": 0,
+      "errors": 8
+    },
+    "sparsity": "2_12",
+    "config_count": 37,
+    "skipped_nk": [
+      {
+        "N": 128,
+        "K": 224,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 256,
+        "K": 448,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 512,
+        "K": 864,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 1024,
+        "K": 1728,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 2048,
+        "K": 3424,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 4096,
+        "K": 6848,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 8192,
+        "K": 13664,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      },
+      {
+        "N": 16384,
+        "K": 27328,
+        "reason": "Data generation error: CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    ]
+  },
+  "nk_entries": {
+    "(64,128)": {
+      "m_thresholds": [
+        64
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 1343,
+          "tops": Infinity,
+          "lat_us": 0.0,
+          "alg_id": 36,
+          "split_k": 1
+        }
+      }
+    },
+    "(128,224)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "128": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(256,448)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "256": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(512,864)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "512": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(1024,1728)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "1024": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(2048,3424)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "2048": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(4096,6848)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "4096": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(8192,13664)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "8192": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    },
+    "(16384,27328)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "16384": "CUDA error: an illegal instruction was encountered\nSearch for `cudaErrorIllegalInstruction' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"
+      }
+    }
+  }
+}

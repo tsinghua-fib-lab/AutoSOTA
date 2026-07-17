@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "watersic"
+version = "1.0.0"
+description = "WaterSIC: information-theoretically (near) optimal post-training quantization"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+authors = [
+    {name = "Egor Lifar", email = "l1far@mit.edu"},
+    {name = "Semyon Savkin"},
+    {name = "Or Ordentlich"},
+    {name = "Yury Polyanskiy"},
+]
+dependencies = [
+    "torch>=2.1.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "tqdm>=4.60.0",
+    "GPUtil>=1.4.0",
+    "fairscale>=0.4.13",
+    "datasets>=2.14.0",
+]
+
+[project.optional-dependencies]
+eval = ["lm_eval>=0.4.9"]
+
+[project.urls]
+Paper = "https://arxiv.org/abs/2603.04956"
+Code  = "https://github.com/egorlifar/w-quant-new"
+
+[project.scripts]
+watersic-quantize              = "scripts.run_pipeline_job:main"
+watersic-eval                  = "scripts.run_eval_job:main"
+watersic-finetune              = "scripts.finetune_zsic:main"
+watersic-sweep                 = "scripts.run_quant_sweep:main"
+watersic-quantize-and-finetune = "scripts.quantize_and_finetune:main"        # added in Step 4.5
+
+[tool.setuptools.packages.find]
+include = [
+    "quant_layerwise*",
+    "scripts*",
+    "parallel*",
+    "llama*",
+    "llama2*",
+    "lm_bench*",
+]
+
+# Install CUDA 12.8 torch build for Linux, CPU for other platforms
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+    { index = "pytorch-cu128", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

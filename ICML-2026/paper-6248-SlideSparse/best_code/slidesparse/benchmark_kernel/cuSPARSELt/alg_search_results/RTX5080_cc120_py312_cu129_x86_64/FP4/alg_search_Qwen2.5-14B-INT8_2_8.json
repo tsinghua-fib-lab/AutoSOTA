@@ -1,0 +1,363 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "gpu_short_name": "RTX5080",
+    "compute_capability": "cc120",
+    "model_name": "Qwen2.5-14B-INT8",
+    "mode": "model",
+    "backend": "cuSPARSELt",
+    "dtype": "fp4e2m1",
+    "alg_count": 2,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-27T14:26:28.496028",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536
+    ],
+    "NK_list": [
+      [
+        7168,
+        7680
+      ],
+      [
+        5120,
+        7680
+      ],
+      [
+        27648,
+        7680
+      ],
+      [
+        5120,
+        20736
+      ]
+    ],
+    "search_stats": {
+      "total": 44,
+      "success": 33,
+      "failed": 0,
+      "errors": 11
+    },
+    "sparsity": "2_8",
+    "config_count": 10,
+    "skipped_nk": [
+      {
+        "N": 5120,
+        "K": 20736,
+        "reason": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)"
+      }
+    ]
+  },
+  "nk_entries": {
+    "(7168,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 382.8117370605469,
+          "lat_us": 18.407039642333984,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 764.109130859375,
+          "lat_us": 18.443519592285156,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "256": {
+          "workspace": 7340992,
+          "tops": 785.2681274414062,
+          "lat_us": 35.89311981201172,
+          "alg_id": 1,
+          "split_k": 4
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 1021.0323486328125,
+          "lat_us": 55.210243225097656,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1080.2174072265625,
+          "lat_us": 104.37055969238281,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1146.5888671875,
+          "lat_us": 196.65792846679688,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1161.5927734375,
+          "lat_us": 388.2355041503906,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1191.9949951171875,
+          "lat_us": 756.6668701171875,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1155.2979736328125,
+          "lat_us": 1561.4034423828125,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "32768": {
+          "workspace": 0,
+          "tops": 1151.958740234375,
+          "lat_us": 3131.859130859375,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "65536": {
+          "workspace": 0,
+          "tops": 1152.6558837890625,
+          "lat_us": 6259.93017578125,
+          "alg_id": 1,
+          "split_k": 1
+        }
+      }
+    },
+    "(5120,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 300.8308410644531,
+          "lat_us": 16.730880737304688,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 548.2846069335938,
+          "lat_us": 18.35968017578125,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 893.9266357421875,
+          "lat_us": 22.5216007232666,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 1034.2515869140625,
+          "lat_us": 38.93183898925781,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1094.9755859375,
+          "lat_us": 73.54560089111328,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1130.3218994140625,
+          "lat_us": 142.49151611328125,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1086.264892578125,
+          "lat_us": 296.54144287109375,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1112.602783203125,
+          "lat_us": 579.043212890625,
+          "alg_id": 0,
+          "split_k": 4
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1110.093017578125,
+          "lat_us": 1160.7047119140625,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "32768": {
+          "workspace": 10487104,
+          "tops": 1140.530029296875,
+          "lat_us": 2259.45849609375,
+          "alg_id": 1,
+          "split_k": 2
+        },
+        "65536": {
+          "workspace": 9962816,
+          "tops": 1139.9222412109375,
+          "lat_us": 4521.32666015625,
+          "alg_id": 1,
+          "split_k": 2
+        }
+      }
+    },
+    "(27648,7680)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 305.46759033203125,
+          "lat_us": 88.9753646850586,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 602.6597900390625,
+          "lat_us": 90.19712829589844,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 892.7333984375,
+          "lat_us": 121.7791976928711,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 1078.47705078125,
+          "lat_us": 201.61090087890625,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1119.2142333984375,
+          "lat_us": 388.5452880859375,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1127.398193359375,
+          "lat_us": 771.4495849609375,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1119.92822265625,
+          "lat_us": 1553.1904296875,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1107.250244140625,
+          "lat_us": 3141.94873046875,
+          "alg_id": 0,
+          "split_k": 4
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1099.21142578125,
+          "lat_us": 6329.853515625,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "32768": {
+          "workspace": 0,
+          "tops": 1140.152099609375,
+          "lat_us": 12205.12109375,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "65536": {
+          "workspace": 0,
+          "tops": 1129.8392333984375,
+          "lat_us": 24633.052734375,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(5120,20736)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "64": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "128": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "256": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "512": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "1024": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "2048": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "4096": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "8192": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "16384": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "32768": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+        "65536": "CUDA OOM during activation prep: CUDA out of memory. Tried to allocate 5.06 GiB. GPU 0 has a total capacity of 15.47 GiB of which 370.94 MiB is free. Including non-PyTorch memory, this process has 15.08 GiB memory in use. Of the allocated memory 14.45 GiB is allocated by PyTorch, and 342.25 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)"
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+# Default configuration for Accuracy vs Compute experiment
+
+[experiment]
+name = "accuracy_vs_compute"
+description = "Compare sparse GP-FVM against baselines on Burgers equation"
+
+[methods]
+enabled = ["sparse_fvm", "sparse_collocation", "classical_fvm"]
+
+[problem]
+# Burgers equation parameters
+x_min = 0.0
+x_max = 1.0
+T_end = 0.3
+viscosity = 0.01
+u_left = 0.0
+u_right = 0.0
+
+[initial_conditions]
+# IC families to test
+families = ["sine", "gaussian", "step"]
+# Number of random samples per family
+n_samples = 10
+# Base random seed for reproducibility
+base_seed = 42
+
+[grid]
+# Grid sizes to test
+sizes = [50, 100, 200, 400, 800]
+
+[solver]
+# Sparse Cholesky parameter
+rho = 2.0
+# Kernel lengthscale (relative to domain size)
+lengthscale = 0.1
+# Matern smoothness (2 = Matern 5/2)
+smoothness = 2
+# Time integration scheme
+time_scheme = "crank_nicolson"
+
+[reference]
+# Grid size for high-resolution reference solution
+N_ref = 2000
+# Number of time steps for reference
+N_t_ref = 1000
+
+[output]
+# Output directory
+dir = "results/accuracy_vs_compute"
+# Save intermediate results
+save_intermediate = true
+# Generate plots
+generate_plots = true

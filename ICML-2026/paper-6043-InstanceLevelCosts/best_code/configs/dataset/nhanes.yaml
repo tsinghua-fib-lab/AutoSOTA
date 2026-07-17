@@ -1,0 +1,49 @@
+paths:
+  demographic:    data/nhanes/demographic.csv
+  examination:    data/nhanes/examination.csv
+  labs:           data/nhanes/labs.csv
+  questionnaire:  data/nhanes/questionnaire.csv
+  # diet/medications optional for now
+
+sbp_cols: ["BPXSY1","BPXSY2","BPXSY3","BPXSY4"]
+dbp_cols: ["BPXDI1","BPXDI2","BPXDI3","BPXDI4"]   # not used for delta
+
+threshold_sbp: 130.0
+
+columns:
+  demographic:
+    - SEQN
+    - RIDAGEYR
+    - RIAGENDR
+    - RIDRETH3
+    - DMDEDUC2
+    - INDHHIN2
+  examination:
+    - SEQN
+    - BPAARM
+    - BPXSY1
+    - BPXSY2
+    - BPXSY3
+    - BPXSY4
+    - BPXDI1
+    - BPXDI2
+    - BPXDI3
+    - BPXDI4
+    - BMXBMI
+  labs:
+    - SEQN
+    - LBXTC
+    - LBDHDD
+    - LBXTR
+  questionnaire:
+    - SEQN
+    - SMQ020
+    - PAQ605
+
+features:
+  numeric: [RIDAGEYR, BMXBMI, LBXTC, LBDHDD, LBXTR]
+  categorical: [RIAGENDR, RIDRETH3, DMDEDUC2, INDHHIN2, BPAARM, SMQ020, PAQ605]
+
+target:
+  mode: both         # {cls, reg, both}
+  weight_scheme: none
