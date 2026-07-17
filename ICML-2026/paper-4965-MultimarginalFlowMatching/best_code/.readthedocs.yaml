@@ -1,0 +1,29 @@
+# Read the Docs configuration file
+# See https://docs.readthedocs.com/platform/stable/config-file/v2.html
+
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  jobs:
+    post_checkout:
+      # hatch-vcs derives the package version from git tags; RTD does a shallow
+      # clone by default so we unshallow to make tags available.
+      - git fetch --unshallow || true
+      - git fetch --tags
+
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: false
+
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+
+formats:
+  - htmlzip

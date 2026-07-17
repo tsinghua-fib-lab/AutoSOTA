@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GB10",
+    "gpu_short_name": "GB10",
+    "compute_capability": "cc121",
+    "model_name": "SQUARE",
+    "mode": "square",
+    "backend": "cuSPARSELt",
+    "dtype": "fp8e4m3",
+    "alg_count": 4,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-28T06:25:53.886078",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        64,
+        128
+      ],
+      [
+        128,
+        256
+      ],
+      [
+        256,
+        512
+      ],
+      [
+        512,
+        1024
+      ],
+      [
+        1024,
+        2048
+      ],
+      [
+        2048,
+        4096
+      ],
+      [
+        4096,
+        8192
+      ],
+      [
+        8192,
+        16384
+      ],
+      [
+        16384,
+        32768
+      ]
+    ],
+    "search_stats": {
+      "total": 9,
+      "success": 9,
+      "failed": 0,
+      "errors": 0
+    },
+    "sparsity": "2_inf",
+    "config_count": 16
+  },
+  "nk_entries": {
+    "(64,128)": {
+      "m_thresholds": [
+        64
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 0.19640374183654785,
+          "lat_us": 5.3388800621032715,
+          "alg_id": 2,
+          "split_k": 8
+        }
+      }
+    },
+    "(128,256)": {
+      "m_thresholds": [
+        128
+      ],
+      "alg_by_m": {
+        "128": {
+          "workspace": 0,
+          "tops": 1.731924057006836,
+          "lat_us": 4.843519687652588,
+          "alg_id": 2,
+          "split_k": 16
+        }
+      }
+    },
+    "(256,512)": {
+      "m_thresholds": [
+        256
+      ],
+      "alg_by_m": {
+        "256": {
+          "workspace": 0,
+          "tops": 10.878472328186035,
+          "lat_us": 6.168960094451904,
+          "alg_id": 2,
+          "split_k": 1
+        }
+      }
+    },
+    "(512,1024)": {
+      "m_thresholds": [
+        512
+      ],
+      "alg_by_m": {
+        "512": {
+          "workspace": 0,
+          "tops": 64.99773406982422,
+          "lat_us": 8.25984001159668,
+          "alg_id": 2,
+          "split_k": 1
+        }
+      }
+    },
+    "(1024,2048)": {
+      "m_thresholds": [
+        1024
+      ],
+      "alg_by_m": {
+        "1024": {
+          "workspace": 0,
+          "tops": 139.3456573486328,
+          "lat_us": 30.822399139404297,
+          "alg_id": 0,
+          "split_k": 1
+        }
+      }
+    },
+    "(2048,4096)": {
+      "m_thresholds": [
+        2048
+      ],
+      "alg_by_m": {
+        "2048": {
+          "workspace": 0,
+          "tops": 219.0442657470703,
+          "lat_us": 156.86207580566406,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(4096,8192)": {
+      "m_thresholds": [
+        4096
+      ],
+      "alg_by_m": {
+        "4096": {
+          "workspace": 0,
+          "tops": 236.1482391357422,
+          "lat_us": 1164.0057373046875,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(8192,16384)": {
+      "m_thresholds": [
+        8192
+      ],
+      "alg_by_m": {
+        "8192": {
+          "workspace": 0,
+          "tops": 234.01412963867188,
+          "lat_us": 9396.9677734375,
+          "alg_id": 0,
+          "split_k": 2
+        }
+      }
+    },
+    "(16384,32768)": {
+      "m_thresholds": [
+        16384
+      ],
+      "alg_by_m": {
+        "16384": {
+          "workspace": 0,
+          "tops": 216.2923583984375,
+          "lat_us": 81335.21875,
+          "alg_id": 0,
+          "split_k": 1
+        }
+      }
+    }
+  }
+}

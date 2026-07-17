@@ -1,0 +1,1378 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GB10",
+    "compute_capability": "12.1",
+    "arch_name": "Blackwell",
+    "dtype": "fp8e4m3",
+    "warmup": 10,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "cuda_version_driver": "13.0",
+    "cuda_version_runtime": "12.9",
+    "time": "2026-01-06T23:09:46.923834",
+    "m_list": [
+      16,
+      256,
+      2048,
+      16384
+    ],
+    "nk_list": [
+      [
+        3840,
+        2560,
+        "Wqkv"
+      ],
+      [
+        2560,
+        2560,
+        "Wo"
+      ],
+      [
+        13824,
+        2560,
+        "W13"
+      ],
+      [
+        2560,
+        6912,
+        "W2"
+      ]
+    ],
+    "layout_configs": [
+      "TN+CC",
+      "NT+RR",
+      "NN+RC",
+      "TT+CR"
+    ],
+    "output_orders": [
+      "Col",
+      "Row"
+    ]
+  },
+  "results": {
+    "(3840,2560)": {
+      "name": "Wqkv",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.502666473388672,
+          "best_lat_us": 10.312960624694824,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.487163543701172,
+          "best_lat_us": 12.342401504516602,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.4686336517334,
+          "best_lat_us": 10.324480056762695,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.41862678527832,
+          "best_lat_us": 12.375679969787598,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.506454467773438,
+          "best_lat_us": 10.31167984008789,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.430463790893555,
+          "best_lat_us": 12.369919776916504,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.412076950073242,
+          "best_lat_us": 10.343680381774902,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.447580337524414,
+          "best_lat_us": 12.361599922180176,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 134.11415100097656,
+          "best_lat_us": 37.528961181640625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 135.50296020507812,
+          "best_lat_us": 37.144317626953125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 126.6375732421875,
+          "best_lat_us": 39.7446403503418,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 135.97386169433594,
+          "best_lat_us": 37.01567840576172,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 136.2471160888672,
+          "best_lat_us": 36.94144058227539,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 134.53399658203125,
+          "best_lat_us": 37.411842346191406,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 135.75086975097656,
+          "best_lat_us": 37.076480865478516,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 136.2258758544922,
+          "best_lat_us": 36.947200775146484,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.25
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 181.9638671875,
+          "best_lat_us": 221.2819366455078,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 191.44613647460938,
+          "best_lat_us": 210.32191467285156,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 184.89491271972656,
+          "best_lat_us": 217.77407836914062,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 191.53762817382812,
+          "best_lat_us": 210.22145080566406,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 182.43771362304688,
+          "best_lat_us": 220.70721435546875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 178.37171936035156,
+          "best_lat_us": 225.7382354736328,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 183.71949768066406,
+          "best_lat_us": 219.1673583984375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 176.79531860351562,
+          "best_lat_us": 227.7510528564453,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 5.0
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 169.32156372070312,
+          "best_lat_us": 1902.4307861328125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 203.7310333251953,
+          "best_lat_us": 1581.11669921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 167.1170654296875,
+          "best_lat_us": 1927.5263671875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 200.55789184570312,
+          "best_lat_us": 1606.1324462890625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 165.54769897460938,
+          "best_lat_us": 1945.799072265625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 200.622802734375,
+          "best_lat_us": 1605.61279296875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 163.82687377929688,
+          "best_lat_us": 1966.237548828125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 202.27615356445312,
+          "best_lat_us": 1592.489013671875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 40.0
+        }
+      }
+    },
+    "(2560,2560)": {
+      "name": "Wo",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.015649795532227,
+          "best_lat_us": 8.383359909057617,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.2777777910232544
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 22.55661964416504,
+          "best_lat_us": 9.297279357910156,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.377944946289062,
+          "best_lat_us": 8.263679504394531,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.393678665161133,
+          "best_lat_us": 8.258559226989746,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.2777777910232544
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.289806365966797,
+          "best_lat_us": 8.292479515075684,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.2777777910232544
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.326942443847656,
+          "best_lat_us": 8.280320167541504,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.2777777910232544
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.36223030090332,
+          "best_lat_us": 8.268799781799316,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 25.342615127563477,
+          "best_lat_us": 8.275199890136719,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.40159606933594,
+          "best_lat_us": 22.610559463500977,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.41000366210938,
+          "best_lat_us": 22.60927963256836,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.4856414794922,
+          "best_lat_us": 22.597761154174805,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 142.65565490722656,
+          "best_lat_us": 23.521278381347656,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.3889923095703,
+          "best_lat_us": 22.61248016357422,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 142.47731018066406,
+          "best_lat_us": 23.55072021484375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.44361877441406,
+          "best_lat_us": 22.60416030883789,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 148.43101501464844,
+          "best_lat_us": 22.6060791015625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 190.5904083251953,
+          "best_lat_us": 140.8441619873047,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 187.3561248779297,
+          "best_lat_us": 143.2755126953125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 188.64625549316406,
+          "best_lat_us": 142.29566955566406,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 187.4993438720703,
+          "best_lat_us": 143.16607666015625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 190.7126007080078,
+          "best_lat_us": 140.75392150878906,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 187.82681274414062,
+          "best_lat_us": 142.91647338867188,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 188.3565216064453,
+          "best_lat_us": 142.51455688476562,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 188.82290649414062,
+          "best_lat_us": 142.1625518798828,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 171.95999145507812,
+          "best_lat_us": 1248.8275146484375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 198.60699462890625,
+          "best_lat_us": 1081.27294921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 172.65882873535156,
+          "best_lat_us": 1243.7728271484375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 195.87948608398438,
+          "best_lat_us": 1096.3289794921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 172.89352416992188,
+          "best_lat_us": 1242.08447265625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 197.33444213867188,
+          "best_lat_us": 1088.2457275390625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 174.84408569335938,
+          "best_lat_us": 1228.227783203125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 198.01953125,
+          "best_lat_us": 1084.480712890625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        }
+      }
+    },
+    "(13824,2560)": {
+      "name": "W13",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 6.7538909912109375,
+          "best_lat_us": 167.67550659179688,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.5
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 7.476505756378174,
+          "best_lat_us": 151.4694366455078,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.0
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 6.835184097290039,
+          "best_lat_us": 165.68128967285156,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.5
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 7.269423007965088,
+          "best_lat_us": 155.78431701660156,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.5
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 6.798679828643799,
+          "best_lat_us": 166.5708770751953,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.5
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 7.470571517944336,
+          "best_lat_us": 151.58975219726562,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 6.791634559631348,
+          "best_lat_us": 166.74366760253906,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 1.5
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 7.504121780395508,
+          "best_lat_us": 150.91200256347656,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.0
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 89.45989990234375,
+          "best_lat_us": 202.5420684814453,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 9.0
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 85.81078338623047,
+          "best_lat_us": 211.1551971435547,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 4.5
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 90.1013412475586,
+          "best_lat_us": 201.10015869140625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 9.0
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 86.385498046875,
+          "best_lat_us": 209.7504119873047,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 4.5
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 89.42908477783203,
+          "best_lat_us": 202.6118621826172,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 9.0
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 87.67059326171875,
+          "best_lat_us": 206.67584228515625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 6.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 90.07411193847656,
+          "best_lat_us": 201.16094970703125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 9.0
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 85.705322265625,
+          "best_lat_us": 211.4150390625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 4.5
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 176.72201538085938,
+          "best_lat_us": 820.2438354492188,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 185.09999084472656,
+          "best_lat_us": 783.1180419921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.2261962890625,
+          "best_lat_us": 804.295654296875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.7827606201172,
+          "best_lat_us": 801.8195190429688,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.91575622558594,
+          "best_lat_us": 801.2301025390625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.5665740966797,
+          "best_lat_us": 802.779541015625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.05152893066406,
+          "best_lat_us": 805.0758666992188,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 180.57664489746094,
+          "best_lat_us": 802.7347412109375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 18.0
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 175.8951873779297,
+          "best_lat_us": 6592.79638671875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 177.19119262695312,
+          "best_lat_us": 6544.57568359375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 176.95301818847656,
+          "best_lat_us": 6553.384765625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 176.6246337890625,
+          "best_lat_us": 6565.56884765625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 174.09983825683594,
+          "best_lat_us": 6660.78271484375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 176.96278381347656,
+          "best_lat_us": 6553.02294921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 175.00900268554688,
+          "best_lat_us": 6626.18017578125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 175.41531372070312,
+          "best_lat_us": 6610.83203125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 144.0
+        }
+      }
+    },
+    "(2560,6912)": {
+      "name": "W2",
+      "16": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 34.2668571472168,
+          "best_lat_us": 16.524160385131836,
+          "best_id": 35,
+          "best_ws": 655999,
+          "best_waves": 0.8333333134651184
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 26.833765029907227,
+          "best_lat_us": 21.101438522338867,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 28.941314697265625,
+          "best_lat_us": 19.564800262451172,
+          "best_id": 35,
+          "best_ws": 655999,
+          "best_waves": 0.8333333134651184
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 26.772052764892578,
+          "best_lat_us": 21.15007972717285,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.559772491455078,
+          "best_lat_us": 18.528640747070312,
+          "best_id": 35,
+          "best_ws": 655999,
+          "best_waves": 0.8333333134651184
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 26.94654655456543,
+          "best_lat_us": 21.013120651245117,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 30.72319984436035,
+          "best_lat_us": 18.43008041381836,
+          "best_id": 35,
+          "best_ws": 655999,
+          "best_waves": 0.8333333134651184
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 7,
+          "config_count": 7,
+          "best_tops": 30.30748176574707,
+          "best_lat_us": 18.682880401611328,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        }
+      },
+      "256": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 147.88270568847656,
+          "best_lat_us": 61.262718200683594,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 166.17294311523438,
+          "best_lat_us": 54.519683837890625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 146.78477478027344,
+          "best_lat_us": 61.7209587097168,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 168.93946838378906,
+          "best_lat_us": 53.62688064575195,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 146.62359619140625,
+          "best_lat_us": 61.78880310058594,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.4166666567325592
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 164.90501403808594,
+          "best_lat_us": 54.93887710571289,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 145.205322265625,
+          "best_lat_us": 62.39231872558594,
+          "best_id": 35,
+          "best_ws": 2621919,
+          "best_waves": 0.8333333134651184
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 143.7908172607422,
+          "best_lat_us": 63.00608444213867,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 0.8333333134651184
+        }
+      },
+      "2048": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 174.19679260253906,
+          "best_lat_us": 416.06719970703125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 182.37571716308594,
+          "best_lat_us": 397.40802001953125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 175.09881591796875,
+          "best_lat_us": 413.923828125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 182.50328063964844,
+          "best_lat_us": 397.1302490234375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 175.95196533203125,
+          "best_lat_us": 411.91680908203125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 182.4488983154297,
+          "best_lat_us": 397.2486267089844,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 175.95989990234375,
+          "best_lat_us": 411.89825439453125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 8,
+          "config_count": 8,
+          "best_tops": 182.99134826660156,
+          "best_lat_us": 396.071044921875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 3.3333332538604736
+        }
+      },
+      "16384": {
+        "TN+CC+Col": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 184.74359130859375,
+          "best_lat_us": 3138.515380859375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TN+CC+Row": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 193.39437866210938,
+          "best_lat_us": 2998.125244140625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NT+RR+Col": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 184.29930114746094,
+          "best_lat_us": 3146.081298828125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NT+RR+Row": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 193.443603515625,
+          "best_lat_us": 2997.3623046875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NN+RC+Col": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 186.0835418701172,
+          "best_lat_us": 3115.91552734375,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "NN+RC+Row": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 192.02987670898438,
+          "best_lat_us": 3019.428955078125,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TT+CR+Col": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 185.38990783691406,
+          "best_lat_us": 3127.57373046875,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        },
+        "TT+CR+Row": {
+          "supported": true,
+          "alg_count": 4,
+          "config_count": 4,
+          "best_tops": 190.37364196777344,
+          "best_lat_us": 3045.69775390625,
+          "best_id": 35,
+          "best_ws": 0,
+          "best_waves": 26.66666603088379
+        }
+      }
+    }
+  }
+}

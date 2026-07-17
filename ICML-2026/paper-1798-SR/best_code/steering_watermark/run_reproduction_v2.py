@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""Corrected reproduction: steered vs steered_bis (two different steering keys).
+Paper 1798 Table 2: Token-level F1=72.0, Text-level F1=85.3 on ELI5 with Llama-3.2-1B."""
+
+import os, sys, copy, json, time
+import numpy as np
+import pandas as pd
+import torch
+
+# Mock clearml
+class MockLogger:
+    def __getattr__(self, n): return lambda *a, **k: None
+class MockTask:
+    _i = None
+    @staticmethod
+    def init(*a, **k):
+        if MockTask._i is None: MockTask._i = MockTask()
+        return MockTask._i
+    def __getattr__(self, n): return lambda *a, **k: MockLogger()
+import clearml; clearml.Task = MockTask
+
+sys.path.insert(0, "src")
+from llm_wrapper import LLMWrapper
+from text_generation import generate_noise
+from data_processing import split_data_accoring_to_sentence_id2
+from ml_model import SimpleMLP
+from datasets import load_dataset
+from tqdm import tqdm
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, confusion_matrix
+
+MODEL_PATH = "/models/Llama-3.2-1B-Instruct"
+DATASET_PATH = "/datasets/hc3/all.jsonl"
+OUTPUT_DIR = "/repo/steering_watermark/reproduction_output"
+
+RUBRIC = {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "benchmark": "ELI5",
+    "n_prompts": 1000,
+    "max_sequence_length": 512,
+    "alpha": 5,
+    "sparsity": 0.003,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "repetition_penalty": 1.1,
+    "steering_layers": [15],
+    "n_classes": 2,
+    "random_seed": 42,
+    "comparison": "steered_bis",  # KEY: distinguish two different steering keys
+}
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+LOG_FILE = os.path.join(OUTPUT_DIR, "reproduction_v2.log")
+
+def log(msg):
+    ts = time.strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{ts}] {msg}"
+    print(line)
+    with open(LOG_FILE, "a") as f: f.write(line + "\n")
+
+log("=" * 80)
+log("PAPER 1798 REPRODUCTION v2: Steered vs Steered_bis (correct comparison)")
+log(f"Config: {json.dumps(RUBRIC, indent=2)}")
+log("=" * 80)
+
+# Step 1: Load model
+log("\n>>> Step 1: Loading model...")
+t0 = time.time()
+llm = LLMWrapper(hf_token=os.environ.get("HF_TOKEN",""), model_id=MODEL_PATH, load_in_8bit=False, torch_dtype="torch.bfloat16")
+log(f"Model loaded in {time.time()-t0:.1f}s. Embedding dim: {llm.embedding_dim}")
+
+# Step 2: Load dataset
+log("\n>>> Step 2: Loading ELI5 dataset...")
+ds = load_dataset("json", data_files=DATASET_PATH, split="train")
+questions = []
+count = 0
+for i in range(len(ds)):
+    if count >= RUBRIC["n_prompts"]: break
+    q = ds[i]["question"].strip()
+    if not q: continue
+    if any(x in q.lower() for x in ["edit", "url"]): continue
+    questions.append(q); count += 1
+log(f"Loaded {len(questions)} questions")
+
+chat_questions = [[
+    {"role": "system", "content": "You are a helpful assistant. Write only in plain text."},
+    {"role": "user", "content": q}
+] for q in questions]
+
+gen_kwargs = {"max_new_tokens": RUBRIC["max_sequence_length"], "do_sample": True, "temperature": RUBRIC["temperature"], "top_p": RUBRIC["top_p"], "repetition_penalty": RUBRIC["repetition_penalty"]}
+
+# Step 3a: Generate steered text (key A, seed=42)
+log("\n>>> Step 3a: Generating steered text (key A, seed=42)...")
+t0 = time.time()
+kv_a = generate_noise(llm.embedding_dim, {"steering_arguments": {"noise_seed": 42, "noise_type": "block_sparse_2", "noise_max": RUBRIC["alpha"]}}).to(llm.device)
+hooks = llm.register_hooks("steering", RUBRIC["steering_layers"], kv_a)
+outs_a = llm(chat_questions, rich_output=True, batch_size=16, **gen_kwargs)
+for h in hooks: h.remove()
+log(f"Generated {len(outs_a)} steered-A texts in {time.time()-t0:.1f}s")
+
+# Step 3b: Generate steered_bis text (key B, seed=12345)
+log("\n>>> Step 3b: Generating steered_bis text (key B, seed=12345)...")
+t0 = time.time()
+kv_b = generate_noise(llm.embedding_dim, {"steering_arguments": {"noise_seed": 12345, "noise_type": "block_sparse_2", "noise_max": RUBRIC["alpha"]}}).to(llm.device)
+hooks = llm.register_hooks("steering", RUBRIC["steering_layers"], kv_b)
+outs_b = llm(chat_questions, rich_output=True, batch_size=16, **gen_kwargs)
+for h in hooks: h.remove()
+log(f"Generated {len(outs_b)} steered-B texts in {time.time()-t0:.1f}s")
+
+# Step 4: Build dataframes
+def build_df(outputs, kv, label, steering_type):
+    data = []
+    for i, o in enumerate(outputs):
+        data.append({
+            "classification_label": label, "input_text": o["input_text"],
+            "input_text_id": i, "output_text": o["generated_texts"],
+            "output_token_strings": o["output_token_strings"],
+            "steering_noise": RUBRIC["alpha"], "steering_type": steering_type,
+            "steering_layers": RUBRIC["steering_layers"],
+            "key_vector": kv.float().detach().cpu().numpy(),
+            "input_token_length": o["input_lengths"],
+            "input_token_ids": o.get("encoded_inputs", []),
+        })
+    return pd.DataFrame(data)
+
+df_a = build_df(outs_a, kv_a, label=42, steering_type="steered")
+df_b = build_df(outs_b, kv_b, label=12345, steering_type="steered_bis")
+# Offset sentence IDs for steered-B to avoid overlap
+df_b["input_text_id"] = df_b["input_text_id"] + len(df_a)
+
+# Step 5: Gather activations
+def gather_acts(df, llm):
+    hooks2 = llm.register_hooks("gather", RUBRIC["steering_layers"])
+    rows = []
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Gathering"):
+        text = row["output_text"]
+        if not text or len(text.strip()) == 0: text = " "
+        _ = llm.gathering_forward([text], max_new_tokens=1)
+        acts = {}
+        for h in hooks2:
+            if h.layer_name in RUBRIC["steering_layers"]:
+                acts[h.layer_name] = h.activations[:RUBRIC["max_sequence_length"]]
+        rows.append({"activations": acts})
+    for h in hooks2: h.remove()
+    return pd.concat([df, pd.DataFrame(rows)], axis=1)
+
+log("\n>>> Step 5: Gathering activations...")
+t0 = time.time()
+df_a = gather_acts(df_a, llm)
+df_b = gather_acts(df_b, llm)
+log(f"Activations gathered in {time.time()-t0:.1f}s")
+
+# Dummy quality
+for df in [df_a, df_b]:
+    for c in ["perplexity", "log_diversity"]: df[c] = [1.0]*len(df)
+    df["quality"] = [[0.5]]*len(df)
+
+# Step 6: Combine and remap
+df_all = pd.concat([df_a, df_b], ignore_index=True)
+df_all["params"] = [None]*len(df_all)
+unique_labels = sorted(df_all["classification_label"].unique())
+label_map = {old: new for new, old in enumerate(unique_labels)}
+df_all["classification_label"] = df_all["classification_label"].map(label_map)
+log(f"Combined: {len(df_all)} rows, Labels: {unique_labels} -> {list(label_map.values())}")
+
+# Step 7: Split and prepare
+log("\n>>> Step 7: Splitting data...")
+t0 = time.time()
+dft, dfv, dfte, sl = split_data_accoring_to_sentence_id2(
+    df_all, val_size=0.1, test_size=0.2, seed=0,
+    token_aggregation=False, sentence_array=False,
+    max_token_seq=RUBRIC["max_sequence_length"], split_labels=None,
+)
+dev = "cuda"
+Xt = torch.stack([torch.as_tensor(x, dtype=torch.float16).to(dev) for x in dft["fwd_data"].values])
+Yt = dft["classification_label"].values.astype(np.int64)
+Xv = torch.stack([torch.as_tensor(x, dtype=torch.float16).to(dev) for x in dfv["fwd_data"].values])
+Yv = dfv["classification_label"].values.astype(np.int64)
+Xte = torch.stack([torch.as_tensor(x, dtype=torch.float16).to(dev) for x in dfte["fwd_data"].values])
+Yte = dfte["classification_label"].values.astype(np.int64)
+log(f"Train: {len(Xt)}, Val: {len(Xv)}, Test: {len(Xte)}")
+log(f"Y_train: {np.bincount(Yt)}, Y_test: {np.bincount(Yte)}")
+
+# Step 8: Train MLP
+log("\n>>> Step 8: Training MLP classifier...")
+t0 = time.time()
+model = SimpleMLP(input_dim=Xt[0].shape[0], hidden_dims=[2048, 64, 64, 32], output_dim=2, device=dev).to(dev)
+model.fit(Xt, Yt, Xv, Yv, epochs=1, batch_size=512, learning_rate=0.001, verbose=False)
+test_acc, preds, probs = model.evaluate(Xte, Yte, batch_size=512)
+log(f"Training in {time.time()-t0:.1f}s")
+
+# Step 9: Evaluate
+log("\n>>> Step 9: Evaluation")
+log("="*60)
+token_f1 = f1_score(Yte, preds, average="binary")
+token_acc = accuracy_score(Yte, preds)
+log(f"\nToken-level: F1={token_f1:.4f}, Acc={token_acc:.4f}")
+log(f"CM:\n{confusion_matrix(Yte, preds)}")
+
+# Text-level via majority voting
+sent_ids = dfte["input_text_id"].values
+sp, sl2 = [], []
+for sid in np.unique(sent_ids):
+    mask = sent_ids == sid; p = np.array(preds)[mask]; l = Yte[mask]
+    if len(p): sp.append(np.bincount(p).argmax()); sl2.append(l[0])
+sp, sl2 = np.array(sp), np.array(sl2)
+text_f1 = f1_score(sl2, sp, average="binary")
+text_acc = accuracy_score(sl2, sp)
+log(f"\nText-level (majority voting): F1={text_f1:.4f}, Acc={text_acc:.4f}")
+log(f"CM:\n{confusion_matrix(sl2, sp)}")
+
+# Save
+results = {
+    "paper_id": 1798,
+    "comparison_type": "steered_vs_steered_bis",
+    "token_level": {"f1": float(token_f1), "accuracy": float(token_acc)},
+    "text_level": {"f1": float(text_f1), "accuracy": float(text_acc)},
+    "paper_values": {"token_f1": 72.0, "text_f1": 85.3},
+    "config": RUBRIC,
+}
+with open(os.path.join(OUTPUT_DIR, "reproduction_results_v2.json"), "w") as f:
+    json.dump(results, f, indent=2, default=str)
+
+del llm, model; torch.cuda.empty_cache()
+log(f"\nComparison with paper (Table 2):")
+log(f"  Token F1: {token_f1*100:.1f}% (paper: 72.0%)")
+log(f"  Text  F1: {text_f1*100:.1f}% (paper: 85.3%)")
+token_ok = 50.0 <= token_f1*100 <= 74.2
+text_ok = 50.0 <= text_f1*100 <= 88.83
+log(f"  Token within bounds [50.0, 74.2]: {token_ok}")
+log(f"  Text  within bounds [50.0, 88.83]: {text_ok}")
+log("\nREPRODUCTION v2 COMPLETE")

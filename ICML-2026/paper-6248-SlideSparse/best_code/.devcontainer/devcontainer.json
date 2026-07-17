@@ -1,0 +1,78 @@
+{
+    // Dev Container display name
+    "name": "Slidesparse vllm benchmark",
+
+    // Use locally built dev image
+    "image": "bcacdwk/vllmbench:universal",
+
+    // [Important] Auto-detect image updates, delete containers using old image
+    // Logic: Compare container image ID with latest image ID, delete if mismatch
+    "initializeCommand": "bash -c 'LATEST=$(docker images -q bcacdwk/vllmbench:universal 2>/dev/null); for CID in $(docker ps -aq --filter label=devcontainer.local_folder=$(pwd)); do CIMG=$(docker inspect $CID --format \"{{.Image}}\" 2>/dev/null); if [[ \"$CIMG\" != *\"$LATEST\"* ]] && [ -n \"$LATEST\" ]; then echo \"🔄 Image update detected, removing old container $CID...\"; docker rm -f $CID 2>/dev/null || true; fi; done; echo \"✅ Image check completed\"'",
+
+    // Default user in container, use root for system dependencies
+    "remoteUser": "root",
+    // Working directory in container, where local repo is mounted
+    "workspaceFolder": "/root/vllmbench",
+    
+    // [Key Config] Enhanced run arguments
+    "runArgs": [
+        // Use host network stack: fix K8s/intranet DNS issues, Copilot timeouts
+        "--network=host",
+        
+        // --- GPU and System Permission Config ---
+        "--gpus=all",
+        "--privileged",
+        "--cap-add=SYS_ADMIN",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt=seccomp=unconfined",
+        "--security-opt=apparmor=unconfined",
+        "--ipc=host",
+        "--ulimit=memlock=-1:-1",
+        "--ulimit=stack=67108864",
+        "--ulimit=nofile=1048576:1048576",
+        "--volume=/usr/lib/modules:/usr/lib/modules:ro",
+        "--volume=/lib/modules:/lib/modules:ro"
+    ],
+
+    "containerEnv": {
+        "NVIDIA_VISIBLE_DEVICES": "all",
+        "NVIDIA_DRIVER_CAPABILITIES": "compute,utility"
+    },
+
+    // Mount local repo to container for code sync
+    "mounts": [
+        {
+            "type": "bind",
+            "source": "${localWorkspaceFolder}",
+            "target": "/root/vllmbench"
+        }
+    ],
+
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "python.analysis.typeCheckingMode": "basic"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.debugpy",
+                "ms-toolsai.jupyter",
+                "GitHub.copilot",
+                "ms-vscode.cpptools",
+                "davidanson.vscode-markdownlint",
+                "cweijan.vscode-office"
+            ]
+        }
+    },
+    
+    // Run after container creation: editable install vLLM + extra deps
+    // pip install -e . creates symlinks, Python/Triton changes take effect immediately
+    // Env vars VLLM_USE_PRECOMPILED / VLLM_PRECOMPILED_WHEEL_* set in Dockerfile
+    // Key: Install build deps first (without upgrading torch), then use --no-build-isolation
+    "postCreateCommand": "pip install cmake ninja packaging 'setuptools>=77.0.3,<81.0.0' 'setuptools-scm>=8.0' wheel jinja2 torch && pip install -e . --no-build-isolation && pip install -r requirements.txt && echo '=== Verify vLLM Installation ===' && python3 -c \"import vllm; print('✅ vllm:', vllm.__file__)\" && python3 -c \"import vllm._C; print('✅ vllm._C:', vllm._C.__file__)\"",
+    // Run after container start: enable GPU persistence mode, create python symlink
+    "postStartCommand": "bash -lc 'nvidia-smi -pm 1 2>/dev/null || true; ln -sf /usr/bin/python3 /usr/local/bin/python 2>/dev/null || true; nvidia-smi'",
+    // Prevent Dev Container from overwriting entry command
+    "overrideCommand": true
+}

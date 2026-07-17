@@ -1,0 +1,356 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "gpu_short_name": "RTX5080",
+    "compute_capability": "cc120",
+    "model_name": "Llama3.2-3B-INT8",
+    "mode": "model",
+    "backend": "cuSPARSELt",
+    "dtype": "fp4e2m1",
+    "alg_count": 2,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-27T12:15:54.233817",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536
+    ],
+    "NK_list": [
+      [
+        5120,
+        4096
+      ],
+      [
+        3072,
+        4096
+      ],
+      [
+        16384,
+        4096
+      ],
+      [
+        3072,
+        10944
+      ]
+    ],
+    "search_stats": {
+      "total": 44,
+      "success": 33,
+      "failed": 0,
+      "errors": 11
+    },
+    "sparsity": "2_6",
+    "config_count": 10
+  },
+  "nk_entries": {
+    "(5120,4096)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 248.03689575195312,
+          "lat_us": 10.822400093078613,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 436.7701416015625,
+          "lat_us": 12.291840553283691,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 814.0722045898438,
+          "lat_us": 13.1897611618042,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 947.811767578125,
+          "lat_us": 22.65727996826172,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1045.162841796875,
+          "lat_us": 41.0937614440918,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1089.845458984375,
+          "lat_us": 78.81791687011719,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1121.040771484375,
+          "lat_us": 153.24928283691406,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1138.888427734375,
+          "lat_us": 301.69537353515625,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1138.1993408203125,
+          "lat_us": 603.756103515625,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "32768": {
+          "workspace": 0,
+          "tops": 1123.0205078125,
+          "lat_us": 1223.8330078125,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "65536": {
+          "workspace": 0,
+          "tops": 1114.8433837890625,
+          "lat_us": 2465.619140625,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(3072,4096)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 149.06898498535156,
+          "lat_us": 10.804479598999023,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 267.6503601074219,
+          "lat_us": 12.035200119018555,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 524.3972778320312,
+          "lat_us": 12.285439491271973,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 604.9295654296875,
+          "lat_us": 21.29983901977539,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 838.6685791015625,
+          "lat_us": 30.727041244506836,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1043.724365234375,
+          "lat_us": 49.38047790527344,
+          "alg_id": 0,
+          "split_k": 8
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1091.7706298828125,
+          "lat_us": 94.41471862792969,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1129.7392578125,
+          "lat_us": 182.4832000732422,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1142.0679931640625,
+          "lat_us": 361.02655029296875,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "32768": {
+          "workspace": 0,
+          "tops": 1130.581787109375,
+          "lat_us": 729.3888549804688,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "65536": {
+          "workspace": 0,
+          "tops": 1128.008056640625,
+          "lat_us": 1462.1060791015625,
+          "alg_id": 0,
+          "split_k": 1
+        }
+      }
+    },
+    "(16384,4096)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 390.2472229003906,
+          "lat_us": 22.011520385742188,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 761.69189453125,
+          "lat_us": 22.554880142211914,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 882.9387817382812,
+          "lat_us": 38.915199279785156,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 1047.9619140625,
+          "lat_us": 65.57440185546875,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1113.938232421875,
+          "lat_us": 123.3811264038086,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1146.6883544921875,
+          "lat_us": 239.71456909179688,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1150.229248046875,
+          "lat_us": 477.9532775878906,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1148.27880859375,
+          "lat_us": 957.5302124023438,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1131.4384765625,
+          "lat_us": 1943.564208984375,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "32768": {
+          "workspace": 0,
+          "tops": 1119.181884765625,
+          "lat_us": 3929.69775390625,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "65536": {
+          "workspace": 0,
+          "tops": 1120.66455078125,
+          "lat_us": 7848.9970703125,
+          "alg_id": 1,
+          "split_k": 1
+        }
+      }
+    },
+    "(3072,10944)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "64": "Failed to allocate shared workspace (536870912 bytes)",
+        "128": "Failed to allocate shared workspace (536870912 bytes)",
+        "256": "Failed to allocate shared workspace (536870912 bytes)",
+        "512": "Failed to allocate shared workspace (536870912 bytes)",
+        "1024": "Failed to allocate shared workspace (536870912 bytes)",
+        "2048": "Failed to allocate shared workspace (536870912 bytes)",
+        "4096": "Failed to allocate shared workspace (536870912 bytes)",
+        "8192": "Failed to allocate shared workspace (536870912 bytes)",
+        "16384": "Failed to allocate shared workspace (536870912 bytes)",
+        "32768": "Failed to allocate shared workspace (536870912 bytes)",
+        "65536": "Failed to allocate shared workspace (536870912 bytes)"
+      }
+    }
+  }
+}

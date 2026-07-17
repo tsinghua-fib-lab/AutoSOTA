@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main, cleanup]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies (CPU-only)
+        run: |
+          python -m pip install --upgrade pip
+          # CPU torch wheel — pyproject pins CUDA for Linux, but CI has no GPU.
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy scipy matplotlib tqdm GPUtil fairscale datasets safetensors pytest pyflakes
+
+      - name: pyflakes
+        run: |
+          # Filter the 6 known-OK closure false-positives (f4_vec/F3 in zsic.py
+          # _mse_gamma, and _prefetch_stream / _prefetch_stream_r in precompute.py).
+          # Each is a closure capture that pyflakes mis-flags because the name is
+          # `del`'d later in the enclosing scope.
+          out=$(python -m pyflakes quant_layerwise/ scripts/ parallel/ lm_bench/ examples/paper/ 2>&1 \
+                | grep -vE "(f4_vec|F3|_prefetch_stream(_r)?)" || true)
+          if [ -n "$out" ]; then
+            echo "$out"
+            exit 1
+          fi
+
+      - name: pytest
+        run: PYTHONPATH=. pytest -x -q tests/

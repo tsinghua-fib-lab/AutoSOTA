@@ -1,0 +1,46 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 3156,
+    "repo_url": "https://github.com/ElliotShu/Size_Transferability_of_GCNs_across_Sparsity",
+    "repo_commit": "704a92df9e6dc9b7b47869170204d8d6e030c309",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_3156",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-3156:reproduced",
+    "eval_command": "bash run_transfer_error.sh Cora 2 32 20",
+    "baseline_metrics": {
+      "Transferability Difference (Scheme I, n=600)": 0.3488
+    },
+    "primary_metric": "Transferability Difference (Scheme I, n=600)",
+    "metric_direction": "lower",
+    "gpu_devices": "2,3",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/rensijian/autosota-v2.5/logs/reproduction/paper-3156.log",
+    "status": "success",
+    "created_at": "2026-07-12T08:41:01Z",
+    "notes": "Successfully reproduced the Transferability Difference metric for GCN size transfer on Cora (2-layer, 32-hidden, Scheme I sparsity f(n)=2.0/n). The reproduced value 0.3488 at n=600 is lower (better) than the paper's visually-estimated ~0.40 from Figure 5(b). The difference is attributed to: (1) different PyTorch/torch-geometric versions (2.1.0/2.8.0 vs paper's 2.6.0/2.6.1), (2) different random initialization (paper did not specify seeds), (3) the paper's metric was visually estimated from a plot rather than numerically reported. Fixed seeds (42) ensure deterministic reproduction. The code runs correctly and produces the full transfer error curve across all 3 sparsity schemes and 11 graph sizes (100-600).",
+    "eval_timeout_minutes": 20,
+    "eval_output_format": "Parse stdout for 'Scheme 1] Sample size 600: mean_diff = X.XXXX' or read CSV column 'mean_diff' for scheme_id=1, sample_size=600 in {dataset}_Test_{layers}_{hidden}.csv. The Transferability Difference is the mean L2 node-wise discrepancy between subgraph GCN output and full-graph reference output.",
+    "known_levers": "1. Architecture: num_layers (2|3), hidden_channels (32|64|128|256). 2. Training: epochs (200 default), learning_rate (0.08 default), graph_size for training (500 default), weight_decay (5e-4 default). 3. Aggregation: SpecificAggrLayer normalization uses 1/sqrt(2|E|) factor which could be tuned. 4. Sampling: num_trials (20 default), sample_sizes range (100-600 for Cora). 5. The training uses a random 500-node subgraph with 50/50 train/test split for supervised classification; different training strategies could be explored.",
+    "setup_notes": "Installed torch-geometric 2.8.0, ogb 1.3.6, pandas 2.3.3, scikit-learn 1.7.2 via pip with Tsinghua mirror. Container uses PyTorch 2.1.0 with CUDA 12.1 (paper recommends 2.6.0 but code is compatible). Added torch.manual_seed(42), np.random.seed(42), random.seed(42) with cudnn deterministic flags to both Stretched_GCN_train.py and Stretched_GCN_test.py for reproducible training/evaluation. Created /repo/run_transfer_error.sh wrapper script that chains training and testing. Cora dataset auto-downloaded by torch_geometric to data/Planetoid/. Model saved as Cora_model_2_32.pt, results as Cora_Test_2_32.csv in the Transfer Error directory.",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize Transferability Difference (L2 discrepancy) for Scheme I sparsity at n=600 on Cora with 2-layer 32-hidden GCN. Lower transfer error means better size transferability across sparsity levels.",
+      "metrics": [
+        {
+          "name": "Transferability Difference (Scheme I, n=600)",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 0.3488,
+          "regression_tolerance_pct": 5.0,
+          "rationale": "This is the paper's primary theoretical claim: GCN transfer error vanishes as graph size increases and edge density decreases. Scheme I (f(n)=2.0/n) represents the most extreme sparsity not covered by prior theoretical guarantees. Lower values validate the generalized graphon framework."
+        }
+      ],
+      "success_policy": "Primary goal: reduce Transferability Difference at n=600 below 0.3488. Any reduction in the core metric is a win, provided the full transfer error curve (100-600) remains monotonically decreasing with graph size (preserving the theoretical trend). Guardrail: other sparsity schemes (II, III) and graph sizes should not regress substantially."
+    },
+    "metric_upper_bound": 0.408,
+    "metric_lower_bound": 0.300
+  }
+}

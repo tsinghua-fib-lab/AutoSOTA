@@ -1,0 +1,40 @@
+# Core experiment configuration for ICML submission
+
+dataset:
+  name: xl-sum
+  subset: english
+  num_samples: 8192
+  prompt_tokens: 20
+  completion_tokens: 200
+  completion_tokens_diff: 10
+  filters:
+    max_doc_length: 2048
+    id_prefix: null
+  test_size: 0.2
+generation:
+  model_name: meta-llama/Llama-3.2-1B-Instruct
+  temperature: 0.7
+  top_p: 0.9
+  use_chat_template: true
+  batch_size: 8
+  max_input_tokens: 1024
+extraction:
+  layers: null
+  tokens:
+  - -1
+  mode: mean
+  use_prompt_for_activations: true
+training:
+  classifier: lda
+  standardize_activations: true
+  compute_perplexity: true
+  compute_mass_mean: true
+  classifier_params:
+    lda:
+      solver: lsqr
+      shrinkage: auto
+  random_seed: 42
+  bootstrap_B: 1000
+  bootstrap_seed: null
+paths:
+  save_name: null

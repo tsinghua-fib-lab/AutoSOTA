@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GB10",
+    "gpu_short_name": "GB10",
+    "compute_capability": "cc121",
+    "model_name": "Qwen2.5-14B-INT8",
+    "mode": "model",
+    "backend": "cuSPARSELt",
+    "dtype": "fp4e2m1",
+    "alg_count": 2,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-28T06:57:55.945242",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        7168,
+        6848
+      ],
+      [
+        5120,
+        6848
+      ],
+      [
+        27648,
+        6848
+      ],
+      [
+        5120,
+        18432
+      ]
+    ],
+    "search_stats": {
+      "total": 18,
+      "success": 18,
+      "failed": 0,
+      "errors": 0,
+      "note": "Partial results converted from progress file due to CUDA errors"
+    },
+    "sparsity": "2_6",
+    "config_count": 9
+  },
+  "nk_entries": {
+    "(7168,6848)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 152.30526733398438,
+          "lat_us": 41.25312042236328,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "128": {
+          "workspace": 3670592,
+          "tops": 291.83392333984375,
+          "lat_us": 43.059200286865234,
+          "alg_id": 1,
+          "split_k": 2
+        },
+        "256": {
+          "workspace": 4194880,
+          "tops": 336.9471740722656,
+          "lat_us": 74.5881576538086,
+          "alg_id": 1,
+          "split_k": -1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 379.0625,
+          "lat_us": 132.6022491455078,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 362.97576904296875,
+          "lat_us": 276.9580993652344,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 368.0239562988281,
+          "lat_us": 546.318115234375,
+          "alg_id": 0,
+          "split_k": 4
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 381.5592346191406,
+          "lat_us": 1053.87646484375,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 386.00262451171875,
+          "lat_us": 2083.489990234375,
+          "alg_id": 0,
+          "split_k": 4
+        },
+        "16384": {
+          "workspace": 4194880,
+          "tops": 388.7728576660156,
+          "lat_us": 4137.2880859375,
+          "alg_id": 1,
+          "split_k": 2
+        }
+      }
+    },
+    "(5120,6848)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 168.65127563476562,
+          "lat_us": 26.61056137084961,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 336.2915954589844,
+          "lat_us": 26.69055938720703,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 348.9253234863281,
+          "lat_us": 51.44831848144531,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "512": {
+          "workspace": 4194880,
+          "tops": 355.7763366699219,
+          "lat_us": 100.91520690917969,
+          "alg_id": 1,
+          "split_k": 4
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 382.78466796875,
+          "lat_us": 187.5897674560547,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 363.4531555175781,
+          "lat_us": 395.1347351074219,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 389.58526611328125,
+          "lat_us": 737.2608032226562,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 4194880,
+          "tops": 392.5614013671875,
+          "lat_us": 1463.3427734375,
+          "alg_id": 1,
+          "split_k": 4
+        },
+        "16384": {
+          "workspace": 5243584,
+          "tops": 395.7657470703125,
+          "lat_us": 2902.9892578125,
+          "alg_id": 1,
+          "split_k": 2
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# GPU: NVIDIA H100 PCIe
+# CC: cc90
+# Mode: model
+# Model: Llama3.2-3B-INT8
+# Backend: cuSPARSELt
+# dtype: FP16 -> FP16
+# alg_count: 52, config_count: 73
+# torch: 2.9.0+cu129
+# CUDA driver: 13.0, runtime: 12.9
+# warmup=25, repeat=50, verify=False
+# M_list: [64]
+# NK_list: [(5120, 5280), (3072, 5280), (16384, 5280), (3072, 14048)]
+# Sparsity: 2_14 (K_factor=1.714)
+# Time: 2026-01-28T07:42:54.272785
+M,N,K,alg_count,tops_1,lat_us_1,alg_id_1,split_k_1,workspace_1,tops_2,lat_us_2,alg_id_2,split_k_2,workspace_2,tops_3,lat_us_3,alg_id_3,split_k_3,workspace_3
+64,5120,5280,52,inf,0.000,36,1,3379519,248.974030,13.898,38,-1,3379519,223.760284,15.464,16,1,3379519

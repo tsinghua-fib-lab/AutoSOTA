@@ -1,0 +1,42 @@
+# Upstream-only observations
+# All observations are upstream/near the source - more challenging for inference
+
+[physics]
+vx = 1.0          # Advection velocity in x
+vy = 0.0          # Advection velocity in y
+D = 0.05          # Diffusion coefficient
+domain = [0.0, 1.0, 0.0, 1.0]  # [x_min, x_max, y_min, y_max]
+c_inflow = 0.0    # Dirichlet BC at left boundary
+
+[[sources]]
+x = 0.3
+y = 0.5
+strength = 5.0
+width = 0.08
+
+# Observations only upstream/near the source (x <= 0.5)
+# This is more challenging since advection carries info downstream
+
+[[observations]]
+x = 0.1
+y = 0.9
+
+[[observations]]
+x = 0.1
+y = 0.7
+
+[[observations]]
+x = 0.1
+y = 0.5
+
+[[observations]]
+x = 0.1
+y = 0.3
+
+[[observations]]
+x = 0.1
+y = 0.1
+
+[noise]
+std = 0.005
+seed = 42

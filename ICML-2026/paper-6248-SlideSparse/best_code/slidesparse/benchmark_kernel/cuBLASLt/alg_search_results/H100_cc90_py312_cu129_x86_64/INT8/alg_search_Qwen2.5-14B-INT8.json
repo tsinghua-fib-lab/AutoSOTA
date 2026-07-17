@@ -1,0 +1,365 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA H100 PCIe",
+    "gpu_short_name": "H100",
+    "compute_capability": "cc90",
+    "model_name": "Qwen2.5-14B-INT8",
+    "mode": "model",
+    "backend": "cuBLASLt",
+    "dtype": "int8",
+    "alg_count": 5,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-27T19:15:27.825161",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        7168,
+        5120
+      ],
+      [
+        5120,
+        5120
+      ],
+      [
+        27648,
+        5120
+      ],
+      [
+        5120,
+        13824
+      ]
+    ],
+    "search_stats": {
+      "total": 36,
+      "success": 36,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  "nk_entries": {
+    "(7168,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 198.52410888671875,
+          "lat_us": 23.6627197265625,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 331.67791748046875,
+          "lat_us": 28.326398849487305,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 564.4441528320312,
+          "lat_us": 33.29024124145508,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 904.2649536132812,
+          "lat_us": 41.5596809387207,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 928.148681640625,
+          "lat_us": 80.98048400878906,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "2048": {
+          "workspace": 131,
+          "tops": 936.6094360351562,
+          "lat_us": 160.49790954589844,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "4096": {
+          "workspace": 131,
+          "tops": 954.0214233398438,
+          "lat_us": 315.13726806640625,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "8192": {
+          "workspace": 131,
+          "tops": 1008.836181640625,
+          "lat_us": 596.02880859375,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "16384": {
+          "workspace": 131,
+          "tops": 838.3120727539062,
+          "lat_us": 1434.538330078125,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        }
+      }
+    },
+    "(5120,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 174.71026611328125,
+          "lat_us": 19.205759048461914,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 345.4263000488281,
+          "lat_us": 19.427839279174805,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 406.5271911621094,
+          "lat_us": 33.015682220458984,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 774.7716674804688,
+          "lat_us": 34.64704132080078,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 790.9602661132812,
+          "lat_us": 67.87583923339844,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "2048": {
+          "workspace": 131,
+          "tops": 955.0415649414062,
+          "lat_us": 112.42880249023438,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "4096": {
+          "workspace": 131,
+          "tops": 966.0537719726562,
+          "lat_us": 222.29441833496094,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "8192": {
+          "workspace": 131,
+          "tops": 980.1365356445312,
+          "lat_us": 438.200927734375,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "16384": {
+          "workspace": 131,
+          "tops": 987.395263671875,
+          "lat_us": 869.9590454101562,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        }
+      }
+    },
+    "(27648,5120)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 211.49488830566406,
+          "lat_us": 85.67295837402344,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 375.3677673339844,
+          "lat_us": 96.54208374023438,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 755.65478515625,
+          "lat_us": 95.91360473632812,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "512": {
+          "workspace": 131,
+          "tops": 791.1238403320312,
+          "lat_us": 183.22686767578125,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "1024": {
+          "workspace": 131,
+          "tops": 812.4603271484375,
+          "lat_us": 356.830078125,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "2048": {
+          "workspace": 131,
+          "tops": 856.8936767578125,
+          "lat_us": 676.654052734375,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "4096": {
+          "workspace": 131,
+          "tops": 776.8239135742188,
+          "lat_us": 1492.7979736328125,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "8192": {
+          "workspace": 131,
+          "tops": 745.7359619140625,
+          "lat_us": 3110.058349609375,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "16384": {
+          "workspace": 131,
+          "tops": 748.5294189453125,
+          "lat_us": 6196.90380859375,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        }
+      }
+    },
+    "(5120,13824)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 133.42672729492188,
+          "lat_us": 67.90016174316406,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 149.88619995117188,
+          "lat_us": 120.8876724243164,
+          "algo_data": "FQAAABIAAAAVAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 21
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 280.9340515136719,
+          "lat_us": 128.99392700195312,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 852.1480712890625,
+          "lat_us": 85.05279541015625,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 831.3173217773438,
+          "lat_us": 174.36801147460938,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "2048": {
+          "workspace": 131,
+          "tops": 977.9570922851562,
+          "lat_us": 296.4447937011719,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "4096": {
+          "workspace": 131,
+          "tops": 991.2260131835938,
+          "lat_us": 584.9529418945312,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "8192": {
+          "workspace": 131,
+          "tops": 918.8924560546875,
+          "lat_us": 1261.998779296875,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        },
+        "16384": {
+          "workspace": 131,
+          "tops": 468.0639343261719,
+          "lat_us": 4955.0546875,
+          "algo_data": "JwAAABcAAAAkAAAAAQAAAAAAAAAAAAAAAAAAAAAAAwABAAAARdgBAAMAAAADAAAAAwADAEkAAAAAAAAAAAAAAA==",
+          "alg_id": 39
+        }
+      }
+    }
+  }
+}

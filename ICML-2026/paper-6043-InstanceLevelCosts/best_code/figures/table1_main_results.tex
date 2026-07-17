@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\caption{Main results: NEC and Error Rate (\%) for Standard CE vs $|\Delta|$-weighted CE. Lower is better. Mean $\pm$ 95\% CI over 10 seeds.}
+\label{tab:main-results}
+\small
+\begin{tabular}{llcccc}
+\toprule
+ & & \multicolumn{2}{c}{Standard CE} & \multicolumn{2}{c}{$|\Delta|$-weighted CE} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+Task & Model & NEC & Error & NEC & Error \\
+\midrule
+\multicolumn{6}{l}{\textit{Linear/Frozen Classifiers}} \\
+Jigsaw & TF-IDF & 1.8$\pm$0.0 & 5.3$\pm$0.0 & 1.8$\pm$0.0 & 5.6$\pm$0.0 \\
+Jigsaw & RoBERTa & 3.3$\pm$0.2 & 7.6$\pm$0.4 & 3.3$\pm$0.3 & 7.6$\pm$0.3 \\
+Turkey & ResNet50 & 4.2$\pm$0.6 & 6.7$\pm$0.6 & 3.6$\pm$0.4 & 6.1$\pm$0.5 \\
+NHANES & HistGBM & 14.8$\pm$0.9 & 21.7$\pm$0.7 & 14.5$\pm$1.1 & 21.5$\pm$0.9 \\
+iNaturalist & ResNet50 & 10.4$\pm$0.6 & 11.7$\pm$0.6 & 11.1$\pm$0.6 & 13.1$\pm$0.6 \\
+Synthetic & LogReg & 0.5$\pm$0.0 & 4.6$\pm$0.2 & 0.4$\pm$0.0 & 4.1$\pm$0.2 \\
+\midrule
+\multicolumn{6}{l}{\textit{End-to-End Fine-tuning}} \\
+Jigsaw & RoBERTa-FT & 1.8$\pm$0.0 & 4.7$\pm$0.0 & 1.8$\pm$0.0 & 4.7$\pm$0.0 \\
+Turkey & ResNet-FT & 2.3$\pm$0.2 & 4.8$\pm$0.2 & 2.1$\pm$0.2 & 4.6$\pm$0.3 \\
+iNaturalist & ResNet-FT & 9.3$\pm$0.4 & 11.1$\pm$0.5 & 8.8$\pm$0.6 & 10.9$\pm$0.6 \\
+\bottomrule
+\end{tabular}
+\end{table}

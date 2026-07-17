@@ -1,0 +1,25 @@
+# Core LLM inference and embedding
+openai>=1.59.0
+torch>=2.5.0
+transformers>=4.47.0
+vllm>=0.7.0
+
+# Gemini detectors / schema generation (Who&When cloud path)
+google-genai>=1.0.0          # Vertex AI, used by src/inference_whoandwhen.py
+google-generativeai>=0.8.0   # AI Studio, used by src/error_schema_generator_cloud.py
+
+# Numerical and ML utilities
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.6.0
+scipy>=1.13.0
+
+# Data handling and IO
+datasets>=3.2.0
+huggingface-hub>=0.26.0,<1.0   # transformers 4.47 requires hub<1.0; cap stops a pre-installed hub 1.x from breaking import
+pyarrow>=18.0.0
+python-dotenv>=1.0.0
+tqdm>=4.67.0
+
+# Optional: logging
+wandb>=0.18.0

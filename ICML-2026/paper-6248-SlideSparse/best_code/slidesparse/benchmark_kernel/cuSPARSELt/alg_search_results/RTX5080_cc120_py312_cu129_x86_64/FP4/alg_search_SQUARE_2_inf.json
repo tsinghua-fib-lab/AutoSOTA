@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "gpu_short_name": "RTX5080",
+    "compute_capability": "cc120",
+    "model_name": "SQUARE",
+    "mode": "square",
+    "backend": "cuSPARSELt",
+    "dtype": "fp4e2m1",
+    "alg_count": 2,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-27T20:44:39.962658",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        64,
+        128
+      ],
+      [
+        128,
+        256
+      ],
+      [
+        256,
+        512
+      ],
+      [
+        512,
+        1024
+      ],
+      [
+        1024,
+        2048
+      ],
+      [
+        2048,
+        4096
+      ],
+      [
+        4096,
+        8192
+      ],
+      [
+        8192,
+        16384
+      ],
+      [
+        16384,
+        32768
+      ]
+    ],
+    "search_stats": {
+      "total": 9,
+      "success": 8,
+      "failed": 0,
+      "errors": 1
+    },
+    "sparsity": "2_inf",
+    "config_count": 7
+  },
+  "nk_entries": {
+    "(64,128)": {
+      "m_thresholds": [
+        64
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 0.25552091002464294,
+          "lat_us": 4.103679656982422,
+          "alg_id": 0,
+          "split_k": 2
+        }
+      }
+    },
+    "(128,256)": {
+      "m_thresholds": [
+        128
+      ],
+      "alg_by_m": {
+        "128": {
+          "workspace": 0,
+          "tops": 2.0397136211395264,
+          "lat_us": 4.112639904022217,
+          "alg_id": 1,
+          "split_k": 4
+        }
+      }
+    },
+    "(256,512)": {
+      "m_thresholds": [
+        256
+      ],
+      "alg_by_m": {
+        "256": {
+          "workspace": 0,
+          "tops": 16.19672393798828,
+          "lat_us": 4.143360137939453,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(512,1024)": {
+      "m_thresholds": [
+        512
+      ],
+      "alg_by_m": {
+        "512": {
+          "workspace": 0,
+          "tops": 87.21780395507812,
+          "lat_us": 6.155519962310791,
+          "alg_id": 1,
+          "split_k": 1
+        }
+      }
+    },
+    "(1024,2048)": {
+      "m_thresholds": [
+        1024
+      ],
+      "alg_by_m": {
+        "1024": {
+          "workspace": 0,
+          "tops": 524.4109497070312,
+          "lat_us": 8.190079689025879,
+          "alg_id": 0,
+          "split_k": 2
+        }
+      }
+    },
+    "(2048,4096)": {
+      "m_thresholds": [
+        2048
+      ],
+      "alg_by_m": {
+        "2048": {
+          "workspace": 0,
+          "tops": 882.9677734375,
+          "lat_us": 38.91392135620117,
+          "alg_id": 0,
+          "split_k": 1
+        }
+      }
+    },
+    "(4096,8192)": {
+      "m_thresholds": [
+        4096
+      ],
+      "alg_by_m": {
+        "4096": {
+          "workspace": 0,
+          "tops": 1159.861572265625,
+          "lat_us": 236.9919891357422,
+          "alg_id": 0,
+          "split_k": 4
+        }
+      }
+    },
+    "(8192,16384)": {
+      "m_thresholds": [
+        8192
+      ],
+      "alg_by_m": {
+        "8192": {
+          "workspace": 0,
+          "tops": 1210.7589111328125,
+          "lat_us": 1816.2354736328125,
+          "alg_id": 1,
+          "split_k": 1
+        }
+      }
+    },
+    "(16384,32768)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "16384": "Failed to allocate shared workspace (536870912 bytes)"
+      }
+    }
+  }
+}

@@ -1,0 +1,304 @@
+{
+  "meta": {
+    "gpu_name": "NVIDIA GeForce RTX 5080",
+    "gpu_short_name": "RTX5080",
+    "compute_capability": "cc120",
+    "model_name": "Qwen2.5-7B-INT8",
+    "mode": "model",
+    "backend": "cuSPARSELt",
+    "dtype": "fp4e2m1",
+    "alg_count": 2,
+    "warmup": 25,
+    "repeat": 50,
+    "torch_version": "2.9.0+cu129",
+    "time": "2026-01-27T19:47:38.076195",
+    "M_list": [
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "NK_list": [
+      [
+        4608,
+        6272
+      ],
+      [
+        3584,
+        6272
+      ],
+      [
+        37888,
+        6272
+      ],
+      [
+        3584,
+        33152
+      ]
+    ],
+    "search_stats": {
+      "total": 36,
+      "success": 27,
+      "failed": 0,
+      "errors": 9
+    },
+    "sparsity": "2_16",
+    "config_count": 9
+  },
+  "nk_entries": {
+    "(4608,6272)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 257.7603454589844,
+          "lat_us": 14.351999282836914,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 514.8090209960938,
+          "lat_us": 14.37183952331543,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 802.3702392578125,
+          "lat_us": 18.44223976135254,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 905.1480102539062,
+          "lat_us": 32.696319580078125,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 963.4193115234375,
+          "lat_us": 61.437442779541016,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1089.679931640625,
+          "lat_us": 108.63744354248047,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1091.6669921875,
+          "lat_us": 216.87937927246094,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1088.567138671875,
+          "lat_us": 434.99395751953125,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1091.8314208984375,
+          "lat_us": 867.3869018554688,
+          "alg_id": 0,
+          "split_k": -1
+        }
+      }
+    },
+    "(3584,6272)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 200.23916625976562,
+          "lat_us": 14.369279861450195,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 399.9795227050781,
+          "lat_us": 14.387199401855469,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 702.1622314453125,
+          "lat_us": 16.391040802001953,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 749.0608520507812,
+          "lat_us": 30.729598999023438,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 973.5318603515625,
+          "lat_us": 47.28831481933594,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1021.802001953125,
+          "lat_us": 90.10881042480469,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1085.926513671875,
+          "lat_us": 169.57566833496094,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1076.65185546875,
+          "lat_us": 342.07293701171875,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1086.78173828125,
+          "lat_us": 677.7689208984375,
+          "alg_id": 0,
+          "split_k": 2
+        }
+      }
+    },
+    "(37888,6272)": {
+      "m_thresholds": [
+        64,
+        128,
+        256,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384
+      ],
+      "alg_by_m": {
+        "64": {
+          "workspace": 0,
+          "tops": 303.9102783203125,
+          "lat_us": 100.08576202392578,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "128": {
+          "workspace": 0,
+          "tops": 600.0771484375,
+          "lat_us": 101.37727355957031,
+          "alg_id": 1,
+          "split_k": 1
+        },
+        "256": {
+          "workspace": 0,
+          "tops": 867.3667602539062,
+          "lat_us": 140.2732696533203,
+          "alg_id": 0,
+          "split_k": 2
+        },
+        "512": {
+          "workspace": 0,
+          "tops": 1033.4364013671875,
+          "lat_us": 235.4636688232422,
+          "alg_id": 0,
+          "split_k": 4
+        },
+        "1024": {
+          "workspace": 0,
+          "tops": 1075.70751953125,
+          "lat_us": 452.4217529296875,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "2048": {
+          "workspace": 0,
+          "tops": 1085.0599365234375,
+          "lat_us": 897.04443359375,
+          "alg_id": 0,
+          "split_k": -1
+        },
+        "4096": {
+          "workspace": 0,
+          "tops": 1043.8011474609375,
+          "lat_us": 1865.004638671875,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "8192": {
+          "workspace": 0,
+          "tops": 1060.122802734375,
+          "lat_us": 3672.581787109375,
+          "alg_id": 0,
+          "split_k": 1
+        },
+        "16384": {
+          "workspace": 0,
+          "tops": 1053.8577880859375,
+          "lat_us": 7388.82958984375,
+          "alg_id": 0,
+          "split_k": 1
+        }
+      }
+    },
+    "(3584,33152)": {
+      "m_thresholds": [],
+      "alg_by_m": {},
+      "errors_by_m": {
+        "64": "Failed to allocate shared workspace (536870912 bytes)",
+        "128": "Failed to allocate shared workspace (536870912 bytes)",
+        "256": "Failed to allocate shared workspace (536870912 bytes)",
+        "512": "Failed to allocate shared workspace (536870912 bytes)",
+        "1024": "Failed to allocate shared workspace (536870912 bytes)",
+        "2048": "Failed to allocate shared workspace (536870912 bytes)",
+        "4096": "Failed to allocate shared workspace (536870912 bytes)",
+        "8192": "Failed to allocate shared workspace (536870912 bytes)",
+        "16384": "Failed to allocate shared workspace (536870912 bytes)"
+      }
+    }
+  }
+}
