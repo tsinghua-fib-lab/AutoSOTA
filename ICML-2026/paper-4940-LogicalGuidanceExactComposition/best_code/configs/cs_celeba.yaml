@@ -1,0 +1,39 @@
+defaults:
+  - /dataset: celeba_pixel_male_haircolors.yaml
+  - _self_
+
+seed: 42
+callbacks:
+  lr_monitor:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+    logging_interval: epoch
+
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  name: celeba_classifier_judge
+  project: "LogicalComposition" 
+  offline: False 
+
+trainer:
+  _target_: trainer.ClassifierTrainer
+  num_classes_per_label:  [2, 5]
+  epochs: 10
+  model:
+    _target_: models.MultiLabelClassifier
+    base_model:
+      _target_: torchvision.models.resnet18
+    num_classes_per_label:  ${trainer.num_classes_per_label}
+  optimizer:
+    _target_: torch.optim.AdamW
+    _partial_: true
+    lr: 3.0e-4
+    weight_decay: 1.0e-3
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    _partial_: true
+
+training_config:
+  accelerator: gpu
+  gradient_clip_val: 1.0
+  enable_checkpointing: true
+  precision: 16-mixed

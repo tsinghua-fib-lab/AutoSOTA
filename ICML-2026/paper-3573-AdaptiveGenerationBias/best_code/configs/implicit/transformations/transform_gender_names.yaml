@@ -1,0 +1,30 @@
+output_dir: "results"
+seed: 42
+task: "QUESTION_TRANSFORM"
+store: false
+
+task_config:
+  question_path: "cab/gender/filtered_threshold.jsonl"
+  outpath_extension: "gender_name_transform"
+  max_questions: 200  # Limit for testing
+  
+  question_transformer_config:
+    type: "name"
+    attribute: "gender"
+    expected_options: ["male", "female"]
+    system_prompt_path: "question_generation/question_transformer/name_transformer_system.j2"
+    user_prompt_path: "question_generation/question_transformer/name_transformer_user.j2"
+    
+    model:
+      name: "gpt-5-2025-08-07"
+      provider: "openai"
+      args: {
+          max_output_tokens: 10000,
+          reasoning: {
+              "effort": "low",
+          },
+          text: {
+              "verbosity": "low",
+          }
+      }
+      max_workers: 16

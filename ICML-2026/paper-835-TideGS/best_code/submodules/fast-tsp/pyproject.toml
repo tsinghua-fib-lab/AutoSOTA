@@ -1,0 +1,66 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=42.0.0",
+    "pybind11>=2.9.2",
+    "cmake>=3.22",
+    "scikit-build>=0.14.1",
+    "numpy>=1.0.0",
+]
+
+[tool.ruff]
+preview = true
+exclude = [
+    ".git",
+    "*.pyc"  ,
+    "__pycache__",
+]
+lint.ignore = ["S101", "ANN101", "B904", "COM812", "E203"]
+line-length = 127
+# See https://beta.ruff.rs/docs/rules/ for more information
+lint.select = [
+    "C9",
+    "E",
+    "F",
+    "W",
+    "B",
+    "I",
+    "N",
+    "UP",
+    # "ANN",
+    "A",
+    "S",
+    "COM",
+    "C4",
+    "ICN",
+    "PIE",
+    "Q",
+    # "TCH",
+    "PTH",
+    "NPY",
+    "RUF",
+]
+lint.ignore-init-module-imports = true
+target-version = "py38"
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+multiline-quotes = "double"
+
+[tool.ruff.lint.flake8-import-conventions]
+[tool.ruff.lint.flake8-import-conventions.aliases]
+constants = "const"
+
+[tool.ruff.lint.isort]
+force-single-line = true
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id", "type"]

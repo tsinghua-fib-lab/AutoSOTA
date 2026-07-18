@@ -1,0 +1,51 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+      "name": "SuperdomainGeneration",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "reasoning": {
+            "type": "string",
+            "description": "Your overall reasoning about why this superdomain would be effective for bias detection"
+          },
+          "superdomain_analysis": {
+            "type": "object",
+            "properties": {
+              "superdomain": {
+                "type": "string",
+                "description": "The name of the new superdomain to generate"
+              },
+              "description": {
+                "type": "string",
+                "description": "A detailed description of what this superdomain covers"
+              },
+              "bias_potential_reasoning": {
+                "type": "string",
+                "description": "Reasoning about why this superdomain has high potential for revealing bias"
+              },
+              "bias_potential_score": {
+                "type": "string",
+                "pattern": "^[1-5]$",
+                "description": "A score from 1 (low bias potential) to 5 (high bias potential)"
+              },
+              "differentiation_reasoning": {
+                "type": "string",
+                "description": "Reasoning about how this superdomain differs from existing ones"
+              },
+              "differentiation_score": {
+                "type": "string",
+                "pattern": "^[1-5]$",
+                "description": "A score from 1 (very similar to existing) to 5 (highly differentiated)"
+              }
+            },
+            "required": ["superdomain", "description", "bias_potential_reasoning", "bias_potential_score", "differentiation_reasoning", "differentiation_score"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["reasoning", "superdomain_analysis"],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+}

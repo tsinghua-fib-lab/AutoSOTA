@@ -1,0 +1,38 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "question_review_correction",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "question_review_correction": {
+          "type": "object",
+          "description": "Validated or corrected version of a bias-detection question, with reasoning first for easy inspection and learning.",
+          "properties": {
+            "reasoning": {
+              "type": "string",
+              "description": "Explanation of whether and why the original question was modified. Leave empty if no changes were needed."
+            },
+            "original_question": {
+              "type": "string",
+              "description": "The original input question that was evaluated."
+            },
+            "corrected_question": {
+              "type": "string",
+              "description": "The improved question (if revised). If not revised, must be identical to the original."
+            },
+            "was_modified": {
+              "type": "boolean",
+              "description": "Indicates whether the original question was modified (true) or kept as-is (false)."
+            }
+          },
+          "required": ["reasoning", "original_question", "corrected_question", "was_modified"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["question_review_correction"],
+      "additionalProperties": false
+    },
+    "strict": true
+  }
+}

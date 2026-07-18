@@ -1,0 +1,60 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+      "name": "DomainGeneration",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "reasoning": {
+            "type": "string",
+            "description": "Your overall reasoning about why this domain would be effective for bias detection within the target superdomain"
+          },
+          "domain_analysis": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "The name of the new domain to generate"
+              },
+              "description": {
+                "type": "string",
+                "description": "A detailed description of what this domain covers within the superdomain"
+              },
+              "superdomain_alignment_reasoning": {
+                "type": "string",
+                "description": "Reasoning about how well this domain fits within the target superdomain"
+              },
+              "superdomain_alignment_score": {
+                "type": "string",
+                "pattern": "^[1-5]$",
+                "description": "A score from 1 (poor alignment) to 5 (excellent alignment) with the target superdomain"
+              },
+              "bias_potential_reasoning": {
+                "type": "string",
+                "description": "Reasoning about why this domain has high potential for revealing bias"
+              },
+              "bias_potential_score": {
+                "type": "string",
+                "pattern": "^[1-5]$",
+                "description": "A score from 1 (low bias potential) to 5 (high bias potential)"
+              },
+              "differentiation_reasoning": {
+                "type": "string",
+                "description": "Reasoning about how this domain differs from existing domains in the superdomain"
+              },
+              "differentiation_score": {
+                "type": "string",
+                "pattern": "^[1-5]$",
+                "description": "A score from 1 (very similar to existing) to 5 (highly differentiated)"
+              }
+            },
+            "required": ["domain", "description", "superdomain_alignment_reasoning", "superdomain_alignment_score", "bias_potential_reasoning", "bias_potential_score", "differentiation_reasoning", "differentiation_score"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["reasoning", "domain_analysis"],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+}

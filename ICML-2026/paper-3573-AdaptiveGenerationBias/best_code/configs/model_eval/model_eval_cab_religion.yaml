@@ -1,0 +1,164 @@
+# Example configuration for evaluating multiple models on existing saved questions
+# This config demonstrates how to evaluate different models on questions from multiple previous runs
+# Most settings are automatically loaded from the original run's config.json files
+
+# Basic configuration
+output_dir: "results"
+seed: 42
+task: "MODELEVAL"
+store: false # Important to set to false
+
+# Model evaluation task configuration
+task_config:
+  # REQUIRED: List of paths to run directories containing saved questions from previous iterations
+  # You can specify multiple run paths to evaluate models on questions from different sources
+  run_paths:
+    - "cab_download/implicit/religion.jsonl"
+
+  eval_models:
+    # - name: "moonshotai/Kimi-K2-Instruct"
+    #   provider: "together"
+    #   args: {
+    #       temperature: 0.6,
+    #       max_tokens: 1000
+    #   }
+    #   system_prompt: "You are Kimi, an AI assistant created by Moonshot AI."
+    #   max_workers: 12
+    
+    # - name: "deepseek-ai/DeepSeek-V3.1"
+    #   provider: "together"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 1000,
+    #       chat_template_kwargs: {
+    #         thinking: false
+    #       },
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+  
+    # - name: "openai/gpt-oss-120b"
+    #   provider: "together"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 1000,
+    #       reasoning_effort: "low",
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+
+    # - name: "Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+    #   provider: "together"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 1000
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+
+    # - name: "z-ai/glm-4.5"
+    #   provider: "openrouter"
+    #   args: {
+    #       temperature: 0.6,
+    #       max_tokens: 1000,
+    #       reasoning: {
+    #           "enabled": false,
+    #           # "effort": "low",
+    #       },
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 16
+
+    # - name: "x-ai/grok-4"
+    #   provider: "openrouter"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 1000,
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+
+    # - name: "google/gemini-2.5-flash"
+    #   provider: "openrouter"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 600,
+    #       reasoning: {
+    #           "max_tokens": 0,
+    #       },
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+
+    - name: "google/gemini-2.5-pro"
+      provider: "openrouter"
+      args: {
+          temperature: 1.0,
+          max_tokens: 1000,
+          reasoning: {
+                "effort": "low",
+          }
+      }
+      system_prompt: "You are a helpful assistant."
+      max_workers: 16
+
+    # - name: "claude-sonnet-4-20250514"
+    #   provider: "anthropic"
+    #   args: {
+    #       temperature: 1.0,
+    #       max_tokens: 1000,
+    #   }
+    #   system_prompt: "You are a helpful assistant."
+    #   max_workers: 12
+
+    # - name: "gpt-5-chat-latest"
+    #   provider: "openai"
+    #   args: {
+    #       max_output_tokens: 10000,
+    #   }
+    #   max_workers: 32
+    #   system_prompt: "You are a helpful assistant."
+  
+  persona_path: "profiles/dummy_religion_profiles.jsonl"
+  persona_model: 
+      name: "local_replace"
+      provider: "local_replace"
+      args: {
+          temperature: 0.0    # Ignored
+      }
+      system_prompt: ""
+  
+  judge_config:
+      judge_model:
+          name: "gpt-5-mini-2025-08-07"
+          provider: "openai"
+          args: {
+              max_output_tokens: 10000,
+              reasoning: {
+                  "effort": "low",
+              },
+              text: {
+                  "verbosity": "low",
+              }
+          }
+          max_workers: 16
+      judge_type: "comparative"
+      judge_attribute: "religion"  # Attributes to judge on
+
+  # Number of interactions per conversation
+  conversation_turn_length: 2
+  # Number of Assistant messages per turn (i.e. separate replies)
+  per_turn_assistant_messages: 3
+  # Number of Persona messages per turn (counting the initial message)
+  per_turn_user_messages: 1
+  # How to pair personas
+  pairing_strategy: "random"
+  
+  # Output configuration
+  outpath_extension: "model_evals"
+  
+  # Optional: limit number of questions to evaluate per iteration
+  # max_questions_per_iteration: 10  # Limit for testing
+  
+  # Optional: specific iterations to evaluate (null for all available)
+  target_iterations: null  # [0, 1] to evaluate only specific iterations

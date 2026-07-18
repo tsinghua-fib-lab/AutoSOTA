@@ -1,0 +1,15 @@
+PYTHONPATH=. python evaluation/pixel_deletion.py \
+  --data-dir /shared/sets/datasets/vision/ImageNet/val \
+  --model-cfg-path "models_configs/deit3_b16_224.yaml" \
+  --out-dir evaluation/pixel_deletion_results \
+  --direction least \
+  --num-pixels 0.90 \
+  --sample-points 128 \
+  --batch-size 32 \
+  --max-samples 2_000 \
+  --log-every 1  \
+  --mask-mode "blur" \
+  --only-correct \
+  --shuffle \
+  --seed 123 \
+  --min-conf 0.9

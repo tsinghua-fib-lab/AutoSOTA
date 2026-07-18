@@ -1,0 +1,23 @@
+train_dataset:
+  _target_: logdiff.datasets.celeba.CelebALatentMaleHairColors
+  celeba_dir: data/
+  latent_dir: data/celeba/vae_train_features
+  split: 'train'
+  
+val_dataset:
+  _target_: logdiff.datasets.celeba.CelebALatentMaleHairColors
+  celeba_dir: data/
+  latent_dir: data/celeba/vae_val_features
+  split: 'val'
+  
+train_dataloader:
+  batch_size: 64
+  num_workers: 4
+  persistent_workers: True
+  shuffle: True
+
+val_dataloader:
+  batch_size: 64
+  num_workers: 4
+  persistent_workers: True
+  shuffle: False

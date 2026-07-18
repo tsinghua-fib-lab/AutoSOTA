@@ -1,0 +1,20 @@
+model:
+  model_name: "DeiT-III-S16-224"
+  model_spec: "deit3_small_patch16_224.fb_in1k"
+
+augment:
+  noise_alpha: 0.5
+  h_flip_prob: 0.5
+  affine_prob: 1.0
+  rotate_range: [-20.0, 20.0]
+  translate_range: [0.1, 0.1]
+  scale_range: [0.9, 1.1]
+
+post_proc:
+    gaussian:
+        kernel_size: 11
+        sgm: 7.0
+    bilateral:
+        kernel_size: 5
+        sgm_spatial: 0.5
+        sgm_range: 0.05

@@ -1,0 +1,43 @@
+_target_: logdiff.score.trainer.ComposableDiffusion
+
+model:
+  _target_: logdiff.models.conditional_unet.ClassConditionalUnet
+  num_class_per_label: [10,10]
+  interaction: sum
+  sample_size: 28
+  in_channels: 3
+  out_channels: 3 
+  layers_per_block: 2
+  block_out_channels: [56, 112, 168] 
+  attention_head_dim:  8
+  class_embed_type: null
+  norm_num_groups: 8
+  dropout: 0.1
+  act_fn: gelu
+  down_block_types:
+    - DownBlock2D
+    - AttnDownBlock2D
+    - AttnDownBlock2D
+  up_block_types: 
+    - AttnUpBlock2D
+    - AttnUpBlock2D
+    - UpBlock2D
+lambda_coind : 0.0
+coind_loss_type: null
+noise_scheduler:
+  _target_: diffusers.DDPMScheduler
+  num_train_timesteps: 1000
+  clip_sample: true
+  prediction_type: epsilon
+  beta_schedule: linear
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 1.0e-3
+  weight_decay: 1.0e-5
+  
+scheduler:
+  _target_: diffusers.optimization.get_cosine_schedule_with_warmup
+  _partial_: true
+  num_warmup_steps: 5000
+  num_training_steps: 50000

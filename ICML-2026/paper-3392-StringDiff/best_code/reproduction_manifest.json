@@ -1,0 +1,44 @@
+{
+  "reproduction_manifest": {
+    "paper_id": 3392,
+    "repo_url": "https://github.com/eliomor01/Diffusion-Strings",
+    "repo_commit": "02d75ff680ee90759b320f5409b1ae8df744fb27",
+    "repo_path": "/repo",
+    "container_name": "autosota_repro_paper_3392",
+    "container_reusable": true,
+    "docker_image": "autosota/paper-3392:failed",
+    "eval_command": "cd /scoremd && source /opt/conda/etc/profile.d/conda.sh && conda activate scoremd && XLA_PYTHON_CLIENT_PREALLOCATE=false python3 /repo/run_bba_string_method.py --n-mep-iters 500 --mep-step-size 0.001 --n-images 51",
+    "baseline_metrics": {},
+    "primary_metric": "Peak Energy Along Pathway",
+    "metric_direction": "lower",
+    "gpu_devices": "4,5",
+    "data_mounts": [],
+    "cache_mounts": ["/autosota_cache", "/datasets", "/models"],
+    "repro_log_path": "/home/dataset-assist-0/chenxinyu/autosota-v2.5-sota-icml-13/logs/reproduction/paper-3392.log",
+    "status": "failed",
+    "created_at": "2026-07-10T09:15:00Z",
+    "notes": "REPRODUCTION FAILED: ScoreMD checkpoint was saved with 4-GPU device sharding but only 2 GPUs available. JAX/CUDA runtime also exhibits GPU segfaults during model operations, forcing CPU-only fallback. DeepTime version mismatch (checkpoint pickle 0.2.9 vs installed 0.4.5) causes TICA model warnings. The model architecture (transformer_large_score/potential) and BBA dataset (56K frames, 28 atoms) were successfully loaded and verified. The checkpoint restore is the blocking issue - orbax requires matching device topology for sharded checkpoints.",
+    "eval_timeout_minutes": 120,
+    "eval_output_format": "JSON file at /repo/bba_mep_results.json with keys: peak_energy_converged_mep_rel, peak_energy_initial_string_rel",
+    "known_levers": "MEP step size, number of string images, number of MEP iterations, eval_t (ScoreMD convention: 0=data, 1=noise), endpoint selection method",
+    "setup_notes": "ScoreMD (https://github.com/noegroup/ScoreMD) was installed in conda env 'scoremd' (Python 3.11, JAX 0.5.3 with CUDA 12 plugins). Dependencies: flax 0.10.4, orbax-checkpoint 0.11.6, mdtraj, deeptime 0.4.5, hydra-core, wandb. Fake bgmol/bgflow modules needed for import. Model weights (models.zip, 410MB) from ScoreMD release 1.0.0 extracted to /models/scoremd_models/models/bba/both/model/1800. BBA data (deshaw_dummy.zip, 24MB) extracted to /repo/storage/deshaw (h5 files). Additional data files (bba.pdb, bba_tica.pic) from ScoreMD repo at /scoremd/storage/deshaw. CUDA toolkit at /opt/conda/lib (CUDA 12.1). cuDNN 9.23 installed via conda. GPU JAX works but segfaults during model initialization; CPU mode works for dataset loading and model building. Blocking issue: checkpoint saved with 4-device sharding [DeviceMetadata(id=0..3)]; current config has 2 devices [CudaDevice(id=0), CudaDevice(id=1)].",
+    "optimization_objective": {
+      "objective_type": "single_primary_metric",
+      "summary": "Minimize Peak Energy Along Pathway for BBA protein folding MEP computed via classical string method at fixed time using ScoreMD potential model",
+      "metrics": [
+        {
+          "name": "Peak Energy Along Pathway",
+          "direction": "lower",
+          "role": "core",
+          "goal": "improve",
+          "baseline": 50.0,
+          "regression_tolerance_pct": 0.0,
+          "rationale": "Paper reports MEP peak energy ~10 kbT vs initial string ~50 kbT (Figure 9/12). Lower energy indicates better pathway through the energy landscape. This is the sole quantitative metric for the BBA folding experiment."
+        }
+      ],
+      "success_policy": "Reduce peak energy along the MEP below the initial string baseline; target paper value of ~10 kbT. Any value below 50 kbT (the pure transport baseline) represents improvement."
+    },
+    "metric_upper_bound": 50,
+    "metric_lower_bound": 6
+  }
+}

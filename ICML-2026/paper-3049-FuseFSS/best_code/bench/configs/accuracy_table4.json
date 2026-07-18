@@ -1,0 +1,215 @@
+{
+  "global": {
+    "seed": 0,
+    "seq_len": 128,
+    "frac_bits": 12,
+    "fusefss_rounding": "round",
+    "mpc_rounding": "trunc",
+    "run_mpc": true,
+    "default_device": "cpu",
+    "cache_dir": null,
+    "num_workers": 4
+  },
+  "rows": [
+    {
+      "id": "bert_tiny_sst2",
+      "family": "bert_seqcls",
+      "task": "glue/sst2",
+      "hf_checkpoint": "takedarn/bert-tiny-sst2",
+      "n_bits": 37,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 67000,
+        "val_size": 872,
+        "pytorch_acc": 82.45,
+        "sigma_acc": 82.57
+      },
+      "notes": "HF: takedarn/bert-tiny-sst2"
+    },
+    {
+      "id": "bert_tiny_mrpc",
+      "family": "bert_seqcls",
+      "task": "glue/mrpc",
+      "hf_checkpoint": "M-FAC/bert-tiny-finetuned-mrpc",
+      "n_bits": 37,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 3700,
+        "val_size": 408,
+        "pytorch_acc": 71.07,
+        "sigma_acc": 70.34
+      },
+      "notes": "HF: M-FAC/bert-tiny-finetuned-mrpc"
+    },
+    {
+      "id": "bert_tiny_qnli",
+      "family": "bert_seqcls",
+      "task": "glue/qnli",
+      "hf_checkpoint": "M-FAC/bert-tiny-finetuned-qnli",
+      "n_bits": 37,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 105000,
+        "val_size": 5463,
+        "pytorch_acc": 81.42,
+        "sigma_acc": 81.93
+      },
+      "notes": "HF: M-FAC/bert-tiny-finetuned-qnli"
+    },
+    {
+      "id": "bert_base_sst2",
+      "family": "bert_seqcls",
+      "task": "glue/sst2",
+      "hf_checkpoint": "textattack/bert-base-uncased-SST-2",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 67000,
+        "val_size": 872,
+        "pytorch_acc": 92.55,
+        "sigma_acc": 92.55
+      },
+      "notes": "HF: textattack/bert-base-uncased-SST-2"
+    },
+    {
+      "id": "bert_base_mrpc",
+      "family": "bert_seqcls",
+      "task": "glue/mrpc",
+      "hf_checkpoint": "textattack/bert-base-uncased-MRPC",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 3700,
+        "val_size": 408,
+        "pytorch_acc": 84.31,
+        "sigma_acc": 87.25
+      },
+      "notes": "HF: textattack/bert-base-uncased-MRPC"
+    },
+    {
+      "id": "bert_base_qnli",
+      "family": "bert_seqcls",
+      "task": "glue/qnli",
+      "hf_checkpoint": "textattack/bert-base-uncased-QNLI",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 105000,
+        "val_size": 5463,
+        "pytorch_acc": 91.60,
+        "sigma_acc": 91.63
+      },
+      "notes": "HF: textattack/bert-base-uncased-QNLI"
+    },
+    {
+      "id": "bert_large_sst2",
+      "family": "bert_seqcls",
+      "task": "glue/sst2",
+      "hf_checkpoint": "yoshitomo-matsubara/bert-large-uncased-sst2",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 67000,
+        "val_size": 872,
+        "pytorch_acc": 93.58,
+        "sigma_acc": 93.35
+      },
+      "notes": "HF: yoshitomo-matsubara/bert-large-uncased-sst2"
+    },
+    {
+      "id": "bert_large_mrpc",
+      "family": "bert_seqcls",
+      "task": "glue/mrpc",
+      "hf_checkpoint": "yoshitomo-matsubara/bert-large-uncased-mrpc",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 3700,
+        "val_size": 408,
+        "pytorch_acc": 87.99,
+        "sigma_acc": 88.48
+      },
+      "notes": "HF: yoshitomo-matsubara/bert-large-uncased-mrpc"
+    },
+    {
+      "id": "bert_large_qnli",
+      "family": "bert_seqcls",
+      "task": "glue/qnli",
+      "hf_checkpoint": "yoshitomo-matsubara/bert-large-uncased-qnli",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 105000,
+        "val_size": 5463,
+        "pytorch_acc": 92.23,
+        "sigma_acc": 92.26
+      },
+      "notes": "HF: yoshitomo-matsubara/bert-large-uncased-qnli"
+    },
+    {
+      "id": "gpt2_lambada",
+      "family": "gpt_lm",
+      "task": "lambada",
+      "hf_checkpoint": "gpt2",
+      "n_bits": 50,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 0,
+        "val_size": 5153,
+        "pytorch_acc": 32.46,
+        "sigma_acc": 33.28
+      },
+      "notes": "HF: gpt2",
+      "batch_size": 1
+    },
+    {
+      "id": "gpt_neo_1p3b_lambada",
+      "family": "gpt_lm",
+      "task": "lambada",
+      "hf_checkpoint": "EleutherAI/gpt-neo-1.3B",
+      "n_bits": 51,
+      "frac_bits": 12,
+      "mpc_rounding": "round",
+      "sigma_ref": {
+        "train_size": 0,
+        "val_size": 5153,
+        "pytorch_acc": 57.46,
+        "sigma_acc": 57.81
+      },
+      "notes": "HF: EleutherAI/gpt-neo-1.3B",
+      "batch_size": 1
+    },
+    {
+      "id": "llama2_7b_lambada",
+      "family": "gpt_lm",
+      "task": "lambada",
+      "hf_checkpoint": "meta-llama/Llama-2-7b-hf",
+      "n_bits": 48,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 0,
+        "val_size": 5153,
+        "pytorch_acc": 70.17,
+        "sigma_acc": 69.92
+      },
+      "skip": true,
+      "notes": "Gated weights; skipped by default"
+    },
+    {
+      "id": "llama2_13b_lambada",
+      "family": "gpt_lm",
+      "task": "lambada",
+      "hf_checkpoint": "meta-llama/Llama-2-13b-hf",
+      "n_bits": 48,
+      "frac_bits": 12,
+      "sigma_ref": {
+        "train_size": 0,
+        "val_size": 5153,
+        "pytorch_acc": 73.14,
+        "sigma_acc": 72.99
+      },
+      "skip": true,
+      "notes": "Gated weights; skipped by default"
+    }
+  ]
+}

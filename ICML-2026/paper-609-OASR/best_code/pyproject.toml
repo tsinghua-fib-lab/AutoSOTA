@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circuit-discovery"
+version = "0.1.0"
+description = "Modular circuit discovery experiments for GPT-2 IOI circuits."
+requires-python = ">=3.10"
+dependencies = [
+  "datasets>=4.5.0",
+  "einops>=0.8.1",
+  "fancy-einsum>=0.0.3",
+  "numpy>=1.26,<3",
+  "PyYAML>=6.0",
+  "torch>=2.9",
+  "tqdm>=4.67.1",
+  "transformer-lens>=2.17.0",
+  "transformers>=4.57.0",
+]
+
+[project.optional-dependencies]
+notebook = [
+  "ipykernel>=6.30",
+  "jupyterlab>=4.4",
+  "plotly>=5.18.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["circuit_discovery*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+circuit_discovery = ["configs.yaml"]

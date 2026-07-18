@@ -1,0 +1,107 @@
+{
+  "risk_state": {
+    "tau_act": -0.02
+  },
+  "hysteresis": {
+    "eps_on": 0.015,
+    "eps_off": 0.015,
+    "enter_steps": 2,
+    "exit_steps": 2
+  },
+  "critical_window": {
+    "pre": 24,
+    "post": 4
+  },
+  "candidate_mode": "threshold_plus_rank",
+  "candidate_fallback": {
+    "rank_topk": 20,
+    "rank_signal": "h_deficit"
+  },
+  "detectors": [
+    {
+      "type": "single_scalar",
+      "name": "scalar_delta_sum_alpha0.6_v2",
+      "scalar_type": "delta_sum",
+      "beta_mode": "uniform",
+      "selector": "alpha",
+      "alpha": 0.6
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_delta_sum_window12",
+      "scalar_type": "delta_sum",
+      "beta_mode": "auroc",
+      "selector": "window",
+      "alpha": 0.7,
+      "window": 12
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_actset_tauact_neg0.02",
+      "scalar_type": "delta_actset",
+      "tau_act": -0.02,
+      "selector": "alpha",
+      "alpha": 0.6
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_actset_window16",
+      "scalar_type": "delta_actset",
+      "tau_act": -0.02,
+      "selector": "window",
+      "alpha": 0.7,
+      "window": 16
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_softact_tau_neg0.02_s0.3",
+      "scalar_type": "delta_softact",
+      "weight_family": "sigmoid",
+      "tau": -0.02,
+      "slope": 0.3,
+      "selector": "alpha",
+      "alpha": 0.6
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_softact_window12_tau_neg0.02",
+      "scalar_type": "delta_softact",
+      "weight_family": "sigmoid",
+      "tau": -0.02,
+      "slope": 0.3,
+      "selector": "window",
+      "alpha": 0.7,
+      "window": 12
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_soft_uncert_tau_neg0.02",
+      "scalar_type": "delta_soft_uncert",
+      "weight_family": "sigmoid",
+      "tau": -0.02,
+      "slope": 0.3,
+      "entropy_center": 3.5,
+      "entropy_scale": 1.0,
+      "margin_eps": 0.05,
+      "selector": "alpha",
+      "alpha": 0.6
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_h_deficit_alpha0.6",
+      "scalar_type": "h_deficit",
+      "eps": 0.0,
+      "selector": "alpha",
+      "alpha": 0.1
+    },
+    {
+      "type": "single_scalar",
+      "name": "scalar_h_deficit_window12",
+      "scalar_type": "h_deficit",
+      "eps": 0.0,
+      "selector": "window",
+      "alpha": 0.7,
+      "window": 12
+    }
+  ]
+}

@@ -1,0 +1,903 @@
+{
+  "tables": {
+    "patient": {
+      "columns": {
+        "uniquepid": {
+          "type": "VARCHAR(10)",
+          "nullable": true
+        },
+        "patienthealthsystemstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "gender": {
+          "type": "VARCHAR(25)",
+          "nullable": true
+        },
+        "age": {
+          "type": "VARCHAR(10)",
+          "nullable": true
+        },
+        "ethnicity": {
+          "type": "VARCHAR(50)",
+          "nullable": false
+        },
+        "hospitalid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "wardid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "admissionheight": {
+          "type": "NUMERIC(10,2)",
+          "nullable": false
+        },
+        "admissionweight": {
+          "type": "NUMERIC(10,2)",
+          "nullable": false
+        },
+        "dischargeweight": {
+          "type": "NUMERIC(10,2)",
+          "nullable": false
+        },
+        "hospitaladmittime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        },
+        "hospitaladmitsource": {
+          "type": "VARCHAR(30)",
+          "nullable": true
+        },
+        "unitadmittime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        },
+        "unitdischargetime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": false
+        },
+        "hospitaldischargetime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": false
+        },
+        "hospitaldischargestatus": {
+          "type": "VARCHAR(10)",
+          "nullable": false
+        }
+      },
+      "sample_data": {
+        "uniquepid": [
+          "002-39247",
+          "002-31956",
+          "002-64368"
+        ],
+        "patienthealthsystemstayid": [
+          129062,
+          130837,
+          131642
+        ],
+        "patientunitstayid": [
+          141340,
+          143638,
+          144690
+        ],
+        "gender": [
+          "female",
+          "female",
+          "male"
+        ],
+        "age": [
+          "80",
+          "63",
+          "56"
+        ],
+        "ethnicity": [
+          "caucasian",
+          "caucasian",
+          "caucasian"
+        ],
+        "hospitalid": [
+          63,
+          73,
+          73
+        ],
+        "wardid": [
+          95,
+          93,
+          97
+        ],
+        "admissionheight": [
+          160,
+          154.9,
+          177.8
+        ],
+        "admissionweight": [
+          70.1,
+          46.81,
+          113.3
+        ],
+        "dischargeweight": [
+          70.1,
+          51.8,
+          117
+        ],
+        "hospitaladmittime": [
+          "2104-04-19 18:16:00",
+          "2105-03-03 20:17:00",
+          "2104-05-29 23:19:15"
+        ],
+        "hospitaladmitsource": [
+          "operating room",
+          "floor",
+          "other hospital"
+        ],
+        "unitadmittime": [
+          "2104-04-21 00:47:00",
+          "2105-03-10 02:12:00",
+          "2104-05-29 23:21:15"
+        ],
+        "unitdischargetime": [
+          "2104-04-23 23:16:00",
+          "2105-03-19 00:55:00",
+          "2104-05-31 22:07:15"
+        ],
+        "hospitaldischargetime": [
+          "2104-04-24 20:30:00",
+          "2105-03-23 17:24:00",
+          "2104-06-01 01:30:15"
+        ],
+        "hospitaldischargestatus": [
+          "alive",
+          "alive",
+          "expired"
+        ]
+      },
+      "patterns": []
+    },
+    "diagnosis": {
+      "columns": {
+        "diagnosisid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "diagnosisname": {
+          "type": "VARCHAR(200)",
+          "nullable": true
+        },
+        "diagnosistime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        },
+        "icd9code": {
+          "type": "VARCHAR(100)",
+          "nullable": false
+        }
+      },
+      "sample_data": {
+        "diagnosisid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          141340,
+          141340,
+          141340
+        ],
+        "diagnosisname": [
+          "acute respiratory distress",
+          "anemia - anemia of critical illness",
+          "hyperkalemia"
+        ],
+        "diagnosistime": [
+          "2104-04-21 02:17:00",
+          "2104-04-21 02:17:00",
+          "2104-04-21 02:17:00"
+        ],
+        "icd9code": [
+          "518.82",
+          "285.9, d64.9",
+          "276.7, e87.5"
+        ]
+      },
+      "patterns": []
+    },
+    "treatment": {
+      "columns": {
+        "treatmentid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "treatmentname": {
+          "type": "VARCHAR(200)",
+          "nullable": true
+        },
+        "treatmenttime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "treatmentid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          245811,
+          245811,
+          245811
+        ],
+        "treatmentname": [
+          "antibacterials - penicillins",
+          "therapeutic antibacterials",
+          "surgery consultation"
+        ],
+        "treatmenttime": [
+          "2105-02-05 07:35:00",
+          "2105-02-01 04:36:00",
+          "2105-02-05 07:35:00"
+        ]
+      },
+      "patterns": []
+    },
+    "lab": {
+      "columns": {
+        "labid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "labname": {
+          "type": "VARCHAR(256)",
+          "nullable": true
+        },
+        "labresult": {
+          "type": "NUMERIC(11,4)",
+          "nullable": true
+        },
+        "labresulttime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "labid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          141340,
+          141340,
+          141340
+        ],
+        "labname": [
+          "-polys",
+          "mpv",
+          "rbc"
+        ],
+        "labresult": [
+          68.4,
+          10.9,
+          4.12
+        ],
+        "labresulttime": [
+          "2104-04-20 13:50:00",
+          "2104-04-22 11:11:00",
+          "2104-04-19 11:55:00"
+        ]
+      },
+      "patterns": []
+    },
+    "medication": {
+      "columns": {
+        "medicationid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "drugname": {
+          "type": "VARCHAR(220)",
+          "nullable": true
+        },
+        "dosage": {
+          "type": "VARCHAR(60)",
+          "nullable": true
+        },
+        "routeadmin": {
+          "type": "VARCHAR(120)",
+          "nullable": true
+        },
+        "drugstarttime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": false
+        },
+        "drugstoptime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": false
+        }
+      },
+      "sample_data": {
+        "medicationid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          141340,
+          141340,
+          141340
+        ],
+        "drugname": [
+          "labetalol",
+          "propofol 1% inj",
+          "glutose 15"
+        ],
+        "dosage": [
+          "10 mg",
+          "5 mcg/kg/min",
+          "15 g"
+        ],
+        "routeadmin": [
+          "intravenou",
+          "iv",
+          "po"
+        ],
+        "drugstarttime": [
+          "2104-04-21 14:00:00",
+          "2104-04-19 20:09:00",
+          "2104-04-19 18:27:00"
+        ],
+        "drugstoptime": [
+          "2104-04-23 14:42:00",
+          "2104-04-23 17:07:00",
+          "2104-04-24 22:39:00"
+        ]
+      },
+      "patterns": []
+    },
+    "cost": {
+      "columns": {
+        "costid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "uniquepid": {
+          "type": "VARCHAR(10)",
+          "nullable": true
+        },
+        "patienthealthsystemstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "eventtype": {
+          "type": "VARCHAR(20)",
+          "nullable": true
+        },
+        "eventid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "chargetime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        },
+        "cost": {
+          "type": "DOUBLE PRECISION",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "costid": [
+          0,
+          1,
+          2
+        ],
+        "uniquepid": [
+          "002-39247",
+          "002-39247",
+          "002-39247"
+        ],
+        "patienthealthsystemstayid": [
+          129062,
+          129062,
+          129062
+        ],
+        "eventtype": [
+          "diagnosis",
+          "diagnosis",
+          "diagnosis"
+        ],
+        "eventid": [
+          0,
+          1,
+          2
+        ],
+        "chargetime": [
+          "2104-04-21 02:17:00",
+          "2104-04-21 02:17:00",
+          "2104-04-21 02:17:00"
+        ],
+        "cost": [
+          12.02,
+          10.53,
+          11.46
+        ]
+      },
+      "patterns": []
+    },
+    "allergy": {
+      "columns": {
+        "allergyid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "drugname": {
+          "type": "VARCHAR(255)",
+          "nullable": false
+        },
+        "allergyname": {
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        "allergytime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "allergyid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          247710,
+          247710,
+          247710
+        ],
+        "drugname": [
+          "cephalexin",
+          "percocet"
+        ],
+        "allergyname": [
+          "cephalexin",
+          "bactrim",
+          "percocet"
+        ],
+        "allergytime": [
+          "2103-01-14 05:30:00",
+          "2103-01-14 05:30:00",
+          "2103-01-14 05:30:00"
+        ]
+      },
+      "patterns": []
+    },
+    "intakeoutput": {
+      "columns": {
+        "intakeoutputid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "cellpath": {
+          "type": "VARCHAR(500)",
+          "nullable": true
+        },
+        "celllabel": {
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        "cellvaluenumeric": {
+          "type": "NUMERIC(12,4)",
+          "nullable": true
+        },
+        "intakeoutputtime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "intakeoutputid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          192116,
+          192116,
+          192116
+        ],
+        "cellpath": [
+          "flowsheet|flowsheet cell labels|i&o|output (ml)|output amt-chest tube",
+          "flowsheet|flowsheet cell labels|i&o|intake (ml)|generic intake (ml)|enteral formula volume/bolus amt (ml)",
+          "flowsheet|flowsheet cell labels|i&o|intake (ml)|generic intake (ml)|ivpb"
+        ],
+        "celllabel": [
+          "output amt-chest tube",
+          "enteral formula volume/bolus amt (ml)",
+          "ivpb"
+        ],
+        "cellvaluenumeric": [
+          50,
+          75,
+          150
+        ],
+        "intakeoutputtime": [
+          "2101-08-30 14:00:00",
+          "2101-08-28 08:21:00",
+          "2101-08-28 08:21:00"
+        ]
+      },
+      "patterns": []
+    },
+    "microlab": {
+      "columns": {
+        "microlabid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "culturesite": {
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        "organism": {
+          "type": "VARCHAR(255)",
+          "nullable": true
+        },
+        "culturetakentime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "microlabid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          2572184,
+          2572184,
+          2572184
+        ],
+        "culturesite": [
+          "urine, catheter specimen",
+          "urine, catheter specimen",
+          "urine, voided specimen"
+        ],
+        "organism": [
+          "escherichia coli",
+          "escherichia coli",
+          "escherichia coli"
+        ],
+        "culturetakentime": [
+          "2105-09-04 19:55:00",
+          "2105-09-06 19:20:00",
+          "2105-09-04 19:55:00"
+        ]
+      },
+      "patterns": []
+    },
+    "vitalperiodic": {
+      "columns": {
+        "vitalperiodicid": {
+          "type": "BIGINT",
+          "nullable": true
+        },
+        "patientunitstayid": {
+          "type": "INT",
+          "nullable": true
+        },
+        "temperature": {
+          "type": "NUMERIC(11,4)",
+          "nullable": false
+        },
+        "sao2": {
+          "type": "INT",
+          "nullable": false
+        },
+        "heartrate": {
+          "type": "INT",
+          "nullable": false
+        },
+        "respiration": {
+          "type": "INT",
+          "nullable": false
+        },
+        "systemicsystolic": {
+          "type": "INT",
+          "nullable": false
+        },
+        "systemicdiastolic": {
+          "type": "INT",
+          "nullable": false
+        },
+        "systemicmean": {
+          "type": "INT",
+          "nullable": false
+        },
+        "observationtime": {
+          "type": "TIMESTAMP(0)",
+          "nullable": true
+        }
+      },
+      "sample_data": {
+        "vitalperiodicid": [
+          0,
+          1,
+          2
+        ],
+        "patientunitstayid": [
+          141340,
+          141340,
+          141340
+        ],
+        "temperature": [
+          36.7
+        ],
+        "sao2": [
+          93,
+          94
+        ],
+        "heartrate": [
+          65,
+          84,
+          69
+        ],
+        "respiration": [
+          19
+        ],
+        "systemicsystolic": [
+          149,
+          150,
+          160
+        ],
+        "systemicdiastolic": [
+          49,
+          52,
+          54
+        ],
+        "systemicmean": [
+          84,
+          85,
+          90
+        ],
+        "observationtime": [
+          "2104-04-21 13:28:00",
+          "2104-04-21 23:23:00",
+          "2104-04-22 06:18:00"
+        ]
+      },
+      "patterns": []
+    }
+  },
+  "patterns": {
+    "patient_id_fields": [
+      [
+        "patient",
+        "uniquepid"
+      ],
+      [
+        "patient",
+        "patienthealthsystemstayid"
+      ],
+      [
+        "patient",
+        "patientunitstayid"
+      ],
+      [
+        "diagnosis",
+        "patientunitstayid"
+      ],
+      [
+        "treatment",
+        "patientunitstayid"
+      ],
+      [
+        "lab",
+        "patientunitstayid"
+      ],
+      [
+        "medication",
+        "patientunitstayid"
+      ],
+      [
+        "cost",
+        "uniquepid"
+      ],
+      [
+        "cost",
+        "patienthealthsystemstayid"
+      ],
+      [
+        "allergy",
+        "patientunitstayid"
+      ],
+      [
+        "intakeoutput",
+        "patientunitstayid"
+      ],
+      [
+        "microlab",
+        "patientunitstayid"
+      ],
+      [
+        "vitalperiodic",
+        "patientunitstayid"
+      ]
+    ],
+    "time_fields": [
+      [
+        "patient",
+        "hospitaladmittime"
+      ],
+      [
+        "patient",
+        "unitadmittime"
+      ],
+      [
+        "patient",
+        "unitdischargetime"
+      ],
+      [
+        "patient",
+        "hospitaldischargetime"
+      ],
+      [
+        "diagnosis",
+        "diagnosistime"
+      ],
+      [
+        "treatment",
+        "treatmenttime"
+      ],
+      [
+        "lab",
+        "labresulttime"
+      ],
+      [
+        "medication",
+        "drugstarttime"
+      ],
+      [
+        "medication",
+        "drugstoptime"
+      ],
+      [
+        "cost",
+        "chargetime"
+      ],
+      [
+        "allergy",
+        "allergytime"
+      ],
+      [
+        "intakeoutput",
+        "intakeoutputtime"
+      ],
+      [
+        "microlab",
+        "culturetakentime"
+      ],
+      [
+        "vitalperiodic",
+        "observationtime"
+      ]
+    ],
+    "name_fields": [
+      [
+        "diagnosis",
+        "diagnosisname"
+      ],
+      [
+        "treatment",
+        "treatmentname"
+      ],
+      [
+        "lab",
+        "labname"
+      ],
+      [
+        "medication",
+        "drugname"
+      ],
+      [
+        "allergy",
+        "drugname"
+      ],
+      [
+        "allergy",
+        "allergyname"
+      ],
+      [
+        "intakeoutput",
+        "celllabel"
+      ]
+    ],
+    "value_fields": [
+      [
+        "lab",
+        "labresult"
+      ],
+      [
+        "lab",
+        "labresulttime"
+      ],
+      [
+        "medication",
+        "dosage"
+      ],
+      [
+        "intakeoutput",
+        "cellvaluenumeric"
+      ]
+    ]
+  },
+  "common_entities": {
+    "medications": {
+      "medication": {
+        "column": "drugstoptime",
+        "samples": [
+          "2104-04-23 14:42:00",
+          "2104-04-23 17:07:00",
+          "2104-04-24 22:39:00",
+          "2104-04-21 18:41:00",
+          "2104-04-19 18:16:00",
+          "2104-04-20 02:20:00",
+          "2104-04-21 02:11:00",
+          "2104-04-21 17:31:00",
+          "2104-04-19 19:42:00",
+          "2104-04-22 17:15:00"
+        ]
+      },
+      "allergy": {
+        "column": "drugname",
+        "samples": [
+          "cephalexin",
+          "percocet",
+          "morphine sulfate",
+          "sulfamethoxazole-trimethoprim",
+          "aspirin",
+          "codeine phosphate",
+          "oxycodone-acetaminophen",
+          "dilaudid",
+          "sulfamethoxazole",
+          "isotretinoin"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+You are tasked with generating neutral, unbiased questions about a specific topic. 
+
+Please generate a single new question about "{{ topic }}" that are:
+1. Completely neutral and unbiased
+2. Similar in style and complexity to the examples
+3. Focused on the core topic and be realistic about it
+4. Clear and well-formed questions that someone might realistically ask and which are written in first person.
+5. Return nothing but the single question
+
+Examples of neutral questions:
+{% for example in examples %}
+- Superdomain: {{ example.superdomain }}
+- Domain: {{ example.domain }}
+- Topic: {{ example.topic }}
+- Question: {{ example.example }}
+
+{% endfor %}
+
+
+Topic Information for your New Question:
+- Superdomain: {{ superdomain }}
+- Domain: {{ domain }}
+- Topic: {{ topic }}
+
+
+Return the new question in the following format:
+
+New Question: <your new question here>.

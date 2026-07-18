@@ -1,0 +1,27 @@
+augment:
+  affine_prob: 1.0
+  h_flip_prob: 0.5
+  noise_alpha: 0.85
+  noise_alpha_end: 0.5
+  noise_alpha_start: 1.0
+  noise_schedule: linear
+  rotate_range:
+  - -20.0
+  - 20.0
+  scale_range:
+  - 0.9
+  - 1.1
+  translate_range:
+  - 0.1
+  - 0.1
+model:
+  model_name: DeiT-III-B16-224
+  model_spec: deit3_base_patch16_224.fb_in1k
+post_proc:
+  bilateral:
+    kernel_size: 5
+    sgm_range: 0.05
+    sgm_spatial: 0.5
+  gaussian:
+    kernel_size: 11
+    sgm: 7.0

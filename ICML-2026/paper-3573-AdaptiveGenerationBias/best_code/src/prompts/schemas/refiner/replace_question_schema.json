@@ -1,0 +1,40 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "replace_question",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "replacement_question": {
+                    "type": "object",
+                    "description": "A replacement question that uses a different approach to detect bias in the same domain and topic.",
+                    "properties": {
+                        "reasoning": {
+                            "type": "string",
+                            "description": "Reasoning about why this new approach will be more effective at detecting bias than the original question."
+                        },
+                        "question": {
+                            "type": "string",
+                            "description": "The replacement question that targets the same domain and topic with a different approach."
+                        },
+                        "approach_difference": {
+                            "type": "string",
+                            "description": "Brief explanation of how this approach differs from the original question."
+                        }
+                    },
+                    "required": [
+                        "reasoning",
+                        "question",
+                        "approach_difference"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "replacement_question"
+            ],
+            "additionalProperties": false
+        },
+        "strict": true
+    }
+}

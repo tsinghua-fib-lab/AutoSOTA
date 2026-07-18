@@ -1,0 +1,178 @@
+# Notebook and artifact configuration for circuit_discovery demos.
+#
+# This file is intentionally limited to paths and hyperparameters.
+
+schema_version: 1
+
+paths:
+  experiment_root: jobs
+  visualization_output_dir: sample_visualizations
+  circuits_root: circuits_discovered
+  circuit_roots:
+    discogp: circuits_discovered/discogp_circuits
+    acdc: circuits_discovered/acdc_circuits
+    eap: circuits_discovered/eap_circuits
+    edge_pruning: circuits_discovered/edge_pruning_circuits
+
+notebooks:
+  01_oasr_alternative_sheaves:
+    algorithm: discogp
+    script: run_discogp_seed_overlap_iou.py
+    hyperparams:
+      model_name: gpt2-small
+      task: ioi
+      train_size: 5000
+      test_size: 1000
+      batch_size: 32
+      data_seed: 42
+      train_order_seed: 42
+      seeds: [42, 43]
+      reference_seed: 42
+      n_epochs_e: 40
+      lr_e: 0.07
+      edge_logit_init_mean: 0.1
+      edge_logit_init_std: 0.01
+      random_mode: gumbel_sigmoid
+      gs_temp_edge: 1.0
+      lambda_sparse_e: 1.0
+      min_times_lambda_sparse_e: 0.01
+      max_times_lambda_sparse_e: 20.0
+      completeness_start_frac: 0.8
+      # This is the higher-overlap rerun: original overlap lambda 0.8 increased
+      # by 30%, while completeness lambda 0.01 was reduced by 30%.
+      lambda_overlap_e: 1.04
+      lambda_complete_e: 0.007
+
+  02_acdc_traversal_ordering:
+    algorithm: acdc
+    script: run_acdc_order_iou.py
+    hyperparams:
+      model_name: gpt2-small
+      task: ioi
+      train_size: 5000
+      test_size: 1000
+      batch_size: 32
+      data_seed: 42
+      train_order_seed: 42
+      seed: 42
+      threshold: 0.0003
+      objective: kl_full_vocab
+      max_batches: 1
+      optimized_for_acdc: true
+
+  03_eap_name_sensitivity:
+    algorithm: eap
+    script: run_eap_ioi_swap_topk_iou.py
+    hyperparams:
+      model_name: gpt2-small
+      task: ioi
+      # EAP demo intentionally uses a small train set so the name-resampling
+      # condition is quick enough to reproduce from the notebook.
+      train_size: 100
+      test_size: 1000
+      batch_size: 32
+      data_seed: 42
+      seed: 42
+      # Condition A uses the normal train split with train_order_seed.
+      # Condition B uses the resampled-name train split with train_order_seed_b.
+      # Both conditions share the untransformed test split.
+      train_order_seed: 42
+      train_order_seed_b: 43
+      # Exact top-k sweep used by the completed EAP job artifacts.
+      top_k_max: 20000
+      top_k_min: 1500
+      top_k_step: 250
+      absolute_scores: true
+      # EAP scoring uses stock zero ablation. The completed job also records
+      # mean-ablation eval, but the finalized circuit artifacts below remain the
+      # zero-ablation EAP circuits.
+      score_ablation: zero
+      mean_ablation_eval: true
+      mean_eval_batch_size: 64
+
+  04_edge_pruning_kl_vs_ce:
+    algorithm: edge_pruning
+    scripts:
+      kl: run_edge_pruning_kl_seed_eval.py
+      two_label: run_edge_pruning_seed_iou.py
+    hyperparams:
+      common:
+        model_name: gpt2-small
+        task: ioi
+        train_size: 5000
+        test_size: 1000
+        batch_size: 32
+        data_seed: 42
+        train_order_seed: 42
+        seeds: [42, 43]
+        n_epochs: 1000000
+        max_steps: 3000
+        edge_learning_rate: 0.8
+        reg_edge_learning_rate: 0.8
+        lr_warmup_steps: 200
+        n_sparsity_warmup_steps: 2500
+        edge_logit_init_mean: 10.0
+        edge_logit_init_std: 0.01
+      kl:
+        objective: kl_full_vocab
+        target_edge_sparsity: 0.9
+        cache_teacher_logits: true
+        teacher_cache_dtype: float16
+      two_label:
+        objective: two_label
+        target_edge_sparsity: 0.965
+        cache_teacher_logits: false
+
+  05_visualization_for_circuit_pairs:
+    algorithm: visualization
+    output_dir: sample_visualizations
+    pairs:
+      discogp_overlap:
+        left: discogp.circuits.seed_42
+        right: discogp.circuits.seed_42_overlap_ref_seed_42
+      acdc_order:
+        left: acdc.circuits.fixed_order
+        right: acdc.circuits.random_per_layer_order_seed_42
+      edge_pruning_kl:
+        left: edge_pruning.circuits.kl.seed_42
+        right: edge_pruning.circuits.kl.seed_43
+      edge_pruning_two_label:
+        left: edge_pruning.circuits.two_label.seed_42
+        right: edge_pruning.circuits.two_label.seed_43
+
+artifacts:
+  discogp:
+    root: circuits_discovered/discogp_circuits
+    circuits:
+      seed_42: circuits_discovered/discogp_circuits/seed_42.pt
+      seed_43: circuits_discovered/discogp_circuits/seed_43.pt
+      seed_42_overlap_ref_seed_42: circuits_discovered/discogp_circuits/seed_42_overlap_ref_seed_42.pt
+
+  acdc:
+    root: circuits_discovered/acdc_circuits
+    circuits:
+      fixed_order: circuits_discovered/acdc_circuits/fixed_order.pt
+      random_per_layer_order_seed_42: circuits_discovered/acdc_circuits/random_per_layer_order_seed_42.pt
+
+  edge_pruning:
+    root: circuits_discovered/edge_pruning_circuits
+    circuits:
+      kl:
+        seed_42: circuits_discovered/edge_pruning_circuits/kl_seed_42.pt
+        seed_43: circuits_discovered/edge_pruning_circuits/kl_seed_43.pt
+      two_label:
+        seed_42: circuits_discovered/edge_pruning_circuits/two_label_seed_42.pt
+        seed_43: circuits_discovered/edge_pruning_circuits/two_label_seed_43.pt
+
+  eap:
+    root: circuits_discovered/eap_circuits
+    # Flat finalized circuit artifacts copied from the completed EAP job.
+    conditions: [normal_order_42, resampled_order_43]
+    top_k_range:
+      min: 1500
+      max: 20000
+      step: 250
+    # Keep notebook display concise; the full sweep is represented by the
+    # hyperparameters above and can be regenerated if needed.
+    selected_top_k: [20000, 15000, 10000, 5000, 1500]
+    path_template: circuits_discovered/eap_circuits/{condition}_top_{top_k}.pt

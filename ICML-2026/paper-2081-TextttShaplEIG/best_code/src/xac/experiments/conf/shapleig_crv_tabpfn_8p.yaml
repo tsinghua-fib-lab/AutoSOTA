@@ -1,0 +1,62 @@
+application:
+  _target_: xac.applications.ShapiqShapleyApplication
+  init_design_factor: 1
+
+blackbox:
+  _target_: xac.blackbox_functions.ShapIQGameBBF
+  name: tabpfn_15
+  seed: ${meta.seed}
+
+meta:
+  _target_: xac.experiments.MetaExperimentConfig
+  seed: 0
+  debug_mode: true
+  skip_fitting: false
+  time_ops: true
+  scalability_mode: true
+
+surrogate:
+  _target_: xac.surrogates.GPSurrogateConfig
+  kernel_config:
+    _target_: xac.surrogates.HammingKernelConfig
+    min_lengthscale: 1e-6
+  missing_strategy: mean
+  warp: false
+  fit_config:
+    _target_: xac.surrogates.MLMConfig
+    optimizer: default
+    amount_restarts: 5
+    run_all_attempts: false
+    warmstart: false
+    refit_interval: 1
+  noise_config:
+    _target_: xac.surrogates.ConstantNoiseConfig
+    noise_level: 1e-6
+    
+experimental_design:
+  _target_: xac.experimental_designs.ExperimentalDesignConfig
+  iterations: 240
+
+acquisition:
+  _target_: xac.acquisition_functions.EIGFunctionProperty
+
+acquisition_optimizer:
+  _target_: xac.acquisition_optimizers.Exhaustive
+
+defaults:
+  - _self_
+  - hydra/callbacks@_global_: aggregator
+  - override hydra/launcher: joblib
+
+hydra:
+  mode: MULTIRUN
+  launcher:
+    n_jobs: 25
+  sweeper:
+    params:
+      blackbox.name: tabpfn_15,tabpfn_37
+      acquisition._target_: xac.acquisition_functions.EIGFunctionProperty,xac.acquisition_functions.EIGExecutionPath,xac.acquisition_functions.Random,xac.acquisition_functions.KernelSHAPSampler,xac.acquisition_functions.PermutationSampler,xac.acquisition_functions.LeverageSHAPSampler,xac.acquisition_functions.RegressionMSRSampler,xac.acquisition_functions.LeverageGPSampler
+      meta.seed: range(0,100)
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: single_runs/${hydra.job.num}
