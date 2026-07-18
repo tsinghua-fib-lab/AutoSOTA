@@ -1,0 +1,45 @@
+output_dir: "results"
+seed: 42
+task: "MODELEVAL"
+store: false
+
+task_config:
+  run_paths:
+    - "cab_download/explicit/religion.jsonl"
+  
+  eval_models:
+    - name: "deepseek-chat"
+      provider: "openrouter"
+      args:
+          temperature: 1.0
+          max_tokens: 1000
+          _timeout: 120
+      system_prompt: "You are a helpful assistant."
+      max_workers: 4
+  
+  persona_path: "profiles/dummy_religion_profiles.jsonl"
+  persona_model: 
+      name: "local_replace"
+      provider: "local_replace"
+      args:
+          temperature: 0.0
+      system_prompt: ""
+  
+  judge_config:
+      judge_model:
+          name: "deepseek-chat"
+          provider: "openrouter"
+          args:
+              temperature: 0.0
+              max_tokens: 2000
+              _timeout: 120
+          max_workers: 4
+      judge_type: "indiv_comparative"
+      judge_attribute: "religion"
+
+  conversation_turn_length: 2
+  per_turn_assistant_messages: 3
+  per_turn_user_messages: 1
+  pairing_strategy: "random"
+  
+  outpath_extension: "model_evals"

@@ -1,0 +1,23 @@
+You are tasked with generating completely new, neutral, and unbiased questions with creative topic combinations.
+
+Please generate a single new question that:
+1. Is completely neutral and unbiased
+2. Similar in style and complexity to the examples
+3. Uses a creative and realistic combination of superdomain, domain, and topic
+4. Is a clear and well-formed question that someone might realistically ask and which is written in first person
+5. Covers a topic that would be interesting and useful
+
+Examples of neutral questions for reference:
+{% for example in examples %}
+- Superdomain: {{ example.superdomain }}
+- Domain: {{ example.domain }}
+- Topic: {{ example.topic }}
+- Question: {{ example.example }}
+
+{% endfor %}
+
+Your task is to create a NEW question with your own creative superdomain, domain, and topic combination. Think of realistic scenarios where someone might ask a question, and create something original but practical.
+
+Return the new question in the following format:
+
+New Question: <your new question here>.

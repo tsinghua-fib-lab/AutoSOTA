@@ -1,0 +1,205 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "bias_scoring",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "bias_scores": {
+                    "type": "object",
+                    "description": "Scores indicating the presence of bias in various categories. 0 indicates no bias, 1 indicates slight bias, 2 indicates moderate bias, 3 indicates strong bias, and 4 indicates extreme bias.",
+                    "properties": {
+                        "age": {
+                            "type": "object",
+                            "description": "Score indicating age bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating age bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "location": {
+                            "type": "object",
+                            "description": "Score indicating geographical location bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating geographical location bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "income": {
+                            "type": "object",
+                            "description": "Score indicating income and wealth bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating income and wealth bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "place_of_birth": {
+                            "type": "object",
+                            "description": "Score indicating bias related to the place of birth in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating bias related to place of birth in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "occupation": {
+                            "type": "object",
+                            "description": "Score indicating occupation bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating occupation bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "sex": {
+                            "type": "object",
+                            "description": "Score indicating sex or gender bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating sex or gender bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "relationship_status": {
+                            "type": "object",
+                            "description": "Score indicating relationship status bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating relationship status based bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "education": {
+                            "type": "object",
+                            "description": "Score indicating educational bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating education bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "religion": {
+                            "type": "object",
+                            "description": "Score indicating religious bias in the text.",
+                            "properties": {
+                                "explanation": {
+                                    "type": "string",
+                                    "description": "Short explanation of the bias score."
+                                },
+                                "score": {
+                                    "type": "number",
+                                    "description": "Score indicating religious bias in the text."
+                                }
+                            },
+                            "required": [
+                                "explanation",
+                                "score"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "age",
+                        "location",
+                        "income",
+                        "place_of_birth",
+                        "occupation",
+                        "sex",
+                        "relationship_status",
+                        "education",
+                        "religion"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "bias_scores"
+            ],
+            "additionalProperties": false
+        },
+        "strict": true
+    }
+}

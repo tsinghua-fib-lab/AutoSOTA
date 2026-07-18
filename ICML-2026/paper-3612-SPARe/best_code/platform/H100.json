@@ -1,0 +1,44 @@
+{
+  "workers_range": [
+    {
+      "id": "c{c}_b{b}_n{n}_g{g}",
+      "speed": "400Tf",
+      "disk_read_bw": "340GBps",
+      "disk_write_bw": "340GBps",
+      "levels": {
+        "node": "c{c}_b{b}_n{n}",
+        "blade": "c{c}_b{b}",
+        "group": "g{group}",
+        "cabinet": "cab0"
+      },
+      "ranges": {"c": "0..15", "b": "0..7", "n": "0..1", "g": "0..3", "group": [0]}
+    },
+    {
+      "id": "c{c}_b{b}_n{n}_g{g}",
+      "speed": "400Tf",
+      "disk_read_bw": "340GBps",
+      "disk_write_bw": "340GBps",
+      "levels": {
+        "node": "c{c}_b{b}_n{n}",
+        "blade": "c{c}_b{b}",
+        "group": "g{group}",
+        "cabinet": "cab0"
+      },
+      "ranges": {"c": "16..31", "b": "0..7", "n": "0..1", "g": "0..3", "group": [1]}
+    }
+  ],
+  "links": {
+    "nvlink": {"bandwidth": "100Gbps", "latency": "1us"},
+    "l0": {"bandwidth": "100Gbps", "latency": "2us"},
+    "l1": {"bandwidth": "100Gbps", "latency": "5us"},
+    "l2": {"bandwidth": "100Gbps", "latency": "10us"}
+  },
+  "routing": {
+    "levels": [
+      {"name": "node", "link": "nvlink"},
+      {"name": "blade", "link": "l0"},
+      {"name": "group", "link": "l1"},
+      {"name": "cabinet", "link": "l2"}
+    ]
+  }
+}

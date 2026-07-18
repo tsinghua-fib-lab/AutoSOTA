@@ -1,0 +1,78 @@
+Model:
+    TimesNet:
+        task_name: short_term_forecast
+        e_layers: 2
+        embed: timeF
+        freq: h
+        dropout: 0.1
+        top_k: 5
+        d_model: 256
+        d_ff: 256
+        factor: 3
+        num_kernels: 6
+        output_attention: 0
+        distil: 1
+        use_amp: False
+
+    FEDformer:
+        task_name: short_term_forecast
+        e_layers: 2
+        d_layers: 1
+        num_kernels: 6
+        embed: timeF
+        freq: h
+        dropout: 0.1
+        d_model: 512
+        d_ff: 2048
+        n_heads: 8
+        factor: 3
+        output_attention: 0
+        distil: 1
+        activation: gelu
+        moving_avg: 25
+        use_amp: False
+
+    SimpleTM:
+        task_name: short_term_forecast
+        requires_grad: True
+        wv: "db4"
+        m: 1
+        l1_weight: 5e-5
+        d_model: 32
+        d_ff: 32
+        e_layers: 4
+        use_norm: 1
+        geomattn_dropout: 0.5
+        alpha: 0.3
+        kernel_size: null
+        embed: timeF
+        dropout: 0.1
+        freq: h
+        factor: 1
+        output_attention: 0
+        activation: gelu
+        use_amp: False
+    
+Dataset:
+    PEMS03:
+        data_filename: ./data/PEMS03/PEMS03.npz
+        num_of_vertices: 358
+        dataset_name: PEMS03
+        use_timestamps: False
+    
+    Weather:
+        data_filename: ./data/weather/weather.csv
+        dataset_name: Weather
+        num_of_vertices: 21
+        use_timestamps: True
+
+    ETTm1:
+        data_filename: ./data/ETT-small/ETTm1.csv
+        dataset_name: ETTm1
+        num_of_vertices: 7
+        use_timestamps: True
+
+Target_Pattern:
+    cone: [0.1278, 0.1748, 0.2787, 0.3853, 0.2787, 0.1748, 0.1278]
+    up_trend: [0.1405, 0.2064, 0.2705, 0.2835, 0.2949, 0.3495, 0.3567]
+    up_and_down: [0.10, 0.1687, 0.2851, 0.09601, -0.0230, -0.0916, -0.2402]

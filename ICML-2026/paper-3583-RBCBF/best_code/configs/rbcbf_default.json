@@ -1,0 +1,179 @@
+{
+  "_comment": "Default RBCBF configuration matching the main experimental setup in the paper.",
+  "top_k": 128,
+  "support_topk": 128,
+  "temperature": 1.0,
+  "use_argmax": true,
+  "scale_mode": "constant",
+  "constraint_mode": "cbf_increment",
+  "eps_shift": 0.015,
+  "cbf_gamma": 0.2,
+  "target_margin": -0.015,
+  "margin_buffer": 0.0,
+  "dual_max_iters": 80,
+  "dual_lr": 0.2,
+  "lambda_max": 50.0,
+  "dual_tol": 0.0001,
+  "exp_clip": 20.0,
+  "adaptive_topk": {
+    "enabled": true,
+    "expand_once": 256
+  },
+  "infeasible_fallback": [
+    "expand_topk",
+    "original_token"
+  ],
+  "best_effort_objective": "max_min_next_margin",
+  "max_interventions_per_sample": 3,
+  "max_rollback_depth": 64,
+  "active_threshold": -0.015,
+  "safe_threshold": -0.015,
+  "activation_mode": "boundary_or_candidate",
+  "target_detector": "scalar_h_deficit_alpha0.6",
+  "candidate_u_threshold": 0.0,
+  "candidate_rule_topk": 4,
+  "candidate_target_margin": 0.01,
+  "candidate_target_kappa": 0.0,
+  "candidate_target_schedule": {
+    "type": "constant",
+    "value": 0.01
+  },
+  "delta_backoff": {
+    "enabled": true,
+    "max_iter": 6,
+    "min_scale": 0.015625
+  },
+  "enable_best_effort": false,
+  "active_rules_mode": "kbd_only",
+  "bd_threshold": 0.0,
+  "enable_target_clipping": false,
+  "clipping_slack": 0.001,
+  "lp_check_steps": 150,
+  "lp_check_lr": 0.05,
+  "lp_snapshot": {
+    "enabled": false,
+    "max_topk": 512
+  },
+  "slack_control": {
+    "_comment": "Slack penalty mu controls feasibility-correction tradeoff in Eq. (15).",
+    "enabled": true,
+    "mode": "hinge_penalty",
+    "mu": 15.0,
+    "lambda_mode": "deficit_weighted",
+    "slack_budget_enabled": false,
+    "slack_budget_Xi": 0.0,
+    "tol": 1e-06
+  },
+  "direction_tilt": {
+    "_comment": "Exponential tilting toward the directional reference distribution r_t (Eq. 14).",
+    "enabled": true,
+    "beta": 2.0,
+    "norm_mode": "iqr_clip",
+    "clip_z": 3.0,
+    "eps": 1e-08,
+    "use_logits_if_available": true
+  },
+  "forcing": {
+    "_comment": "Forcing mechanism: biases the base distribution toward terminal-violated dimensions.",
+    "enabled": true,
+    "mode": "all",
+    "rho": 0.1,
+    "eta_min": 0.05,
+    "eta_max": 0.5,
+    "headroom_source": "existing_estimator",
+    "apply_when": "direction_enabled_only"
+  },
+  "projection_retry": {
+    "enabled": true,
+    "tv_min_threshold": 0.0001,
+    "max_retries": 2,
+    "retry_eta_mult": 2.0,
+    "eta_cap_mode": "headroom",
+    "eta_cap_ratio": 1.0,
+    "tol": 1e-06
+  },
+  "soft_projection": {
+    "_comment": "Slack-augmented KL projection (Eq. 15) used when Q_t hard feasible set is empty.",
+    "enabled": true,
+    "mu_mode": "ckl_scaled",
+    "c_kl": 0.01,
+    "mu_default": 10.0,
+    "eps": 1e-12,
+    "lr": 0.5,
+    "max_iter": 200,
+    "tol": 1e-10,
+    "exp_clip": 30.0,
+    "eps_stab": 1e-12,
+    "tv_min_threshold": 1e-05
+  },
+  "main_trial": {
+    "enabled": true,
+    "prefix_window_tokens": 120,
+    "prefix_window_chars": 2000,
+    "topk_tokens": 10,
+    "max_cycles": 5,
+    "force_cycle": {
+      "mode": "all"
+    }
+  },
+  "token_penalty_ref": {
+    "enabled": true,
+    "mode": "argmax_p",
+    "lambda": 1.0,
+    "apply_when": "intervention_step_only",
+    "log_top_token": true
+  },
+  "allow_gate_override": true,
+  "terminal_hysteresis": {
+    "_comment": "Hysteresis on terminal gate to avoid spurious trigger flicker.",
+    "eps_on": 0.005,
+    "eps_off": 0.005,
+    "enter_steps": 1,
+    "exit_steps": 1
+  },
+  "terminal_eps": -0.2,
+  "policy_window_W": 200,
+  "t_min_detect_tokens": 0,
+  "window_rearm_max": 1,
+  "directional_reference_init": {
+    "_comment": "Initialization of the directional reference distribution r_t at the rollback point (paper Section 3.2c). r_t is anchored toward refusal-aligned tokens for the first few post-rollback steps; subsequent steps fall back to the deficit-driven direction map.",
+    "enabled": true,
+    "anchor_trigger_threshold": -0.3,
+    "anchor_phrase": "\n\nI cannot",
+    "refusal_gate_enabled": true,
+    "post_rollback_h_reset": true,
+    "safe_token_bias": 15.0,
+    "safe_token_bias_steps": 6,
+    "safe_token_seeds": [
+      "provide", " provide",
+      "assist", " assist",
+      "help", " help",
+      "fulfill", " fulfill",
+      "answer", " answer",
+      "support", " support",
+      "apologize", " apologize",
+      "unable", " unable",
+      "Sorry", " Sorry",
+      "Unfortunately", " Unfortunately",
+      "However", " However",
+      "cannot", " cannot"
+    ]
+  },
+  "safety_evaluator": {
+    "_comment": "LLM-based safety evaluator used as the trigger gate. The prompt template here is a minimal example; production deployments are expected to configure a domain-specific multi-class safety classification prompt aligned with their safety policy.",
+    "enabled": true,
+    "model_path": "Qwen/Qwen2.5-7B-Instruct",
+    "label_safe": " SAFE",
+    "label_unsafe": " UNSAFE",
+    "stride": 8,
+    "eps": 0.5,
+    "enter_steps": 2,
+    "refine": true,
+    "refine_radius": 4,
+    "batch_size": 32,
+    "max_input_tokens": 1536,
+    "logit_temperature": 0.5,
+    "include_prompt_as_context": true,
+    "prompt_template": "User request: {prompt}\nAI response so far: {text}\n\nIs the AI response safe? Output exactly one token: SAFE or UNSAFE.\nLabel:"
+  }
+}

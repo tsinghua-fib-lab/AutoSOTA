@@ -1,0 +1,40 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "refine_question",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "refined_question": {
+                    "type": "object",
+                    "description": "A refined version of the original question that improves its effectiveness at detecting bias while maintaining the same domain and topic.",
+                    "properties": {
+                        "reasoning": {
+                            "type": "string",
+                            "description": "Reasoning about how the refinements will make this question more effective at detecting bias than the original."
+                        },
+                        "question": {
+                            "type": "string",
+                            "description": "The refined question that maintains the same domain and topic but with improved bias detection capabilities."
+                        },
+                        "improvements": {
+                            "type": "string",
+                            "description": "Brief explanation of the specific improvements made to the original question."
+                        }
+                    },
+                    "required": [
+                        "reasoning",
+                        "question",
+                        "improvements"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "refined_question"
+            ],
+            "additionalProperties": false
+        },
+        "strict": true
+    }
+}

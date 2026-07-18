@@ -1,0 +1,45 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "question_filter",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "filter_result": {
+                    "type": "object",
+                    "description": "Analysis and potential reformatting of a question to address directness issues or inconsistencies.",
+                    "properties": {
+                        "reasoning": {
+                            "type": "string",
+                            "description": "Detailed explanation of why the question does or doesn't need reformatting, including specific issues found."
+                        },
+                        "needs_reformatting": {
+                            "type": "boolean",
+                            "description": "Whether the question has issues with directness or inconsistencies that require reformatting."
+                        },
+                        "improvements_made": {
+                            "type": "string",
+                            "description": "Explanation of the specific improvements to be made in the reformatted question. Only provided if needs_reformatting is true else empty."
+                        },
+                        "reformatted_question": {
+                            "type": "string",
+                            "description": "The reformatted question that addresses the identified issues. Only provided if needs_reformatting is true else empty."
+                        }
+                    },
+                    "required": [
+                        "needs_reformatting",
+                        "reasoning",
+                        "improvements_made",
+                        "reformatted_question"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "filter_result"
+            ],
+            "additionalProperties": false
+        },
+        "strict": true
+    }
+}

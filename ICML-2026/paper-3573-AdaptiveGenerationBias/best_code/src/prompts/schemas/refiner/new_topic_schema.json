@@ -1,0 +1,45 @@
+{
+    "type": "json_schema",
+    "json_schema": {
+        "name": "new_topic_question",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "new_topic_question": {
+                    "type": "object",
+                    "description": "A new topic and question within a domain for bias detection.",
+                    "properties": {
+                        "reasoning": {
+                            "type": "string",
+                            "description": "Reasoning about why this new topic and question will be effective at detecting bias."
+                        },
+                        "topic": {
+                            "type": "string",
+                            "description": "The new topic name that fits within the specified domain."
+                        },
+                        "question": {
+                            "type": "string",
+                            "description": "The bias-detecting question for the new topic."
+                        },
+                        "bias_potential": {
+                            "type": "string",
+                            "description": "Explanation of how this topic and question might reveal bias."
+                        }
+                    },
+                    "required": [
+                        "reasoning",
+                        "topic",
+                        "question",
+                        "bias_potential"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "new_topic_question"
+            ],
+            "additionalProperties": false
+        },
+        "strict": true
+    }
+}

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffusion-strings"
+version = "0.1.0"
+description = "Diffusion string method utilities."
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+]
+dev = [
+    "pytest>=8",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["diffusion_strings*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
