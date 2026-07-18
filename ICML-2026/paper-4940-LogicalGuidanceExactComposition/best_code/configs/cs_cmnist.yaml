@@ -1,0 +1,38 @@
+defaults:
+  - /dataset: cmnist_uniform.yaml
+  - _self_
+
+seed: 42
+callbacks:
+  lr_monitor:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+    logging_interval: epoch
+
+logger:
+  _target_: pytorch_lightning.loggers.TensorBoardLogger
+  save_dir: ${hydra:run.dir}
+  name: classifier
+
+trainer:
+  _target_: logdiff.cs_classifier.trainer.ClassifierTrainer
+  num_classes_per_label:  [10,10]
+  epochs: 50
+  model:
+    _target_: logdiff.cs_classifier.models.MultiLabelClassifier
+    base_model:
+      _target_: torchvision.models.resnet18
+    num_classes_per_label:  ${trainer.num_classes_per_label}
+  optimizer:
+    _target_: torch.optim.AdamW
+    _partial_: true
+    lr: 3.0e-4
+    weight_decay: 1.0e-3
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    _partial_: true
+
+training_config:
+  accelerator: gpu
+  gradient_clip_val: 1.0
+  enable_checkpointing: true
+  precision: 16-mixed

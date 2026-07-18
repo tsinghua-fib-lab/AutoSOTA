@@ -1,0 +1,36 @@
+_target_: logdiff.score.trainer.ComposableDiffusion
+
+model:
+  _target_: logdiff.models.conditional_sit.ClassConditionalSiT
+  # --- Architecture ---
+  input_size: 16            
+  patch_size: 1             # Use 1 for small latents to get 64 tokens
+  in_channels: 16           # Matches your VAE/Latent channels
+  hidden_size: 384          # DiT-Small equivalent 
+  depth: 12                 # Number of blocks
+  num_heads: 6              # 384 / 6 = 64 dim per head
+  
+  num_class_per_label: [2, 5] 
+  interaction: sum
+  
+  learn_sigma: false
+
+lambda_coind : 0.0
+
+noise_scheduler:
+  _target_: diffusers.DDPMScheduler
+  num_train_timesteps: 1000
+  clip_sample: true
+  prediction_type: epsilon
+  beta_schedule: squaredcos_cap_v2
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 2.0e-4 
+
+scheduler:
+  _target_: diffusers.optimization.get_cosine_schedule_with_warmup
+  _partial_: true
+  num_warmup_steps: 2000
+  num_training_steps: 750000

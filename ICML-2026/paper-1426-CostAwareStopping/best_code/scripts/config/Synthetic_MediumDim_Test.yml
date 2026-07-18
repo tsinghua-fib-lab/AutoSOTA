@@ -1,0 +1,30 @@
+name: LmbdaImpact
+program: scripts/impact_of_lmbda.py
+method: grid
+parameters:
+  dim:
+    values: [8]
+  kernel:
+    values: ["Matern52"]
+  lengthscale:
+    values: [0.1]
+  amplitude:
+    values: [1.0]
+  num_iterations:
+    values: [50]
+  seed:
+    values: [0]
+  output_standardize:
+    value: false
+  draw_initial_method:
+    values: ['sobol']
+  cost:
+    values: ['periodic']
+  policy:
+    values:
+      - Stable_Gittins_Lambda_1
+      - Stable_Gittins_Lambda_01
+      - Stable_Gittins_Lambda_001
+      - LogEIWithCost
+      - UpperConfidenceBound
+      - ThompsonSampling

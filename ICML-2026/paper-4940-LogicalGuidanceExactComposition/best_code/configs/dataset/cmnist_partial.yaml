@@ -1,0 +1,26 @@
+train_dataset:
+  _target_: logdiff.datasets.coloredMNIST.ColoredMNIST
+  root_dir: data
+  download: True
+  train: True
+  support: 'partial'
+  
+val_dataset:
+  _target_: logdiff.datasets.coloredMNIST.ColoredMNIST
+  root_dir: data
+  download: True
+  train: False
+  support: 'partial'
+  
+train_dataloader:
+  batch_size: 256
+  num_workers: 4
+  persistent_workers: True
+  shuffle: True
+
+val_dataloader:
+  batch_size: 256
+  num_workers: 4
+  persistent_workers: True
+  shuffle: False
+

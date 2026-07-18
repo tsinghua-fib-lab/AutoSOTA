@@ -1,0 +1,57 @@
+defaults:
+  - /dataset: celeba_dm_latents_male_haircolors
+  - _self_
+
+model:
+  _target_: logdiff.models.conditional_sit.ClassConditionalSiT
+  input_size: 16            
+  patch_size: 1
+  in_channels: 16
+  hidden_size: 384
+  depth: 12
+  num_heads: 6
+  num_class_per_label: [2, 5] 
+  interaction: sum
+  learn_sigma: false
+
+noise_scheduler:
+  _target_: diffusers.DDIMScheduler
+  num_train_timesteps: 1000
+  clip_sample: false
+  prediction_type: epsilon
+  beta_schedule: squaredcos_cap_v2
+
+seed: 42
+checkpoint_path: checkpoints/celeba/celeba_male_haircolors_normal/tensorboard/version_0/checkpoints/epoch_epoch=589-step_step=750000.ckpt
+use_neg_guidance: false
+evaluate_baselines: true
+
+composition_classifier:
+  _target_: logdiff.cs_classifier.models.MultiheadLatentClassifier
+  base_model:
+    _target_: torchvision.models.resnet18
+  num_classes_per_label: ${model.num_class_per_label}
+  in_channels: 16
+
+judge_classifier:
+  _target_: logdiff.cs_classifier.models.MultiLabelClassifier
+  base_model:
+    _target_: torchvision.models.resnet18
+  num_classes_per_label: ${model.num_class_per_label}
+
+composition_classifier_checkpoint: checkpoints/celeba/cs_celebA_composition_100epochs_male_haircolors/epoch=99-step=254400.ckpt
+judge_classifier_checkpoint: checkpoints/celeba/cs_celebA_judge_10epochs_male_haircolors/checkpoints/epoch=9-step=15670.ckpt
+output_suffix: celeba
+
+guidance:
+  atom: 1.0
+  not: 1.0
+  logdiff:
+    and: 1.0
+    not: 1.0
+    or_ci: 1.0
+    or_me: 1.0
+  constant:
+    and: 1.0
+    not: 1.0
+    or: 1.0

@@ -1,0 +1,36 @@
+defaults:
+  - /diffusion: cmnist_dm
+  - /dataset: cmnist_uniform
+  - _self_
+
+seed: 42
+callbacks:
+  ema_callback:
+    _target_: logdiff.score.ema.EMA
+    decay: 0.9999
+    validate_original_weights: true
+    every_n_steps: 100
+  lr_monitor:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+    logging_interval: epoch
+  model_checkpoint:
+    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    dirpath: checkpoints/cmnist/cmnist_uniform_normal/checkpoints
+    filename: "epoch_{epoch}-step_{step}"
+    save_last: true
+    every_n_train_steps: 5000
+    save_top_k: -1
+
+loggers:
+  wandb_logger:
+    _target_: pytorch_lightning.loggers.WandbLogger
+    name: null
+    project: "LogicalComposition" 
+    offline: true
+
+trainer:
+  max_steps: ${diffusion.scheduler.num_training_steps}
+  accelerator: gpu
+  devices: 1
+  gradient_clip_val: 1.0
+  enable_checkpointing: true

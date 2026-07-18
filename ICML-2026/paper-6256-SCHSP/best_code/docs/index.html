@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weight Recycling for Vision-Language Alignment</title>
+  <meta
+    name="description"
+    content="Project page for Supervised Classification Heads as Semantic Prototypes: Unlocking Vision-Language Alignment via Weight Recycling."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="site-mark" href="#top">Recycling4VLAlignment</a>
+      <nav class="site-nav" aria-label="Section navigation">
+        <a href="#summary">Motivation</a>
+        <a href="#prototypes">Prototypes</a>
+        <a href="#alignment">Alignment</a>
+        <a href="#results">Results</a>
+        <a href="#analysis">Analysis</a>
+        <a href="#conclusion">Conclusion</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="hero-title-block">
+            <p class="eyebrow">Accepted at ICML 2026</p>
+            <h1>Supervised Classification Heads as Semantic Prototypes</h1>
+            <p class="hero-subtitle">Unlocking Vision-Language Alignment via Weight Recycling</p>
+            <p class="hero-summary">
+              We recycle supervised classifier weights as semantic prototypes, showing that they can connect frozen image and text encoders with little or even no paired multimodal data.
+            </p>
+          </div>
+
+          <div class="hero-meta-block">
+            <div class="author-row">
+              <span>David Mendez*</span>
+              <span>Roberto Confalonieri</span>
+              <span>Natalia Diaz-Rodriguez</span>
+            </div>
+            <div class="affiliation-list" aria-label="Affiliations">
+              <p><strong>University of Granada</strong> &middot; Department of Computer Science and Artificial Intelligence, DaSCI Institute, Granada, Spain</p>
+              <p><strong>University of Padova</strong> &middot; Department of Mathematics "Tullio Levi-Civita", Padova, Italy</p>
+            </div>
+            <p class="correspondence-line">
+              * Corresponding author:
+              <a href="mailto:davidmendez@ugr.es">davidmendez@ugr.es</a>
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://github.com/david-mnd/recycling4vlalignment">View code on GitHub</a>
+              <a
+                class="button button-secondary"
+                href="https://arxiv.org/abs/2605.22484"
+                title="arXiv:2605.22484"
+              >
+                arXiv
+              </a>
+              <a
+                class="button button-secondary"
+                href="assets/poster.pdf"
+                download="recycling4vlalignment-poster.pdf"
+                title="Download poster PDF"
+              >
+                Download poster
+              </a>
+              <a class="button button-secondary" href="#citation">Cite</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-main-idea">
+          <p class="hero-band-label">Main idea</p>
+          <p>
+            Recycle supervised classifier weights as semantic prototypes to align vision and language with little or no paired image-text data.
+          </p>
+        </div>
+
+        <div class="hero-workflow" aria-label="Paper workflow">
+          <article class="workflow-step">
+            <span class="workflow-index">1</span>
+            <p class="workflow-kicker">Motivation</p>
+            <h2>Supervised image models may already hide reusable semantic anchors.</h2>
+          </article>
+          <article class="workflow-step">
+            <span class="workflow-index">2</span>
+            <p class="workflow-kicker">Weight recycling</p>
+            <h2>Classifier rows become alignment data for lightweight post-hoc bridges.</h2>
+          </article>
+          <article class="workflow-step">
+            <span class="workflow-index">3</span>
+            <p class="workflow-kicker">Two settings</p>
+            <h2>Use weights alone for zero-shot alignment, or combine them with scarce image-text pairs.</h2>
+          </article>
+        </div>
+      </section>
+
+      <section id="summary" class="content-section intro-grid">
+        <div class="section-heading">
+          <p class="section-kicker">Motivation</p>
+          <h2>Can supervised image models already contain reusable semantic anchors for language alignment?</h2>
+        </div>
+
+        <article class="text-card">
+          <h3>Why this problem matters</h3>
+          <p>
+            Vision-language models need a shared image-text space, but large-scale contrastive pretraining depends on massive paired datasets. Post-hoc alignment freezes existing image and text encoders, yet still often needs many image-caption pairs.
+          </p>
+        </article>
+
+        <article class="text-card">
+          <h3>Overlooked supervision</h3>
+          <p>
+            A supervised classifier head is usually discarded after pretraining, even though each row was learned to recognize a named visual class.
+          </p>
+          <p>
+            We show that the rows of the discarded classifier head can be reused as class-level prototypes instead of treated as task-specific leftovers.
+          </p>
+        </article>
+
+        <aside class="callout figure-card-wide">
+          <p class="callout-label">Main answer</p>
+          <p>
+            Pair each classifier row with the text embedding of its class name, then use those weight-text pairs as alignment data for lightweight post-hoc bridges.
+          </p>
+        </aside>
+      </section>
+
+      <section id="prototypes" class="content-section">
+        <div class="section-heading">
+          <p class="section-kicker">Semantic prototypes</p>
+          <h2>Studying the rows of the classifier head as reusable concepts</h2>
+        </div>
+
+        <article class="pretraining-block figure-card-wide">
+          <figure class="pretraining-figure" aria-label="Supervised pretraining workflow">
+            <svg class="poster-svg pretraining-svg pretraining-svg-desktop" viewBox="0 0 1120 380" role="img" aria-labelledby="pretraining-title pretraining-desc">
+              <title id="pretraining-title">Supervised pretraining workflow</title>
+              <desc id="pretraining-desc">An input image x passes through a trainable image encoder, then a trainable linear classifier W times f I of x plus b, and then a supervised loss. The trained W and b are commonly discarded after pretraining.</desc>
+              <defs>
+                <marker id="pretraining-arrow" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#23232d"></path>
+                </marker>
+                <marker id="pretraining-discard-arrow" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#6f7280"></path>
+                </marker>
+              </defs>
+
+              <text x="560" y="36" text-anchor="middle" class="svg-chart-title">Supervised Pretraining</text>
+
+              <rect x="24" y="70" width="762" height="236" rx="22" class="svg-surface"></rect>
+              <rect x="822" y="70" width="274" height="236" rx="22" class="svg-surface"></rect>
+
+              <text x="60" y="184" class="svg-math">x</text>
+              <line x1="80" y1="178" x2="140" y2="178" class="svg-arrow" marker-end="url(#pretraining-arrow)"></line>
+
+              <polygon points="156,110 402,128 402,228 156,246" class="svg-encoder-fill"></polygon>
+              <polygon points="156,110 402,128 402,228 156,246" class="svg-encoder-stroke"></polygon>
+              <text x="282" y="158" text-anchor="middle" class="svg-small svg-label-strong">Image Encoder</text>
+              <text x="282" y="195" text-anchor="middle" class="svg-math">
+                f<tspan baseline-shift="sub" font-size="72%">I</tspan>(.)
+              </text>
+              <g transform="translate(354 190)">
+                <polygon points="0,-13 11,-6 11,6 0,13 -11,6 -11,-6" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="3.6" class="svg-trainable-core"></circle>
+              </g>
+
+              <line x1="402" y1="178" x2="488" y2="178" class="svg-arrow" marker-end="url(#pretraining-arrow)"></line>
+              <text x="445" y="162" text-anchor="middle" class="svg-wide-flow-label svg-text-muted">
+                f<tspan baseline-shift="sub" font-size="72%">I</tspan>(x)
+              </text>
+
+              <rect x="510" y="132" width="122" height="92" rx="18" class="svg-module"></rect>
+              <text x="571" y="173" text-anchor="middle" class="svg-math">W . f<tspan baseline-shift="sub" font-size="72%">I</tspan>(x) + b</text>
+              <g transform="translate(614 148)">
+                <polygon points="0,-11 9,-5 9,5 0,11 -9,5 -9,-5" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="3.1" class="svg-trainable-core"></circle>
+              </g>
+
+              <line x1="632" y1="178" x2="690" y2="178" class="svg-arrow" marker-end="url(#pretraining-arrow)"></line>
+              <text x="662" y="164" text-anchor="middle" class="svg-wide-flow-label svg-text-muted">&#375;</text>
+              <rect x="708" y="139" width="58" height="78" rx="14" class="svg-loss"></rect>
+              <text x="737" y="184" text-anchor="middle" class="svg-math">L</text>
+
+              <text x="56" y="284" class="svg-caption svg-dataset-text">
+                (x, y) ~ D
+              </text>
+              <text x="150" y="284" class="svg-caption svg-text-muted">supervised pretraining dataset, e.g. ImageNet</text>
+
+              <g transform="translate(554 274)">
+                <polygon points="0,-10 8,-5 8,5 0,10 -8,5 -8,-5" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="3" class="svg-trainable-core"></circle>
+              </g>
+              <text x="572" y="279" class="svg-caption svg-text-muted">Trainable parameters</text>
+
+              <text x="880" y="152" text-anchor="middle" class="svg-math">W</text>
+              <text x="880" y="224" text-anchor="middle" class="svg-math">b</text>
+              <line x1="900" y1="148" x2="970" y2="166" class="svg-discard-arrow" marker-end="url(#pretraining-discard-arrow)"></line>
+              <line x1="900" y1="220" x2="970" y2="190" class="svg-discard-arrow" marker-end="url(#pretraining-discard-arrow)"></line>
+              <g transform="translate(1010 178)">
+                <path class="svg-trash-body" d="M-34,-20 L34,-20 L27,56 L-27,56 Z"></path>
+                <rect x="-42" y="-32" width="84" height="12" rx="3" class="svg-trash-lid"></rect>
+                <rect x="-15" y="-43" width="30" height="11" rx="3" class="svg-trash-lid"></rect>
+                <line x1="-14" y1="-9" x2="-18" y2="42" class="svg-trash-line"></line>
+                <line x1="0" y1="-9" x2="0" y2="42" class="svg-trash-line"></line>
+                <line x1="14" y1="-9" x2="18" y2="42" class="svg-trash-line"></line>
+              </g>
+              <text x="959" y="284" text-anchor="middle" class="svg-caption svg-text-muted">Discarded after pretraining</text>
+            </svg>
+
+            <svg class="poster-svg pretraining-svg pretraining-svg-mobile" viewBox="0 0 340 560" role="img" aria-labelledby="pretraining-mobile-title pretraining-mobile-desc">
+              <title id="pretraining-mobile-title">Supervised pretraining workflow mobile</title>
+              <desc id="pretraining-mobile-desc">A mobile version of supervised pretraining: x flows through an image encoder, then a linear classifier head, then a supervised loss. The trained W and b are usually discarded.</desc>
+              <defs>
+                <marker id="pretraining-mobile-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <path d="M0,0 L7,3.5 L0,7 z" fill="#23232d"></path>
+                </marker>
+                <marker id="pretraining-mobile-discard-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <path d="M0,0 L7,3.5 L0,7 z" fill="#6f7280"></path>
+                </marker>
+              </defs>
+
+              <rect x="12" y="12" width="316" height="536" rx="20" class="svg-surface"></rect>
+              <text x="170" y="44" text-anchor="middle" class="svg-chart-title">Supervised Pretraining</text>
+
+              <text x="186" y="76" text-anchor="middle" class="svg-math">x</text>
+              <line x1="186" y1="84" x2="186" y2="104" class="svg-arrow" marker-end="url(#pretraining-mobile-arrow)"></line>
+
+              <polygon points="88,108 284,120 284,168 88,180" class="svg-encoder-fill"></polygon>
+              <polygon points="88,108 284,120 284,168 88,180" class="svg-encoder-stroke"></polygon>
+              <text x="186" y="137" text-anchor="middle" class="svg-caption svg-label-strong">Image encoder</text>
+              <text x="186" y="159" text-anchor="middle" class="svg-caption">
+                f<tspan baseline-shift="sub" font-size="72%">I</tspan>(.)
+              </text>
+              <g transform="translate(258 154)">
+                <polygon points="0,-8 7,-4 7,4 0,8 -7,4 -7,-4" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="2.4" class="svg-trainable-core"></circle>
+              </g>
+
+              <line x1="186" y1="186" x2="186" y2="212" class="svg-arrow" marker-end="url(#pretraining-mobile-arrow)"></line>
+              <text x="216" y="205" class="svg-flow-label svg-text-muted">
+                f<tspan baseline-shift="sub" font-size="72%">I</tspan>(x)
+              </text>
+
+              <rect x="96" y="220" width="180" height="64" rx="14" class="svg-module"></rect>
+              <text x="186" y="258" text-anchor="middle" class="svg-caption svg-label-strong">
+                W . f<tspan baseline-shift="sub" font-size="72%">I</tspan>(x) + b
+              </text>
+              <g transform="translate(250 237)">
+                <polygon points="0,-8 7,-4 7,4 0,8 -7,4 -7,-4" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="2.4" class="svg-trainable-core"></circle>
+              </g>
+
+              <line x1="186" y1="286" x2="186" y2="314" class="svg-arrow" marker-end="url(#pretraining-mobile-arrow)"></line>
+              <text x="218" y="307" class="svg-flow-label svg-text-muted">&#375;</text>
+              <rect x="154" y="322" width="64" height="52" rx="12" class="svg-loss"></rect>
+              <text x="186" y="354" text-anchor="middle" class="svg-math">L</text>
+
+              <text x="104" y="416" text-anchor="middle" class="svg-flow-label svg-dataset-text">(x, y) ~ D</text>
+              <text x="104" y="438" text-anchor="middle" class="svg-caption svg-text-muted">Pretraining</text>
+              <g transform="translate(190 410)">
+                <polygon points="0,-8 7,-4 7,4 0,8 -7,4 -7,-4" class="svg-trainable-badge"></polygon>
+                <circle cx="0" cy="0" r="2.4" class="svg-trainable-core"></circle>
+              </g>
+              <text x="208" y="416" class="svg-caption svg-text-muted">Trainable parameters</text>
+
+              <text x="106" y="474" text-anchor="middle" class="svg-math">W</text>
+              <text x="106" y="514" text-anchor="middle" class="svg-math">b</text>
+              <line x1="124" y1="470" x2="184" y2="486" class="svg-discard-arrow" marker-end="url(#pretraining-mobile-discard-arrow)"></line>
+              <line x1="124" y1="510" x2="184" y2="500" class="svg-discard-arrow" marker-end="url(#pretraining-mobile-discard-arrow)"></line>
+              <g transform="translate(220 496) scale(0.62)">
+                <path class="svg-trash-body" d="M-34,-20 L34,-20 L27,56 L-27,56 Z"></path>
+                <rect x="-42" y="-32" width="84" height="12" rx="3" class="svg-trash-lid"></rect>
+                <rect x="-15" y="-43" width="30" height="11" rx="3" class="svg-trash-lid"></rect>
+                <line x1="-14" y1="-9" x2="-18" y2="42" class="svg-trash-line"></line>
+                <line x1="0" y1="-9" x2="0" y2="42" class="svg-trash-line"></line>
+                <line x1="14" y1="-9" x2="18" y2="42" class="svg-trash-line"></line>
+              </g>
+              <text x="170" y="540" text-anchor="middle" class="svg-caption svg-text-muted">Discarded after pretraining</text>
+            </svg>
+          </figure>
+
+          <div class="pretraining-copy">
+            <p class="block-kicker">Supervised pretraining</p>
+            <h3>The classifier head is learned with the encoder, then usually thrown away</h3>
+            <p>
+              A supervised image model learns an encoder <code>f<sub>I</sub></code> and a linear classifier head:
+            </p>
+            <div class="classifier-head-equation" aria-label="Classifier head W f I of x plus b, where W is in R C by d, b is in R C, and W is formed by rows w 1 transpose through w C transpose.">
+              <code class="head-equation-line">W f<sub>I</sub>(x) + b</code>
+              <div class="head-where-line">
+                <span><code>where W &isin; &#8477;<sup>C&times;d</sup></code>, <code>b &isin; &#8477;<sup>C</sup></code>, and</span>
+                <span class="matrix-definition">
+                  <code>W =</code>
+                  <span class="weight-matrix" aria-hidden="true">
+                    <span>w<sub>1</sub><sup>&top;</sup></span>
+                    <span>&vellip;</span>
+                    <span>w<sub>C</sub><sup>&top;</sup></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+            <p>
+              Instead of treating the trained head as disposable, we reuse each row <code>w<sub>i</sub></code> as the semantic prototype for class <code>i</code>. The evidence below asks whether those rows preserve class-level meaning strongly enough to align with language.
+            </p>
+          </div>
+        </article>
+
+        <figure class="figure-card poster-figure figure-card-wide result-card">
+          <svg class="poster-svg chart-svg" viewBox="0 0 760 420" role="img" aria-labelledby="mnn-title mnn-desc">
+            <title id="mnn-title">Semantic neighborhood alignment chart</title>
+            <desc id="mnn-desc">Line chart comparing average image representations and classifier-head vectors across k equals 3, 5, and 10 on the mNN metric.</desc>
+            <rect x="18" y="36" width="724" height="366" rx="24" class="svg-surface"></rect>
+            <text x="56" y="36" class="svg-label svg-label-strong">Semantic neighborhood alignment</text>
+
+            <g class="svg-grid">
+              <line x1="70" y1="358" x2="650" y2="358"></line>
+              <line x1="70" y1="288" x2="650" y2="288"></line>
+              <line x1="70" y1="218" x2="650" y2="218"></line>
+              <line x1="70" y1="148" x2="650" y2="148"></line>
+              <line x1="70" y1="78" x2="650" y2="78"></line>
+            </g>
+
+            <g class="svg-axis">
+              <line x1="70" y1="358" x2="650" y2="358"></line>
+              <line x1="70" y1="358" x2="70" y2="78"></line>
+            </g>
+
+            <g class="svg-axis-labels svg-text-muted">
+              <text x="34" y="362">0.16</text>
+              <text x="34" y="292">0.20</text>
+              <text x="34" y="222">0.24</text>
+              <text x="34" y="152">0.28</text>
+              <text x="34" y="82">0.32</text>
+
+              <text x="70" y="382" text-anchor="middle">1</text>
+              <text x="93.7" y="382" text-anchor="middle">3</text>
+              <text x="117.3" y="382" text-anchor="middle">5</text>
+              <text x="176.5" y="382" text-anchor="middle">10</text>
+              <text x="650" y="382" text-anchor="middle">50</text>
+            </g>
+
+            <text x="338" y="396" text-anchor="middle" class="svg-caption svg-text-muted"># images in averaged representation</text>
+            <text x="22" y="223" transform="rotate(-90 22 223)" text-anchor="middle" class="svg-caption svg-text-muted">mNN</text>
+
+            <polyline points="70,333.8 93.7,214.7 117.3,174.7 176.5,166.4 650,131.2" class="svg-line svg-line-blue"></polyline>
+            <polyline points="70,314.8 93.7,199.6 117.3,162.7 176.5,140.3 650,118.8" class="svg-line svg-line-green"></polyline>
+            <polyline points="70,298.4 93.7,195.9 117.3,159.4 176.5,133.2 650,119.0" class="svg-line svg-line-gold"></polyline>
+            <polyline points="70,108.8 93.7,108.8 117.3,108.8 176.5,108.8 650,108.8" class="svg-line svg-line-blue svg-dashed"></polyline>
+            <polyline points="70,106.8 93.7,106.8 117.3,106.8 176.5,106.8 650,106.8" class="svg-line svg-line-green svg-dashed"></polyline>
+            <polyline points="70,105.5 93.7,105.5 117.3,105.5 176.5,105.5 650,105.5" class="svg-line svg-line-gold svg-dashed"></polyline>
+
+            <g class="svg-legend">
+              <line x1="390" y1="218" x2="422" y2="218" class="svg-line svg-line-blue"></line>
+              <text x="430" y="222" class="svg-caption">k = 3</text>
+              <line x1="390" y1="240" x2="422" y2="240" class="svg-line svg-line-green"></line>
+              <text x="430" y="244" class="svg-caption">k = 5</text>
+              <line x1="390" y1="262" x2="422" y2="262" class="svg-line svg-line-gold"></line>
+              <text x="430" y="266" class="svg-caption">k = 10</text>
+              <line x1="390" y1="284" x2="422" y2="284" class="svg-line"></line>
+              <text x="430" y="288" class="svg-caption">avg. img. repr.</text>
+              <line x1="390" y1="306" x2="422" y2="306" class="svg-line svg-dashed"></line>
+              <text x="430" y="310" class="svg-caption">
+                w<tspan baseline-shift="sub" font-size="72%">i</tspan>
+              </text>
+            </g>
+          </svg>
+          <figcaption>
+            Classifier-head rows preserve semantic neighborhoods with respect to text better than equally budgeted averaged image representations.
+          </figcaption>
+        </figure>
+
+        <aside class="callout">
+          <p class="callout-label">Takeaway</p>
+          <p>
+            Classifier rows retain semantic structure that can be reused for language alignment.
+          </p>
+        </aside>
+      </section>
+
+      <section id="alignment" class="content-section">
+        <div class="section-heading">
+          <p class="section-kicker">Alignment workflow</p>
+          <h2>From post-hoc alignment to weight recycling</h2>
+        </div>
+
+        <div class="intro-grid">
+          <article class="text-card">
+            <h3>Post-hoc alignment</h3>
+            <p>
+              Learn lightweight mappings <code>g</code> and <code>g&#772;</code> between fixed, independently pretrained image and text encoders, so representations with the same semantic content are mapped into a shared space.
+            </p>
+            <p>
+              This is the base alignment workflow used in the paper: the encoders remain frozen, and only the small bridging functions are trained.
+            </p>
+          </article>
+
+          <article class="text-card">
+            <h3>Weight recycling</h3>
+            <p>
+              Classifier rows become extra alignment data once each <code>w<sub>i</sub></code> is paired with the text embedding of its class name.
+            </p>
+            <p>
+              That turns the discarded classification head into reusable supervision, either by itself or as augmentation for scarce image-text pairs.
+            </p>
+          </article>
+        </div>
+
+        <figure class="figure-card poster-figure diagram-desktop">
+          <svg class="poster-svg" viewBox="0 0 720 460" role="img" aria-labelledby="posthoc-title posthoc-desc">
+            <title id="posthoc-title">Post-hoc alignment diagram</title>
+            <desc id="posthoc-desc">A dog image and a short text description are encoded by frozen image and text encoders, then projected through trainable functions into aligned representations.</desc>
+            <defs>
+              <marker id="posthoc-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                <path d="M0,0 L9,4.5 L0,9 z" fill="#23232d"></path>
+              </marker>
+            </defs>
+
+            <rect x="18" y="18" width="684" height="424" rx="26" class="svg-surface"></rect>
+
+            <image href="assets/dog4figure.jpg" x="54" y="82" width="86" height="86" preserveAspectRatio="xMidYMid slice" class="svg-thumb"></image>
+            <text x="97" y="186" text-anchor="middle" class="svg-label svg-label-strong">Image</text>
+            <line x1="152" y1="124" x2="215" y2="124" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+
+            <polygon points="238,72 382,88 382,160 238,176" class="svg-encoder-fill"></polygon>
+            <polygon points="238,72 382,88 382,160 238,176" class="svg-encoder-stroke"></polygon>
+            <text x="312" y="106" text-anchor="middle" class="svg-small svg-label-strong">
+              <tspan x="312" dy="0">Image</tspan>
+              <tspan x="312" dy="20">encoder</tspan>
+            </text>
+            <text x="302" y="146" text-anchor="middle" class="svg-small">
+              f<tspan baseline-shift="sub" font-size="72%">I</tspan>(·)
+            </text>
+            <g transform="translate(348 140)" class="svg-snowflake">
+              <line x1="-9" y1="0" x2="9" y2="0"></line>
+              <line x1="0" y1="-9" x2="0" y2="9"></line>
+              <line x1="-6.5" y1="-6.5" x2="6.5" y2="6.5"></line>
+              <line x1="-6.5" y1="6.5" x2="6.5" y2="-6.5"></line>
+            </g>
+
+            <line x1="382" y1="124" x2="438" y2="124" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+            <rect x="458" y="90" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(491 118)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <text x="491" y="147" text-anchor="middle" class="svg-small svg-label-strong">g</text>
+
+            <text x="103" y="286" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="103" dy="0">A dog</tspan>
+              <tspan x="103" dy="16">in a field</tspan>
+              <tspan x="103" dy="16">...</tspan>
+            </text>
+            <text x="103" y="350" text-anchor="middle" class="svg-label svg-label-strong">Text</text>
+            <line x1="152" y1="298" x2="215" y2="298" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+
+            <polygon points="238,246 382,262 382,334 238,350" class="svg-encoder-fill"></polygon>
+            <polygon points="238,246 382,262 382,334 238,350" class="svg-encoder-stroke"></polygon>
+            <text x="312" y="280" text-anchor="middle" class="svg-small svg-label-strong">
+              <tspan x="312" dy="0">Text</tspan>
+              <tspan x="312" dy="20">encoder</tspan>
+            </text>
+            <text x="302" y="320" text-anchor="middle" class="svg-small">
+              f<tspan baseline-shift="sub" font-size="72%">T</tspan>(·)
+            </text>
+            <g transform="translate(348 314)" class="svg-snowflake">
+              <line x1="-9" y1="0" x2="9" y2="0"></line>
+              <line x1="0" y1="-9" x2="0" y2="9"></line>
+              <line x1="-6.5" y1="-6.5" x2="6.5" y2="6.5"></line>
+              <line x1="-6.5" y1="6.5" x2="6.5" y2="-6.5"></line>
+            </g>
+
+            <line x1="382" y1="298" x2="438" y2="298" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+            <rect x="458" y="264" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(491 286)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <line x1="482" y1="307" x2="500" y2="307" class="svg-overbar"></line>
+            <text x="491" y="324" text-anchor="middle" class="svg-small svg-label-strong">g</text>
+
+            <text x="586" y="214" text-anchor="middle" class="svg-small svg-label-strong">Aligned representations</text>
+            <line x1="524" y1="122" x2="556" y2="180" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+            <line x1="524" y1="300" x2="556" y2="232" class="svg-arrow" marker-end="url(#posthoc-arrow)"></line>
+
+            <g transform="translate(232 394)">
+              <line x1="-9" y1="0" x2="9" y2="0" class="svg-snowflake"></line>
+              <line x1="0" y1="-9" x2="0" y2="9" class="svg-snowflake"></line>
+              <line x1="-6.5" y1="-6.5" x2="6.5" y2="6.5" class="svg-snowflake"></line>
+              <line x1="-6.5" y1="6.5" x2="6.5" y2="-6.5" class="svg-snowflake"></line>
+            </g>
+            <text x="252" y="399" class="svg-caption svg-text-muted">Frozen parameters</text>
+            <g transform="translate(454 392)">
+              <polygon points="0,-12 10,-6 10,6 0,12 -10,6 -10,-6" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="3.4" class="svg-trainable-core"></circle>
+            </g>
+            <text x="474" y="399" class="svg-caption svg-text-muted">Trainable parameters</text>
+          </svg>
+          <figcaption>
+            Post-hoc alignment learns lightweight bridges between frozen image and text encoders before weight recycling broadens the available supervision.
+          </figcaption>
+        </figure>
+
+        <figure class="figure-card poster-figure diagram-mobile">
+          <svg class="poster-svg" viewBox="0 0 340 640" role="img" aria-labelledby="posthoc-mobile-title posthoc-mobile-desc">
+            <title id="posthoc-mobile-title">Post-hoc alignment diagram mobile</title>
+            <desc id="posthoc-mobile-desc">A dog image and a short text description flow downward through frozen image and text encoders, then through trainable g and g-bar modules into aligned representations.</desc>
+            <defs>
+              <marker id="posthoc-mobile-arrow" markerWidth="4.5" markerHeight="4.5" refX="4" refY="2.25" orient="auto">
+                <path d="M0,0 L4.5,2.25 L0,4.5 z" fill="#23232d"></path>
+              </marker>
+            </defs>
+
+            <rect x="12" y="12" width="316" height="616" rx="22" class="svg-surface"></rect>
+            <text x="170" y="42" text-anchor="middle" class="svg-label svg-label-strong">Post-hoc alignment</text>
+
+            <image href="assets/dog4figure.jpg" x="62" y="70" width="60" height="60" preserveAspectRatio="xMidYMid slice" class="svg-thumb"></image>
+            <text x="92" y="153" text-anchor="middle" class="svg-small svg-label-strong">Image</text>
+
+            <text x="248" y="88" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="248" dy="0">A dog</tspan>
+              <tspan x="248" dy="16">in a field</tspan>
+              <tspan x="248" dy="16">...</tspan>
+            </text>
+            <text x="248" y="153" text-anchor="middle" class="svg-small svg-label-strong">Text</text>
+
+            <line x1="92" y1="164" x2="92" y2="194" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+            <line x1="248" y1="164" x2="248" y2="194" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+
+            <polygon points="36,204 158,204 144,274 50,274" class="svg-encoder-fill"></polygon>
+            <polygon points="36,204 158,204 144,274 50,274" class="svg-encoder-stroke"></polygon>
+            <text x="97" y="230" text-anchor="middle" class="svg-small svg-label-strong">
+              <tspan x="97" dy="0">Image</tspan>
+              <tspan x="97" dy="18">encoder</tspan>
+            </text>
+            <text x="86" y="263" text-anchor="middle" class="svg-caption">
+              f<tspan baseline-shift="sub" font-size="72%">I</tspan>(.)
+            </text>
+            <g transform="translate(132 258)" class="svg-snowflake">
+              <line x1="-7" y1="0" x2="7" y2="0"></line>
+              <line x1="0" y1="-7" x2="0" y2="7"></line>
+              <line x1="-5" y1="-5" x2="5" y2="5"></line>
+              <line x1="-5" y1="5" x2="5" y2="-5"></line>
+            </g>
+
+            <polygon points="182,204 304,204 290,274 196,274" class="svg-encoder-fill"></polygon>
+            <polygon points="182,204 304,204 290,274 196,274" class="svg-encoder-stroke"></polygon>
+            <text x="243" y="230" text-anchor="middle" class="svg-small svg-label-strong">
+              <tspan x="243" dy="0">Text</tspan>
+              <tspan x="243" dy="18">encoder</tspan>
+            </text>
+            <text x="232" y="263" text-anchor="middle" class="svg-caption">
+              f<tspan baseline-shift="sub" font-size="72%">T</tspan>(.)
+            </text>
+            <g transform="translate(278 258)" class="svg-snowflake">
+              <line x1="-7" y1="0" x2="7" y2="0"></line>
+              <line x1="0" y1="-7" x2="0" y2="7"></line>
+              <line x1="-5" y1="-5" x2="5" y2="5"></line>
+              <line x1="-5" y1="5" x2="5" y2="-5"></line>
+            </g>
+
+            <line x1="92" y1="280" x2="92" y2="318" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+            <line x1="248" y1="280" x2="248" y2="318" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+
+            <rect x="59" y="322" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(92 344)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <text x="92" y="381" text-anchor="middle" class="svg-small svg-label-strong">g</text>
+
+            <rect x="215" y="322" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(248 344)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <line x1="239" y1="364" x2="257" y2="364" class="svg-overbar"></line>
+            <text x="248" y="381" text-anchor="middle" class="svg-small svg-label-strong">g</text>
+
+            <line x1="92" y1="394" x2="132" y2="454" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+            <line x1="248" y1="394" x2="208" y2="454" class="svg-arrow" marker-end="url(#posthoc-mobile-arrow)"></line>
+            <rect x="70" y="456" width="200" height="80" rx="18" class="svg-note"></rect>
+            <text x="170" y="492" text-anchor="middle" class="svg-small svg-label-strong">
+              <tspan x="170" dy="0">Aligned</tspan>
+              <tspan x="170" dy="20">representations</tspan>
+            </text>
+
+            <g transform="translate(62 582)">
+              <line x1="-7" y1="0" x2="7" y2="0" class="svg-snowflake"></line>
+              <line x1="0" y1="-7" x2="0" y2="7" class="svg-snowflake"></line>
+              <line x1="-5" y1="-5" x2="5" y2="5" class="svg-snowflake"></line>
+              <line x1="-5" y1="5" x2="5" y2="-5" class="svg-snowflake"></line>
+            </g>
+            <text x="80" y="587" class="svg-caption svg-text-muted">Frozen</text>
+            <g transform="translate(210 581)">
+              <polygon points="0,-10 8,-5 8,5 0,10 -8,5 -8,-5" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="3.2" class="svg-trainable-core"></circle>
+            </g>
+            <text x="228" y="587" class="svg-caption svg-text-muted">Trainable</text>
+          </svg>
+          <figcaption>
+            Post-hoc alignment sends image and text inputs downward through frozen encoders and trainable bridges into the shared representation space.
+          </figcaption>
+        </figure>
+
+        <figure class="figure-card poster-figure diagram-desktop">
+          <svg class="poster-svg" viewBox="0 0 1080 470" role="img" aria-labelledby="recycling-title recycling-desc">
+            <title id="recycling-title">Weight recycling diagram</title>
+            <desc id="recycling-desc">Image-text representation pairs and classifier-head weights are both paired with text embeddings and used to learn lightweight alignment functions.</desc>
+            <defs>
+              <marker id="idea-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                <path d="M0,0 L9,4.5 L0,9 z" fill="#23232d"></path>
+              </marker>
+              <marker id="idea-arrow-start" markerWidth="9" markerHeight="9" refX="1" refY="4.5" orient="auto">
+                <path d="M9,0 L0,4.5 L9,9 z" fill="#23232d"></path>
+              </marker>
+            </defs>
+
+            <rect x="20" y="20" width="1040" height="430" rx="26" class="svg-surface"></rect>
+
+            <text x="292" y="56" text-anchor="middle" class="svg-label svg-label-strong">Image-text pairs</text>
+            <path d="M90 74 C110 54 190 54 210 74" class="svg-brace"></path>
+            <path d="M210 74 C230 54 310 54 330 74" class="svg-brace"></path>
+            <path d="M330 74 C350 54 430 54 450 74" class="svg-brace"></path>
+
+            <text x="610" y="56" text-anchor="middle" class="svg-label svg-label-strong">Classification head</text>
+            <image href="assets/recycling4figures.png" x="728" y="30" width="24" height="24"></image>
+            <path d="M530 74 C550 54 620 54 640 74" class="svg-brace"></path>
+            <path d="M640 74 C660 54 730 54 750 74" class="svg-brace"></path>
+
+            <text x="116" y="132" class="svg-small">f_I(</text>
+            <image href="assets/cat4figure.png" x="146" y="101" width="34" height="34"></image>
+            <text x="184" y="132" class="svg-small">)</text>
+            <line x1="163" y1="144" x2="163" y2="288" class="svg-guide"></line>
+            <text x="163" y="322" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="163" dy="0">tabby kitten</tspan>
+            </text>
+
+            <text x="253" y="132" class="svg-small">f_I(</text>
+            <image href="assets/flowers4figure.png" x="283" y="101" width="34" height="34"></image>
+            <text x="321" y="132" class="svg-small">)</text>
+            <line x1="300" y1="144" x2="300" y2="288" class="svg-guide"></line>
+            <text x="300" y="322" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="300" dy="0">pink primrose</tspan>
+            </text>
+
+            <text x="390" y="132" class="svg-small">f_I(</text>
+            <image href="assets/planes4figures.png" x="420" y="101" width="34" height="34"></image>
+            <text x="458" y="132" class="svg-small">)</text>
+            <line x1="437" y1="144" x2="437" y2="288" class="svg-guide"></line>
+            <text x="437" y="322" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="437" dy="0">runway planes</tspan>
+            </text>
+
+            <text x="506" y="132" text-anchor="middle" class="svg-label svg-label-strong">...</text>
+            <text x="506" y="322" text-anchor="middle" class="svg-label svg-label-strong">...</text>
+
+            <text x="560" y="132" class="svg-small svg-label-strong">
+              w<tspan baseline-shift="sub" font-size="72%">1</tspan>
+            </text>
+            <line x1="560" y1="144" x2="560" y2="288" class="svg-guide"></line>
+            <text x="560" y="322" text-anchor="middle" class="svg-caption svg-text-muted">tench</text>
+
+            <text x="634" y="132" class="svg-small svg-label-strong">
+              w<tspan baseline-shift="sub" font-size="72%">2</tspan>
+            </text>
+            <line x1="634" y1="144" x2="634" y2="288" class="svg-guide"></line>
+            <text x="634" y="322" text-anchor="middle" class="svg-caption svg-text-muted">tree frog</text>
+
+            <text x="708" y="132" class="svg-small svg-label-strong">
+              w<tspan baseline-shift="sub" font-size="72%">3</tspan>
+            </text>
+            <line x1="708" y1="144" x2="708" y2="288" class="svg-guide"></line>
+            <text x="708" y="322" text-anchor="middle" class="svg-caption svg-text-muted">ice cream</text>
+
+            <text x="758" y="132" text-anchor="middle" class="svg-label svg-label-strong">...</text>
+            <text x="758" y="322" text-anchor="middle" class="svg-label svg-label-strong">...</text>
+
+            <rect x="934" y="92" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(967 120)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <text x="967" y="149" text-anchor="middle" class="svg-math">g</text>
+
+            <rect x="922" y="204" width="90" height="40" rx="12" class="svg-loss"></rect>
+            <text x="967" y="229" text-anchor="middle" class="svg-small svg-label-strong">Loss</text>
+
+            <rect x="934" y="288" width="66" height="68" rx="16" class="svg-module"></rect>
+            <g transform="translate(967 310)">
+              <polygon points="0,-15 12,-8 12,8 0,15 -12,8 -12,-8" class="svg-trainable-badge"></polygon>
+              <circle cx="0" cy="0" r="4.2" class="svg-trainable-core"></circle>
+            </g>
+            <line x1="956" y1="332" x2="978" y2="332" class="svg-overbar"></line>
+            <text x="967" y="349" text-anchor="middle" class="svg-math">g</text>
+
+            <line x1="774" y1="126" x2="933" y2="126" class="svg-arrow" marker-end="url(#idea-arrow)"></line>
+            <line x1="774" y1="322" x2="933" y2="322" class="svg-arrow" marker-end="url(#idea-arrow)"></line>
+            <line x1="967" y1="160" x2="967" y2="204" class="svg-arrow-both"></line>
+            <line x1="967" y1="244" x2="967" y2="288" class="svg-arrow-both"></line>
+          </svg>
+          <div class="figure-notes figure-notes-split">
+            <div class="figure-note">
+              <p class="figure-note-title">Two regimes</p>
+              <p>1. Weights-only alignment. 2. Weights augment scarce pairs.</p>
+            </div>
+            <div class="figure-note figure-note-accent">
+              <p class="figure-note-title">Key idea</p>
+              <p>Reusable semantic anchors.</p>
+            </div>
+          </div>
+          <figcaption>
+            Weight vectors and real image-text pairs can both act as alignment data for lightweight post-hoc bridges.
+          </figcaption>
+        </figure>
+
+        <figure class="figure-card poster-figure diagram-mobile">
+          <svg class="poster-svg" viewBox="0 0 340 680" role="img" aria-labelledby="recycling-mobile-title recycling-mobile-desc">
+            <title id="recycling-mobile-title">Weight recycling diagram mobile</title>
+            <desc id="recycling-mobile-desc">Mobile diagram showing image-text pairs and recycled weight-text pairs as aligned representation and text-embedding columns, then mapped by g and g-bar before applying an alignment loss.</desc>
+            <defs>
+              <marker id="mobile-recycling-arrow" markerWidth="4.5" markerHeight="4.5" refX="4" refY="2.25" orient="auto">
+                <path d="M0,0 L4.5,2.25 L0,4.5 z" fill="#23232d"></path>
+              </marker>
+              <marker id="mobile-recycling-arrow-start" markerWidth="4.5" markerHeight="4.5" refX="0.5" refY="2.25" orient="auto">
+                <path d="M4.5,0 L0,2.25 L4.5,4.5 z" fill="#23232d"></path>
+              </marker>
+            </defs>
+
+            <rect x="12" y="12" width="316" height="656" rx="22" class="svg-surface"></rect>
+            <text x="28" y="40" class="svg-chart-title">Weight recycling</text>
+            <text x="28" y="66" class="svg-caption svg-text-muted">Parallel representation and text-embedding pairs.</text>
+
+            <text x="86" y="102" text-anchor="middle" class="svg-caption svg-text-muted">representation</text>
+            <text x="86" y="118" text-anchor="middle" class="svg-caption svg-text-muted">side</text>
+            <text x="254" y="102" text-anchor="middle" class="svg-caption svg-text-muted">text-embedding</text>
+            <text x="254" y="118" text-anchor="middle" class="svg-caption svg-text-muted">side</text>
+
+            <rect x="26" y="132" width="288" height="134" rx="18" class="svg-note"></rect>
+            <text x="44" y="160" class="svg-small svg-label-strong">Image-text pairs</text>
+            <image href="assets/cat4figure.png" x="48" y="178" width="26" height="26" preserveAspectRatio="xMidYMid slice" class="svg-thumb"></image>
+            <text x="84" y="197" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">I</tspan>(cat)</text>
+            <line x1="138" y1="192" x2="196" y2="192" class="svg-guide"></line>
+            <text x="216" y="190" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">T</tspan>("tabby")</text>
+
+            <image href="assets/flowers4figure.png" x="48" y="218" width="26" height="26" preserveAspectRatio="xMidYMid slice" class="svg-thumb"></image>
+            <text x="84" y="237" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">I</tspan>(flower)</text>
+            <line x1="138" y1="232" x2="196" y2="232" class="svg-guide"></line>
+            <text x="216" y="230" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">T</tspan>("flower")</text>
+
+            <g class="svg-vertical-ellipsis" aria-hidden="true">
+              <circle cx="86" cy="270" r="2.2"></circle>
+              <circle cx="86" cy="277" r="2.2"></circle>
+              <circle cx="86" cy="284" r="2.2"></circle>
+              <circle cx="254" cy="270" r="2.2"></circle>
+              <circle cx="254" cy="277" r="2.2"></circle>
+              <circle cx="254" cy="284" r="2.2"></circle>
+            </g>
+
+            <rect x="26" y="288" width="288" height="134" rx="18" class="svg-note"></rect>
+            <text x="44" y="316" class="svg-small svg-label-strong">Recycled weight-text pairs</text>
+            <text x="86" y="352" text-anchor="middle" class="svg-small svg-label-strong">
+              w<tspan baseline-shift="sub" font-size="72%">1</tspan>
+            </text>
+            <line x1="138" y1="347" x2="196" y2="347" class="svg-guide"></line>
+            <text x="216" y="345" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">T</tspan>("tench")</text>
+
+            <text x="86" y="392" text-anchor="middle" class="svg-small svg-label-strong">
+              w<tspan baseline-shift="sub" font-size="72%">2</tspan>
+            </text>
+            <line x1="138" y1="387" x2="196" y2="387" class="svg-guide"></line>
+            <text x="216" y="385" class="svg-caption">f<tspan baseline-shift="sub" font-size="72%">T</tspan>("frog")</text>
+            <g class="svg-vertical-ellipsis" aria-hidden="true">
+              <circle cx="86" cy="438" r="2.2"></circle>
+              <circle cx="86" cy="450" r="2.2"></circle>
+              <circle cx="86" cy="462" r="2.2"></circle>
+              <circle cx="254" cy="438" r="2.2"></circle>
+              <circle cx="254" cy="450" r="2.2"></circle>
+              <circle cx="254" cy="462" r="2.2"></circle>
+            </g>
+
+            <line x1="86" y1="468" x2="86" y2="513" class="svg-arrow" marker-end="url(#mobile-recycling-arrow)"></line>
+            <line x1="254" y1="468" x2="254" y2="513" class="svg-arrow" marker-end="url(#mobile-recycling-arrow)"></line>
+
+            <g transform="translate(61 514)">
+              <rect x="0" y="0" width="50" height="68" rx="16" class="svg-module"></rect>
+              <polygon points="25,8 36,14 36,28 25,34 14,28 14,14" class="svg-trainable-badge"></polygon>
+              <circle cx="25" cy="21" r="4.2" class="svg-trainable-core"></circle>
+              <text x="25" y="56" text-anchor="middle" class="svg-math">g</text>
+            </g>
+            <g transform="translate(229 514)">
+              <rect x="0" y="0" width="50" height="68" rx="16" class="svg-module"></rect>
+              <polygon points="25,8 36,14 36,28 25,34 14,28 14,14" class="svg-trainable-badge"></polygon>
+              <circle cx="25" cy="21" r="4.2" class="svg-trainable-core"></circle>
+              <line x1="16" y1="41" x2="34" y2="41" class="svg-overbar"></line>
+              <text x="25" y="56" text-anchor="middle" class="svg-math">g</text>
+            </g>
+
+            <line x1="114" y1="548" x2="148" y2="548" class="svg-arrow" marker-start="url(#mobile-recycling-arrow-start)" marker-end="url(#mobile-recycling-arrow)"></line>
+            <line x1="226" y1="548" x2="192" y2="548" class="svg-arrow" marker-start="url(#mobile-recycling-arrow-start)" marker-end="url(#mobile-recycling-arrow)"></line>
+            <rect x="150" y="525" width="40" height="46" rx="14" class="svg-loss"></rect>
+            <text x="170" y="553" text-anchor="middle" class="svg-caption svg-label-strong">Loss</text>
+
+            <text x="170" y="622" text-anchor="middle" class="svg-caption svg-text-muted">
+              <tspan x="170" dy="0">Weights add more paired anchors</tspan>
+              <tspan x="170" dy="18">for the same post-hoc bridges.</tspan>
+            </text>
+          </svg>
+          <figcaption>
+            Recycled classifier rows and real image-text pairs both become alignment data for lightweight post-hoc bridges.
+          </figcaption>
+        </figure>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Classifier heads as semantic prototypes</h3>
+            <p>
+              The weight vector associated with each supervised class can act as a meaningful prototype of that concept, rather than just a disposable decision boundary.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Alignment without image-text pairs</h3>
+            <p>
+              By pairing recycled classifier weights with text embeddings of their class names, we can learn a post-hoc bridge between independently pretrained image and text encoders even when paired multimodal data is absent.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Low-data augmentation from recycled weights</h3>
+            <p>
+              When real image-text pairs do exist, the recycled weights provide a compatible and effective augmentation source, with the largest gains appearing in low-data regimes.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="results" class="content-section">
+        <div class="section-heading">
+          <p class="section-kicker">Two settings</p>
+          <h2>We evaluate weights alone first, then weights as augmentation</h2>
+        </div>
+
+        <div class="figure-grid">
+          <article class="text-card figure-card-wide">
+            <h3>Setting I: No image-text pairs</h3>
+            <p>
+              Train <code>g</code> and <code>g&#772;</code> using classifier weights and class names only. This setting tests the strongest claim of the work: a frozen vision encoder can acquire non-trivial vision-language capabilities without any image-text pairs.
+            </p>
+            <p>
+              The key observations are that weight-only alignment can be competitive with CLIP on some benchmarks, and that ImageNet-21K weights provide broader semantic coverage than ImageNet-1K alone.
+            </p>
+          </article>
+
+          <figure class="figure-card poster-figure figure-card-wide result-card zero-shot-card">
+            <svg class="poster-svg chart-svg chart-desktop" viewBox="0 0 980 430" role="img" aria-labelledby="zero-shot-title zero-shot-desc">
+              <title id="zero-shot-title">Zero-shot classification chart</title>
+              <desc id="zero-shot-desc">Stacked bar chart comparing ImageNet-1K based alignment, added ImageNet-21K weight gains, and CLIP reference scores across nine datasets.</desc>
+              <rect x="18" y="18" width="944" height="394" rx="24" class="svg-surface"></rect>
+            <text x="56" y="36" class="svg-label svg-label-strong">Zero-shot classification</text>
+
+              <g class="svg-grid">
+                <line x1="80" y1="340" x2="900" y2="340"></line>
+                <line x1="80" y1="270" x2="900" y2="270"></line>
+                <line x1="80" y1="200" x2="900" y2="200"></line>
+                <line x1="80" y1="130" x2="900" y2="130"></line>
+                <line x1="80" y1="60" x2="900" y2="60"></line>
+              </g>
+              <g class="svg-axis">
+                <line x1="80" y1="340" x2="900" y2="340"></line>
+                <line x1="80" y1="340" x2="80" y2="60"></line>
+              </g>
+
+              <g class="svg-axis-labels svg-text-muted">
+                <text x="56" y="344">0</text>
+                <text x="48" y="274">25</text>
+                <text x="48" y="204">50</text>
+                <text x="48" y="134">75</text>
+                <text x="40" y="64">100</text>
+              </g>
+
+              <text x="38" y="205" transform="rotate(-90 38 205)" text-anchor="middle" class="svg-caption svg-text-muted">Accuracy (%)</text>
+
+              <g class="svg-bars">
+                <rect x="106" y="280.8" width="48" height="59.2" class="svg-bar-base"></rect>
+                <rect x="106" y="272.2" width="48" height="8.6" class="svg-bar-add"></rect>
+                <line x1="100" y1="180.0" x2="160" y2="180.0" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="130" y="380" transform="rotate(35 130 380)" text-anchor="end" class="svg-caption svg-text-muted">RESISC</text>
+
+                <rect x="192" y="290.4" width="48" height="49.6" class="svg-bar-base"></rect>
+                <rect x="192" y="273.7" width="48" height="16.7" class="svg-bar-add"></rect>
+                <line x1="186" y1="194.6" x2="246" y2="194.6" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="216" y="380" transform="rotate(35 216 380)" text-anchor="end" class="svg-caption svg-text-muted">EUSAT</text>
+
+                <rect x="278" y="306.9" width="48" height="33.1" class="svg-bar-base"></rect>
+                <rect x="278" y="164.6" width="48" height="142.3" class="svg-bar-add"></rect>
+                <line x1="272" y1="155.3" x2="332" y2="155.3" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="302" y="380" transform="rotate(35 302 380)" text-anchor="end" class="svg-caption svg-text-muted">FLOW</text>
+
+                <rect x="364" y="128.1" width="48" height="211.9" class="svg-bar-base"></rect>
+                <rect x="364" y="121.4" width="48" height="6.6" class="svg-bar-add"></rect>
+                <line x1="358" y1="92.7" x2="418" y2="92.7" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="388" y="380" transform="rotate(35 388 380)" text-anchor="end" class="svg-caption svg-text-muted">OXPET</text>
+
+                <rect x="450" y="281.3" width="48" height="58.7" class="svg-bar-base"></rect>
+                <rect x="450" y="180.1" width="48" height="101.2" class="svg-bar-add"></rect>
+                <line x1="444" y1="99.1" x2="504" y2="99.1" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="474" y="380" transform="rotate(35 474 380)" text-anchor="end" class="svg-caption svg-text-muted">FOOD</text>
+
+                <rect x="536" y="89.8" width="48" height="250.2" class="svg-bar-base"></rect>
+                <rect x="536" y="75.7" width="48" height="14.1" class="svg-bar-add"></rect>
+                <line x1="530" y1="88.9" x2="590" y2="88.9" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="560" y="380" transform="rotate(35 560 380)" text-anchor="end" class="svg-caption svg-text-muted">CFR10</text>
+
+                <rect x="622" y="168.9" width="48" height="171.1" class="svg-bar-base"></rect>
+                <rect x="622" y="133.8" width="48" height="35.1" class="svg-bar-add"></rect>
+                <line x1="616" y1="149.5" x2="676" y2="149.5" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="646" y="380" transform="rotate(35 646 380)" text-anchor="end" class="svg-caption svg-text-muted">CFR100</text>
+
+                <rect x="708" y="276.4" width="48" height="63.6" class="svg-bar-base"></rect>
+                <rect x="708" y="240.9" width="48" height="35.5" class="svg-bar-add"></rect>
+                <line x1="702" y1="216.8" x2="762" y2="216.8" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="732" y="380" transform="rotate(35 732 380)" text-anchor="end" class="svg-caption svg-text-muted">DTD</text>
+
+                <rect x="794" y="271.9" width="48" height="68.1" class="svg-bar-base"></rect>
+                <rect x="794" y="243.8" width="48" height="28.1" class="svg-bar-add"></rect>
+                <line x1="788" y1="230.9" x2="848" y2="230.9" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="818" y="380" transform="rotate(35 818 380)" text-anchor="end" class="svg-caption svg-text-muted">PLACES</text>
+              </g>
+
+              <g class="svg-legend">
+                <rect x="610" y="92" width="22" height="10" class="svg-bar-base"></rect>
+                <text x="640" y="101" class="svg-caption">IN1K</text>
+                <rect x="690" y="92" width="22" height="10" class="svg-bar-add"></rect>
+                <text x="720" y="101" class="svg-caption">+ IN21K</text>
+                <line x1="790" y1="97" x2="820" y2="97" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="830" y="101" class="svg-caption">CLIP</text>
+              </g>
+            </svg>
+            <svg class="poster-svg chart-svg chart-mobile" viewBox="0 0 340 600" role="img" aria-labelledby="zero-shot-title-mobile zero-shot-desc-mobile">
+              <title id="zero-shot-title-mobile">Zero-shot classification mobile chart</title>
+              <desc id="zero-shot-desc-mobile">Horizontal mobile summary of zero-shot transfer across nine datasets, showing IN1K base performance, additional IN21K gain, and vertical dashed CLIP reference markers.</desc>
+              <rect x="12" y="12" width="316" height="576" rx="20" class="svg-surface"></rect>
+              <text x="24" y="34" class="svg-chart-title">Zero-shot transfer</text>
+
+              <g class="svg-legend">
+                <rect x="24" y="58" width="18" height="10" class="svg-bar-base"></rect>
+                <text x="48" y="68" class="svg-caption">IN1K</text>
+                <rect x="96" y="58" width="18" height="10" class="svg-bar-add"></rect>
+                <text x="120" y="68" class="svg-caption">+ IN21K</text>
+                <line x1="205" y1="63" x2="229" y2="63" class="svg-line svg-line-flame svg-dashed"></line>
+                <text x="237" y="68" class="svg-caption">CLIP</text>
+              </g>
+
+              <g class="svg-caption svg-text-muted">
+                <text x="116" y="105">0</text>
+                <text x="200" y="105" text-anchor="middle">50</text>
+                <text x="284" y="105" text-anchor="end">100</text>
+              </g>
+              <line x1="116" y1="113" x2="284" y2="113" class="svg-guide"></line>
+
+              <g class="svg-caption svg-text-muted">
+                <text x="24" y="146">RESISC</text>
+                <text x="24" y="190">EUSAT</text>
+                <text x="24" y="234">FLOW</text>
+                <text x="24" y="278">OXPET</text>
+                <text x="24" y="322">FOOD</text>
+                <text x="24" y="366">CFR10</text>
+                <text x="24" y="410">CFR100</text>
+                <text x="24" y="454">DTD</text>
+                <text x="24" y="498">PLACES</text>
+              </g>
+
+              <g class="svg-bars">
+                <line x1="116" y1="141" x2="284" y2="141" class="svg-guide"></line>
+                <rect x="116" y="134" width="35.4" height="14" class="svg-bar-base"></rect>
+                <rect x="151.4" y="134" width="5.2" height="14" class="svg-bar-add"></rect>
+                <line x1="212" y1="129" x2="212" y2="153" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="185" x2="284" y2="185" class="svg-guide"></line>
+                <rect x="116" y="178" width="29.8" height="14" class="svg-bar-base"></rect>
+                <rect x="145.8" y="178" width="10.1" height="14" class="svg-bar-add"></rect>
+                <line x1="203" y1="173" x2="203" y2="197" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="229" x2="284" y2="229" class="svg-guide"></line>
+                <rect x="116" y="222" width="19.8" height="14" class="svg-bar-base"></rect>
+                <rect x="135.8" y="222" width="85.3" height="14" class="svg-bar-add"></rect>
+                <line x1="227" y1="217" x2="227" y2="241" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="273" x2="284" y2="273" class="svg-guide"></line>
+                <rect x="116" y="266" width="127.2" height="14" class="svg-bar-base"></rect>
+                <rect x="243.2" y="266" width="4.0" height="14" class="svg-bar-add"></rect>
+                <line x1="264" y1="261" x2="264" y2="285" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="317" x2="284" y2="317" class="svg-guide"></line>
+                <rect x="116" y="310" width="35.2" height="14" class="svg-bar-base"></rect>
+                <rect x="151.2" y="310" width="60.7" height="14" class="svg-bar-add"></rect>
+                <line x1="261" y1="305" x2="261" y2="329" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="361" x2="284" y2="361" class="svg-guide"></line>
+                <rect x="116" y="354" width="150.2" height="14" class="svg-bar-base"></rect>
+                <rect x="266.2" y="354" width="8.4" height="14" class="svg-bar-add"></rect>
+                <line x1="267" y1="349" x2="267" y2="373" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="405" x2="284" y2="405" class="svg-guide"></line>
+                <rect x="116" y="398" width="102.7" height="14" class="svg-bar-base"></rect>
+                <rect x="218.7" y="398" width="21.1" height="14" class="svg-bar-add"></rect>
+                <line x1="230" y1="393" x2="230" y2="417" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="449" x2="284" y2="449" class="svg-guide"></line>
+                <rect x="116" y="442" width="38.2" height="14" class="svg-bar-base"></rect>
+                <rect x="154.2" y="442" width="21.3" height="14" class="svg-bar-add"></rect>
+                <line x1="190" y1="437" x2="190" y2="461" class="svg-line svg-line-flame svg-dashed"></line>
+
+                <line x1="116" y1="493" x2="284" y2="493" class="svg-guide"></line>
+                <rect x="116" y="486" width="40.8" height="14" class="svg-bar-base"></rect>
+                <rect x="156.8" y="486" width="16.8" height="14" class="svg-bar-add"></rect>
+                <line x1="182" y1="481" x2="182" y2="505" class="svg-line svg-line-flame svg-dashed"></line>
+              </g>
+
+              <text x="200" y="548" text-anchor="middle" class="svg-caption svg-text-muted">Accuracy (%)</text>
+            </svg>
+            <figcaption>
+              Setting I: with no image-text pairs, weight-only alignment already supports non-trivial zero-shot transfer.
+            </figcaption>
+          </figure>
+
+          <aside class="callout figure-card-wide">
+            <p class="callout-label">Setting I takeaway</p>
+            <p>
+              Discarded classifier heads can endow a vision encoder with vision-language capabilities without paired image-text data.
+            </p>
+          </aside>
+
+          <article class="text-card figure-card-wide">
+            <h3>Setting II: Data augmentation</h3>
+            <p>
+              Once some paired data exists, recycled weights remain useful because they are compatible with image representations and help most in the low-pair regime.
+            </p>
+            <p>
+              Here, weight recycling acts as complementary supervision rather than a replacement for real image-text pairs: the gains are strongest where paired data is hardest to collect.
+            </p>
+          </article>
+
+          <figure class="figure-card figure-card-wide retrieval-card result-card">
+            <div class="retrieval-header">
+              <h3>Retrieval with scarce paired data</h3>
+              <p>Flickr30K retrieval; the x-axis is the number of image-caption pairs used for alignment.</p>
+            </div>
+            <div class="retrieval-grid">
+              <div class="mini-chart">
+                <h4 class="mini-chart-title">i2t P@1</h4>
+                <svg class="poster-svg mini-chart-svg" viewBox="0 38 340 190" role="img" aria-labelledby="ret-p1-title ret-p1-desc">
+                  <title id="ret-p1-title">Image-to-text precision at one</title>
+                  <desc id="ret-p1-desc">Retrieval chart for image-to-text precision at one across increasing alignment set sizes.</desc>
+                  <g class="svg-grid">
+                    <line x1="42" y1="194.0" x2="300" y2="194.0"></line>
+                    <line x1="42" y1="127.6" x2="300" y2="127.6"></line>
+                    <line x1="42" y1="61.2" x2="300" y2="61.2"></line>
+                  </g>
+                  <g class="svg-axis">
+                    <line x1="42" y1="202" x2="300" y2="202"></line>
+                    <line x1="42" y1="202" x2="42" y2="48"></line>
+                  </g>
+                  <g class="svg-axis-labels svg-text-muted">
+                    <text x="28" y="198">0</text>
+                    <text x="14" y="131">0.25</text>
+                    <text x="14" y="65">0.50</text>
+                    <text x="42" y="218" text-anchor="middle">0</text>
+                    <text x="106.5" y="218" text-anchor="middle">1k</text>
+                    <text x="171" y="218" text-anchor="middle">5k</text>
+                    <text x="235.5" y="218" text-anchor="middle">10k</text>
+                    <text x="300" y="218" text-anchor="middle">30k</text>
+                  </g>
+                  <polygon points="42,53.4 106.5,74.6 171,168.8 235.5,177.7 300,190.5 300,193.3 235.5,194.1 171,192.9 106.5,169.0 42,63.1" class="svg-area"></polygon>
+                  <polyline points="42,58.3 106.5,121.8 171,180.8 235.5,185.9 300,191.9" class="svg-line svg-line-blue"></polyline>
+                </svg>
+              </div>
+              <div class="mini-chart">
+                <h4 class="mini-chart-title">i2t mAP</h4>
+                <svg class="poster-svg mini-chart-svg" viewBox="0 38 340 190" role="img" aria-labelledby="ret-map-title ret-map-desc">
+                  <title id="ret-map-title">Image-to-text mean average precision</title>
+                  <desc id="ret-map-desc">Retrieval chart for image-to-text mean average precision across increasing alignment set sizes.</desc>
+                  <g class="svg-grid">
+                    <line x1="42" y1="194.0" x2="300" y2="194.0"></line>
+                    <line x1="42" y1="127.6" x2="300" y2="127.6"></line>
+                    <line x1="42" y1="61.2" x2="300" y2="61.2"></line>
+                  </g>
+                  <g class="svg-axis">
+                    <line x1="42" y1="202" x2="300" y2="202"></line>
+                    <line x1="42" y1="202" x2="42" y2="48"></line>
+                  </g>
+                  <g class="svg-axis-labels svg-text-muted">
+                    <text x="28" y="198">0</text>
+                    <text x="14" y="131">0.25</text>
+                    <text x="14" y="65">0.50</text>
+                    <text x="42" y="218" text-anchor="middle">0</text>
+                    <text x="106.5" y="218" text-anchor="middle">1k</text>
+                    <text x="171" y="218" text-anchor="middle">5k</text>
+                    <text x="235.5" y="218" text-anchor="middle">10k</text>
+                    <text x="300" y="218" text-anchor="middle">30k</text>
+                  </g>
+                  <polygon points="42,76.9 106.5,104.2 171,174.1 235.5,184.6 300,191.1 300,193.6 235.5,192.1 171,190.3 106.5,175.8 42,89.2" class="svg-area"></polygon>
+                  <polyline points="42,83.1 106.5,140.0 171,182.2 235.5,188.4 300,192.4" class="svg-line svg-line-blue"></polyline>
+                </svg>
+              </div>
+              <div class="mini-chart">
+                <h4 class="mini-chart-title">t2i P@1</h4>
+                <svg class="poster-svg mini-chart-svg" viewBox="0 38 340 190" role="img" aria-labelledby="ret-t2i-title ret-t2i-desc">
+                  <title id="ret-t2i-title">Text-to-image precision at one</title>
+                  <desc id="ret-t2i-desc">Retrieval chart for text-to-image precision at one across increasing alignment set sizes.</desc>
+                  <g class="svg-grid">
+                    <line x1="42" y1="194.0" x2="300" y2="194.0"></line>
+                    <line x1="42" y1="127.6" x2="300" y2="127.6"></line>
+                    <line x1="42" y1="61.2" x2="300" y2="61.2"></line>
+                  </g>
+                  <g class="svg-axis">
+                    <line x1="42" y1="202" x2="300" y2="202"></line>
+                    <line x1="42" y1="202" x2="42" y2="48"></line>
+                  </g>
+                  <g class="svg-axis-labels svg-text-muted">
+                    <text x="28" y="198">0</text>
+                    <text x="14" y="131">0.25</text>
+                    <text x="14" y="65">0.50</text>
+                    <text x="42" y="218" text-anchor="middle">0</text>
+                    <text x="106.5" y="218" text-anchor="middle">1k</text>
+                    <text x="171" y="218" text-anchor="middle">5k</text>
+                    <text x="235.5" y="218" text-anchor="middle">10k</text>
+                    <text x="300" y="218" text-anchor="middle">30k</text>
+                  </g>
+                  <polygon points="42,100.1 106.5,159.8 171,177.5 235.5,184.8 300,193.6 300,198.2 235.5,194.5 171,192.4 106.5,180.3 42,150.7" class="svg-area"></polygon>
+                  <polyline points="42,125.4 106.5,170.1 171,185.0 235.5,189.7 300,195.9" class="svg-line svg-line-blue"></polyline>
+                </svg>
+              </div>
+            </div>
+            <figcaption>
+              Setting II: classifier weights are most useful as augmentation exactly in the low-pair regime, where paired data is hardest to collect.
+            </figcaption>
+          </figure>
+
+          <aside class="callout figure-card-wide">
+            <p class="callout-label">Setting II takeaway</p>
+            <p>
+              Classifier weights are complementary to real image-text pairs and are most useful exactly where paired data is hardest to collect.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="analysis" class="content-section method-section">
+        <div class="section-heading">
+          <p class="section-kicker">Further analyses</p>
+          <h2>Why the recycled weights work, and where the limits are</h2>
+        </div>
+
+        <div class="method-grid">
+          <article class="method-card">
+            <span class="method-step">1</span>
+            <h3>Image and weight representations are different</h3>
+            <p>
+              Further analyses show a clear modality gap: classifier weights and image embeddings occupy different regions of the frozen vision feature space, even though they remain compatible enough for augmentation.
+            </p>
+          </article>
+          <article class="method-card">
+            <span class="method-step">2</span>
+            <h3>Source dataset quality matters</h3>
+            <p>
+              ImageNet-21K provides broader semantic coverage than narrower supervised heads, which is why its recycled classifier rows transfer more strongly across downstream tasks.
+            </p>
+          </article>
+          <article class="method-card">
+            <span class="method-step">3</span>
+            <h3>Weights beat images on equal budget</h3>
+            <p>
+              When the number of alignment pairs is matched, recycled classifier weights provide stronger text-aligned supervision than image representations.
+            </p>
+          </article>
+        </div>
+
+        <div class="intro-grid">
+          <article class="text-card">
+            <h3>Limitations and future work</h3>
+            <p>
+              Weights and image embeddings occupy different regions, so better methods are still needed to combine them more effectively.
+            </p>
+            <p>
+              Combining heads from multiple supervised datasets is promising, but only when they share the same frozen feature space; extending this across different backbones remains open.
+            </p>
+          </article>
+
+          <article class="text-card">
+            <h3>What the results establish</h3>
+            <p>
+              The classifier head carries reusable semantic structure across the motivation, weight-only setting, and low-data augmentation setting.
+            </p>
+            <p>
+              The broader message is not only that recycling works, but that it does so in a resource-efficient way that complements standard multimodal supervision.
+            </p>
+          </article>
+        </div>
+
+        <aside class="callout">
+          <p class="callout-label">Key takeaway</p>
+          <p>
+            Supervised classifier heads are not just disposable task heads: they are reusable semantic prototypes. Those anchors can boost vision-language alignment with no paired data, and they remain complementary when paired data is scarce.
+          </p>
+        </aside>
+      </section>
+
+      <section id="conclusion" class="content-section">
+        <div class="section-heading">
+          <p class="section-kicker">Conclusion</p>
+          <h2>Reusable semantic prototypes are the through-line of the paper</h2>
+        </div>
+
+        <div class="intro-grid">
+          <article class="text-card">
+            <h3>Without image-text data</h3>
+            <p>
+              Supervised classifier heads can endow a vision encoder with text-aligned capabilities even when no paired image-text data is available.
+            </p>
+          </article>
+
+          <article class="text-card">
+            <h3>With scarce image-text data</h3>
+            <p>
+              The same recycled weights remain useful as augmentation, with the strongest benefits appearing in the low-data regime.
+            </p>
+          </article>
+        </div>
+
+        <aside class="callout">
+          <p class="callout-label">Final message</p>
+          <p>
+            Supervised classifier heads are reusable semantic prototypes for resource-efficient vision-language alignment: they can boost alignment with no pairs, and they still help when only a few pairs are available.
+          </p>
+        </aside>
+      </section>
+
+      <section id="citation" class="content-section citation-section">
+        <div class="section-heading">
+          <p class="section-kicker">Citation</p>
+          <h2>Cite the paper</h2>
+        </div>
+
+        <p class="citation-note">
+          If you use this repository, please cite the ICML 2026 paper:
+        </p>
+
+        <div class="bibtex-card">
+          <div class="bibtex-toolbar">
+            <span>BibTeX</span>
+          </div>
+          <pre class="bibtex-block"><code id="preprint-bibtex">@inproceedings{mendez2026supervised,
+  title = {Supervised Classification Heads as Semantic Prototypes: Unlocking Vision-Language Alignment via Weight Recycling},
+  author = {Mendez, David and Confalonieri, Roberto and Diaz-Rodriguez, Natalia},
+  booktitle = {Proceedings of the International Conference on Machine Learning (ICML)},
+  year = {2026},
+  archivePrefix = {arXiv},
+  eprint = {2605.22484},
+  primaryClass = {cs.CV},
+  url = {https://arxiv.org/abs/2605.22484}
+}</code></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

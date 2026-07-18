@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "syngler"
+version = "0.1.0"
+description = "Efficient Synthetic Network Generation via Latent Embedding Reconstruction"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+dependencies = [
+  "numpy>=1.21",
+  "scipy>=1.7",
+  "networkx>=2.8",
+  "scikit-learn>=1.0",
+  "tqdm>=4.60",
+  "pyyaml>=6.0",
+  "torch>=2.0",
+  "matplotlib>=3.4",
+  "pandas>=1.4",
+]
+
+[project.optional-dependencies]
+forest = ["ForestDiffusion>=1.0"]
+dev = ["pytest>=7.0", "ipython"]
+
+[tool.setuptools.packages.find]
+include = ["syngler*"]

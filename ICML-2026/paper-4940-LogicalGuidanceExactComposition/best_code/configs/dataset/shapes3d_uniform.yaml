@@ -1,0 +1,25 @@
+train_dataset:
+  _target_: logdiff.datasets.shapes3d.BenchmarkDataset  
+  dataset_path: ${hydra:runtime.cwd}/data/shapes3d
+  dataset_name: shapes3d
+  variant: full
+  mode: train  
+  
+val_dataset:
+  _target_: logdiff.datasets.shapes3d.BenchmarkDataset  
+  dataset_path: ${hydra:runtime.cwd}/data/shapes3d
+  dataset_name: shapes3d
+  variant: random
+  mode: test  
+
+train_dataloader:
+  batch_size: 1024
+  num_workers: 4
+  persistent_workers: True
+  shuffle: True
+
+val_dataloader:
+  batch_size: 1024
+  num_workers: 4
+  persistent_workers: True
+  shuffle: False
