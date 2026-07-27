@@ -30,6 +30,8 @@ For installation and usage instructions, please see [cli_guide.md](./cli_guide.m
 
 ## 📢 News
 
+- **2026-07-27** 🔧 Released **v0.3.1** — Fixed log spam: some backends (third-party relays in particular) emit status events continuously, repeating the `[session]` line until it buried the useful output. It is now printed once per session, keeping only retry and error notices.
+
 - **2026-06-28** 🚀 Released **v0.3.0** — Ported the multi-agent optimization "brain" into the local CLI: resumable runs (`autosota --resume`); a continuation supervisor that fixes premature aborts by relaunching until the budget is spent; an independent read-only evaluation pass (`evaluation_verdict.json`); removal of percentage-target early stopping in favor of a budget-only, structured multi-metric objective with guardrails; deep-research web-search verification (`web_search VERIFIED / UNVERIFIED`); and a fix for workspace cross-talk.
 
 - **2026-05-15** 🔧 Released **v0.2.1** — fixes CLI invocation failure on clean machines after global install; adds `autosota login` for one-time terms-of-service acceptance.
