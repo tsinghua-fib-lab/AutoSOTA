@@ -4,6 +4,8 @@
 
 **A curated leaderboard of automatically optimized research codebases**
 
+Developed by **FIB LAB, Tsinghua University** and **Zhongguancun Academy**
+
 [![Papers](https://img.shields.io/badge/Papers-105-4c1?style=for-the-badge&logo=googlescholar&logoColor=white)](#)
 [![AutoSota](https://img.shields.io/badge/Generated%20by-AutoSota-6f42c1?style=for-the-badge&logo=github&logoColor=white)](#)
 [![Status](https://img.shields.io/badge/Status-Active-0a7?style=for-the-badge&logo=activity&logoColor=white)](#)
@@ -1403,7 +1405,6 @@ The optimization tuned XGBoost hyperparameters (learning_rate: 0.001→0.1, n_es
 Applied Laplace smoothing (alpha=2.0) to the prevalence estimate for the African American subgroup, which has only 332 patients with 6 positive cases. This Bayesian regularization improved dca_overall_african_american from 0.900 to 0.922 (+2.4%), exceeding the target of 0.918.
 
 **[→ paper-105-BinaryClassEval/OPTIMIZATION.md](./paper-105-BinaryClassEval/OPTIMIZATION.md)**
-
 
 
 
