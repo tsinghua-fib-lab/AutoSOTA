@@ -1,0 +1,62 @@
+{
+  "method": "released_fold_heads_variants_v29",
+  "feature_dim": 2688,
+  "stage_dims": [
+    768,
+    960,
+    960
+  ],
+  "fold_specs": {
+    "0": [
+      "stage",
+      {
+        "bound": 0.25,
+        "freeze_temp": true,
+        "use_bias": false
+      }
+    ],
+    "1": [
+      "bias_only",
+      {
+        "bound": 0.2
+      }
+    ],
+    "2": [
+      "stage",
+      {
+        "bound": 0.25,
+        "freeze_temp": true,
+        "bias_bound": 0.2
+      }
+    ],
+    "3": [
+      "stage",
+      {
+        "bound": 1.0,
+        "kl_lambda": 2.0
+      }
+    ],
+    "4": [
+      "stage",
+      {
+        "bound": 1.5,
+        "kl_lambda": 2.0
+      }
+    ],
+    "5": [
+      "bias_only",
+      {
+        "bound": 0.2
+      }
+    ],
+    "6": [
+      "stage",
+      {
+        "bound": 0.4,
+        "freeze_temp": true,
+        "bias_bound": 0.2
+      }
+    ]
+  },
+  "note": "Audit mirror of heads.FOLD_SPECS; the Python constants are authoritative."
+}

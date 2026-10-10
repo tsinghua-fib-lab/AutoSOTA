@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meisenmeister"
+version = "0.1.0"
+description = "Meisenmeister utilities and CLI entrypoints."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dependencies = [
+    "blosc2",
+    "breastdivider",
+    "dynamic_network_architectures",
+    "einops",
+    "numpy",
+    "SimpleITK",
+    "timm",
+    "torch",
+    "torchio",
+    "tqdm",
+]
+
+[project.scripts]
+mm_extract_dataset_fingerprint = "meisenmeister.cli:mm_extract_dataset_fingerprint"
+mm_create_breast_segmentations = "meisenmeister.cli:mm_create_breast_segmentations"
+mm_homogenize = "meisenmeister.cli:mm_homogenize"
+mm_plan_experiment = "meisenmeister.cli:mm_plan_experiment"
+mm_preprocess = "meisenmeister.cli:mm_preprocess"
+mm_plan_and_preprocess = "meisenmeister.cli:mm_plan_and_preprocess"
+mm_create_5fold = "meisenmeister.cli:mm_create_5fold"
+mm_train = "meisenmeister.cli:mm_train"
+mm_preview_da = "meisenmeister.cli:mm_preview_da"
+mm_benchmark_train = "meisenmeister.cli:mm_benchmark_train"
+mm_predict = "meisenmeister.cli:mm_predict"
+mm_predict_from_modelfolder = "meisenmeister.cli:mm_predict_from_modelfolder"
+mm_evaluate_predictions = "meisenmeister.cli:mm_evaluate_predictions"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["meisenmeister*"]
+
+[tool.black]
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+py_version = 312

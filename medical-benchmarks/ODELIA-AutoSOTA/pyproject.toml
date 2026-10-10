@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odelia-autosota"
+version = "0.1.1"
+description = "Independent residual heads for seven frozen MeisenMeister encoders"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+dependencies = ["torch>=2.8,<3", "numpy>=2,<3", "scikit-learn>=1.5,<2"]
+
+[project.optional-dependencies]
+dev = ["black==26.5.1"]
+
+[project.scripts]
+odelia-autosota = "odelia_autosota.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.black]
+target-version = ["py312"]
+line-length = 88

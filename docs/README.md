@@ -14,12 +14,14 @@ Developed by **FIB LAB, Tsinghua University** and **Zhongguancun Academy**
 <br>
 
 > **Overview** — AutoSota automatically optimizes research codebases. This repository
-> provides the CLI usage guide and the code and report archives from three experiment
-> batches: early experiments across multiple conferences, CVPR 2026, and ICML 2026.
+> provides the CLI usage guide and code and report archives for conference experiments
+> and medical benchmark studies.
 
 ---
 
 ## 🧪 Experiment Results
+
+### Conference Experiments
 
 | Batch | Scope | Entry points |
 |:---:|:---|:---|
@@ -27,7 +29,19 @@ Developed by **FIB LAB, Tsinghua University** and **Zhongguancun Academy**
 | 2 | CVPR 2026 | [Code and reports](../CVPR-2026/) · [Results dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/cvpr.html) |
 | 3 | ICML 2026 | [Code and reports](../ICML-2026/) · [Results dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/icml.html) |
 
+### Medical Benchmarks
+
+| Benchmark | Task | Challenge score | Entry points |
+|:---|:---|:---|:---|
+| ODELIA Breast MRI Challenge 2025 | Healthy / benign / malignant breast-ROI classification | 0.876448 → **0.899644** | [Research report](../medical-benchmarks/ODELIA-AutoSOTA/docs/research_report.md) · [Code and results](../medical-benchmarks/ODELIA-AutoSOTA/) |
+
+The ODELIA study improves Challenge score in all seven folds on the same public-test
+cohort. Public-test feedback informed the search, and released encoder training may
+overlap this cohort; this is not a new official hidden-test leaderboard result.
+
 ### Experiment News
+
+- **2026-10-10** 🧪 Published the **ODELIA medical benchmark study**, including the final method, aggregate results, and an English Markdown report with the complete search history.
 
 - **2026-07-06** 🧪 Added the **third experiment batch: ICML 2026**, with paper-level reproduction and optimization tracking.
 
