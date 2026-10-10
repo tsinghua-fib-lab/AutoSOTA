@@ -21,7 +21,7 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 <tr>
 <td width="50%" valign="top">
 <h3>🧪 Explore the research</h3>
-<p>Conference experiments and medical benchmark studies, with source code, reports, and evaluation protocols.</p>
+<p>Conference experiments and science benchmarks, with source code, reports, and evaluation protocols.</p>
 <a href="#experiment-results"><strong>Browse experiment results →</strong></a>
 </td>
 <td width="50%" valign="top">
@@ -38,6 +38,16 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 
 ## 🧪 Experiment Results
 
+### Experiment News
+
+- **2026-10-10** 🧬 Published the **ODELIA Breast MRI Challenge** study, with public-test results, code, a research report, and the complete search history.
+
+- **2026-07-06** 🚀 Added the **ICML 2026** experiment batch, with **454 paper optimization archives** and a dashboard tracking reproduction and optimization progress.
+
+- **2026-06-07** 👁️ Published the **CVPR 2026** experiment batch, with **51 paper optimization archives** and a conference-wide results dashboard.
+
+- **2026-03-27** 🎉 Released our first **105 paper optimization archives** across multiple conferences, including code and experiment reports.
+
 ### Conference Experiments
 
 | Batch | Research archive | Explore |
@@ -46,33 +56,20 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 | **02** | **CVPR 2026** | [Code & reports](./CVPR-2026/) · [Dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/cvpr.html) |
 | **03** | **ICML 2026** | [Code & reports](./ICML-2026/) · [Dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/icml.html) |
 
-### Medical Benchmarks
+### Science Benchmarks
 
-**ODELIA Breast MRI Challenge 2025**
-
-Healthy / benign / malignant breast-ROI classification with independent heads for seven frozen encoders.
-
-| Released baseline | AutoSOTA | Folds with improved Challenge score |
-|:---:|:---:|:---:|
-| 0.876448 | **0.899644** | **7 / 7** |
-
-*Challenge score on the same 300 public-test breast ROIs.*
-
-[Read the research report →](./medical-benchmarks/ODELIA-AutoSOTA/docs/research_report.md) &nbsp;·&nbsp; [Code & results](./medical-benchmarks/ODELIA-AutoSOTA/) &nbsp;·&nbsp; [Complete search history](./medical-benchmarks/ODELIA-AutoSOTA/docs/search_history.md)
-
-> [!NOTE]
-> Scores compare the same public-test cohort. Public-test feedback informed the search, and released encoder training may overlap this cohort. This is not a new official hidden-test leaderboard result.
-
-### Experiment News
-
-| Date | Research milestone |
-|:---|:---|
-| **2026-10-10** | Published the **ODELIA medical benchmark study**, with final code, aggregate results, and an English Markdown report and search history. |
-| **2026-07-06** | Added the **ICML 2026** experiment batch, with paper-level reproduction and optimization tracking. |
-| **2026-06-07** | Published the **CVPR 2026** experiment batch. |
-| **2026-03-27** | Published our **early experiments** across multiple conferences. |
+| Benchmark | Metric & evaluation | Released baseline | AutoSOTA | Improved folds | Explore |
+|:---|:---|:---:|:---:|:---:|:---|
+| **ODELIA Breast MRI Challenge 2025** · Medical | Challenge score · public-test-adaptive evaluation | 0.876448 | **0.899644** | **7 / 7** | [Report](./medical-benchmarks/ODELIA-AutoSOTA/docs/research_report.md) · [Code & results](./medical-benchmarks/ODELIA-AutoSOTA/) · [Search history](./medical-benchmarks/ODELIA-AutoSOTA/docs/search_history.md) |
 
 ---
+
+<div align="center">
+<a id="autosota-cli"></a>
+<a href="./cli_guide.md">
+<img src="./assets/readme-cli.svg" width="100%" alt="AutoSOTA CLI — Your research loop, in your terminal" />
+</a>
+</div>
 
 ## 🛠️ AutoSOTA CLI
 
@@ -84,30 +81,29 @@ Bring a runnable codebase and an optimization goal. **AutoSOTA CLI** iteratively
 
 **[Installation, configuration & usage →](./cli_guide.md)**
 
-### CLI Updates
+### CLI News
 
-**v0.3.1 · July 27, 2026** — Cleaner session output: one session-start message, with retry and error notices kept visible.
+- **2026-07-27** 🔧 Released **v0.3.1** — Reduced repetitive session logs to make experiment output easier to follow.
 
-<details>
-<summary><strong>View the full CLI release history</strong></summary>
+- **2026-06-28** 🚀 Released **v0.3.0** — Added multi-agent research to the local CLI, with resumable runs, budget-driven optimization, multi-metric guardrails, literature verification, and independent final evaluation.
 
-- **2026-07-27** 🔧 Released **v0.3.1** — Fixed log spam: some backends (third-party relays in particular) emit status events continuously, repeating the `[session]` line until it buried the useful output. It is now printed once per session, keeping only retry and error notices.
+- **2026-05-15** 🛠️ Released **v0.2.1** — Fixed invocation failures after global installation on clean machines and added `autosota login` for one-time terms acceptance.
 
-- **2026-06-28** 🚀 Released **v0.3.0** — Ported the multi-agent optimization "brain" into the local CLI: resumable runs (`autosota --resume`); a continuation supervisor that fixes premature aborts by relaunching until the budget is spent; an independent read-only evaluation pass (`evaluation_verdict.json`); removal of percentage-target early stopping in favor of a budget-only, structured multi-metric objective with guardrails; deep-research web-search verification (`web_search VERIFIED / UNVERIFIED`); and a fix for workspace cross-talk.
+- **2026-05-13** 📖 Added setup instructions for **DeepSeek**, both directly and through **OpenRouter**.
 
-- **2026-05-15** 🔧 Released **v0.2.1** — fixes CLI invocation failure on clean machines after global install; adds `autosota login` for one-time terms-of-service acceptance.
+- **2026-05-12** ⚡ Released **v0.2.0** — Added direct **DeepSeek** access, separate API keys for optimization and literature review, and protection against changes to evaluation scripts.
 
-- **2026-05-13** 📝 Added detailed configuration instructions for both DeepSeek official direct connection and calling DeepSeek via OpenRouter.
+- **2026-04-29** 🎛️ Released **v0.1.1** — Added inter-round pauses with `-i` and the interactive commands `ask`, `steer`, and `sessions`.
 
-- **2026-05-12** 🚀 Released v0.2.0 — Supported direct access to domestic models like DeepSeek (no longer tied to OpenRouter), allowed the use of separate API keys for code optimization and literature review, and added anti-tampering protection for evaluation scripts.
+- **2026-04-22** 🎉 Released **v0.1.0** — The first CLI release supports codebase exploration, literature review, iterative experiments, and code and patch export.
 
-- **2026-04-29** 🔧 Released v0.1.1 — Added inter-round pause functionality (-i), allowing you to check progress or add instructions without killing the process; introduced new interactive commands including ask, steer, and sessions.
+- **2026-04-21** 💻 Initialized the AutoSOTA CLI project on our lab server.
 
-- **2026-04-22** 🎉 Released v0.1.0 — Initial release, achieving a closed loop for automated research code optimization: automatically explores repository configurations, reviews relevant literature, iteratively modifies code, and exports the optimal code and patch upon completion.
+### Latest release
 
-- **2026-04-21** 💻 Initialized the AutoSOTA CLI project on the laboratory server.
+**v0.3.1 · July 27, 2026**
 
-</details>
+Session output stays readable even when a backend continuously emits status events. The CLI now prints the `[session]` start message once per session, while keeping retry and error notices visible so you can follow the experiment and spot problems.
 
 ---
 
