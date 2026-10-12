@@ -1,0 +1,58 @@
+output_dir: /home/dataset-assist-0/chenzhibin/s3f+autosota/ckpt/s2f_pretrain_output
+
+dataset:
+  class: CATH
+  path: {{ datadir }}   # Your path to the dataset, specified in command line arguments
+  max_length: 300
+  transform:
+    class: ProteinView
+    view: residue
+
+split: [0.97, 0.02, 0.01]   # Split pre-training dataset into train, val, test
+
+task:
+  class: ResidueTypePrediction
+  mask_rate: 0.15
+  dropout: 0.5
+  model:
+    class: FusionNetwork
+    sequence_model:
+      class: ESM
+      path: /home/dataset-assist-0/chenzhibin/s3f+autosota/ckpt/esm-model-weights/    # Your path to download esm model weights
+      model: ESM-2-650M
+    structure_model:
+      class: GVPGNN
+      node_in_dim: [1280, 0]
+      node_h_dim: [256, 16]
+      edge_in_dim: [16, 1]
+      edge_h_dim: [64, 1]
+      num_layers: 5
+      vector_gate: True
+      readout: mean
+      drop_rate: 0.25
+  graph_construction_model:
+    class: GraphConstruction
+    node_layers:
+      - class: AlphaCarbonNode
+    edge_layers:
+      - class: SpatialEdge
+        radius: 10.0
+        min_distance: 0
+    edge_feature: null
+
+optimizer:
+  class: Adam
+  lr: 2.0e-4
+
+engine:
+  gpus: [0, 1, 2, 3]
+  batch_size: 32    # Batch size per gpu
+
+fix_sequence_model: True    # Do not tune esm model weights
+
+checkpoint: null  # Put the path to your checkpoint here to continue pre-training
+
+metric: accuracy
+
+train:
+  num_epoch: 100

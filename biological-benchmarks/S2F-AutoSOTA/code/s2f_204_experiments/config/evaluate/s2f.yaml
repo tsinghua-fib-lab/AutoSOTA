@@ -1,0 +1,87 @@
+output_dir: ~/scratch/proteingym_output
+
+summary:
+  class: ProteinGym
+  path: {{ datadir }}
+  csv_file: DMS_substitutions.csv
+
+structure_path: {{ structdir }}
+surface_path: {{ surfdir }}
+
+# id_list:      # If you only want to evaluate a subset of assays
+#   - B2L11_HUMAN_Dutta_2010_binding-Mcl-1
+#   - ADRB2_HUMAN_Jones_2020
+
+# exclude_id_list:    # If you want to exclude some assays from evaluation
+#   - SPIKE_SARS2_Starr_2020_binding
+
+dataset:
+  class: DMSAssay
+  atom_feature: null
+  bond_feature: null
+  transform:
+    class: Compose
+    transforms:
+      - class: MutantStructure
+        key: graph
+        template_key: wild_type
+      - class: ProteinView
+        view: residue
+
+task:
+  class: ResidueTypePrediction
+  mask_rate: 0.15
+  dropout: 0.5
+  plddt_threshold: 0
+  # IDEA-303+404: fused scoring distribution =
+  #   (1-w-c)*log_softmax(S2F) + w*log_softmax(ESM_masked) + c*log_softmax(ESM_wt)
+  # IDEA-503 (round 5): 31-cell (w,c) grid on sel-80 found a plateau argmax at
+  # w=0, c~0.35-0.40 (sel-80 0.5086 vs 0.5075 at the old w=0.10, c=0.15);
+  # dev-40 at the winner: 0.4524 vs 0.4500 (exact same-checkpoint delta).
+  # The masked-ESM branch is redundant once the WT marginal is present
+  # (round-4 sel-24 already hinted at this: argmax was w=0 at c=0.15).
+  # IDEA-303+404 (rounds 3-4): model-side fusion weights.
+  # IDEA-608 (round 6): with the ESM-1v 5-model ensemble as the scoring
+  # backbone (default in script/evaluate.py, S2F_SCORING_ESM), the masked
+  # marginal RETURNS: (w,c) grid on sel-80 gives w=0.20, c=0.30 (sel-80
+  # 0.5270 vs 0.5257 at the old (0,0.30), vs 0.5189 for the ESM-2-650M
+  # stack). The ensemble's masked marginal is the published ESM-1v recipe;
+  # averaging five models denoises it enough to carry weight again.
+  # IDEA-601+603 (round 6): the evolutionary (MSA/PSSM) expert is fused at the
+  # ROW level in script/evaluate.py with a per-assay weight
+  # e(neff) = sigmoid(8*(log10(neff)-1.47)) over the assay's subMSA Henikoff
+  # effective-sequence count (adaptive ON by default, S2F_PSSM_ADAPTIVE).
+  # dev-40 with PSSM on the ESM-2-650M scoring stack: 0.4572 (+0.0048 over the
+  # round-5 champion 0.4524).
+  esm_weight: 0.20
+  wt_esm_weight: 0.30
+  model:
+    class: FusionNetwork
+    sequence_model:
+      class: MyESM
+      path: /home/dataset-assist-0/chenzhibin/s3f+autosota/ckpt/esm-model-weights/
+      model: ESM-2-650M
+    structure_model:
+      class: GVPGNN
+      node_in_dim: [1280, 0]
+      node_h_dim: [256, 16]
+      edge_in_dim: [16, 1]
+      edge_h_dim: [64, 1]
+      num_layers: 5
+      vector_gate: True
+      readout: mean
+      drop_rate: 0.25
+  graph_construction_model:
+    class: GraphConstruction
+    node_layers:
+      - class: AlphaCarbonNode
+    edge_layers:
+      - class: SpatialEdge
+        radius: 10.0
+        min_distance: 0
+    edge_feature: null
+
+gpus: [0]   # Only support single gpu inference now
+batch_size: 4
+
+model_checkpoint: {{ ckpt }}

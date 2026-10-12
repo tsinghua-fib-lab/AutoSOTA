@@ -1,0 +1,81 @@
+{
+  "benchmark": "ProteinGym v1.3 substitutions",
+  "method_id": "S2F_ESM1v_PSSM",
+  "task": "Protein fitness prediction",
+  "evidence": "Aggregate values transcribed from the supplied research report; raw predictions and metric output tables were not supplied.",
+  "source_report_sha256": "43140c59f1bf807347025e2d12a0d80422ef2f3830f9c04b0aba84c173a960c8",
+  "benchmark_adaptive": true,
+  "primary_result": {
+    "assays": 217,
+    "mutants": 2465767,
+    "run_dates": [
+      "2026-09-24",
+      "2026-09-25"
+    ],
+    "metric": "Spearman",
+    "aggregation": "Mean of functional-category means after grouping assays by UniProt and functional category.",
+    "published_original_s2f": 0.45560865,
+    "autosota": 0.46633717,
+    "absolute_gain": 0.01072852,
+    "relative_gain_percent_reported": 2.35,
+    "official_display": {
+      "published_original_s2f": 0.456,
+      "autosota": 0.466
+    },
+    "per_assay_comparison": {
+      "wins": 145,
+      "ties": 2,
+      "losses": 70,
+      "precision_decimal_places": 3
+    }
+  },
+  "non_binding_204": {
+    "assays": 204,
+    "aggregation": "Arithmetic mean of per-assay Spearman; distinct from the primary grouped metric.",
+    "published_original_s2f": 0.4802745,
+    "autosota": 0.5040833,
+    "absolute_gain": 0.0238088,
+    "relative_gain_percent_reported": 4.96,
+    "per_assay_comparison": {
+      "wins": 139,
+      "ties": 2,
+      "losses": 63,
+      "precision_decimal_places": 3
+    }
+  },
+  "historical_local_comparisons": {
+    "baseline_source": "Local reevaluation of the authors released s2f.pth; temporary loading patch not fully preserved.",
+    "dev_40": {
+      "baseline": 0.4436,
+      "autosota": 0.4653,
+      "relative_gain_percent_reported": 4.89
+    },
+    "non_binding_204": {
+      "baseline": 0.4776,
+      "autosota": 0.5041,
+      "relative_gain_percent_reported": 5.55
+    }
+  },
+  "other_full_217_metrics": {
+    "AUC": 0.756,
+    "MCC": 0.367,
+    "NDCG": 0.781,
+    "Top_recall": 0.236,
+    "per_assay_mean_Spearman": 0.49517
+  },
+  "search": {
+    "rounds": 7,
+    "iterations": 89,
+    "start_date": "2026-08-01",
+    "end_date": "2026-09-08"
+  },
+  "limitations": [
+    "ProteinGym subset labels informed method selection, and full-204 results were inspected during development.",
+    "The structure checkpoint was locally trained, not the original authors released checkpoint.",
+    "The method combines multiple language models and MSA information.",
+    "Some assays and functional-category means declined.",
+    "The archive does not establish overall ProteinGym SOTA, leaderboard inclusion, or a global rank.",
+    "Checkpoint, data, reference CSVs, per-mutation predictions, caches, and run logs are external.",
+    "The portable launcher was checked on four representative assays according to the source report, not rerun on all 217."
+  ]
+}

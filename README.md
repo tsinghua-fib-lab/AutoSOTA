@@ -40,6 +40,8 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 
 ### Experiment News
 
+- **2026-10-12** 🧫 Published the **S2F optimization study on ProteinGym v1.3**, covering 217 substitution assays, with code, an English research report, and aggregate results.
+
 - **2026-10-10** 🧬 Published the **ODELIA Breast MRI Challenge** study, with public-test results, code, a research report, and the complete search history.
 
 - **2026-07-06** 🚀 Added the **ICML 2026** experiment batch, with **454 paper optimization archives** and a dashboard tracking reproduction and optimization progress.
@@ -58,9 +60,10 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 
 ### Science Benchmarks
 
-| Benchmark | Metric & evaluation | Released baseline | AutoSOTA | Improved folds | Explore |
+| Benchmark | Metric & evaluation | Released baseline | AutoSOTA | Improved folds / assays | Explore |
 |:---|:---|:---:|:---:|:---:|:---|
 | **ODELIA Breast MRI Challenge 2025** · Medical | Challenge score · public-test-adaptive evaluation | 0.876448 | **0.899644** | **7 / 7** | [Report](./medical-benchmarks/ODELIA-AutoSOTA/docs/research_report.md) · [Code & results](./medical-benchmarks/ODELIA-AutoSOTA/) · [Search history](./medical-benchmarks/ODELIA-AutoSOTA/docs/search_history.md) |
+| **ProteinGym v1.3** · Biology | Grouped Spearman · 217 assays; benchmark-adaptive evaluation | S2F: 0.455609 | **0.466337** | **145 / 217** | [Report](./biological-benchmarks/S2F-AutoSOTA/docs/research_report.md) · [Code & results](./biological-benchmarks/S2F-AutoSOTA/) · [Search summary](./biological-benchmarks/S2F-AutoSOTA/docs/search_history.md) |
 
 ---
 
