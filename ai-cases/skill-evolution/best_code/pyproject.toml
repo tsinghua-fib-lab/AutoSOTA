@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skillopt"
+version = "0.2.0"
+description = "SkillOpt: Agentic Skill Optimization via Reflective Training Loops"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "SkillOpt Team"},
+]
+keywords = ["agent", "prompt-optimization", "skill-learning", "LLM", "agentic"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "openai>=1.30.0",
+    "pyyaml>=6.0",
+    "numpy>=1.24.0",
+    "openpyxl>=3.1.0",
+    "azure-identity>=1.15.0",
+    "azure-core>=1.30.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+# Benchmark-specific dependencies
+alfworld = ["alfworld>=0.4.0", "gymnasium>=0.29.0", "omegaconf>=2.3.0"]
+# Claude model backend
+claude = ["claude-agent-sdk>=0.1.0", "json_repair>=0.61.0"]
+# Qwen local model backend (via vLLM)
+qwen = ["vllm>=0.4.0", "json_repair>=0.61.0"]
+# SearchQA data materialization
+searchqa = ["datasets>=2.18.0"]
+# Documentation site
+docs = ["mkdocs-material>=9.5.0", "mkdocstrings[python]>=0.24.0"]
+# WebUI dashboard
+# Broad gradio support is tied to a single huggingface_hub bound: gradio 4/5
+# need huggingface-hub<1 (gradio 4.44 imports HfFolder), but gradio 6 needs
+# huggingface-hub>=1.16. A single bound cannot satisfy both, so narrow the range
+# to the two majors this project actually validates (5 exercises the Blocks
+# theme path, 6 the launch() theme path); the CI matrix tests both. The floor
+# is 5.50.0: earlier gradio 5.x (5.0-5.49) still import HfFolder or don't apply
+# the Blocks theme the same way, so they are not valid supported versions.
+webui = ["gradio>=5.50.0,<7"]
+# Development tools
+dev = ["ruff>=0.4.0", "pytest>=8.0.0"]
+# All optional dependencies (except docs/dev/webui)
+all = [
+    "alfworld>=0.4.0",
+    "gymnasium>=0.29.0",
+    "omegaconf>=2.3.0",
+    "claude-agent-sdk>=0.1.0",
+    "json_repair>=0.61.0",
+]
+
+[project.scripts]
+skillopt-train = "scripts.train:main"
+skillopt-eval = "scripts.eval_only:main"
+skillopt-sleep = "skillopt_sleep.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/microsoft/SkillOpt"
+Documentation = "https://microsoft.github.io/SkillOpt"
+Repository = "https://github.com/microsoft/SkillOpt"
+Issues = "https://github.com/microsoft/SkillOpt/issues"
+
+[tool.setuptools.packages.find]
+# skillopt*      = the research package
+# skillopt_sleep = the open-source Sleep tool (decoupled, zero research dep)
+# skillopt_webui = the Gradio dashboard (installed via the `webui` extra)
+include = ["skillopt", "skillopt.*", "skillopt_sleep", "skillopt_sleep.*", "skillopt_webui", "skillopt_webui.*", "scripts*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

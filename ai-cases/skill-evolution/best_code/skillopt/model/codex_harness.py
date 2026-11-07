@@ -1,0 +1,2036 @@
+"""Helpers for running exec backends as the target harness."""
+from __future__ import annotations
+
+import asyncio
+import errno
+import json
+import os
+import re
+import shutil
+import subprocess
+import tempfile
+import threading
+import traceback
+import warnings
+from typing import Any
+
+from skillopt.model.backend_config import (
+    build_codex_exec_cli_config_overrides,
+    get_claude_code_exec_config,
+    get_codex_exec_config,
+    get_copilot_exec_config,
+    get_cursor_exec_config,
+    get_target_backend,
+    validate_exec_sandbox,
+)
+from skillopt.model.copilot_backend import (
+    build_copilot_subprocess_env,
+    parse_copilot_jsonl,
+)
+
+ANSWER_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "final_response": {
+            "type": "string",
+            "description": "The exact final answer text to return, preserving required <answer>...</answer> tags.",
+        },
+        "final_answer": {
+            "type": "string",
+            "description": "The concise answer value without explanation, if separable.",
+        },
+    },
+    "required": ["final_response", "final_answer"],
+    "additionalProperties": False,
+}
+
+
+def render_skill_md(
+    skill_content: str,
+    *,
+    name: str = "skillopt-target",
+    description: str = "Dynamic ReflACT skill for the current benchmark task.",
+    preamble: str = "",
+) -> str:
+    body = skill_content.strip() or "No additional dynamic guidance was provided for this task."
+    chunks = [
+        "---",
+        f'name: "{name}"',
+        f'description: "{description}"',
+        "---",
+        "",
+        "# ReflACT Target Skill",
+        "",
+    ]
+    if preamble.strip():
+        chunks.append(preamble.strip())
+        chunks.append("")
+    chunks.extend([
+        "## Dynamic Guidance",
+        "",
+        body,
+        "",
+    ])
+    return "\n".join(chunks)
+
+
+def _is_symlink_privilege_error(exc: OSError) -> bool:
+    """Return True only for the Windows 'symlink privilege not held' case.
+
+    We must not mask a real collision/error by silently falling back to a copy;
+    only the case where the OS refuses to create a symlink because the caller
+    lacks SeCreateSymbolicLinkPrivilege (Windows Developer Mode / elevation)
+    should fall back to a copy inside a private work dir.
+    """
+    if getattr(exc, "winerror", None) in (1314,):  # ERROR_PRIVILEGE_NOT_HELD
+        return True
+    if isinstance(exc, OSError):
+        return exc.errno in {
+            getattr(errno, "EPERM", -1),
+            getattr(errno, "ENOTSUP", -1),
+            getattr(errno, "EOPNOTSUPP", -1),
+        }
+    return False
+
+
+def prepare_workspace(
+    *,
+    work_dir: str,
+    skill_md: str,
+    task_text: str = "",
+    task_filename: str = "task.md",
+    images: list[str] | None = None,
+    extra_files: dict[str, str] | None = None,
+    copy_files: list[tuple[str, str]] | None = None,
+    link_dirs: list[tuple[str, str]] | None = None,
+) -> tuple[str, str]:
+    if os.path.exists(work_dir):
+        shutil.rmtree(work_dir)
+    os.makedirs(os.path.join(work_dir, ".agents", "skills", "skillopt-target"), exist_ok=True)
+
+    skill_path = os.path.join(work_dir, ".agents", "skills", "skillopt-target", "SKILL.md")
+    with open(skill_path, "w", encoding="utf-8") as f:
+        f.write(skill_md)
+
+    task_path = os.path.join(work_dir, task_filename)
+    if task_text:
+        with open(task_path, "w", encoding="utf-8") as f:
+            f.write(task_text)
+
+    if extra_files:
+        for rel_path, content in extra_files.items():
+            full_path = os.path.join(work_dir, rel_path)
+            parent = os.path.dirname(full_path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+    if copy_files:
+        for src, rel_dst in copy_files:
+            dst = os.path.join(work_dir, rel_dst)
+            parent = os.path.dirname(dst)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            shutil.copy2(src, dst)
+
+    if link_dirs:
+        for src, rel_dst in link_dirs:
+            dst = os.path.join(work_dir, rel_dst)
+            parent = os.path.dirname(dst)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            src_abs = os.path.abspath(src)
+            if os.path.lexists(dst):
+                raise FileExistsError(
+                    f"link destination already exists: {dst} (from {src})"
+                )
+            try:
+                os.symlink(src_abs, dst, target_is_directory=os.path.isdir(src_abs))
+            except OSError as exc:
+                # Fail closed: only fall back for the Windows symlink-privilege
+                # case, and never merge into an existing destination.
+                if not _is_symlink_privilege_error(exc):
+                    raise
+                if os.path.isdir(src_abs):
+                    shutil.copytree(src_abs, dst)
+                else:
+                    shutil.copy2(src_abs, dst)
+
+    attachment_lines: list[str] = []
+    if images:
+        attachments_dir = os.path.join(work_dir, "attachments")
+        os.makedirs(attachments_dir, exist_ok=True)
+        for index, image in enumerate(images, 1):
+            if not os.path.exists(image):
+                raise FileNotFoundError(image)
+            src = os.path.abspath(image)
+            base = os.path.basename(src) or f"image_{index}"
+            dst_name = f"{index:02d}_{base}"
+            dst = os.path.join(attachments_dir, dst_name)
+            if os.path.abspath(src) != os.path.abspath(dst):
+                shutil.copy2(src, dst)
+            rel_dst = os.path.relpath(dst, work_dir)
+            attachment_lines.append(f"- `{rel_dst}` (source: `{src}`)")
+
+    if attachment_lines:
+        with open(os.path.join(work_dir, "ATTACHMENTS.md"), "w", encoding="utf-8") as f:
+            f.write(
+                "# Attachments\n\n"
+                "Use these local files when the task refers to attached images or documents.\n\n"
+                + "\n".join(attachment_lines)
+                + "\n"
+            )
+
+    return skill_path, task_path
+
+
+def _build_codex_trace_summary(raw: str, response: str) -> str:
+    lines = [ln.rstrip() for ln in (raw or "").splitlines()]
+
+    def _find(prefix: str) -> str:
+        for ln in lines:
+            if ln.startswith(prefix):
+                return ln[len(prefix):].strip()
+        return ""
+
+    sandbox = _find("sandbox: ")
+    reasoning = _find("reasoning effort: ")
+    task_read = "unknown"
+    skill_read = "unknown"
+    exec_errors: list[str] = []
+    tokens_used = ""
+
+    for idx, ln in enumerate(lines):
+        if ln.startswith("exec"):
+            cmd = lines[idx + 1] if idx + 1 < len(lines) else ""
+            outcome = lines[idx + 2] if idx + 2 < len(lines) else ""
+            joined = f"{cmd}\n{outcome}"
+            if "task.md" in joined:
+                if "succeeded" in outcome:
+                    task_read = "success"
+                elif "failed" in outcome or "ERROR" in outcome:
+                    task_read = "failed"
+            if "SKILL.md" in joined:
+                if "succeeded" in outcome:
+                    skill_read = "success"
+                elif "failed" in outcome or "ERROR" in outcome:
+                    skill_read = "failed"
+        if ln.startswith("ERROR:"):
+            exec_errors.append(ln[len("ERROR:"):].strip())
+        if ln == "tokens used" and idx + 1 < len(lines):
+            tokens_used = lines[idx + 1].strip()
+
+    match = re.search(r"<answer>\s*([A-E])\s*</answer>", response or "", re.IGNORECASE)
+    if match:
+        answer_format = "well_formed"
+        answer_label = match.group(1).upper()
+    elif "<answer>" in (response or "").lower():
+        answer_format = "tagged_nonlabel"
+        answer_label = ""
+    elif (response or "").strip():
+        answer_format = "plain_text"
+        answer_label = ""
+    else:
+        answer_format = "missing"
+        answer_label = ""
+
+    parts = ["Codex Trace Summary"]
+    if sandbox:
+        parts.append(f"- sandbox: {sandbox}")
+    if reasoning:
+        parts.append(f"- reasoning: {reasoning}")
+    parts.append(f"- read task.md: {task_read}")
+    parts.append(f"- read SKILL.md: {skill_read}")
+    if exec_errors:
+        parts.append(f"- shell/tool errors: {' | '.join(exec_errors[:3])}")
+    else:
+        parts.append("- shell/tool errors: none")
+    parts.append(f"- final answer format: {answer_format}")
+    parts.append(f"- final answer label: {answer_label or '(none)'}")
+    if tokens_used:
+        parts.append(f"- tokens used: {tokens_used}")
+    return "\n".join(parts)
+
+
+def _build_claude_trace_summary(raw: str, response: str) -> str:
+    answer_format = "missing"
+    if "<answer>" in (response or "").lower():
+        answer_format = "tagged"
+    elif (response or "").strip():
+        answer_format = "plain_text"
+    errors: list[str] = []
+    for ln in (raw or "").splitlines():
+        if "error" in ln.lower() or "traceback" in ln.lower():
+            errors.append(ln.strip())
+        if len(errors) >= 3:
+            break
+    parts = ["Claude Code Trace Summary", f"- final answer format: {answer_format}"]
+    parts.append(f"- final response chars: {len(response or '')}")
+    parts.append(f"- errors: {' | '.join(errors) if errors else 'none'}")
+    return "\n".join(parts)
+
+
+def _build_cursor_trace_summary(raw: str, response: str) -> str:
+    model = ""
+    permission_mode = ""
+    session_id = ""
+    duration_ms = 0
+    tool_calls = 0
+    terminal_error = False
+    for line in (raw or "").splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        if event.get("type") == "system" and event.get("subtype") == "init":
+            model = str(event.get("model") or model)
+            permission_mode = str(event.get("permissionMode") or permission_mode)
+            session_id = str(event.get("session_id") or session_id)
+        elif event.get("type") == "tool_call" and event.get("subtype") == "started":
+            tool_calls += 1
+        elif event.get("type") == "result":
+            session_id = str(event.get("session_id") or session_id)
+            try:
+                duration_ms = int(event.get("duration_ms") or 0)
+            except (TypeError, ValueError):
+                duration_ms = 0
+            terminal_error = bool(event.get("is_error")) or event.get("subtype") == "error"
+
+    parts = ["Cursor Agent Trace Summary"]
+    if model:
+        parts.append(f"- model: {model}")
+    if permission_mode:
+        parts.append(f"- permission mode: {permission_mode}")
+    if session_id:
+        parts.append(f"- session id: {session_id}")
+    parts.append(f"- tool calls: {tool_calls}")
+    parts.append(f"- duration ms: {duration_ms}")
+    parts.append(f"- terminal error: {'yes' if terminal_error else 'no'}")
+    parts.append(f"- final response chars: {len(response or '')}")
+    return "\n".join(parts)
+
+
+def _persist_artifacts(
+    *,
+    work_dir: str,
+    raw: str,
+    response: str,
+    prefix: str,
+    summary_builder,
+) -> str:
+    pred_dir = os.path.dirname(work_dir.rstrip(os.sep))
+    raw_path = os.path.join(pred_dir, f"{prefix}_raw.txt")
+    summary_path = os.path.join(pred_dir, f"{prefix}_trace_summary.txt")
+
+    combined_raw = raw
+    if os.path.exists(raw_path):
+        with open(raw_path, encoding="utf-8") as f:
+            prev = f.read()
+        combined_raw = f"{prev}\n\n===== TURN BREAK =====\n\n{raw}" if prev.strip() else raw
+
+    with open(raw_path, "w", encoding="utf-8") as f:
+        f.write(combined_raw)
+    with open(summary_path, "w", encoding="utf-8") as f:
+        f.write(summary_builder(combined_raw, response))
+    return combined_raw
+
+
+def _persist_codex_artifacts(work_dir: str, raw: str, response: str) -> None:
+    _persist_artifacts(
+        work_dir=work_dir,
+        raw=raw,
+        response=response,
+        prefix="codex",
+        summary_builder=_build_codex_trace_summary,
+    )
+
+
+def _persist_claude_artifacts(work_dir: str, raw: str, response: str) -> None:
+    combined_raw = _persist_artifacts(
+        work_dir=work_dir,
+        raw=raw,
+        response=response,
+        prefix="claude",
+        summary_builder=_build_claude_trace_summary,
+    )
+    # Structured trace steps for the reflector (issue #233): expose what the
+    # agent actually did, not just the collapsed final answer.  Format from the
+    # *combined* raw (across turns) and write unconditionally so a turn that
+    # parses to no steps never leaves the previous turn's stale file behind.
+    steps_text = format_claude_trace_steps(combined_raw)
+    pred_dir = os.path.dirname(work_dir.rstrip(os.sep))
+    steps_path = os.path.join(pred_dir, "claude_trace_steps.txt")
+    with open(steps_path, "w", encoding="utf-8") as f:
+        f.write(steps_text)
+
+
+def _persist_cursor_artifacts(work_dir: str, raw: str, response: str) -> None:
+    _persist_artifacts(
+        work_dir=work_dir,
+        raw=_sanitize_cursor_trace(raw, preserve_markers=True),
+        response=response,
+        prefix="cursor",
+        summary_builder=_build_cursor_trace_summary,
+    )
+
+
+def parse_codex_raw(raw: str) -> dict:
+    """Parse raw Codex CLI output into step sections.
+
+    Returns a dict with:
+    - ``steps``: ordered sections beginning at the first ``user/codex/exec`` marker
+    - ``trace_body``: raw trace starting at the first marker
+    """
+    lines = (raw or "").splitlines()
+    markers = {"user", "codex", "exec"}
+    first_step_line: int | None = None
+    for idx, line in enumerate(lines):
+        if line in markers:
+            first_step_line = idx
+            break
+    if first_step_line is None:
+        return {"steps": [], "trace_body": ""}
+
+    steps: list[dict] = []
+    current: dict | None = None
+    for idx in range(first_step_line, len(lines)):
+        line = lines[idx]
+        if line in markers:
+            if current is not None:
+                current["end_line"] = idx
+                current["content"] = "\n".join(current["content_lines"]).strip()
+                current.pop("content_lines", None)
+                steps.append(current)
+            current = {
+                "index": len(steps) + 1,
+                "type": line,
+                "start_line": idx,
+                "content_lines": [],
+            }
+            continue
+        if current is not None:
+            current["content_lines"].append(line)
+    if current is not None:
+        current["end_line"] = len(lines)
+        current["content"] = "\n".join(current["content_lines"]).strip()
+        current.pop("content_lines", None)
+        steps.append(current)
+
+    trace_body = "\n".join(lines[first_step_line:]).strip()
+    return {"steps": steps, "trace_body": trace_body}
+
+
+def format_codex_trace_steps(raw: str, *, max_chars: int = 4000) -> str:
+    """Render parsed Codex trace into numbered compact steps for optimizer prompts."""
+    parsed = parse_codex_raw(raw)
+    steps = parsed["steps"]
+    if not steps:
+        return ""
+
+    rendered: list[str] = []
+    for step in steps:
+        summary = ""
+        content = str(step.get("content") or "").strip()
+        if step["type"] == "exec":
+            body_lines = [ln.strip() for ln in content.splitlines() if ln.strip()]
+            cmd = body_lines[0] if body_lines else ""
+            status = ""
+            for ln in body_lines[1:]:
+                low = ln.lower()
+                if "succeeded in" in low or "failed in" in low or "timed out" in low or low.startswith("error"):
+                    status = ln
+                    break
+            summary = cmd
+            if status:
+                summary = f"{summary} | {status}" if summary else status
+        else:
+            summary = " ".join(content.splitlines())
+        summary = summary[:500] if summary else "(empty)"
+        rendered.append(f"[{step['index']}] {step['type']}: {summary}")
+
+    text = "\n".join(rendered)
+    if len(text) > max_chars:
+        text = text[:max_chars] + "\n...[trace steps truncated]..."
+    return text
+
+
+def extract_codex_trace_prefix(raw: str, *, after_step: int) -> str:
+    """Return raw trace body up to and including ``after_step``.
+
+    ``after_step <= 0`` yields an empty string.
+    """
+    if after_step <= 0:
+        return ""
+    parsed = parse_codex_raw(raw)
+    steps = parsed["steps"]
+    if not steps:
+        return ""
+    clamped = min(after_step, len(steps))
+    lines = parsed["trace_body"].splitlines()
+    end_line = int(steps[clamped - 1]["end_line"]) - int(steps[0]["start_line"])
+    return "\n".join(lines[:end_line]).strip()
+
+
+# ── Claude Code trace steps (SDK messages → compact steps) ──────────────────
+# The Claude Code SDK serializes its full session into ``messages``: most
+# entries are bookkeeping (init / thinking_tokens), the rest are assistant text,
+# tool calls, and tool results.  Flatten those into numbered steps so the
+# reflector can see what the agent actually did without paying the full raw
+# payload size.
+
+
+def _claude_step_truncate(text: str, limit: int) -> str:
+    text = str(text or "").strip()
+    if len(text) <= limit:
+        return text
+    return text[:limit] + f"...[+{len(text) - limit} chars]"
+
+
+def _summarize_claude_tool_call(name: str, input_data: Any) -> str:
+    name = str(name or "")
+    if isinstance(input_data, dict):
+        if name == "Read":
+            return f"Read {input_data.get('file_path', '')}"
+        if name == "Glob":
+            return f"Glob {input_data.get('pattern', '')}"
+        if name == "Grep":
+            return f"Grep {input_data.get('pattern', '')}"
+        if name == "Bash":
+            return f"Bash {input_data.get('command', '')}"
+    return _claude_step_truncate(f"{name} {json.dumps(input_data, ensure_ascii=False)}", 500)
+
+
+def _iter_claude_json_blocks(raw: str):
+    """Yield each JSON object embedded in ``raw``.
+
+    ``run_claude_code_exec`` prefixes every attempt with a
+    ``===== CLAUDE ... ATTEMPT n =====`` header, so the persisted payload is not
+    a single JSON document.  Split on those headers and parse each block.
+    """
+    for chunk in re.split(r"(?m)^={5,}.*={5,}\s*$", raw or ""):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        try:
+            yield json.loads(chunk)
+        except json.JSONDecodeError:
+            continue
+
+
+def parse_claude_trace_steps(raw: str) -> list[dict]:
+    """Parse serialized Claude Code SDK messages into ordered, compact steps.
+
+    Returns a list of ``{"index", "type", "summary"}`` dicts where ``type`` is
+    one of ``text`` / ``tool_call`` / ``tool_result``.  System bookkeeping
+    events (init, thinking tokens) are dropped; tool results are truncated to
+    keep the trace small.
+    """
+    steps: list[dict] = []
+    for block in _iter_claude_json_blocks(raw):
+        messages = block.get("messages") if isinstance(block, dict) else None
+        if not isinstance(messages, list):
+            continue
+        for message in messages:
+            if not isinstance(message, dict):
+                continue
+            if message.get("subtype") in {"init", "thinking_tokens"}:
+                continue
+            data = message.get("data")
+            if isinstance(data, dict) and data.get("type") == "system":
+                continue
+            content = message.get("content")
+            if not isinstance(content, list):
+                # Terminal result message carries the final text.
+                text = str(message.get("result") or "").strip()
+                if text:
+                    steps.append({"type": "text", "summary": _claude_step_truncate(text, 500)})
+                continue
+            for item in content:
+                if not isinstance(item, dict):
+                    continue
+                if "name" in item and "input" in item:
+                    steps.append({
+                        "type": "tool_call",
+                        "summary": _summarize_claude_tool_call(item.get("name"), item.get("input")),
+                    })
+                elif "tool_use_id" in item:
+                    body = item.get("content")
+                    if isinstance(body, list):
+                        text_parts: list[str] = []
+                        for part in body:
+                            if isinstance(part, dict):
+                                # Anthropic content blocks carry their payload
+                                # under ``text`` (tool_result content is
+                                # ``[{"type": "text", "text": "..."}]``), not
+                                # ``content``.
+                                part_text = part.get("text")
+                                if isinstance(part_text, str):
+                                    text_parts.append(part_text)
+                            elif isinstance(part, str):
+                                text_parts.append(part)
+                        body = "\n".join(text_parts)
+                    summary = _claude_step_truncate(body, 200)
+                    if item.get("is_error"):
+                        summary = f"[error] {summary}"
+                    steps.append({"type": "tool_result", "summary": summary})
+                else:
+                    text = item.get("text")
+                    if isinstance(text, str) and text.strip():
+                        steps.append({"type": "text", "summary": _claude_step_truncate(text, 500)})
+    for index, step in enumerate(steps, 1):
+        step["index"] = index
+    return steps
+
+
+def format_claude_trace_steps(raw: str, *, max_chars: int = 4000) -> str:
+    """Render parsed Claude Code SDK trace into numbered compact steps."""
+    steps = parse_claude_trace_steps(raw)
+    if not steps:
+        return ""
+    rendered = [f"[{step['index']}] {step['type']}: {step['summary']}" for step in steps]
+    text = "\n".join(rendered)
+    if len(text) > max_chars:
+        text = text[:max_chars] + "\n...[claude trace steps truncated]..."
+    return text
+
+
+_DENIED_DATA_DIR_NAMES = {"officeqa_split", "sealqa_split"}
+
+
+def _normalize_tools(allowed_tools: list[str] | str | None) -> str:
+    if allowed_tools is None:
+        return ""
+    if isinstance(allowed_tools, str):
+        return ",".join(part.strip() for part in allowed_tools.split(",") if part.strip())
+    return ",".join(str(tool).strip() for tool in allowed_tools if str(tool).strip())
+
+
+def _tools_list(allowed_tools: list[str] | str | None) -> list[str]:
+    tools = _normalize_tools(allowed_tools)
+    return [part.strip() for part in tools.split(",") if part.strip()]
+
+
+def _validate_exec_path(path: str) -> str:
+    resolved = os.path.realpath(os.path.abspath(path))
+    parts = set(resolved.split(os.sep))
+    denied = parts & _DENIED_DATA_DIR_NAMES
+    if denied:
+        raise ValueError(f"Refusing to expose denied data directory to exec backend: {', '.join(sorted(denied))}")
+    return resolved
+
+
+def _validated_add_dirs(work_dir: str, data_dirs: list[str] | None, images: list[str] | None) -> list[str]:
+    add_dirs = [_validate_exec_path(work_dir)]
+    for data_dir in data_dirs or []:
+        add_dirs.append(_validate_exec_path(data_dir))
+    for image in images or []:
+        add_dirs.append(_validate_exec_path(os.path.dirname(image) or work_dir))
+    deduped: list[str] = []
+    for path in add_dirs:
+        if path not in deduped:
+            deduped.append(path)
+    return deduped
+
+
+def _sdk_mode(value: Any) -> str:
+    mode = str(value or "auto").strip().lower()
+    if mode in {"1", "true", "yes", "on", "sdk"}:
+        return "sdk"
+    if mode in {"0", "false", "no", "off", "cli"}:
+        return "cli"
+    return "auto"
+
+
+def _claude_effort(value: Any) -> str:
+    effort = str(value or "medium").strip().lower()
+    if effort in {"", "none", "off"}:
+        return ""
+    if effort == "xhigh":
+        return "max"
+    if effort not in {"low", "medium", "high", "max"}:
+        return "medium"
+    return effort
+
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, (str, int, float, bool)) or obj is None:
+        return obj
+    if isinstance(obj, (list, tuple)):
+        return list(obj)
+    if isinstance(obj, dict):
+        return obj
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump(mode="json")
+    if hasattr(obj, "__dict__"):
+        return {k: v for k, v in vars(obj).items() if not k.startswith("_")}
+    return str(obj)
+
+
+def _json_dumps(data: Any) -> str:
+    return json.dumps(data, ensure_ascii=False, indent=2, default=_json_default)
+
+
+def _run_async(coro):
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+
+    box: dict[str, Any] = {}
+
+    def _target() -> None:
+        try:
+            box["result"] = asyncio.run(coro)
+        except BaseException as exc:  # noqa: BLE001
+            box["exception"] = exc
+
+    thread = threading.Thread(target=_target, daemon=True)
+    thread.start()
+    thread.join()
+    if "exception" in box:
+        raise box["exception"]
+    return box.get("result")
+
+
+def _exec_prompt(prompt: str, *, allow_file_edits: bool = False) -> str:
+    edit_instruction = (
+        "You may modify files in the workspace when the task asks you to create an artifact. "
+        if allow_file_edits
+        else "Do not modify files. "
+    )
+    return (
+        "Use the workspace files to solve the task. Read task.md and the skill at "
+        ".agents/skills/skillopt-target/SKILL.md before answering. "
+        "If ATTACHMENTS.md exists, read it and inspect the listed local files. "
+        "Do not call a Skill tool; the ReflACT guidance is a local markdown file. "
+        f"Do not ask for permission. {edit_instruction}"
+        "Return only the final answer text, keeping any required <answer>...</answer> tags exactly.\n\n"
+        f"{_normalize_target_exec_prompt(prompt)}"
+    )
+
+
+def _retry_prompt(prompt: str, attempt: int) -> str:
+    if attempt <= 0:
+        return prompt
+    return (
+        f"{prompt}\n\n"
+        "Previous execution returned an empty final response. Re-read task.md and "
+        ".agents/skills/skillopt-target/SKILL.md. If ATTACHMENTS.md exists, use the listed files. "
+        "Then produce the final answer inside <answer>...</answer>."
+    )
+
+
+def _normalize_target_exec_prompt(prompt: str) -> str:
+    """Avoid wording that makes Claude Code call an unregistered Skill tool."""
+    text = prompt or ""
+    replacements = {
+        "Use the `skillopt-target` skill available in this workspace.": (
+            "Read `.agents/skills/skillopt-target/SKILL.md` directly; do not call a Skill tool."
+        ),
+        "- Use the local `skillopt-target` skill before writing code.": (
+            "- Read `.agents/skills/skillopt-target/SKILL.md` before writing code; do not call a Skill tool."
+        ),
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text
+
+
+def _strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    strict = json.loads(json.dumps(schema))
+    strict["additionalProperties"] = False
+    properties = strict.get("properties") or {}
+    strict["required"] = list(properties.keys())
+    return strict
+
+
+def _structured_response(data: Any) -> tuple[str, str]:
+    if not isinstance(data, dict):
+        return "", f"Structured output was not an object: {type(data).__name__}"
+    final_response = str(data.get("final_response") or "").strip()
+    final_answer = str(data.get("final_answer") or "").strip()
+    if final_response:
+        return final_response, ""
+    if final_answer:
+        if "<answer>" in final_answer.lower():
+            return final_answer, ""
+        return f"<answer>{final_answer}</answer>", ""
+    return "", "Structured output did not contain a final response."
+
+
+def _extract_claude_structured_output(messages: list[Any]) -> Any:
+    """Claude Code SDK can finish with error_during_execution after StructuredOutput."""
+    for msg in reversed(messages):
+        structured = getattr(msg, "structured_output", None)
+        if isinstance(structured, dict):
+            return structured
+
+        content = getattr(msg, "content", None)
+        if content is None and isinstance(msg, dict):
+            content = msg.get("content")
+        if not isinstance(content, list):
+            continue
+
+        for item in reversed(content):
+            name = getattr(item, "name", None)
+            payload = getattr(item, "input", None)
+            if isinstance(item, dict):
+                name = item.get("name", name)
+                payload = item.get("input", payload)
+            if name == "StructuredOutput" and isinstance(payload, dict):
+                return payload
+    return None
+
+
+def _raw_exception(label: str, exc: BaseException) -> str:
+    return _json_dumps({
+        "backend": label,
+        "is_error": True,
+        "error_type": type(exc).__name__,
+        "error": str(exc),
+        "traceback": traceback.format_exc(),
+    })
+
+
+def _run_claude_code_sdk_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    allowed_tools: list[str] | str | None = None,
+    permission_mode: str | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+
+    async def _query() -> tuple[str, str]:
+        system_prompt: dict[str, Any] = {
+            "type": "preset",
+            "preset": "claude_code",
+            "append": (
+                "Use the workspace files to solve the task. Read task.md and the skill at "
+                ".agents/skills/skillopt-target/SKILL.md before answering. "
+                "If ATTACHMENTS.md exists, read it and inspect the listed local files. "
+                "Do not call a Skill tool; the ReflACT guidance is a local markdown file. "
+                + (
+                    "You may modify files in the workspace when the task asks you to create an artifact. "
+                    if allow_file_edits
+                    else "Do not modify files. "
+                )
+                + "Return structured output whose final_response preserves required <answer>...</answer> tags."
+            ),
+        }
+        kwargs: dict[str, Any] = {
+            "system_prompt": system_prompt,
+            "output_format": {"type": "json_schema", "schema": ANSWER_SCHEMA},
+            "allowed_tools": _tools_list(allowed_tools) or ["Read", "Bash"],
+            "cwd": str(work_dir),
+            "permission_mode": permission_mode or "bypassPermissions",
+            "add_dirs": _validated_add_dirs(work_dir, data_dirs, images),
+            "max_buffer_size": 8 * 1024 * 1024,
+        }
+        config = get_claude_code_exec_config()
+        effort = _claude_effort(config.get("effort"))
+        if effort:
+            kwargs["effort"] = effort
+        max_thinking_tokens = int(config.get("max_thinking_tokens", 0) or 0)
+        if max_thinking_tokens > 0:
+            kwargs["max_thinking_tokens"] = max_thinking_tokens
+        options = ClaudeAgentOptions(**kwargs)
+        if model:
+            options.model = model.split("/", 1)[1] if model.startswith("anthropic/") else model
+
+        messages = []
+        async with ClaudeSDKClient(options) as client:
+            await client.query(_normalize_target_exec_prompt(prompt))
+            messages = [msg async for msg in client.receive_response()]
+        last = messages[-1] if messages else None
+        raw_structured_output = _extract_claude_structured_output(messages)
+        response, parse_error = _structured_response(raw_structured_output)
+        first = messages[0] if messages else None
+        first_data = getattr(first, "data", {}) if first is not None else {}
+        terminal_is_error = bool(getattr(last, "is_error", False)) if last is not None else False
+        raw = _json_dumps({
+            "backend": "claude_code_sdk",
+            "uuid": first_data.get("uuid", "") if isinstance(first_data, dict) else "",
+            "session_id": getattr(last, "session_id", "") if last is not None else "",
+            "model": first_data.get("model", model) if isinstance(first_data, dict) else model,
+            "tools": first_data.get("tools", _tools_list(allowed_tools)) if isinstance(first_data, dict) else _tools_list(allowed_tools),
+            "duration_ms": getattr(last, "duration_ms", 0) if last is not None else 0,
+            "total_cost_usd": getattr(last, "total_cost_usd", 0.0) if last is not None else 0.0,
+            "num_turns": getattr(last, "num_turns", 0) if last is not None else 0,
+            "usage": getattr(last, "usage", {}) if last is not None else {},
+            "result": getattr(last, "result", "") if last is not None else "",
+            "is_error": bool(parse_error) or (terminal_is_error and not response.strip()),
+            "terminal_is_error": terminal_is_error,
+            "parse_error": parse_error,
+            "raw_structured_output": raw_structured_output,
+            "messages": messages,
+        })
+        return response, raw
+
+    return _run_async(asyncio.wait_for(_query(), timeout=timeout))
+
+
+def _run_claude_code_cli_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    allowed_tools: list[str] | str | None = None,
+    permission_mode: str | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    config = get_claude_code_exec_config()
+    tools = "Read,Bash" if allowed_tools is None else _normalize_tools(allowed_tools)
+    cmd = [
+        str(config["path"]),
+        "-p",
+        "--output-format",
+        "text",
+        "--permission-mode",
+        permission_mode or "bypassPermissions",
+        "--add-dir",
+        work_dir,
+        "--tools",
+        tools,
+        "--allowedTools",
+        tools,
+    ]
+    if config.get("profile"):
+        cmd.extend(["--settings", '{"env":{"CLAUDE_CODE_USE_BEDROCK":"0"}}'])
+        cmd.extend(["--append-system-prompt", f"Profile: {config['profile']}"])
+    if model:
+        cmd.extend(["--model", model])
+    effort = _claude_effort(config.get("effort"))
+    if effort:
+        cmd.extend(["--effort", effort])
+    max_thinking_tokens = int(config.get("max_thinking_tokens", 0) or 0)
+    if max_thinking_tokens > 0:
+        cmd.extend(["--max-thinking-tokens", str(max_thinking_tokens)])
+    for data_dir in data_dirs or []:
+        cmd.extend(["--add-dir", _validate_exec_path(data_dir)])
+    if images:
+        for image in images:
+            cmd.extend(["--add-dir", _validate_exec_path(os.path.dirname(image) or work_dir)])
+    cmd.extend(["--", _exec_prompt(prompt, allow_file_edits=allow_file_edits)])
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        raw = stdout
+        if stderr:
+            raw = f"{raw}\n[stderr]\n{stderr}" if raw else stderr
+        return "", raw
+
+    stdout = proc.stdout or ""
+    stderr = proc.stderr or ""
+    raw = stdout
+    if stderr:
+        raw = f"{raw}\n[stderr]\n{stderr}" if raw else stderr
+    response = stdout.strip()
+    if proc.returncode != 0 and not response:
+        return "", raw
+    return response, raw
+
+
+def run_claude_code_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    allowed_tools: list[str] | str | None = None,
+    permission_mode: str | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    config = get_claude_code_exec_config()
+    mode = _sdk_mode(config.get("use_sdk"))
+    retries = int(config.get("empty_response_retries", 0) or 0)
+    last_response = ""
+    all_raw: list[str] = []
+
+    for attempt in range(retries + 1):
+        attempt_prompt = _retry_prompt(prompt, attempt)
+        if mode != "cli":
+            try:
+                response, raw = _run_claude_code_sdk_exec(
+                    work_dir=work_dir,
+                    prompt=attempt_prompt,
+                    model=model,
+                    timeout=timeout,
+                    images=images,
+                    data_dirs=data_dirs,
+                    allowed_tools=allowed_tools,
+                    permission_mode=permission_mode,
+                    allow_file_edits=allow_file_edits,
+                )
+                all_raw.append(f"===== CLAUDE SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if response.strip():
+                    combined = "\n\n".join(all_raw)
+                    _persist_claude_artifacts(work_dir, combined, response)
+                    return response, combined
+            except (ImportError, ModuleNotFoundError) as exc:
+                raw = _raw_exception("claude_code_sdk", exc)
+                all_raw.append(f"===== CLAUDE SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if mode == "sdk":
+                    _persist_claude_artifacts(work_dir, "\n\n".join(all_raw), "")
+                    raise
+            except Exception as exc:  # noqa: BLE001
+                raw = _raw_exception("claude_code_sdk", exc)
+                all_raw.append(f"===== CLAUDE SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if mode == "sdk" and attempt >= retries:
+                    _persist_claude_artifacts(work_dir, "\n\n".join(all_raw), "")
+                    raise
+        if mode != "sdk":
+            response, raw = _run_claude_code_cli_exec(
+                work_dir=work_dir,
+                prompt=attempt_prompt,
+                model=model,
+                timeout=timeout,
+                images=images,
+                data_dirs=data_dirs,
+                allowed_tools=allowed_tools,
+                permission_mode=permission_mode,
+                allow_file_edits=allow_file_edits,
+            )
+            all_raw.append(f"===== CLAUDE CLI ATTEMPT {attempt + 1} =====\n{raw}")
+            last_response = response
+            if response.strip():
+                combined = "\n\n".join(all_raw)
+                _persist_claude_artifacts(work_dir, combined, response)
+                return response, combined
+
+    combined = "\n\n".join(all_raw)
+    _persist_claude_artifacts(work_dir, combined, last_response)
+    return last_response, combined
+
+
+# ── Claude Code *chat* mode (optimizer role) ────────────────────────────────
+# The functions above run Claude Code as the *target* exec backend: they embed
+# the target preamble, force the ANSWER_SCHEMA structured output, and read from
+# a prepared workspace.  When Claude Code is instead selected as the optimizer
+# backend (claude_code_exec), reflection calls need a plain-text model call with
+# the analyst's own system prompt and no tooling — mirroring claude_backend's
+# chat path but driven through the same Claude Code CLI/SDK as the target.
+
+
+def _claude_chat_text_from_messages(messages: list[Any]) -> str:
+    """Extract the final assistant text from SDK chat-mode messages.
+
+    With ``output_format={"type": "text"}`` the SDK ends with a result message
+    whose ``result`` holds the final text; fall back to the last text block of
+    the final assistant message.
+    """
+    for msg in reversed(messages):
+        result = getattr(msg, "result", None)
+        if isinstance(result, str) and result.strip():
+            return result
+        content = getattr(msg, "content", None)
+        if content is None and isinstance(msg, dict):
+            content = msg.get("content")
+        if not isinstance(content, list):
+            continue
+        for item in content:
+            text = item.get("text") if isinstance(item, dict) else getattr(item, "text", None)
+            if isinstance(text, str) and text.strip():
+                return text
+    return ""
+
+
+def _claude_chat_usage_from_event(event: Any) -> dict[str, int]:
+    """Convert an SDK/CLI result usage payload into the shared usage shape."""
+    usage = getattr(event, "usage", {}) if not isinstance(event, dict) else (event or {}).get("usage", {})
+    if isinstance(usage, dict):
+        input_tokens = int(usage.get("input_tokens", 0) or 0)
+        output_tokens = int(usage.get("output_tokens", 0) or 0)
+    else:
+        input_tokens = int(getattr(usage, "input_tokens", 0) or 0)
+        output_tokens = int(getattr(usage, "output_tokens", 0) or 0)
+    return {
+        "prompt_tokens": input_tokens,
+        "completion_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
+    }
+
+
+def _run_claude_code_sdk_chat_exec(
+    *,
+    system: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    schema: dict[str, Any] | None = None,
+    effort: str | None = None,
+) -> tuple[str, dict]:
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+
+    async def _query() -> tuple[str, dict]:
+        # Optimizer chat call: no workspace, no tools, optional schema.
+        with tempfile.TemporaryDirectory(prefix="skillopt_claude_code_chat_") as tmp:
+            system_prompt: dict[str, Any] = {
+                "type": "preset",
+                "preset": "claude_code",
+                "append": system or "",
+            }
+            kwargs: dict[str, Any] = {
+                "system_prompt": system_prompt,
+                "output_format": (
+                    {"type": "json_schema", "schema": schema}
+                    if schema is not None
+                    else {"type": "text"}
+                ),
+                "tools": [],
+                "cwd": tmp,
+                "permission_mode": "bypassPermissions",
+            }
+            config = get_claude_code_exec_config()
+            effort_value = _claude_effort(effort if effort is not None else config.get("effort"))
+            if effort_value:
+                kwargs["effort"] = effort_value
+            max_thinking_tokens = int(config.get("max_thinking_tokens", 0) or 0)
+            if max_thinking_tokens > 0:
+                kwargs["max_thinking_tokens"] = max_thinking_tokens
+            options = ClaudeAgentOptions(**kwargs)
+            if model:
+                options.model = model.split("/", 1)[1] if model.startswith("anthropic/") else model
+
+            messages = []
+            async with ClaudeSDKClient(options) as client:
+                await client.query(prompt)
+                messages = [msg async for msg in client.receive_response()]
+        last = messages[-1] if messages else None
+        if schema is not None:
+            payload = _extract_claude_structured_output(messages)
+            text = _json_dumps(payload) if isinstance(payload, dict) else ""
+            if not text:
+                result = getattr(last, "result", None)
+                if isinstance(result, str) and result.strip():
+                    text = result
+        else:
+            text = _claude_chat_text_from_messages(messages)
+        usage_info = _claude_chat_usage_from_event(last)
+        return text, usage_info
+
+    return _run_async(asyncio.wait_for(_query(), timeout=timeout))
+
+
+def _run_claude_code_cli_chat_exec(
+    *,
+    system: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    schema: dict[str, Any] | None = None,
+    effort: str | None = None,
+) -> tuple[str, dict]:
+    config = get_claude_code_exec_config()
+    cmd = [
+        str(config["path"]),
+        "-p",
+        "--output-format",
+        "json",
+        "--permission-mode",
+        "dontAsk",
+        "--tools",
+        "",
+    ]
+    if model:
+        cmd.extend(["--model", model])
+    if schema is not None:
+        cmd.extend(["--json-schema", json.dumps(schema, ensure_ascii=False)])
+    if config.get("profile"):
+        cmd.extend(["--settings", '{"env":{"CLAUDE_CODE_USE_BEDROCK":"0"}}'])
+        cmd.extend(["--append-system-prompt", f"Profile: {config['profile']}"])
+    effort_value = _claude_effort(effort if effort is not None else config.get("effort"))
+    if effort_value:
+        cmd.extend(["--effort", effort_value])
+
+    with tempfile.TemporaryDirectory(prefix="skillopt_claude_code_chat_") as tmp:
+        # System prompt via file, not argv, to avoid the Windows argv cap.
+        system_path = os.path.join(tmp, "system_prompt.txt")
+        with open(system_path, "w", encoding="utf-8") as system_fh:
+            system_fh.write(system or "")
+        cmd.extend(["--append-system-prompt-file", system_path])
+        proc = subprocess.run(
+            cmd,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout or 300,
+            cwd=tmp,
+        )
+
+    stderr_text = (proc.stderr or "").strip()
+    if proc.returncode != 0:
+        raise RuntimeError(stderr_text or f"Claude Code CLI exited with code {proc.returncode}")
+    stream = []
+    for raw_line in (proc.stdout or "").splitlines():
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+        try:
+            stream.append(json.loads(raw_line))
+        except json.JSONDecodeError:
+            continue
+    result_event = None
+    for event in reversed(stream):
+        if event.get("type") == "result":
+            result_event = event
+            break
+    if result_event is None:
+        raise RuntimeError("Claude Code CLI did not return a result event.")
+    text = str(result_event.get("result") or result_event.get("content") or "")
+    usage_info = _claude_chat_usage_from_event(result_event)
+    return text, usage_info
+
+
+def run_claude_code_chat(
+    *,
+    system: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    schema: dict[str, Any] | None = None,
+    effort: str | None = None,
+) -> tuple[str, dict]:
+    """Run Claude Code as a plain chat model (optimizer role).
+
+    ``effort`` overrides the configured ``claude_code_exec_effort``; when ``None``
+    the config value (default "medium") is used, matching the target-exec path.
+    """
+    config = get_claude_code_exec_config()
+    mode = _sdk_mode(config.get("use_sdk"))
+    retries = int(config.get("empty_response_retries", 0) or 0)
+    last_text = ""
+    last_usage: dict[str, int] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+    for _attempt in range(retries + 1):
+        if mode != "cli":
+            try:
+                text, usage_info = _run_claude_code_sdk_chat_exec(
+                    system=system,
+                    prompt=prompt,
+                    model=model,
+                    timeout=timeout,
+                    schema=schema,
+                    effort=effort,
+                )
+                last_text = text
+                last_usage = usage_info
+                if text.strip():
+                    return text, usage_info
+            except (ImportError, ModuleNotFoundError):
+                if mode == "sdk":
+                    raise
+            except Exception:  # noqa: BLE001
+                if mode == "sdk":
+                    raise
+        if mode != "sdk":
+            text, usage_info = _run_claude_code_cli_chat_exec(
+                system=system,
+                prompt=prompt,
+                model=model,
+                timeout=timeout,
+                schema=schema,
+                effort=effort,
+            )
+            last_text = text
+            last_usage = usage_info
+            if text.strip():
+                return text, usage_info
+
+    return last_text, last_usage
+
+
+def _run_codex_sdk_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+) -> tuple[str, str]:
+    from openai_codex_sdk import Codex
+
+    for data_dir in data_dirs or []:
+        _validate_exec_path(data_dir)
+    for image in images or []:
+        _validate_exec_path(os.path.dirname(image) or work_dir)
+
+    async def _query() -> tuple[str, str]:
+        config = get_codex_exec_config()
+        reasoning_effort = str(config.get("reasoning_effort", "") or "").strip()
+        thread_options: dict[str, Any] = {
+            "working_directory": work_dir,
+            "skip_git_repo_check": True,
+            "sandbox_mode": str(config.get("sandbox") or "workspace-write"),
+            "network_access_enabled": bool(config.get("network_access", False)),
+            "web_search_enabled": bool(config.get("web_search", False)),
+            "approval_policy": str(config.get("approval_policy") or "never"),
+        }
+        if model:
+            thread_options["model"] = model
+        if data_dirs:
+            thread_options["additional_directories"] = data_dirs
+        if reasoning_effort and reasoning_effort != "none":
+            thread_options["model_reasoning_effort"] = reasoning_effort
+
+        codex_options: dict[str, Any] = {"env": os.environ.copy()}
+        codex_path = str(config.get("path") or "").strip()
+        if codex_path:
+            codex_options["codexPathOverride"] = codex_path
+        codex = Codex(codex_options)
+        thread = codex.start_thread(thread_options)
+        turn = await thread.run(prompt, {"output_schema": _strict_schema(ANSWER_SCHEMA)})
+        result_text = str(getattr(turn, "final_response", "") or "")
+        parsed: Any = None
+        parse_error = ""
+        response = ""
+        if result_text.strip():
+            try:
+                parsed = json.loads(result_text)
+                response, parse_error = _structured_response(parsed)
+            except Exception as exc:  # noqa: BLE001
+                parse_error = f"{type(exc).__name__}: {exc}"
+        else:
+            parse_error = "No response from Codex SDK (final_response is empty)."
+        raw = _json_dumps({
+            "backend": "codex_sdk",
+            "id": getattr(turn, "id", ""),
+            "thread_id": getattr(turn, "thread_id", ""),
+            "model": model,
+            "thread_options": thread_options,
+            "final_response": result_text,
+            "raw_structured_output": parsed,
+            "parse_error": parse_error,
+            "is_error": bool(parse_error),
+            "items": getattr(turn, "items", []),
+        })
+        return response, raw
+
+    return _run_async(asyncio.wait_for(_query(), timeout=timeout))
+
+
+def _run_codex_cli_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    sandbox: str | None = None,
+) -> tuple[str, str]:
+    config = get_codex_exec_config()
+    last_message_path = os.path.join(work_dir, "codex_last_message.txt")
+    cmd = [
+        str(config["path"]),
+        "exec",
+        "--skip-git-repo-check",
+        "--color",
+        "never",
+        "-C",
+        work_dir,
+    ]
+    if config.get("profile"):
+        cmd.extend(["-p", str(config["profile"])])
+    reasoning_effort = str(config.get("reasoning_effort", "")).strip()
+    if reasoning_effort:
+        cmd.extend(["-c", f'model_reasoning_effort="{reasoning_effort}"'])
+    actual_sandbox = str(sandbox or config["sandbox"])
+    validate_exec_sandbox(actual_sandbox)
+    cmd.extend(["--sandbox", actual_sandbox])
+
+    approval_policy = str(config.get("approval_policy", "never")).strip()
+    if approval_policy:
+        cmd.extend(["-c", f'approval_policy="{approval_policy}"'])
+    for override in build_codex_exec_cli_config_overrides(config):
+        cmd.extend(["-c", override])
+    if model:
+        cmd.extend(["-m", model])
+    for data_dir in data_dirs or []:
+        _validate_exec_path(data_dir)
+    for image in images or []:
+        _validate_exec_path(os.path.dirname(image) or work_dir)
+        cmd.extend(["-i", image])
+    cmd.extend(["--output-last-message", last_message_path, prompt])
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=work_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        raw = stdout
+        if stderr:
+            raw = f"{raw}\n[stderr]\n{stderr}" if raw else stderr
+        _persist_codex_artifacts(work_dir, raw, "")
+        raise
+    try:
+        from skillopt.model import azure_openai as _openai
+        _openai.tracker.record("rollout", 0, 0)
+    except Exception:
+        pass
+    stdout = proc.stdout or ""
+    stderr = proc.stderr or ""
+    last_message = ""
+    if os.path.exists(last_message_path):
+        with open(last_message_path, encoding="utf-8") as f:
+            last_message = f.read()
+    raw = stdout
+    if stderr:
+        raw = f"{raw}\n[stderr]\n{stderr}" if raw else stderr
+    if proc.returncode != 0:
+        _persist_codex_artifacts(work_dir, raw, last_message)
+        detail = (stderr or stdout).strip()
+        raise RuntimeError(
+            f"codex exec failed with exit code {proc.returncode}: {detail[:4000]}"
+        )
+    return last_message, raw
+
+
+def run_codex_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    sandbox: str | None = None,
+    full_auto: bool | None = None,
+) -> tuple[str, str]:
+    if full_auto is not None:
+        warnings.warn(
+            "full_auto is deprecated and ignored; configure sandbox and "
+            "approval_policy explicitly instead",
+            FutureWarning,
+            stacklevel=2,
+        )
+    config = get_codex_exec_config()
+    mode = _sdk_mode(config.get("use_sdk"))
+    retries = int(config.get("empty_response_retries", 0) or 0)
+    last_response = ""
+    all_raw: list[str] = []
+
+    for attempt in range(retries + 1):
+        attempt_prompt = _retry_prompt(prompt, attempt)
+        if mode != "cli":
+            try:
+                response, raw = _run_codex_sdk_exec(
+                    work_dir=work_dir,
+                    prompt=attempt_prompt,
+                    model=model,
+                    timeout=timeout,
+                    images=images,
+                    data_dirs=data_dirs,
+                )
+                all_raw.append(f"===== CODEX SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if response.strip():
+                    combined = "\n\n".join(all_raw)
+                    _persist_codex_artifacts(work_dir, combined, response)
+                    return response, combined
+            except (ImportError, ModuleNotFoundError) as exc:
+                raw = _raw_exception("codex_sdk", exc)
+                all_raw.append(f"===== CODEX SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if mode == "sdk":
+                    _persist_codex_artifacts(work_dir, "\n\n".join(all_raw), "")
+                    raise
+            except Exception as exc:  # noqa: BLE001
+                raw = _raw_exception("codex_sdk", exc)
+                all_raw.append(f"===== CODEX SDK ATTEMPT {attempt + 1} =====\n{raw}")
+                if mode == "sdk" and attempt >= retries:
+                    _persist_codex_artifacts(work_dir, "\n\n".join(all_raw), "")
+                    raise
+        if mode != "sdk":
+            response, raw = _run_codex_cli_exec(
+                work_dir=work_dir,
+                prompt=attempt_prompt,
+                model=model,
+                timeout=timeout,
+                images=images,
+                data_dirs=data_dirs,
+                sandbox=sandbox,
+            )
+            all_raw.append(f"===== CODEX CLI ATTEMPT {attempt + 1} =====\n{raw}")
+            last_response = response
+            if response.strip():
+                combined = "\n\n".join(all_raw)
+                _persist_codex_artifacts(work_dir, combined, response)
+                return response, combined
+
+    combined = "\n\n".join(all_raw)
+    _persist_codex_artifacts(work_dir, combined, last_response)
+    return last_response, combined
+
+
+_CURSOR_SECRET_ASSIGNMENT = re.compile(
+    r"(?i)\b(cursor_api_key|api[_ -]?key|authorization|bearer|"
+    r"access[_ -]?token|refresh[_ -]?token|token|password)\b"
+    r"(\s*[:=]\s*|\s+)(?:bearer\s+)?([^\s,;]+)"
+)
+_CURSOR_SECRET_TOKEN = re.compile(r"\b(?:sk|key)[_-][A-Za-z0-9_-]{8,}\b")
+_CURSOR_OMITTED_TRACE_FIELDS = {"args", "content", "filetext", "prompt", "result"}
+_CURSOR_SECRET_TRACE_FIELDS = {
+    "accesstoken",
+    "apikey",
+    "authorization",
+    "cursorapikey",
+    "password",
+    "refreshtoken",
+    "secret",
+    "token",
+}
+
+
+# ``"token": "..."`` / ``"accessToken": {...}`` quoted JSON pairs, matched in
+# arbitrary (possibly non-JSON) text. Value may be a string, number, bool, or a
+# nested object/array literal quoted as a unit — we redact the whole payload.
+# Applied FIRST inside ``_redact_cursor_error``: the unquoted keyword regex below
+# stops at the first whitespace, so ``"token": "a b c"`` would otherwise leak
+# ``b c"``. Capturing the whole quoted payload up front fixes that, and since
+# ``_redact_cursor_error`` is the single shared string redactor, one change
+# covers the copilot fallback, the cursor stderr paths, and string leaves.
+# ponytail: the object branch is single-level only; deep-nested values under a
+# secret key in non-JSON text are not stripped (valid-JSON lines already go
+# through the structural walker). Add an unbounded nest parser if that ever
+# appears in real stderr.
+_COPILOT_SECRET_KEY_SUFFIXES = (
+    "apikey",
+    "accesstoken",
+    "refreshtoken",
+    "token",
+    "password",
+    "passwd",
+    "clientsecret",
+    "secret",
+    "secretkey",
+    "secretaccesskey",
+    "sharedaccesskey",
+    "privatekey",
+    "accountkey",
+    "cookie",
+    "setcookie",
+)
+_COPILOT_SECRET_KEY_EXACT = {"pwd", "sig", "authorization", "bearer"}
+
+def _is_copilot_secret_key(field: str) -> bool:
+    """The single mapping-aware secret-key policy for the Copilot path.
+
+    Uses endswith on the compacted key (mirroring ``_is_secret_mapping_key``), so
+    ``token`` / ``api_key`` / ``refreshToken`` / ``bearer`` / ``cookie`` are
+    redacted, but ``token_count`` / ``token_budget`` / ``secret_version``
+    diagnostics are preserved.
+    """
+    compact = re.sub(r"[^a-z0-9]", "", (field or "").casefold())
+    return compact in _COPILOT_SECRET_KEY_EXACT or compact.endswith(_COPILOT_SECRET_KEY_SUFFIXES)
+
+
+def _find_json_end(text: str, start: int) -> int | None:
+    """Bracket-match a JSON object/array starting at ``start`` (unbounded nesting).
+
+    String-aware (handles quotes and escapes), so a ``{`` inside a string value
+    does not confuse the matching.
+    """
+    open_ch = text[start]
+    close_ch = "}" if open_ch == "{" else "]"
+    depth = 0
+    in_str = False
+    escaped = False
+    for k in range(start, len(text)):
+        ch = text[k]
+        if in_str:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_str = False
+        else:
+            if ch == '"':
+                in_str = True
+            elif ch == open_ch:
+                depth += 1
+            elif ch == close_ch:
+                depth -= 1
+                if depth == 0:
+                    return k
+    return None
+
+
+def _redact_embedded_json(text: str) -> str:
+    """Structurally redact JSON objects/arrays embedded in plain text.
+
+    Finds balanced JSON fragments (unbounded nesting, string-aware) and walks
+    each with the mapping-aware redactor, so deeply nested or pretty-printed
+    JSON embedded in a non-JSON line no longer leaks. Non-JSON text is preserved.
+    """
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if ch in "{[":
+            end = _find_json_end(text, i)
+            if end is not None:
+                frag = text[i:end + 1]
+                try:
+                    obj = json.loads(frag)
+                except (ValueError, TypeError):
+                    out.append(ch)
+                    i += 1
+                    continue
+                out.append(json.dumps(_redact_copilot_json(obj), ensure_ascii=False))
+                i = end + 1
+                continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def _redact_cursor_error(value: str) -> str:
+    text = value or ""
+    text = _redact_embedded_json(text)
+    text = _CURSOR_SECRET_ASSIGNMENT.sub(r"\1\2[REDACTED]", text)
+    return _CURSOR_SECRET_TOKEN.sub("[REDACTED]", text)
+
+
+def _sanitize_cursor_json(value: Any, *, field: str = "") -> Any:
+    normalized_field = re.sub(r"[^a-z0-9]", "", field.lower())
+    if normalized_field in _CURSOR_OMITTED_TRACE_FIELDS:
+        return "[OMITTED]"
+    if (
+        normalized_field in _CURSOR_SECRET_TRACE_FIELDS
+        or normalized_field.endswith("apikey")
+    ):
+        return "[REDACTED]"
+    if isinstance(value, dict):
+        return {
+            str(key): _sanitize_cursor_json(item, field=str(key))
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_sanitize_cursor_json(item) for item in value]
+    if isinstance(value, str):
+        return _redact_cursor_error(value)
+    return value
+
+
+def _redact_copilot_json(value: Any, *, field: str = "") -> Any:
+    """Mapping-key-aware redaction for Copilot JSONL.
+
+    Unlike the cursor trace sanitizer, this does NOT omit ``content``/``prompt``
+    (those are the CLI output we want to keep debuggable); it redacts by secret
+    field name and applies the string-level redactor to remaining string leaves.
+    Uses the SAME key policy as the embedded-JSON fallback so valid JSON and
+    non-JSON fragments agree on what a secret field is.
+    """
+    if _is_copilot_secret_key(field):
+        return "[REDACTED]"
+    if isinstance(value, dict):
+        return {
+            str(key): _redact_copilot_json(item, field=str(key))
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_copilot_json(item) for item in value]
+    if isinstance(value, str):
+        return _redact_cursor_error(value)
+    return value
+
+
+def _redact_copilot_trace(raw: str | bytes) -> str:
+    """Sanitize Copilot JSONL output (mapping-key aware, unbounded nesting).
+
+    The whole text is scanned for JSON objects/arrays (single-line, multiple
+    fragments, or pretty-printed / deeply nested) and each is walked with the
+    mapping-aware redactor; remaining non-JSON text gets string-level redaction
+    for ``key=value`` and token patterns. This replaces the old line-by-line
+    regex, which only handled single-level object values.
+    """
+    text = _cursor_process_text(raw)
+    return _redact_cursor_error(text)
+
+
+def _cursor_process_text(value: str | bytes) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value or "")
+
+
+def _sanitize_cursor_trace(
+    raw: str | bytes,
+    *,
+    preserve_markers: bool = False,
+) -> str:
+    text = _cursor_process_text(raw)
+    sanitized: list[str] = []
+    in_stderr = False
+    omitted_stdout = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if preserve_markers and stripped.startswith("===== CURSOR CLI ATTEMPT "):
+            in_stderr = False
+            omitted_stdout = False
+            sanitized.append(line)
+            continue
+        if preserve_markers and stripped == "[stderr]":
+            in_stderr = True
+            sanitized.append(line)
+            continue
+        if in_stderr:
+            sanitized.append(_redact_cursor_error(line))
+            continue
+        if stripped.startswith("{"):
+            try:
+                event = json.loads(stripped)
+            except json.JSONDecodeError:
+                pass
+            else:
+                sanitized.append(
+                    json.dumps(
+                        _sanitize_cursor_json(event),
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    )
+                )
+                continue
+        if not stripped:
+            sanitized.append("")
+        elif not omitted_stdout:
+            sanitized.append("[OMITTED NON-JSON OUTPUT]")
+            omitted_stdout = True
+    return "\n".join(sanitized)
+
+
+def _parse_cursor_terminal(raw: str) -> tuple[str, str]:
+    terminal: dict[str, Any] | None = None
+    for line in (raw or "").splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and event.get("type") == "result":
+            terminal = event
+
+    if terminal is None:
+        return "", "Cursor Agent did not emit a terminal result"
+    if terminal.get("is_error") is True or terminal.get("subtype") == "error":
+        detail = str(terminal.get("result") or terminal.get("error") or "unknown error")
+        return "", f"Cursor Agent returned an error result: {_redact_cursor_error(detail)}"
+    result = terminal.get("result")
+    if not isinstance(result, str) or not result.strip():
+        return "", "Cursor Agent returned an empty terminal result"
+    return result.strip(), ""
+
+
+def run_cursor_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    sandbox: str | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    """Run Cursor Agent headlessly as a benchmark target."""
+    config = get_cursor_exec_config()
+    retries = int(config.get("empty_response_retries", 0) or 0)
+    add_dirs = _validated_add_dirs(work_dir, data_dirs, images)[1:]
+    all_raw: list[str] = []
+    last_error = "Cursor Agent returned no response"
+    actual_sandbox = str(sandbox or config["sandbox"])
+    if actual_sandbox not in {"enabled", "disabled"}:
+        raise ValueError("Cursor Agent sandbox must be 'enabled' or 'disabled'")
+    if allow_file_edits and actual_sandbox == "disabled":
+        raise ValueError(
+            "Cursor Agent file-edit rollouts require sandbox='enabled'; "
+            "refusing to combine --force with a disabled sandbox"
+        )
+
+    for attempt in range(retries + 1):
+        attempt_prompt = _exec_prompt(
+            _retry_prompt(prompt, attempt),
+            allow_file_edits=allow_file_edits,
+        )
+        cmd = [
+            str(config["path"]),
+            "-p",
+            "--output-format",
+            "stream-json",
+            "--trust",
+            "--workspace",
+            work_dir,
+            "--sandbox",
+            actual_sandbox,
+        ]
+        if allow_file_edits:
+            cmd.append("--force")
+        else:
+            cmd.extend(["--mode", "ask"])
+        if model:
+            cmd.extend(["--model", model])
+        for path in add_dirs:
+            cmd.extend(["--add-dir", path])
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                input=attempt_prompt,
+            )
+        except subprocess.TimeoutExpired as exc:
+            stdout = exc.stdout or ""
+            stderr = exc.stderr or ""
+            raw = stdout
+            safe_raw = _sanitize_cursor_trace(raw)
+            if stderr:
+                safe_stderr = _redact_cursor_error(_cursor_process_text(stderr))
+                safe_raw = (
+                    f"{safe_raw}\n[stderr]\n{safe_stderr}"
+                    if safe_raw
+                    else f"[stderr]\n{safe_stderr}"
+                )
+            all_raw.append(f"===== CURSOR CLI ATTEMPT {attempt + 1} =====\n{safe_raw}")
+            _persist_cursor_artifacts(work_dir, "\n\n".join(all_raw), "")
+            raise
+        except OSError as exc:
+            detail = _redact_cursor_error(str(exc))
+            raise RuntimeError(f"Cursor Agent could not be executed: {detail}") from exc
+
+        stdout = proc.stdout or ""
+        stderr = proc.stderr or ""
+        raw = stdout
+        safe_raw = _sanitize_cursor_trace(raw)
+        if stderr:
+            safe_stderr = _redact_cursor_error(_cursor_process_text(stderr))
+            safe_raw = (
+                f"{safe_raw}\n[stderr]\n{safe_stderr}"
+                if safe_raw
+                else f"[stderr]\n{safe_stderr}"
+            )
+        all_raw.append(f"===== CURSOR CLI ATTEMPT {attempt + 1} =====\n{safe_raw}")
+        combined = "\n\n".join(all_raw)
+
+        if proc.returncode != 0:
+            _persist_cursor_artifacts(work_dir, combined, "")
+            detail = _redact_cursor_error((stderr or stdout).strip())[:4000]
+            raise RuntimeError(
+                f"Cursor Agent failed with exit code {proc.returncode}: {detail}"
+            )
+
+        response, last_error = _parse_cursor_terminal(stdout)
+        if response:
+            _persist_cursor_artifacts(work_dir, combined, response)
+            return response, combined
+        if last_error.startswith("Cursor Agent returned an error result"):
+            _persist_cursor_artifacts(work_dir, combined, "")
+            raise RuntimeError(last_error)
+
+    combined = "\n\n".join(all_raw)
+    _persist_cursor_artifacts(work_dir, combined, "")
+    raise RuntimeError(last_error)
+
+
+def run_copilot_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    """Run the GitHub Copilot CLI headlessly as a benchmark target.
+
+    Uses ``copilot -p <prompt> --output-format json`` and parses the emitted
+    JSONL event stream, concatenating ``assistant.message`` content. The plain
+    text / ``--silent`` modes do not reliably stream the response to stdout on
+    every platform, so JSONL is used for robust capture.
+    """
+    config = get_copilot_exec_config()
+    retries = int(config.get("empty_response_retries", 0) or 0)
+    add_dirs = _validated_add_dirs(work_dir, data_dirs, images)[1:]
+    all_raw: list[str] = []
+    last_error = "Copilot CLI returned no response"
+    allow_all_tools = str(config.get("allow_all_tools", "0")) == "1"
+
+    for attempt in range(retries + 1):
+        attempt_prompt = _exec_prompt(
+            _retry_prompt(prompt, attempt),
+            allow_file_edits=allow_file_edits,
+        )
+        cmd = [
+            str(config["path"]),
+            "-p",
+            attempt_prompt,
+            "--output-format",
+            "json",
+            "--stream",
+            "off",
+            "--no-color",
+            "--log-level",
+            "none",
+            "-C",
+            work_dir,
+            "--disable-builtin-mcps",
+            "--no-custom-instructions",
+        ]
+        # Read-only rollouts keep the CLI's approval gate; only opt in to
+        # unattended tool use when the caller explicitly allows file edits and
+        # the operator has enabled it.
+        if allow_file_edits and allow_all_tools:
+            cmd.append("--allow-all-tools")
+        if model:
+            cmd.extend(["--model", model])
+        for path in add_dirs:
+            cmd.extend(["--add-dir", path])
+
+        home = str(config.get("home") or "")
+        env = build_copilot_subprocess_env(home)
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
+            )
+        except subprocess.TimeoutExpired:
+            # Nothing to capture here: all_raw is local and this path re-raises,
+            # and TimeoutExpired already carries .stdout/.stderr for the caller.
+            raise
+        except OSError as exc:
+            raise RuntimeError(f"Copilot CLI could not be executed: {exc}") from exc
+
+        stdout = proc.stdout or ""
+        stderr = proc.stderr or ""
+        safe_raw = _redact_copilot_trace(stdout)
+        if stderr:
+            safe_stderr = _redact_copilot_trace(stderr)
+            safe_raw = f"{safe_raw}\n[stderr]\n{safe_stderr}" if safe_raw else f"[stderr]\n{safe_stderr}"
+        all_raw.append(f"===== COPILOT CLI ATTEMPT {attempt + 1} =====\n{safe_raw}")
+        combined = "\n\n".join(all_raw)
+
+        if proc.returncode != 0:
+            detail = _redact_copilot_trace((stderr or stdout).strip())[:4000]
+            raise RuntimeError(
+                f"Copilot CLI failed with exit code {proc.returncode}: {detail}"
+            )
+
+        response = parse_copilot_jsonl(stdout)
+        if response:
+            return response, combined
+
+    combined = "\n\n".join(all_raw)
+    # Without this the caller gets a bare "returned no response" and no CLI
+    # output at all, since copilot_exec persists no artifacts; include a
+    # bounded tail so an empty/invalid JSONL stream is debuggable.
+    detail = combined.strip()[-4000:]
+    raise RuntimeError(f"{last_error}\n{detail}" if detail else last_error)
+
+
+def run_target_exec(
+    *,
+    work_dir: str,
+    prompt: str,
+    model: str,
+    timeout: int,
+    images: list[str] | None = None,
+    data_dirs: list[str] | None = None,
+    allowed_tools: list[str] | str | None = None,
+    permission_mode: str | None = None,
+    sandbox: str | None = None,
+    full_auto: bool | None = None,
+    allow_file_edits: bool = False,
+) -> tuple[str, str]:
+    backend = get_target_backend()
+    if backend == "codex_exec":
+        return run_codex_exec(
+            work_dir=work_dir,
+            prompt=prompt,
+            model=model,
+            timeout=timeout,
+            images=images,
+            data_dirs=data_dirs,
+            sandbox=sandbox,
+            full_auto=full_auto,
+        )
+    if backend == "claude_code_exec":
+        return run_claude_code_exec(
+            work_dir=work_dir,
+            prompt=prompt,
+            model=model,
+            timeout=timeout,
+            images=images,
+            data_dirs=data_dirs,
+            allowed_tools=allowed_tools,
+            permission_mode=permission_mode,
+            allow_file_edits=allow_file_edits,
+        )
+    if backend == "cursor_exec":
+        return run_cursor_exec(
+            work_dir=work_dir,
+            prompt=prompt,
+            model=model,
+            timeout=timeout,
+            images=images,
+            data_dirs=data_dirs,
+            sandbox=sandbox,
+            allow_file_edits=allow_file_edits,
+        )
+    if backend == "copilot_exec":
+        return run_copilot_exec(
+            work_dir=work_dir,
+            prompt=prompt,
+            model=model,
+            timeout=timeout,
+            images=images,
+            data_dirs=data_dirs,
+            allow_file_edits=allow_file_edits,
+        )
+    raise ValueError(f"Unsupported exec backend: {backend}")

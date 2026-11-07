@@ -1,0 +1,324 @@
+data:
+  tokenizer: null
+  train_files: ~/data/rlhf/gsm8k/train.parquet
+  val_files: ~/data/rlhf/gsm8k/test.parquet
+  prompt_key: prompt
+  max_prompt_length: 512
+  max_response_length: 512
+  train_batch_size: 1024
+  val_batch_size: 1312
+  return_raw_input_ids: False  # This should be set to true when the tokenizer between policy and rm differs
+  return_raw_chat: False
+
+actor_rollout_ref:
+  hybrid_engine: True
+  model:
+    path: ~/models/deepseek-llm-7b-chat
+    external_lib: null
+    override_config: { }
+    enable_gradient_checkpointing: False
+    use_remove_padding: False
+  actor:
+    strategy: fsdp  # This is for backward-compatibility
+    ppo_mini_batch_size: 256
+    ppo_micro_batch_size: 64
+    use_dynamic_bsz: False
+    ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
+    grad_clip: 1.0
+    clip_ratio: 0.2
+    # DAPO-style asymmetric upper clipping. null preserves symmetric PPO.
+    clip_ratio_high: null
+    entropy_coeff: 0.001
+    # token_mean is legacy GRPO. fixed removes response-length normalization
+    # bias; 64 is a calibrated constant near the observed Countdown mean.
+    loss_normalization: token_mean
+    fixed_loss_normalizer: 64.0
+    use_kl_loss: False # True for GRPO
+    kl_loss_coef: 0.001 # for grpo
+    kl_loss_type: low_var_kl # for grpo
+    ppo_epochs: 1
+    shuffle: False
+    ulysses_sequence_parallel_size: 1 # sp size
+    optim:
+      lr: 1e-6
+      lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
+      min_lr_ratio: null   # only useful for warmup with cosine
+      warmup_style: constant  # select from constant/cosine
+      total_training_steps: -1  # must be override by program
+    fsdp_config:
+      wrap_policy:
+        # transformer_layer_cls_to_wrap: None
+        min_num_params: 0
+      param_offload: False
+      grad_offload: False
+      optimizer_offload: False
+      fsdp_size: -1
+  ref:
+    fsdp_config:
+      param_offload: False
+      wrap_policy:
+        # transformer_layer_cls_to_wrap: None
+        min_num_params: 0
+      fsdp_size: -1
+    log_prob_micro_batch_size: 128
+    log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
+    log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+    ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+  rollout:
+    name: vllm
+    temperature: 1.0
+    top_k: -1 # 0 for hf rollout, -1 for vllm rollout
+    top_p: 1
+    prompt_length: ${data.max_prompt_length}  # not use for opensource
+    response_length: ${data.max_response_length}
+    # for vllm rollout
+    dtype: bfloat16 # should align with FSDP
+    gpu_memory_utilization: 0.5
+    ignore_eos: False
+    enforce_eager: True
+    free_cache_engine: True
+    load_format: dummy_dtensor
+    tensor_model_parallel_size: 2
+    max_num_batched_tokens: 8192
+    max_num_seqs: 1024
+    log_prob_micro_batch_size: 128
+    log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
+    log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+    # for hf rollout
+    do_sample: True
+    # number of responses (i.e. num sample times)
+    n: 1 # > 1 for grpo
+
+critic:
+  strategy: fsdp
+  optim:
+    lr: 1e-5
+    lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
+    min_lr_ratio: null   # only useful for warmup with cosine
+    warmup_style: constant  # select from constant/cosine
+    total_training_steps: -1  # must be override by program
+  model:
+    path: ~/models/deepseek-llm-7b-chat
+    tokenizer_path: ${actor_rollout_ref.model.path}
+    override_config: { }
+    external_lib: ${actor_rollout_ref.model.external_lib}
+    enable_gradient_checkpointing: False
+    use_remove_padding: False
+    fsdp_config:
+      param_offload: False
+      grad_offload: False
+      optimizer_offload: False
+      wrap_policy:
+        # transformer_layer_cls_to_wrap: None
+        min_num_params: 0
+      fsdp_size: -1
+  ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
+  ppo_micro_batch_size: 64
+  forward_micro_batch_size: ${critic.ppo_micro_batch_size}
+  use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
+  ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
+  forward_max_token_len_per_gpu: ${critic.ppo_max_token_len_per_gpu}
+  ulysses_sequence_parallel_size: 1 # sp size
+  ppo_epochs: ${actor_rollout_ref.actor.ppo_epochs}
+  shuffle: ${actor_rollout_ref.actor.shuffle}
+  grad_clip: 1.0
+  cliprange_value: 0.5
+
+reward_model:
+  enable: False
+  strategy: fsdp
+  model:
+    input_tokenizer: ${actor_rollout_ref.model.path}  # set this to null if the chat template is identical
+    path: ~/models/FsfairX-LLaMA3-RM-v0.1
+    external_lib: ${actor_rollout_ref.model.external_lib}
+    use_remove_padding: False
+    fsdp_config:
+      min_num_params: 0
+      param_offload: False
+  micro_batch_size: 64
+  max_length: null
+  ulysses_sequence_parallel_size: 1 # sp size
+  use_dynamic_bsz: ${critic.use_dynamic_bsz}
+  forward_max_token_len_per_gpu: ${critic.forward_max_token_len_per_gpu}
+
+algorithm:
+  gamma: 1.0
+  lam: 1.0
+  adv_estimator: gae
+  kl_penalty: kl  # how to estimate kl divergence
+  kl_ctrl:
+    type: fixed
+    kl_coef: 0.001
+
+trainer:
+  seed: 1
+  format_score: 0.1
+  correctness_score: 1.0
+  # standard | drgrpo | pda_drgrpo | hcaa | bifrontier | lexi | lexiguard
+  advantage_variant: standard
+  drgrpo:
+    advantage_scale: 2.0
+  # Our Protocol-Decoupled Advantage: separate semantic and format residuals,
+  # then assign format credit only to output-contract tokens/tails.
+  pda:
+    correctness_scale: 1.8
+    format_scale: 0.8
+    projection: local
+    invalid_tail_tokens: 16
+    protocol_mass: 16.0
+    protocol_tags: ['</think>', '<answer>', '</answer>']
+    # Zero-mean correctness contrast among rollouts of the same paired view.
+    view_contrast_scale: 0.0
+    # Training-only dual guard for deployment-format preservation. Requires
+    # format_constraint with no_hint feedback and no_hint application scope.
+    protocol_guard_enable: false
+    protocol_guard_multiplier: 1.0
+    # "all_wrong" confines the guard to groups with zero semantic advantage.
+    protocol_guard_scope: all
+    # Zero disables positive credit for formatted-but-incorrect trajectories.
+    protocol_guard_valid_credit: 1.0
+    # Correct-only, within-prompt length tie-breaker. Requires response_budget
+    # and cannot reward a short incorrect trajectory.
+    correct_length_frontier_enable: false
+  hcaa:
+    advantage_scale: 2.0
+    amplification: 1.0
+    hardness_power: 1.0
+  total_epochs: 30
+  total_training_steps: 500
+  total_training_steps_hint: 300
+  lower_prob: 0.05
+  upper_prob: 0.95
+  adaptive_hint:
+    enable: false
+    warmup_steps: 40
+    sample_ema_alpha: 0.30
+    reward_ema_alpha: 0.25
+    exploration_coef: 0.10
+    temperature: 0.15
+    prior_utility: 0.50
+    hard_threshold: 0.25
+    easy_threshold: 0.75
+    frontier_uncertainty_threshold: 0.50
+    success_bonus: 0.25
+    # "observed" reproduces BAHA-v1. "least_assisted" prevents previous
+    # hint actions from leaking into the sample-difficulty estimate.
+    difficulty_mode: observed
+    mastery_hint_tolerance: 0.05
+    easy_max_hint_fraction: 0.25
+  paired_hint:
+    enable: false
+    min_hint_chunks: 1
+    ate_bonus: 0.5
+  posterior_frontier:
+    enable: false
+    coefficient: 0.5
+    prior_alpha: 1.0
+    prior_beta: 1.0
+    min_observations: 1
+  # FSA-GRPO: cross-fitted scaling of existing, zero-mean GRPO contrasts.
+  frontier_scaling:
+    enable: false
+    min_weight: 0.25
+    max_weight: 1.75
+    prior_alpha: 1.0
+    prior_beta: 1.0
+    min_observations: 1
+  # Two semantically equivalent number-order views share one GRPO group.
+  mirror_view:
+    enable: false
+    # paired=true spends two prompts per group; paired=false randomly augments
+    # one prompt and preserves the standard n-rollout group structure.
+    paired: true
+    random_probability: 0.5
+    # Ramping avoids perturbing the high-hint imitation-like phase. Balanced
+    # assignment deterministically alternates views across epochs.
+    schedule: constant
+    ramp_start_step: 50
+    ramp_end_step: 100
+    balanced: false
+  # Adaptive secondary reward that activates only when format validity falls
+  # below its target. Correct and invalid responses are never modified.
+  format_constraint:
+    enable: false
+    target_rate: 0.995
+    dual_lr: 2.0
+    max_bonus: 0.20
+    # AnchorGuard keeps a small post-warmup protocol prior active even when
+    # sampled training rollouts look healthy, and releases accumulated dual
+    # pressure more slowly than it adds pressure after a breach.
+    min_bonus: 0.0
+    release_lr_scale: 1.0
+    # Optional Wilson lower-confidence control rate for finite anchor probes.
+    lcb_z: 0.0
+    ema_alpha: 0.10
+    warmup_steps: 40
+    # anchor: a fixed, greedy, no-hint subset of training data; unlike
+    # validation this never reads the reported test benchmark.
+    feedback_source: train
+    apply_scope: all
+    apply_hint_threshold: 0.0
+  # Leakage-free deployment-style feedback for AnchorGuard. The selected
+  # examples come only from data.train_files and never receive hints/MIRROR.
+  anchor_probe:
+    enable: false
+    size: 128
+    frequency: 10
+    seed: 20260908
+  # Reuse existing no-hint validation as a deployment probe. Two consecutive
+  # format breaches reduce semantic-augmentation dose without extra rollouts.
+  deployment_probe:
+    enable: false
+    # no_hint is leakage-free and is used by all registered experiments.
+    # validation is retained only for experiments with a separate held-out
+    # development split; never point it at the reported test benchmark.
+    feedback_source: no_hint
+    target_format_rate: 0.98
+    breach_patience: 2
+    decay_factor: 0.25
+    recovery_step: 0.20
+    min_scale: 0.10
+    warmup_steps: 50
+  # Token-local negative credit only after a confirmed invalid repetition loop
+  # or a long invalid tail. Correct and format-valid responses are untouched.
+  repetition_quarantine:
+    enable: false
+    coefficient: 0.10
+    ngram_size: 8
+    min_repeats: 3
+    invalid_tail_tokens: 256
+  # Correct-only, zero-mean quality-diversity credit over expression trees.
+  strategy_archive:
+    enable: false
+    coefficient: 0.15
+  # Keep the verifier-forged curriculum early, then replace forged rows with
+  # original rows along a linear schedule without changing optimizer steps.
+  forge_anneal:
+    enable: false
+    start_step: 75
+    end_step: 100
+  # Bi-Frontier's correctness-preserving dual response-budget controller.
+  # It changes advantages only among correct responses from the same prompt.
+  response_budget:
+    enable: false
+    target_tokens: 192
+    dual_lr: 0.05
+    max_coef: 0.35
+    ema_alpha: 0.10
+    warmup_steps: 40
+  lexiguard:
+    # Secondary format signal applies only within the incorrect tier.
+    format_coef: 0.5
+    # A token-local continuation penalty applies only to incorrect suffixes.
+    incorrect_tail_tokens: 128
+    incorrect_tail_coef: 0.05
+  project_name: verl_examples
+  experiment_name: gsm8k
+  logger: [ 'console', 'wandb' ]
+  nnodes: 1
+  n_gpus_per_node: 8
+  save_freq: -1
+  test_freq: -1
+  critic_warmup: 0
+  default_hdfs_dir: ~/experiments/gsm8k/ppo/${trainer.experiment_name}
+  default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}

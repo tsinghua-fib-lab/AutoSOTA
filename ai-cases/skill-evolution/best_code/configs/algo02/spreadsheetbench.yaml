@@ -1,0 +1,20 @@
+_base_: ../spreadsheetbench/default.yaml
+
+model:
+  backend: openai_compatible
+  optimizer: deepseek-v4-flash
+  target: deepseek-v4-flash
+  optimizer_backend: openai_compatible
+  target_backend: openai_compatible
+
+optimizer:
+  # ALGO-02: GEPA-style trajectory and failure-aware reflection.
+  use_skill_aware_reflection: true
+
+gradient:
+  analyst_workers: 4
+
+env:
+  out_root: output/algo02_spreadsheetbench
+  workers: 4
+  exec_timeout: 1800

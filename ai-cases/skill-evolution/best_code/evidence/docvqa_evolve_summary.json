@@ -1,0 +1,170 @@
+{
+  "status": "complete",
+  "source_out_root": "C:\\Users\\MateBookGT14\\Desktop\\AutoSOTA\\4.0\\ai-cases\\SkillOpt_ALGO02_local\\output\\ALGO-02\\docvqa",
+  "initial_skill": "C:\\Users\\MateBookGT14\\Desktop\\AutoSOTA\\4.0\\ai-cases\\SkillOpt_ALGO02_local\\output\\ALGO-02\\docvqa\\best_skill.md",
+  "initial_skill_sha256": "992fcdef374c9632acb8d01581545342242ddd5f539e5a95879303bcd25d9c1a",
+  "validation_split": "valid_seen",
+  "strategies": [
+    "contrastive",
+    "delta_rule",
+    "llm_rewrite"
+  ],
+  "rounds_requested": 3,
+  "patience": 2,
+  "records": [
+    {
+      "round": 1,
+      "case_offset": 0,
+      "n_failures": 32,
+      "n_successes": 32,
+      "baseline_hard": 0.886792452830189,
+      "candidates": [
+        {
+          "name": "contrastive",
+          "hard": 0.8867924528301887,
+          "soft": 0.9345687331536389,
+          "improvement": -3.3306690738754696e-16,
+          "change_summary": [
+            "Added 8 contrastive (wrong->reason->correct) examples.",
+            "Preserved the original skill rules; only appended calibration patterns."
+          ]
+        },
+        {
+          "name": "delta_rule",
+          "hard": 0.8490566037735849,
+          "soft": 0.9111174331007592,
+          "improvement": -0.0377358490566041,
+          "change_summary": [
+            "Added 3 targeted guard rules for the top residual error clusters.",
+            "Rules are support-weighted and derived from compiler IR, not free-form search.",
+            "Original skill body is preserved below the guard block."
+          ]
+        },
+        {
+          "name": "llm_rewrite",
+          "hard": 0.8301886792452831,
+          "soft": 0.8921159029649596,
+          "improvement": -0.05660377358490598,
+          "change_summary": [
+            "Return the smallest complete exact span that answers the question, preserving official acronyms, parentheticals, units, punctuation, and required multi-part values.",
+            "Strip only non-answer text such as question numbering, table labels, page boilerplate, explanatory conversions, and leading articles unless the question explicitly asks for them.",
+            "For form and table questions, anchor to the exact field label, row key, or column header named in the question before reading the value.",
+            "Verify the target's semantic role, including receiver versus sender, row versus total, and actual versus budgeted fields, before finalizing.",
+            "For comparative questions, evaluate all relevant rows or categories and choose the row that satisfies the requested condition, not merely the largest or most salient number.",
+            "For count questions, count every qualifying item in the specified section or table, including nested or numbered subpoints when the section's points are requested.",
+            "For handwritten or degraded text, decode character by character and avoid inserting punctuation, spaces, slashes, or expanded brand text that is not clearly visible.",
+            "When several similar strings exist, disambiguate using the surrounding label, column header, and document hierarchy, then re-read the exact supporting text before answering."
+          ]
+        }
+      ],
+      "accepted": null,
+      "current_hard_after_round": 0.886792452830189,
+      "current_soft_after_round": 0.909905660377359,
+      "best_hard_after_round": 0.886792452830189,
+      "no_improve": 1
+    },
+    {
+      "round": 2,
+      "case_offset": 12,
+      "n_failures": 32,
+      "n_successes": 32,
+      "baseline_hard": 0.886792452830189,
+      "candidates": [
+        {
+          "name": "contrastive",
+          "hard": 0.8113207547169812,
+          "soft": 0.9249753644610613,
+          "improvement": -0.07547169811320786,
+          "change_summary": [
+            "Added 8 contrastive (wrong->reason->correct) examples.",
+            "Preserved the original skill rules; only appended calibration patterns."
+          ]
+        },
+        {
+          "name": "delta_rule",
+          "hard": 0.8679245283018868,
+          "soft": 0.9339600904269194,
+          "improvement": -0.018867924528302216,
+          "change_summary": [
+            "Added 3 targeted guard rules for the top residual error clusters.",
+            "Rules are support-weighted and derived from compiler IR, not free-form search.",
+            "Original skill body is preserved below the guard block."
+          ]
+        }
+      ],
+      "accepted": null,
+      "current_hard_after_round": 0.886792452830189,
+      "current_soft_after_round": 0.909905660377359,
+      "best_hard_after_round": 0.886792452830189,
+      "no_improve": 2
+    }
+  ],
+  "best_hard": 0.886792452830189,
+  "best_soft": 0.909905660377359,
+  "best_skill": "C:\\Users\\MateBookGT14\\Desktop\\AutoSOTA\\4.0\\ai-cases\\SkillOpt_ALGO02_local\\output\\ALGO-03-current\\docvqa_evolve\\best_skill.md",
+  "token_summary": {
+    "_total": {
+      "calls": 267,
+      "prompt_tokens": 434918,
+      "completion_tokens": 127948,
+      "total_tokens": 562866
+    },
+    "algo03_plan": {
+      "calls": 1,
+      "prompt_tokens": 10663,
+      "completion_tokens": 4309,
+      "total_tokens": 14972
+    },
+    "algo03_rewrite": {
+      "calls": 1,
+      "prompt_tokens": 1228,
+      "completion_tokens": 2677,
+      "total_tokens": 3905
+    },
+    "rollout": {
+      "calls": 265,
+      "prompt_tokens": 423027,
+      "completion_tokens": 120962,
+      "total_tokens": 543989
+    }
+  },
+  "provenance": {
+    "created_at_utc": "2026-09-11T16:26:37.500673+00:00",
+    "cwd": "C:\\Users\\MateBookGT14\\Desktop\\AutoSOTA\\4.0\\ai-cases\\SkillOpt_ALGO02_local",
+    "argv": [
+      "scripts\\run_algo03_evolve.py",
+      "--config",
+      "configs\\algo03\\current_docvqa_delta.yaml",
+      "--source_out_root",
+      "output\\ALGO-02\\docvqa",
+      "--skill",
+      "output\\ALGO-02\\docvqa\\best_skill.md",
+      "--baseline_hard",
+      "0.886792452830189",
+      "--baseline_soft",
+      "0.909905660377359",
+      "--rounds",
+      "3",
+      "--patience",
+      "2",
+      "--case_stride",
+      "12",
+      "--case_pool_multiplier",
+      "4",
+      "--strategies",
+      "contrastive",
+      "delta_rule",
+      "llm_rewrite",
+      "--cfg-options",
+      "out_root=output/ALGO-03-current/docvqa_evolve"
+    ],
+    "project_root": "C:\\Users\\MateBookGT14\\Desktop\\AutoSOTA\\4.0\\ai-cases\\SkillOpt_ALGO02_local",
+    "code_sha256": {
+      "skillopt/optimizer/algo03.py": "34aff0460a3b7281a900423b72dc65900b1b82312bbcb364a70d8762e6e46d89",
+      "scripts/consolidate_algo03.py": "64146d0481308851ae9a661d1387c2d7ffb2524dea84a1c4c831ad4f4f8b8791",
+      "scripts/run_algo03_iterative.py": "8c6c4fcce28bcb2845d3ccc30a9094d35597fd710e1cb1029a7a42472d873a45",
+      "scripts/eval_only.py": "46118477528709a953b761cecc3f10590088950311e03e64919b25011db28b68",
+      "configs\\algo03\\current_docvqa_delta.yaml": "34e7745b0338228a9d354a8e8a974db61b907f851d4f1fb89cc8b610c43ec482"
+    }
+  }
+}

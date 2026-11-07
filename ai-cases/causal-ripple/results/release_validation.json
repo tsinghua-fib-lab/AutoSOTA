@@ -1,0 +1,170 @@
+{
+  "release_date": "2026-10-09",
+  "cpu_sampling": {
+    "passed": true,
+    "cases": 36,
+    "token_and_cost_parity": true,
+    "ripple_cases_with_active_probes": 12
+  },
+  "gpu_sampling": {
+    "model_revision": "0f2787f2d87eac5eed8a087d5ecd24277e6255b2",
+    "gpu": "A100-SXM4-80GB",
+    "all_passed": true,
+    "cases": [
+      {
+        "profile": "base",
+        "task_id": "Mbpp/2",
+        "token_ids_identical": true,
+        "cleaned_program_identical": true,
+        "cost_identical": true,
+        "cost": {
+          "serial_calls": 136,
+          "sequence_forwards": 140,
+          "processed_tokens": 79660,
+          "max_forward_batch": 2
+        },
+        "elapsed_seconds": 20.093104518018663,
+        "output_token_ids_sha256": "4578453be9734470dcb2afcff08c3ef134aba1c2ff6ba1e2b957377978d1a296"
+      },
+      {
+        "profile": "ds1000",
+        "task_id": "DS1000/156",
+        "token_ids_identical": true,
+        "cleaned_program_identical": true,
+        "cost_identical": true,
+        "cost": {
+          "serial_calls": 135,
+          "sequence_forwards": 138,
+          "processed_tokens": 490452,
+          "max_forward_batch": 2
+        },
+        "elapsed_seconds": 85.8460274701938,
+        "output_token_ids_sha256": "a036464ebff523c829d1ae70bb68e358c1027ba8b4d80fd774e8c27afcea7b5b"
+      },
+      {
+        "profile": "bigcodebench",
+        "task_id": "BigCodeBench/939",
+        "token_ids_identical": true,
+        "cleaned_program_identical": true,
+        "cost_identical": true,
+        "cost": {
+          "serial_calls": 135,
+          "sequence_forwards": 138,
+          "processed_tokens": 96186,
+          "max_forward_batch": 2
+        },
+        "elapsed_seconds": 17.86657469905913,
+        "output_token_ids_sha256": "e8696cf2ea923d12c3e62b61c12ca96b462fd3b44006010d399ba4810026cf77"
+      },
+      {
+        "profile": "visible-cascade/bigcodebench",
+        "task_id": "BigCodeBench/939",
+        "token_ids_identical": true,
+        "incremental_cost_identical": true,
+        "incremental_cost": {
+          "serial_calls": 11,
+          "sequence_forwards": 11,
+          "processed_tokens": 7667,
+          "max_forward_batch": 1
+        },
+        "elapsed_seconds": 1.3734978092834353
+      },
+      {
+        "profile": "visible-cascade/bigcodebench",
+        "task_id": "BigCodeBench/0",
+        "token_ids_identical": true,
+        "cleaned_program_identical": true,
+        "incremental_cost_identical": true,
+        "incremental_cost": {
+          "serial_calls": 282,
+          "sequence_forwards": 282,
+          "processed_tokens": 192606,
+          "max_forward_batch": 1
+        },
+        "full_experts": 2,
+        "output_token_ids_sha256": "b6b75bb5e0f0a07a7f709b9b2afe4600c7eae962d7c34aaee0a263688b2126e6"
+      }
+    ]
+  },
+  "historical_harness": [
+    {
+      "benchmark": "humaneval",
+      "doc_id": 0,
+      "response_identical": true
+    },
+    {
+      "benchmark": "mbpp",
+      "doc_id": 0,
+      "response_identical": true
+    }
+  ],
+  "data_preparation": {
+    "ds1000": {
+      "count": 1000,
+      "all_fields_identical": true
+    },
+    "bigcodebench": {
+      "count": 1140,
+      "all_fields_identical": true
+    },
+    "mbppplus": {
+      "count": 378,
+      "all_fields_identical": true
+    }
+  },
+  "official_scorers": [
+    {
+      "benchmark": "ds1000",
+      "task_id": "DS1000/156",
+      "archived_passed": true,
+      "release_passed": true,
+      "identical": true
+    },
+    {
+      "benchmark": "mbppplus",
+      "task_id": "Mbpp/2",
+      "archived_passed": false,
+      "release_passed": false,
+      "identical": true
+    },
+    {
+      "benchmark": "bigcodebench",
+      "task_id": "BigCodeBench/939",
+      "archived_passed": true,
+      "release_passed": true,
+      "identical": true
+    }
+  ],
+  "scope": "Compatibility replays and scorer checks; full-benchmark counts come from archived evaluations.",
+  "installed_cli": {
+    "benchmark": "bigcodebench",
+    "task_id": "BigCodeBench/0",
+    "token_ids_identical": true,
+    "cleaned_program_identical": true,
+    "cost_identical": true,
+    "cost": {
+      "serial_calls": 132,
+      "sequence_forwards": 132,
+      "processed_tokens": 90156,
+      "max_forward_batch": 1
+    },
+    "installed_wheel": "causal_ripple-0.1.0-py3-none-any.whl"
+  },
+  "core_input_alignment": [
+    {
+      "benchmark": "ds1000",
+      "count": 1000,
+      "core_prompt_hashes_identical": true
+    },
+    {
+      "benchmark": "bigcodebench",
+      "count": 1140,
+      "core_prompt_hashes_identical": true
+    },
+    {
+      "benchmark": "mbppplus",
+      "count": 378,
+      "core_prompt_hashes_identical": true
+    }
+  ]
+}

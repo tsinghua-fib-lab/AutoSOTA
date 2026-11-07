@@ -1,0 +1,122 @@
+# SkillOpt default configuration — base for all environments.
+# Environment configs should inherit via: _base_: default.yaml
+
+model:
+  backend: azure_openai
+  optimizer: gpt-5.5
+  target: gpt-5.5
+  optimizer_backend: openai_chat
+  target_backend: openai_chat
+  reasoning_effort: medium
+  rewrite_reasoning_effort: ""
+  rewrite_max_completion_tokens: 64000
+  codex_exec_path: ""       # blank preserves CODEX_EXEC_PATH or the built-in default
+  codex_exec_sandbox: ""    # blank preserves CODEX_EXEC_SANDBOX or workspace-write
+  codex_exec_profile: ""
+  codex_exec_reasoning_effort: ""
+  codex_exec_use_sdk: null
+  codex_exec_network_access: null
+  codex_exec_web_search: null
+  codex_exec_approval_policy: ""
+  claude_code_exec_path: claude
+  claude_code_exec_profile: ""
+  claude_code_exec_use_sdk: auto
+  claude_code_exec_effort: medium
+  claude_code_exec_max_thinking_tokens: 16384
+  cursor_exec_path: ""       # blank uses CURSOR_EXEC_PATH or cursor-agent
+  cursor_exec_sandbox: ""    # blank uses CURSOR_EXEC_SANDBOX or enabled
+  # GitHub Copilot CLI. `--backend copilot` selects copilot_chat for BOTH roles,
+  # using CLI authentication rather than a separate provider API key.
+  copilot_exec_path: ""              # blank uses COPILOT_EXEC_PATH or copilot
+  copilot_exec_home: ""              # blank leaves COPILOT_HOME untouched
+  # null preserves COPILOT_EXEC_ALLOW_ALL_TOOLS (default off); copilot_exec only
+  copilot_exec_allow_all_tools: null  # required for file-edit rollouts
+  copilot_chat_optimizer_model: ""   # blank lets the CLI pick its default model
+  copilot_chat_target_model: ""
+  copilot_chat_timeout: null         # preserves COPILOT_CHAT_TIMEOUT or the built-in default
+  codex_trace_to_optimizer: true
+  claude_trace_to_optimizer: true
+  azure_openai_endpoint: ""           # e.g. "https://your-resource.openai.azure.com/"
+  azure_openai_api_version: "2024-12-01-preview"
+  azure_openai_api_key: ""       # Fill locally if you do not export AZURE_OPENAI_API_KEY
+  azure_openai_auth_mode: ""           # empty → fall back to AZURE_OPENAI_AUTH_MODE env (default "azure_cli")
+  azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  azure_openai_managed_identity_client_id: ""
+  optimizer_azure_openai_endpoint: ""   # e.g. "https://your-resource.openai.azure.com/"
+  optimizer_azure_openai_api_version: "2024-12-01-preview"
+  optimizer_azure_openai_api_key: ""
+  optimizer_azure_openai_auth_mode: ""           # empty → fall back to OPTIMIZER_AZURE_OPENAI_AUTH_MODE env, then shared
+  optimizer_azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  optimizer_azure_openai_managed_identity_client_id: ""
+  target_azure_openai_endpoint: ""   # e.g. "https://your-resource.openai.azure.com/"
+  target_azure_openai_api_version: "2024-12-01-preview"
+  target_azure_openai_api_key: ""
+  target_azure_openai_auth_mode: ""           # empty → fall back to TARGET_AZURE_OPENAI_AUTH_MODE env, then shared
+  target_azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  target_azure_openai_managed_identity_client_id: ""
+
+  # Qwen backend settings (qwen_chat roles). `chat_template_kwargs` is a
+  # vLLM/SGLang extension that OpenAI/Azure reject, so the wire policy is
+  # explicit: server_default omits the key (safe default), enabled/disabled
+  # send it. Pin "disabled" to reproduce the published non-thinking numbers.
+  qwen_chat_thinking_mode: ""            # server_default (default) | enabled | disabled
+  optimizer_qwen_chat_thinking_mode: ""  # per-role override
+  target_qwen_chat_thinking_mode: ""     # per-role override
+
+  # MiniMax backend settings (minimax_chat target)
+  minimax_region: ""            # global_en (default) or cn_zh; selects the base URL
+  minimax_base_url: ""          # region base URL if blank
+  minimax_api_key: ""
+  minimax_model: "MiniMax-M3"
+  minimax_temperature: "0.7"
+  minimax_max_tokens: "8000"
+  minimax_enable_thinking: "false"
+  optimizer_minimax_base_url: ""    # per-role override
+  target_minimax_base_url: ""       # per-role override
+  optimizer_minimax_api_key: ""
+  target_minimax_api_key: ""
+
+train:
+  num_epochs: 4
+  train_size: 0          # 0 = derive from dataset split when available
+  batch_size: 40
+  accumulation: 1
+  seed: 42
+
+gradient:
+  minibatch_size: 8
+  merge_batch_size: 8
+  analyst_workers: 16
+  failure_only: false
+
+optimizer:
+  learning_rate: 4          # max edits per step (edit_budget)
+  min_learning_rate: 2      # min edits for decay schedulers
+  lr_scheduler: cosine      # constant / linear / cosine / autonomous
+  lr_control_mode: fixed    # fixed / autonomous / none
+  skill_update_mode: patch  # patch / rewrite_from_suggestions / full_rewrite_minibatch
+  use_slow_update: true
+  slow_update_samples: 20
+  slow_update_gate_with_selection: false
+  longitudinal_pair_policy: mixed  # mixed / changed / unchanged
+  use_meta_skill: true
+  use_skill_aware_reflection: false  # EmbodiSkill: split failures into SKILL_DEFECT (edit body) vs EXECUTION_LAPSE (protected appendix)
+  skill_aware_appendix_source: both  # both = success+failure emit appendix notes; failure_only = only EXECUTION_LAPSE (paper-faithful)
+  skill_aware_consolidate_threshold: 0  # 0 = off; >0 = LLM-consolidate the appendix when its note count exceeds N
+
+evaluation:
+  use_gate: true
+  sel_env_num: 0
+  test_env_num: 0
+  eval_test: true
+
+env:
+  name: ""
+  skill_init: ""
+  split_mode: ratio       # ratio = build deterministic split from data_path; split_dir = use pre-split train/val/test
+  split_seed: 42
+  split_dir: ""
+  data_path: ""
+  split_output_dir: ""
+  exec_timeout: 120      # per target model/code-agent call timeout in seconds
+  out_root: ""

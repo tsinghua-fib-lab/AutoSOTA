@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "causal-ripple"
+version = "0.1.0"
+description = "Paired counterfactual revision for diffusion language models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "torch>=2.2,<3",
+    "transformers>=4.46,<4.47",
+    "numpy>=1.26,<3",
+    "accelerate>=0.30",
+    "huggingface-hub>=0.26,<1",
+    "safetensors>=0.4",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+data = ["datasets>=2.19,<5"]
+harness = ["lm-eval==0.4.12"]
+dev = ["ruff>=0.9"]
+
+[project.urls]
+Repository = "https://github.com/PLUTO-SCY/causal-ripple"
+
+[project.scripts]
+causal-ripple = "causal_ripple.run:main"
+causal-ripple-prepare = "causal_ripple.prepare:main"
+causal-ripple-score = "causal_ripple.evaluate:main"
+
+[tool.setuptools.packages.find]
+include = ["causal_ripple*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

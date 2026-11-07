@@ -1,0 +1,50 @@
+id,idea,mechanism_or_experiment,result,decision
+A01,Syntax-Closed CORE,Extend a seed to lexical/bracket structure and structural repair,"Full HumanEval 40/164, MBPP 142/500",Retained as a complementary structural expert; not the main sampler
+A02,CAUSE,Early paired counterfactual repair-set design,"Full 37/164, 134/500",Rejected relative to the selected pipeline
+A03,Causal-Ripple v1,Matched probes under original and revised seed contexts; bounded joint update,"Full 40/164, 146/500",Selected base method
+A04,Dual-Order Consensus,Confidence/margin drafts; preserve agreement and regenerate disagreement,"Full 14/164, 52/500",Strong failure; not retained
+A05,Utility Predictor proxy,Seven-feature analytic estimate of revision utility,"Full 37/164, 139/500",Marginal; trained version not established
+A06,Ripple-Syntax,Add syntactic constraints to Ripple,"Smoke 3/8, 4/16, same as base",No new correctness signal
+A07,Adaptive-Ripple,Gate propagation adaptively,"Smoke 3/8, 4/16",Conservative gate; no new signal
+A08,Deep-Ripple,Increase propagation depth,"Smoke 3/8, 3/16 versus base 3/8, 4/16",Regression; not promoted
+A09,Controlled-Ripple,Additional controls on propagation,"Smoke 3/8, 4/16",No new signal
+A10,Graph-Ripple,Multiple roots and influence graph; centrality/node influence guide edits,"Full 37/164, 148/500",MBPP gains offset by HumanEval losses
+A11,Temporal-Ripple,Token-flip history and margin variation adjust priority,"Development 28/64, 30/128 versus 29/64, 35/128",Not retained
+A12,Trajectory-Graph,Combine influence graph with temporal instability,"Development 28/64, 30/128",Not retained
+A13,SafeGraph,"Lexical filtering, edit journal, static-certificate fallback","Full 38/164, 148/500",Complementary expert; ties base combined count
+A14,RobustGraph,"Multiple context views, negative controls, agreement, conservative scoring","Smoke 3/8, 4/16",No new correctness signal
+A15,AnchorGraph,"Protect important keywords, prompt identifiers, high-margin tokens","Smoke 3/8, 4/16",Overly conservative in observed screen
+A16,BranchGraph,Batched repair/no-op rollout and future-confidence selection,"Smoke 3/8, 4/16",No demonstrated improvement
+A17,HoleGraph,Limit edits to delimiter/operator conflict neighborhoods,"Smoke 3/8, 4/16; MBPP one win/one harm",Not retained
+A18,CURE proxy,Repair-set utility heuristic with an optional learned-head interface,"Development 26/64, 31/128",Regressed; no independently trained head
+B01,Certificate-based offline routing,Select complementary complete candidates using static defects,"Retrospective 42/164, 154/500",Diagnostic evidence only; not an unbiased deployed result
+B02,CTRP,Trigger full structural/SafeGraph trajectories for hard defects,"Full 41/164, 153/500",Strong extension predecessor
+B03,JRR,Reconstruction-based tie-break on top of certificate routing,"Full 41/164, 153/500; more accepted candidates",No additional correct tasks over CTRP
+B04,CAV-Ripple,Separate benefit/harm prediction heads with abstention,"Without trained heads: smoke equals base, zero accepted edits",Interface only; learned effectiveness unvalidated
+B05,PDSR,Diagnose suspicious units and selectively re-diffuse,"Full 42/164, 148/500","Useful local-repair direction, below portfolio aggregate"
+B06,EGTR,Visible assert/doctest feedback guides local repair,"Full 40/164, 150/500",Complementary signal later used in Visible-Cascade
+B07,IPMS,Search over local masked candidates while retaining original,"Full 42/164, 148/500",Useful but more expensive local search
+B08,ICCR,Require proposal agreement across invariant prompt views,"Full 41/164, 146/500",Small benefit
+B09,LSCD,Jointly revise code with a latent scaffold,"Full 42/164, 148/500",Interesting but no aggregate advantage over alternatives
+B10,BN-PDSR,Shorten primary denoising to fund local repair within 136 serial calls,"Development 23/64, 30/128",Rejected
+B11,BN-IPMS,Budget-neutral local candidate search,"Development 21/64, 29/128",Rejected
+B12,Cascade Portfolio,Route defects to complementary experts with early exit,"Full 41/164, 153/500; 284 extra trajectories vs CTRP's 308",Same correctness with fewer trajectories
+B13,Hierarchical Portfolio,Attempt local repair before full expert generation,"Full 42/164, 152/500; 251.1 minutes",Fewer full trajectories did not reduce total runtime
+B14,Budget-Recycled Ripple,Preserve 128 ordinary steps; trade two midstream events for late repair,"Smoke 3/8, 4/16; no new wins",Not promoted
+B15,Visible-Cascade,"Visible repair first, then hard-defect routing","Full 41/164, 155/500",Selected extension; additional computation
+C01,Influence-ranked transfer cap,"DS-1000, preserve seed and rank remaining edits by influence","52/1,000 vs original Ripple 45 and CORE 48",Retained; also the Cascade input profile
+C02,"Changed, confident probes",Reject unchanged proposals or confidence below 0.30,DS-1000 46; BigCodeBench 66; APPS 61,"Helpful on some tasks, insufficient alone"
+C03,P24 diagnostic coverage,Larger probe pool with changed/ranked edits,"BigCodeBench 68/1,140","Intermediate profile, below CORE 70"
+C04,Global probe variant,Change probe locality,"BigCodeBench 66/1,140",Not selected
+C05,Smaller APPS joint action,K2 variant,"APPS 59/1,000 vs CORE 64",Not selected
+C06,Later APPS revision,Shift revision timing,"APPS 59/1,000",Not selected
+C07,P48 diagnostic coverage,Up to 31 effective probes; keep four-token action cap,"BigCodeBench 73/1,140",Selected BigCodeBench profile
+C08,Higher probe confidence,Threshold 0.50,"BigCodeBench 72/1,140",Near-best alternative; not selected
+C09,Stronger seed-score gate,Threshold 1.25,"BigCodeBench 66/1,140",Not selected
+C10,Harder support-loss gate,Threshold 0.30,"BigCodeBench 66/1,140",Not selected
+C11,Smaller DS verification pool,16 candidates with ranked transfer,"DS-1000 55/1,000",Selected DS-1000 profile
+C12,DS probe guard,Additional probe guarding,"DS-1000 52/1,000",No improvement
+C13,Smaller pool plus guard,16 candidates and guard,"DS-1000 55/1,000",Ties simpler selected profile
+C14,DS seed confirmation,Additional seed confirmation guard,"DS-1000 54/1,000",Below selected profile
+C15,Reasoning-task transfer,Same backbone on GSM8K,"Ripple strict 698/1,319 vs CORE 702",Does not establish general reasoning improvement
+C16,Arithmetic/format-guided refinement,GSM8K-specific observable diagnostics,"Strict 704/1,319, with extra inference",Positive extension result at higher cost

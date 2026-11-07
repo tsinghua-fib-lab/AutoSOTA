@@ -1,0 +1,2567 @@
+{
+  "integration_date": "2026-11-07",
+  "source_archives": [
+    {
+      "filename": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "sha256": "1193399ce820d4bb7d0388614ce613b9f31fb7fa1ef7c8851cc18bdd9be7a8d7",
+      "archive_directory": "causal-ripple"
+    },
+    {
+      "filename": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "sha256": "16d3fd054fee03ee5ee5d71caa9a376dfb99864376c5223ccb136859db083d1e",
+      "archive_directory": "grpo"
+    },
+    {
+      "filename": "AutoSOTA_Skill_Evolve_case.zip",
+      "sha256": "5bdbac28557320b2219ab816189ae2287101f1e166984636f9094b0d976027f9",
+      "archive_directory": "skill-evolution"
+    }
+  ],
+  "python_implementation_files_changed": 0,
+  "integration_notes": [
+    "English Markdown reports retained; five duplicate PDF figure exports omitted, PNG/SVG figures preserved.",
+    "README navigation and local installation example adjusted for the AutoSOTA archive.",
+    "Skill Evolution evidence coverage clarified; Chinese comments translated and historical path component replaced by an English alias without changing metrics or runtime values.",
+    "Source ZIPs are retained outside the repository.",
+    "Two Causal-Ripple CSV tables have LF line endings for Git; all cell values are unchanged."
+  ],
+  "files": [
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": ".gitattributes",
+      "source_sha256": "a90c79d820f0012217cc181a9bf1f5c8d240b5b7e5e912f3013ed894afcce61b",
+      "included": true,
+      "path": "causal-ripple/.gitattributes",
+      "archive_sha256": "a90c79d820f0012217cc181a9bf1f5c8d240b5b7e5e912f3013ed894afcce61b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": ".gitignore",
+      "source_sha256": "8d71d42d4f17bbb067c6d03ad98a6c5e7a8d5f1388a7ababcecfeadb6a03cef2",
+      "included": true,
+      "path": "causal-ripple/.gitignore",
+      "archive_sha256": "8d71d42d4f17bbb067c6d03ad98a6c5e7a8d5f1388a7ababcecfeadb6a03cef2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "CHECKSUMS.sha256",
+      "source_sha256": "2a81a52ef103cf55062aeb65858fc59670d5ebff18c3c892d2942fc2aa3e5ed9",
+      "included": true,
+      "path": "causal-ripple/CHECKSUMS.sha256",
+      "archive_sha256": "9207a95980c6472cbb1da5dbfa829f95f7c82fdb24e504be4e972d27ed1b2626",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "LICENSE",
+      "source_sha256": "66e582ed6c65f80185437ae52de66d5e0f3bc4c0977531e8fd5ec33088fc5724",
+      "included": true,
+      "path": "causal-ripple/LICENSE",
+      "archive_sha256": "66e582ed6c65f80185437ae52de66d5e0f3bc4c0977531e8fd5ec33088fc5724",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "MANIFEST.in",
+      "source_sha256": "a68d9ebfd64790e0d2e4e7410707c606159c0877fc019397f21f041e7870d424",
+      "included": true,
+      "path": "causal-ripple/MANIFEST.in",
+      "archive_sha256": "a68d9ebfd64790e0d2e4e7410707c606159c0877fc019397f21f041e7870d424",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "README.md",
+      "source_sha256": "42bbf29fafd8482afa4944cee0795205fef376ac39471d098fde7183986546cc",
+      "included": true,
+      "path": "causal-ripple/README.md",
+      "archive_sha256": "bc99ae614249bba154da2ceedc2ea414e1f0693bc5558f05392fbdcc562c5e81",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "REPORT.md",
+      "source_sha256": "6bdb534e75d3a10496a5bedab55ea29ef6e94332f8c703d214fb9603932f54d5",
+      "included": true,
+      "path": "causal-ripple/REPORT.md",
+      "archive_sha256": "6bdb534e75d3a10496a5bedab55ea29ef6e94332f8c703d214fb9603932f54d5",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "THIRD_PARTY_NOTICES.md",
+      "source_sha256": "b9893aad7c8a0ef5e40438b6ea061de858405130929de9fb3b0d57d807ee502d",
+      "included": true,
+      "path": "causal-ripple/THIRD_PARTY_NOTICES.md",
+      "archive_sha256": "b9893aad7c8a0ef5e40438b6ea061de858405130929de9fb3b0d57d807ee502d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/banner.svg",
+      "source_sha256": "0b55d0e25ba99bc23016c19f1776a34ddd6592832678eab1e6f6f08cf8b9d1b2",
+      "included": true,
+      "path": "causal-ripple/assets/banner.svg",
+      "archive_sha256": "0b55d0e25ba99bc23016c19f1776a34ddd6592832678eab1e6f6f08cf8b9d1b2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/method.pdf",
+      "source_sha256": "3dde0e941dd87b960c52349e017b704f793f7d23d768846b8448b1d9c35655ed",
+      "included": false,
+      "reason": "Duplicate figure PDF omitted; PNG counterpart retained."
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/method.png",
+      "source_sha256": "b6a8d1ba032af33cd08e9368e35fbb38b10386705e690262c76b758ab244322d",
+      "included": true,
+      "path": "causal-ripple/assets/method.png",
+      "archive_sha256": "b6a8d1ba032af33cd08e9368e35fbb38b10386705e690262c76b758ab244322d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision-case.pdf",
+      "source_sha256": "ea4a4aa19c9cf4d5deb8ca2f7a8f080881475a15054b7b50b7d8ceb1d7177e1d",
+      "included": false,
+      "reason": "Duplicate figure PDF omitted; PNG counterpart retained."
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision-case.png",
+      "source_sha256": "083122058b89373a245a193605056beb102f65475c26c527de9d8e5a049cfbf8",
+      "included": true,
+      "path": "causal-ripple/assets/revision-case.png",
+      "archive_sha256": "083122058b89373a245a193605056beb102f65475c26c527de9d8e5a049cfbf8",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision_efficiency.pdf",
+      "source_sha256": "651be281e1da200077c5255e74ae3940be8380bb9c3f25e78beb63eb966ebd56",
+      "included": false,
+      "reason": "Duplicate figure PDF omitted; PNG counterpart retained."
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision_efficiency.png",
+      "source_sha256": "6b2948cb8d7d50243856fce0e601d4e02ae91187aa48c246c42ddfac7df89963",
+      "included": true,
+      "path": "causal-ripple/assets/revision_efficiency.png",
+      "archive_sha256": "6b2948cb8d7d50243856fce0e601d4e02ae91187aa48c246c42ddfac7df89963",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision_influence_bcb939.pdf",
+      "source_sha256": "14f46e70436807e915ab71bceb74eec3d6e2a15945f3b2b8d499f98064d5a5d6",
+      "included": false,
+      "reason": "Duplicate figure PDF omitted; PNG counterpart retained."
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "assets/revision_influence_bcb939.png",
+      "source_sha256": "db1ed59e53ddb63dffab9df7ddedb341f5dd3a0755f4393c7248f6dca0062bd8",
+      "included": true,
+      "path": "causal-ripple/assets/revision_influence_bcb939.png",
+      "archive_sha256": "db1ed59e53ddb63dffab9df7ddedb341f5dd3a0755f4393c7248f6dca0062bd8",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/__init__.py",
+      "source_sha256": "623c4972155ca1605c7e698ee0c665d93d5fe1127a575a02875fc2afd2b1cc69",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/__init__.py",
+      "archive_sha256": "623c4972155ca1605c7e698ee0c665d93d5fe1127a575a02875fc2afd2b1cc69",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/adapters.py",
+      "source_sha256": "7010f6839cbf2cd05847f177c3e8a649c7a981aecf701a27cae4e6f240a155dd",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/adapters.py",
+      "archive_sha256": "7010f6839cbf2cd05847f177c3e8a649c7a981aecf701a27cae4e6f240a155dd",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/baselines.py",
+      "source_sha256": "bfb369d6850d5b109b5b38c5fef88c8b63093b3c5f087937fc15a5e2f0f17a7f",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/baselines.py",
+      "archive_sha256": "bfb369d6850d5b109b5b38c5fef88c8b63093b3c5f087937fc15a5e2f0f17a7f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/cascade.py",
+      "source_sha256": "a5d1421045a56b667ed8f9ffffd9e89b9b43147c3f25a50e9e56379b84b668aa",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/cascade.py",
+      "archive_sha256": "a5d1421045a56b667ed8f9ffffd9e89b9b43147c3f25a50e9e56379b84b668aa",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/config.py",
+      "source_sha256": "084c66ab6975b83f00b068a275ede0f7cb55de8110d58f04a159ebc9dfe13d32",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/config.py",
+      "archive_sha256": "084c66ab6975b83f00b068a275ede0f7cb55de8110d58f04a159ebc9dfe13d32",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/evaluate.py",
+      "source_sha256": "eecb9411999fb2bc5e3d3349cebcb9417a81b2658c1795eb7f45a7b27b9e9446",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/evaluate.py",
+      "archive_sha256": "eecb9411999fb2bc5e3d3349cebcb9417a81b2658c1795eb7f45a7b27b9e9446",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/graph.py",
+      "source_sha256": "70596a7d68d221f8621a7cafe2879e565815ebc879131d65134bf95dfb4e4880",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/graph.py",
+      "archive_sha256": "70596a7d68d221f8621a7cafe2879e565815ebc879131d65134bf95dfb4e4880",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/guards.py",
+      "source_sha256": "282cd69122769e47c7d4a73eeff501767d59c65529f2a2d979c703a318775f52",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/guards.py",
+      "archive_sha256": "282cd69122769e47c7d4a73eeff501767d59c65529f2a2d979c703a318775f52",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/io.py",
+      "source_sha256": "db02ca1efe9664bbf5f8373502be4fdf32f3e0b0f3ae8ba8175bda603a330ab1",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/io.py",
+      "archive_sha256": "db02ca1efe9664bbf5f8373502be4fdf32f3e0b0f3ae8ba8175bda603a330ab1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/jsonl.py",
+      "source_sha256": "022647053ae4257e37465a347eec181359afd081f88fcfd1f50f8fd27cdba713",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/jsonl.py",
+      "archive_sha256": "022647053ae4257e37465a347eec181359afd081f88fcfd1f50f8fd27cdba713",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/lm_eval.py",
+      "source_sha256": "b4f239536b2105846631a471d0d6140d18e6afe3e548e752627a6c4184ec27e4",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/lm_eval.py",
+      "archive_sha256": "b4f239536b2105846631a471d0d6140d18e6afe3e548e752627a6c4184ec27e4",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/prepare.py",
+      "source_sha256": "26429e85ce34bca5c37401cd7a4ff51fa52034d75b3f6585119eab314eafe839",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/prepare.py",
+      "archive_sha256": "26429e85ce34bca5c37401cd7a4ff51fa52034d75b3f6585119eab314eafe839",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/refinement.py",
+      "source_sha256": "413f09b8b935989a8f8d2432477b65c72d4865f17ff5745e8aeb27e1bb22d0b0",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/refinement.py",
+      "archive_sha256": "413f09b8b935989a8f8d2432477b65c72d4865f17ff5745e8aeb27e1bb22d0b0",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/revision.py",
+      "source_sha256": "de47e394dbf730116acee09ee8b1d5f311db8c1a78441f08ca91f934226e2913",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/revision.py",
+      "archive_sha256": "de47e394dbf730116acee09ee8b1d5f311db8c1a78441f08ca91f934226e2913",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/run.py",
+      "source_sha256": "b6f9a83922b90dad72076e8a8111adfc4d7ed2377845e6935836affb6083a062",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/run.py",
+      "archive_sha256": "b6f9a83922b90dad72076e8a8111adfc4d7ed2377845e6935836affb6083a062",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/sampling.py",
+      "source_sha256": "62de04f86e51e7cc0aff59bec8d87fbb001ffec8cea2c85b90920053f8940aef",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/sampling.py",
+      "archive_sha256": "62de04f86e51e7cc0aff59bec8d87fbb001ffec8cea2c85b90920053f8940aef",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "causal_ripple/structure.py",
+      "source_sha256": "c14f6f1241ef54b038842c0a949c084287c5539cccaee9dbc5e0dd700ab59171",
+      "included": true,
+      "path": "causal-ripple/causal_ripple/structure.py",
+      "archive_sha256": "c14f6f1241ef54b038842c0a949c084287c5539cccaee9dbc5e0dd700ab59171",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "configs/base.json",
+      "source_sha256": "b80c3eabc3bc502f8eb37b3ba635d99e6270675b784765ad50f9478dfc21f12c",
+      "included": true,
+      "path": "causal-ripple/configs/base.json",
+      "archive_sha256": "b80c3eabc3bc502f8eb37b3ba635d99e6270675b784765ad50f9478dfc21f12c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "configs/bigcodebench.json",
+      "source_sha256": "35f244bce290bc4219259c8d84a0a4ac70b920ff256cf71c20bcb3f521838c96",
+      "included": true,
+      "path": "causal-ripple/configs/bigcodebench.json",
+      "archive_sha256": "35f244bce290bc4219259c8d84a0a4ac70b920ff256cf71c20bcb3f521838c96",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "configs/ds1000-cascade.json",
+      "source_sha256": "2b9726e58d9da357d40c614b3dc51adc199759fac32ea625f23a5ed1408fa58b",
+      "included": true,
+      "path": "causal-ripple/configs/ds1000-cascade.json",
+      "archive_sha256": "2b9726e58d9da357d40c614b3dc51adc199759fac32ea625f23a5ed1408fa58b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "configs/ds1000.json",
+      "source_sha256": "0d8fda956cd500e4c86d0a64e86d1fbfb84599863392506ae060d1e3ffdf54dc",
+      "included": true,
+      "path": "causal-ripple/configs/ds1000.json",
+      "archive_sha256": "0d8fda956cd500e4c86d0a64e86d1fbfb84599863392506ae060d1e3ffdf54dc",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "docs/evidence.md",
+      "source_sha256": "0dbb51f813942b36321107b47d07b0f06cd7301d24269481be068ff8927326ef",
+      "included": true,
+      "path": "causal-ripple/docs/evidence.md",
+      "archive_sha256": "0dbb51f813942b36321107b47d07b0f06cd7301d24269481be068ff8927326ef",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "docs/idea_catalog.md",
+      "source_sha256": "202fa7cb47a14d47b00f87efa5e0c0b73419a73d9e17b17998a03033e32fee91",
+      "included": true,
+      "path": "causal-ripple/docs/idea_catalog.md",
+      "archive_sha256": "202fa7cb47a14d47b00f87efa5e0c0b73419a73d9e17b17998a03033e32fee91",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "docs/reproduction.md",
+      "source_sha256": "0253ea897df11bfdcf10f019fba8b45b3cdb33921e5de86ae6afe502c185256b",
+      "included": true,
+      "path": "causal-ripple/docs/reproduction.md",
+      "archive_sha256": "0253ea897df11bfdcf10f019fba8b45b3cdb33921e5de86ae6afe502c185256b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "docs/revision_baselines.md",
+      "source_sha256": "f675fea072a3bd2b3f4f2508a05fd685bf30d1f4cb6d09b1c3655187966939f5",
+      "included": true,
+      "path": "causal-ripple/docs/revision_baselines.md",
+      "archive_sha256": "f675fea072a3bd2b3f4f2508a05fd685bf30d1f4cb6d09b1c3655187966939f5",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E03.md",
+      "source_sha256": "7578e6ce3699567e1b3137d5e0dbab594d97aae731fd7c538c835396f7b08976",
+      "included": true,
+      "path": "causal-ripple/evidence/E03.md",
+      "archive_sha256": "7578e6ce3699567e1b3137d5e0dbab594d97aae731fd7c538c835396f7b08976",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E04.md",
+      "source_sha256": "0a59cdd357e94a6204ad42ddf948967cf26fea2d26a9ffd42a9cc1075797364f",
+      "included": true,
+      "path": "causal-ripple/evidence/E04.md",
+      "archive_sha256": "0a59cdd357e94a6204ad42ddf948967cf26fea2d26a9ffd42a9cc1075797364f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E05.md",
+      "source_sha256": "6d140769959492216536672eef172eda9782faf345cdd4c1e1b65a86706447ea",
+      "included": true,
+      "path": "causal-ripple/evidence/E05.md",
+      "archive_sha256": "6d140769959492216536672eef172eda9782faf345cdd4c1e1b65a86706447ea",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E06.md",
+      "source_sha256": "cdc03066069b9131237587e8b7ee892aaf31e54616190a85fa26d0d588bc0aaa",
+      "included": true,
+      "path": "causal-ripple/evidence/E06.md",
+      "archive_sha256": "cdc03066069b9131237587e8b7ee892aaf31e54616190a85fa26d0d588bc0aaa",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E07.json",
+      "source_sha256": "8aad3ace4b424076b4f4f367bd79b7c04bfe64839408d2b0989d8584d4620693",
+      "included": true,
+      "path": "causal-ripple/evidence/E07.json",
+      "archive_sha256": "8aad3ace4b424076b4f4f367bd79b7c04bfe64839408d2b0989d8584d4620693",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E08.md",
+      "source_sha256": "0c7b8f9e16ca67d2a01f825b7fbb7b1fdc9f4cd6c7962d4fec925d2a0d986b07",
+      "included": true,
+      "path": "causal-ripple/evidence/E08.md",
+      "archive_sha256": "0c7b8f9e16ca67d2a01f825b7fbb7b1fdc9f4cd6c7962d4fec925d2a0d986b07",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E09.md",
+      "source_sha256": "f4815a2a8c0343cce130c6082151f6954b36338747827816964a2717736b115d",
+      "included": true,
+      "path": "causal-ripple/evidence/E09.md",
+      "archive_sha256": "f4815a2a8c0343cce130c6082151f6954b36338747827816964a2717736b115d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/E13.json",
+      "source_sha256": "eae2002a499b3d219f890f85000013274c863b9853e8c7732b43ca2c7f5f7b19",
+      "included": true,
+      "path": "causal-ripple/evidence/E13.json",
+      "archive_sha256": "eae2002a499b3d219f890f85000013274c863b9853e8c7732b43ca2c7f5f7b19",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/handoff_validation.json",
+      "source_sha256": "1c59cc10ebe5bae5dbe9bf1f534872e649790bafa489518d53d8bda8d9472e03",
+      "included": true,
+      "path": "causal-ripple/evidence/handoff_validation.json",
+      "archive_sha256": "1c59cc10ebe5bae5dbe9bf1f534872e649790bafa489518d53d8bda8d9472e03",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/selected_code_sha256.json",
+      "source_sha256": "e4877f7a7548d7da9069f1ef4c4f745292cea4b263f24e60063422bc3b1d21d7",
+      "included": true,
+      "path": "causal-ripple/evidence/selected_code_sha256.json",
+      "archive_sha256": "e4877f7a7548d7da9069f1ef4c4f745292cea4b263f24e60063422bc3b1d21d7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/source_index.json",
+      "source_sha256": "4270007fb1dd74b9f7fe5e6329a6dfb68fbc9d01edf412b16d4d712a1c72494a",
+      "included": true,
+      "path": "causal-ripple/evidence/source_index.json",
+      "archive_sha256": "4270007fb1dd74b9f7fe5e6329a6dfb68fbc9d01edf412b16d4d712a1c72494a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "evidence/unit_tests.txt",
+      "source_sha256": "230fe150b1fb8d34ad7317de5737663245d1e61325b8f9cb84ca89b57df90ba3",
+      "included": true,
+      "path": "causal-ripple/evidence/unit_tests.txt",
+      "archive_sha256": "230fe150b1fb8d34ad7317de5737663245d1e61325b8f9cb84ca89b57df90ba3",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "pyproject.toml",
+      "source_sha256": "d6f7809bdea83ce9665e2bf4560a92dcb454965ded9039141755f0067584ac6d",
+      "included": true,
+      "path": "causal-ripple/pyproject.toml",
+      "archive_sha256": "d6f7809bdea83ce9665e2bf4560a92dcb454965ded9039141755f0067584ac6d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "requirements/bigcodebench-eval.txt",
+      "source_sha256": "23b94f78526871e6cc7c132e810b582f2bf7a390dcb5d4dbcd8e20eb0c683a1b",
+      "included": true,
+      "path": "causal-ripple/requirements/bigcodebench-eval.txt",
+      "archive_sha256": "23b94f78526871e6cc7c132e810b582f2bf7a390dcb5d4dbcd8e20eb0c683a1b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "requirements/bigcodebench.txt",
+      "source_sha256": "2c6e926386c77599a22a85d1b44002924890503d2887f031f0795f0dcc3032c2",
+      "included": true,
+      "path": "causal-ripple/requirements/bigcodebench.txt",
+      "archive_sha256": "2c6e926386c77599a22a85d1b44002924890503d2887f031f0795f0dcc3032c2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "requirements/ds1000.txt",
+      "source_sha256": "352dfc3040c8361c2f78fcca14f3dab296cf1d2afe7c3cfb02b93464f18028e9",
+      "included": true,
+      "path": "causal-ripple/requirements/ds1000.txt",
+      "archive_sha256": "352dfc3040c8361c2f78fcca14f3dab296cf1d2afe7c3cfb02b93464f18028e9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "requirements/evalplus.txt",
+      "source_sha256": "c9cbf7454b92f8ed5deb43dcdd5bba1b78d8c660c4ab0962ae1c0f79d8c09952",
+      "included": true,
+      "path": "causal-ripple/requirements/evalplus.txt",
+      "archive_sha256": "c9cbf7454b92f8ed5deb43dcdd5bba1b78d8c660c4ab0962ae1c0f79d8c09952",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "requirements/runtime.txt",
+      "source_sha256": "aab1980aa06d89ef62ba55021f598414f45377c412c4a9ade073241048412221",
+      "included": true,
+      "path": "causal-ripple/requirements/runtime.txt",
+      "archive_sha256": "aab1980aa06d89ef62ba55021f598414f45377c412c4a9ade073241048412221",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/README.md",
+      "source_sha256": "6fa43e8fc2ea467f09603cb66f34a66c4a6b1231f21b08d695b10e06fe5082b1",
+      "included": true,
+      "path": "causal-ripple/results/README.md",
+      "archive_sha256": "6fa43e8fc2ea467f09603cb66f34a66c4a6b1231f21b08d695b10e06fe5082b1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/analysis_results.json",
+      "source_sha256": "96ba384cff7086f2484b9b7b8ff2e0add96e57b7b5e24836d0fca44b6c6f23d6",
+      "included": true,
+      "path": "causal-ripple/results/analysis_results.json",
+      "archive_sha256": "96ba384cff7086f2484b9b7b8ff2e0add96e57b7b5e24836d0fca44b6c6f23d6",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/bigcodebench_groundtruth_times.jsonl",
+      "source_sha256": "b0d2b4e3be9cd8fa217dd6f9356f7d103eaf9dd7f61cdde50900ee16b8069b3b",
+      "included": true,
+      "path": "causal-ripple/results/bigcodebench_groundtruth_times.jsonl",
+      "archive_sha256": "b0d2b4e3be9cd8fa217dd6f9356f7d103eaf9dd7f61cdde50900ee16b8069b3b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/final_results.csv",
+      "source_sha256": "5e4de2d398322da7f7c0c06f41879e32eb27ca31a3a92a788d8c6ee210bcfa5a",
+      "included": true,
+      "path": "causal-ripple/results/final_results.csv",
+      "archive_sha256": "1b8126849d3054177d001cb6de21b6800c881febea4630fee9d5584e5974f5fe",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/idea_catalog.csv",
+      "source_sha256": "7fa6bed83e33dfdf7016485abca701103dc6c0f3330193088bfcebefc274e89d",
+      "included": true,
+      "path": "causal-ripple/results/idea_catalog.csv",
+      "archive_sha256": "4fabea9b6824ba233b117856d3f0af40c4f245437dad351b266108e1847f2b4b",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/outcomes.json",
+      "source_sha256": "cca78d66d1e71d945c6a0f0907a2d1b7d7d2de04920e2b9f75616d8520f8ad6b",
+      "included": true,
+      "path": "causal-ripple/results/outcomes.json",
+      "archive_sha256": "cca78d66d1e71d945c6a0f0907a2d1b7d7d2de04920e2b9f75616d8520f8ad6b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/paper_results.json",
+      "source_sha256": "115028944cb87b6eba365812e1a1c35d2401c29421667c6d922b32577cd25104",
+      "included": true,
+      "path": "causal-ripple/results/paper_results.json",
+      "archive_sha256": "115028944cb87b6eba365812e1a1c35d2401c29421667c6d922b32577cd25104",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "results/release_validation.json",
+      "source_sha256": "21fbcc6f179d4c55051bc2bd3f11591a4146ae886d063bc316b5d033c4475a69",
+      "included": true,
+      "path": "causal-ripple/results/release_validation.json",
+      "archive_sha256": "21fbcc6f179d4c55051bc2bd3f11591a4146ae886d063bc316b5d033c4475a69",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "scripts/verify_results.py",
+      "source_sha256": "f1eda9147893b1942b4461b3a575669e81daa78ff25dfc8b935b4bb6e30ea140",
+      "included": true,
+      "path": "causal-ripple/scripts/verify_results.py",
+      "archive_sha256": "f1eda9147893b1942b4461b3a575669e81daa78ff25dfc8b935b4bb6e30ea140",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "tests/fixtures/sampling_compatibility.json",
+      "source_sha256": "372dbf28322129a9ec5bc535175c0434776ddc9dfc80b094934d5509b2158c6c",
+      "included": true,
+      "path": "causal-ripple/tests/fixtures/sampling_compatibility.json",
+      "archive_sha256": "372dbf28322129a9ec5bc535175c0434776ddc9dfc80b094934d5509b2158c6c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "tests/test_baselines.py",
+      "source_sha256": "03d4e2819a7558407d165c60540dcde1600b76b2550c3e10f192459fa6142980",
+      "included": true,
+      "path": "causal-ripple/tests/test_baselines.py",
+      "archive_sha256": "03d4e2819a7558407d165c60540dcde1600b76b2550c3e10f192459fa6142980",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "tests/test_release.py",
+      "source_sha256": "6d14301ce6f7be32a58c5cb110d207b64d5c2c53e9344151914054bdb18ba08e",
+      "included": true,
+      "path": "causal-ripple/tests/test_release.py",
+      "archive_sha256": "6d14301ce6f7be32a58c5cb110d207b64d5c2c53e9344151914054bdb18ba08e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "tests/test_revision.py",
+      "source_sha256": "51bec4f627b4b085bb30dcc1411972e5cf6e7e8846095106d60e877fab155848",
+      "included": true,
+      "path": "causal-ripple/tests/test_revision.py",
+      "archive_sha256": "51bec4f627b4b085bb30dcc1411972e5cf6e7e8846095106d60e877fab155848",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Causal_Ripple_Research_Package_20261107.zip",
+      "source_path": "tests/test_sampling.py",
+      "source_sha256": "8e1507f04beb6f1d6e695bd4fa839785b4696bee4897b5063d4bdf47a77ec51f",
+      "included": true,
+      "path": "causal-ripple/tests/test_sampling.py",
+      "archive_sha256": "8e1507f04beb6f1d6e695bd4fa839785b4696bee4897b5063d4bdf47a77ec51f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "README.md",
+      "source_sha256": "9d67a63865d013d21c5ae6a4eac57d5892ea576ed53561d07f2e0db3c583b756",
+      "included": true,
+      "path": "grpo/README.md",
+      "archive_sha256": "bb4eed8058d314e75c30867c60ad709037515be5e03b4f85d6902884ca2975e2",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "REPORT.md",
+      "source_sha256": "dfbcb3e46b64b8d801c38583af91d1cff19f378f8c1b75e29a2f3d4325a718de",
+      "included": true,
+      "path": "grpo/REPORT.md",
+      "archive_sha256": "dfbcb3e46b64b8d801c38583af91d1cff19f378f8c1b75e29a2f3d4325a718de",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "REPRODUCTION.md",
+      "source_sha256": "0834dc431eb407098ccfa11195225efb7cbe95d865b4c0e3c50122765def6f28",
+      "included": true,
+      "path": "grpo/REPRODUCTION.md",
+      "archive_sha256": "0834dc431eb407098ccfa11195225efb7cbe95d865b4c0e3c50122765def6f28",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "SHA256SUMS",
+      "source_sha256": "606ce2582aaa85098a4a0292b6b667bb40e94658c362add9317ece793271813a",
+      "included": true,
+      "path": "grpo/SHA256SUMS",
+      "archive_sha256": "606ce2582aaa85098a4a0292b6b667bb40e94658c362add9317ece793271813a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "assets/matched500-numbered.pdf",
+      "source_sha256": "0a8376aa99320c96c8b8aaa4049ac9c67a5099468720b41c246c207cd0bf525a",
+      "included": false,
+      "reason": "Duplicate figure PDF omitted; PNG counterpart retained."
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "assets/matched500-numbered.png",
+      "source_sha256": "1e0fb9d5b40ec649ac6ec8b5712dc0f2f2740657f615b5a31f1b550ef3eded98",
+      "included": true,
+      "path": "grpo/assets/matched500-numbered.png",
+      "archive_sha256": "1e0fb9d5b40ec649ac6ec8b5712dc0f2f2740657f615b5a31f1b550ef3eded98",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "configs/drgrpo.recorded.env",
+      "source_sha256": "b83c6831f4fa81844db817ee006b2b5a8757f3684834ef6400ad88e53a05834e",
+      "included": true,
+      "path": "grpo/configs/drgrpo.recorded.env",
+      "archive_sha256": "b83c6831f4fa81844db817ee006b2b5a8757f3684834ef6400ad88e53a05834e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "configs/grpo.recorded.env",
+      "source_sha256": "01bc1fcde08b36105b3ef5d96ec9c76f90f4020385edf09179daf59d0ebf82a9",
+      "included": true,
+      "path": "grpo/configs/grpo.recorded.env",
+      "archive_sha256": "01bc1fcde08b36105b3ef5d96ec9c76f90f4020385edf09179daf59d0ebf82a9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "configs/pda-iso.recorded.env",
+      "source_sha256": "32717a9d613377f0e2df9652691336287d078504cae092043d18b6b964636d4e",
+      "included": true,
+      "path": "grpo/configs/pda-iso.recorded.env",
+      "archive_sha256": "32717a9d613377f0e2df9652691336287d078504cae092043d18b6b964636d4e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/LICENSE",
+      "source_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "included": true,
+      "path": "grpo/overlay/LICENSE",
+      "archive_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/Notice.txt",
+      "source_sha256": "f40ed94400d2b9636afb1f8019ab817255b19892d426c40eebe0c60d4850a1c9",
+      "included": true,
+      "path": "grpo/overlay/Notice.txt",
+      "archive_sha256": "f40ed94400d2b9636afb1f8019ab817255b19892d426c40eebe0c60d4850a1c9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_adaptive_hint.py",
+      "source_sha256": "f1813e2d4bd3fa18ab62aca4c9fce52adfca1d6b01c57db13196bfe1bb7b753f",
+      "included": true,
+      "path": "grpo/overlay/tests/test_adaptive_hint.py",
+      "archive_sha256": "f1813e2d4bd3fa18ab62aca4c9fce52adfca1d6b01c57db13196bfe1bb7b753f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_bifrontier.py",
+      "source_sha256": "0a38dfa230cfef81e5d8dbebb30ad887b2b5cc999df79133bf619628ca0ed828",
+      "included": true,
+      "path": "grpo/overlay/tests/test_bifrontier.py",
+      "archive_sha256": "0a38dfa230cfef81e5d8dbebb30ad887b2b5cc999df79133bf619628ca0ed828",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_deployment_alignment.py",
+      "source_sha256": "088a01d553992bf72c41ee5a54db572515d76b0fd8235bc78a5117119af089d6",
+      "included": true,
+      "path": "grpo/overlay/tests/test_deployment_alignment.py",
+      "archive_sha256": "088a01d553992bf72c41ee5a54db572515d76b0fd8235bc78a5117119af089d6",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_drgrpo.py",
+      "source_sha256": "836c725999b2f3393bf4ed24be293f081e555c7754ef9009cb405c244d944032",
+      "included": true,
+      "path": "grpo/overlay/tests/test_drgrpo.py",
+      "archive_sha256": "836c725999b2f3393bf4ed24be293f081e555c7754ef9009cb405c244d944032",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_forge_anneal.py",
+      "source_sha256": "11ea4a0330add38f5d4afc860944da2cbd1c891f3bfa38d11a0e028bd984414e",
+      "included": true,
+      "path": "grpo/overlay/tests/test_forge_anneal.py",
+      "archive_sha256": "11ea4a0330add38f5d4afc860944da2cbd1c891f3bfa38d11a0e028bd984414e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_frontier_scaling.py",
+      "source_sha256": "dce3c60ca83714cf85e00129f79d070358ee022a37482634fbc7b6391433199a",
+      "included": true,
+      "path": "grpo/overlay/tests/test_frontier_scaling.py",
+      "archive_sha256": "dce3c60ca83714cf85e00129f79d070358ee022a37482634fbc7b6391433199a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_posterior_frontier.py",
+      "source_sha256": "4ad6c10645217d2acdc316d602cbb84aeb770c68519b5659a9786fef24d4ea8f",
+      "included": true,
+      "path": "grpo/overlay/tests/test_posterior_frontier.py",
+      "archive_sha256": "4ad6c10645217d2acdc316d602cbb84aeb770c68519b5659a9786fef24d4ea8f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_repetition_quarantine.py",
+      "source_sha256": "17a94180d3823e283e80cecbaeffdad4ae434b3c96af77a29b914f59134db722",
+      "included": true,
+      "path": "grpo/overlay/tests/test_repetition_quarantine.py",
+      "archive_sha256": "17a94180d3823e283e80cecbaeffdad4ae434b3c96af77a29b914f59134db722",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_scasa.py",
+      "source_sha256": "bee5bb037549a3e6d94e397751bbcfe5aaaba6f04641c16b487c7ceaf2f7ab89",
+      "included": true,
+      "path": "grpo/overlay/tests/test_scasa.py",
+      "archive_sha256": "bee5bb037549a3e6d94e397751bbcfe5aaaba6f04641c16b487c7ceaf2f7ab89",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tests/test_strategy_archive.py",
+      "source_sha256": "98705453919f939b80f8a6bda908556e2659c887fa73fb3337d9adf383d31449",
+      "included": true,
+      "path": "grpo/overlay/tests/test_strategy_archive.py",
+      "archive_sha256": "98705453919f939b80f8a6bda908556e2659c887fa73fb3337d9adf383d31449",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/tools/generate_forge_countdown.py",
+      "source_sha256": "29ca505ee31ffe96a2f3b081149a3225176190b14b436937e3e39ad4c5060863",
+      "included": true,
+      "path": "grpo/overlay/tools/generate_forge_countdown.py",
+      "archive_sha256": "29ca505ee31ffe96a2f3b081149a3225176190b14b436937e3e39ad4c5060863",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/config/ppo_trainer.yaml",
+      "source_sha256": "970a3d682ad58acf72a3ad6288e67be4cc3b52a3232c1e2a963629067abdd5db",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/config/ppo_trainer.yaml",
+      "archive_sha256": "970a3d682ad58acf72a3ad6288e67be4cc3b52a3232c1e2a963629067abdd5db",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/bifrontier.py",
+      "source_sha256": "8a0dd28fd24eb0a9997b6c4aea86bd02761c96be42f727cc8594627db3834115",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/bifrontier.py",
+      "archive_sha256": "8a0dd28fd24eb0a9997b6c4aea86bd02761c96be42f727cc8594627db3834115",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/core_algos.py",
+      "source_sha256": "fe84f89077b77232f4e5f22e9f9845dd101a1207b6e25cd0c32016cb87d4b2fe",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/core_algos.py",
+      "archive_sha256": "fe84f89077b77232f4e5f22e9f9845dd101a1207b6e25cd0c32016cb87d4b2fe",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/deployment_alignment.py",
+      "source_sha256": "2c57751c4e9c5925a234b2c3cde30a6f57eb0ea3e248f2d9f4feaab2e1605af8",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/deployment_alignment.py",
+      "archive_sha256": "2c57751c4e9c5925a234b2c3cde30a6f57eb0ea3e248f2d9f4feaab2e1605af8",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/format_constraint.py",
+      "source_sha256": "d06b34467eacddb2e72920cf4f65f5eebc0f14b0419344c39ac5680552734fdb",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/format_constraint.py",
+      "archive_sha256": "d06b34467eacddb2e72920cf4f65f5eebc0f14b0419344c39ac5680552734fdb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/frontier_scaling.py",
+      "source_sha256": "9811a67f96501dff335360e956490a81d571b69e83f1fb46d10e751bfde0fdbb",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/frontier_scaling.py",
+      "archive_sha256": "9811a67f96501dff335360e956490a81d571b69e83f1fb46d10e751bfde0fdbb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/posterior_frontier.py",
+      "source_sha256": "6e65c82d3530ea3780a1c743d156bbb7f0ce1828ce66bb7b06cbff8aa3e0125b",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/posterior_frontier.py",
+      "archive_sha256": "6e65c82d3530ea3780a1c743d156bbb7f0ce1828ce66bb7b06cbff8aa3e0125b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/ray_trainer.py",
+      "source_sha256": "a64c0c218ccfc9c1b047a8f3e184d115af34cca86e42d8a5750e3fcc202f5fcf",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/ray_trainer.py",
+      "archive_sha256": "a64c0c218ccfc9c1b047a8f3e184d115af34cca86e42d8a5750e3fcc202f5fcf",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/repetition_quarantine.py",
+      "source_sha256": "4f665190c5866627558b79a810848fb29878a0051ab1f994204446d382f9ae30",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/repetition_quarantine.py",
+      "archive_sha256": "4f665190c5866627558b79a810848fb29878a0051ab1f994204446d382f9ae30",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/trainer/ppo/strategy_archive.py",
+      "source_sha256": "1fee9216cb68e9662718ef447d525288a1eafbcafa25e2c23220f150a93f3330",
+      "included": true,
+      "path": "grpo/overlay/verl/trainer/ppo/strategy_archive.py",
+      "archive_sha256": "1fee9216cb68e9662718ef447d525288a1eafbcafa25e2c23220f150a93f3330",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/utils/dataset/adaptive_hint.py",
+      "source_sha256": "3b91f49a510ca70d492ba11689e8b6f8b3e966ba72e59b230169b6015cb9350f",
+      "included": true,
+      "path": "grpo/overlay/verl/utils/dataset/adaptive_hint.py",
+      "archive_sha256": "3b91f49a510ca70d492ba11689e8b6f8b3e966ba72e59b230169b6015cb9350f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/utils/dataset/rl_dataset.py",
+      "source_sha256": "16362e0503cfa3e100291f7bec8f7ff9ec9aebc049ed95c82d96696be7576fa1",
+      "included": true,
+      "path": "grpo/overlay/verl/utils/dataset/rl_dataset.py",
+      "archive_sha256": "16362e0503cfa3e100291f7bec8f7ff9ec9aebc049ed95c82d96696be7576fa1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/utils/reward_score/countdown.py",
+      "source_sha256": "b674e32dab3d77eb083acc946c2202b259207ee4bf114f9f98e3d03ac81cacaf",
+      "included": true,
+      "path": "grpo/overlay/verl/utils/reward_score/countdown.py",
+      "archive_sha256": "b674e32dab3d77eb083acc946c2202b259207ee4bf114f9f98e3d03ac81cacaf",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/utils/reward_score/utils.py",
+      "source_sha256": "08e295826745151ead22945490f00e7d674eea640d62589ab905e8ca4bea4688",
+      "included": true,
+      "path": "grpo/overlay/verl/utils/reward_score/utils.py",
+      "archive_sha256": "08e295826745151ead22945490f00e7d674eea640d62589ab905e8ca4bea4688",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/workers/actor/dp_actor.py",
+      "source_sha256": "4fbd6d3fa83caf25a3f99c0f7011b4afb4495c7e5d0236f77dd822442c877116",
+      "included": true,
+      "path": "grpo/overlay/verl/workers/actor/dp_actor.py",
+      "archive_sha256": "4fbd6d3fa83caf25a3f99c0f7011b4afb4495c7e5d0236f77dd822442c877116",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "overlay/verl/workers/actor/megatron_actor.py",
+      "source_sha256": "f5725470e5c68549bc8752f573161c08df2f639847d29b65e1ccf40306e08a6c",
+      "included": true,
+      "path": "grpo/overlay/verl/workers/actor/megatron_actor.py",
+      "archive_sha256": "f5725470e5c68549bc8752f573161c08df2f639847d29b65e1ccf40306e08a6c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "requirements.lock.txt",
+      "source_sha256": "9b15103153f60b0b21e47e7f3ab1b7706339a8f9159be7c684172b71edd5c35c",
+      "included": true,
+      "path": "grpo/requirements.lock.txt",
+      "archive_sha256": "9b15103153f60b0b21e47e7f3ab1b7706339a8f9159be7c684172b71edd5c35c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "results/exploration-ledger.csv",
+      "source_sha256": "1bf6997dd9fefb63dee05f2fb6a51795665a767d6061bf78e2bf38cf633281fb",
+      "included": true,
+      "path": "grpo/results/exploration-ledger.csv",
+      "archive_sha256": "1bf6997dd9fefb63dee05f2fb6a51795665a767d6061bf78e2bf38cf633281fb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "results/handoff_validation.json",
+      "source_sha256": "336d5114506ff87e351d2e4ade452b4233f07a2daa1eba608862c50d85dcf225",
+      "included": true,
+      "path": "grpo/results/handoff_validation.json",
+      "archive_sha256": "336d5114506ff87e351d2e4ade452b4233f07a2daa1eba608862c50d85dcf225",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "results/matched-checkpoints.csv",
+      "source_sha256": "31d27eb9e51c7047085c22c3e077290465c7da8b84aa92dff71a1c583393517e",
+      "included": true,
+      "path": "grpo/results/matched-checkpoints.csv",
+      "archive_sha256": "31d27eb9e51c7047085c22c3e077290465c7da8b84aa92dff71a1c583393517e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "results/matched500.csv",
+      "source_sha256": "31d3ce390ed6ebf8185cdbe3b2e5b0e2b2205e25d84f8b44c5e066709767e58f",
+      "included": true,
+      "path": "grpo/results/matched500.csv",
+      "archive_sha256": "31d3ce390ed6ebf8185cdbe3b2e5b0e2b2205e25d84f8b44c5e066709767e58f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "results/source_manifest.json",
+      "source_sha256": "4207d907d5b38be7a8ab3a794d6a531cb36b2382f774f7254e345a0b2c0a2987",
+      "included": true,
+      "path": "grpo/results/source_manifest.json",
+      "archive_sha256": "4207d907d5b38be7a8ab3a794d6a531cb36b2382f774f7254e345a0b2c0a2987",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "scripts/apply_overlay.py",
+      "source_sha256": "5b5914ebea70ce6df6351143d8f16fa940d2598c16a16750a6dc7bd1d23baeda",
+      "included": true,
+      "path": "grpo/scripts/apply_overlay.py",
+      "archive_sha256": "5b5914ebea70ce6df6351143d8f16fa940d2598c16a16750a6dc7bd1d23baeda",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_GRPO_Research_Package_20261107.zip",
+      "source_path": "scripts/train_overnight_inside_container.sh",
+      "source_sha256": "2a984ad1c1fcb30d2335bd9671ff1a4864be498071f3f693bebe8e33e939a5bd",
+      "included": true,
+      "path": "grpo/scripts/train_overnight_inside_container.sh",
+      "archive_sha256": "2a984ad1c1fcb30d2335bd9671ff1a4864be498071f3f693bebe8e33e939a5bd",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/LICENSE",
+      "source_sha256": "9515a04280cf50ce154eb3ab8fa375c7cc5e6b45ea5cb23b7ff3830737020c15",
+      "included": true,
+      "path": "skill-evolution/best_code/LICENSE",
+      "archive_sha256": "9515a04280cf50ce154eb3ab8fa375c7cc5e6b45ea5cb23b7ff3830737020c15",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/README.md",
+      "source_sha256": "5ab689aed96d1e2da19dc648708114164d0994265f5324cef0f9b554ed984396",
+      "included": true,
+      "path": "skill-evolution/best_code/README.md",
+      "archive_sha256": "5ab689aed96d1e2da19dc648708114164d0994265f5324cef0f9b554ed984396",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/_base_/default.yaml",
+      "source_sha256": "d008b75a8ab1c70abfd77f678c3f4b84e9c3f6bd3392de072fa8adab7387f222",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/_base_/default.yaml",
+      "archive_sha256": "d008b75a8ab1c70abfd77f678c3f4b84e9c3f6bd3392de072fa8adab7387f222",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/alfworld/default.yaml",
+      "source_sha256": "823b0705e4ac26a6517b5ef51abe0f1935e4f60226caa519e34ed0e1087b097c",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/alfworld/default.yaml",
+      "archive_sha256": "823b0705e4ac26a6517b5ef51abe0f1935e4f60226caa519e34ed0e1087b097c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo02/alfworld.yaml",
+      "source_sha256": "cc9af2b2ae589e2f750bbf33ff5abadb4341bef8ab80472f106c5ab163efddec",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo02/alfworld.yaml",
+      "archive_sha256": "cc9af2b2ae589e2f750bbf33ff5abadb4341bef8ab80472f106c5ab163efddec",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo02/docvqa.yaml",
+      "source_sha256": "36ad3332f2d35143e8d3a8451ae3f28710aba157db7458ee96ef4ae2474f02f6",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo02/docvqa.yaml",
+      "archive_sha256": "36ad3332f2d35143e8d3a8451ae3f28710aba157db7458ee96ef4ae2474f02f6",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo02/searchqa.yaml",
+      "source_sha256": "5fe8f556f017a7087445e95f0f5ff863b67d4d2f9236d08d483057c1141abb40",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo02/searchqa.yaml",
+      "archive_sha256": "b092324a2df718eebf4b1991b1001f63b66b85f4414c32908d8c79bb93964449",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo02/spreadsheetbench.yaml",
+      "source_sha256": "7ee30e37e753f643bdf42ed3914026c90e301d6908ce83b92a95f09b72eb20f2",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo02/spreadsheetbench.yaml",
+      "archive_sha256": "7ee30e37e753f643bdf42ed3914026c90e301d6908ce83b92a95f09b72eb20f2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo03/current_alfworld_delta.yaml",
+      "source_sha256": "e525a5307401fc926e161fbce44a6d8dfcbead253ea9ece39665ca94cf82e8ac",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo03/current_alfworld_delta.yaml",
+      "archive_sha256": "e525a5307401fc926e161fbce44a6d8dfcbead253ea9ece39665ca94cf82e8ac",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo03/current_alfworld_delta_datafix.yaml",
+      "source_sha256": "293bb6976221a5467e1bff4ee188814fa7bf6376d2cd420f5dd04ece88bcdfed",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo03/current_alfworld_delta_datafix.yaml",
+      "archive_sha256": "293bb6976221a5467e1bff4ee188814fa7bf6376d2cd420f5dd04ece88bcdfed",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo03/current_docvqa_delta.yaml",
+      "source_sha256": "34e7745b0338228a9d354a8e8a974db61b907f851d4f1fb89cc8b610c43ec482",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo03/current_docvqa_delta.yaml",
+      "archive_sha256": "34e7745b0338228a9d354a8e8a974db61b907f851d4f1fb89cc8b610c43ec482",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo03/current_searchqa.yaml",
+      "source_sha256": "4f8a8984104e28ae6386c3c05235e7c52503d25a987c54e7207aff4bfc1adf58",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo03/current_searchqa.yaml",
+      "archive_sha256": "4f8a8984104e28ae6386c3c05235e7c52503d25a987c54e7207aff4bfc1adf58",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/algo03/searchqa_consolidate.yaml",
+      "source_sha256": "83e55ee398bc40dfd64c133cbc8d4a08422438c417b5cd3d73ddd81bd0c6680e",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/algo03/searchqa_consolidate.yaml",
+      "archive_sha256": "83e55ee398bc40dfd64c133cbc8d4a08422438c417b5cd3d73ddd81bd0c6680e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/docvqa/default.yaml",
+      "source_sha256": "fdd2be153d10e7f07fd1e90697ee8ce64ebe74207161aa1ac59a01db5498e5ee",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/docvqa/default.yaml",
+      "archive_sha256": "fdd2be153d10e7f07fd1e90697ee8ce64ebe74207161aa1ac59a01db5498e5ee",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/searchqa/default.yaml",
+      "source_sha256": "4393ea112362140d7ece5f0fbe0a78a47ca7637f06466109c247591aa570ebe0",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/searchqa/default.yaml",
+      "archive_sha256": "4393ea112362140d7ece5f0fbe0a78a47ca7637f06466109c247591aa570ebe0",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/configs/spreadsheetbench/default.yaml",
+      "source_sha256": "4cce24962a200958d584a2b4ca040bc19f0b87c46e970e4f9b0628d3d5f2037d",
+      "included": true,
+      "path": "skill-evolution/best_code/configs/spreadsheetbench/default.yaml",
+      "archive_sha256": "4cce24962a200958d584a2b4ca040bc19f0b87c46e970e4f9b0628d3d5f2037d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/alfworld/eval_summary.json",
+      "source_sha256": "f30a7fa6c78997d2414ff5e19f30a5d6e98150a391869fadc5ea7006657c0040",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/alfworld/eval_summary.json",
+      "archive_sha256": "c02f535cc672d1e2508cdb49934dcaae0ece2748ca09f6d1fc9501d16a6c85f4",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/alfworld/per_example_scores.jsonl",
+      "source_sha256": "a086c60dfda8153385a794e8ce82c4f76299ef811ec06d7bbab36306a3f8eac9",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/alfworld/per_example_scores.jsonl",
+      "archive_sha256": "a086c60dfda8153385a794e8ce82c4f76299ef811ec06d7bbab36306a3f8eac9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/alfworld/source_hashes.json",
+      "source_sha256": "e67965a6e5c9d1dcb4f1ad515f8c928c9dda6b7bfdd44c77591f24f5f0705ac8",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/alfworld/source_hashes.json",
+      "archive_sha256": "e67965a6e5c9d1dcb4f1ad515f8c928c9dda6b7bfdd44c77591f24f5f0705ac8",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/docvqa/eval_summary.json",
+      "source_sha256": "12f9f145fc6008673329f9f83e92e76ebe9bcac72bd4e646034694334cafa6f1",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/docvqa/eval_summary.json",
+      "archive_sha256": "002322930dc9a67a24cc2e7ec970d5921a93030dbbe9a11c53e9068f3a66056d",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/docvqa/per_example_scores.jsonl",
+      "source_sha256": "9110b34b60273fcdfda6e7de31c42db23cccd05b808cdb1539787fdb648d19e7",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/docvqa/per_example_scores.jsonl",
+      "archive_sha256": "9110b34b60273fcdfda6e7de31c42db23cccd05b808cdb1539787fdb648d19e7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/docvqa/source_hashes.json",
+      "source_sha256": "3cba0cb7f587835571fcb14290e790bb5c179c723ee6018acb3c490f4e42bd78",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/docvqa/source_hashes.json",
+      "archive_sha256": "3cba0cb7f587835571fcb14290e790bb5c179c723ee6018acb3c490f4e42bd78",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/docvqa_evolve_summary.json",
+      "source_sha256": "44c678b2441228eef875dba32d80e7695bff8bcd66172e29b7b65bb4fb72a97d",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/docvqa_evolve_summary.json",
+      "archive_sha256": "4b9d83753947a67e844c8ae03fe6d70b280845f3a7915507a9ab174d6e0613f5",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/searchqa/eval_summary.json",
+      "source_sha256": "da2d5d13b32a24f0dda3226b75adba5c6715842b34eebecd2d08c92e5156859a",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/searchqa/eval_summary.json",
+      "archive_sha256": "3d6b37a09e191e2ff2097baf7c76981e92ee5cbe22792cf31c2feeb3c7392391",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/searchqa/per_example_scores.jsonl",
+      "source_sha256": "56ff4d9d0cbd4ff56499ef061593b72ddaa092c44c33f40e681e8b3c2489b268",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/searchqa/per_example_scores.jsonl",
+      "archive_sha256": "56ff4d9d0cbd4ff56499ef061593b72ddaa092c44c33f40e681e8b3c2489b268",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/searchqa/source_hashes.json",
+      "source_sha256": "7f81a0d8d88096a53d1c3a5ced463493917b6b5cf2d4635cea7775a233387c87",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/searchqa/source_hashes.json",
+      "archive_sha256": "7f81a0d8d88096a53d1c3a5ced463493917b6b5cf2d4635cea7775a233387c87",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/evidence/searchqa_rejected_candidate_summary.json",
+      "source_sha256": "5cd162f21e1fc443645c6bf411b01be58344e894d8d69fdbd1ada83b401609e2",
+      "included": true,
+      "path": "skill-evolution/best_code/evidence/searchqa_rejected_candidate_summary.json",
+      "archive_sha256": "d567e9f3b94215019e974e5a49cc98df25c3ca8e8ae4721121146fe66285cc98",
+      "modified": true
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/final_skills/alfworld_round2.md",
+      "source_sha256": "180f441e409f5eb495e7a7883f46ddab02781e3ba719c4b5960880790bc1ba1b",
+      "included": true,
+      "path": "skill-evolution/best_code/final_skills/alfworld_round2.md",
+      "archive_sha256": "180f441e409f5eb495e7a7883f46ddab02781e3ba719c4b5960880790bc1ba1b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/final_skills/docvqa_round2.md",
+      "source_sha256": "cd914d1ec9f4799250110f7f2505b6f69a4566ab10c9c46407cbf6c2a079e131",
+      "included": true,
+      "path": "skill-evolution/best_code/final_skills/docvqa_round2.md",
+      "archive_sha256": "cd914d1ec9f4799250110f7f2505b6f69a4566ab10c9c46407cbf6c2a079e131",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/final_skills/searchqa_round2.md",
+      "source_sha256": "9de2fcf7c0d7aae45aefd2ae3d8126403951c81563d386760675307f6bd778c8",
+      "included": true,
+      "path": "skill-evolution/best_code/final_skills/searchqa_round2.md",
+      "archive_sha256": "9de2fcf7c0d7aae45aefd2ae3d8126403951c81563d386760675307f6bd778c8",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/pyproject.toml",
+      "source_sha256": "6fec63327bb05637e92a8f388f73a267f0594304411573d9b593b40bbd67e781",
+      "included": true,
+      "path": "skill-evolution/best_code/pyproject.toml",
+      "archive_sha256": "6fec63327bb05637e92a8f388f73a267f0594304411573d9b593b40bbd67e781",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/requirements.txt",
+      "source_sha256": "95c3c4c22e3e9bbde7d34cb8771bae2b6de6299e8d67ba1a827c0fb091016c3f",
+      "included": true,
+      "path": "skill-evolution/best_code/requirements.txt",
+      "archive_sha256": "95c3c4c22e3e9bbde7d34cb8771bae2b6de6299e8d67ba1a827c0fb091016c3f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/__init__.py",
+      "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/consolidate_algo03.py",
+      "source_sha256": "918728b7019916bc696a391d161f1b2a1cdb4ecb64e6d9132eab396680566729",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/consolidate_algo03.py",
+      "archive_sha256": "918728b7019916bc696a391d161f1b2a1cdb4ecb64e6d9132eab396680566729",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/eval_only.py",
+      "source_sha256": "345766a81a79febfcf1963a19280f9979cb19d8756da28c02b885feddb4b1d91",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/eval_only.py",
+      "archive_sha256": "345766a81a79febfcf1963a19280f9979cb19d8756da28c02b885feddb4b1d91",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/materialize_docvqa.py",
+      "source_sha256": "d8345eefe8dc395a4ba188a4987a6568b4bda779aed5b56c6f74743e08641ba2",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/materialize_docvqa.py",
+      "archive_sha256": "d8345eefe8dc395a4ba188a4987a6568b4bda779aed5b56c6f74743e08641ba2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/materialize_searchqa.py",
+      "source_sha256": "aa6c8c535ddaa589d4ee52c1de73f17055d325ce88563c321fb105860f7b2dfd",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/materialize_searchqa.py",
+      "archive_sha256": "aa6c8c535ddaa589d4ee52c1de73f17055d325ce88563c321fb105860f7b2dfd",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/materialize_spreadsheetbench.py",
+      "source_sha256": "be5abd116dabbef341952c9de1959118aa628f9d343bea5f8a31bed7fa2416a9",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/materialize_spreadsheetbench.py",
+      "archive_sha256": "be5abd116dabbef341952c9de1959118aa628f9d343bea5f8a31bed7fa2416a9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/run_algo03_evolve.py",
+      "source_sha256": "d15331e81ebee6a4d723d5b5c8c584fcb01690c2fad05208a777dca29da1a154",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/run_algo03_evolve.py",
+      "archive_sha256": "d15331e81ebee6a4d723d5b5c8c584fcb01690c2fad05208a777dca29da1a154",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/run_algo03_iterative.py",
+      "source_sha256": "8c6c4fcce28bcb2845d3ccc30a9094d35597fd710e1cb1029a7a42472d873a45",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/run_algo03_iterative.py",
+      "archive_sha256": "8c6c4fcce28bcb2845d3ccc30a9094d35597fd710e1cb1029a7a42472d873a45",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/scripts/train.py",
+      "source_sha256": "81c351e582d8b1f56a2189b32443db81d41ab67eb9a0503722fe431129624bf7",
+      "included": true,
+      "path": "skill-evolution/best_code/scripts/train.py",
+      "archive_sha256": "81c351e582d8b1f56a2189b32443db81d41ab67eb9a0503722fe431129624bf7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/__init__.py",
+      "source_sha256": "acde34f209004e93450198fbcc4cf5f161e5079c53e5e38492d934e42347995c",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/__init__.py",
+      "archive_sha256": "acde34f209004e93450198fbcc4cf5f161e5079c53e5e38492d934e42347995c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/config.py",
+      "source_sha256": "d4339fa6cabb3f00cc5e037e618cfb9f85f5f400791955521048ab74d284f47c",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/config.py",
+      "archive_sha256": "d4339fa6cabb3f00cc5e037e618cfb9f85f5f400791955521048ab74d284f47c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/datasets/__init__.py",
+      "source_sha256": "39a907e5207f3daa2477a4b3f9b01395fbadd43918f22ecdb8d4c132958467e7",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/datasets/__init__.py",
+      "archive_sha256": "39a907e5207f3daa2477a4b3f9b01395fbadd43918f22ecdb8d4c132958467e7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/datasets/base.py",
+      "source_sha256": "82a68f80271fadb4947f49b81a27cf03af08af61ed85d5326381a7955d0da48b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/datasets/base.py",
+      "archive_sha256": "82a68f80271fadb4947f49b81a27cf03af08af61ed85d5326381a7955d0da48b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/engine/__init__.py",
+      "source_sha256": "ef54fb8adc9731d16ec85321959437a41df1ba9c88114a424fa4da12df2a82db",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/engine/__init__.py",
+      "archive_sha256": "ef54fb8adc9731d16ec85321959437a41df1ba9c88114a424fa4da12df2a82db",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/engine/trainer.py",
+      "source_sha256": "262d183a78584fe3da58e7c1837d6db15f6c44333297e5cec1e02c6b405c49b1",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/engine/trainer.py",
+      "archive_sha256": "262d183a78584fe3da58e7c1837d6db15f6c44333297e5cec1e02c6b405c49b1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/__init__.py",
+      "source_sha256": "a3e66f90175f614a239a4f1264569cefdc6f8c7c62f4204986119d9c8f605621",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/__init__.py",
+      "archive_sha256": "a3e66f90175f614a239a4f1264569cefdc6f8c7c62f4204986119d9c8f605621",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/__init__.py",
+      "source_sha256": "9338a5fbfeb5e983b39feae2c00858cfef2146e8b6fcc977dd86ce0060aa9c9d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/__init__.py",
+      "archive_sha256": "9338a5fbfeb5e983b39feae2c00858cfef2146e8b6fcc977dd86ce0060aa9c9d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/adapter.py",
+      "source_sha256": "a85a89e4fde1a690347c6ed88497e7861c736f479fd0a1c41b1aaf1726cdc3a2",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/adapter.py",
+      "archive_sha256": "a85a89e4fde1a690347c6ed88497e7861c736f479fd0a1c41b1aaf1726cdc3a2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/dataloader.py",
+      "source_sha256": "3dff2eb535576c109c770d5a90a7a6e9d9442bd15c8035ff77a3f942766ecb7b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/dataloader.py",
+      "archive_sha256": "3dff2eb535576c109c770d5a90a7a6e9d9442bd15c8035ff77a3f942766ecb7b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/prompts/analyst_error.md",
+      "source_sha256": "b8747f41bf2b9535b852e93b74eda268ff260591b982e82c4f068e9cab4c3b8c",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/prompts/analyst_error.md",
+      "archive_sha256": "b8747f41bf2b9535b852e93b74eda268ff260591b982e82c4f068e9cab4c3b8c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/prompts/analyst_success.md",
+      "source_sha256": "1cf47b94ecca52109cbe813f7f35661c4f6ff5db1067c944a3c2e2d2467501b6",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/prompts/analyst_success.md",
+      "archive_sha256": "1cf47b94ecca52109cbe813f7f35661c4f6ff5db1067c944a3c2e2d2467501b6",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/prompts/rollout_no_history.md",
+      "source_sha256": "fcf6fe7a561729ccc4581697f5c8ad5986c150e56e32d761bad944b2fc9da614",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/prompts/rollout_no_history.md",
+      "archive_sha256": "fcf6fe7a561729ccc4581697f5c8ad5986c150e56e32d761bad944b2fc9da614",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/prompts/rollout_with_history.md",
+      "source_sha256": "7b17c85e102f3e49400df99bd3f333337827df9441abd873926a566ad9858027",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/prompts/rollout_with_history.md",
+      "archive_sha256": "7b17c85e102f3e49400df99bd3f333337827df9441abd873926a566ad9858027",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/prompts/rollout_with_memory.md",
+      "source_sha256": "74ff72a6e78d0feab1edd3295b5c7fe430f27c7d0d462871779784b008d16f92",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/prompts/rollout_with_memory.md",
+      "archive_sha256": "74ff72a6e78d0feab1edd3295b5c7fe430f27c7d0d462871779784b008d16f92",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/reflect.py",
+      "source_sha256": "1dc783ea375e1d8e513a53e7007df3cbc4dae7c1ef8cc2994f843b5e560b1f88",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/reflect.py",
+      "archive_sha256": "1dc783ea375e1d8e513a53e7007df3cbc4dae7c1ef8cc2994f843b5e560b1f88",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/rollout.py",
+      "source_sha256": "71aa79974f79c4a65de5bfc5d735167f40f9a424f239c16a0735b01d10fa0132",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/rollout.py",
+      "archive_sha256": "71aa79974f79c4a65de5bfc5d735167f40f9a424f239c16a0735b01d10fa0132",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/skills/initial.md",
+      "source_sha256": "01bd29e825b81715e7b592e135a9a9d6d0f812a5e84dcd56b51cc1075247f941",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/skills/initial.md",
+      "archive_sha256": "01bd29e825b81715e7b592e135a9a9d6d0f812a5e84dcd56b51cc1075247f941",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/__init__.py",
+      "source_sha256": "4fe9aa8cca043c4587235d89b5e99b30b655227c08be51251347896c6d13f766",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/__init__.py",
+      "archive_sha256": "4fe9aa8cca043c4587235d89b5e99b30b655227c08be51251347896c6d13f766",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/alfworld_envs.py",
+      "source_sha256": "fbb1dffd7c3ccad18d3a7bdf91718c80cd8de41927ec2a9583ce0c57241ab929",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/alfworld_envs.py",
+      "archive_sha256": "fbb1dffd7c3ccad18d3a7bdf91718c80cd8de41927ec2a9583ce0c57241ab929",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/alfworld_projection.py",
+      "source_sha256": "b4a6fe296a09fedea023c5f820b89e36acc39fe38de47f2542da01d270fed155",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/alfworld_projection.py",
+      "archive_sha256": "b4a6fe296a09fedea023c5f820b89e36acc39fe38de47f2542da01d270fed155",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/alfworld_prompts.py",
+      "source_sha256": "5356d37f2c0b141b8cf80e16882584c9470e6f0453a8cd401b1094769e680a87",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/alfworld_prompts.py",
+      "archive_sha256": "5356d37f2c0b141b8cf80e16882584c9470e6f0453a8cd401b1094769e680a87",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/config_tw.yaml",
+      "source_sha256": "a33f87ab43253ea602f93c9a0b176771a8ae16a34cd953130e45fc03700f1f49",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/config_tw.yaml",
+      "archive_sha256": "a33f87ab43253ea602f93c9a0b176771a8ae16a34cd953130e45fc03700f1f49",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/env_base.py",
+      "source_sha256": "1d2b23d7b9dcc9fda2c7ccb1680a671cf8ffeb7a5b8a15c0b08847a609613e82",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/env_base.py",
+      "archive_sha256": "1d2b23d7b9dcc9fda2c7ccb1680a671cf8ffeb7a5b8a15c0b08847a609613e82",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/env_manager.py",
+      "source_sha256": "f20a9b34cc365b985ea0b08fd5ead5fe2d843b796f9eec6a7f988840d9f26b9a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/env_manager.py",
+      "archive_sha256": "f20a9b34cc365b985ea0b08fd5ead5fe2d843b796f9eec6a7f988840d9f26b9a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/alfworld/vendor/memory.py",
+      "source_sha256": "16cab09411702c5d885387a5921f6ae3dfdb9bc277057e4fb3c2efac48638e33",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/alfworld/vendor/memory.py",
+      "archive_sha256": "16cab09411702c5d885387a5921f6ae3dfdb9bc277057e4fb3c2efac48638e33",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/base.py",
+      "source_sha256": "ea8c650e8bce460be047a03183cf17fbc49b436345cd1b1484093f763c6c64d7",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/base.py",
+      "archive_sha256": "ea8c650e8bce460be047a03183cf17fbc49b436345cd1b1484093f763c6c64d7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/__init__.py",
+      "source_sha256": "cc98501c0d2aee0afca305abc72241ec5cb314b7aae719e6ad0a4c6634b8968d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/__init__.py",
+      "archive_sha256": "cc98501c0d2aee0afca305abc72241ec5cb314b7aae719e6ad0a4c6634b8968d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/adapter.py",
+      "source_sha256": "9f98e40a2dce8f7a63edb61727cf068c3417942726cd8d10fe3c3cc511ece476",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/adapter.py",
+      "archive_sha256": "9f98e40a2dce8f7a63edb61727cf068c3417942726cd8d10fe3c3cc511ece476",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/dataloader.py",
+      "source_sha256": "234f57e74f54366d1109be3f36d9a889d5af15cba534c1edc9ad038892e86a5d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/dataloader.py",
+      "archive_sha256": "234f57e74f54366d1109be3f36d9a889d5af15cba534c1edc9ad038892e86a5d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/evaluator.py",
+      "source_sha256": "09157ae524c546dfa1e5c42c3383b017303e04a95c09a5c9683e06d618b66b0b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/evaluator.py",
+      "archive_sha256": "09157ae524c546dfa1e5c42c3383b017303e04a95c09a5c9683e06d618b66b0b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/prompts/analyst_error.md",
+      "source_sha256": "29ff71f094b66472b015a4dabc68a3d5d77e9e72a086f9e09b74643c237bdb54",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/prompts/analyst_error.md",
+      "archive_sha256": "29ff71f094b66472b015a4dabc68a3d5d77e9e72a086f9e09b74643c237bdb54",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/prompts/analyst_success.md",
+      "source_sha256": "71052e02f76ad03b3e1755c88dfb2932fd69fe27326be0afd5e09c2cf1d2654b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/prompts/analyst_success.md",
+      "archive_sha256": "71052e02f76ad03b3e1755c88dfb2932fd69fe27326be0afd5e09c2cf1d2654b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/prompts/rollout_system.md",
+      "source_sha256": "f6484254d7e4a8bc8504caab5090937e650c4ffda1baa233d5be65202560ffd9",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/prompts/rollout_system.md",
+      "archive_sha256": "f6484254d7e4a8bc8504caab5090937e650c4ffda1baa233d5be65202560ffd9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/rollout.py",
+      "source_sha256": "0750bc09f460607fede146e17fe5eafb2a97f42e580b79c6180f72a88b410801",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/rollout.py",
+      "archive_sha256": "0750bc09f460607fede146e17fe5eafb2a97f42e580b79c6180f72a88b410801",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/docvqa/skills/initial.md",
+      "source_sha256": "60fa9bae90590a50970c9d5d33d92eaa412bf1fa380bd00c8343430202795d97",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/docvqa/skills/initial.md",
+      "archive_sha256": "60fa9bae90590a50970c9d5d33d92eaa412bf1fa380bd00c8343430202795d97",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/__init__.py",
+      "source_sha256": "3874a40b6adfb028a32a8aa3a54604b1586032131a30cf53271e3cf0b2ece2fc",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/__init__.py",
+      "archive_sha256": "3874a40b6adfb028a32a8aa3a54604b1586032131a30cf53271e3cf0b2ece2fc",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/adapter.py",
+      "source_sha256": "8959e7ab0e1494c23f6c2cedcce669c78de5539f9ae00d4619b81a88f884e491",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/adapter.py",
+      "archive_sha256": "8959e7ab0e1494c23f6c2cedcce669c78de5539f9ae00d4619b81a88f884e491",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/dataloader.py",
+      "source_sha256": "de33859056bb195cc629a132d66c1afc018b0f6bdd46a74ae53cfc9eaa64af24",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/dataloader.py",
+      "archive_sha256": "de33859056bb195cc629a132d66c1afc018b0f6bdd46a74ae53cfc9eaa64af24",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/evaluator.py",
+      "source_sha256": "b69136fa727fedeede7ab257144f4dc937877bd1792f13c5c596d566df66fbd3",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/evaluator.py",
+      "archive_sha256": "b69136fa727fedeede7ab257144f4dc937877bd1792f13c5c596d566df66fbd3",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/prompts/analyst_error.md",
+      "source_sha256": "ac58184f03e2198244ace28a9339674256061a62433787aed358954e6a031a19",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/prompts/analyst_error.md",
+      "archive_sha256": "ac58184f03e2198244ace28a9339674256061a62433787aed358954e6a031a19",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/prompts/analyst_success.md",
+      "source_sha256": "0a169f33a141ed544b460d3f800f9dd2da28450d42b93556a3656cf8a45f0322",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/prompts/analyst_success.md",
+      "archive_sha256": "0a169f33a141ed544b460d3f800f9dd2da28450d42b93556a3656cf8a45f0322",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/prompts/rollout_system.md",
+      "source_sha256": "080659db39377c7cb5673063466e16c51446397d09aa3f0382152cea3ca1abbe",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/prompts/rollout_system.md",
+      "archive_sha256": "080659db39377c7cb5673063466e16c51446397d09aa3f0382152cea3ca1abbe",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/reflect.py",
+      "source_sha256": "cecf8e770bc920d2a3a4a7ee1c9d7a20734c18f39a26d05c751abf4a04062b7c",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/reflect.py",
+      "archive_sha256": "cecf8e770bc920d2a3a4a7ee1c9d7a20734c18f39a26d05c751abf4a04062b7c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/rollout.py",
+      "source_sha256": "f733f3bdf3418b8e314eccfa5da601c25a63433ec5f185530a9245cac221266b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/rollout.py",
+      "archive_sha256": "f733f3bdf3418b8e314eccfa5da601c25a63433ec5f185530a9245cac221266b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/searchqa/skills/initial.md",
+      "source_sha256": "d3ed21de4a5216da7c3cd63acc2330dc78227524753c9d29573e6692f48d6709",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/searchqa/skills/initial.md",
+      "archive_sha256": "d3ed21de4a5216da7c3cd63acc2330dc78227524753c9d29573e6692f48d6709",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/__init__.py",
+      "source_sha256": "bb65dbdcc0273c225958903cf9f5f9a441e5d1770b2875f80845e4d2df8f8837",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/__init__.py",
+      "archive_sha256": "bb65dbdcc0273c225958903cf9f5f9a441e5d1770b2875f80845e4d2df8f8837",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/adapter.py",
+      "source_sha256": "f25f7311280c42b5416739c9c1d9453dfc126f2b5a3696f44bac68d6a8b20660",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/adapter.py",
+      "archive_sha256": "f25f7311280c42b5416739c9c1d9453dfc126f2b5a3696f44bac68d6a8b20660",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/codegen_agent.py",
+      "source_sha256": "27fe04bc672764b69f1374031a3606162504b35ddab2b6092f9f1b3da13f6edd",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/codegen_agent.py",
+      "archive_sha256": "27fe04bc672764b69f1374031a3606162504b35ddab2b6092f9f1b3da13f6edd",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/dataloader.py",
+      "source_sha256": "d5ab3731ba4430b52b71a49c1df355e32b0fe6ff62fc74ceb7a9b693c3e0957d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/dataloader.py",
+      "archive_sha256": "d5ab3731ba4430b52b71a49c1df355e32b0fe6ff62fc74ceb7a9b693c3e0957d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/evaluator.py",
+      "source_sha256": "341dd5a5e6109460fce41b336d78a897bd691159c5410a5fd98701de713dd162",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/evaluator.py",
+      "archive_sha256": "341dd5a5e6109460fce41b336d78a897bd691159c5410a5fd98701de713dd162",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/executor.py",
+      "source_sha256": "3be6906334547c10390ea8ea72f6c316ec0dcf4a24ebd1846bdf41bf8cd6bd60",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/executor.py",
+      "archive_sha256": "3be6906334547c10390ea8ea72f6c316ec0dcf4a24ebd1846bdf41bf8cd6bd60",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/prompts/analyst_error.md",
+      "source_sha256": "2e5aeb30856529ff39e40c84483a55971744f9c97fdb679b98e07bcebd668839",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/prompts/analyst_error.md",
+      "archive_sha256": "2e5aeb30856529ff39e40c84483a55971744f9c97fdb679b98e07bcebd668839",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/prompts/analyst_success.md",
+      "source_sha256": "6c71d691286275f8cf775a5517e16d705bd31d2b4bce6b4136b59a7a9ba3abf2",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/prompts/analyst_success.md",
+      "archive_sha256": "6c71d691286275f8cf775a5517e16d705bd31d2b4bce6b4136b59a7a9ba3abf2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/prompts/codegen_system.md",
+      "source_sha256": "a8b561ebd38fc384035cd7e9210ad679e6f84ad581233f0d51a2086e96f690b4",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/prompts/codegen_system.md",
+      "archive_sha256": "a8b561ebd38fc384035cd7e9210ad679e6f84ad581233f0d51a2086e96f690b4",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/prompts/critical_rules.md",
+      "source_sha256": "47a0c80e670adbfe7dbe585fd1f2db8f7e5af999f274e3644c5fc80ad92ff8e2",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/prompts/critical_rules.md",
+      "archive_sha256": "47a0c80e670adbfe7dbe585fd1f2db8f7e5af999f274e3644c5fc80ad92ff8e2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/prompts/react_system.md",
+      "source_sha256": "bbf77f997eadeb0beaec38db8fb96275d515fa1870b77b5e48bf021f59325e48",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/prompts/react_system.md",
+      "archive_sha256": "bbf77f997eadeb0beaec38db8fb96275d515fa1870b77b5e48bf021f59325e48",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/react_agent.py",
+      "source_sha256": "8e286f0d7961325d2157cc18a7646a9fd5b3e61099483a15a11915a315589c88",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/react_agent.py",
+      "archive_sha256": "8e286f0d7961325d2157cc18a7646a9fd5b3e61099483a15a11915a315589c88",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/reflect.py",
+      "source_sha256": "6f4c5ae1714f2f7478c43adc31258876a257c70996760aa1f7f39cf01c5a21a3",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/reflect.py",
+      "archive_sha256": "6f4c5ae1714f2f7478c43adc31258876a257c70996760aa1f7f39cf01c5a21a3",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/rollout.py",
+      "source_sha256": "5e2c213ea46e1844ecd5ecd987d5352c18bb965ed34e5e3f3b0017013bde7871",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/rollout.py",
+      "archive_sha256": "5e2c213ea46e1844ecd5ecd987d5352c18bb965ed34e5e3f3b0017013bde7871",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/envs/spreadsheetbench/skills/initial.md",
+      "source_sha256": "5c49d03008aea2c7151b134da20f2258a746c7323b76f0e49ec2c1ea8c131f26",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/envs/spreadsheetbench/skills/initial.md",
+      "archive_sha256": "5c49d03008aea2c7151b134da20f2258a746c7323b76f0e49ec2c1ea8c131f26",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/evaluation/__init__.py",
+      "source_sha256": "1d34dd85f77152bca307443ec0ad4609cdc0f8fb0d68638d1e1235d2e5bbc854",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/evaluation/__init__.py",
+      "archive_sha256": "1d34dd85f77152bca307443ec0ad4609cdc0f8fb0d68638d1e1235d2e5bbc854",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/evaluation/gate.py",
+      "source_sha256": "3c2405f13288e97f53afa0bdfc0752ba6917c51edd1904a810deb4b5a1a81bef",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/evaluation/gate.py",
+      "archive_sha256": "3c2405f13288e97f53afa0bdfc0752ba6917c51edd1904a810deb4b5a1a81bef",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/gradient/__init__.py",
+      "source_sha256": "570b2e37e2ca7a82b76ee0a0054cd8ecd849a55552d83dab1f7029be099fc43d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/gradient/__init__.py",
+      "archive_sha256": "570b2e37e2ca7a82b76ee0a0054cd8ecd849a55552d83dab1f7029be099fc43d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/gradient/aggregate.py",
+      "source_sha256": "332d1aa261e8a0969a95d327b67436c153bba74dde27f312c650eae3cff5cd39",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/gradient/aggregate.py",
+      "archive_sha256": "332d1aa261e8a0969a95d327b67436c153bba74dde27f312c650eae3cff5cd39",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/gradient/reflect.py",
+      "source_sha256": "59246c2130a9accf8dac9ee4349f27d289c68fc46bfb56ae0d1819764ec876eb",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/gradient/reflect.py",
+      "archive_sha256": "59246c2130a9accf8dac9ee4349f27d289c68fc46bfb56ae0d1819764ec876eb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/__init__.py",
+      "source_sha256": "5ac3a02c8eef1fb0310a39babd4721012eb7260b097cd7442d8ce5d2697631fb",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/__init__.py",
+      "archive_sha256": "5ac3a02c8eef1fb0310a39babd4721012eb7260b097cd7442d8ce5d2697631fb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/azure_openai.py",
+      "source_sha256": "0a726c842e4fafad169e0b7d8552624c9b071cde96512d80e29db4670cc6a12a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/azure_openai.py",
+      "archive_sha256": "0a726c842e4fafad169e0b7d8552624c9b071cde96512d80e29db4670cc6a12a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/backend_config.py",
+      "source_sha256": "623906322dc6495bb39881f455befe6f1463c0574d953882b7b1af535da44066",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/backend_config.py",
+      "archive_sha256": "623906322dc6495bb39881f455befe6f1463c0574d953882b7b1af535da44066",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/claude_backend.py",
+      "source_sha256": "a3aca64462c40376bb72abd7c7498a4645c57803afb4b912630c2f28c4174fc6",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/claude_backend.py",
+      "archive_sha256": "a3aca64462c40376bb72abd7c7498a4645c57803afb4b912630c2f28c4174fc6",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/claude_code_backend.py",
+      "source_sha256": "e4ce7ee56cb85de3664079ea6e813240e8c681a72412cd7a5b181e3a090dae35",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/claude_code_backend.py",
+      "archive_sha256": "e4ce7ee56cb85de3664079ea6e813240e8c681a72412cd7a5b181e3a090dae35",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/codex_backend.py",
+      "source_sha256": "9b55fae2ea02071d37b1cc23043f769c15ad33a2bfc055c464cf317d50d1d93a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/codex_backend.py",
+      "archive_sha256": "9b55fae2ea02071d37b1cc23043f769c15ad33a2bfc055c464cf317d50d1d93a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/codex_harness.py",
+      "source_sha256": "7b873d1893c423958c3dafbb674f137e9e29d3e25ece654521e06ac66db67e33",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/codex_harness.py",
+      "archive_sha256": "7b873d1893c423958c3dafbb674f137e9e29d3e25ece654521e06ac66db67e33",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/common.py",
+      "source_sha256": "436b54b3faa418a533477645e650d6cd08384645dbab0dc6b23199658ba21780",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/common.py",
+      "archive_sha256": "436b54b3faa418a533477645e650d6cd08384645dbab0dc6b23199658ba21780",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/copilot_backend.py",
+      "source_sha256": "51aa26ae359905f81578dec4dd402f7e3c7e4e862f1fcbc167baf3f106fbc6af",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/copilot_backend.py",
+      "archive_sha256": "51aa26ae359905f81578dec4dd402f7e3c7e4e862f1fcbc167baf3f106fbc6af",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/minimax_backend.py",
+      "source_sha256": "4d021689a301a10fff093864eb92082bda2b6a9dac87e57d954efad9953a30b1",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/minimax_backend.py",
+      "archive_sha256": "4d021689a301a10fff093864eb92082bda2b6a9dac87e57d954efad9953a30b1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/openai_compatible_backend.py",
+      "source_sha256": "0a457453dd596dfc0d8007f998bf5442d53c4dfdd93b3064cb3cce54d432e12d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/openai_compatible_backend.py",
+      "archive_sha256": "0a457453dd596dfc0d8007f998bf5442d53c4dfdd93b3064cb3cce54d432e12d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/qwen_backend.py",
+      "source_sha256": "1c7b0886457325dc8a20083c76f7a700ce83e300a1c7085e110d3482c85bba13",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/qwen_backend.py",
+      "archive_sha256": "1c7b0886457325dc8a20083c76f7a700ce83e300a1c7085e110d3482c85bba13",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/model/router.py",
+      "source_sha256": "3265614f352cd0dd665f39eb351278351b0f3c98f7dc3cde9a6b4b005015e5fb",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/model/router.py",
+      "archive_sha256": "3265614f352cd0dd665f39eb351278351b0f3c98f7dc3cde9a6b4b005015e5fb",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/__init__.py",
+      "source_sha256": "5f18d2f2fbcd469ef7ff64705fbb6b883102b28cccee7353af21e8bb36b8749b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/__init__.py",
+      "archive_sha256": "5f18d2f2fbcd469ef7ff64705fbb6b883102b28cccee7353af21e8bb36b8749b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/algo03.py",
+      "source_sha256": "8d809a2adfab1811dc802facf4a2630eeadc1b868ad75fdc1eac166440bdf6e7",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/algo03.py",
+      "archive_sha256": "8d809a2adfab1811dc802facf4a2630eeadc1b868ad75fdc1eac166440bdf6e7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/appendix.py",
+      "source_sha256": "220c373fd1e0bb14f47b99a51ff7c712dfc9387c6107f4fae3f89f9102ca4f9c",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/appendix.py",
+      "archive_sha256": "220c373fd1e0bb14f47b99a51ff7c712dfc9387c6107f4fae3f89f9102ca4f9c",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/clip.py",
+      "source_sha256": "0c1060799884eb32e131000299ae78af094ee375d9c81c3dd1e1e2c78bd3c728",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/clip.py",
+      "archive_sha256": "0c1060799884eb32e131000299ae78af094ee375d9c81c3dd1e1e2c78bd3c728",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/lr_autonomous.py",
+      "source_sha256": "8ce459602b548c495825af9fba9621fcb5066b798876cdd0306b5d4ed48d2b68",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/lr_autonomous.py",
+      "archive_sha256": "8ce459602b548c495825af9fba9621fcb5066b798876cdd0306b5d4ed48d2b68",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/meta_skill.py",
+      "source_sha256": "a9b02bded86aca1575bf8647d85c55808fbe12162b5de69ca91c3ef2b7424b6d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/meta_skill.py",
+      "archive_sha256": "a9b02bded86aca1575bf8647d85c55808fbe12162b5de69ca91c3ef2b7424b6d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/rewrite.py",
+      "source_sha256": "d5606e7859d9a36e34b3d870fd1d9f8172f3cdc97cfd2160610c3fed2de3f158",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/rewrite.py",
+      "archive_sha256": "d5606e7859d9a36e34b3d870fd1d9f8172f3cdc97cfd2160610c3fed2de3f158",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/scheduler.py",
+      "source_sha256": "791b81b6d7e3de974d6a9d4a9e69636bf2a442019a19c039dc7e2e0ff26b894a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/scheduler.py",
+      "archive_sha256": "791b81b6d7e3de974d6a9d4a9e69636bf2a442019a19c039dc7e2e0ff26b894a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/select.py",
+      "source_sha256": "e675ebfe4c79627c944e6aa90de6542f85deaf948054c1cfe1b8876ec8442dab",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/select.py",
+      "archive_sha256": "e675ebfe4c79627c944e6aa90de6542f85deaf948054c1cfe1b8876ec8442dab",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/skill.py",
+      "source_sha256": "1cb3ecd9da7ab5ea89ad86780f3e4536fcf5cda84455ea6ae8fcc9c86cc73d3f",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/skill.py",
+      "archive_sha256": "1cb3ecd9da7ab5ea89ad86780f3e4536fcf5cda84455ea6ae8fcc9c86cc73d3f",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/skill_aware.py",
+      "source_sha256": "ea37beb95056ac52a61167153a2e05b05692d55fbe2b3bcfb039516801f0b418",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/skill_aware.py",
+      "archive_sha256": "ea37beb95056ac52a61167153a2e05b05692d55fbe2b3bcfb039516801f0b418",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/slow_update.py",
+      "source_sha256": "90e71c6fd4ae5ca0506a2e0bee604a9c05f53b0d8d017618a0d44e65635efaed",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/slow_update.py",
+      "archive_sha256": "90e71c6fd4ae5ca0506a2e0bee604a9c05f53b0d8d017618a0d44e65635efaed",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/optimizer/update_modes.py",
+      "source_sha256": "37c15553afd820a94216caadfe80d29a9cbfca7c01dacee3b628e439830d8841",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/optimizer/update_modes.py",
+      "archive_sha256": "37c15553afd820a94216caadfe80d29a9cbfca7c01dacee3b628e439830d8841",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/__init__.py",
+      "source_sha256": "50c017a18c35d990bf24d5efa4019aaa13bb3ef8db0e2b50dcab5c923a376455",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/__init__.py",
+      "archive_sha256": "50c017a18c35d990bf24d5efa4019aaa13bb3ef8db0e2b50dcab5c923a376455",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_error.md",
+      "source_sha256": "40eaf561c7fdbdfc1c7a1febd9f7c3540270ca6d5e7e0a8798c7c90b8d303200",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_error.md",
+      "archive_sha256": "40eaf561c7fdbdfc1c7a1febd9f7c3540270ca6d5e7e0a8798c7c90b8d303200",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_error_full_rewrite.md",
+      "source_sha256": "a81389ca63e75f13d6aca4d2f01cd6825a364e9cca833f316de125014a2f7365",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_error_full_rewrite.md",
+      "archive_sha256": "a81389ca63e75f13d6aca4d2f01cd6825a364e9cca833f316de125014a2f7365",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_error_rewrite.md",
+      "source_sha256": "c393358b2be63d49bc8400944f17bcfb45f58aed5959cf6a46c2e1c1caefcd1b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_error_rewrite.md",
+      "archive_sha256": "c393358b2be63d49bc8400944f17bcfb45f58aed5959cf6a46c2e1c1caefcd1b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_success.md",
+      "source_sha256": "0ffc8f85e13af2b14e1b9f3307a44d30ecf60e9d803ccb9190fdd9785e43fabc",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_success.md",
+      "archive_sha256": "0ffc8f85e13af2b14e1b9f3307a44d30ecf60e9d803ccb9190fdd9785e43fabc",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_success_full_rewrite.md",
+      "source_sha256": "359a7481e348a89d51e5c7ee60a3d4d1d7a5ce7fdd8193d490c64f2667aeec55",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_success_full_rewrite.md",
+      "archive_sha256": "359a7481e348a89d51e5c7ee60a3d4d1d7a5ce7fdd8193d490c64f2667aeec55",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/analyst_success_rewrite.md",
+      "source_sha256": "758bfe107d15ba1b5318f7191ea9e965fb09982b12599d62fee9db0d823f22f0",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/analyst_success_rewrite.md",
+      "archive_sha256": "758bfe107d15ba1b5318f7191ea9e965fb09982b12599d62fee9db0d823f22f0",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/lr_autonomous.md",
+      "source_sha256": "667c78c7873a28fae0e6f47c5c6ed556d76dfe337c74da986757c9e4fadb1f0e",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/lr_autonomous.md",
+      "archive_sha256": "667c78c7873a28fae0e6f47c5c6ed556d76dfe337c74da986757c9e4fadb1f0e",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_failure.md",
+      "source_sha256": "071313895da226840164ccda6e7f01d5f849ea128037d3f337cddab66ae799db",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_failure.md",
+      "archive_sha256": "071313895da226840164ccda6e7f01d5f849ea128037d3f337cddab66ae799db",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_failure_full_rewrite.md",
+      "source_sha256": "adef4b6e8f0b1d7cf992e4bd9a34f633375b122cc054477c305a228627ec79ae",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_failure_full_rewrite.md",
+      "archive_sha256": "adef4b6e8f0b1d7cf992e4bd9a34f633375b122cc054477c305a228627ec79ae",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_failure_rewrite.md",
+      "source_sha256": "e9cd2289d8515bca4561e52d3c8da14a2fe97d1b2e77d50f0d34f2fb257326c1",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_failure_rewrite.md",
+      "archive_sha256": "e9cd2289d8515bca4561e52d3c8da14a2fe97d1b2e77d50f0d34f2fb257326c1",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_final.md",
+      "source_sha256": "b2c7b452032fbbe3b223e877b766ea6202775d685c3b32e68956a402e775b84b",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_final.md",
+      "archive_sha256": "b2c7b452032fbbe3b223e877b766ea6202775d685c3b32e68956a402e775b84b",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_final_full_rewrite.md",
+      "source_sha256": "21ee282d5720dd07dcea9ddd3cce2de893adeeed51518a0c241590130f1635bd",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_final_full_rewrite.md",
+      "archive_sha256": "21ee282d5720dd07dcea9ddd3cce2de893adeeed51518a0c241590130f1635bd",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_final_rewrite.md",
+      "source_sha256": "6a79e19eebe2fbbe20f93a6b864c7c157388bbae168980154c0cdac452bbdfe4",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_final_rewrite.md",
+      "archive_sha256": "6a79e19eebe2fbbe20f93a6b864c7c157388bbae168980154c0cdac452bbdfe4",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_success.md",
+      "source_sha256": "6b816bcf5526d31164b779921f3c8c847541bf92fbe26c6a38b555eb3b753712",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_success.md",
+      "archive_sha256": "6b816bcf5526d31164b779921f3c8c847541bf92fbe26c6a38b555eb3b753712",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_success_full_rewrite.md",
+      "source_sha256": "8f1339cd57ed41af82f8ac7675891a9a58412b5c7ef4e6762a12ad8caad347ca",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_success_full_rewrite.md",
+      "archive_sha256": "8f1339cd57ed41af82f8ac7675891a9a58412b5c7ef4e6762a12ad8caad347ca",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/merge_success_rewrite.md",
+      "source_sha256": "2b293d9a16da199cade8bdade560b12553577ad66aacb0f9de3ae979aa150ab7",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/merge_success_rewrite.md",
+      "archive_sha256": "2b293d9a16da199cade8bdade560b12553577ad66aacb0f9de3ae979aa150ab7",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/meta_skill.md",
+      "source_sha256": "b2bab7f7635cd2a94348de6adf15ceaa247ddabd0a2a8bb7c53eab5cfca7deba",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/meta_skill.md",
+      "archive_sha256": "b2bab7f7635cd2a94348de6adf15ceaa247ddabd0a2a8bb7c53eab5cfca7deba",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/ranking.md",
+      "source_sha256": "8bf37725b7b328d8d54af7a8fb173179bdd0f02b57399ed2cc7a5b5d25edea8a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/ranking.md",
+      "archive_sha256": "8bf37725b7b328d8d54af7a8fb173179bdd0f02b57399ed2cc7a5b5d25edea8a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/ranking_rewrite.md",
+      "source_sha256": "2ff8c755188704352cb7dd5c57bbce66c506145a5a5cd212b8881bd09d608031",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/ranking_rewrite.md",
+      "archive_sha256": "2ff8c755188704352cb7dd5c57bbce66c506145a5a5cd212b8881bd09d608031",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/rewrite_skill.md",
+      "source_sha256": "2da412ee1d92ab32e59f8a33e2816a2c315edef5e2906d7628d8d093ae0dc68a",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/rewrite_skill.md",
+      "archive_sha256": "2da412ee1d92ab32e59f8a33e2816a2c315edef5e2906d7628d8d093ae0dc68a",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/prompts/slow_update.md",
+      "source_sha256": "7f6f97d2283a370ad072a91ad61e152551f4f4eb4f519c9a1c5c60679b4782f2",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/prompts/slow_update.md",
+      "archive_sha256": "7f6f97d2283a370ad072a91ad61e152551f4f4eb4f519c9a1c5c60679b4782f2",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/scheduler/__init__.py",
+      "source_sha256": "0b5dde163078007b9c45b14db83d2fb676d62d11bc81df90155a50f1d73d0623",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/scheduler/__init__.py",
+      "archive_sha256": "0b5dde163078007b9c45b14db83d2fb676d62d11bc81df90155a50f1d73d0623",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/types.py",
+      "source_sha256": "f8f425c44f352255dd36a5bd6438ae0aafbc671d5e84af349ccb32c9674fddfa",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/types.py",
+      "archive_sha256": "f8f425c44f352255dd36a5bd6438ae0aafbc671d5e84af349ccb32c9674fddfa",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/utils/__init__.py",
+      "source_sha256": "7a2f608332c095057fa82173f4841dee1d6f9f7a127b35a4770bf418319bc5f0",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/utils/__init__.py",
+      "archive_sha256": "7a2f608332c095057fa82173f4841dee1d6f9f7a127b35a4770bf418319bc5f0",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/utils/console.py",
+      "source_sha256": "211f0f4370b28044f826f04df10ea84388879432471166add335fef66e5f8869",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/utils/console.py",
+      "archive_sha256": "211f0f4370b28044f826f04df10ea84388879432471166add335fef66e5f8869",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/utils/json_utils.py",
+      "source_sha256": "77d06263ab9dd6537c52c80a7cd4614d2a0362ed933407725a032bb095738589",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/utils/json_utils.py",
+      "archive_sha256": "77d06263ab9dd6537c52c80a7cd4614d2a0362ed933407725a032bb095738589",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/utils/provenance.py",
+      "source_sha256": "a5875778367b4baaf889a416cc368a082064bde3b1484aba28cee41b457e447d",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/utils/provenance.py",
+      "archive_sha256": "a5875778367b4baaf889a416cc368a082064bde3b1484aba28cee41b457e447d",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "best_code/skillopt/utils/scoring.py",
+      "source_sha256": "f5756974a6d0f62f45bc408cc18ea13376eb1ab6592a351e8722d53860fcb8e9",
+      "included": true,
+      "path": "skill-evolution/best_code/skillopt/utils/scoring.py",
+      "archive_sha256": "f5756974a6d0f62f45bc408cc18ea13376eb1ab6592a351e8722d53860fcb8e9",
+      "modified": false
+    },
+    {
+      "source_archive": "AutoSOTA_Skill_Evolve_case.zip",
+      "source_path": "final_report.md",
+      "source_sha256": "1d64ddbdd7737db144d4bcfaf87aa0e86a7c3646c260696037146efd5de8f4eb",
+      "included": true,
+      "path": "skill-evolution/final_report.md",
+      "archive_sha256": "a42207856540786cc63e2eeed9ad3043de027d347b5989445e2b8ca795198313",
+      "modified": true
+    }
+  ]
+}

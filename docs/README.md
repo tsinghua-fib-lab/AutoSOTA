@@ -21,7 +21,7 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 <tr>
 <td width="50%" valign="top">
 <h3>🧪 Explore the research</h3>
-<p>Conference experiments and science benchmarks, with source code, reports, and evaluation protocols.</p>
+<p>Conference experiments, AI research cases, and science benchmarks, with source code, reports, and evaluation protocols.</p>
 <a href="#experiment-results"><strong>Browse experiment results →</strong></a>
 </td>
 <td width="50%" valign="top">
@@ -40,6 +40,8 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 
 ### Experiment News
 
+- **2026-11-07** 🤖 Added three AI research cases: **[Causal-Ripple](../ai-cases/causal-ripple/)** for diffusion code generation, **[GRPO / PDA-Iso](../ai-cases/grpo/)** for reasoning post-training, and **[Skill Evolution](../ai-cases/skill-evolution/)** for agent skill optimization, with code, English reports, and evaluation records.
+
 - **2026-10-12** 🧫 Published the **S2F optimization study on ProteinGym v1.3**, covering 217 substitution assays, with code, an English research report, and aggregate results.
 
 - **2026-10-10** 🧬 Published the **ODELIA Breast MRI Challenge** study, with public-test results, code, a research report, and the complete search history.
@@ -57,6 +59,14 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 | **01** | **Early experiments** · 105 papers across multiple conferences | [Code & reports](../improved-papers/) · [Results](https://tsinghua-fib-lab.github.io/AutoSOTA/#papers) |
 | **02** | **CVPR 2026** | [Code & reports](../CVPR-2026/) · [Dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/cvpr.html) |
 | **03** | **ICML 2026** | [Code & reports](../ICML-2026/) · [Dashboard](https://tsinghua-fib-lab.github.io/AutoSOTA/icml.html) |
+
+### AI Research Cases
+
+| Case | Research focus | Explore |
+|:---|:---|:---|
+| **Causal-Ripple** | Paired token revision for diffusion code generation | [Report](../ai-cases/causal-ripple/REPORT.md) · [Code & results](../ai-cases/causal-ripple/) |
+| **GRPO / PDA-Iso** | Correctness and format credit assignment; accuracy–length trade-offs | [Report](../ai-cases/grpo/REPORT.md) · [Code & results](../ai-cases/grpo/) |
+| **Skill Evolution** | Failure attribution and cross-trajectory skill generalization | [Report](../ai-cases/skill-evolution/final_report.md) · [Code & results](../ai-cases/skill-evolution/) |
 
 ### Science Benchmarks
 

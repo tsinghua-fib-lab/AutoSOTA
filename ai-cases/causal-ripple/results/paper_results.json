@@ -1,0 +1,394 @@
+{
+  "release_date": "2026-11-07",
+  "model": "GSAI-ML/LLaDA-8B-Base",
+  "model_revision": "0f2787f2d87eac5eed8a087d5ecd24277e6255b2",
+  "seed": 1234,
+  "ordinary_steps": 128,
+  "temperature": 0,
+  "tasks": {
+    "humaneval": 164,
+    "mbpp": 500,
+    "mbppplus": 378,
+    "ds1000": 1000,
+    "bigcodebench": 1140
+  },
+  "successful_tasks": {
+    "confidence": {
+      "humaneval": 20,
+      "mbpp": 79,
+      "mbppplus": 35,
+      "ds1000": 47,
+      "bigcodebench": 37
+    },
+    "topk": {
+      "humaneval": 31,
+      "mbpp": 107,
+      "mbppplus": 59,
+      "ds1000": 53,
+      "bigcodebench": 42
+    },
+    "core": {
+      "humaneval": 37,
+      "mbpp": 138,
+      "mbppplus": 80,
+      "ds1000": 48,
+      "bigcodebench": 70
+    },
+    "ripple": {
+      "humaneval": 40,
+      "mbpp": 146,
+      "mbppplus": 84,
+      "ds1000": 55,
+      "bigcodebench": 73
+    },
+    "remdm-conf": {
+      "mbppplus": 59,
+      "ds1000": 54,
+      "bigcodebench": 46
+    },
+    "margin-remask": {
+      "mbppplus": 66,
+      "ds1000": 26,
+      "bigcodebench": 42
+    }
+  },
+  "cascade": {
+    "humaneval": {
+      "profile": "base",
+      "input_passed": 40,
+      "cascade_passed": 41
+    },
+    "mbpp": {
+      "profile": "base",
+      "input_passed": 146,
+      "cascade_passed": 155
+    },
+    "mbppplus": {
+      "profile": "base",
+      "input_passed": 84,
+      "cascade_passed": 92
+    },
+    "ds1000": {
+      "profile": "ds1000-cascade",
+      "input_passed": 52,
+      "cascade_passed": 53
+    },
+    "bigcodebench": {
+      "profile": "bigcodebench",
+      "input_passed": 73,
+      "cascade_passed": 74
+    }
+  },
+  "source_sha256": {
+    "humaneval/confidence": {
+      "files": [
+        {
+          "file": "representative_20260820T053558Z_ad15d915_seed1234/results/low_confidence_humaneval/qdpv68r5/samples_humaneval_2026-08-20T21-29-42.863867.jsonl",
+          "sha256": "a6675e8ec900eeddebdc03bb0460a1abba8105f3788b054e578f6997cd6bf163"
+        }
+      ]
+    },
+    "humaneval/topk": {
+      "files": [
+        {
+          "file": "topk_margin_code_20260821_ad15d915_seed1234/results/topk_margin_humaneval/qdpv68r5/samples_humaneval_2026-08-21T12-35-05.457661.jsonl",
+          "sha256": "3681f0661593239561599dd6dc73535f870ff98f963224c3d57b67f891467bf0"
+        }
+      ]
+    },
+    "humaneval/core": {
+      "files": [
+        {
+          "file": "topk_margin_code_20260821_ad15d915_seed1234/results/core_humaneval/qdpv68r5/samples_humaneval_2026-08-21T12-36-24.679795.jsonl",
+          "sha256": "960b1ab58cf5b9ffd5fbb12ad1651f3a5f4af7f435611b1fc4c3a3bcdb2e3506"
+        }
+      ]
+    },
+    "humaneval/ripple": {
+      "files": [
+        {
+          "file": "ideas_full_20260821_seed1234/results/causal_ripple_humaneval/qdpv68r5/samples_humaneval_2026-08-21T21-00-01.847939.jsonl",
+          "sha256": "3ff8a9100a79f44a4c31f28e9c0a741dbe50109e0c259108afbffbf4ce00f1c7"
+        }
+      ]
+    },
+    "humaneval/visible_cascade": {
+      "files": [
+        {
+          "file": "next_wave_full_20260826T031529Z_seed1234/results/visible_cascade_humaneval/qdpv68r5/samples_humaneval_2026-08-26T13-36-10.518240.jsonl",
+          "sha256": "b6d50b471bd7358b5cdead73aeb39316d0a59d8c9c2a1e1b2b45064cb76997d8"
+        }
+      ]
+    },
+    "mbpp/confidence": {
+      "files": [
+        {
+          "file": "representative_20260820T053558Z_ad15d915_seed1234/results/low_confidence_mbpp/qdpv68r5/samples_mbpp_2026-08-20T23-41-06.421704.jsonl",
+          "sha256": "4324ec66279f58cab18973da117a33b4b179cd64169a75d8d843c551c5481606"
+        }
+      ]
+    },
+    "mbpp/topk": {
+      "files": [
+        {
+          "file": "topk_margin_code_20260821_ad15d915_seed1234/results/topk_margin_mbpp/qdpv68r5/samples_mbpp_2026-08-21T14-48-37.674020.jsonl",
+          "sha256": "2f7b08a80bcd55fa03d3c115f1a3701eeece5352bb110794e260653ca3de92fc"
+        }
+      ]
+    },
+    "mbpp/core": {
+      "files": [
+        {
+          "file": "topk_margin_code_20260821_ad15d915_seed1234/results/core_mbpp/qdpv68r5/samples_mbpp_2026-08-21T14-57-13.708661.jsonl",
+          "sha256": "a054584facdca76cae3c1eae56d35d410aa08a62c97e0b27424689ad241cbb46"
+        }
+      ]
+    },
+    "mbpp/ripple": {
+      "files": [
+        {
+          "file": "ideas_full_20260821_seed1234/results/causal_ripple_mbpp/qdpv68r5/samples_mbpp_2026-08-21T23-21-55.024731.jsonl",
+          "sha256": "9bba23eb157269d011e08b0bff144c85159139f68bbe494e165b3538247b1ab4"
+        }
+      ]
+    },
+    "mbpp/visible_cascade": {
+      "files": [
+        {
+          "file": "next_wave_full_20260826T031529Z_seed1234/results/visible_cascade_mbpp/qdpv68r5/samples_mbpp_2026-08-26T17-02-09.334161.jsonl",
+          "sha256": "06ad807a92a930a6a4397055bd8059728f60d2f37d9c8cb386252e6fa952756d"
+        }
+      ]
+    },
+    "mbppplus/confidence": {
+      "files": [
+        {
+          "file": "acl_arr_batch17_baselines_20260929_seed1234/results/mbppplus_full_vanilla_confidence128.scores.jsonl",
+          "sha256": "e714bf0642f6db4f4f4af1afe122c7a84cd7688d364715a0178005ce42ec1b1c"
+        }
+      ]
+    },
+    "mbppplus/core": {
+      "files": [
+        {
+          "file": "acl_arr_batch5_code_suite_20260926_seed1234/results/core_mbppplus_scores.jsonl",
+          "sha256": "23b998e9ab80f1f90078bce5018ff560791982bf70dba31508663396858e85ac"
+        }
+      ]
+    },
+    "mbppplus/topk": {
+      "files": [
+        {
+          "file": "acl_arr_batch5_code_suite_20260926_seed1234/results/topk_margin_mbppplus_scores.jsonl",
+          "sha256": "d1fbeae4019884ff74c2a80281c72a44ab8eccba46fa163b6071df89394dd43f"
+        }
+      ]
+    },
+    "mbppplus/ripple": {
+      "files": [
+        {
+          "file": "acl_arr_batch5_code_suite_20260926_seed1234/results/ripple_mbppplus_scores.jsonl",
+          "sha256": "030dffd5f06dda7a819dc498c1406af96907f7a20b687fdf06b8a5c9319ad00d"
+        }
+      ]
+    },
+    "mbppplus/visible_cascade": {
+      "files": [
+        {
+          "file": "acl_arr_batch5_code_suite_20260926_seed1234/results/visible_cascade_mbppplus_scores.jsonl",
+          "sha256": "45c5e28bd5eb9a56cdccc61b0636c164ea928b8533c1ae1ac3a7ce8e9766f4be"
+        }
+      ]
+    },
+    "ds1000/confidence": {
+      "files": [
+        {
+          "file": "acl_arr_batch17_baselines_20260929_seed1234/results/ds1000_full_vanilla_confidence128.scores.jsonl",
+          "sha256": "7575d0c0fdd87a91a9272791500196a57590313b5d44d609a260b6c9946e9d7e"
+        }
+      ]
+    },
+    "ds1000/core": {
+      "files": [
+        {
+          "file": "acl_arr_batch10_legacy_regression_20260927_seed1234/results/ds1000_dev_core.scores.jsonl",
+          "sha256": "caf55454b564fc96111ca7e0e151242a1b44d04759181a7da6f8204a5036494f"
+        },
+        {
+          "file": "acl_arr_batch10_legacy_regression_20260927_seed1234/results/ds1000_eval_core.scores.jsonl",
+          "sha256": "307bcfb2cca165ee5a00e026261410646de4081cb17a5896f394f38f300eb507"
+        }
+      ]
+    },
+    "ds1000/topk": {
+      "files": [
+        {
+          "file": "acl_arr_batch18_ds_topk128_20260929_seed1234/results/ds1000_full_topk_margin128.scores.jsonl",
+          "sha256": "7e4e7948588a62eac8e08fa8233d12f0fa9b19571795b599db231ba30aa69590"
+        }
+      ]
+    },
+    "ds1000/ripple": {
+      "files": [
+        {
+          "file": "acl_arr_batch20_ds_repair_20260930_seed1234/results/ds1000_full_ripple_verify16.scores.jsonl",
+          "sha256": "635212c14690296aea78feac5426addda1a116f95610e9f2a42ed7dfffe3e6c7"
+        }
+      ]
+    },
+    "ds1000/cascade_input": {
+      "files": [
+        {
+          "file": "acl_arr_batch12_causal_full_20260928_seed1234/results/ds1000_full_ripple_ranked_cap.scores.jsonl",
+          "sha256": "69bf7fa74f803e46fcc17eb7a8a1abe1251a28a600813fc0a94e05512173c442"
+        }
+      ]
+    },
+    "ds1000/visible_cascade": {
+      "files": [
+        {
+          "file": "acl_arr_batch19_cascade_selected_20260930_seed1234/results/ds1000_full_visible_cascade_selected.scores.jsonl",
+          "sha256": "3cc045b897a70fedc011f2ef0b9cda790315a166b695a92dca85f0792e409cff"
+        }
+      ]
+    },
+    "bigcodebench/confidence": {
+      "files": [
+        {
+          "file": "acl_arr_batch17_baselines_20260929_seed1234/results/bigcodebench_full_vanilla_confidence128.scores.jsonl",
+          "sha256": "8c6f62caed6a7daf2223bdfe0fcb83e97caccd6485f4dd9383cd114e38f98f01"
+        }
+      ]
+    },
+    "bigcodebench/core": {
+      "files": [
+        {
+          "file": "acl_arr_batch3_bigcodebench_scores_20260926/results/core_bigcodebench_scores.jsonl",
+          "sha256": "dd7b8fcc26aa98d427fc6dfccb9775cc512ad31b920bf862382faec3552b6d85"
+        }
+      ]
+    },
+    "bigcodebench/topk": {
+      "files": [
+        {
+          "file": "acl_arr_batch3_bigcodebench_scores_20260926/results/topk_margin_bigcodebench_scores.jsonl",
+          "sha256": "117318e6ed00e9332475261988d8d3c3a40d0346df836fefd6d17a8d3bd0abc5"
+        }
+      ]
+    },
+    "bigcodebench/ripple": {
+      "files": [
+        {
+          "file": "acl_arr_batch16_bcb_20260929_seed1234/results/bigcodebench_full_ripple_bcb_p48.scores.jsonl",
+          "sha256": "b4fec16840caeec7ae8f10a18ac93af15406718b62600f54b9636047a7c7e755"
+        }
+      ]
+    },
+    "bigcodebench/visible_cascade": {
+      "files": [
+        {
+          "file": "acl_arr_batch19_cascade_selected_20260930_seed1234/results/bigcodebench_full_visible_cascade_selected.scores.jsonl",
+          "sha256": "cc5b0985193c1da0cabe5bb419cf426bce52bd4a283524310ff3c85ddd10008e"
+        }
+      ]
+    },
+    "mbppplus/remdm-conf": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/mbppplus_remdm-conf.scores.jsonl",
+          "sha256": "4ac72f0868117b2ffbb460e41ad0a5514a5c7be5f71ae16d14c28b8dcc92ab62"
+        }
+      ]
+    },
+    "ds1000/remdm-conf": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/ds1000_remdm-conf.scores.jsonl",
+          "sha256": "5a99ab7565fd835725c62246a231442628cf5b14940185f778f1bff9b9168f2f"
+        }
+      ]
+    },
+    "bigcodebench/remdm-conf": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/bigcodebench_remdm-conf.scores.jsonl",
+          "sha256": "357808d6e6b0c838d77f0e00d1ba8aa41232733e4aac6d89972facfccd7f4284"
+        }
+      ]
+    },
+    "mbppplus/margin-remask": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/mbppplus_margin-remask.scores.jsonl",
+          "sha256": "e7a69d239fb3ecabf98c567dd1466ef31eac9d8560943467efcc3ae4c576153e"
+        }
+      ]
+    },
+    "ds1000/margin-remask": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/ds1000_margin-remask.scores.jsonl",
+          "sha256": "bfbaef2121028f8111557a393b89c2f7630f30f69ce1d7bfaca65be34ea8e380"
+        }
+      ]
+    },
+    "bigcodebench/margin-remask": {
+      "files": [
+        {
+          "file": "acl_arr_batch21_revision_baselines_20261011_seed1234/results/bigcodebench_margin-remask.scores.jsonl",
+          "sha256": "9693165342e4553c8faeb3123de9a39aeb56dbec9e2e3e7d88723878e53ffcac"
+        }
+      ]
+    }
+  },
+  "results_through": "2026-10-11",
+  "packaging_note": "Research handoff; no new full-benchmark runs were performed during packaging.",
+  "main_comparison": [
+    {
+      "benchmark": "humaneval",
+      "tasks": 164,
+      "ripple": 40,
+      "strongest_baseline": "core",
+      "baseline_correct": 37,
+      "additional_correct": 3,
+      "relative_gain_percent": 8.108108108108109
+    },
+    {
+      "benchmark": "mbpp",
+      "tasks": 500,
+      "ripple": 146,
+      "strongest_baseline": "core",
+      "baseline_correct": 138,
+      "additional_correct": 8,
+      "relative_gain_percent": 5.797101449275362
+    },
+    {
+      "benchmark": "mbppplus",
+      "tasks": 378,
+      "ripple": 84,
+      "strongest_baseline": "core",
+      "baseline_correct": 80,
+      "additional_correct": 4,
+      "relative_gain_percent": 5.0
+    },
+    {
+      "benchmark": "ds1000",
+      "tasks": 1000,
+      "ripple": 55,
+      "strongest_baseline": "remdm-conf",
+      "baseline_correct": 54,
+      "additional_correct": 1,
+      "relative_gain_percent": 1.8518518518518519
+    },
+    {
+      "benchmark": "bigcodebench",
+      "tasks": 1140,
+      "ripple": 73,
+      "strongest_baseline": "core",
+      "baseline_correct": 70,
+      "additional_correct": 3,
+      "relative_gain_percent": 4.285714285714286
+    }
+  ],
+  "macro_average_relative_gain_percent": 5.008555138989921
+}

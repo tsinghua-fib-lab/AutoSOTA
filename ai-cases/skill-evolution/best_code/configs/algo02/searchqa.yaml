@@ -1,0 +1,21 @@
+_base_: ../searchqa/default.yaml
+
+model:
+  backend: openai_compatible
+  optimizer: deepseek-v4-flash
+  target: deepseek-v4-flash
+  optimizer_backend: openai_compatible
+  target_backend: openai_compatible
+  # 2026-09-05 calibration: restore reasoning_effort to high to preserve the reasoning budget for SearchQA.
+  reasoning_effort: high
+
+optimizer:
+  # ALGO-02: GEPA-style trajectory and failure-aware reflection.
+  use_skill_aware_reflection: true
+
+env:
+  out_root: output/algo02_searchqa
+  # 2026-09-05 calibration: double max_completion_tokens to avoid truncating deep search chains.
+  max_completion_tokens: 32768
+  # 2026-09-05 OOM fallback: reduce workers from 24 to 12 to limit peak memory with high effort and 32k output.
+  workers: 12
