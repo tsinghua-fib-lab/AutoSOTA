@@ -21,7 +21,7 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 <tr>
 <td width="50%" valign="top">
 <h3>🧪 Explore the research</h3>
-<p>Conference experiments, AI research cases, and science benchmarks, with source code, reports, and evaluation protocols.</p>
+<p>Conference experiments, AI research cases, Kaggle competitions, and science benchmarks, with source code, reports, and evaluation protocols.</p>
 <a href="#experiment-results"><strong>Browse experiment results →</strong></a>
 </td>
 <td width="50%" valign="top">
@@ -39,6 +39,8 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 ## 🧪 Experiment Results
 
 ### Experiment News
+
+- **2026-11-09** 🏅 Added **[eight Kaggle competition case studies](../kaggle-cases/)**, with source code, English research reports, and documented late-submission results.
 
 - **2026-11-07** 🤖 Added three AI research cases: **[Causal-Ripple](../ai-cases/causal-ripple/)** for diffusion code generation, **[GRPO / PDA-Iso](../ai-cases/grpo/)** for reasoning post-training, and **[Skill Evolution](../ai-cases/skill-evolution/)** for agent skill optimization, with code, English reports, and evaluation records.
 
@@ -67,6 +69,19 @@ AutoSOTA automatically explores research codebases, proposes improvements, runs 
 | **Causal-Ripple** | Paired token revision for diffusion code generation | [Report](../ai-cases/causal-ripple/REPORT.md) · [Code & results](../ai-cases/causal-ripple/) |
 | **GRPO / PDA-Iso** | Correctness and format credit assignment; accuracy–length trade-offs | [Report](../ai-cases/grpo/REPORT.md) · [Code & results](../ai-cases/grpo/) |
 | **Skill Evolution** | Failure attribution and cross-trajectory skill generalization | [Report](../ai-cases/skill-evolution/final_report.md) · [Code & results](../ai-cases/skill-evolution/) |
+
+### Kaggle Competition Cases
+
+| Competition | Task | Explore |
+|:---|:---|:---|
+| **GeoHab 2026 MLWG** | Benthic habitat classification | [Report](../kaggle-cases/geohab2026/REPORT.md) · [Code](../kaggle-cases/geohab2026/) |
+| **Novozymes Enzyme Stability** | Protein melting-temperature ranking | [Report](../kaggle-cases/novozymes/REPORT.md) · [Code](../kaggle-cases/novozymes/) |
+| **Single-Cell Perturbations** | Gene-expression response prediction | [Report](../kaggle-cases/c09/REPORT.md) · [Code](../kaggle-cases/c09/) |
+| **LEAP / ClimSim** | Atmospheric physics emulation | [Report](../kaggle-cases/leap/REPORT.md) · [Code](../kaggle-cases/leap/) |
+| **CHAMPS** | Molecular scalar coupling prediction | [Report](../kaggle-cases/champs/REPORT.md) · [Code](../kaggle-cases/champs/) |
+| **G2Net** | Gravitational-wave detection | [Report](../kaggle-cases/g2net/REPORT.md) · [Code](../kaggle-cases/g2net/) |
+| **GSDC 2021** | Smartphone GNSS positioning | [Report](../kaggle-cases/gsdc2021/REPORT.md) · [Code](../kaggle-cases/gsdc2021/) |
+| **OpenVaccine** | RNA degradation prediction | [Report](../kaggle-cases/openvaccine/REPORT.md) · [Code](../kaggle-cases/openvaccine/) |
 
 ### Science Benchmarks
 

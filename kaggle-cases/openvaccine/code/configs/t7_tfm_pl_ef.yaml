@@ -1,0 +1,40 @@
+# Transformer, pseudo labels from s1 0.5 + e1 (EternaFold structures) 0.2 + t3 0.3.
+name: t7_tfm_pl_ef
+model: tfm
+seed: 42
+n_folds: 5
+heads: [base, lr2, gnn, gnn_d256]
+structure: eternafold
+test_loop: bprna
+mask: {err_max: 10.0, snr_min: 1.5}
+cluster_threshold: 10
+cluster_weight: true
+snr_weight: false
+col_weights: [0.3, 0.3, 0.3, 0.05, 0.05]
+perturb: 0.5
+reverse_aug: true
+tfm:
+  model: {d: 192, heads: 6, layers: 8, pair_dim: 32, kernel: 7, dropout: 0.1}
+  lr: 0.001
+  weight_decay: 0.1
+  batch_size: 32
+  epochs: 60
+  variants:
+    base: {}
+    lr2: {lr: 0.002}
+    gnn: {gnn: true}
+    gnn_d256: {gnn: true, d: 256, heads: 8}
+random_sets:
+  - {name: rand130, n: 6000, length: 130, seed: 0}
+
+pl:
+  teachers: [s1_nopl, e1_ef_nopl, t3_sweep]
+  teacher_weights: [0.5, 0.2, 0.3]
+  use_official: false
+  sets: [test130, test107, rand130]
+  positions: {"107": 68, "130": 91}
+  std_mask_quantile: 0.95
+  perturb: 1.0
+  weight: 1.0
+  tfm_pl_frac: 0.3
+  tfm_pl_until: 0.8

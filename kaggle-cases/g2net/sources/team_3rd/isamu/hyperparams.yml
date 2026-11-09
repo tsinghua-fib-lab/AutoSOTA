@@ -1,0 +1,73 @@
+default_run:  &defaults
+  model_name: Eff-B3
+  efficientnet_size: 3
+  tfhub_model: null
+  
+  fmin: 22
+  fmax: null
+  window_type: 'nuttall'
+  bins: 64
+  hop_length: 32
+  scale: 1
+  norm: 1
+  octave: 12
+
+  lr: 0.0001 # 1e-4
+  image_size: 512 #
+  batch_size: 32
+  batch_size_infer: 4
+
+  weight: "imagenet" #"noisy-student"#"imagenet"
+  mixed: True # mixed precision does not work with tf models
+
+  epochs: 20
+  tta: True
+  seed: 2021
+#  debug: False
+  
+  nfold: 5
+  folds: [0,1,2,3,4]
+  use_pseudo: True
+
+effb3:
+  <<: *defaults
+  batch_size: 32
+  batch_size_infer: 4
+
+effb4:
+  <<: *defaults
+  model_name: Eff-B4
+  efficientnet_size: 4
+  batch_size: 32
+  batch_size_infer: 4
+
+effb5:
+  <<: *defaults
+  model_name: Eff-B5
+  efficientnet_size: 5
+  
+  batch_size: 32
+  batch_size_infer: 4
+  
+effb7:
+  <<: *defaults
+  model_name: Eff-B7
+  efficientnet_size: 7
+ 
+  fmin: 20
+  fmax: 512
+  bins: 84
+  octave: 24
+  scale: 0.4
+  window_type: "hann" 
+  
+  batch_size: 32
+  batch_size_infer: 4
+  
+inceptionV3:
+  <<: *defaults
+  model_name: inception-v3
+  tfhub_model: https://tfhub.dev/google/imagenet/inception_v3/feature_vector/5 
+
+  batch_size: 32
+  batch_size_infer: 4

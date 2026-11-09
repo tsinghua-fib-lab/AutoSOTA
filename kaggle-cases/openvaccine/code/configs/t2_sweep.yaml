@@ -1,0 +1,28 @@
+name: t2_sweep
+model: tfm
+seed: 42
+n_folds: 5
+heads: [small, drop3, wide_lr, bs16, deep_long]
+structure: eternafold
+test_loop: bprna
+mask: {err_max: 10.0, snr_min: 1.5}
+cluster_threshold: 10
+cluster_weight: true
+snr_weight: false
+col_weights: [0.3, 0.3, 0.3, 0.05, 0.05]
+perturb: 0.5
+reverse_aug: true
+tfm:
+  model: {d: 192, heads: 6, layers: 8, pair_dim: 32, kernel: 7, dropout: 0.1}
+  lr: 0.0005
+  weight_decay: 0.05
+  batch_size: 32
+  epochs: 60
+  variants:
+    small: {d: 128, heads: 4, layers: 4}
+    drop3: {dropout: 0.3}
+    wide_lr: {lr: 0.001, weight_decay: 0.1}
+    bs16: {batch_size: 16, lr: 0.0003}
+    deep_long: {layers: 12, dropout: 0.2, epochs: 100}
+random_sets:
+  - {name: rand130, n: 6000, length: 130, seed: 0}

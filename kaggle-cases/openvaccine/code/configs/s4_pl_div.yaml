@@ -1,0 +1,41 @@
+# Stage 2 with a diverse teacher: Keras s1 + Transformer t3 (0.7 / 0.3, chosen by blended CV).
+# Teacher = blend of stage-1 models; PL sets = test inputs (first 91 nt of 130-mers) + random 130-mers.
+# Train / PL sections alternate; a PL section that worsens val by > rollback_tol is undone.
+name: s4_pl_div
+seed: 43
+n_folds: 5
+heads: [gru, lstm, forward, wave]
+
+train_structure: vienna
+test_loop: bprna
+
+mask: {err_max: 10.0, snr_min: 1.5}
+cluster_threshold: 10
+cluster_weight: true
+snr_weight: false
+col_weights: [0.3, 0.3, 0.3, 0.05, 0.05]
+perturb: 0.5
+reverse_aug: true
+
+lr: 0.001
+ae: {epochs: 20, each: 5, batch_size: 32, sets: [train, test107, test130]}
+ae_from: s1_nopl
+
+random_sets:
+  - {name: rand130, n: 6000, length: 130, seed: 0}
+
+pl:
+  teachers: [s1_nopl, t3_sweep]
+  teacher_weights: [0.7, 0.3]
+  use_official: false          # also blend the released 20 Nullrecurrent models into the teacher
+  sets: [test130, test107, rand130]
+  positions: {"107": 68, "130": 91}
+  std_mask_quantile: 0.95      # NaN pseudo labels where teacher std is in the top 5%
+  perturb: 1.0                 # PL target noise = N(0,1) * teacher std * perturb
+  weight: 1.0
+  batch_size: 32
+  train_epochs: 5
+  pl_epochs: 2
+  cycles: 12
+  rollback_tol: 0.002          # 20 bps
+  final_schedule: [[3, 64], [5, 128], [5, 256]]

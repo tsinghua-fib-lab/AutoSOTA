@@ -1,0 +1,25 @@
+# Stage 1: Nullrecurrent training without pseudo labels (1st place writeup: preprocessing,
+# weights, augmentation, features; architecture = mrkmakr ae+gnn kernel + recurrent/conv heads).
+name: e1_ef_nopl
+seed: 42
+n_folds: 5
+heads: [gru, lstm, forward, wave]
+
+structure: eternafold        # EternaFold MFE for train + all test (private 130-mers already use it)
+test_loop: bprna             # bprna (same generator as train) | kaggle (provided loop types)
+
+mask: {err_max: 10.0, snr_min: 1.5}
+cluster_threshold: 10        # edit distance; max cluster = 60, as in the writeup
+cluster_weight: true         # w = 1/sqrt(cluster size)
+snr_weight: false
+col_weights: [0.3, 0.3, 0.3, 0.05, 0.05]   # MODEL_COLS: reactivity, deg_Mg_pH10, deg_Mg_50C, deg_pH10, deg_50C
+perturb: 0.5                 # target noise = N(0,1) * error * perturb
+reverse_aug: true
+
+lr: 0.001
+ae: {epochs: 20, each: 5, batch_size: 32, sets: [train, test107, test130]}
+schedule: [[30, 8], [10, 16], [3, 32], [3, 64], [5, 128], [5, 256]]   # (epochs, batch size), mrkmakr
+
+# predicted by every model so later stages can use them as pseudo-label inputs
+random_sets:
+  - {name: rand130, n: 6000, length: 130, seed: 0}

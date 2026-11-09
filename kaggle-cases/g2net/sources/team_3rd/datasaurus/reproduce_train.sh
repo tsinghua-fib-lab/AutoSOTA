@@ -1,0 +1,9 @@
+sh train.sh resnet200d
+sh train.sh effnetb5
+sh train.sh effnetv2
+sh train.sh cnn1d
+sh train.sh effnetb5_cwt
+# Pseudolabeled models
+sh train.sh effnetb5_pl
+sh train.sh effnetb3_pl
+sh train.sh effnetb3_cwt_pl

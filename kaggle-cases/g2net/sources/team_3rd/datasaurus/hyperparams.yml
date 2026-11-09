@@ -1,0 +1,221 @@
+default_run:  &defaults
+  encoder: resnet50d
+  max_epochs: 6
+  batch_size: 32
+  lr: 0.001
+  weight_decay: 0.0
+  gpus: 2
+  accelerator: ddp
+  precision: 16
+  sync_batchnorm: True
+  fmin: 20
+  fmax: 1000
+  hop_length: 8
+  seed: 48
+  tukey_alpha: 0.2
+  bp_lf: null
+  bp_hf: null
+  bp_order: 4
+  whiten: True
+  window: flattop
+  img_size: null  # [256, 512]
+  mixup_alpha: 0.4
+  denoising: False
+  bins_per_octave: 48
+  filter_scale: 0.25
+  val_check_interval: 0.25
+  limit_train_batches: 0.2
+  limit_val_batches: 0.2
+  rn1d_params:
+    base_filters: 128
+    kernel_size: 16
+    n_block: 16
+    groups: 32
+    stride: 2
+    downsample_gap: 2
+    increasefilter_gap: 4
+
+
+
+resnet50d:
+  <<: *defaults
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+
+
+resnet200d:
+  <<: *defaults
+  encoder: resnet200d
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+
+
+vit:
+  <<: *defaults
+  encoder: vit_deit_base_distilled_patch16_384
+  img_size: [256, 576]
+  # img_size: [384, 384]
+  batch_size: 32
+  lr: 0.0001
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+
+
+cwt:
+  <<: *defaults
+  cwt: True
+
+
+resnet1d:
+  <<: *defaults
+  encoder: resnet1d
+  max_epochs: 6
+  lr: 0.005
+  warmup: 250
+  batch_size: 256
+  # weight_decay: 0.001
+  # bp_lf: 20
+  # bp_hf: 500
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  rn1d_params:
+    base_filters: 128
+    kernel_size: 32
+    n_block: 48
+    groups: 32
+    stride: 2
+    downsample_gap: 6
+    increasefilter_gap: 12
+    # shrink_kernel: True
+    # use_do: False
+  # rn1d_params:
+  #   base_filters: 64
+  #   kernel_size: 64
+  #   n_block: 8
+  #   groups: 32
+  #   stride: 2
+  #   downsample_gap: 2
+  #   increasefilter_gap: 2
+
+
+cnn1d:
+  <<: *defaults
+  encoder: model1dcnn
+  max_epochs: 10
+  lr: 0.005
+  warmup: 250
+  batch_size: 256
+  # batch_size: 32
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  # Not sure why this model throws errors on DDP. Use single GPU
+  gpus: 1
+  accelerator: null
+  sync_batchnorm: False
+
+
+effnetb5:
+  <<: *defaults
+  encoder: tf_efficientnet_b5
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+
+
+effnetb5_cwt:
+  <<: *defaults
+  encoder: tf_efficientnet_b5
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  cwt: True
+
+
+effnetv2:
+  <<: *defaults
+  encoder: tf_efficientnetv2_m
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+
+
+effnetb5_pt2:
+  <<: *defaults
+  encoder: tf_efficientnet_b5
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  stage2: True
+  checkpoint: "20210901-130913"
+  lr: 0.0005
+  max_epochs: 3
+  warmup: 250
+  mixup_alpha: 0.0
+
+
+effnetb5_pl:
+  <<: *defaults
+  encoder: tf_efficientnet_b5
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+
+
+effnetv2_pl:
+  <<: *defaults
+  encoder: tf_efficientnetv2_m
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+  max_epochs: 7
+  batch_size: 48
+
+
+effnetb3_cwt_pl:
+  <<: *defaults
+  encoder: tf_efficientnet_b3
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  cwt: True
+  pseudo_label: True
+  max_epochs: 8
+  
+
+resnet152d_pl:
+  <<: *defaults
+  encoder: resnet152d
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+  # batch_size: 64
+  # lr: 0.003
+  max_epochs: 8
+  # checkpoint: 20210922-221713
+
+
+densenet201_pl:
+  <<: *defaults
+  encoder: densenet201
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+  batch_size: 64
+  lr: 0.003
+  max_epochs: 6
+
+
+effnetb3_pl:
+  <<: *defaults
+  encoder: tf_efficientnet_b3
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+  max_epochs: 8
+
+
+resnet34_pl:
+  <<: *defaults
+  encoder: resnet34
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  pseudo_label: True
+  # batch_size: 64
+  # lr: 0.003
+  max_epochs: 8
+  # checkpoint: 20210922-221713

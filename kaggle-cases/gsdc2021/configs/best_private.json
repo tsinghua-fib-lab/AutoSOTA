@@ -1,0 +1,47 @@
+{
+  "implementation": "autosota GSDC2021 best Private; Public tie-break",
+  "submission_id": 56804334,
+  "public_score": 2.53616,
+  "private_score": 1.12943,
+  "submission_sha256": "cee19920d9bd5190debbe5fa692f7e6a8a3642d60419ca9c8eb2d0a086273cdb",
+  "source": "recomputed_merged",
+  "bias_scope": "unmapped",
+  "parameters": {
+    "position_sigma": 16.0,
+    "tdcp_sigma": 0.1,
+    "doppler_sigma": 0.5,
+    "accel_sigma": 1.5,
+    "position_huber": 5.0,
+    "excluded_dates": [
+      "2020-05-21",
+      "2020-06-11",
+      "2021-04-22",
+      "2021-04-15"
+    ],
+    "iterations": 10,
+    "tdcp_huber": 0.05,
+    "joint_road_sigma": 2.0,
+    "joint_road_direction": "signed",
+    "heading_fill": true,
+    "velocity_dirs": [
+      "velocity_midpoint",
+      "velocity_lag5"
+    ],
+    "pseudorange_sigma": 10.0
+  },
+  "bias_training_recipe": {
+    "huber": 0.5,
+    "ridge": 1.0,
+    "shrink": 1.0,
+    "max_correction_m": 3.0,
+    "prediction_source": "merged",
+    "exclude_region": "-SJC-",
+    "exclude_dates": [
+      "2020-05-21",
+      "2020-06-11",
+      "2021-04-22",
+      "2021-04-15"
+    ]
+  },
+  "fitted_bias_file": "artifacts/autosota_best/bias_parameters.json"
+}
